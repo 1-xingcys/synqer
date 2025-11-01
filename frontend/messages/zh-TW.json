@@ -1,0 +1,17 @@
+{
+  "common": {
+    "welcome": "歡迎",
+    "hello": "你好"
+  },
+  "home": {
+    "title": "開始編輯 page.tsx 文件",
+    "description": "尋找起點或更多指導？前往",
+    "templates": "模板",
+    "or": "或",
+    "learning": "學習",
+    "center": "中心",
+    "deployNow": "立即部署",
+    "documentation": "文檔"
+  }
+}
+

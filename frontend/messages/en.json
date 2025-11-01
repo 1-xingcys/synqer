@@ -1,0 +1,17 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "hello": "Hello"
+  },
+  "home": {
+    "title": "To get started, edit the page.tsx file.",
+    "description": "Looking for a starting point or more instructions? Head over to",
+    "templates": "Templates",
+    "or": "or the",
+    "learning": "Learning",
+    "center": "center",
+    "deployNow": "Deploy Now",
+    "documentation": "Documentation"
+  }
+}
+
