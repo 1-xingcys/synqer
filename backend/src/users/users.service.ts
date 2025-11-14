@@ -59,7 +59,7 @@ export class UsersService {
   }
 
   async findUserById(
-    userId: number,
+    userId: string,
   ): Promise<(User & { identities: AuthIdentity[] }) | null> {
     return this.prisma.user.findUnique({
       where: { id: userId },

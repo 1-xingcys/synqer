@@ -99,7 +99,7 @@ export class AuthController {
   // Get current user
   @Get('me')
   async getMe(@Session() session: SessionData): Promise<{
-    id: number;
+    id: string;
     displayName: string | null;
     primaryEmail: string | null;
     providers: string[];
@@ -108,7 +108,7 @@ export class AuthController {
       throw new UnauthorizedException('Not authenticated');
     }
 
-    const userId = Number(session.userId);
+    const userId = session.userId;
     const user = await this.usersService.findUserById(userId);
 
     if (!user) {
@@ -117,7 +117,7 @@ export class AuthController {
 
     // Format response
     return {
-      id: Number(user.id),
+      id: user.id,
       displayName: user.displayName,
       primaryEmail: user.primaryEmail,
       providers: user.identities.map((identity) => identity.provider),
