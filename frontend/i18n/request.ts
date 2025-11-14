@@ -1,16 +1,21 @@
-import { getRequestConfig } from 'next-intl/server';
-import { routing } from './routing';
+import { getRequestConfig } from "next-intl/server";
+import { routing } from "./routing";
+
+type Locale = (typeof routing.locales)[number];
 
 export default getRequestConfig(async ({ requestLocale }) => {
-  let locale = await requestLocale;
+  const localeFromRequest = await requestLocale;
 
-  if (!locale || !routing.locales.includes(locale as any)) {
-    locale = routing.defaultLocale;
-  }
+  const locale: Locale = routing.locales.includes(localeFromRequest as Locale)
+    ? (localeFromRequest as Locale)
+    : routing.defaultLocale;
 
   return {
     locale,
-    messages: (await import(`../messages/${locale}.json`)).default,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    messages: (await import(`../messages/${locale}.json`)).default as Record<
+      string,
+      string
+    >,
   };
 });
-

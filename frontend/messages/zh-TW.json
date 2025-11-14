@@ -1,17 +1,20 @@
 {
   "common": {
     "welcome": "歡迎",
-    "hello": "你好"
+    "hello": "你好",
+    "loading": "載入中..."
   },
-  "home": {
-    "title": "開始編輯 page.tsx 文件",
-    "description": "尋找起點或更多指導？前往",
-    "templates": "模板",
-    "or": "或",
-    "learning": "學習",
-    "center": "中心",
-    "deployNow": "立即部署",
-    "documentation": "文檔"
+  "auth": {
+    "title": "OAuth 登入示範",
+    "pleaseSignIn": "請登入",
+    "signInWithGoogle": "使用 Google 登入",
+    "signInWithLine": "使用 LINE 登入",
+    "welcome": "歡迎！",
+    "displayName": "顯示名稱：",
+    "email": "電子郵件：",
+    "connectedProviders": "已連結的提供者：",
+    "logout": "登出",
+    "notAvailable": "無資料"
   }
 }
 

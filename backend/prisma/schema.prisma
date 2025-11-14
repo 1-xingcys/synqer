@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  displayName  String?
+  primaryEmail String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  identities AuthIdentity[]
+  votes      EventVote[]
+}
+
+model AuthIdentity {
+  id             String   @id @default(cuid())
+  provider       String
+  providerUserId String
+  providerEmail  String?
+  createdAt      DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+}
+
+// 代表一個時間投票活動
+model Event {
+  id          String  @id @default(cuid())
+  title       String?
+  description String?
+  ownerId     String? // 預留：未來可用於權限管理
+
+  // 日期範圍
+  startDate DateTime
+  endDate   DateTime
+
+  // 時間範圍（以分鐘表示，例如 9:00 = 540）
+  startMinuteOfDay Int
+  endMinuteOfDay   Int
+
+  slotDurationMin Int    @default(15) // 預留：未來可支援 30/60 分鐘
+  timeZone        String @default("Asia/Taipei") // 預留：未來可自動轉換時區
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  slots EventTimeSlot[]
+  votes EventVote[]
+
+  // TODO: 未來擴充
+  // - EventParticipant: 支援「只允許特定人投票」
+  // - isPrivate: 私密活動（需邀請碼）
+  // - allowAnonymous: 允許匿名投票
+}
+
+// 時間格子（slot）已展開
+model EventTimeSlot {
+  id          String   @id @default(cuid())
+  eventId     String
+  date        DateTime // 該 slot 的日期
+  startMinute Int // 當天的起始分鐘
+  endMinute   Int // 當天的結束分鐘
+  index       Int // 用於表格排序定位
+
+  event Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  votes EventVote[]
+
+  @@index([eventId])
+  @@index([eventId, date])
+}
+
+// 投票紀錄：有紀錄 = 有空，無紀錄 = 沒空或未填
+model EventVote {
+  id        String   @id @default(cuid())
+  eventId   String
+  slotId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  event Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  slot  EventTimeSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, slotId, userId])
+  @@index([eventId])
+  @@index([slotId])
+  @@index([userId])
+}
