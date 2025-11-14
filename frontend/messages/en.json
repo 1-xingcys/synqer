@@ -1,17 +1,20 @@
 {
   "common": {
     "welcome": "Welcome",
-    "hello": "Hello"
+    "hello": "Hello",
+    "loading": "Loading..."
   },
-  "home": {
-    "title": "To get started, edit the page.tsx file.",
-    "description": "Looking for a starting point or more instructions? Head over to",
-    "templates": "Templates",
-    "or": "or the",
-    "learning": "Learning",
-    "center": "center",
-    "deployNow": "Deploy Now",
-    "documentation": "Documentation"
+  "auth": {
+    "title": "OAuth Login Demo",
+    "pleaseSignIn": "Please sign in",
+    "signInWithGoogle": "Sign in with Google",
+    "signInWithLine": "Sign in with LINE",
+    "welcome": "Welcome!",
+    "displayName": "Display Name:",
+    "email": "Email:",
+    "connectedProviders": "Connected Providers:",
+    "logout": "Logout",
+    "notAvailable": "N/A"
   }
 }
 
