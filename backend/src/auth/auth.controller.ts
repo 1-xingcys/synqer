@@ -11,6 +11,7 @@ import {
   HttpCode,
   UnauthorizedException,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import type { SessionData } from 'express-session';
@@ -28,7 +29,8 @@ export class AuthController {
   @Get('google/start')
   @Redirect()
   googleStart(@Query('redirect') redirect: string) {
-    const url = this.authService.getGoogleAuthUrl(redirect);
+    const validatedRedirect = this.validateRedirectUrl(redirect);
+    const url = this.authService.getGoogleAuthUrl(validatedRedirect);
     return { url };
   }
 
@@ -64,7 +66,8 @@ export class AuthController {
   @Get('line/start')
   @Redirect()
   lineStart(@Query('redirect') redirect: string) {
-    const url = this.authService.getLineAuthUrl(redirect);
+    const validatedRedirect = this.validateRedirectUrl(redirect);
+    const url = this.authService.getLineAuthUrl(validatedRedirect);
     return { url };
   }
 
@@ -145,5 +148,26 @@ export class AuthController {
 
     // Return response body (NestJS will serialize and send it)
     return { message: 'Logged out successfully' };
+  }
+
+  // Validate redirect URL to prevent open redirect attacks
+  private validateRedirectUrl(
+    redirect: string | undefined,
+  ): string | undefined {
+    if (!redirect) {
+      return undefined;
+    }
+
+    // Only allow relative paths that start with /
+    if (redirect.startsWith('/')) {
+      // Prevent protocol-relative URLs like //evil.com
+      if (redirect.startsWith('//')) {
+        throw new BadRequestException('Invalid redirect URL');
+      }
+      return redirect;
+    }
+
+    // Reject any other patterns (absolute URLs, javascript:, data:, etc.)
+    throw new BadRequestException('Invalid redirect URL');
   }
 }
