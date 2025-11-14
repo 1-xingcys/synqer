@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Session,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -54,7 +55,7 @@ export class EventsController {
     // TODO: 未來可支援匿名投票，目前需要登入
     const userId = session.userId;
     if (!userId) {
-      throw new Error('Please login first'); // 暫時簡化，未來可用 Guard
+      throw new UnauthorizedException('Please login first'); // 暫時簡化，未來可用 Guard
     }
     return this.eventsService.vote(eventId, userId, voteDto);
   }
