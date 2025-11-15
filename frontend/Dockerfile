@@ -3,6 +3,12 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# 接收构建参数（NEXT_PUBLIC_* 环境变量需要在构建时存在）
+ARG NEXT_PUBLIC_API
+
+# 将构建参数转换为环境变量（Next.js 构建时需要）
+ENV NEXT_PUBLIC_API=${NEXT_PUBLIC_API}
+
 # 复制 package 文件
 COPY package*.json ./
 
@@ -13,6 +19,7 @@ RUN npm ci
 COPY . .
 
 # 构建应用（standalone 模式会生成优化的输出）
+# NEXT_PUBLIC_* 环境变量会在此阶段被嵌入到客户端代码中
 RUN npm run build
 
 # 生产阶段
