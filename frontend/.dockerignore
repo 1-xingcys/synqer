@@ -1,0 +1,46 @@
+# 依赖
+node_modules
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# 构建产物
+.next
+out
+dist
+coverage
+
+# 测试文件
+*.spec.ts
+*.test.ts
+*.test.tsx
+__tests__
+test
+
+# 开发工具
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Git
+.git
+.gitignore
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# 文档
+README.md
+*.md
+
+# 其他
+.DS_Store
+Thumbs.db
+
+# Next.js 特定
+.vercel
+

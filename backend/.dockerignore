@@ -1,0 +1,44 @@
+# 依赖
+node_modules
+npm-debug.log
+yarn-error.log
+
+# 构建产物
+dist
+coverage
+
+# 测试文件
+*.spec.ts
+test
+*.e2e-spec.ts
+
+# 开发工具
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Git
+.git
+.gitignore
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# 数据库文件（生产环境应该使用外部数据库）
+*.db
+*.db-journal
+prisma/dev.db
+
+# 文档
+README.md
+ESLINT.md
+*.md
+
+# 其他
+.DS_Store
+Thumbs.db
+
