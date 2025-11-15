@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { useParams } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
 import TimeSlotGrid from "@/components/TimeSlotGrid";
 import HeatmapGrid from "@/components/HeatmapGrid";
