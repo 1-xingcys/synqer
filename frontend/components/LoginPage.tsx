@@ -5,7 +5,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function LoginPage() {
   const t = useTranslations();
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:4000";
+  const API_BASE = process.env.NEXT_PUBLIC_API;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
