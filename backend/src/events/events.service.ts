@@ -90,6 +90,38 @@ export class EventsService {
   }
 
   /**
+   * 取得使用者建立的所有活動
+   */
+  async findUserEvents(userId: string) {
+    const events = await this.prisma.event.findMany({
+      where: {
+        ownerId: userId,
+      },
+      include: {
+        votes: {
+          select: {
+            userId: true,
+          },
+          distinct: ['userId'],
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return events.map((event) => ({
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      createdAt: event.createdAt,
+      participantCount: event.votes.length,
+    }));
+  }
+
+  /**
    * 取得 Event 完整資料（含 slots 和 votes）
    */
   async findOne(eventId: string) {

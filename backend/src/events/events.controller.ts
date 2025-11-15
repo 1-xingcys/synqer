@@ -18,6 +18,19 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   /**
+   * GET /events/my
+   * 取得當前使用者建立的所有活動
+   */
+  @Get('my')
+  async findMyEvents(@Session() session: { userId?: string }) {
+    const userId = session.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Please login first');
+    }
+    return await this.eventsService.findUserEvents(userId);
+  }
+
+  /**
    * POST /events
    * 建立新活動（包含自動展開 slots）
    */

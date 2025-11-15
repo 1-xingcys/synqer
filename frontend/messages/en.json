@@ -4,9 +4,32 @@
     "hello": "Hello",
     "loading": "Loading..."
   },
+  "landing": {
+    "gotoDashboard": "Go to Dashboard",
+    "signIn": "Sign In",
+    "hero": {
+      "title": "Manage Your Events Effortlessly",
+      "subtitle": "Synqer makes event management simple and efficient, so you can focus on what matters most",
+      "getStarted": "Get Started"
+    },
+    "features": {
+      "events": {
+        "title": "Event Management",
+        "description": "Easily create and manage your events, tracking all the important details"
+      },
+      "collaboration": {
+        "title": "Seamless Collaboration",
+        "description": "Work together with your team members seamlessly, keeping everyone in sync"
+      },
+      "simple": {
+        "title": "Simple to Use",
+        "description": "Intuitive interface design lets you get started immediately, no complex learning curve"
+      }
+    }
+  },
   "auth": {
-    "title": "OAuth Login Demo",
-    "pleaseSignIn": "Please sign in",
+    "title": "Sign In",
+    "pleaseSignIn": "Please sign in to continue",
     "signInWithGoogle": "Sign in with Google",
     "signInWithLine": "Sign in with LINE",
     "welcome": "Welcome!",
@@ -15,6 +38,19 @@
     "connectedProviders": "Connected Providers:",
     "logout": "Logout",
     "notAvailable": "N/A"
+  },
+  "dashboard": {
+    "title": "My Events",
+    "welcome": "Welcome back, {name}",
+    "createNewEvent": "Create New Event",
+    "noEvents": "No events yet",
+    "noEventsDescription": "Create your first event to get started",
+    "myEvents": "My Events",
+    "createdAt": "Created at",
+    "participants": "{count} participants",
+    "viewEvent": "View Event",
+    "loadingEvents": "Loading events...",
+    "errorLoadingEvents": "Failed to load events"
   }
 }
 

@@ -1,9 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 
-export default function NewEventPage() {
+interface CreateEventModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function CreateEventModal({
+  isOpen,
+  onClose,
+}: CreateEventModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,12 +31,15 @@ export default function NewEventPage() {
 
     void (async () => {
       try {
-        const response = await fetch("http://localhost:4000/events", {
+        if (!process.env.NEXT_PUBLIC_API) {
+          throw new Error("NEXT_PUBLIC_API is not set");
+        }
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API}/events`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include", // 帶上 cookie
+          credentials: "include",
           body: JSON.stringify(formData),
         });
 
@@ -37,7 +48,7 @@ export default function NewEventPage() {
         }
 
         const result = (await response.json()) as { eventId: string };
-        // 成功後跳轉到活動頁面
+        onClose();
         router.push(`/events/${result.eventId}`);
       } catch (error) {
         console.error("建立活動失敗:", error);
@@ -48,13 +59,47 @@ export default function NewEventPage() {
     })();
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white shadow rounded-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">建立新活動</h1>
+  if (!isOpen) return null;
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div
+          className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-lg">
+            <h2 className="text-2xl font-bold text-gray-900">建立新活動</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* 活動標題 */}
             <div>
               <label
@@ -206,11 +251,18 @@ export default function NewEventPage() {
             </div>
 
             {/* 提交按鈕 */}
-            <div className="pt-4">
+            <div className="flex gap-3 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                取消
+              </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "建立中..." : "建立活動"}
               </button>

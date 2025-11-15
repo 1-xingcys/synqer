@@ -4,9 +4,32 @@
     "hello": "你好",
     "loading": "載入中..."
   },
+  "landing": {
+    "gotoDashboard": "前往控制台",
+    "signIn": "登入",
+    "hero": {
+      "title": "輕鬆管理您的活動",
+      "subtitle": "Synqer 讓活動管理變得簡單而有效率，讓您專注於最重要的事情",
+      "getStarted": "開始使用"
+    },
+    "features": {
+      "events": {
+        "title": "活動管理",
+        "description": "輕鬆建立和管理您的活動，追蹤所有重要細節"
+      },
+      "collaboration": {
+        "title": "協作共享",
+        "description": "與您的團隊成員無縫協作，讓每個人都保持同步"
+      },
+      "simple": {
+        "title": "簡單易用",
+        "description": "直觀的介面設計，讓您立即上手，無需複雜的學習過程"
+      }
+    }
+  },
   "auth": {
-    "title": "OAuth 登入示範",
-    "pleaseSignIn": "請登入",
+    "title": "登入",
+    "pleaseSignIn": "請登入以繼續",
     "signInWithGoogle": "使用 Google 登入",
     "signInWithLine": "使用 LINE 登入",
     "welcome": "歡迎！",
@@ -15,6 +38,19 @@
     "connectedProviders": "已連結的提供者：",
     "logout": "登出",
     "notAvailable": "無資料"
+  },
+  "dashboard": {
+    "title": "我的活動",
+    "welcome": "歡迎回來，{name}",
+    "createNewEvent": "建立新活動",
+    "noEvents": "尚無活動",
+    "noEventsDescription": "建立您的第一個活動來開始",
+    "myEvents": "我的活動列表",
+    "createdAt": "建立於",
+    "participants": "{count} 位參與者",
+    "viewEvent": "查看活動",
+    "loadingEvents": "載入活動中...",
+    "errorLoadingEvents": "載入活動失敗"
   }
 }
 
