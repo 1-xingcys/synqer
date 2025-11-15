@@ -26,7 +26,10 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.API_PORT ?? process.env.PORT ?? 4000);
+  const port = 8080;
+  const host = '0.0.0.0'; // 监听所有网络接口，确保 Docker 容器可以接收外部请求
+  await app.listen(port, host);
+  console.log(`Application is running on: http://${host}:${port}`);
 }
 bootstrap().catch((err) => {
   console.error('Error during application bootstrap:', err);

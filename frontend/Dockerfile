@@ -1,0 +1,39 @@
+# 多阶段构建：构建阶段
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# 复制 package 文件
+COPY package*.json ./
+
+# 安装依赖（包括 devDependencies，因为需要构建工具）
+RUN npm ci
+
+# 复制源代码
+COPY . .
+
+# 构建应用（standalone 模式会生成优化的输出）
+RUN npm run build
+
+# 生产阶段
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# 设置环境变量
+ENV NODE_ENV=production
+ENV PORT=8080
+ENV HOSTNAME=0.0.0.0
+
+# 从构建阶段复制 standalone 输出
+# Next.js standalone 模式会生成 .next/standalone 目录，包含运行所需的所有文件
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+# 暴露端口 8080（GCP 要求）
+EXPOSE 8080
+
+# 启动应用
+CMD ["node", "server.js"]
+
