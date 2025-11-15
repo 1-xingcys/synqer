@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useAuthContext } from "@/contexts/AuthContext";
 import TimeSlotGrid from "@/components/TimeSlotGrid";
 import HeatmapGrid from "@/components/HeatmapGrid";
 
@@ -47,6 +48,8 @@ interface EventData {
 export default function EventPage() {
   const params = useParams();
   const eventId = params.eventId as string;
+  const { user } = useAuthContext();
+  const router = useRouter();
 
   const [data, setData] = useState<EventData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,9 +58,15 @@ export default function EventPage() {
 
   const fetchEventData = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:4000/events/${eventId}`, {
-        credentials: "include",
-      });
+      if (!process.env.NEXT_PUBLIC_API) {
+        throw new Error("NEXT_PUBLIC_API is not set");
+      }
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API}/events/${eventId}`,
+        {
+          credentials: "include",
+        },
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch event data");
@@ -78,8 +87,11 @@ export default function EventPage() {
   }, [fetchEventData]);
 
   const handleSaveVotes = async (selectedSlotIds: string[]) => {
+    if (!process.env.NEXT_PUBLIC_API) {
+      throw new Error("NEXT_PUBLIC_API is not set");
+    }
     const response = await fetch(
-      `http://localhost:4000/events/${eventId}/votes`,
+      `${process.env.NEXT_PUBLIC_API}/events/${eventId}/votes`,
       {
         method: "POST",
         headers: {
@@ -114,13 +126,37 @@ export default function EventPage() {
     );
   }
 
-  // 取得目前使用者已投票的 slotIds（簡化版：從 votes 中過濾）
-  // TODO: 未來需要從 session 取得 userId 來判斷
-  const currentUserVotes: string[] = []; // 暫時留空，需要登入系統整合
+  // 取得目前使用者已投票的 slotIds
+  const currentUserVotes: string[] = user
+    ? data.votes
+        .filter((vote) => vote.userId === user.id.toString())
+        .map((vote) => vote.slotId)
+    : [];
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-5xl mx-auto">
+        {/* 返回按鈕 */}
+        <button
+          onClick={() => router.push("/dashboard")}
+          className="mb-4 inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          回到主頁
+        </button>
+
         {/* 標題區 */}
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
