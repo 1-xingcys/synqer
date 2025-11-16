@@ -29,9 +29,8 @@ export function middleware(request: NextRequest) {
 
     if (!sessionCookie) {
       // 重定向到登入頁面並帶上 redirect 參數
-      const locale = pathname.split("/")[1] || "zh-TW";
       const url = request.nextUrl.clone();
-      url.pathname = `/${locale}/login`;
+      url.pathname = `/login`;
       url.searchParams.set("redirect", pathname);
       return NextResponse.redirect(url);
     }
