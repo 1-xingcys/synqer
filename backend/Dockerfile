@@ -48,7 +48,6 @@ ENV DATABASE_URL="file:/app/data/production.db"
 # 暴露端口 8080（GCP 要求）
 EXPOSE 8080
 
-# 启动应用前运行 migrations，然后启动应用
-# 使用 sh -c 来运行多个命令
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+# 启动应用
+CMD ["node", "dist/main.js"]
 
