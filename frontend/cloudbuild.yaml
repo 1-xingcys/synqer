@@ -5,8 +5,6 @@ steps:
       - 'build'
       - '--build-arg'
       - 'NEXT_PUBLIC_API=${_NEXT_PUBLIC_API}'
-      - '--build-arg'
-      - 'NEXT_PUBLIC_API_BASE=${_NEXT_PUBLIC_API_BASE}'
       - '--tag'
       - '${_IMAGE_NAME}:${_TAG}'
       - '.'
