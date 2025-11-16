@@ -10,8 +10,10 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 先處理國際化
+  console.log("before intl middleware", request.nextUrl);
   const intlMiddleware = createIntlMiddleware(routing);
-  const response = intlMiddleware(request) || NextResponse.next();
+  const response = intlMiddleware(request);
+  console.log("after intl middleware", response);
 
   // 提取不含語系的路徑
   const pathWithoutLocale = pathname.replace(/^\/(zh-TW|en)/, "") || "/";
@@ -31,7 +33,7 @@ export function middleware(request: NextRequest) {
       // 重定向到登入頁面並帶上 redirect 參數
       const url = request.nextUrl.clone();
       url.pathname = `/login`;
-      url.searchParams.set("redirect", pathname);
+      url.searchParams.set("redirect", pathWithoutLocale);
       return NextResponse.redirect(url);
     }
   }

@@ -1,15 +1,19 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import session from 'express-session';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Configure CORS
   app.enableCors({
     origin: process.env.WEB_ORIGIN,
     credentials: true,
   });
+
+  // Trust proxy for Cloud Run / load balancer
+  app.set('trust proxy', 1);
 
   // Configure session
   app.use(
