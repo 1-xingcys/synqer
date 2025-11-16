@@ -55,7 +55,7 @@ export class AuthController {
         ? `${process.env.WEB_ORIGIN}${redirect}`
         : process.env.WEB_ORIGIN;
 
-      return { url: redirectUrl || 'http://localhost:3000' };
+      return { url: redirectUrl };
     } catch (error) {
       console.error('Google OAuth error:', error);
       return { url: `${process.env.WEB_ORIGIN}?error=auth_failed` };
@@ -92,7 +92,7 @@ export class AuthController {
         ? `${process.env.WEB_ORIGIN}${redirect}`
         : process.env.WEB_ORIGIN;
 
-      return { url: redirectUrl || 'http://localhost:3000' };
+      return { url: redirectUrl };
     } catch (error) {
       console.error('LINE OAuth error:', error);
       return { url: `${process.env.WEB_ORIGIN}?error=auth_failed` };
