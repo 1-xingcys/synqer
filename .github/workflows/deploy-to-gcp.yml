@@ -1,0 +1,77 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+env:
+  PROJECT_ID: no-invite-478215
+  REGION: asia-east1
+  BACKEND_SERVICE: backend
+  FRONTEND_SERVICE: frontend
+
+jobs:
+  deploy:
+    # 只在 push 到 main 或 PR merge 到 main 時執行
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Test gcloud auth
+        run: |
+          gcloud auth list
+          gcloud config list
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build and Push Backend Image
+        run: |
+          cd backend
+          gcloud builds submit --config=cloudbuild.yaml \
+            --substitutions=_TAG=${{ github.sha }}
+
+      - name: Build and Push Frontend Image
+        run: |
+          cd frontend
+          gcloud builds submit --config=cloudbuild.yaml \
+            --substitutions=_TAG=${{ github.sha }}
+
+      - name: Deploy Backend to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.BACKEND_SERVICE }} \
+            --image=asia-east1-docker.pkg.dev/${{ env.PROJECT_ID }}/no-invite/backend:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated
+
+      - name: Deploy Frontend to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.FRONTEND_SERVICE }} \
+            --image=asia-east1-docker.pkg.dev/${{ env.PROJECT_ID }}/no-invite/frontend:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated
+
+      - name: Show Deployment URLs
+        run: |
+          echo "Backend URL: $(gcloud run services describe ${{ env.BACKEND_SERVICE }} --region=${{ env.REGION }} --format='value(status.url)')"
+          echo "Frontend URL: $(gcloud run services describe ${{ env.FRONTEND_SERVICE }} --region=${{ env.REGION }} --format='value(status.url)')"
