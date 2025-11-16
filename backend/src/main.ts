@@ -14,14 +14,14 @@ async function bootstrap() {
   // Configure session
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || 'dev-secret',
+      secret: process.env.SESSION_SECRET as string,
       resave: false,
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: false, // Set to true in production with HTTPS
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        sameSite: 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       },
     }),
   );
