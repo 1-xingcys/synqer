@@ -7,11 +7,12 @@ import {
   HttpCode,
   HttpStatus,
   Session,
-  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { VoteEventDto } from './dto/vote-event.dto';
+import { SessionAuthGuard, CurrentUser } from '../auth';
 
 @Controller('events')
 export class EventsController {
@@ -22,11 +23,8 @@ export class EventsController {
    * 取得當前使用者建立的所有活動
    */
   @Get('my')
-  async findMyEvents(@Session() session: { userId?: string }) {
-    const userId = session.userId;
-    if (!userId) {
-      throw new UnauthorizedException('Please login first');
-    }
+  @UseGuards(SessionAuthGuard)
+  async findMyEvents(@CurrentUser() userId: string) {
     return await this.eventsService.findUserEvents(userId);
   }
 
@@ -60,16 +58,13 @@ export class EventsController {
    */
   @Post(':eventId/votes')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionAuthGuard)
   async vote(
     @Param('eventId') eventId: string,
     @Body() voteDto: VoteEventDto,
-    @Session() session: { userId?: string },
+    @CurrentUser() userId: string,
   ) {
-    // TODO: 未來可支援匿名投票，目前需要登入
-    const userId = session.userId;
-    if (!userId) {
-      throw new UnauthorizedException('Please login first'); // 暫時簡化，未來可用 Guard
-    }
+    // TODO: 未來可支援匿名投票
     return this.eventsService.vote(eventId, userId, voteDto);
   }
 }

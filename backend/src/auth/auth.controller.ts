@@ -9,7 +9,7 @@ import {
   Res,
   HttpStatus,
   HttpCode,
-  UnauthorizedException,
+  UseGuards,
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
@@ -17,6 +17,8 @@ import type { Request, Response } from 'express';
 import type { SessionData } from 'express-session';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
+import { SessionAuthGuard } from './guards';
+import { CurrentUser } from './decorators';
 
 @Controller('auth')
 export class AuthController {
@@ -101,21 +103,17 @@ export class AuthController {
 
   // Get current user
   @Get('me')
-  async getMe(@Session() session: SessionData): Promise<{
+  @UseGuards(SessionAuthGuard)
+  async getMe(@CurrentUser() userId: string): Promise<{
     id: string;
     displayName: string | null;
     primaryEmail: string | null;
     providers: string[];
   }> {
-    if (!session.userId) {
-      throw new UnauthorizedException('Not authenticated');
-    }
-
-    const userId = session.userId;
     const user = await this.usersService.findUserById(userId);
 
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new BadRequestException('User not found');
     }
 
     // Format response
