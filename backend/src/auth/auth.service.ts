@@ -96,6 +96,7 @@ export class AuthService {
 
     const { id_token } = tokenResponse.data as { id_token: string };
 
+    // TODO: Verify id_token
     // Decode and verify id_token
     const decoded = jwt.decode(id_token, { complete: true });
     if (!decoded || typeof decoded === 'string') {
