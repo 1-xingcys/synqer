@@ -11,6 +11,7 @@ export class UsersService {
     providerUserId: string,
     email?: string,
     displayName?: string,
+    avatarUrl?: string,
   ): Promise<User> {
     // Check if AuthIdentity exists
     const existingIdentity = await this.prisma.authIdentity.findUnique({
@@ -27,12 +28,13 @@ export class UsersService {
 
     if (existingIdentity) {
       // Update user info if provided
-      if (email || displayName) {
+      if (email || displayName || avatarUrl) {
         const updatedUser = await this.prisma.user.update({
           where: { id: existingIdentity.userId },
           data: {
             ...(email && { primaryEmail: email }),
             ...(displayName && { displayName }),
+            ...(avatarUrl && { avatarUrl }),
           },
         });
         return updatedUser;
@@ -45,6 +47,7 @@ export class UsersService {
       data: {
         displayName,
         primaryEmail: email,
+        avatarUrl,
         identities: {
           create: {
             provider,

@@ -108,6 +108,7 @@ export class AuthController {
     id: string;
     displayName: string | null;
     primaryEmail: string | null;
+    avatarUrl: string | null;
     providers: string[];
   }> {
     const user = await this.usersService.findUserById(userId);
@@ -121,6 +122,7 @@ export class AuthController {
       id: user.id,
       displayName: user.displayName,
       primaryEmail: user.primaryEmail,
+      avatarUrl: user.avatarUrl,
       providers: user.identities.map((identity) => identity.provider),
     };
   }
