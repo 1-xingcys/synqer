@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface TimeSlot {
   id: string;
@@ -21,6 +22,7 @@ export default function TimeSlotGrid({
   onSave,
   initialSelectedIds = [],
 }: TimeSlotGridProps) {
+  const t = useTranslations("event");
   const [selectedSlots, setSelectedSlots] = useState<Set<string>>(
     new Set(initialSelectedIds),
   );
@@ -29,7 +31,7 @@ export default function TimeSlotGrid({
   // 將 slots 按日期分組
   const slotsByDate = slots.reduce(
     (acc, slot) => {
-      const dateKey = new Date(slot.date).toLocaleDateString("zh-TW");
+      const dateKey = new Date(slot.date).toLocaleDateString();
       if (!acc[dateKey]) acc[dateKey] = [];
       acc[dateKey].push(slot);
       return acc;
@@ -57,10 +59,10 @@ export default function TimeSlotGrid({
     void (async () => {
       try {
         await onSave(Array.from(selectedSlots));
-        alert("儲存成功！");
+        alert(t("saveSuccess"));
       } catch (error) {
-        console.error("儲存失敗:", error);
-        alert("儲存失敗，請重試");
+        console.error("Save error:", error);
+        alert(t("saveError"));
       } finally {
         setSaving(false);
       }
@@ -77,19 +79,19 @@ export default function TimeSlotGrid({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">
-          選擇你有空的時段
+          {t("selectAvailableSlots")}
         </h2>
         <button
           onClick={handleSave}
           disabled={saving}
           className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {saving ? "儲存中..." : "儲存"}
+          {saving ? t("saving") : t("save")}
         </button>
       </div>
 
       <div className="text-sm text-gray-600 mb-4">
-        點擊格子選擇有空的時段（綠色 = 有空）
+        {t("clickToSelect")}
         {/* TODO: 未來可加入拖曳多選功能 */}
       </div>
 
@@ -98,7 +100,7 @@ export default function TimeSlotGrid({
           <thead>
             <tr>
               <th className="border border-gray-300 bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-700">
-                時間
+                {t("time")}
               </th>
               {dates.map((date) => (
                 <th
@@ -141,7 +143,7 @@ export default function TimeSlotGrid({
       </div>
 
       <div className="text-sm text-gray-600">
-        已選擇 {selectedSlots.size} 個時段
+        {t("selectedCount", { count: selectedSlots.size })}
       </div>
     </div>
   );
