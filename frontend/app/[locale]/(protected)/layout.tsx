@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useRouter, usePathname } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import AppHeader from "@/components/AppHeader";
 
 interface ProtectedLayoutProps {
   children: ReactNode;
@@ -63,5 +64,10 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   }
 
   // ✅ 通過驗證，渲染所有 protected children
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen bg-zinc-50 dark:bg-black">
+      <AppHeader />
+      <main>{children}</main>
+    </div>
+  );
 }
