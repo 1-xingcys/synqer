@@ -13,7 +13,7 @@ export default function AppHeader({ children }: AppHeaderProps) {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           {/* Logo 區域 - 預留給未來的 logo */}
-          <Logo height={40} />
+          <Logo height={40} href="/dashboard" />
           <div className="flex items-center gap-4">
             {children || <div className="w-8 h-8" />}
           </div>
