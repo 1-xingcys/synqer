@@ -1,14 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
-
-interface User {
-  id: number;
-  displayName: string | null;
-  primaryEmail: string | null;
-  providers: string[];
-}
+import type { User } from "@/types/auth";
 
 interface AuthContextType {
   user: User | null;

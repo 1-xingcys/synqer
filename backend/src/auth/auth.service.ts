@@ -17,6 +17,7 @@ interface OAuthTokenPayload {
   sub: string;
   email?: string;
   name?: string;
+  picture?: string;
 }
 
 @Injectable()
@@ -120,7 +121,7 @@ export class AuthService {
     }
 
     // Extract user info
-    const { sub, email, name } = payload;
+    const { sub, email, name, picture } = payload;
 
     // Upsert user
     const user = await this.usersService.upsertUserFromIdentity(
@@ -128,6 +129,7 @@ export class AuthService {
       sub,
       email,
       name,
+      picture,
     );
 
     return { user, redirect: pkceData.redirect };
@@ -200,7 +202,7 @@ export class AuthService {
     }
 
     // Extract user info
-    const { sub, email, name } = payload;
+    const { sub, email, name, picture } = payload;
 
     // Upsert user
     const user = await this.usersService.upsertUserFromIdentity(
@@ -208,6 +210,7 @@ export class AuthService {
       sub,
       email,
       name,
+      picture,
     );
 
     return { user, redirect: pkceData.redirect };

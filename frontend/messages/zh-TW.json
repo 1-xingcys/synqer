@@ -51,6 +51,34 @@
     "viewEvent": "查看活動",
     "loadingEvents": "載入活動中...",
     "errorLoadingEvents": "載入活動失敗"
-  }
+  },
+  "event": {
+    "loading": "載入中...",
+    "notFound": "找不到活動",
+    "backToDashboard": "回到主頁",
+    "untitled": "未命名活動",
+    "copyLink": "複製活動連結",
+    "copied": "已複製！",
+    "eventDate": "活動日期",
+    "timeRange": "時間範圍",
+    "participantCount": "參與人數",
+    "participantUnit": "位",
+    "myAvailability": "我的可用時段",
+    "heatmap": "熱力圖",
+    "selectAvailableSlots": "選擇你有空的時段",
+    "clickToSelect": "點擊格子選擇有空的時段（綠色 = 有空）",
+    "selectedCount": "已選擇 {count} 個時段",
+    "save": "儲存",
+    "saving": "儲存中...",
+    "saveSuccess": "儲存成功！",
+    "saveError": "儲存失敗，請重試",
+    "time": "時間",
+    "heatmapTitle": "時段熱力圖",
+    "heatmapDescription": "顏色越深表示越多人有空（點擊格子查看詳情）",
+    "slotDetails": "時段詳情",
+    "available": "有空",
+    "unavailable": "沒空",
+    "peopleCount": "{count} 人"
+  },
+  "language": "語言"
 }
-

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface TimeSlot {
   id: string;
@@ -32,6 +33,7 @@ export default function HeatmapGrid({
   votes,
   participants,
 }: HeatmapGridProps) {
+  const t = useTranslations("event");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
 
   // 將 votes 按 slotId 分組，計算每個 slot 的票數
@@ -53,7 +55,7 @@ export default function HeatmapGrid({
   // 將 slots 按日期分組
   const slotsByDate = slots.reduce(
     (acc, slot) => {
-      const dateKey = new Date(slot.date).toLocaleDateString("zh-TW");
+      const dateKey = new Date(slot.date).toLocaleDateString();
       if (!acc[dateKey]) acc[dateKey] = [];
       acc[dateKey].push(slot);
       return acc;
@@ -115,10 +117,10 @@ export default function HeatmapGrid({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">時段熱力圖</h2>
-        <p className="text-sm text-gray-600">
-          顏色越深表示越多人有空（點擊格子查看詳情）
-        </p>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          {t("heatmapTitle")}
+        </h2>
+        <p className="text-sm text-gray-600">{t("heatmapDescription")}</p>
         {/* TODO: 未來可加入 Websocket/SSE 即時同步 */}
       </div>
 
@@ -127,7 +129,7 @@ export default function HeatmapGrid({
           <thead>
             <tr>
               <th className="border border-gray-300 bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-700">
-                時間
+                {t("time")}
               </th>
               {dates.map((date) => (
                 <th
@@ -175,11 +177,17 @@ export default function HeatmapGrid({
       {/* 顯示所選時段的詳細資訊 */}
       {selectedSlotDetails && (
         <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">時段詳情</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+            {t("slotDetails")}
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h4 className="font-medium text-green-700 mb-2">
-                有空（{selectedSlotDetails.availableUsers.length} 人）
+                {t("available")} (
+                {t("peopleCount", {
+                  count: selectedSlotDetails.availableUsers.length,
+                })}
+                )
               </h4>
               <ul className="space-y-1">
                 {selectedSlotDetails.availableUsers.map((vote) => (
@@ -191,7 +199,11 @@ export default function HeatmapGrid({
             </div>
             <div>
               <h4 className="font-medium text-red-700 mb-2">
-                沒空（{selectedSlotDetails.unavailableUsers.length} 人）
+                {t("unavailable")} (
+                {t("peopleCount", {
+                  count: selectedSlotDetails.unavailableUsers.length,
+                })}
+                )
               </h4>
               <ul className="space-y-1">
                 {selectedSlotDetails.unavailableUsers.map((user) => (
