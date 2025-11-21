@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-
-interface User {
-  id: number;
-  displayName: string | null;
-  primaryEmail: string | null;
-  providers: string[];
-}
+import type { User } from "@/types/auth";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);

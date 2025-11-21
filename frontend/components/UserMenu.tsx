@@ -26,10 +26,6 @@ export default function UserMenu() {
     return name.charAt(0).toUpperCase();
   };
 
-  // TODO: 從 OAuth provider 取得頭像 URL
-  // 目前先使用 fallback
-  const avatarUrl = undefined;
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -38,7 +34,12 @@ export default function UserMenu() {
           aria-label="使用者選單"
         >
           <Avatar className="size-9 cursor-pointer hover:opacity-80 transition-opacity">
-            <AvatarImage src={avatarUrl} alt={user.displayName || "User"} />
+            {user.avatarUrl ? (
+              <AvatarImage
+                src={user.avatarUrl}
+                alt={user.displayName ?? "User"}
+              />
+            ) : null}
             <AvatarFallback className="bg-blue-600 text-white text-sm font-semibold">
               {getInitials()}
             </AvatarFallback>
