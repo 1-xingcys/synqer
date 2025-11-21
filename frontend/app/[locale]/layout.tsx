@@ -20,6 +20,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Synqer - 輕鬆管理您的活動",
   description: "Synqer 讓活動管理變得簡單而有效率，讓您專注於最重要的事情",
+  icons: {
+    icon: "/synqer.png",
+    shortcut: "/synqer.png",
+    apple: "/synqer.png",
+  },
 };
 
 export default async function LocaleLayout({

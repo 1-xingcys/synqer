@@ -6,6 +6,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import EventList from "@/components/EventList";
 import CreateEventModal from "@/components/CreateEventModal";
+import Logo from "@/components/Logo";
 
 interface Event {
   id: string;
@@ -61,9 +62,7 @@ export default function Dashboard() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                {t("dashboard.title")}
-              </h1>
+              <Logo height={40} />
             </div>
             <div className="flex items-center gap-4">
               <LanguageSwitcher />
