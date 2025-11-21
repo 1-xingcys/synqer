@@ -51,6 +51,34 @@
     "viewEvent": "View Event",
     "loadingEvents": "Loading events...",
     "errorLoadingEvents": "Failed to load events"
-  }
+  },
+  "event": {
+    "loading": "Loading...",
+    "notFound": "Event not found",
+    "backToDashboard": "Back to Dashboard",
+    "untitled": "Untitled Event",
+    "copyLink": "Copy Event Link",
+    "copied": "Copied!",
+    "eventDate": "Event Date",
+    "timeRange": "Time Range",
+    "participantCount": "Participants",
+    "participantUnit": "",
+    "myAvailability": "My Availability",
+    "heatmap": "Heatmap",
+    "selectAvailableSlots": "Select your available time slots",
+    "clickToSelect": "Click on cells to select available time slots (Green = Available)",
+    "selectedCount": "{count} slots selected",
+    "save": "Save",
+    "saving": "Saving...",
+    "saveSuccess": "Saved successfully!",
+    "saveError": "Failed to save, please try again",
+    "time": "Time",
+    "heatmapTitle": "Time Slot Heatmap",
+    "heatmapDescription": "Darker colors indicate more people available (Click to view details)",
+    "slotDetails": "Slot Details",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "peopleCount": "{count} people"
+  },
+  "language": "English"
 }
-
