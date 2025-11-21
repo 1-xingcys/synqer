@@ -1,9 +1,6 @@
 name: Deploy to GCP
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -17,8 +14,8 @@ env:
 
 jobs:
   deploy:
-    # 只在 push 到 main 或 PR merge 到 main 時執行
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    # 只在 PR merge 到 main 時執行
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     permissions:
