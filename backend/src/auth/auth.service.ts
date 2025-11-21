@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as crypto from 'crypto';
 import axios from 'axios';
@@ -78,7 +78,7 @@ export class AuthService {
   async handleGoogleCallback(code: string, state: string) {
     const pkceData = this.getPKCE(state);
     if (!pkceData) {
-      throw new Error('Invalid or expired state');
+      throw new UnauthorizedException('Invalid or expired state');
     }
 
     // Exchange code for tokens
@@ -96,26 +96,27 @@ export class AuthService {
 
     const { id_token } = tokenResponse.data as { id_token: string };
 
+    // TODO: Verify id_token
     // Decode and verify id_token
     const decoded = jwt.decode(id_token, { complete: true });
     if (!decoded || typeof decoded === 'string') {
-      throw new Error('Invalid ID token');
+      throw new UnauthorizedException('Invalid ID token');
     }
 
     const payload = decoded.payload as OAuthTokenPayload;
 
     // Verify claims
     if (payload.aud !== process.env.GOOGLE_CLIENT_ID) {
-      throw new Error('Invalid audience');
+      throw new UnauthorizedException('Invalid audience');
     }
     if (
       payload.iss !== 'https://accounts.google.com' &&
       payload.iss !== 'accounts.google.com'
     ) {
-      throw new Error('Invalid issuer');
+      throw new UnauthorizedException('Invalid issuer');
     }
     if (payload.exp * 1000 < Date.now()) {
-      throw new Error('Token expired');
+      throw new UnauthorizedException('Token expired');
     }
 
     // Extract user info
@@ -156,7 +157,7 @@ export class AuthService {
   async handleLineCallback(code: string, state: string) {
     const pkceData = this.getPKCE(state);
     if (!pkceData) {
-      throw new Error('Invalid or expired state');
+      throw new UnauthorizedException('Invalid or expired state');
     }
 
     // Exchange code for tokens
@@ -182,20 +183,20 @@ export class AuthService {
     // Decode and verify id_token
     const decoded = jwt.decode(id_token, { complete: true });
     if (!decoded || typeof decoded === 'string') {
-      throw new Error('Invalid ID token');
+      throw new UnauthorizedException('Invalid ID token');
     }
 
     const payload = decoded.payload as OAuthTokenPayload;
 
     // Verify claims
     if (payload.aud !== process.env.LINE_CHANNEL_ID) {
-      throw new Error('Invalid audience');
+      throw new UnauthorizedException('Invalid audience');
     }
     if (!payload.iss.includes('line.me')) {
-      throw new Error('Invalid issuer');
+      throw new UnauthorizedException('Invalid issuer');
     }
     if (payload.exp * 1000 < Date.now()) {
-      throw new Error('Token expired');
+      throw new UnauthorizedException('Token expired');
     }
 
     // Extract user info
