@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 interface LogoProps {
   className?: string;
@@ -25,19 +26,19 @@ export default function Logo({
   const content = (
     <div className={`flex items-center gap-3 ${className}`}>
       {/* Logo Image */}
-      <img
+      <Image
         src="/synqer.png"
         alt="Synqer Logo"
-        style={{ height: `${height}px`, width: "auto" }}
-        className="object-contain flex-shrink-0"
+        width={height}
+        height={height}
+        className="object-contain shrink-0"
       />
       {/* Logo Text with Gradient */}
       {showText && (
         <span
           className={`${textSizeClasses[textSize]} font-bold bg-clip-text text-transparent`}
           style={{
-            backgroundImage:
-              "linear-gradient(to right, #6780c7, #78b0e0)",
+            backgroundImage: "linear-gradient(to right, #6780c7, #78b0e0)",
           }}
         >
           Synqer
@@ -56,4 +57,3 @@ export default function Logo({
 
   return content;
 }
-
