@@ -6,6 +6,25 @@ import { useRouter } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import LoginPage from "@/components/LoginPage";
 
+/**
+ * 驗證 redirect 路徑，防止 open redirect 攻擊
+ */
+const validateRedirectPath = (redirect: string | null): string => {
+  if (!redirect) return "/dashboard";
+
+  // 只允許以 / 開頭的相對路徑
+  if (redirect.startsWith("/")) {
+    // 防止 protocol-relative URLs 如 //evil.com
+    if (redirect.startsWith("//")) {
+      return "/dashboard";
+    }
+    return redirect;
+  }
+
+  // 拒絕其他模式（絕對 URLs、javascript:、data: 等）
+  return "/dashboard";
+};
+
 export default function Login() {
   const t = useTranslations("common");
   const router = useRouter();
@@ -27,7 +46,7 @@ export default function Login() {
 
         if (res.ok) {
           // 已登入 → 跳轉到 redirect 或 dashboard
-          const redirect = searchParams.get("redirect") || "/dashboard";
+          const redirect = validateRedirectPath(searchParams.get("redirect"));
           router.replace(redirect);
         } else {
           // 未登入 → 顯示登入頁面
@@ -51,5 +70,7 @@ export default function Login() {
     );
   }
 
-  return <LoginPage />;
+  const redirectPath = validateRedirectPath(searchParams.get("redirect"));
+
+  return <LoginPage redirectPath={redirectPath} />;
 }

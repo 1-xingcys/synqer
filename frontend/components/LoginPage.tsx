@@ -4,7 +4,13 @@ import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import Logo from "@/components/Logo";
 
-export default function LoginPage() {
+interface LoginPageProps {
+  redirectPath?: string;
+}
+
+export default function LoginPage({
+  redirectPath = "/dashboard",
+}: LoginPageProps) {
   const t = useTranslations();
   const API_BASE = process.env.NEXT_PUBLIC_API;
 
@@ -29,7 +35,7 @@ export default function LoginPage() {
 
           <div className="flex flex-col gap-4">
             <a
-              href={`${API_BASE}/auth/google/start?redirect=/dashboard`}
+              href={`${API_BASE}/auth/google/start?redirect=${encodeURIComponent(redirectPath)}`}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-white border-2 border-zinc-300 px-5 text-zinc-800 font-medium transition-colors hover:bg-zinc-50 dark:bg-zinc-800 dark:border-zinc-600 dark:text-white dark:hover:bg-zinc-700"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -54,7 +60,7 @@ export default function LoginPage() {
             </a>
 
             <a
-              href={`${API_BASE}/auth/line/start?redirect=/dashboard`}
+              href={`${API_BASE}/auth/line/start?redirect=${encodeURIComponent(redirectPath)}`}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#06C755] px-5 text-white font-medium transition-colors hover:bg-[#05b34c]"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
