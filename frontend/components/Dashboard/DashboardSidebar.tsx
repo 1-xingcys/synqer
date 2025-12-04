@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import Sidebar, { SidebarItem } from "@/components/ui/Sidebar";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 /**
  * SidebarView 類型
@@ -39,7 +40,7 @@ export default function DashboardSidebar({
   onCreateEvent,
 }: DashboardSidebarProps) {
   const t = useTranslations("dashboard");
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   const menuItems: Array<{
     id: SidebarView;
@@ -92,7 +93,7 @@ export default function DashboardSidebar({
       <button
         onClick={() => {
           onCreateEvent();
-          if (isMobile) {
+          if (!isDesktop) {
             onClose();
           }
         }}
@@ -132,7 +133,7 @@ export default function DashboardSidebar({
           active={currentView === item.id}
           onClick={() => {
             onViewChange(item.id);
-            if (isMobile) {
+            if (!isDesktop) {
               onClose();
             }
           }}
