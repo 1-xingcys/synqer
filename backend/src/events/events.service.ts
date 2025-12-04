@@ -122,6 +122,58 @@ export class EventsService {
   }
 
   /**
+   * 取得使用者參與的所有活動（有投票紀錄的活動）
+   */
+  async findAttendedEvents(userId: string) {
+    // 找出使用者有投票的所有活動
+    const votedEvents = await this.prisma.eventVote.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        eventId: true,
+      },
+      distinct: ['eventId'],
+    });
+
+    const eventIds = votedEvents.map((v) => v.eventId);
+
+    if (eventIds.length === 0) {
+      return [];
+    }
+
+    // 取得這些活動的詳細資訊
+    const events = await this.prisma.event.findMany({
+      where: {
+        id: {
+          in: eventIds,
+        },
+      },
+      include: {
+        votes: {
+          select: {
+            userId: true,
+          },
+          distinct: ['userId'],
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return events.map((event) => ({
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      createdAt: event.createdAt,
+      participantCount: event.votes.length,
+    }));
+  }
+
+  /**
    * 取得 Event 完整資料（含 slots 和 votes）
    */
   async findOne(eventId: string) {

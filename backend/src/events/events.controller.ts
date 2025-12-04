@@ -29,6 +29,16 @@ export class EventsController {
   }
 
   /**
+   * GET /events/attended
+   * 取得當前使用者參與的所有活動（有投票紀錄的活動）
+   */
+  @Get('attended')
+  @UseGuards(SessionAuthGuard)
+  async findAttendedEvents(@CurrentUser() userId: string) {
+    return await this.eventsService.findAttendedEvents(userId);
+  }
+
+  /**
    * POST /events
    * 建立新活動（包含自動展開 slots）
    */
