@@ -125,28 +125,12 @@ export class EventsService {
    * 取得使用者參與的所有活動（有投票紀錄的活動）
    */
   async findAttendedEvents(userId: string) {
-    // 找出使用者有投票的所有活動
-    const votedEvents = await this.prisma.eventVote.findMany({
-      where: {
-        userId,
-      },
-      select: {
-        eventId: true,
-      },
-      distinct: ['eventId'],
-    });
-
-    const eventIds = votedEvents.map((v) => v.eventId);
-
-    if (eventIds.length === 0) {
-      return [];
-    }
-
-    // 取得這些活動的詳細資訊
     const events = await this.prisma.event.findMany({
       where: {
-        id: {
-          in: eventIds,
+        votes: {
+          some: {
+            userId,
+          },
         },
       },
       include: {
