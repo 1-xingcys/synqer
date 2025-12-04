@@ -51,5 +51,7 @@ export default function Login() {
     );
   }
 
-  return <LoginPage />;
+  const redirectPath = searchParams.get("redirect") || "/dashboard";
+
+  return <LoginPage redirectPath={redirectPath} />;
 }
