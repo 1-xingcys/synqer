@@ -2,13 +2,12 @@
 
 import { useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import TimeSlotGrid from "@/components/EventsPage/TimeSlotGrid";
 import HeatmapGrid from "@/components/EventsPage/HeatmapGrid";
 import EventInfo from "@/components/EventsPage/EventInfo";
-import ProtectedPageLayout from "@/components/ProtectedPageLayout";
-import EventSidebar from "@/components/EventsPage/EventSidebar";
 
 interface EventsPageProps {
   eventId: string;
@@ -16,6 +15,7 @@ interface EventsPageProps {
 
 export default function EventsPage({ eventId }: EventsPageProps) {
   const t = useTranslations("event");
+  const router = useRouter();
   const { user } = useAuthContext();
 
   const {
@@ -25,9 +25,6 @@ export default function EventsPage({ eventId }: EventsPageProps) {
     saveVotes,
   } = useEventDetail(eventId);
   const [activeTab, setActiveTab] = useState<"vote" | "heatmap">("vote");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // 預設收合
-
-  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
 
   let content: ReactNode;
 
@@ -107,17 +104,30 @@ export default function EventsPage({ eventId }: EventsPageProps) {
   }
 
   return (
-    <ProtectedPageLayout
-      sidebar={
-        <EventSidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-        />
-      }
-      onMenuClick={toggleSidebar}
-      contentClassName="py-8 space-y-6"
-    >
+    <div className="py-8 space-y-6">
+      {/* 返回 Dashboard 連結 */}
+      <div className="mb-4">
+        <button
+          onClick={() => router.push("/dashboard")}
+          className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          <span>{t("backToDashboard")}</span>
+        </button>
+      </div>
       {content}
-    </ProtectedPageLayout>
+    </div>
   );
 }
