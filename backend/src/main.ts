@@ -22,10 +22,11 @@ async function bootstrap() {
       resave: false,
       saveUninitialized: false,
       cookie: {
+        domain: process.env.NODE_ENV === 'production' ? '.synqer.club' : undefined,
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'lax',
       },
     }),
   );
