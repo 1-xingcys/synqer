@@ -74,26 +74,26 @@ export default function HeatmapGrid({
 
   // 根據票數計算顏色深淺（0-10 級）
   const getHeatmapColor = (voteCount: number) => {
-    if (voteCount === 0) return "bg-gray-100";
+    if (voteCount === 0) return "bg-gray-100 dark:bg-zinc-800";
     const intensity = Math.min(Math.ceil((voteCount / maxVotes) * 10), 10);
     const colorMap: Record<number, string> = {
-      1: "bg-green-100",
-      2: "bg-green-200",
-      3: "bg-green-300",
-      4: "bg-green-400",
-      5: "bg-green-500",
-      6: "bg-green-600",
-      7: "bg-green-700",
-      8: "bg-green-800",
-      9: "bg-green-900",
-      10: "bg-green-950",
+      1: "bg-green-100 dark:bg-green-900/30",
+      2: "bg-green-200 dark:bg-green-900/40",
+      3: "bg-green-300 dark:bg-green-800/50",
+      4: "bg-green-400 dark:bg-green-800/60",
+      5: "bg-green-500 dark:bg-green-700",
+      6: "bg-green-600 dark:bg-green-700",
+      7: "bg-green-700 dark:bg-green-600",
+      8: "bg-green-800 dark:bg-green-600",
+      9: "bg-green-900 dark:bg-green-500",
+      10: "bg-green-950 dark:bg-green-500",
     };
-    return colorMap[intensity] || "bg-gray-100";
+    return colorMap[intensity] || "bg-gray-100 dark:bg-zinc-800";
   };
 
   const getTextColor = (voteCount: number) => {
     const intensity = Math.min(Math.ceil((voteCount / maxVotes) * 10), 10);
-    return intensity >= 5 ? "text-white" : "text-gray-900";
+    return intensity >= 5 ? "text-white" : "text-gray-900 dark:text-zinc-100";
   };
 
   const handleSlotClick = (slotId: string) => {
@@ -117,10 +117,10 @@ export default function HeatmapGrid({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-zinc-100 mb-2">
           {t("heatmapTitle")}
         </h2>
-        <p className="text-sm text-gray-600">{t("heatmapDescription")}</p>
+        <p className="text-sm text-gray-600 dark:text-zinc-400">{t("heatmapDescription")}</p>
         {/* TODO: 未來可加入 Websocket/SSE 即時同步 */}
       </div>
 
@@ -128,13 +128,13 @@ export default function HeatmapGrid({
         <table className="min-w-full border-collapse">
           <thead>
             <tr>
-              <th className="border border-gray-300 bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-700">
+              <th className="border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-zinc-200">
                 {t("time")}
               </th>
               {dates.map((date) => (
                 <th
                   key={date}
-                  className="border border-gray-300 bg-gray-50 px-4 py-2 text-center text-sm font-medium text-gray-700"
+                  className="border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 px-4 py-2 text-center text-sm font-medium text-gray-700 dark:text-zinc-200"
                 >
                   {date}
                 </th>
@@ -144,7 +144,7 @@ export default function HeatmapGrid({
           <tbody>
             {timeSlots.map((timeSlot, timeIndex) => (
               <tr key={timeIndex}>
-                <td className="border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-700 whitespace-nowrap">
+                <td className="border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 px-4 py-2 text-sm text-gray-700 dark:text-zinc-200 whitespace-nowrap">
                   {formatTime(timeSlot.startMinute)} -{" "}
                   {formatTime(timeSlot.endMinute)}
                 </td>
@@ -156,10 +156,10 @@ export default function HeatmapGrid({
                     <td
                       key={slot.id}
                       onClick={() => handleSlotClick(slot.id)}
-                      className={`border border-gray-300 px-4 py-2 cursor-pointer transition-all ${getHeatmapColor(
+                      className={`border border-gray-300 dark:border-zinc-700 px-4 py-2 cursor-pointer transition-all ${getHeatmapColor(
                         voteCount,
                       )} ${getTextColor(voteCount)} ${
-                        isSelected ? "ring-4 ring-blue-500" : ""
+                        isSelected ? "ring-4 ring-blue-500 dark:ring-blue-400" : ""
                       }`}
                     >
                       <div className="h-6 flex items-center justify-center font-medium">
@@ -176,13 +176,13 @@ export default function HeatmapGrid({
 
       {/* 顯示所選時段的詳細資訊 */}
       {selectedSlotDetails && (
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
+        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-3">
             {t("slotDetails")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <h4 className="font-medium text-green-700 mb-2">
+              <h4 className="font-medium text-green-700 dark:text-green-400 mb-2">
                 {t("available")} (
                 {t("peopleCount", {
                   count: selectedSlotDetails.availableUsers.length,
@@ -191,14 +191,14 @@ export default function HeatmapGrid({
               </h4>
               <ul className="space-y-1">
                 {selectedSlotDetails.availableUsers.map((vote) => (
-                  <li key={vote.userId} className="text-sm text-gray-700">
+                  <li key={vote.userId} className="text-sm text-gray-700 dark:text-zinc-200">
                     ✓ {vote.userDisplayName}
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <h4 className="font-medium text-red-700 mb-2">
+              <h4 className="font-medium text-red-700 dark:text-red-400 mb-2">
                 {t("unavailable")} (
                 {t("peopleCount", {
                   count: selectedSlotDetails.unavailableUsers.length,
@@ -207,7 +207,7 @@ export default function HeatmapGrid({
               </h4>
               <ul className="space-y-1">
                 {selectedSlotDetails.unavailableUsers.map((user) => (
-                  <li key={user.userId} className="text-sm text-gray-700">
+                  <li key={user.userId} className="text-sm text-gray-700 dark:text-zinc-200">
                     ✗ {user.displayName}
                   </li>
                 ))}
