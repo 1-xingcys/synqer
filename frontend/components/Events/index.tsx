@@ -5,9 +5,9 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useEventDetail } from "@/hooks/useEventDetail";
-import TimeSlotGrid from "@/components/EventsPage/TimeSlotGrid";
-import HeatmapGrid from "@/components/EventsPage/HeatmapGrid";
-import EventInfo from "@/components/EventsPage/EventInfo";
+import TimeSlotGrid from "@/components/Events/TimeSlotGrid";
+import HeatmapGrid from "@/components/Events/HeatmapGrid";
+import EventInfo from "@/components/Events/EventInfo";
 
 interface EventsPageProps {
   eventId: string;
