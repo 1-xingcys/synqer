@@ -1,7 +1,7 @@
 "use client";
 
 import { Children, cloneElement, isValidElement, useEffect, useMemo, type ReactNode } from "react";
-import { useRouter, usePathname } from "@/i18n/routing";
+import { useRouter, usePathname, Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useSidebar } from "@/contexts/SidebarContext";
@@ -256,17 +256,15 @@ function ProtectedSidebarContent() {
     setContent(
       <>
         {/* 建立活動按鈕 */}
-        <button
+        <Link
+          href="/new"
           onClick={() => {
-            // 觸發自定義事件，讓 Dashboard 組件監聽並處理
-            window.dispatchEvent(new CustomEvent("openCreateEventModal"));
             if (!isDesktop) {
               close();
             }
           }}
-          id="create-event-button"
           className={`
-            w-full h-12 font-medium rounded-lg transition-colors bg-blue-600 hover:bg-blue-700 text-white
+            w-full h-12 font-medium rounded-lg transition-colors bg-blue-600 hover:bg-blue-700 text-white no-underline
             ${isCollapsed && isDesktop 
               ? "lg:flex lg:items-center lg:justify-center lg:px-2" 
               : "flex items-center gap-3 px-4"
@@ -297,7 +295,7 @@ function ProtectedSidebarContent() {
           `}>
             {t("dashboard.createNewEvent")}
           </span>
-        </button>
+        </Link>
 
         {/* 選單項目 */}
         {menuItems.map((item) => (

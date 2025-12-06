@@ -133,3 +133,51 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* React DatePicker Dark Mode Styles */
+.dark .react-datepicker {
+  background-color: rgb(39 39 42);
+  border-color: rgb(63 63 70);
+  color: rgb(244 244 245);
+}
+
+.dark .react-datepicker__header {
+  background-color: rgb(39 39 42);
+  border-bottom-color: rgb(63 63 70);
+}
+
+.dark .react-datepicker__current-month,
+.dark .react-datepicker__day-name {
+  color: rgb(244 244 245);
+}
+
+.dark .react-datepicker__day {
+  color: rgb(244 244 245);
+}
+
+.dark .react-datepicker__day:hover {
+  background-color: rgb(63 63 70);
+}
+
+.dark .react-datepicker__day--selected,
+.dark .react-datepicker__day--keyboard-selected {
+  background-color: rgb(37 99 235);
+  color: white;
+}
+
+.dark .react-datepicker__day--today {
+  font-weight: bold;
+  color: rgb(37 99 235);
+}
+
+.dark .react-datepicker__day--disabled {
+  color: rgb(113 113 122);
+}
+
+.dark .react-datepicker__triangle {
+  border-bottom-color: rgb(39 39 42) !important;
+}
+
+.dark .react-datepicker__triangle::before {
+  border-bottom-color: rgb(63 63 70) !important;
+}

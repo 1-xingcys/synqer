@@ -89,5 +89,35 @@
     "light": "淺色",
     "dark": "深色",
     "system": "系統預設"
+  },
+  "createEvent": {
+    "title": "建立新活動",
+    "description": "建立一個新的活動來收集參與者的可用時間",
+    "requiredNote": "必填欄位標記有星號 (*)",
+    "general": {
+      "title": "General",
+      "host": "Host",
+      "hostDescription": "選擇活動的主辦者",
+      "eventName": "Event name",
+      "eventNamePlaceholder": "例如：團隊聚餐時間投票",
+      "description": "Description",
+      "descriptionPlaceholder": "選填，描述這個活動的目的和內容",
+      "characters": "字元"
+    },
+    "configuration": {
+      "title": "Configuration",
+      "startDate": "開始日期",
+      "endDate": "結束日期",
+      "selectDate": "選擇日期",
+      "startTime": "開始時間",
+      "endTime": "結束時間",
+      "timeDescription": "每日活動的時間範圍",
+      "slotDuration": "時間間隔",
+      "minutes": "分鐘",
+      "slotDurationDescription": "每個時段的持續時間"
+    },
+    "cancel": "取消",
+    "create": "建立活動",
+    "creating": "建立中..."
   }
 }
