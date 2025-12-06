@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useAuthContext } from "@/contexts/AuthContext";
-import Navbar from "@/components/Navbar";
+import Header from "@/components/Header";
 
 export default function LandingPage() {
   const t = useTranslations("landing");
@@ -29,7 +29,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-b from-zinc-50 to-white dark:from-black dark:to-zinc-900">
-      <Navbar />
+      <Header variant="public" />
 
       {/* Hero Section */}
       <main className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Navbar from "@/components/Navbar";
+import Header from "@/components/Header";
 
 interface LoginPageProps {
   redirectPath?: string;
@@ -15,7 +15,7 @@ export default function LoginPage({
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <Navbar />
+      <Header variant="public" />
       <main className="flex w-full max-w-md flex-col items-center justify-center gap-8 px-4 py-32">
         <div className="w-full space-y-8">
           <div className="text-center">

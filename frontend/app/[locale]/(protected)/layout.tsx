@@ -3,11 +3,54 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useRouter, usePathname } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import Header from "@/components/Header";
+import Sidebar from "@/components/ui/Sidebar";
+import { SidebarProvider, useSidebar } from "@/contexts/SidebarContext";
 
 interface ProtectedLayoutProps {
   children: ReactNode;
 }
 
+/**
+ * ProtectedLayoutContent
+ * 內部組件，可以使用 SidebarContext 並渲染統一的 Sidebar
+ */
+function ProtectedLayoutContent({ children }: ProtectedLayoutProps) {
+  const { isOpen, toggle, close } = useSidebar();
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-zinc-900">
+      {/* Header with hamburger button */}
+      <Header variant="protected" onMenuClick={toggle} />
+
+      {/* Sidebar + Content 容器 */}
+      <div className="w-full">
+        <div className="flex gap-6 items-start">
+          {/* 統一的 Sidebar - 內容由 Sidebar 組件內部自動設置 */}
+          <Sidebar isOpen={isOpen} onClose={close} />
+
+          {/* Main Content */}
+          <div className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8">
+            <main>{children}</main>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * ProtectedLayout
+ * 為所有受保護的頁面提供統一的佈局結構
+ * 
+ * 包含：
+ * 1. 認證檢查
+ * 2. SidebarContext（用於共享 sidebar 狀態）
+ * 3. Header（ProtectedHeader）
+ * 4. 基本容器結構
+ * 
+ * 注意：Sidebar 由各個頁面自己管理，因為不同頁面有不同的 sidebar
+ */
 export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -62,6 +105,10 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
     );
   }
 
-  // 通過驗證，渲染所有 protected children
-  return <>{children}</>;
+  // 通過驗證，渲染佈局（包含 SidebarContext）
+  return (
+    <SidebarProvider>
+      <ProtectedLayoutContent>{children}</ProtectedLayoutContent>
+    </SidebarProvider>
+  );
 }
