@@ -89,5 +89,35 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "createEvent": {
+    "title": "Create a new event",
+    "description": "Create a new event to collect participants' available times",
+    "requiredNote": "Required fields are marked with an asterisk (*)",
+    "general": {
+      "title": "General",
+      "host": "Host",
+      "hostDescription": "Choose who will host this event",
+      "eventName": "Event name",
+      "eventNamePlaceholder": "e.g., Team dinner time poll",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional. Describe the purpose and content of this event",
+      "characters": "characters"
+    },
+    "configuration": {
+      "title": "Configuration",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "selectDate": "Select date",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "timeDescription": "Daily time range for the event",
+      "slotDuration": "Time slot duration",
+      "minutes": "minutes",
+      "slotDurationDescription": "Duration of each time slot"
+    },
+    "cancel": "Cancel",
+    "create": "Create event",
+    "creating": "Creating..."
   }
 }
