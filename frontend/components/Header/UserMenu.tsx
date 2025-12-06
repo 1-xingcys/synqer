@@ -12,6 +12,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { LogOutIcon } from "lucide-react";
 
 export default function UserMenu() {
@@ -59,6 +60,7 @@ export default function UserMenu() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <LanguageSwitcher asSubmenu />
+        <ThemeSwitcher asSubmenu />
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => void logout()}

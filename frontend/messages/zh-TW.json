@@ -83,5 +83,11 @@
     "unavailable": "沒空",
     "peopleCount": "{count} 人"
   },
-  "language": "語言"
+  "language": "語言",
+  "theme": {
+    "title": "主題",
+    "light": "淺色",
+    "dark": "深色",
+    "system": "系統預設"
+  }
 }
