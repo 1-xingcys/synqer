@@ -22,9 +22,6 @@ export default function LoginPage({
       <main className="flex w-full max-w-md flex-col items-center justify-center gap-8 px-4 py-32">
         <div className="w-full space-y-8">
           <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <Logo height={80} />
-            </div>
             <h1 className="text-4xl font-bold text-black dark:text-white">
               {t("auth.title")}
             </h1>
