@@ -57,15 +57,15 @@ export default function EventsPage({ eventId }: EventsPageProps) {
         />
 
         {/* Tab 切換 */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="border-b border-gray-200">
+        <div className="bg-white dark:bg-zinc-900 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-800">
+          <div className="border-b border-gray-200 dark:border-zinc-800">
             <nav className="flex -mb-px">
               <button
                 onClick={() => setActiveTab("vote")}
                 className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === "vote"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 hover:border-gray-300 dark:hover:border-zinc-600"
                 }`}
               >
                 {t("myAvailability")}
@@ -74,8 +74,8 @@ export default function EventsPage({ eventId }: EventsPageProps) {
                 onClick={() => setActiveTab("heatmap")}
                 className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === "heatmap"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 hover:border-gray-300 dark:hover:border-zinc-600"
                 }`}
               >
                 {t("heatmap")}

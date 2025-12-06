@@ -58,15 +58,15 @@ export default function EventInfo({ event, participants }: EventInfoProps) {
   };
 
   return (
-    <div className="bg-white shadow-sm rounded-2xl p-2 sm:p-8 mb-8 border border-gray-100">
+    <div className="bg-white dark:bg-zinc-900 shadow-sm rounded-2xl p-2 sm:p-8 mb-8 border border-gray-100 dark:border-zinc-800">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="flex-1 space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight leading-tight">
             {event.title || t("untitled")}
           </h1>
           {event.description && (
-            <p className="text-gray-500 text-sm sm:text-base leading-relaxed max-w-2xl">
+            <p className="text-gray-500 dark:text-zinc-400 text-sm sm:text-base leading-relaxed max-w-2xl">
               {event.description}
             </p>
           )}
@@ -77,7 +77,7 @@ export default function EventInfo({ event, participants }: EventInfoProps) {
             <TooltipTrigger asChild>
               <button
                 onClick={handleCopyLink}
-                className="group flex items-center justify-center p-2.5 rounded-xl bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-all duration-200"
+                className="group flex items-center justify-center p-2.5 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 hover:bg-gray-100 dark:hover:bg-zinc-700 hover:text-gray-900 dark:hover:text-zinc-200 transition-all duration-200"
                 aria-label={t("copyLink")}
               >
                 <IoCopyOutline className="w-5 h-5" />
@@ -95,13 +95,13 @@ export default function EventInfo({ event, participants }: EventInfoProps) {
       </div>
 
       {/* Divider */}
-      <div className="h-px w-full bg-gray-100 my-6 sm:my-8" />
+      <div className="h-px w-full bg-gray-100 dark:bg-zinc-800 my-6 sm:my-8" />
 
       {/* Info Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
         {/* Date */}
         <div className="flex items-start gap-3 group">
-          <div className="mt-0.5 p-2 rounded-lg bg-gray-50 text-gray-400 group-hover:text-gray-600 group-hover:bg-gray-100 transition-colors">
+          <div className="mt-0.5 p-2 rounded-lg bg-gray-50 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 group-hover:text-gray-600 dark:group-hover:text-zinc-300 group-hover:bg-gray-100 dark:group-hover:bg-zinc-700 transition-colors">
             <svg
               className="w-5 h-5"
               fill="none"
@@ -117,12 +117,12 @@ export default function EventInfo({ event, participants }: EventInfoProps) {
             </svg>
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">
+            <p className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-0.5">
               {t("eventDate")}
             </p>
-            <p className="text-sm font-semibold text-gray-700">
+            <p className="text-sm font-semibold text-gray-700 dark:text-zinc-200">
               {formatDate(event.startDate)}{" "}
-              <span className="text-gray-300 mx-1">/</span>{" "}
+              <span className="text-gray-300 dark:text-zinc-600 mx-1">/</span>{" "}
               {formatDate(event.endDate)}
             </p>
           </div>
@@ -130,7 +130,7 @@ export default function EventInfo({ event, participants }: EventInfoProps) {
 
         {/* Time */}
         <div className="flex items-start gap-3 group">
-          <div className="mt-0.5 p-2 rounded-lg bg-gray-50 text-gray-400 group-hover:text-gray-600 group-hover:bg-gray-100 transition-colors">
+          <div className="mt-0.5 p-2 rounded-lg bg-gray-50 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 group-hover:text-gray-600 dark:group-hover:text-zinc-300 group-hover:bg-gray-100 dark:group-hover:bg-zinc-700 transition-colors">
             <svg
               className="w-5 h-5"
               fill="none"
@@ -146,10 +146,10 @@ export default function EventInfo({ event, participants }: EventInfoProps) {
             </svg>
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">
+            <p className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-0.5">
               {t("timeRange")}
             </p>
-            <p className="text-sm font-semibold text-gray-700 font-mono">
+            <p className="text-sm font-semibold text-gray-700 dark:text-zinc-200 font-mono">
               {formatTime(event.startMinuteOfDay)} -{" "}
               {formatTime(event.endMinuteOfDay)}
             </p>
@@ -158,7 +158,7 @@ export default function EventInfo({ event, participants }: EventInfoProps) {
 
         {/* Participants */}
         <div className="flex items-start gap-3 group">
-          <div className="mt-0.5 p-2 rounded-lg bg-gray-50 text-gray-400 group-hover:text-gray-600 group-hover:bg-gray-100 transition-colors">
+          <div className="mt-0.5 p-2 rounded-lg bg-gray-50 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 group-hover:text-gray-600 dark:group-hover:text-zinc-300 group-hover:bg-gray-100 dark:group-hover:bg-zinc-700 transition-colors">
             <svg
               className="w-5 h-5"
               fill="none"
@@ -174,11 +174,11 @@ export default function EventInfo({ event, participants }: EventInfoProps) {
             </svg>
           </div>
           <div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-0.5">
+            <p className="text-xs font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-0.5">
               {t("participantCount")}
             </p>
             <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold text-gray-700">
+              <p className="text-sm font-semibold text-gray-700 dark:text-zinc-200">
                 {participants.length} {t("participantUnit")}
               </p>
               {participants.length > 0 && (
@@ -187,13 +187,13 @@ export default function EventInfo({ event, participants }: EventInfoProps) {
                   {participants.slice(0, 3).map((p) => (
                     <div
                       key={p.userId}
-                      className="h-5 w-5 rounded-full ring-2 ring-white bg-gray-200 flex items-center justify-center text-[10px] text-gray-500 font-bold"
+                      className="h-5 w-5 rounded-full ring-2 ring-white dark:ring-zinc-900 bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-[10px] text-gray-500 dark:text-zinc-300 font-bold"
                     >
                       {p.displayName[0]?.toUpperCase()}
                     </div>
                   ))}
                   {participants.length > 3 && (
-                    <div className="h-5 w-5 rounded-full ring-2 ring-white bg-gray-100 flex items-center justify-center text-[8px] text-gray-400 font-bold">
+                    <div className="h-5 w-5 rounded-full ring-2 ring-white dark:ring-zinc-900 bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-[8px] text-gray-400 dark:text-zinc-500 font-bold">
                       +{participants.length - 3}
                     </div>
                   )}

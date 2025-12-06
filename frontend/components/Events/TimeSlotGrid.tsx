@@ -78,19 +78,19 @@ export default function TimeSlotGrid({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-zinc-100">
           {t("selectAvailableSlots")}
         </h2>
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600"
         >
           {saving ? t("saving") : t("save")}
         </button>
       </div>
 
-      <div className="text-sm text-gray-600 mb-4">
+      <div className="text-sm text-gray-600 dark:text-zinc-400 mb-4">
         {t("clickToSelect")}
         {/* TODO: 未來可加入拖曳多選功能 */}
       </div>
@@ -99,13 +99,13 @@ export default function TimeSlotGrid({
         <table className="min-w-full border-collapse">
           <thead>
             <tr>
-              <th className="border border-gray-300 bg-gray-50 px-4 py-2 text-left text-sm font-medium text-gray-700">
+              <th className="border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-zinc-200">
                 {t("time")}
               </th>
               {dates.map((date) => (
                 <th
                   key={date}
-                  className="border border-gray-300 bg-gray-50 px-4 py-2 text-center text-sm font-medium text-gray-700"
+                  className="border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 px-4 py-2 text-center text-sm font-medium text-gray-700 dark:text-zinc-200"
                 >
                   {date}
                 </th>
@@ -115,7 +115,7 @@ export default function TimeSlotGrid({
           <tbody>
             {timeSlots.map((timeSlot, timeIndex) => (
               <tr key={timeIndex}>
-                <td className="border border-gray-300 bg-gray-50 px-4 py-2 text-sm text-gray-700 whitespace-nowrap">
+                <td className="border border-gray-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 px-4 py-2 text-sm text-gray-700 dark:text-zinc-200 whitespace-nowrap">
                   {formatTime(timeSlot.startMinute)} -{" "}
                   {formatTime(timeSlot.endMinute)}
                 </td>
@@ -126,10 +126,10 @@ export default function TimeSlotGrid({
                     <td
                       key={slot.id}
                       onClick={() => toggleSlot(slot.id)}
-                      className={`border border-gray-300 px-4 py-2 cursor-pointer transition-colors ${
+                      className={`border border-gray-300 dark:border-zinc-700 px-4 py-2 cursor-pointer transition-colors ${
                         isSelected
-                          ? "bg-green-500 hover:bg-green-600"
-                          : "bg-white hover:bg-gray-100"
+                          ? "bg-green-500 dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-700"
+                          : "bg-white dark:bg-zinc-900 hover:bg-gray-100 dark:hover:bg-zinc-800"
                       }`}
                     >
                       <div className="h-6"></div>
@@ -142,7 +142,7 @@ export default function TimeSlotGrid({
         </table>
       </div>
 
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-600 dark:text-zinc-400">
         {t("selectedCount", { count: selectedSlots.size })}
       </div>
     </div>
