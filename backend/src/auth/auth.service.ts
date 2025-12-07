@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
+import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 import axios from 'axios';
 import * as jwt from 'jsonwebtoken';
@@ -24,7 +25,10 @@ interface OAuthTokenPayload {
 export class AuthService {
   private pkceStore = new Map<string, PKCEData>();
 
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private prisma: PrismaService,
+  ) {}
 
   // PKCE helpers
   generateCodeVerifier(): string {
@@ -135,7 +139,7 @@ export class AuthService {
     return { user, redirect: pkceData.redirect };
   }
 
-  // LINE OAuth
+  // LINE OAuth (使用 LINE Login Channel)
   getLineAuthUrl(redirect?: string): string {
     const state = this.generateState();
     const codeVerifier = this.generateCodeVerifier();
@@ -145,8 +149,8 @@ export class AuthService {
 
     const params = new URLSearchParams({
       response_type: 'code',
-      client_id: process.env.LINE_CHANNEL_ID!,
-      redirect_uri: process.env.LINE_REDIRECT_URI!,
+      client_id: process.env.LINE_LOGIN_CHANNEL_ID!,
+      redirect_uri: process.env.LINE_LOGIN_REDIRECT_URI!,
       state,
       scope: 'openid email profile',
       code_challenge: codeChallenge,
@@ -162,15 +166,15 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired state');
     }
 
-    // Exchange code for tokens
+    // Exchange code for tokens (使用 LINE Login Channel)
     const tokenResponse = await axios.post(
       'https://api.line.me/oauth2/v2.1/token',
       new URLSearchParams({
         grant_type: 'authorization_code',
         code,
-        redirect_uri: process.env.LINE_REDIRECT_URI!,
-        client_id: process.env.LINE_CHANNEL_ID!,
-        client_secret: process.env.LINE_CHANNEL_SECRET!,
+        redirect_uri: process.env.LINE_LOGIN_REDIRECT_URI!,
+        client_id: process.env.LINE_LOGIN_CHANNEL_ID!,
+        client_secret: process.env.LINE_LOGIN_CHANNEL_SECRET!,
         code_verifier: pkceData.codeVerifier,
       }),
       {
@@ -190,8 +194,8 @@ export class AuthService {
 
     const payload = decoded.payload as OAuthTokenPayload;
 
-    // Verify claims
-    if (payload.aud !== process.env.LINE_CHANNEL_ID) {
+    // Verify claims (使用 LINE Login Channel ID)
+    if (payload.aud !== process.env.LINE_LOGIN_CHANNEL_ID) {
       throw new UnauthorizedException('Invalid audience');
     }
     if (!payload.iss.includes('line.me')) {
@@ -213,6 +217,26 @@ export class AuthService {
       picture,
     );
 
+    // 關聯 LINE userId 到所有群組成員記錄
+    await this.linkUserToGroupMembers(user.id, sub);
+
     return { user, redirect: pkceData.redirect };
+  }
+
+  /**
+   * 當使用者 OAuth 登入後，關聯其 LINE 身份到群組成員
+   */
+  private async linkUserToGroupMembers(userId: string, lineUserId: string) {
+    // 更新所有該 LINE userId 的群組成員記錄
+    await this.prisma.lineGroupMember.updateMany({
+      where: { lineUserId },
+      data: { userId },
+    });
+
+    // 同時更新 EventExpectedParticipant
+    await this.prisma.eventExpectedParticipant.updateMany({
+      where: { lineUserId },
+      data: { userId },
+    });
   }
 }
