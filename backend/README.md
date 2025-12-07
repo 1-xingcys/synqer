@@ -52,13 +52,20 @@ The `.env` file in `backend/` is already configured with your credentials:
 ```env
 DATABASE_URL="file:./dev.db"
 
-GOOGLE_CLIENT_ID=61142687327-iek6nuqvgok2imud5o2cmk0e152bemmr.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_REDIRECT_URI=http://localhost:4000/auth/google/callback
 
-LINE_CHANNEL_ID=2008403450
-LINE_CHANNEL_SECRET=d91a76161a66fea7f738873e7c37fe7e
-LINE_REDIRECT_URI=http://localhost:4000/auth/line/callback
+# LINE Login (OAuth 登入專用)
+LINE_LOGIN_CHANNEL_ID=your_line_login_channel_id
+LINE_LOGIN_CHANNEL_SECRET=your_line_login_channel_secret
+LINE_LOGIN_REDIRECT_URI=http://localhost:4000/auth/line/callback
+
+# LINE Bot (Messaging API 專用)
+LINE_BOT_CHANNEL_ID=your_line_bot_channel_id
+LINE_BOT_CHANNEL_SECRET=your_line_bot_channel_secret
+LINE_CHANNEL_ACCESS_TOKEN=your_channel_access_token
 
 SESSION_SECRET=dev-secret-change-in-production
 WEB_ORIGIN=http://localhost:3000
