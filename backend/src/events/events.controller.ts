@@ -8,15 +8,20 @@ import {
   HttpStatus,
   Session,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { VoteEventDto } from './dto/vote-event.dto';
 import { SessionAuthGuard, CurrentUser } from '../auth';
+import { LineBotService } from '../line-bot/line-bot.service';
 
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly lineBotService: LineBotService,
+  ) {}
 
   /**
    * GET /events/my
@@ -76,5 +81,60 @@ export class EventsController {
   ) {
     // TODO: 未來可支援匿名投票
     return this.eventsService.vote(eventId, userId, voteDto);
+  }
+
+  /**
+   * GET /events/:eventId/unvoted
+   * 取得活動中尚未投票的預期參與者
+   */
+  @Get(':eventId/unvoted')
+  @UseGuards(SessionAuthGuard)
+  async getUnvotedParticipants(
+    @Param('eventId') eventId: string,
+    @CurrentUser() userId: string,
+  ) {
+    // 驗證使用者是活動擁有者
+    const eventData = await this.eventsService.findOne(eventId);
+    if (eventData.event.ownerId !== userId) {
+      throw new ForbiddenException('Only event owner can view unvoted participants');
+    }
+    
+    return this.eventsService.getUnvotedParticipants(eventId);
+  }
+
+  /**
+   * POST /events/:eventId/remind
+   * 發送提醒給未投票的參與者
+   */
+  @Post(':eventId/remind')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionAuthGuard)
+  async sendReminder(
+    @Param('eventId') eventId: string,
+    @Body() body: { lineUserIds: string[] },
+    @CurrentUser() userId: string,
+  ) {
+    // 驗證使用者是活動擁有者
+    const eventData = await this.eventsService.findOne(eventId);
+    if (eventData.event.ownerId !== userId) {
+      throw new ForbiddenException('Only event owner can send reminders');
+    }
+
+    if (!eventData.lineGroup) {
+      throw new ForbiddenException('Event is not linked to a LINE group');
+    }
+
+    const { lineUserIds } = body;
+    if (!lineUserIds || lineUserIds.length === 0) {
+      return { success: true, reminded: 0 };
+    }
+
+    await this.lineBotService.sendVoteReminder(
+      eventId,
+      eventData.lineGroup.id,
+      lineUserIds,
+    );
+
+    return { success: true, reminded: lineUserIds.length };
   }
 }
