@@ -26,9 +26,11 @@ export default function ThemeSwitcher({
   const [mounted, setMounted] = useState(false);
   const t = useTranslations();
 
-  // 避免 hydration mismatch
+  // 避免 hydration mismatch - 在組件掛載後才顯示主題選擇器
   useEffect(() => {
-    setMounted(true);
+    // 使用 setTimeout 避免在 effect 中直接調用 setState
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!mounted) {
@@ -49,9 +51,7 @@ export default function ThemeSwitcher({
         onClick={() => setTheme(themeOption.value)}
         className="cursor-pointer"
       >
-        {theme === themeOption.value && (
-          <CheckIcon className="mr-2 h-4 w-4" />
-        )}
+        {theme === themeOption.value && <CheckIcon className="mr-2 h-4 w-4" />}
         <Icon className="mr-2 h-4 w-4" />
         <span className={theme !== themeOption.value ? "ml-6" : ""}>
           {themeOption.label}
@@ -96,4 +96,3 @@ export default function ThemeSwitcher({
     </DropdownMenu>
   );
 }
-
