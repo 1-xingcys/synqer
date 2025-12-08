@@ -11,7 +11,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuthContext();
-  
+
   // 檢查是否在登入頁面
   const isLoginPage = pathname?.endsWith("/login");
 
@@ -24,8 +24,8 @@ export default function Navbar() {
           </div>
           <div className="flex items-center gap-4">
             <LanguageSwitcher />
-            {!isLoginPage && (
-              user ? (
+            {!isLoginPage &&
+              (user ? (
                 <button
                   onClick={() => router.push("/dashboard")}
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
@@ -39,12 +39,10 @@ export default function Navbar() {
                 >
                   {t("signIn")}
                 </button>
-              )
-            )}
+              ))}
           </div>
         </div>
       </div>
     </header>
   );
 }
-
