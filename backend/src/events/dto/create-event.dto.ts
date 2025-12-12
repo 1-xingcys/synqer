@@ -5,6 +5,7 @@ import {
   IsInt,
   Min,
   Max,
+  IsArray,
 } from 'class-validator';
 
 export class CreateEventDto {
@@ -37,4 +38,15 @@ export class CreateEventDto {
   @IsOptional()
   @IsString()
   timeZone?: string; // 預設 "Asia/Taipei"
+
+  // LINE 群組綁定（群組的資料庫 ID）
+  @IsOptional()
+  @IsString()
+  lineGroupId?: string;
+
+  // 預期應該投票的成員 LINE userIds
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  expectedLineUserIds?: string[];
 }

@@ -21,6 +21,8 @@ export class EventsService {
       endTime,
       slotDurationMin = 15,
       timeZone = 'Asia/Taipei',
+      lineGroupId,
+      expectedLineUserIds,
     } = createEventDto;
 
     // 解析時間為分鐘數
@@ -46,6 +48,7 @@ export class EventsService {
             endMinuteOfDay,
             slotDurationMin,
             timeZone,
+            lineGroupId: lineGroupId || null,
           },
         });
 
@@ -69,6 +72,33 @@ export class EventsService {
           })),
         });
 
+        // 建立預期參與者記錄
+        if (expectedLineUserIds && expectedLineUserIds.length > 0) {
+          // 先查詢哪些 LINE userId 已經關聯到系統使用者
+          const linkedMembers = await prisma.lineGroupMember.findMany({
+            where: {
+              lineUserId: { in: expectedLineUserIds },
+              userId: { not: null },
+            },
+            select: {
+              lineUserId: true,
+              userId: true,
+            },
+          });
+
+          const linkedMap = new Map(
+            linkedMembers.map((m) => [m.lineUserId, m.userId]),
+          );
+
+          await prisma.eventExpectedParticipant.createMany({
+            data: expectedLineUserIds.map((lineUserId) => ({
+              eventId: event.id,
+              lineUserId,
+              userId: linkedMap.get(lineUserId) || null,
+            })),
+          });
+        }
+
         return event;
       },
     );
@@ -85,6 +115,8 @@ export class EventsService {
           endMinuteOfDay,
           slotDurationMin,
         ).length,
+        lineGroupId: result.lineGroupId,
+        expectedParticipants: expectedLineUserIds?.length || 0,
       },
     };
   }
@@ -177,6 +209,24 @@ export class EventsService {
             },
           },
         },
+        lineGroup: {
+          select: {
+            id: true,
+            lineGroupId: true,
+            groupName: true,
+          },
+        },
+        expectedParticipants: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                displayName: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -206,6 +256,47 @@ export class EventsService {
     });
     const participants = Array.from(participantsMap.values());
 
+    // 計算已投票的 userId 和 lineUserId
+    const votedUserIds = new Set(event.votes.map((v) => v.userId));
+
+    // 整理預期參與者資料，標註是否已投票
+    const expectedParticipants = await Promise.all(
+      event.expectedParticipants.map(async (ep) => {
+        // 檢查是否已投票
+        let hasVoted = false;
+        if (ep.userId) {
+          hasVoted = votedUserIds.has(ep.userId);
+        }
+
+        // 取得 LINE 群組成員資料（如果有 lineUserId）
+        let lineGroupMember: { displayName: string | null; pictureUrl: string | null } | null = null;
+        if (ep.lineUserId && event.lineGroup) {
+          lineGroupMember = await this.prisma.lineGroupMember.findUnique({
+            where: {
+              lineGroupId_lineUserId: {
+                lineGroupId: event.lineGroup.id,
+                lineUserId: ep.lineUserId,
+              },
+            },
+            select: {
+              displayName: true,
+              pictureUrl: true,
+            },
+          });
+        }
+
+        return {
+          id: ep.id,
+          lineUserId: ep.lineUserId,
+          userId: ep.userId,
+          hasVoted,
+          reminderSentAt: ep.reminderSentAt,
+          user: ep.user,
+          lineGroupMember,
+        };
+      }),
+    );
+
     return {
       event: {
         id: event.id,
@@ -217,10 +308,90 @@ export class EventsService {
         endMinuteOfDay: event.endMinuteOfDay,
         slotDurationMin: event.slotDurationMin,
         timeZone: event.timeZone,
+        lineGroupId: event.lineGroupId,
+        ownerId: event.ownerId,
       },
+      lineGroup: event.lineGroup,
       slots: event.slots,
       votes,
       participants,
+      expectedParticipants,
+    };
+  }
+
+  /**
+   * 取得活動中尚未投票的預期參與者
+   */
+  async getUnvotedParticipants(eventId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        votes: {
+          select: { userId: true },
+          distinct: ['userId'],
+        },
+        expectedParticipants: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                displayName: true,
+              },
+            },
+          },
+        },
+        lineGroup: true,
+      },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event ${eventId} not found`);
+    }
+
+    const votedUserIds = new Set(event.votes.map((v) => v.userId));
+
+    // 找出未投票的預期參與者
+    const unvoted: Array<{
+      id: string;
+      lineUserId: string;
+      userId: string | null;
+      displayName: string;
+      pictureUrl: string | null | undefined;
+      reminderSentAt: Date | null;
+    }> = [];
+
+    for (const ep of event.expectedParticipants) {
+      const hasVoted = ep.userId ? votedUserIds.has(ep.userId) : false;
+      
+      if (!hasVoted && ep.lineUserId) {
+        // 取得 LINE 群組成員資料
+        const memberInfo = event.lineGroup
+          ? await this.prisma.lineGroupMember.findUnique({
+              where: {
+                lineGroupId_lineUserId: {
+                  lineGroupId: event.lineGroup.id,
+                  lineUserId: ep.lineUserId,
+                },
+              },
+            })
+          : null;
+
+        unvoted.push({
+          id: ep.id,
+          lineUserId: ep.lineUserId,
+          userId: ep.userId,
+          displayName: ep.user?.displayName || memberInfo?.displayName || 'Unknown',
+          pictureUrl: memberInfo?.pictureUrl,
+          reminderSentAt: ep.reminderSentAt,
+        });
+      }
+    }
+
+    return {
+      eventId,
+      lineGroupId: event.lineGroup?.id,
+      lineGroupLineId: event.lineGroup?.lineGroupId,
+      unvotedParticipants: unvoted,
     };
   }
 
