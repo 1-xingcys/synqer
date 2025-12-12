@@ -4,7 +4,10 @@ import { AppModule } from './app.module';
 import session from 'express-session';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    // 啟用 rawBody 以便 LINE Webhook 簽章驗證
+    rawBody: true,
+  });
 
   // Configure CORS
   app.enableCors({
