@@ -49,7 +49,7 @@ export default function CreateEventModal({
 
         const result = (await response.json()) as { eventId: string };
         onClose();
-        router.push(`/events/${result.eventId}`);
+        router.push(`/hosted/${result.eventId}`);
       } catch (error) {
         console.error("建立活動失敗:", error);
         alert("建立活動失敗，請重試");

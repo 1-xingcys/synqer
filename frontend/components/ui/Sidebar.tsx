@@ -3,7 +3,6 @@
 import { Children, cloneElement, isValidElement, useEffect, useMemo, type ReactNode } from "react";
 import { useRouter, usePathname, Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
@@ -182,12 +181,11 @@ export function SidebarItem({
  * ProtectedSidebarContent
  * 自動設置受保護頁面的 Sidebar 內容
  */
-type SidebarView = "hosted-events" | "attended-events";
+type SidebarView = "hosted-events" | "joined-events";
 
 function ProtectedSidebarContent() {
   const { isOpen, close, setContent, setTitle } = useSidebar();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const router = useRouter();
   const t = useTranslations();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
@@ -197,11 +195,11 @@ function ProtectedSidebarContent() {
   const currentView = useMemo<SidebarView>(() => {
     // Check if we're on the hosted events pages
     if (pathname?.startsWith("/hosted")) return "hosted-events";
-    // Check URL param for dashboard
-    const view = searchParams.get("view");
-    if (view === "attended-events") return "attended-events";
-    return "hosted-events";
-  }, [searchParams, pathname]);
+    // Check if we're on the joined events pages
+    if (pathname?.startsWith("/joined")) return "joined-events";
+    // Default to joined-events (main page after login)
+    return "joined-events";
+  }, [pathname]);
 
   // 設置 Sidebar 內容 - 所有頁面都顯示相同的 Dashboard sidebar
   useEffect(() => {
@@ -213,6 +211,26 @@ function ProtectedSidebarContent() {
       icon: ReactNode;
       href: string;
     }> = [
+      {
+        id: "joined-events",
+        label: t("dashboard.joinedEvents"),
+        href: "/joined",
+        icon: (
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+            />
+          </svg>
+        ),
+      },
       {
         id: "hosted-events",
         label: t("dashboard.hostedEvents"),
@@ -229,26 +247,6 @@ function ProtectedSidebarContent() {
               strokeLinejoin="round"
               strokeWidth={2}
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
-        ),
-      },
-      {
-        id: "attended-events",
-        label: t("dashboard.attendedEvents"),
-        href: "/dashboard?view=attended-events",
-        icon: (
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
             />
           </svg>
         ),
@@ -318,7 +316,6 @@ function ProtectedSidebarContent() {
       </>
     );
   }, [
-    searchParams,
     currentView,
     pathname,
     setContent,

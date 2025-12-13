@@ -14,7 +14,7 @@ export default function Dashboard() {
     <div className="py-8 space-y-6">
       <div>
         <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-          {t("dashboard.attendedEvents")}
+          {t("dashboard.joinedEvents")}
         </h2>
       </div>
 

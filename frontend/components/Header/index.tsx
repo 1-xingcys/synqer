@@ -39,7 +39,9 @@ export default function Header({ children, onMenuClick, variant }: HeaderProps) 
   
   // 判斷是否為受保護頁面
   const isProtectedPage = pathname?.startsWith("/dashboard") || 
-                          pathname?.startsWith("/events");
+                          pathname?.startsWith("/events") ||
+                          pathname?.startsWith("/joined") ||
+                          pathname?.startsWith("/hosted");
   
   // 決定使用哪個 Header
   const shouldUseProtected = variant === "protected" || 

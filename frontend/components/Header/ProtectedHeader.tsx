@@ -47,7 +47,7 @@ export default function ProtectedHeader({ children, onMenuClick }: ProtectedHead
               </svg>
             </button>
             {/* Logo - 位置與 PublicHeader 對齊 */}
-            <Logo height={40} href="/dashboard" />
+            <Logo height={40} href="/joined" />
           </div>
 
           {/* 中間內容（可選） */}
