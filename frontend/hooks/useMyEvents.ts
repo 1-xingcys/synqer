@@ -1,17 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
+import { EventListItem } from "@/types/event";
 
-export interface MyEvent {
-  id: string;
-  title: string | null;
-  description: string | null;
-  startDate: string;
-  endDate: string;
-  createdAt: string;
-  participantCount: number;
-}
+// 保留舊介面以便向後相容
+export type MyEvent = EventListItem;
 
 export function useMyEvents() {
-  const [events, setEvents] = useState<MyEvent[]>([]);
+  const [events, setEvents] = useState<EventListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +23,7 @@ export function useMyEvents() {
         throw new Error("Failed to fetch events");
       }
 
-      const data = (await response.json()) as MyEvent[];
+      const data = (await response.json()) as EventListItem[];
       setEvents(data);
       setError(null);
     } catch (err) {

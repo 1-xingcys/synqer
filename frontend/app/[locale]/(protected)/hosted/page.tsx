@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useMyEvents } from "@/hooks/useMyEvents";
 import { Link } from "@/i18n/routing";
 import { format } from "date-fns";
+import { EventStatusBadge } from "@/components/Events/EventStatusBadge";
 
 export default function HostedEventsPage() {
   const t = useTranslations();
@@ -97,15 +98,18 @@ export default function HostedEventsPage() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {event.title || t("event.untitled")}
-                  </h3>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      {event.title || t("event.untitled")}
+                    </h3>
+                    <EventStatusBadge status={event.status} size="sm" />
+                  </div>
                   {event.description && (
                     <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
                       {event.description}
                     </p>
                   )}
-                  <div className="flex items-center gap-4 mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+                  <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-zinc-500 dark:text-zinc-400">
                     <span className="flex items-center gap-1.5">
                       <svg
                         className="w-4 h-4"
@@ -141,6 +145,24 @@ export default function HostedEventsPage() {
                         count: event.participantCount,
                       })}
                     </span>
+                    {event.confirmedStartTime && (
+                      <span className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        {format(new Date(event.confirmedStartTime), "MMM d, HH:mm")}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="shrink-0">

@@ -1,17 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
+import { AttendedEventListItem } from "@/types/event";
 
-export interface AttendedEvent {
-  id: string;
-  title: string | null;
-  description: string | null;
-  startDate: string;
-  endDate: string;
-  createdAt: string;
-  participantCount: number;
-}
+// 保留舊介面以便向後相容
+export type AttendedEvent = AttendedEventListItem;
 
 export function useAttendedEvents() {
-  const [events, setEvents] = useState<AttendedEvent[]>([]);
+  const [events, setEvents] = useState<AttendedEventListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +26,7 @@ export function useAttendedEvents() {
         throw new Error("Failed to fetch attended events");
       }
 
-      const data = (await response.json()) as AttendedEvent[];
+      const data = (await response.json()) as AttendedEventListItem[];
       setEvents(data);
       setError(null);
     } catch (err) {

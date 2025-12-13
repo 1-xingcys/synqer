@@ -160,6 +160,21 @@
       "confirmDelete": "Are you sure you want to delete this event?"
     }
   },
+  "eventJoin": {
+    "youAreInvited": "You're invited to",
+    "votingDateRange": "Voting Date Range",
+    "votingDeadline": "Voting Deadline",
+    "confirmedTime": "Confirmed Event Time",
+    "currentParticipants": "Current Participants",
+    "joinEvent": "Join Event",
+    "joining": "Joining...",
+    "cancel": "Cancel",
+    "alreadyParticipant": "You're Already a Participant",
+    "alreadyParticipantDescription": "You have already joined this event.",
+    "goToVote": "Go to Vote",
+    "goToEvent": "View Event",
+    "eventNotFoundDescription": "The event you're looking for doesn't exist or has been deleted."
+  },
   "event": {
     "loading": "Loading...",
     "notFound": "Event not found",
@@ -188,6 +203,17 @@
     "available": "Available",
     "unavailable": "Unavailable",
     "peopleCount": "{count} people"
+  },
+  "eventStatus": {
+    "voting": "Voting",
+    "votingEnded": "Voting Ended",
+    "confirmed": "Confirmed",
+    "completed": "Completed"
+  },
+  "participantStatus": {
+    "voted": "Voted",
+    "notVoted": "Not Voted",
+    "notRegistered": "Not Registered"
   },
   "language": "English",
   "theme": {

@@ -5,6 +5,9 @@ import { useTranslations } from "next-intl";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { Link } from "@/i18n/routing";
 import { format } from "date-fns";
+import { EventStatusBadge } from "@/components/Events/EventStatusBadge";
+import { ParticipantStatusBadge } from "@/components/Events/ParticipantStatusBadge";
+import { ParticipantStatus } from "@/types/event";
 
 export default function HostedEventOverviewPage() {
   const params = useParams();
@@ -33,7 +36,9 @@ export default function HostedEventOverviewPage() {
   const { event, participants, votingStats, expectedParticipants } = data;
 
   const votedParticipants = participants.filter((p) => p.hasVoted);
-  const pendingParticipants = expectedParticipants.filter((p) => !p.hasVoted);
+  const pendingParticipants = expectedParticipants.filter(
+    (p) => p.status === ParticipantStatus.NOT_VOTED || p.status === ParticipantStatus.NOT_REGISTERED
+  );
 
   return (
     <div className="space-y-6">
@@ -41,15 +46,18 @@ export default function HostedEventOverviewPage() {
       <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-              {event.title || t("event.untitled")}
-            </h1>
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+                {event.title || t("event.untitled")}
+              </h1>
+              <EventStatusBadge status={event.status} />
+            </div>
             {event.description && (
               <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2 max-w-2xl">
                 {event.description}
               </p>
             )}
-            <div className="flex items-center gap-4 mt-4 text-sm text-zinc-500 dark:text-zinc-400">
+            <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-zinc-500 dark:text-zinc-400">
               <span className="flex items-center gap-1.5">
                 <svg
                   className="w-4 h-4"
@@ -67,6 +75,24 @@ export default function HostedEventOverviewPage() {
                 {format(new Date(event.startDate), "MMM d")} -{" "}
                 {format(new Date(event.endDate), "MMM d, yyyy")}
               </span>
+              {event.confirmedStartTime && event.confirmedEndTime && (
+                <span className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  {format(new Date(event.confirmedStartTime), "MMM d, HH:mm")} - {format(new Date(event.confirmedEndTime), "HH:mm")}
+                </span>
+              )}
             </div>
           </div>
           <Link
@@ -241,26 +267,18 @@ export default function HostedEventOverviewPage() {
                       className="w-8 h-8 rounded-full"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 text-sm font-medium">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                      participant.status === ParticipantStatus.NOT_REGISTERED
+                        ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+                        : "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                    }`}>
                       {participant.displayName?.[0]?.toUpperCase() || "?"}
                     </div>
                   )}
-                  <span className="text-sm text-zinc-700 dark:text-zinc-300">
+                  <span className="text-sm text-zinc-700 dark:text-zinc-300 flex-1">
                     {participant.displayName || "Unknown"}
                   </span>
-                  <svg
-                    className="w-4 h-4 text-amber-500 ml-auto"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <ParticipantStatusBadge status={participant.status} />
                 </li>
               ))}
             </ul>
