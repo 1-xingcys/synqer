@@ -51,15 +51,15 @@ export class EventsController {
   /**
    * POST /events
    * 建立新活動（包含自動展開 slots）
+   * 需要登入，創建者會自動加入為參與者
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(SessionAuthGuard)
   async create(
     @Body() createEventDto: CreateEventDto,
-    @Session() session: { userId?: string },
+    @CurrentUser() userId: string,
   ) {
-    // 從 session 取得 userId（如未登入則為 undefined）
-    const userId = session.userId;
     return this.eventsService.create(createEventDto, userId);
   }
 

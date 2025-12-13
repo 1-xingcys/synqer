@@ -79,6 +79,21 @@ export class EventsService {
         });
 
         // 建立預期參與者記錄
+        const participantData: Array<{
+          eventId: string;
+          lineUserId?: string;
+          userId?: string;
+        }> = [];
+
+        // 自動將創建者加入為參與者
+        if (userId) {
+          participantData.push({
+            eventId: event.id,
+            userId: userId,
+          });
+        }
+
+        // 加入 LINE 群組的預期參與者
         if (expectedLineUserIds && expectedLineUserIds.length > 0) {
           // 先查詢哪些 LINE userId 已經關聯到系統使用者
           const linkedMembers = await prisma.lineGroupMember.findMany({
@@ -96,18 +111,36 @@ export class EventsService {
             linkedMembers.map((m) => [m.lineUserId, m.userId]),
           );
 
-          await prisma.eventExpectedParticipant.createMany({
-            data: expectedLineUserIds.map((lineUserId) => ({
+          expectedLineUserIds.forEach((lineUserId) => {
+            const linkedUserId = linkedMap.get(lineUserId);
+            // 如果創建者也在 LINE 群組中，避免重複添加
+            if (linkedUserId && linkedUserId === userId) {
+              return; // 跳過，因為已經在上面添加了
+            }
+            participantData.push({
               eventId: event.id,
               lineUserId,
-              userId: linkedMap.get(lineUserId) || null,
-            })),
+              userId: linkedUserId || undefined,
+            });
+          });
+        }
+
+        // 批次建立參與者記錄
+        if (participantData.length > 0) {
+          await prisma.eventExpectedParticipant.createMany({
+            data: participantData,
           });
         }
 
         return event;
       },
     );
+
+    // 計算實際加入的參與者數量（包含 Host）
+    let expectedParticipantsCount = userId ? 1 : 0;
+    if (expectedLineUserIds && expectedLineUserIds.length > 0) {
+      expectedParticipantsCount += expectedLineUserIds.length;
+    }
 
     return {
       eventId: result.id,
@@ -122,7 +155,7 @@ export class EventsService {
           slotDurationMin,
         ).length,
         lineGroupId: result.lineGroupId,
-        expectedParticipants: expectedLineUserIds?.length || 0,
+        expectedParticipants: expectedParticipantsCount,
       },
     };
   }
@@ -136,11 +169,10 @@ export class EventsService {
         ownerId: userId,
       },
       include: {
-        votes: {
+        expectedParticipants: {
           select: {
-            userId: true,
+            id: true,
           },
-          distinct: ['userId'],
         },
       },
       orderBy: {
@@ -155,28 +187,40 @@ export class EventsService {
       startDate: event.startDate,
       endDate: event.endDate,
       createdAt: event.createdAt,
-      participantCount: event.votes.length,
+      participantCount: event.expectedParticipants.length,
     }));
   }
 
   /**
-   * 取得使用者參與的所有活動（有投票紀錄的活動）
+   * 取得使用者參與的所有活動（有投票紀錄或作為預期參與者的活動）
    */
   async findAttendedEvents(userId: string) {
     const events = await this.prisma.event.findMany({
       where: {
-        votes: {
-          some: {
-            userId,
+        OR: [
+          // 有投票紀錄的活動
+          {
+            votes: {
+              some: {
+                userId,
+              },
+            },
           },
-        },
+          // 作為預期參與者的活動（包括自己創建的）
+          {
+            expectedParticipants: {
+              some: {
+                userId,
+              },
+            },
+          },
+        ],
       },
       include: {
-        votes: {
+        expectedParticipants: {
           select: {
-            userId: true,
+            id: true,
           },
-          distinct: ['userId'],
         },
       },
       orderBy: {
@@ -191,7 +235,7 @@ export class EventsService {
       startDate: event.startDate,
       endDate: event.endDate,
       createdAt: event.createdAt,
-      participantCount: event.votes.length,
+      participantCount: event.expectedParticipants.length,
     }));
   }
 
