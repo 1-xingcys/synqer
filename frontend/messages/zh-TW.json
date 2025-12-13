@@ -108,7 +108,28 @@
     "dragToSelectAvailable": "拖曳選取你「可以」的時段，或點擊日期選取整天",
     "dragToSelectUnavailable": "拖曳選取你「不行」的時段，或點擊日期選取整天",
     "legendAvailable": "可以",
-    "legendUnavailable": "不行"
+    "legendUnavailable": "不行",
+    "googleCalendar": {
+      "title": "Google 日曆整合",
+      "description": "從你的 Google 日曆匯入行程，快速標記不行的時間",
+      "connected": "已連結",
+      "notConnected": "未連結",
+      "connectedAs": "已連結帳號：{email}",
+      "connect": "連結 Google 日曆",
+      "disconnect": "斷開連結",
+      "import": "重新載入",
+      "importing": "匯入中...",
+      "importSuccess": "已匯入 {count} 個衝突時段",
+      "noConflicts": "沒有與行程衝突的時段",
+      "conflictsFound": "發現 {count} 個時段與你的行程衝突",
+      "markAsUnavailable": "一鍵標記為不行",
+      "calendarEvents": "你的行程",
+      "noEvents": "這段時間沒有行程",
+      "allDay": "全天",
+      "connectHint": "連結你的 Google 日曆來自動偵測時間衝突",
+      "showOnGrid": "在時間表上顯示行程",
+      "legendCalendarEvent": "日曆行程"
+    }
   },
   "hosted": {
     "title": "主辦的活動",

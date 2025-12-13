@@ -160,6 +160,7 @@ export default function JoinedEventPage() {
           onSave={saveVotes}
           initialSelectedIds={currentUserVotes}
           currentUserId={user?.id?.toString()}
+          eventId={eventId}
         />
       </div>
     </div>
