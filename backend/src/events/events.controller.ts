@@ -2,6 +2,9 @@ import {
   Controller,
   Get,
   Post,
+  Put,
+  Patch,
+  Delete,
   Body,
   Param,
   HttpCode,
@@ -13,6 +16,8 @@ import {
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { VoteEventDto } from './dto/vote-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateParticipantsDto } from './dto/update-participants.dto';
 import { SessionAuthGuard, CurrentUser } from '../auth';
 import { LineBotService } from '../line-bot/line-bot.service';
 
@@ -84,57 +89,57 @@ export class EventsController {
   }
 
   /**
-   * GET /events/:eventId/unvoted
-   * 取得活動中尚未投票的預期參與者
+   * GET /events/:eventId/hosted
+   * 取得 Host 端的活動詳細資料（包含投票狀態）
    */
-  @Get(':eventId/unvoted')
+  @Get(':eventId/hosted')
   @UseGuards(SessionAuthGuard)
-  async getUnvotedParticipants(
+  async findOneHosted(
     @Param('eventId') eventId: string,
     @CurrentUser() userId: string,
   ) {
-    // 驗證使用者是活動擁有者
-    const eventData = await this.eventsService.findOne(eventId);
-    if (eventData.event.ownerId !== userId) {
-      throw new ForbiddenException('Only event owner can view unvoted participants');
-    }
-    
-    return this.eventsService.getUnvotedParticipants(eventId);
+    return this.eventsService.findOneHosted(eventId, userId);
   }
 
   /**
-   * POST /events/:eventId/remind
-   * 發送提醒給未投票的參與者
+   * PATCH /events/:eventId
+   * 更新活動設定
    */
-  @Post(':eventId/remind')
-  @HttpCode(HttpStatus.OK)
+  @Patch(':eventId')
   @UseGuards(SessionAuthGuard)
-  async sendReminder(
+  async update(
     @Param('eventId') eventId: string,
-    @Body() body: { lineUserIds: string[] },
+    @Body() updateDto: UpdateEventDto,
     @CurrentUser() userId: string,
   ) {
-    // 驗證使用者是活動擁有者
-    const eventData = await this.eventsService.findOne(eventId);
-    if (eventData.event.ownerId !== userId) {
-      throw new ForbiddenException('Only event owner can send reminders');
-    }
+    return this.eventsService.update(eventId, userId, updateDto);
+  }
 
-    if (!eventData.lineGroup) {
-      throw new ForbiddenException('Event is not linked to a LINE group');
-    }
+  /**
+   * DELETE /events/:eventId
+   * 刪除活動
+   */
+  @Delete(':eventId')
+  @UseGuards(SessionAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async remove(
+    @Param('eventId') eventId: string,
+    @CurrentUser() userId: string,
+  ) {
+    return this.eventsService.remove(eventId, userId);
+  }
 
-    const { lineUserIds } = body;
-    if (!lineUserIds || lineUserIds.length === 0) {
-      return { success: true, reminded: 0 };
-    }
-
-    await this.lineBotService.sendVoteReminder(
-      eventId,
-      eventData.lineGroup.id,
-      lineUserIds,
-    );
-
-    return { success: true, reminded: lineUserIds.length };
+  /**
+   * PUT /events/:eventId/participants
+   * 更新活動的預期參與者
+   */
+  @Put(':eventId/participants')
+  @UseGuards(SessionAuthGuard)
+  async updateParticipants(
+    @Param('eventId') eventId: string,
+    @Body() dto: UpdateParticipantsDto,
+    @CurrentUser() userId: string,
+  ) {
+    return this.eventsService.updateParticipants(eventId, userId, dto);
   }
 }
