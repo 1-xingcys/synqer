@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import type { VoteMode } from "@/components/Events/VotingGrid";
 
 interface TimeSlot {
   id: string;
@@ -92,7 +93,7 @@ export function useEventDetail(eventId: string) {
     void fetchEventData();
   }, [fetchEventData]);
 
-  const saveVotes = async (selectedSlotIds: string[]) => {
+  const saveVotes = async (selectedSlotIds: string[], voteMode: VoteMode = "available") => {
     if (!process.env.NEXT_PUBLIC_API) {
       throw new Error("NEXT_PUBLIC_API is not set");
     }
@@ -104,7 +105,7 @@ export function useEventDetail(eventId: string) {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ availableSlotIds: selectedSlotIds }),
+        body: JSON.stringify({ selectedSlotIds, voteMode }),
       },
     );
 

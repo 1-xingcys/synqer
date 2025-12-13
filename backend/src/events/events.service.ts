@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
-import { VoteEventDto } from './dto/vote-event.dto';
+import { VoteEventDto, VoteMode } from './dto/vote-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateParticipantsDto } from './dto/update-participants.dto';
 import { ConfirmEventTimeDto } from './dto/confirm-event-time.dto';
@@ -568,34 +568,64 @@ export class EventsService {
   }
 
   /**
-   * 儲存使用者的投票（有空的 slots）
+   * 儲存使用者的投票
+   * 支援兩種模式：
+   * 1. available: 投自己「可以」的時間，未選擇的時段視為不行
+   * 2. unavailable: 投自己「不行」的時間，未選擇的時段視為可以
    */
   async vote(eventId: string, userId: string, voteDto: VoteEventDto) {
-    const { availableSlotIds } = voteDto;
+    const { selectedSlotIds, voteMode = VoteMode.AVAILABLE } = voteDto;
 
     // 使用 transaction 保證一致性
-    await this.prisma.$transaction(async (prisma: Prisma.TransactionClient) => {
-      // 1. 刪除該 user 在此 event 的舊投票
-      await prisma.eventVote.deleteMany({
-        where: {
-          eventId,
-          userId,
-        },
-      });
-
-      // 2. 建立新的投票紀錄
-      if (availableSlotIds.length > 0) {
-        await prisma.eventVote.createMany({
-          data: availableSlotIds.map((slotId) => ({
+    const result = await this.prisma.$transaction(
+      async (prisma: Prisma.TransactionClient) => {
+        // 1. 刪除該 user 在此 event 的舊投票
+        await prisma.eventVote.deleteMany({
+          where: {
             eventId,
-            slotId,
             userId,
-          })),
+          },
         });
-      }
-    });
 
-    return { success: true, votedSlots: availableSlotIds.length };
+        // 2. 取得該活動的所有 slot IDs
+        const allSlots = await prisma.eventTimeSlot.findMany({
+          where: { eventId },
+          select: { id: true },
+        });
+        const allSlotIds = allSlots.map((s) => s.id);
+
+        // 3. 根據投票模式計算「有空」的時段
+        let availableSlotIds: string[];
+
+        if (voteMode === VoteMode.UNAVAILABLE) {
+          // 如果是投「不行」的時間，把其他時間都視為可以
+          const unavailableSet = new Set(selectedSlotIds);
+          availableSlotIds = allSlotIds.filter((id) => !unavailableSet.has(id));
+        } else {
+          // 如果是投「可以」的時間，直接使用選擇的時段
+          availableSlotIds = selectedSlotIds;
+        }
+
+        // 4. 建立新的投票紀錄（記錄有空的時段）
+        if (availableSlotIds.length > 0) {
+          await prisma.eventVote.createMany({
+            data: availableSlotIds.map((slotId) => ({
+              eventId,
+              slotId,
+              userId,
+            })),
+          });
+        }
+
+        return { availableSlotIds };
+      },
+    );
+
+    return {
+      success: true,
+      votedSlots: result.availableSlotIds.length,
+      voteMode,
+    };
   }
 
   /**
