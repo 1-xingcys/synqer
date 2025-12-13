@@ -11,6 +11,7 @@ import {
   HttpStatus,
   Session,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -18,10 +19,14 @@ import { VoteEventDto } from './dto/vote-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateParticipantsDto } from './dto/update-participants.dto';
 import { SessionAuthGuard, CurrentUser } from '../auth';
+import { LineBotService } from '../line-bot/line-bot.service';
 
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly lineBotService: LineBotService,
+  ) {}
 
   /**
    * GET /events/my
