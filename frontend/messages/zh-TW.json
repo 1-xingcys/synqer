@@ -160,6 +160,21 @@
       "confirmDelete": "您確定要刪除此活動嗎？"
     }
   },
+  "eventJoin": {
+    "youAreInvited": "您被邀請參加",
+    "votingDateRange": "投票日期範圍",
+    "votingDeadline": "投票截止時間",
+    "confirmedTime": "確認的活動時間",
+    "currentParticipants": "目前參與者",
+    "joinEvent": "加入活動",
+    "joining": "加入中...",
+    "cancel": "取消",
+    "alreadyParticipant": "您已經是參與者",
+    "alreadyParticipantDescription": "您已經加入了這個活動。",
+    "goToVote": "前往投票",
+    "goToEvent": "查看活動",
+    "eventNotFoundDescription": "您尋找的活動不存在或已被刪除。"
+  },
   "event": {
     "loading": "載入中...",
     "notFound": "找不到活動",
@@ -188,6 +203,17 @@
     "available": "有空",
     "unavailable": "沒空",
     "peopleCount": "{count} 人"
+  },
+  "eventStatus": {
+    "voting": "投票中",
+    "votingEnded": "投票結束",
+    "confirmed": "時間已定",
+    "completed": "活動結束"
+  },
+  "participantStatus": {
+    "voted": "已投票",
+    "notVoted": "未投票",
+    "notRegistered": "未註冊"
   },
   "language": "語言",
   "theme": {

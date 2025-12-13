@@ -18,6 +18,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { VoteEventDto } from './dto/vote-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateParticipantsDto } from './dto/update-participants.dto';
+import { ConfirmEventTimeDto } from './dto/confirm-event-time.dto';
 import { SessionAuthGuard, CurrentUser } from '../auth';
 import { LineBotService } from '../line-bot/line-bot.service';
 
@@ -70,6 +71,42 @@ export class EventsController {
   @Get(':eventId')
   async findOne(@Param('eventId') eventId: string) {
     return this.eventsService.findOne(eventId);
+  }
+
+  /**
+   * GET /events/:eventId/public
+   * 取得活動的公開資訊（用於加入確認頁面）
+   */
+  @Get(':eventId/public')
+  async getEventPublicInfo(@Param('eventId') eventId: string) {
+    return this.eventsService.getEventPublicInfo(eventId);
+  }
+
+  /**
+   * GET /events/:eventId/participation
+   * 檢查當前使用者是否已經是活動的參與者
+   */
+  @Get(':eventId/participation')
+  @UseGuards(SessionAuthGuard)
+  async checkParticipantStatus(
+    @Param('eventId') eventId: string,
+    @CurrentUser() userId: string,
+  ) {
+    return this.eventsService.checkParticipantStatus(eventId, userId);
+  }
+
+  /**
+   * POST /events/:eventId/join
+   * 加入活動（透過分享連結）
+   */
+  @Post(':eventId/join')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionAuthGuard)
+  async joinEvent(
+    @Param('eventId') eventId: string,
+    @CurrentUser() userId: string,
+  ) {
+    return this.eventsService.joinEvent(eventId, userId);
   }
 
   /**
@@ -141,5 +178,34 @@ export class EventsController {
     @CurrentUser() userId: string,
   ) {
     return this.eventsService.updateParticipants(eventId, userId, dto);
+  }
+
+  /**
+   * POST /events/:eventId/confirm-time
+   * 確認活動時間（僅限活動擁有者）
+   */
+  @Post(':eventId/confirm-time')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionAuthGuard)
+  async confirmEventTime(
+    @Param('eventId') eventId: string,
+    @Body() dto: ConfirmEventTimeDto,
+    @CurrentUser() userId: string,
+  ) {
+    return this.eventsService.confirmEventTime(eventId, userId, dto);
+  }
+
+  /**
+   * DELETE /events/:eventId/confirm-time
+   * 取消確認的活動時間（僅限活動擁有者）
+   */
+  @Delete(':eventId/confirm-time')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionAuthGuard)
+  async cancelConfirmedTime(
+    @Param('eventId') eventId: string,
+    @CurrentUser() userId: string,
+  ) {
+    return this.eventsService.cancelConfirmedTime(eventId, userId);
   }
 }

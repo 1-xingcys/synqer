@@ -6,6 +6,7 @@ import {
   Min,
   Max,
   IsArray,
+  IsISO8601,
 } from 'class-validator';
 
 export class CreateEventDto {
@@ -38,6 +39,11 @@ export class CreateEventDto {
   @IsOptional()
   @IsString()
   timeZone?: string; // 預設 "Asia/Taipei"
+
+  // 投票截止時間（ISO 8601 格式）
+  @IsOptional()
+  @IsISO8601()
+  votingDeadline?: string; // "2025-08-14T23:59:59.000Z"
 
   // LINE 群組綁定（群組的資料庫 ID）
   @IsOptional()
