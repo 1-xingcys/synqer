@@ -18,10 +18,11 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  identities           AuthIdentity[]
-  votes                EventVote[]
-  lineGroupMemberships LineGroupMember[]
-  expectedParticipants EventExpectedParticipant[]
+  identities               AuthIdentity[]
+  votes                    EventVote[]
+  lineGroupMemberships     LineGroupMember[]
+  expectedParticipants     EventExpectedParticipant[]
+  googleCalendarConnection GoogleCalendarConnection?
 }
 
 model AuthIdentity {
@@ -35,6 +36,29 @@ model AuthIdentity {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerUserId])
+}
+
+// Google Calendar 連結
+// 注意：這是獨立於登入 OAuth 的，用於存取 Google Calendar API
+// 同一個 Google 帳號可以被多個 User 連結（因為同一個人可能有 Google + LINE 兩個帳號）
+model GoogleCalendarConnection {
+  id                 String   @id @default(cuid())
+  userId             String
+  googleAccountId    String   // Google 帳號的 sub (unique identifier)
+  googleEmail        String?  // Google 帳號的 email（便於顯示）
+  accessToken        String   @db.Text // Access Token
+  refreshToken       String?  @db.Text // Refresh Token
+  tokenExpiresAt     DateTime // Access Token 過期時間
+  scope              String   // 授權的 scope
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 每個 User 只能連結一個 Google Calendar 帳號
+  // 但同一個 Google 帳號可以被不同的 User 連結
+  @@unique([userId])
+  @@index([googleAccountId])
 }
 
 // LINE 群組

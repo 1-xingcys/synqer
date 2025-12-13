@@ -108,7 +108,28 @@
     "dragToSelectAvailable": "Drag to select times you're available, or click dates to select entire days",
     "dragToSelectUnavailable": "Drag to select times you're NOT available, or click dates to select entire days",
     "legendAvailable": "Available",
-    "legendUnavailable": "Unavailable"
+    "legendUnavailable": "Unavailable",
+    "googleCalendar": {
+      "title": "Google Calendar Integration",
+      "description": "Import events from your Google Calendar to quickly mark unavailable times",
+      "connected": "Connected",
+      "notConnected": "Not Connected",
+      "connectedAs": "Connected as: {email}",
+      "connect": "Connect Google Calendar",
+      "disconnect": "Disconnect",
+      "import": "Refresh",
+      "importing": "Importing...",
+      "importSuccess": "Imported {count} conflicting slots",
+      "noConflicts": "No conflicts with your schedule",
+      "conflictsFound": "{count} slots conflict with your schedule",
+      "markAsUnavailable": "Mark all as unavailable",
+      "calendarEvents": "Your Schedule",
+      "noEvents": "No events during this time",
+      "allDay": "All day",
+      "connectHint": "Connect your Google Calendar to automatically detect time conflicts",
+      "showOnGrid": "Show events on grid",
+      "legendCalendarEvent": "Calendar event"
+    }
   },
   "hosted": {
     "title": "Hosted Events",
