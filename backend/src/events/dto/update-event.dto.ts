@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsInt, Min, Max, Matches } from 'class-validator';
+import { IsString, IsOptional, IsInt, Min, Max, Matches, IsISO8601 } from 'class-validator';
 
 export class UpdateEventDto {
   @IsOptional()
@@ -38,4 +38,9 @@ export class UpdateEventDto {
   @IsOptional()
   @IsString()
   timeZone?: string;
+
+  // 投票截止時間（ISO 8601 格式）
+  @IsOptional()
+  @IsISO8601()
+  votingDeadline?: string;
 }

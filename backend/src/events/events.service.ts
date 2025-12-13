@@ -2,17 +2,91 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { VoteEventDto } from './dto/vote-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateParticipantsDto } from './dto/update-participants.dto';
+import { ConfirmEventTimeDto } from './dto/confirm-event-time.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+
+// 活動狀態
+export enum EventStatus {
+  VOTING = 'VOTING',           // 正在進行投票 (活動創建後 ~ 投票 deadline)
+  VOTING_ENDED = 'VOTING_ENDED', // 已經投票結束 (投票 deadline 已過，但 host 還沒決定活動時間)
+  CONFIRMED = 'CONFIRMED',     // 活動時間已定 (host 決定活動時間 ~ 活動時間結束)
+  COMPLETED = 'COMPLETED',     // 活動時間已過 (活動已經辦完)
+}
+
+// 參與者狀態
+export enum ParticipantStatus {
+  VOTED = 'VOTED',             // 已經投票
+  NOT_VOTED = 'NOT_VOTED',     // 還沒投票（已註冊）
+  NOT_REGISTERED = 'NOT_REGISTERED', // 還沒註冊（只有 LINE 使用者）
+}
 
 @Injectable()
 export class EventsService {
   constructor(private prisma: PrismaService) {}
+
+  /**
+   * 根據活動資訊計算活動狀態
+   */
+  computeEventStatus(event: {
+    votingDeadline: Date | null;
+    confirmedStartTime: Date | null;
+    confirmedEndTime: Date | null;
+  }): EventStatus {
+    const now = new Date();
+
+    // 如果有確認的活動時間
+    if (event.confirmedStartTime && event.confirmedEndTime) {
+      // 檢查活動是否已結束
+      if (now > event.confirmedEndTime) {
+        return EventStatus.COMPLETED;
+      }
+      return EventStatus.CONFIRMED;
+    }
+
+    // 如果沒有確認的活動時間，檢查投票截止時間
+    if (event.votingDeadline) {
+      if (now > event.votingDeadline) {
+        return EventStatus.VOTING_ENDED;
+      }
+    }
+
+    // 預設狀態：正在投票
+    return EventStatus.VOTING;
+  }
+
+  /**
+   * 根據參與者資訊計算參與者狀態
+   */
+  computeParticipantStatus(participant: {
+    userId: string | null;
+    lineUserId: string | null;
+    hasVoted: boolean;
+  }): ParticipantStatus {
+    // 如果已經投票
+    if (participant.hasVoted) {
+      return ParticipantStatus.VOTED;
+    }
+
+    // 如果有 userId 但還沒投票
+    if (participant.userId) {
+      return ParticipantStatus.NOT_VOTED;
+    }
+
+    // 如果只有 lineUserId 但沒有 userId（還沒註冊）
+    if (participant.lineUserId) {
+      return ParticipantStatus.NOT_REGISTERED;
+    }
+
+    // 預設狀態
+    return ParticipantStatus.NOT_VOTED;
+  }
 
   /**
    * 建立 Event 並展開所有 TimeSlots
@@ -27,6 +101,7 @@ export class EventsService {
       endTime,
       slotDurationMin = 15,
       timeZone = 'Asia/Taipei',
+      votingDeadline,
       lineGroupId,
       expectedLineUserIds,
     } = createEventDto;
@@ -38,6 +113,9 @@ export class EventsService {
     // 解析日期
     const startDateObj = new Date(startDate);
     const endDateObj = new Date(endDate);
+
+    // 解析投票截止時間
+    const votingDeadlineObj = votingDeadline ? new Date(votingDeadline) : null;
 
     // 使用 transaction 確保一致性
     const result = await this.prisma.$transaction(
@@ -54,6 +132,7 @@ export class EventsService {
             endMinuteOfDay,
             slotDurationMin,
             timeZone,
+            votingDeadline: votingDeadlineObj,
             lineGroupId: lineGroupId || null,
           },
         });
@@ -188,6 +267,14 @@ export class EventsService {
       endDate: event.endDate,
       createdAt: event.createdAt,
       participantCount: event.expectedParticipants.length,
+      votingDeadline: event.votingDeadline,
+      confirmedStartTime: event.confirmedStartTime,
+      confirmedEndTime: event.confirmedEndTime,
+      status: this.computeEventStatus({
+        votingDeadline: event.votingDeadline,
+        confirmedStartTime: event.confirmedStartTime,
+        confirmedEndTime: event.confirmedEndTime,
+      }),
     }));
   }
 
@@ -222,21 +309,38 @@ export class EventsService {
             id: true,
           },
         },
+        votes: {
+          where: { userId },
+          select: { id: true },
+          take: 1,
+        },
       },
       orderBy: {
         createdAt: 'desc',
       },
     });
 
-    return events.map((event) => ({
-      id: event.id,
-      title: event.title,
-      description: event.description,
-      startDate: event.startDate,
-      endDate: event.endDate,
-      createdAt: event.createdAt,
-      participantCount: event.expectedParticipants.length,
-    }));
+    return events.map((event) => {
+      const hasVoted = event.votes.length > 0;
+      return {
+        id: event.id,
+        title: event.title,
+        description: event.description,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        createdAt: event.createdAt,
+        participantCount: event.expectedParticipants.length,
+        votingDeadline: event.votingDeadline,
+        confirmedStartTime: event.confirmedStartTime,
+        confirmedEndTime: event.confirmedEndTime,
+        status: this.computeEventStatus({
+          votingDeadline: event.votingDeadline,
+          confirmedStartTime: event.confirmedStartTime,
+          confirmedEndTime: event.confirmedEndTime,
+        }),
+        hasVoted,
+      };
+    });
   }
 
   /**
@@ -309,7 +413,7 @@ export class EventsService {
     // 計算已投票的 userId 和 lineUserId
     const votedUserIds = new Set(event.votes.map((v) => v.userId));
 
-    // 整理預期參與者資料，標註是否已投票
+    // 整理預期參與者資料，標註是否已投票和參與者狀態
     const expectedParticipants = await Promise.all(
       event.expectedParticipants.map(async (ep) => {
         // 檢查是否已投票
@@ -335,17 +439,31 @@ export class EventsService {
           });
         }
 
+        // 計算參與者狀態
+        const participantStatus = this.computeParticipantStatus({
+          userId: ep.userId,
+          lineUserId: ep.lineUserId,
+          hasVoted,
+        });
+
         return {
           id: ep.id,
           lineUserId: ep.lineUserId,
           userId: ep.userId,
           hasVoted,
+          status: participantStatus,
           reminderSentAt: ep.reminderSentAt,
           user: ep.user,
           lineGroupMember,
         };
       }),
     );
+
+    const eventStatus = this.computeEventStatus({
+      votingDeadline: event.votingDeadline,
+      confirmedStartTime: event.confirmedStartTime,
+      confirmedEndTime: event.confirmedEndTime,
+    });
 
     return {
       event: {
@@ -360,6 +478,10 @@ export class EventsService {
         timeZone: event.timeZone,
         lineGroupId: event.lineGroupId,
         ownerId: event.ownerId,
+        votingDeadline: event.votingDeadline,
+        confirmedStartTime: event.confirmedStartTime,
+        confirmedEndTime: event.confirmedEndTime,
+        status: eventStatus,
       },
       lineGroup: event.lineGroup,
       slots: event.slots,
@@ -627,13 +749,23 @@ export class EventsService {
         ? lineUserIdToMember.get(ep.lineUserId)
         : null;
 
+      const hasVoted = ep.userId ? votedUserIds.has(ep.userId) : false;
+
+      // 計算參與者狀態
+      const participantStatus = this.computeParticipantStatus({
+        userId: ep.userId,
+        lineUserId: ep.lineUserId,
+        hasVoted,
+      });
+
       return {
         id: ep.id,
         lineUserId: ep.lineUserId || undefined,
         userId: ep.userId || undefined,
         displayName: ep.user?.displayName || lineMember?.displayName || undefined,
         pictureUrl: lineMember?.pictureUrl || undefined,
-        hasVoted: ep.userId ? votedUserIds.has(ep.userId) : false,
+        hasVoted,
+        status: participantStatus,
       };
     });
 
@@ -642,6 +774,13 @@ export class EventsService {
     const totalVoted = participants.filter((p) => p.hasVoted).length;
     const votingPercentage =
       totalExpected > 0 ? (totalVoted / totalExpected) * 100 : 0;
+
+    // 計算活動狀態
+    const eventStatus = this.computeEventStatus({
+      votingDeadline: event.votingDeadline,
+      confirmedStartTime: event.confirmedStartTime,
+      confirmedEndTime: event.confirmedEndTime,
+    });
 
     return {
       event: {
@@ -656,6 +795,10 @@ export class EventsService {
         timeZone: event.timeZone,
         ownerId: event.ownerId,
         lineGroupId: event.lineGroupId,
+        votingDeadline: event.votingDeadline,
+        confirmedStartTime: event.confirmedStartTime,
+        confirmedEndTime: event.confirmedEndTime,
+        status: eventStatus,
       },
       slots: event.slots,
       votes,
@@ -719,6 +862,10 @@ export class EventsService {
       updateData.timeZone = updateDto.timeZone;
     }
 
+    if (updateDto.votingDeadline !== undefined) {
+      updateData.votingDeadline = new Date(updateDto.votingDeadline);
+    }
+
     const updatedEvent = await this.prisma.event.update({
       where: { id: eventId },
       data: updateData,
@@ -754,6 +901,90 @@ export class EventsService {
     });
 
     return { success: true };
+  }
+
+  /**
+   * 確認活動時間（僅限活動擁有者）
+   */
+  async confirmEventTime(
+    eventId: string,
+    userId: string,
+    dto: ConfirmEventTimeDto,
+  ) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event ${eventId} not found`);
+    }
+
+    if (event.ownerId !== userId) {
+      throw new ForbiddenException('You are not the owner of this event');
+    }
+
+    const confirmedStartTime = new Date(dto.confirmedStartTime);
+    const confirmedEndTime = new Date(dto.confirmedEndTime);
+
+    // 驗證結束時間必須在開始時間之後
+    if (confirmedEndTime <= confirmedStartTime) {
+      throw new BadRequestException(
+        'Confirmed end time must be after confirmed start time',
+      );
+    }
+
+    const updatedEvent = await this.prisma.event.update({
+      where: { id: eventId },
+      data: {
+        confirmedStartTime,
+        confirmedEndTime,
+      },
+    });
+
+    return {
+      id: updatedEvent.id,
+      confirmedStartTime: updatedEvent.confirmedStartTime,
+      confirmedEndTime: updatedEvent.confirmedEndTime,
+      status: this.computeEventStatus({
+        votingDeadline: updatedEvent.votingDeadline,
+        confirmedStartTime: updatedEvent.confirmedStartTime,
+        confirmedEndTime: updatedEvent.confirmedEndTime,
+      }),
+    };
+  }
+
+  /**
+   * 取消確認的活動時間（僅限活動擁有者）
+   */
+  async cancelConfirmedTime(eventId: string, userId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event ${eventId} not found`);
+    }
+
+    if (event.ownerId !== userId) {
+      throw new ForbiddenException('You are not the owner of this event');
+    }
+
+    const updatedEvent = await this.prisma.event.update({
+      where: { id: eventId },
+      data: {
+        confirmedStartTime: null,
+        confirmedEndTime: null,
+      },
+    });
+
+    return {
+      id: updatedEvent.id,
+      status: this.computeEventStatus({
+        votingDeadline: updatedEvent.votingDeadline,
+        confirmedStartTime: updatedEvent.confirmedStartTime,
+        confirmedEndTime: updatedEvent.confirmedEndTime,
+      }),
+    };
   }
 
   /**
@@ -800,5 +1031,121 @@ export class EventsService {
     });
 
     return { success: true, count: dto.participants.length };
+  }
+
+  /**
+   * 取得活動的公開資訊（用於加入確認頁面）
+   */
+  async getEventPublicInfo(eventId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        expectedParticipants: {
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event ${eventId} not found`);
+    }
+
+    const eventStatus = this.computeEventStatus({
+      votingDeadline: event.votingDeadline,
+      confirmedStartTime: event.confirmedStartTime,
+      confirmedEndTime: event.confirmedEndTime,
+    });
+
+    return {
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      votingDeadline: event.votingDeadline,
+      confirmedStartTime: event.confirmedStartTime,
+      confirmedEndTime: event.confirmedEndTime,
+      status: eventStatus,
+      participantCount: event.expectedParticipants.length,
+    };
+  }
+
+  /**
+   * 檢查使用者是否已經是活動的參與者
+   */
+  async checkParticipantStatus(eventId: string, userId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event ${eventId} not found`);
+    }
+
+    // 檢查是否已經是預期參與者
+    const existingParticipant =
+      await this.prisma.eventExpectedParticipant.findFirst({
+        where: {
+          eventId,
+          userId,
+        },
+      });
+
+    // 檢查是否有投票紀錄
+    const hasVoted = await this.prisma.eventVote.findFirst({
+      where: {
+        eventId,
+        userId,
+      },
+    });
+
+    return {
+      isParticipant: !!existingParticipant,
+      hasVoted: !!hasVoted,
+    };
+  }
+
+  /**
+   * 加入活動（透過分享連結）
+   */
+  async joinEvent(eventId: string, userId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event ${eventId} not found`);
+    }
+
+    // 檢查是否已經是參與者
+    const existingParticipant =
+      await this.prisma.eventExpectedParticipant.findFirst({
+        where: {
+          eventId,
+          userId,
+        },
+      });
+
+    if (existingParticipant) {
+      return {
+        success: true,
+        alreadyJoined: true,
+        message: 'You are already a participant of this event',
+      };
+    }
+
+    // 加入為參與者
+    await this.prisma.eventExpectedParticipant.create({
+      data: {
+        eventId,
+        userId,
+      },
+    });
+
+    return {
+      success: true,
+      alreadyJoined: false,
+      message: 'Successfully joined the event',
+    };
   }
 }
