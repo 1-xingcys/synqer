@@ -20,6 +20,23 @@ interface Participant {
   displayName: string;
 }
 
+interface ExpectedParticipant {
+  id: string;
+  lineUserId?: string;
+  userId?: string;
+  hasVoted: boolean;
+  reminderSentAt?: string;
+  user?: {
+    id: string;
+    displayName?: string;
+    avatarUrl?: string;
+  };
+  lineGroupMember?: {
+    displayName?: string;
+    pictureUrl?: string;
+  };
+}
+
 interface Event {
   id: string;
   title?: string;
@@ -37,6 +54,7 @@ export interface EventDetailData {
   slots: TimeSlot[];
   votes: Vote[];
   participants: Participant[];
+  expectedParticipants: ExpectedParticipant[];
 }
 
 export function useEventDetail(eventId: string) {
