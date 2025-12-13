@@ -182,7 +182,7 @@ export function SidebarItem({
  * ProtectedSidebarContent
  * 自動設置受保護頁面的 Sidebar 內容
  */
-type SidebarView = "my-events" | "attended-events";
+type SidebarView = "hosted-events" | "attended-events";
 
 function ProtectedSidebarContent() {
   const { isOpen, close, setContent, setTitle } = useSidebar();
@@ -193,16 +193,15 @@ function ProtectedSidebarContent() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const isCollapsed = !isOpen;
 
-  // 獲取 Sidebar 組件的 isCollapsed 狀態
-  // 由於 ProtectedSidebarContent 在 Sidebar 內部渲染，我們需要從 context 或通過其他方式獲取
-  // 但實際上，我們可以在設置內容時就傳遞 collapsed 狀態
-
-  // 判斷當前視圖（用於 Dashboard）
+  // 判斷當前視圖
   const currentView = useMemo<SidebarView>(() => {
+    // Check if we're on the hosted events pages
+    if (pathname?.startsWith("/hosted")) return "hosted-events";
+    // Check URL param for dashboard
     const view = searchParams.get("view");
     if (view === "attended-events") return "attended-events";
-    return "my-events";
-  }, [searchParams]);
+    return "hosted-events";
+  }, [searchParams, pathname]);
 
   // 設置 Sidebar 內容 - 所有頁面都顯示相同的 Dashboard sidebar
   useEffect(() => {
@@ -212,10 +211,12 @@ function ProtectedSidebarContent() {
       id: SidebarView;
       label: string;
       icon: ReactNode;
+      href: string;
     }> = [
       {
-        id: "my-events",
-        label: t("dashboard.myEvents"),
+        id: "hosted-events",
+        label: t("dashboard.hostedEvents"),
+        href: "/hosted",
         icon: (
           <svg
             className="w-5 h-5"
@@ -235,6 +236,7 @@ function ProtectedSidebarContent() {
       {
         id: "attended-events",
         label: t("dashboard.attendedEvents"),
+        href: "/dashboard?view=attended-events",
         icon: (
           <svg
             className="w-5 h-5"
@@ -303,17 +305,10 @@ function ProtectedSidebarContent() {
             key={item.id}
             icon={item.icon}
             label={item.label}
-            active={currentView === item.id && pathname?.includes("/dashboard")}
+            active={currentView === item.id}
             collapsed={isCollapsed}
             onClick={() => {
-              const newParams = new URLSearchParams(searchParams.toString());
-              if (item.id === "my-events") {
-                newParams.delete("view");
-              } else {
-                newParams.set("view", item.id);
-              }
-              const queryString = newParams.toString();
-              router.push(`/dashboard${queryString ? `?${queryString}` : ""}`);
+              router.push(item.href);
               if (!isDesktop) {
                 close();
               }
