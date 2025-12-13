@@ -1,6 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { VoteEventDto } from './dto/vote-event.dto';
+import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateParticipantsDto } from './dto/update-participants.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -300,5 +306,284 @@ export class EventsService {
     }
 
     return slots;
+  }
+
+  /**
+   * 取得 Host 端的活動詳細資料（包含投票狀態）
+   */
+  async findOneHosted(eventId: string, userId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        slots: {
+          orderBy: [{ date: 'asc' }, { startMinute: 'asc' }],
+        },
+        votes: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                displayName: true,
+              },
+            },
+          },
+        },
+        expectedParticipants: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                displayName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event ${eventId} not found`);
+    }
+
+    // 檢查是否為 owner
+    if (event.ownerId !== userId) {
+      throw new ForbiddenException('You are not the owner of this event');
+    }
+
+    // 整理 votes 資料
+    const votes = event.votes.map((vote) => ({
+      slotId: vote.slotId,
+      userId: vote.userId,
+      userDisplayName: vote.user.displayName || 'Anonymous',
+    }));
+
+    // 取得所有已投票的使用者
+    const votedUserIds = new Set<string>();
+    event.votes.forEach((vote) => votedUserIds.add(vote.userId));
+
+    // 整理參與者資料（有投票紀錄的人）
+    const participantsMap = new Map<
+      string,
+      { userId: string; displayName: string; hasVoted: boolean }
+    >();
+    event.votes.forEach((vote) => {
+      if (!participantsMap.has(vote.userId)) {
+        participantsMap.set(vote.userId, {
+          userId: vote.userId,
+          displayName: vote.user.displayName || 'Anonymous',
+          hasVoted: true,
+        });
+      }
+    });
+    const participants = Array.from(participantsMap.values());
+
+    // 取得所有 lineUserId 以便查詢 LineGroupMember
+    const lineUserIds = event.expectedParticipants
+      .filter((ep) => ep.lineUserId)
+      .map((ep) => ep.lineUserId as string);
+
+    // 查詢 LineGroupMember 以取得未連結使用者的 displayName 和 pictureUrl
+    const lineGroupMembers = await this.prisma.lineGroupMember.findMany({
+      where: {
+        lineUserId: { in: lineUserIds },
+      },
+      orderBy: { lastSeenAt: 'desc' },
+    });
+
+    // 建立 lineUserId -> LineGroupMember 的映射
+    const lineUserIdToMember = new Map<
+      string,
+      { displayName: string | null; pictureUrl: string | null }
+    >();
+    lineGroupMembers.forEach((member) => {
+      // 只取最新的記錄（已經按 lastSeenAt 排序）
+      if (!lineUserIdToMember.has(member.lineUserId)) {
+        lineUserIdToMember.set(member.lineUserId, {
+          displayName: member.displayName,
+          pictureUrl: member.pictureUrl,
+        });
+      }
+    });
+
+    // 整理預期參與者資料
+    const expectedParticipants = event.expectedParticipants.map((ep) => {
+      // 優先使用已連結使用者的資料，否則使用 LineGroupMember 的資料
+      const lineMember = ep.lineUserId
+        ? lineUserIdToMember.get(ep.lineUserId)
+        : null;
+
+      return {
+        id: ep.id,
+        lineUserId: ep.lineUserId || undefined,
+        userId: ep.userId || undefined,
+        displayName: ep.user?.displayName || lineMember?.displayName || undefined,
+        pictureUrl: lineMember?.pictureUrl || undefined,
+        hasVoted: ep.userId ? votedUserIds.has(ep.userId) : false,
+      };
+    });
+
+    // 計算投票統計
+    const totalExpected = expectedParticipants.length || participants.length;
+    const totalVoted = participants.filter((p) => p.hasVoted).length;
+    const votingPercentage =
+      totalExpected > 0 ? (totalVoted / totalExpected) * 100 : 0;
+
+    return {
+      event: {
+        id: event.id,
+        title: event.title,
+        description: event.description,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        startMinuteOfDay: event.startMinuteOfDay,
+        endMinuteOfDay: event.endMinuteOfDay,
+        slotDurationMin: event.slotDurationMin,
+        timeZone: event.timeZone,
+        ownerId: event.ownerId,
+        lineGroupId: event.lineGroupId,
+      },
+      slots: event.slots,
+      votes,
+      participants,
+      expectedParticipants,
+      votingStats: {
+        totalExpected,
+        totalVoted,
+        votingPercentage,
+      },
+    };
+  }
+
+  /**
+   * 更新活動設定
+   */
+  async update(eventId: string, userId: string, updateDto: UpdateEventDto) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event ${eventId} not found`);
+    }
+
+    if (event.ownerId !== userId) {
+      throw new ForbiddenException('You are not the owner of this event');
+    }
+
+    const updateData: Prisma.EventUpdateInput = {};
+
+    if (updateDto.title !== undefined) {
+      updateData.title = updateDto.title;
+    }
+
+    if (updateDto.description !== undefined) {
+      updateData.description = updateDto.description;
+    }
+
+    if (updateDto.startDate !== undefined) {
+      updateData.startDate = new Date(updateDto.startDate);
+    }
+
+    if (updateDto.endDate !== undefined) {
+      updateData.endDate = new Date(updateDto.endDate);
+    }
+
+    if (updateDto.startTime !== undefined) {
+      updateData.startMinuteOfDay = this.parseTimeToMinutes(updateDto.startTime);
+    }
+
+    if (updateDto.endTime !== undefined) {
+      updateData.endMinuteOfDay = this.parseTimeToMinutes(updateDto.endTime);
+    }
+
+    if (updateDto.slotDurationMin !== undefined) {
+      updateData.slotDurationMin = updateDto.slotDurationMin;
+    }
+
+    if (updateDto.timeZone !== undefined) {
+      updateData.timeZone = updateDto.timeZone;
+    }
+
+    const updatedEvent = await this.prisma.event.update({
+      where: { id: eventId },
+      data: updateData,
+    });
+
+    return {
+      id: updatedEvent.id,
+      title: updatedEvent.title,
+      description: updatedEvent.description,
+      startDate: updatedEvent.startDate,
+      endDate: updatedEvent.endDate,
+    };
+  }
+
+  /**
+   * 刪除活動
+   */
+  async remove(eventId: string, userId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event ${eventId} not found`);
+    }
+
+    if (event.ownerId !== userId) {
+      throw new ForbiddenException('You are not the owner of this event');
+    }
+
+    await this.prisma.event.delete({
+      where: { id: eventId },
+    });
+
+    return { success: true };
+  }
+
+  /**
+   * 更新活動的預期參與者
+   */
+  async updateParticipants(
+    eventId: string,
+    userId: string,
+    dto: UpdateParticipantsDto,
+  ) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Event ${eventId} not found`);
+    }
+
+    if (event.ownerId !== userId) {
+      throw new ForbiddenException('You are not the owner of this event');
+    }
+
+    // 使用 transaction 確保一致性
+    await this.prisma.$transaction(async (prisma: Prisma.TransactionClient) => {
+      // 刪除現有的預期參與者
+      await prisma.eventExpectedParticipant.deleteMany({
+        where: { eventId },
+      });
+
+      // 建立新的預期參與者
+      const participantsData = dto.participants
+        .filter((p) => p.lineUserId || p.userId)
+        .map((p) => ({
+          eventId,
+          lineUserId: p.lineUserId || null,
+          userId: p.userId || null,
+        }));
+
+      if (participantsData.length > 0) {
+        await prisma.eventExpectedParticipant.createMany({
+          data: participantsData,
+        });
+      }
+    });
+
+    return { success: true, count: dto.participants.length };
   }
 }

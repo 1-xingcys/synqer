@@ -71,4 +71,32 @@ export class UsersService {
       },
     });
   }
+
+  /**
+   * 搜尋已註冊的使用者
+   */
+  async searchUsers(query: string, limit = 20) {
+    if (!query || query.length < 2) {
+      return [];
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        OR: [
+          { displayName: { contains: query, mode: 'insensitive' } },
+          { primaryEmail: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        id: true,
+        displayName: true,
+        primaryEmail: true,
+        avatarUrl: true,
+      },
+      take: limit,
+      orderBy: { displayName: 'asc' },
+    });
+
+    return users;
+  }
 }
