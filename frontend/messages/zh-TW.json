@@ -97,7 +97,18 @@
     "totalParticipants": "參與者",
     "totalSlots": "時段數",
     "maxAvailability": "最多人有空",
-    "available": "有空"
+    "available": "有空",
+    "voteModeLabel": "選擇投票方式",
+    "voteModeAvailable": "投「可以」的時間",
+    "voteModeAvailableDesc": "選擇你有空的時段，其他時段視為不行",
+    "voteModeUnavailable": "投「不行」的時間",
+    "voteModeUnavailableDesc": "選擇你不行的時段，其他時段視為可以",
+    "selectAvailableMode": "選擇你可以的時間",
+    "selectUnavailableMode": "選擇你不行的時間",
+    "dragToSelectAvailable": "拖曳選取你「可以」的時段，或點擊日期選取整天",
+    "dragToSelectUnavailable": "拖曳選取你「不行」的時段，或點擊日期選取整天",
+    "legendAvailable": "可以",
+    "legendUnavailable": "不行"
   },
   "hosted": {
     "title": "主辦的活動",

@@ -97,7 +97,18 @@
     "totalParticipants": "Participants",
     "totalSlots": "Time Slots",
     "maxAvailability": "Max Available",
-    "available": "available"
+    "available": "available",
+    "voteModeLabel": "Choose voting method",
+    "voteModeAvailable": "Select available times",
+    "voteModeAvailableDesc": "Mark when you're free, unselected = unavailable",
+    "voteModeUnavailable": "Select unavailable times",
+    "voteModeUnavailableDesc": "Mark when you're busy, unselected = available",
+    "selectAvailableMode": "Select your available times",
+    "selectUnavailableMode": "Select your unavailable times",
+    "dragToSelectAvailable": "Drag to select times you're available, or click dates to select entire days",
+    "dragToSelectUnavailable": "Drag to select times you're NOT available, or click dates to select entire days",
+    "legendAvailable": "Available",
+    "legendUnavailable": "Unavailable"
   },
   "hosted": {
     "title": "Hosted Events",
