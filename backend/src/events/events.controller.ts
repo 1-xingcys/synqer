@@ -9,9 +9,7 @@ import {
   Param,
   HttpCode,
   HttpStatus,
-  Session,
   UseGuards,
-  ForbiddenException,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';

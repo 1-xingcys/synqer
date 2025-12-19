@@ -14,16 +14,16 @@ import { Prisma } from '@prisma/client';
 
 // 活動狀態
 export enum EventStatus {
-  VOTING = 'VOTING',           // 正在進行投票 (活動創建後 ~ 投票 deadline)
+  VOTING = 'VOTING', // 正在進行投票 (活動創建後 ~ 投票 deadline)
   VOTING_ENDED = 'VOTING_ENDED', // 已經投票結束 (投票 deadline 已過，但 host 還沒決定活動時間)
-  CONFIRMED = 'CONFIRMED',     // 活動時間已定 (host 決定活動時間 ~ 活動時間結束)
-  COMPLETED = 'COMPLETED',     // 活動時間已過 (活動已經辦完)
+  CONFIRMED = 'CONFIRMED', // 活動時間已定 (host 決定活動時間 ~ 活動時間結束)
+  COMPLETED = 'COMPLETED', // 活動時間已過 (活動已經辦完)
 }
 
 // 參與者狀態
 export enum ParticipantStatus {
-  VOTED = 'VOTED',             // 已經投票
-  NOT_VOTED = 'NOT_VOTED',     // 還沒投票（已註冊）
+  VOTED = 'VOTED', // 已經投票
+  NOT_VOTED = 'NOT_VOTED', // 還沒投票（已註冊）
   NOT_REGISTERED = 'NOT_REGISTERED', // 還沒註冊（只有 LINE 使用者）
 }
 
@@ -259,23 +259,28 @@ export class EventsService {
       },
     });
 
-    return events.map((event) => ({
-      id: event.id,
-      title: event.title,
-      description: event.description,
-      startDate: event.startDate,
-      endDate: event.endDate,
-      createdAt: event.createdAt,
-      participantCount: event.expectedParticipants.length,
-      votingDeadline: event.votingDeadline,
-      confirmedStartTime: event.confirmedStartTime,
-      confirmedEndTime: event.confirmedEndTime,
-      status: this.computeEventStatus({
-        votingDeadline: event.votingDeadline,
-        confirmedStartTime: event.confirmedStartTime,
-        confirmedEndTime: event.confirmedEndTime,
-      }),
-    }));
+    return events.map((event) => {
+      const votingDeadline = event.votingDeadline;
+      const confirmedStartTime = event.confirmedStartTime;
+      const confirmedEndTime = event.confirmedEndTime;
+      return {
+        id: event.id,
+        title: event.title,
+        description: event.description,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        createdAt: event.createdAt,
+        participantCount: event.expectedParticipants.length,
+        votingDeadline,
+        confirmedStartTime,
+        confirmedEndTime,
+        status: this.computeEventStatus({
+          votingDeadline,
+          confirmedStartTime,
+          confirmedEndTime,
+        }),
+      };
+    });
   }
 
   /**
@@ -322,6 +327,9 @@ export class EventsService {
 
     return events.map((event) => {
       const hasVoted = event.votes.length > 0;
+      const votingDeadline = event.votingDeadline;
+      const confirmedStartTime = event.confirmedStartTime;
+      const confirmedEndTime = event.confirmedEndTime;
       return {
         id: event.id,
         title: event.title,
@@ -330,13 +338,13 @@ export class EventsService {
         endDate: event.endDate,
         createdAt: event.createdAt,
         participantCount: event.expectedParticipants.length,
-        votingDeadline: event.votingDeadline,
-        confirmedStartTime: event.confirmedStartTime,
-        confirmedEndTime: event.confirmedEndTime,
+        votingDeadline,
+        confirmedStartTime,
+        confirmedEndTime,
         status: this.computeEventStatus({
-          votingDeadline: event.votingDeadline,
-          confirmedStartTime: event.confirmedStartTime,
-          confirmedEndTime: event.confirmedEndTime,
+          votingDeadline,
+          confirmedStartTime,
+          confirmedEndTime,
         }),
         hasVoted,
       };
@@ -423,7 +431,10 @@ export class EventsService {
         }
 
         // 取得 LINE 群組成員資料（如果有 lineUserId）
-        let lineGroupMember: { displayName: string | null; pictureUrl: string | null } | null = null;
+        let lineGroupMember: {
+          displayName: string | null;
+          pictureUrl: string | null;
+        } | null = null;
         if (ep.lineUserId && event.lineGroup) {
           lineGroupMember = await this.prisma.lineGroupMember.findUnique({
             where: {
@@ -459,10 +470,14 @@ export class EventsService {
       }),
     );
 
+    const votingDeadline = event.votingDeadline;
+    const confirmedStartTime = event.confirmedStartTime;
+    const confirmedEndTime = event.confirmedEndTime;
+
     const eventStatus = this.computeEventStatus({
-      votingDeadline: event.votingDeadline,
-      confirmedStartTime: event.confirmedStartTime,
-      confirmedEndTime: event.confirmedEndTime,
+      votingDeadline,
+      confirmedStartTime,
+      confirmedEndTime,
     });
 
     return {
@@ -478,9 +493,9 @@ export class EventsService {
         timeZone: event.timeZone,
         lineGroupId: event.lineGroupId,
         ownerId: event.ownerId,
-        votingDeadline: event.votingDeadline,
-        confirmedStartTime: event.confirmedStartTime,
-        confirmedEndTime: event.confirmedEndTime,
+        votingDeadline,
+        confirmedStartTime,
+        confirmedEndTime,
         status: eventStatus,
       },
       lineGroup: event.lineGroup,
@@ -534,7 +549,7 @@ export class EventsService {
 
     for (const ep of event.expectedParticipants) {
       const hasVoted = ep.userId ? votedUserIds.has(ep.userId) : false;
-      
+
       if (!hasVoted && ep.lineUserId) {
         // 取得 LINE 群組成員資料
         const memberInfo = event.lineGroup
@@ -552,7 +567,8 @@ export class EventsService {
           id: ep.id,
           lineUserId: ep.lineUserId,
           userId: ep.userId,
-          displayName: ep.user?.displayName || memberInfo?.displayName || 'Unknown',
+          displayName:
+            ep.user?.displayName || memberInfo?.displayName || 'Unknown',
           pictureUrl: memberInfo?.pictureUrl,
           reminderSentAt: ep.reminderSentAt,
         });
@@ -792,7 +808,8 @@ export class EventsService {
         id: ep.id,
         lineUserId: ep.lineUserId || undefined,
         userId: ep.userId || undefined,
-        displayName: ep.user?.displayName || lineMember?.displayName || undefined,
+        displayName:
+          ep.user?.displayName || lineMember?.displayName || undefined,
         pictureUrl: lineMember?.pictureUrl || undefined,
         hasVoted,
         status: participantStatus,
@@ -806,10 +823,13 @@ export class EventsService {
       totalExpected > 0 ? (totalVoted / totalExpected) * 100 : 0;
 
     // 計算活動狀態
+    const votingDeadline = event.votingDeadline;
+    const confirmedStartTime = event.confirmedStartTime;
+    const confirmedEndTime = event.confirmedEndTime;
     const eventStatus = this.computeEventStatus({
-      votingDeadline: event.votingDeadline,
-      confirmedStartTime: event.confirmedStartTime,
-      confirmedEndTime: event.confirmedEndTime,
+      votingDeadline,
+      confirmedStartTime,
+      confirmedEndTime,
     });
 
     return {
@@ -825,9 +845,9 @@ export class EventsService {
         timeZone: event.timeZone,
         ownerId: event.ownerId,
         lineGroupId: event.lineGroupId,
-        votingDeadline: event.votingDeadline,
-        confirmedStartTime: event.confirmedStartTime,
-        confirmedEndTime: event.confirmedEndTime,
+        votingDeadline,
+        confirmedStartTime,
+        confirmedEndTime,
         status: eventStatus,
       },
       slots: event.slots,
@@ -877,7 +897,9 @@ export class EventsService {
     }
 
     if (updateDto.startTime !== undefined) {
-      updateData.startMinuteOfDay = this.parseTimeToMinutes(updateDto.startTime);
+      updateData.startMinuteOfDay = this.parseTimeToMinutes(
+        updateDto.startTime,
+      );
     }
 
     if (updateDto.endTime !== undefined) {
@@ -971,14 +993,18 @@ export class EventsService {
       },
     });
 
+    const updatedVotingDeadline = updatedEvent.votingDeadline;
+    const updatedConfirmedStartTime = updatedEvent.confirmedStartTime;
+    const updatedConfirmedEndTime = updatedEvent.confirmedEndTime;
+
     return {
       id: updatedEvent.id,
-      confirmedStartTime: updatedEvent.confirmedStartTime,
-      confirmedEndTime: updatedEvent.confirmedEndTime,
+      confirmedStartTime: updatedConfirmedStartTime,
+      confirmedEndTime: updatedConfirmedEndTime,
       status: this.computeEventStatus({
-        votingDeadline: updatedEvent.votingDeadline,
-        confirmedStartTime: updatedEvent.confirmedStartTime,
-        confirmedEndTime: updatedEvent.confirmedEndTime,
+        votingDeadline: updatedVotingDeadline,
+        confirmedStartTime: updatedConfirmedStartTime,
+        confirmedEndTime: updatedConfirmedEndTime,
       }),
     };
   }
@@ -1007,12 +1033,16 @@ export class EventsService {
       },
     });
 
+    const cancelVotingDeadline = updatedEvent.votingDeadline;
+    const cancelConfirmedStartTime = updatedEvent.confirmedStartTime;
+    const cancelConfirmedEndTime = updatedEvent.confirmedEndTime;
+
     return {
       id: updatedEvent.id,
       status: this.computeEventStatus({
-        votingDeadline: updatedEvent.votingDeadline,
-        confirmedStartTime: updatedEvent.confirmedStartTime,
-        confirmedEndTime: updatedEvent.confirmedEndTime,
+        votingDeadline: cancelVotingDeadline,
+        confirmedStartTime: cancelConfirmedStartTime,
+        confirmedEndTime: cancelConfirmedEndTime,
       }),
     };
   }
@@ -1080,10 +1110,14 @@ export class EventsService {
       throw new NotFoundException(`Event ${eventId} not found`);
     }
 
+    const publicVotingDeadline = event.votingDeadline;
+    const publicConfirmedStartTime = event.confirmedStartTime;
+    const publicConfirmedEndTime = event.confirmedEndTime;
+
     const eventStatus = this.computeEventStatus({
-      votingDeadline: event.votingDeadline,
-      confirmedStartTime: event.confirmedStartTime,
-      confirmedEndTime: event.confirmedEndTime,
+      votingDeadline: publicVotingDeadline,
+      confirmedStartTime: publicConfirmedStartTime,
+      confirmedEndTime: publicConfirmedEndTime,
     });
 
     return {
@@ -1092,9 +1126,9 @@ export class EventsService {
       description: event.description,
       startDate: event.startDate,
       endDate: event.endDate,
-      votingDeadline: event.votingDeadline,
-      confirmedStartTime: event.confirmedStartTime,
-      confirmedEndTime: event.confirmedEndTime,
+      votingDeadline: publicVotingDeadline,
+      confirmedStartTime: publicConfirmedStartTime,
+      confirmedEndTime: publicConfirmedEndTime,
       status: eventStatus,
       participantCount: event.expectedParticipants.length,
     };

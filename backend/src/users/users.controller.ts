@@ -16,4 +16,3 @@ export class UsersController {
     return this.usersService.searchUsers(query);
   }
 }
-

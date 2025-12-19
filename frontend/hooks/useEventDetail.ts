@@ -93,7 +93,10 @@ export function useEventDetail(eventId: string) {
     void fetchEventData();
   }, [fetchEventData]);
 
-  const saveVotes = async (selectedSlotIds: string[], voteMode: VoteMode = "available") => {
+  const saveVotes = async (
+    selectedSlotIds: string[],
+    voteMode: VoteMode = "available",
+  ) => {
     if (!process.env.NEXT_PUBLIC_API) {
       throw new Error("NEXT_PUBLIC_API is not set");
     }

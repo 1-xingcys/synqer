@@ -31,66 +31,64 @@ export default function JoinedEventResultsPage() {
   const { data: eventDetailData, loading, error } = useEventDetail(eventId);
 
   // Calculate vote counts and find best slots
-  const {
-    votesBySlot,
-    maxVotes,
-    slotsByDate,
-    dates,
-    timeSlots,
-    topSlots,
-  } = useMemo(() => {
-    if (!eventDetailData) {
-      return {
-        votesBySlot: {} as Record<string, Vote[]>,
-        maxVotes: 0,
-        slotsByDate: {} as Record<string, TimeSlot[]>,
-        dates: [] as string[],
-        timeSlots: [] as TimeSlot[],
-        topSlots: [] as Array<{ slot: TimeSlot; count: number; voters: string[] }>,
-      };
-    }
+  const { votesBySlot, maxVotes, slotsByDate, dates, timeSlots, topSlots } =
+    useMemo(() => {
+      if (!eventDetailData) {
+        return {
+          votesBySlot: {} as Record<string, Vote[]>,
+          maxVotes: 0,
+          slotsByDate: {} as Record<string, TimeSlot[]>,
+          dates: [] as string[],
+          timeSlots: [] as TimeSlot[],
+          topSlots: [] as Array<{
+            slot: TimeSlot;
+            count: number;
+            voters: string[];
+          }>,
+        };
+      }
 
-    const votesBySlot = eventDetailData.votes.reduce(
-      (acc, vote) => {
-        if (!acc[vote.slotId]) acc[vote.slotId] = [];
-        acc[vote.slotId].push(vote);
-        return acc;
-      },
-      {} as Record<string, Vote[]>
-    );
+      const votesBySlot = eventDetailData.votes.reduce(
+        (acc, vote) => {
+          if (!acc[vote.slotId]) acc[vote.slotId] = [];
+          acc[vote.slotId].push(vote);
+          return acc;
+        },
+        {} as Record<string, Vote[]>,
+      );
 
-    const maxVotes = Math.max(
-      ...Object.values(votesBySlot).map((votes) => votes.length),
-      1
-    );
+      const maxVotes = Math.max(
+        ...Object.values(votesBySlot).map((votes) => votes.length),
+        1,
+      );
 
-    const slotsByDate = eventDetailData.slots.reduce(
-      (acc, slot) => {
-        const dateKey = slot.date.split("T")[0];
-        if (!acc[dateKey]) acc[dateKey] = [];
-        acc[dateKey].push(slot);
-        return acc;
-      },
-      {} as Record<string, TimeSlot[]>
-    );
+      const slotsByDate = eventDetailData.slots.reduce(
+        (acc, slot) => {
+          const dateKey = slot.date.split("T")[0];
+          if (!acc[dateKey]) acc[dateKey] = [];
+          acc[dateKey].push(slot);
+          return acc;
+        },
+        {} as Record<string, TimeSlot[]>,
+      );
 
-    const dates = Object.keys(slotsByDate).sort();
-    const timeSlots = dates.length > 0 ? slotsByDate[dates[0]] : [];
+      const dates = Object.keys(slotsByDate).sort();
+      const timeSlots = dates.length > 0 ? slotsByDate[dates[0]] : [];
 
-    // Find top slots (sorted by vote count)
-    const slotsWithCounts = eventDetailData.slots.map((slot) => ({
-      slot,
-      count: votesBySlot[slot.id]?.length || 0,
-      voters: (votesBySlot[slot.id] || []).map((v) => v.userDisplayName),
-    }));
+      // Find top slots (sorted by vote count)
+      const slotsWithCounts = eventDetailData.slots.map((slot) => ({
+        slot,
+        count: votesBySlot[slot.id]?.length || 0,
+        voters: (votesBySlot[slot.id] || []).map((v) => v.userDisplayName),
+      }));
 
-    const topSlots = slotsWithCounts
-      .filter((s) => s.count > 0)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
+      const topSlots = slotsWithCounts
+        .filter((s) => s.count > 0)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
 
-    return { votesBySlot, maxVotes, slotsByDate, dates, timeSlots, topSlots };
-  }, [eventDetailData]);
+      return { votesBySlot, maxVotes, slotsByDate, dates, timeSlots, topSlots };
+    }, [eventDetailData]);
 
   // Format helpers
   const formatTime = (minutes: number) => {
@@ -142,7 +140,7 @@ export default function JoinedEventResultsPage() {
     if (!slot) return null;
     const voters = votesBySlot[selectedSlot] || [];
     const nonVoters = eventDetailData.participants.filter(
-      (p) => !voters.some((v) => v.userId === p.userId)
+      (p) => !voters.some((v) => v.userId === p.userId),
     );
     return { slot, voters, nonVoters };
   }, [selectedSlot, eventDetailData, votesBySlot]);
@@ -152,7 +150,9 @@ export default function JoinedEventResultsPage() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-lg text-zinc-600 dark:text-zinc-300">{t("loading")}</p>
+          <p className="text-lg text-zinc-600 dark:text-zinc-300">
+            {t("loading")}
+          </p>
         </div>
       </div>
     );
@@ -177,7 +177,9 @@ export default function JoinedEventResultsPage() {
               />
             </svg>
           </div>
-          <p className="text-lg text-red-600 dark:text-red-400">{error || t("notFound")}</p>
+          <p className="text-lg text-red-600 dark:text-red-400">
+            {error || t("notFound")}
+          </p>
           <button
             onClick={() => router.push("/joined")}
             className="mt-4 px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
@@ -199,7 +201,12 @@ export default function JoinedEventResultsPage() {
           href={`/joined/${eventId}`}
           className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -226,7 +233,11 @@ export default function JoinedEventResultsPage() {
         <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-zinc-800">
             <h2 className="font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-              <svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className="w-5 h-5 text-amber-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
                 <path
                   fillRule="evenodd"
                   d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z"
@@ -238,12 +249,12 @@ export default function JoinedEventResultsPage() {
           </div>
           <div className="p-4">
             <div className="grid gap-3">
-              {topSlots.map(({ slot, count, voters }, index) => (
+              {topSlots.map(({ slot, count }, index) => (
                 <div
                   key={slot.id}
                   className={`flex items-center gap-4 p-4 rounded-lg ${
                     index === 0
-                      ? "bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800"
+                      ? "bg-linear-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800"
                       : "bg-gray-50 dark:bg-zinc-800/50"
                   }`}
                 >
@@ -252,10 +263,10 @@ export default function JoinedEventResultsPage() {
                       index === 0
                         ? "bg-amber-500 text-white"
                         : index === 1
-                        ? "bg-gray-300 dark:bg-zinc-600 text-gray-700 dark:text-zinc-200"
-                        : index === 2
-                        ? "bg-amber-700 text-white"
-                        : "bg-gray-200 dark:bg-zinc-700 text-gray-600 dark:text-zinc-300"
+                          ? "bg-gray-300 dark:bg-zinc-600 text-gray-700 dark:text-zinc-200"
+                          : index === 2
+                            ? "bg-amber-700 text-white"
+                            : "bg-gray-200 dark:bg-zinc-700 text-gray-600 dark:text-zinc-300"
                     }`}
                   >
                     {index + 1}
@@ -265,7 +276,8 @@ export default function JoinedEventResultsPage() {
                       {formatFullDate(slot.date)}
                     </div>
                     <div className="text-sm text-zinc-500 dark:text-zinc-400 font-mono">
-                      {formatTime(slot.startMinute)} - {formatTime(slot.endMinute)}
+                      {formatTime(slot.startMinute)} -{" "}
+                      {formatTime(slot.endMinute)}
                     </div>
                   </div>
                   <div className="text-right">
@@ -273,7 +285,8 @@ export default function JoinedEventResultsPage() {
                       {count}/{totalParticipants}
                     </div>
                     <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                      {Math.round((count / totalParticipants) * 100)}% {tJoined("available")}
+                      {Math.round((count / totalParticipants) * 100)}%{" "}
+                      {tJoined("available")}
                     </div>
                   </div>
                 </div>
@@ -314,7 +327,9 @@ export default function JoinedEventResultsPage() {
                       <div className="text-lg font-bold text-gray-900 dark:text-zinc-100">
                         {day}
                       </div>
-                      <div className="text-xs text-gray-400 dark:text-zinc-500">{month}</div>
+                      <div className="text-xs text-gray-400 dark:text-zinc-500">
+                        {month}
+                      </div>
                     </div>
                   );
                 })}
@@ -337,7 +352,9 @@ export default function JoinedEventResultsPage() {
                       return (
                         <div
                           key={slot.id}
-                          onClick={() => setSelectedSlot(isSelected ? null : slot.id)}
+                          onClick={() =>
+                            setSelectedSlot(isSelected ? null : slot.id)
+                          }
                           className={`
                             flex-1 min-w-[60px] min-h-[44px] relative
                             border-r border-b border-gray-100 dark:border-zinc-800
@@ -395,8 +412,18 @@ export default function JoinedEventResultsPage() {
               onClick={() => setSelectedSlot(null)}
               className="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-colors"
             >
-              <svg className="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5 text-zinc-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -404,7 +431,11 @@ export default function JoinedEventResultsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h4 className="font-medium text-emerald-700 dark:text-emerald-400 mb-3 flex items-center gap-2">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path
                     fillRule="evenodd"
                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -414,15 +445,22 @@ export default function JoinedEventResultsPage() {
                 {t("available")} ({selectedSlotDetails.voters.length})
               </h4>
               {selectedSlotDetails.voters.length === 0 ? (
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">{tJoined("noVoters")}</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  {tJoined("noVoters")}
+                </p>
               ) : (
                 <ul className="space-y-2">
                   {selectedSlotDetails.voters.map((voter) => (
-                    <li key={voter.userId} className="flex items-center gap-2 text-sm">
+                    <li
+                      key={voter.userId}
+                      className="flex items-center gap-2 text-sm"
+                    >
                       <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xs font-semibold">
                         {voter.userDisplayName[0]?.toUpperCase()}
                       </div>
-                      <span className="text-zinc-700 dark:text-zinc-200">{voter.userDisplayName}</span>
+                      <span className="text-zinc-700 dark:text-zinc-200">
+                        {voter.userDisplayName}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -430,7 +468,11 @@ export default function JoinedEventResultsPage() {
             </div>
             <div>
               <h4 className="font-medium text-red-700 dark:text-red-400 mb-3 flex items-center gap-2">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path
                     fillRule="evenodd"
                     d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -446,11 +488,16 @@ export default function JoinedEventResultsPage() {
               ) : (
                 <ul className="space-y-2">
                   {selectedSlotDetails.nonVoters.map((participant) => (
-                    <li key={participant.userId} className="flex items-center gap-2 text-sm">
+                    <li
+                      key={participant.userId}
+                      className="flex items-center gap-2 text-sm"
+                    >
                       <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-gray-500 dark:text-zinc-400 text-xs font-semibold">
                         {participant.displayName[0]?.toUpperCase()}
                       </div>
-                      <span className="text-zinc-700 dark:text-zinc-200">{participant.displayName}</span>
+                      <span className="text-zinc-700 dark:text-zinc-200">
+                        {participant.displayName}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -498,4 +545,3 @@ export default function JoinedEventResultsPage() {
     </div>
   );
 }
-

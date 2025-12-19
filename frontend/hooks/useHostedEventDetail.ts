@@ -78,7 +78,7 @@ export function useHostedEventDetail(eventId: string) {
         `${process.env.NEXT_PUBLIC_API}/events/${eventId}/hosted`,
         {
           credentials: "include",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -110,4 +110,3 @@ export function useHostedEventDetail(eventId: string) {
     refetch: fetchEventData,
   };
 }
-

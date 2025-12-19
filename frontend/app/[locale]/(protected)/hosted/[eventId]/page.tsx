@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { EventStatusBadge } from "@/components/Events/EventStatusBadge";
 import { ParticipantStatusBadge } from "@/components/Events/ParticipantStatusBadge";
 import { ParticipantStatus } from "@/types/event";
+import Image from "next/image";
 
 export default function HostedEventOverviewPage() {
   const params = useParams();
@@ -18,7 +19,9 @@ export default function HostedEventOverviewPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <p className="text-zinc-600 dark:text-zinc-400">{t("common.loading")}</p>
+        <p className="text-zinc-600 dark:text-zinc-400">
+          {t("common.loading")}
+        </p>
       </div>
     );
   }
@@ -37,7 +40,9 @@ export default function HostedEventOverviewPage() {
 
   const votedParticipants = participants.filter((p) => p.hasVoted);
   const pendingParticipants = expectedParticipants.filter(
-    (p) => p.status === ParticipantStatus.NOT_VOTED || p.status === ParticipantStatus.NOT_REGISTERED
+    (p) =>
+      p.status === ParticipantStatus.NOT_VOTED ||
+      p.status === ParticipantStatus.NOT_REGISTERED,
   );
 
   return (
@@ -90,7 +95,8 @@ export default function HostedEventOverviewPage() {
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  {format(new Date(event.confirmedStartTime), "MMM d, HH:mm")} - {format(new Date(event.confirmedEndTime), "HH:mm")}
+                  {format(new Date(event.confirmedStartTime), "MMM d, HH:mm")} -{" "}
+                  {format(new Date(event.confirmedEndTime), "HH:mm")}
                 </span>
               )}
             </div>
@@ -261,17 +267,21 @@ export default function HostedEventOverviewPage() {
                   className="flex items-center gap-3 py-2"
                 >
                   {participant.pictureUrl ? (
-                    <img
+                    <Image
                       src={participant.pictureUrl}
-                      alt=""
+                      alt={participant.displayName || ""}
+                      width={32}
+                      height={32}
                       className="w-8 h-8 rounded-full"
                     />
                   ) : (
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                      participant.status === ParticipantStatus.NOT_REGISTERED
-                        ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
-                        : "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
-                    }`}>
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                        participant.status === ParticipantStatus.NOT_REGISTERED
+                          ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+                          : "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                      }`}
+                    >
                       {participant.displayName?.[0]?.toUpperCase() || "?"}
                     </div>
                   )}
@@ -336,4 +346,3 @@ export default function HostedEventOverviewPage() {
     </div>
   );
 }
-

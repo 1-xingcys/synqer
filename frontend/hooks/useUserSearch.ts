@@ -27,7 +27,7 @@ export function useUserSearch() {
         `${process.env.NEXT_PUBLIC_API}/users/search?q=${encodeURIComponent(query)}`,
         {
           credentials: "include",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -58,4 +58,3 @@ export function useUserSearch() {
     clearResults,
   };
 }
-

@@ -1,7 +1,7 @@
 import { IsArray, IsString, IsOptional, IsEnum } from 'class-validator';
 
 export enum VoteMode {
-  AVAILABLE = 'available',     // 投自己「可以」的時間
+  AVAILABLE = 'available', // 投自己「可以」的時間
   UNAVAILABLE = 'unavailable', // 投自己「不行」的時間
 }
 

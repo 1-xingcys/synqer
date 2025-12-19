@@ -160,7 +160,10 @@ export default function HostedEventsPage() {
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
-                        {format(new Date(event.confirmedStartTime), "MMM d, HH:mm")}
+                        {format(
+                          new Date(event.confirmedStartTime),
+                          "MMM d, HH:mm",
+                        )}
                       </span>
                     )}
                   </div>
@@ -191,4 +194,3 @@ export default function HostedEventsPage() {
     </div>
   );
 }
-

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/routing";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useMemo } from "react";
+import Image from "next/image";
 
 export default function JoinedEventParticipantsPage() {
   const params = useParams();
@@ -17,14 +18,16 @@ export default function JoinedEventParticipantsPage() {
 
   // Calculate who has voted based on expectedParticipants
   const { votedParticipants, pendingParticipants } = useMemo(() => {
-    if (!eventDetailData) return { votedParticipants: [], pendingParticipants: [] };
+    if (!eventDetailData)
+      return { votedParticipants: [], pendingParticipants: [] };
 
     // 使用 expectedParticipants 來判斷投票狀態
     const voted = eventDetailData.expectedParticipants
       .filter((p) => p.hasVoted)
       .map((p) => ({
         id: p.id,
-        displayName: p.user?.displayName || p.lineGroupMember?.displayName || "Unknown",
+        displayName:
+          p.user?.displayName || p.lineGroupMember?.displayName || "Unknown",
         pictureUrl: p.user?.avatarUrl || p.lineGroupMember?.pictureUrl,
       }));
 
@@ -32,7 +35,8 @@ export default function JoinedEventParticipantsPage() {
       .filter((p) => !p.hasVoted)
       .map((p) => ({
         id: p.id,
-        displayName: p.user?.displayName || p.lineGroupMember?.displayName || "Unknown",
+        displayName:
+          p.user?.displayName || p.lineGroupMember?.displayName || "Unknown",
         pictureUrl: p.user?.avatarUrl || p.lineGroupMember?.pictureUrl,
       }));
 
@@ -44,7 +48,9 @@ export default function JoinedEventParticipantsPage() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-lg text-zinc-600 dark:text-zinc-300">{t("loading")}</p>
+          <p className="text-lg text-zinc-600 dark:text-zinc-300">
+            {t("loading")}
+          </p>
         </div>
       </div>
     );
@@ -69,7 +75,9 @@ export default function JoinedEventParticipantsPage() {
               />
             </svg>
           </div>
-          <p className="text-lg text-red-600 dark:text-red-400">{error || t("notFound")}</p>
+          <p className="text-lg text-red-600 dark:text-red-400">
+            {error || t("notFound")}
+          </p>
           <button
             onClick={() => router.push("/joined")}
             className="mt-4 px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
@@ -83,7 +91,8 @@ export default function JoinedEventParticipantsPage() {
 
   const totalParticipants = eventDetailData.expectedParticipants.length;
   const votedCount = votedParticipants.length;
-  const progress = totalParticipants > 0 ? (votedCount / totalParticipants) * 100 : 0;
+  const progress =
+    totalParticipants > 0 ? (votedCount / totalParticipants) * 100 : 0;
 
   return (
     <div className="py-8 space-y-6">
@@ -93,7 +102,12 @@ export default function JoinedEventParticipantsPage() {
           href={`/joined/${eventId}`}
           className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -118,9 +132,14 @@ export default function JoinedEventParticipantsPage() {
           </div>
           <div className="text-right">
             <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-              {votedCount}<span className="text-zinc-400 dark:text-zinc-500">/{totalParticipants}</span>
+              {votedCount}
+              <span className="text-zinc-400 dark:text-zinc-500">
+                /{totalParticipants}
+              </span>
             </div>
-            <div className="text-sm text-zinc-500 dark:text-zinc-400">{tJoined("voted")}</div>
+            <div className="text-sm text-zinc-500 dark:text-zinc-400">
+              {tJoined("voted")}
+            </div>
           </div>
         </div>
 
@@ -143,7 +162,11 @@ export default function JoinedEventParticipantsPage() {
       <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-zinc-800 bg-emerald-50 dark:bg-emerald-900/10">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+            <svg
+              className="w-5 h-5 text-emerald-600 dark:text-emerald-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
               <path
                 fillRule="evenodd"
                 d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -162,11 +185,16 @@ export default function JoinedEventParticipantsPage() {
         ) : (
           <ul className="divide-y divide-gray-100 dark:divide-zinc-800">
             {votedParticipants.map((participant) => (
-              <li key={participant.id} className="px-6 py-4 flex items-center gap-3">
+              <li
+                key={participant.id}
+                className="px-6 py-4 flex items-center gap-3"
+              >
                 {participant.pictureUrl ? (
-                  <img
+                  <Image
                     src={participant.pictureUrl}
-                    alt=""
+                    alt={participant.displayName || ""}
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full"
                   />
                 ) : (
@@ -180,7 +208,11 @@ export default function JoinedEventParticipantsPage() {
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-3 h-3"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -199,7 +231,11 @@ export default function JoinedEventParticipantsPage() {
       <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-zinc-800 bg-amber-50 dark:bg-amber-900/10">
           <div className="flex items-center gap-2">
-            <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+            <svg
+              className="w-5 h-5 text-amber-600 dark:text-amber-400"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
               <path
                 fillRule="evenodd"
                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
@@ -227,11 +263,16 @@ export default function JoinedEventParticipantsPage() {
         ) : (
           <ul className="divide-y divide-gray-100 dark:divide-zinc-800">
             {pendingParticipants.map((participant) => (
-              <li key={participant.id} className="px-6 py-4 flex items-center gap-3">
+              <li
+                key={participant.id}
+                className="px-6 py-4 flex items-center gap-3"
+              >
                 {participant.pictureUrl ? (
-                  <img
+                  <Image
                     src={participant.pictureUrl}
-                    alt=""
+                    alt={participant.displayName || ""}
+                    width={40}
+                    height={40}
                     className="w-10 h-10 rounded-full"
                   />
                 ) : (
@@ -245,7 +286,11 @@ export default function JoinedEventParticipantsPage() {
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-3 h-3"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
@@ -262,4 +307,3 @@ export default function JoinedEventParticipantsPage() {
     </div>
   );
 }
-
