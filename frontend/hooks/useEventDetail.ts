@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import type { VoteMode } from "@/components/Events/VotingGrid";
+import type { VoteMode } from "@/components/JoinedEventPage/VotingGrid";
 
 interface TimeSlot {
   id: string;

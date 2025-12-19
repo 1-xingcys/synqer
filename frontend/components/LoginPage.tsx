@@ -8,7 +8,7 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({
-  redirectPath = "/dashboard",
+  redirectPath = "/joined",
 }: LoginPageProps) {
   const t = useTranslations();
   const API_BASE = process.env.NEXT_PUBLIC_API;
