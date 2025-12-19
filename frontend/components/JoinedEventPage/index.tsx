@@ -6,7 +6,7 @@ import { useRouter, Link } from "@/i18n/routing";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import VotingGrid from "@/components/JoinedEventPage/VotingGrid";
-import EventInfo from "@/components/eventCommon/EventInfo";
+import EventInfo from "@/components/JoinedEventPage/EventInfo";
 
 export default function JoinedEventPage() {
   const params = useParams();
