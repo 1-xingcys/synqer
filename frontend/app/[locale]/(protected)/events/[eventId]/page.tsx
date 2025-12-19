@@ -143,7 +143,7 @@ export default function EventJoinPage() {
             {error || t("eventJoin.eventNotFoundDescription")}
           </p>
           <Link
-            href="/dashboard"
+            href="/joined"
             className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
           >
             {t("event.backToDashboard")}
@@ -411,7 +411,7 @@ export default function EventJoinPage() {
                 )}
               </button>
               <Link
-                href="/dashboard"
+                href="/joined"
                 className="w-full py-3 px-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors font-medium text-center"
               >
                 {t("eventJoin.cancel")}

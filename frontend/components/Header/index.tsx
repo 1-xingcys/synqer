@@ -43,7 +43,6 @@ export default function Header({
 
   // 判斷是否為受保護頁面
   const isProtectedPage =
-    pathname?.startsWith("/dashboard") ||
     pathname?.startsWith("/events") ||
     pathname?.startsWith("/joined") ||
     pathname?.startsWith("/hosted");
