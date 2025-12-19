@@ -10,19 +10,19 @@ import LoginPage from "@/components/LoginPage";
  * 驗證 redirect 路徑，防止 open redirect 攻擊
  */
 const validateRedirectPath = (redirect: string | null): string => {
-  if (!redirect) return "/dashboard";
+  if (!redirect) return "/joined";
 
   // 只允許以 / 開頭的相對路徑
   if (redirect.startsWith("/")) {
     // 防止 protocol-relative URLs 如 //evil.com
     if (redirect.startsWith("//")) {
-      return "/dashboard";
+      return "/joined";
     }
     return redirect;
   }
 
   // 拒絕其他模式（絕對 URLs、javascript:、data: 等）
-  return "/dashboard";
+  return "/joined";
 };
 
 export default function Login() {

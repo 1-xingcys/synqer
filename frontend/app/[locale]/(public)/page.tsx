@@ -13,7 +13,7 @@ export default function LandingPage() {
 
   const handleGetStarted = () => {
     if (user) {
-      router.push("/dashboard");
+      router.push("/joined");
     } else {
       router.push("/login");
     }
