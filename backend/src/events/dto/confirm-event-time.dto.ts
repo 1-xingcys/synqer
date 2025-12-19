@@ -7,4 +7,3 @@ export class ConfirmEventTimeDto {
   @IsISO8601()
   confirmedEndTime: string; // "2025-08-14T12:00:00.000Z"
 }
-

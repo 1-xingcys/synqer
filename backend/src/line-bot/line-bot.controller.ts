@@ -16,7 +16,6 @@ import type { Request } from 'express';
 import { LineBotService } from './line-bot.service';
 import type { WebhookRequestBody } from './dto/webhook-event.dto';
 import { SessionAuthGuard } from '../auth/guards';
-import { CurrentUser } from '../auth/decorators';
 
 @Controller('line-bot')
 export class LineBotController {
@@ -28,14 +27,14 @@ export class LineBotController {
    */
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
-  async handleWebhook(
+  handleWebhook(
     @Req() req: RawBodyRequest<Request>,
     @Headers('x-line-signature') signature: string,
     @Body() body: WebhookRequestBody,
   ) {
     // 驗證簽章
     const rawBody = req.rawBody?.toString() || JSON.stringify(body);
-    
+
     if (!this.lineBotService.verifySignature(rawBody, signature)) {
       throw new BadRequestException('Invalid signature');
     }
@@ -103,7 +102,6 @@ export class LineBotController {
   async sendReminder(
     @Param('groupId') groupId: string,
     @Body() body: { eventId: string; lineUserIds: string[] },
-    @CurrentUser() userId: string,
   ) {
     const { eventId, lineUserIds } = body;
 
@@ -116,4 +114,3 @@ export class LineBotController {
     return { success: true, reminded: lineUserIds.length };
   }
 }
-

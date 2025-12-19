@@ -150,13 +150,8 @@ export class GoogleCalendarService {
       },
     );
 
-    const {
-      access_token,
-      refresh_token,
-      expires_in,
-      scope,
-      id_token,
-    } = tokenResponse.data;
+    const { access_token, refresh_token, expires_in, scope, id_token } =
+      tokenResponse.data;
 
     // Decode and verify id_token to get Google account info
     if (!id_token) {
@@ -188,6 +183,7 @@ export class GoogleCalendarService {
     const tokenExpiresAt = new Date(Date.now() + expires_in * 1000);
 
     // Upsert Google Calendar connection
+
     await this.prisma.googleCalendarConnection.upsert({
       where: { userId },
       create: {
@@ -228,7 +224,9 @@ export class GoogleCalendarService {
 
     return {
       connected: true,
+
       googleEmail: connection.googleEmail || undefined,
+
       connectedAt: connection.createdAt,
     };
   }
@@ -274,14 +272,17 @@ export class GoogleCalendarService {
     }
 
     // Check if token is expired (with 5 minute buffer)
+
     const isExpired =
-      new Date(connection.tokenExpiresAt).getTime() < Date.now() + 5 * 60 * 1000;
+      new Date(connection.tokenExpiresAt).getTime() <
+      Date.now() + 5 * 60 * 1000;
 
     if (!isExpired) {
       return connection.accessToken;
     }
 
     // Refresh the token
+
     if (!connection.refreshToken) {
       throw new UnauthorizedException(
         'Refresh token not available. Please reconnect Google Calendar.',
@@ -294,6 +295,7 @@ export class GoogleCalendarService {
         {
           client_id: process.env.GOOGLE_CLIENT_ID,
           client_secret: process.env.GOOGLE_CLIENT_SECRET,
+
           refresh_token: connection.refreshToken,
           grant_type: 'refresh_token',
         },
@@ -303,6 +305,7 @@ export class GoogleCalendarService {
       const tokenExpiresAt = new Date(Date.now() + expires_in * 1000);
 
       // Update the stored token
+
       await this.prisma.googleCalendarConnection.update({
         where: { userId },
         data: {
@@ -312,7 +315,7 @@ export class GoogleCalendarService {
       });
 
       return access_token;
-    } catch (error) {
+    } catch {
       // If refresh fails, user needs to reconnect
       throw new UnauthorizedException(
         'Failed to refresh token. Please reconnect Google Calendar.',
@@ -456,4 +459,3 @@ export class GoogleCalendarService {
     };
   }
 }
-

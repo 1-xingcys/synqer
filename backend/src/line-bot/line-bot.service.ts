@@ -46,19 +46,19 @@ export class LineBotService {
   private async handleEvent(event: WebhookEvent): Promise<void> {
     switch (event.type) {
       case 'join':
-        await this.handleBotJoinGroup(event as JoinEvent);
+        await this.handleBotJoinGroup(event);
         break;
       case 'leave':
-        await this.handleBotLeaveGroup(event as LeaveEvent);
+        await this.handleBotLeaveGroup(event);
         break;
       case 'memberJoined':
-        await this.handleMemberJoined(event as MemberJoinedEvent);
+        await this.handleMemberJoined(event);
         break;
       case 'memberLeft':
-        await this.handleMemberLeft(event as MemberLeftEvent);
+        await this.handleMemberLeft(event);
         break;
       case 'message':
-        await this.handleMessage(event as MessageEvent);
+        await this.handleMessage(event);
         break;
       default:
         this.logger.debug(`Unhandled event type: ${event.type}`);

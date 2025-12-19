@@ -13,4 +13,3 @@ import { UsersModule } from '../users/users.module';
   exports: [LineBotService, LineApiService, LineGroupService],
 })
 export class LineBotModule {}
-
