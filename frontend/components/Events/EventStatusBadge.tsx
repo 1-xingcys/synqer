@@ -21,7 +21,7 @@ export function EventStatusBadge({
 
   const statusConfig: Record<
     EventStatus,
-    { label: string; className: string; icon: JSX.Element }
+    { label: string; className: string; icon: React.ReactNode }
   > = {
     [EventStatus.VOTING]: {
       label: t("eventStatus.voting"),

@@ -147,7 +147,7 @@ export default function JoinedEventParticipantsPage() {
         <div className="space-y-2">
           <div className="h-3 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-500"
+              className="h-full bg-linear-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
