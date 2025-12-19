@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useAttendedEvents } from "@/hooks/useAttendedEvents";
 import EmptyState from "./EmptyState";
-import EventCard from "./EventCard";
+import EventCard from "@/components/eventCommon/EventCard";
 
 export default function JoinedEventsOverview() {
   const t = useTranslations();
@@ -49,7 +49,7 @@ export default function JoinedEventsOverview() {
       ) : (
         <div className="grid gap-4">
           {events.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCard key={event.id} event={event} variant="joined" />
           ))}
         </div>
       )}
