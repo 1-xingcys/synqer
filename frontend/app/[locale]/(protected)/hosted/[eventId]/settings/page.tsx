@@ -73,13 +73,17 @@ export default function SettingsPage() {
           body: JSON.stringify({
             title: formData.title,
             description: formData.description,
-            startDate: formData.startDate ? formatDate(formData.startDate) : undefined,
-            endDate: formData.endDate ? formatDate(formData.endDate) : undefined,
+            startDate: formData.startDate
+              ? formatDate(formData.startDate)
+              : undefined,
+            endDate: formData.endDate
+              ? formatDate(formData.endDate)
+              : undefined,
             startTime: formData.startTime,
             endTime: formData.endTime,
             slotDurationMin: formData.slotDurationMin,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -104,7 +108,7 @@ export default function SettingsPage() {
         {
           method: "DELETE",
           credentials: "include",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -121,7 +125,9 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <p className="text-zinc-600 dark:text-zinc-400">{t("common.loading")}</p>
+        <p className="text-zinc-600 dark:text-zinc-400">
+          {t("common.loading")}
+        </p>
       </div>
     );
   }
@@ -148,7 +154,9 @@ export default function SettingsPage() {
           <input
             type="text"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, title: e.target.value })
+            }
             className="w-full px-3 py-2 text-sm border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder={t("createEvent.general.eventNamePlaceholder")}
           />
@@ -243,16 +251,22 @@ export default function SettingsPage() {
             }
             className="w-full px-3 py-2 text-sm border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value={15}>15 {t("createEvent.configuration.minutes")}</option>
-            <option value={30}>30 {t("createEvent.configuration.minutes")}</option>
-            <option value={60}>60 {t("createEvent.configuration.minutes")}</option>
+            <option value={15}>
+              15 {t("createEvent.configuration.minutes")}
+            </option>
+            <option value={30}>
+              30 {t("createEvent.configuration.minutes")}
+            </option>
+            <option value={60}>
+              60 {t("createEvent.configuration.minutes")}
+            </option>
           </select>
         </div>
 
         {/* Save Button */}
         <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
           <button
-            onClick={handleSave}
+            onClick={() => void handleSave()}
             disabled={saving}
             className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm flex items-center justify-center gap-2"
           >
@@ -324,7 +338,7 @@ export default function SettingsPage() {
               {t("hosted.settingsPage.confirmDelete")}
             </p>
             <button
-              onClick={handleDelete}
+              onClick={() => void handleDelete()}
               disabled={deleting}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors text-sm font-medium"
             >
@@ -342,4 +356,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-

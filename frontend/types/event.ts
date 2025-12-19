@@ -43,4 +43,3 @@ export interface ExpectedParticipant {
   hasVoted: boolean;
   status: ParticipantStatus;
 }
-

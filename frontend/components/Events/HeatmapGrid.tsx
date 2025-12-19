@@ -120,7 +120,9 @@ export default function HeatmapGrid({
         <h2 className="text-xl font-semibold text-gray-900 dark:text-zinc-100 mb-2">
           {t("heatmapTitle")}
         </h2>
-        <p className="text-sm text-gray-600 dark:text-zinc-400">{t("heatmapDescription")}</p>
+        <p className="text-sm text-gray-600 dark:text-zinc-400">
+          {t("heatmapDescription")}
+        </p>
         {/* TODO: 未來可加入 Websocket/SSE 即時同步 */}
       </div>
 
@@ -159,7 +161,9 @@ export default function HeatmapGrid({
                       className={`border border-gray-300 dark:border-zinc-700 px-4 py-2 cursor-pointer transition-all ${getHeatmapColor(
                         voteCount,
                       )} ${getTextColor(voteCount)} ${
-                        isSelected ? "ring-4 ring-blue-500 dark:ring-blue-400" : ""
+                        isSelected
+                          ? "ring-4 ring-blue-500 dark:ring-blue-400"
+                          : ""
                       }`}
                     >
                       <div className="h-6 flex items-center justify-center font-medium">
@@ -191,7 +195,10 @@ export default function HeatmapGrid({
               </h4>
               <ul className="space-y-1">
                 {selectedSlotDetails.availableUsers.map((vote) => (
-                  <li key={vote.userId} className="text-sm text-gray-700 dark:text-zinc-200">
+                  <li
+                    key={vote.userId}
+                    className="text-sm text-gray-700 dark:text-zinc-200"
+                  >
                     ✓ {vote.userDisplayName}
                   </li>
                 ))}
@@ -207,7 +214,10 @@ export default function HeatmapGrid({
               </h4>
               <ul className="space-y-1">
                 {selectedSlotDetails.unavailableUsers.map((user) => (
-                  <li key={user.userId} className="text-sm text-gray-700 dark:text-zinc-200">
+                  <li
+                    key={user.userId}
+                    className="text-sm text-gray-700 dark:text-zinc-200"
+                  >
                     ✗ {user.displayName}
                   </li>
                 ))}

@@ -142,7 +142,10 @@ export default function JoinedEventsPage() {
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
-                        {format(new Date(event.confirmedStartTime), "MMM d, HH:mm")}
+                        {format(
+                          new Date(event.confirmedStartTime),
+                          "MMM d, HH:mm",
+                        )}
                       </span>
                     )}
                   </div>
@@ -159,15 +162,35 @@ export default function JoinedEventsPage() {
                     >
                       {event.hasVoted ? (
                         <>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          <svg
+                            className="w-3 h-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
                           </svg>
                           {t("participantStatus.voted")}
                         </>
                       ) : (
                         <>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          <svg
+                            className="w-3 h-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
                           </svg>
                           {t("participantStatus.notVoted")}
                         </>
@@ -199,4 +222,3 @@ export default function JoinedEventsPage() {
     </div>
   );
 }
-

@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+  type ReactNode,
+} from "react";
 
 interface SidebarContextType {
   isOpen: boolean;
@@ -41,13 +48,11 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       title,
       setTitle,
     }),
-    [isOpen, toggle, open, close, content, title]
+    [isOpen, toggle, open, close, content, title],
   );
 
   return (
-    <SidebarContext.Provider value={value}>
-      {children}
-    </SidebarContext.Provider>
+    <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>
   );
 }
 
@@ -58,4 +63,3 @@ export function useSidebar() {
   }
   return context;
 }
-

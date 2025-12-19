@@ -1,6 +1,13 @@
 "use client";
 
-import { Children, cloneElement, isValidElement, useEffect, useMemo, type ReactNode } from "react";
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useMemo,
+  type ReactNode,
+} from "react";
 import { useRouter, usePathname, Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useSidebar } from "@/contexts/SidebarContext";
@@ -56,9 +63,17 @@ export default function Sidebar({
           // 原生 HTML 元素（如 button）會被跳過
           if (typeof child.type === "function") {
             // 檢查是否是 SidebarItem 組件
-            const componentName = child.type.name || (child.type as any).displayName;
-            const childProps = child.props as any;
-            if (componentName === "SidebarItem" || childProps?.collapsed !== undefined) {
+            const componentType = child.type as {
+              name?: string;
+              displayName?: string;
+            };
+            const componentName =
+              componentType.name || componentType.displayName;
+            const childProps = child.props as { collapsed?: boolean };
+            if (
+              componentName === "SidebarItem" ||
+              childProps.collapsed !== undefined
+            ) {
               return cloneElement(child, {
                 collapsed: isCollapsed,
               } as Partial<unknown>);
@@ -165,10 +180,7 @@ export function SidebarItem({
       <span
         className={`
           transition-all duration-200
-          ${collapsed 
-            ? "lg:hidden" 
-            : "whitespace-nowrap"
-          }
+          ${collapsed ? "lg:hidden" : "whitespace-nowrap"}
         `}
       >
         {label}
@@ -265,9 +277,10 @@ function ProtectedSidebarContent() {
           }}
           className={`
             w-full h-12 font-medium rounded-lg transition-colors bg-blue-600 hover:bg-blue-700 text-white no-underline
-            ${isCollapsed && isDesktop 
-              ? "lg:flex lg:items-center lg:justify-center lg:px-2" 
-              : "flex items-center gap-3 px-4"
+            ${
+              isCollapsed && isDesktop
+                ? "lg:flex lg:items-center lg:justify-center lg:px-2"
+                : "flex items-center gap-3 px-4"
             }
           `}
         >
@@ -286,13 +299,12 @@ function ProtectedSidebarContent() {
               />
             </svg>
           </span>
-          <span className={`
+          <span
+            className={`
             transition-all duration-200
-            ${isCollapsed && isDesktop 
-              ? "lg:hidden" 
-              : "whitespace-nowrap"
-            }
-          `}>
+            ${isCollapsed && isDesktop ? "lg:hidden" : "whitespace-nowrap"}
+          `}
+          >
             {t("dashboard.createNewEvent")}
           </span>
         </Link>
@@ -313,7 +325,7 @@ function ProtectedSidebarContent() {
             }}
           />
         ))}
-      </>
+      </>,
     );
   }, [
     currentView,

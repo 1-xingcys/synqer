@@ -9,7 +9,7 @@ import Logo from "@/components/Logo";
 /**
  * PublicHeader 元件
  * 用於登入前的公開頁面（landing page, login page 等）
- * 
+ *
  * 顯示內容：
  * - Logo（左側）
  * - LanguageSwitcher + 登入按鈕（右側）
@@ -19,7 +19,7 @@ export default function PublicHeader() {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuthContext();
-  
+
   // 檢查是否在登入頁面
   const isLoginPage = pathname?.endsWith("/login");
 
@@ -31,12 +31,12 @@ export default function PublicHeader() {
           <div className="flex items-center gap-2">
             <Logo height={40} href="/" />
           </div>
-          
+
           {/* 右側：語言選項 + 登入按鈕 */}
           <div className="flex items-center gap-4">
             <LanguageSwitcher />
-            {!isLoginPage && (
-              user ? (
+            {!isLoginPage &&
+              (user ? (
                 <button
                   onClick={() => router.push("/dashboard")}
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
@@ -50,12 +50,10 @@ export default function PublicHeader() {
                 >
                   {t("signIn")}
                 </button>
-              )
-            )}
+              ))}
           </div>
         </div>
       </div>
     </header>
   );
 }
-

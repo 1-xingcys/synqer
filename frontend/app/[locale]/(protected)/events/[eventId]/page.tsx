@@ -46,7 +46,9 @@ export default function EventJoinPage() {
         const apiBase = process.env.NEXT_PUBLIC_API;
 
         // 取得活動公開資訊
-        const eventResponse = await fetch(`${apiBase}/events/${eventId}/public`);
+        const eventResponse = await fetch(
+          `${apiBase}/events/${eventId}/public`,
+        );
         if (!eventResponse.ok) {
           if (eventResponse.status === 404) {
             throw new Error("Event not found");
@@ -59,7 +61,7 @@ export default function EventJoinPage() {
         // 取得使用者參與狀態
         const participationResponse = await fetch(
           `${apiBase}/events/${eventId}/participation`,
-          { credentials: "include" }
+          { credentials: "include" },
         );
         if (participationResponse.ok) {
           const participationData =
@@ -107,7 +109,9 @@ export default function EventJoinPage() {
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
-          <p className="text-zinc-600 dark:text-zinc-400">{t("common.loading")}</p>
+          <p className="text-zinc-600 dark:text-zinc-400">
+            {t("common.loading")}
+          </p>
         </div>
       </div>
     );
@@ -212,7 +216,7 @@ export default function EventJoinPage() {
       <div className="max-w-lg w-full mx-auto px-4">
         <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-br from-blue-500 to-indigo-600 px-6 py-8 text-white text-center">
+          <div className="bg-linear-to-br from-blue-500 to-indigo-600 px-6 py-8 text-white text-center">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
               <svg
                 className="w-8 h-8"
@@ -305,7 +309,7 @@ export default function EventJoinPage() {
                     <p className="text-zinc-900 dark:text-zinc-100 font-medium">
                       {format(
                         new Date(eventInfo.votingDeadline),
-                        "MMM d, yyyy HH:mm"
+                        "MMM d, yyyy HH:mm",
                       )}
                     </p>
                   </div>
@@ -337,7 +341,7 @@ export default function EventJoinPage() {
                     <p className="text-zinc-900 dark:text-zinc-100 font-medium">
                       {format(
                         new Date(eventInfo.confirmedStartTime),
-                        "MMM d, yyyy HH:mm"
+                        "MMM d, yyyy HH:mm",
                       )}{" "}
                       - {format(new Date(eventInfo.confirmedEndTime), "HH:mm")}
                     </p>
@@ -378,7 +382,7 @@ export default function EventJoinPage() {
             {/* Actions */}
             <div className="flex flex-col gap-3 pt-2">
               <button
-                onClick={handleJoin}
+                onClick={() => void handleJoin()}
                 disabled={joining}
                 className="w-full py-3 px-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >

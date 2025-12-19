@@ -42,13 +42,13 @@ function ProtectedLayoutContent({ children }: ProtectedLayoutProps) {
 /**
  * ProtectedLayout
  * 為所有受保護的頁面提供統一的佈局結構
- * 
+ *
  * 包含：
  * 1. 認證檢查
  * 2. SidebarContext（用於共享 sidebar 狀態）
  * 3. Header（ProtectedHeader）
  * 4. 基本容器結構
- * 
+ *
  * 注意：Sidebar 由各個頁面自己管理，因為不同頁面有不同的 sidebar
  */
 export default function ProtectedLayout({ children }: ProtectedLayoutProps) {

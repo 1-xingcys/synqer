@@ -44,7 +44,7 @@ export function useGoogleCalendar() {
         throw new Error("Failed to fetch status");
       }
 
-      const data = await res.json();
+      const data: ConnectionStatus = (await res.json()) as ConnectionStatus;
       setStatus(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -56,7 +56,7 @@ export function useGoogleCalendar() {
 
   // 初始化時取得狀態
   useEffect(() => {
-    fetchStatus();
+    void fetchStatus();
   }, [fetchStatus]);
 
   // 開始連結流程
@@ -95,7 +95,7 @@ export function useGoogleCalendar() {
           `${API_BASE_URL}/google-calendar/events/${eventId}/conflicts`,
           {
             credentials: "include",
-          }
+          },
         );
 
         if (!res.ok) {
@@ -106,13 +106,13 @@ export function useGoogleCalendar() {
           throw new Error("Failed to fetch conflicts");
         }
 
-        return await res.json();
+        return (await res.json()) as ConflictingSlots;
       } catch (err) {
         console.error("Error fetching calendar conflicts:", err);
         return null;
       }
     },
-    []
+    [],
   );
 
   return {
@@ -131,7 +131,7 @@ export function checkSlotConflict(
   slotDate: Date,
   startMinute: number,
   endMinute: number,
-  calendarEvents: CalendarEvent[]
+  calendarEvents: CalendarEvent[],
 ): CalendarEvent | null {
   // 計算 slot 的實際時間
   const slotStart = new Date(slotDate);
@@ -155,4 +155,3 @@ export function checkSlotConflict(
 
   return null;
 }
-

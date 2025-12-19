@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -19,17 +19,21 @@ interface ThemeSwitcherProps {
   asSubmenu?: boolean;
 }
 
+// 使用 useSyncExternalStore 來安全地處理 hydration
+const emptySubscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 export default function ThemeSwitcher({
   asSubmenu = false,
 }: ThemeSwitcherProps) {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
   const t = useTranslations();
-
-  // 避免 hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (!mounted) {
     return null;
@@ -49,9 +53,7 @@ export default function ThemeSwitcher({
         onClick={() => setTheme(themeOption.value)}
         className="cursor-pointer"
       >
-        {theme === themeOption.value && (
-          <CheckIcon className="mr-2 h-4 w-4" />
-        )}
+        {theme === themeOption.value && <CheckIcon className="mr-2 h-4 w-4" />}
         <Icon className="mr-2 h-4 w-4" />
         <span className={theme !== themeOption.value ? "ml-6" : ""}>
           {themeOption.label}
@@ -96,4 +98,3 @@ export default function ThemeSwitcher({
     </DropdownMenu>
   );
 }
-

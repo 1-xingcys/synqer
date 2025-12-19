@@ -16,14 +16,21 @@ export default function JoinedEventPage() {
   const router = useRouter();
   const { user } = useAuthContext();
 
-  const { data: eventDetailData, loading, error, saveVotes } = useEventDetail(eventId);
+  const {
+    data: eventDetailData,
+    loading,
+    error,
+    saveVotes,
+  } = useEventDetail(eventId);
 
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-lg text-zinc-600 dark:text-zinc-300">{t("loading")}</p>
+          <p className="text-lg text-zinc-600 dark:text-zinc-300">
+            {t("loading")}
+          </p>
         </div>
       </div>
     );
@@ -48,7 +55,9 @@ export default function JoinedEventPage() {
               />
             </svg>
           </div>
-          <p className="text-lg text-red-600 dark:text-red-400">{error || t("notFound")}</p>
+          <p className="text-lg text-red-600 dark:text-red-400">
+            {error || t("notFound")}
+          </p>
           <button
             onClick={() => router.push("/joined")}
             className="mt-4 px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
@@ -69,7 +78,8 @@ export default function JoinedEventPage() {
 
   // Calculate voting stats
   const totalParticipants = eventDetailData.participants.length;
-  const votedParticipants = new Set(eventDetailData.votes.map((v) => v.userId)).size;
+  const votedParticipants = new Set(eventDetailData.votes.map((v) => v.userId))
+    .size;
 
   return (
     <div className="py-8 space-y-6">
@@ -79,7 +89,12 @@ export default function JoinedEventPage() {
           onClick={() => router.push("/joined")}
           className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -92,7 +107,10 @@ export default function JoinedEventPage() {
       </div>
 
       {/* Event Info */}
-      <EventInfo event={eventDetailData.event} participants={eventDetailData.participants} />
+      <EventInfo
+        event={eventDetailData.event}
+        participants={eventDetailData.participants}
+      />
 
       {/* Quick Navigation Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -101,7 +119,12 @@ export default function JoinedEventPage() {
           className="flex items-center gap-4 p-4 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all group"
         >
           <div className="p-3 rounded-xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 group-hover:scale-105 transition-transform">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -115,11 +138,22 @@ export default function JoinedEventPage() {
               {tJoined("participants")}
             </div>
             <div className="text-sm text-zinc-500 dark:text-zinc-400">
-              {votedParticipants}/{totalParticipants} {tJoined("voted").toLowerCase()}
+              {votedParticipants}/{totalParticipants}{" "}
+              {tJoined("voted").toLowerCase()}
             </div>
           </div>
-          <svg className="w-5 h-5 text-zinc-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <svg
+            className="w-5 h-5 text-zinc-400 group-hover:text-blue-500 transition-colors"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </Link>
 
@@ -128,7 +162,12 @@ export default function JoinedEventPage() {
           className="flex items-center gap-4 p-4 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all group"
         >
           <div className="p-3 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -145,8 +184,18 @@ export default function JoinedEventPage() {
               {tJoined("viewResultsDescription")}
             </div>
           </div>
-          <svg className="w-5 h-5 text-zinc-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <svg
+            className="w-5 h-5 text-zinc-400 group-hover:text-blue-500 transition-colors"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </Link>
       </div>

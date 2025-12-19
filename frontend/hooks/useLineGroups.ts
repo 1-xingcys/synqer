@@ -39,7 +39,7 @@ export function useLineGroups() {
         `${process.env.NEXT_PUBLIC_API}/line-bot/groups`,
         {
           credentials: "include",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -89,7 +89,7 @@ export function useLineGroupMembers(groupId: string | null) {
         `${process.env.NEXT_PUBLIC_API}/line-bot/groups/${groupId}/members`,
         {
           credentials: "include",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -118,4 +118,3 @@ export function useLineGroupMembers(groupId: string | null) {
     refetch: fetchMembers,
   };
 }
-
