@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { format } from "date-fns";
-import { EventStatusBadge } from "@/components/Events/EventStatusBadge";
+import { EventStatusBadge } from "@/components/eventCommon/EventStatusBadge";
 import { EventStatus } from "@/types/event";
 
 interface EventCardProps {

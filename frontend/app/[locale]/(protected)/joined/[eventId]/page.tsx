@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/routing";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useEventDetail } from "@/hooks/useEventDetail";
-import VotingGrid from "@/components/Events/VotingGrid";
-import EventInfo from "@/components/Events/EventInfo";
+import VotingGrid from "@/components/eventCommon/VotingGrid";
+import EventInfo from "@/components/eventCommon/EventInfo";
 
 export default function JoinedEventPage() {
   const params = useParams();

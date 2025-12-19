@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { Link } from "@/i18n/routing";
 import { format } from "date-fns";
-import { EventStatusBadge } from "@/components/Events/EventStatusBadge";
-import { ParticipantStatusBadge } from "@/components/Events/ParticipantStatusBadge";
+import { EventStatusBadge } from "@/components/eventCommon/EventStatusBadge";
+import { ParticipantStatusBadge } from "@/components/eventCommon/ParticipantStatusBadge";
 import { ParticipantStatus } from "@/types/event";
 import Image from "next/image";
 
