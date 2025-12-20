@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { LineApiService, LineMessage } from './line-api.service';
 import axios from 'axios';
+import * as crypto from 'crypto';
 
 // Mock axios
 jest.mock('axios');
@@ -37,7 +39,6 @@ describe('LineApiService', () => {
   describe('verifySignature', () => {
     it('should return true for valid signature', () => {
       // 使用真實的 HMAC-SHA256 計算
-      const crypto = require('crypto');
       const body = '{"events":[]}';
       const hash = crypto
         .createHmac('sha256', 'test-channel-secret')
@@ -49,7 +50,10 @@ describe('LineApiService', () => {
     });
 
     it('should return false for invalid signature', () => {
-      const result = service.verifySignature('{"events":[]}', 'invalid-signature');
+      const result = service.verifySignature(
+        '{"events":[]}',
+        'invalid-signature',
+      );
       expect(result).toBe(false);
     });
   });
@@ -92,7 +96,10 @@ describe('LineApiService', () => {
 
       mockedAxios.get.mockResolvedValue({ data: mockProfile });
 
-      const result = await service.getGroupMemberProfile('group-123', 'user-123');
+      const result = await service.getGroupMemberProfile(
+        'group-123',
+        'user-123',
+      );
 
       expect(result).toEqual(mockProfile);
       expect(mockedAxios.get).toHaveBeenCalledWith(
@@ -104,7 +111,10 @@ describe('LineApiService', () => {
     it('should return null on error', async () => {
       mockedAxios.get.mockRejectedValue(new Error('API Error'));
 
-      const result = await service.getGroupMemberProfile('group-123', 'user-123');
+      const result = await service.getGroupMemberProfile(
+        'group-123',
+        'user-123',
+      );
 
       expect(result).toBeNull();
     });
@@ -134,7 +144,9 @@ describe('LineApiService', () => {
     it('should throw error on failure', async () => {
       mockedAxios.post.mockRejectedValue(new Error('API Error'));
 
-      await expect(service.pushMessage('group-123', 'Hello')).rejects.toThrow('API Error');
+      await expect(service.pushMessage('group-123', 'Hello')).rejects.toThrow(
+        'API Error',
+      );
     });
   });
 
@@ -211,7 +223,9 @@ describe('LineApiService', () => {
         text: `Message ${i + 1}`,
       }));
 
-      await expect(service.pushMessages('group-123', messages)).rejects.toThrow('API Error');
+      await expect(service.pushMessages('group-123', messages)).rejects.toThrow(
+        'API Error',
+      );
     });
 
     it('should support flex messages', async () => {
@@ -294,4 +308,3 @@ describe('LineApiService', () => {
     });
   });
 });
-

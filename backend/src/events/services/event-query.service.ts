@@ -200,7 +200,9 @@ export class EventQueryService {
     }
 
     const votes = this.eventMapper.mapVotes(event.votes);
-    const participants = this.eventMapper.extractParticipantsForHost(event.votes);
+    const participants = this.eventMapper.extractParticipantsForHost(
+      event.votes,
+    );
     const votedUserIds = new Set<string>(event.votes.map((v) => v.userId));
 
     const lineUserIds = event.expectedParticipants
@@ -262,4 +264,3 @@ export class EventQueryService {
     };
   }
 }
-

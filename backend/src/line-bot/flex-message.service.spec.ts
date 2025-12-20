@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
 import { FlexMessageService, EventInfo } from './flex-message.service';
 import { EventStatus } from '../events/services/event-status.service';
@@ -89,7 +94,9 @@ describe('FlexMessageService', () => {
         expect(footer).toBeDefined();
         const button = footer.contents[0];
         expect(button.action.label).toBe('前往投票');
-        expect(button.action.uri).toBe('https://liff.line.me/test-liff-id/joined/event-1');
+        expect(button.action.uri).toBe(
+          'https://liff.line.me/test-liff-id/joined/event-1',
+        );
       });
     });
 
@@ -106,7 +113,9 @@ describe('FlexMessageService', () => {
 
         const button = footer.contents[0];
         expect(button.action.label).toBe('投票結果');
-        expect(button.action.uri).toBe('https://liff.line.me/test-liff-id/joined/event-1/results');
+        expect(button.action.uri).toBe(
+          'https://liff.line.me/test-liff-id/joined/event-1/results',
+        );
       });
 
       it('should not display voting stats for VOTING_ENDED status', () => {
@@ -115,7 +124,7 @@ describe('FlexMessageService', () => {
 
         // VOTING_ENDED 不應該有投票進度條
         const hasProgressBar = body.contents.some((c: any) =>
-          c.contents?.some?.((cc: any) => cc.text === '📊 投票進度')
+          c.contents?.some?.((cc: any) => cc.text === '📊 投票進度'),
         );
         expect(hasProgressBar).toBeFalsy();
       });
@@ -136,7 +145,9 @@ describe('FlexMessageService', () => {
 
         const button = footer.contents[0];
         expect(button.action.label).toBe('查看活動');
-        expect(button.action.uri).toBe('https://liff.line.me/test-liff-id/joined/event-1');
+        expect(button.action.uri).toBe(
+          'https://liff.line.me/test-liff-id/joined/event-1',
+        );
       });
 
       it('should display confirmed time range', () => {
@@ -162,7 +173,9 @@ describe('FlexMessageService', () => {
         const result = service.buildEventFlexMessage(baseEvent);
         const body = (result.contents as any).body;
 
-        const hasAvatar = JSON.stringify(body).includes('https://example.com/avatar.jpg');
+        const hasAvatar = JSON.stringify(body).includes(
+          'https://example.com/avatar.jpg',
+        );
         expect(hasAvatar).toBeTruthy();
       });
 
@@ -187,7 +200,10 @@ describe('FlexMessageService', () => {
       });
 
       it('should use orange for VOTING_ENDED status', () => {
-        const votingEndedEvent = { ...baseEvent, status: EventStatus.VOTING_ENDED };
+        const votingEndedEvent = {
+          ...baseEvent,
+          status: EventStatus.VOTING_ENDED,
+        };
         const result = service.buildEventFlexMessage(votingEndedEvent);
         const bodyStr = JSON.stringify(result.contents);
 
@@ -284,7 +300,8 @@ describe('FlexMessageService', () => {
 
       // 重新建立 service
       return module.compile().then((testModule) => {
-        const newService = testModule.get<FlexMessageService>(FlexMessageService);
+        const newService =
+          testModule.get<FlexMessageService>(FlexMessageService);
         const event: EventInfo = {
           id: 'event-1',
           title: 'Test Event',
@@ -303,4 +320,3 @@ describe('FlexMessageService', () => {
     });
   });
 });
-

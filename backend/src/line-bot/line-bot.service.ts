@@ -3,7 +3,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { LineApiService, LineMessage } from './line-api.service';
 import { LineGroupService } from './line-group.service';
 import { FlexMessageService, EventInfo } from './flex-message.service';
-import { EventStatusService, EventStatus } from '../events/services/event-status.service';
+import {
+  EventStatusService,
+  EventStatus,
+} from '../events/services/event-status.service';
 import {
   WebhookEvent,
   MessageEvent,
@@ -38,8 +41,10 @@ export class LineBotService implements OnModuleInit {
         this.botUserId = botInfo.userId;
         this.logger.log(`Bot initialized with userId: ${this.botUserId}`);
       }
-    } catch (error) {
-      this.logger.warn('Failed to get bot userId on init, will try again later');
+    } catch {
+      this.logger.warn(
+        'Failed to get bot userId on init, will try again later',
+      );
     }
   }
 
@@ -141,7 +146,9 @@ export class LineBotService implements OnModuleInit {
 
     // 檢查是否有 @mention Bot
     if (event.message.type === 'text' && event.message.mention) {
-      const isBotMentioned = await this.checkBotMentioned(event.message.mention);
+      const isBotMentioned = await this.checkBotMentioned(
+        event.message.mention,
+      );
       if (isBotMentioned) {
         this.logger.log(`Bot mentioned in group: ${groupId}`);
         await this.handleBotMention(groupId, group.id);
@@ -152,7 +159,9 @@ export class LineBotService implements OnModuleInit {
   /**
    * 檢查 Bot 是否被 @mention
    */
-  private async checkBotMentioned(mention: { mentionees: Array<{ type: string; userId?: string }> }): Promise<boolean> {
+  private async checkBotMentioned(mention: {
+    mentionees: Array<{ type: string; userId?: string }>;
+  }): Promise<boolean> {
     // 確保有 Bot userId
     if (!this.botUserId) {
       const botInfo = await this.lineApi.getBotInfo();
@@ -165,7 +174,7 @@ export class LineBotService implements OnModuleInit {
 
     // 檢查是否有人 mention Bot
     return mention.mentionees.some(
-      (m) => m.type === 'user' && m.userId === this.botUserId
+      (m) => m.type === 'user' && m.userId === this.botUserId,
     );
   }
 
@@ -173,7 +182,10 @@ export class LineBotService implements OnModuleInit {
    * 處理 Bot 被 @mention 的情況
    * 查詢群組中尚未結束的活動，並發送 Flex Message
    */
-  private async handleBotMention(lineGroupId: string, lineGroupDbId: string): Promise<void> {
+  private async handleBotMention(
+    lineGroupId: string,
+    lineGroupDbId: string,
+  ): Promise<void> {
     // 查詢這個群組中尚未結束的活動
     const activeEvents = await this.getActiveGroupEvents(lineGroupDbId);
 
@@ -181,12 +193,14 @@ export class LineBotService implements OnModuleInit {
       // 沒有活動，發送提示訊息
       await this.lineApi.pushMessage(
         lineGroupId,
-        '目前這個群組沒有進行中的活動喔！'
+        '目前這個群組沒有進行中的活動喔！',
       );
       return;
     }
 
-    this.logger.log(`Found ${activeEvents.length} active events for group ${lineGroupId}`);
+    this.logger.log(
+      `Found ${activeEvents.length} active events for group ${lineGroupId}`,
+    );
 
     // 為每個活動準備訊息
     const messages: LineMessage[] = [];
@@ -202,7 +216,10 @@ export class LineBotService implements OnModuleInit {
 
       // 如果是投票中的活動，檢查是否有人還沒投票
       if (event.status === EventStatus.VOTING) {
-        const unvotedMembers = await this.getUnvotedGroupMembers(event.id, lineGroupDbId);
+        const unvotedMembers = await this.getUnvotedGroupMembers(
+          event.id,
+          lineGroupDbId,
+        );
         if (unvotedMembers.length > 0) {
           votingEventsWithUnvoted.push({ event, unvotedMembers });
         }
@@ -217,7 +234,7 @@ export class LineBotService implements OnModuleInit {
     for (const { event, unvotedMembers } of votingEventsWithUnvoted) {
       const reminderMsg = this.flexMessage.buildVoteReminderMessage(
         event.title || '未命名活動',
-        unvotedMembers
+        unvotedMembers,
       );
       await this.lineApi.pushMessages(lineGroupId, [reminderMsg]);
     }
@@ -226,7 +243,9 @@ export class LineBotService implements OnModuleInit {
   /**
    * 查詢群組中尚未結束（非 COMPLETED）的活動
    */
-  private async getActiveGroupEvents(lineGroupDbId: string): Promise<EventInfo[]> {
+  private async getActiveGroupEvents(
+    lineGroupDbId: string,
+  ): Promise<EventInfo[]> {
     const events = await this.prisma.event.findMany({
       where: {
         lineGroupId: lineGroupDbId,
@@ -268,9 +287,12 @@ export class LineBotService implements OnModuleInit {
 
       // 計算投票統計
       const totalExpected = event.expectedParticipants.length;
-      const votedUserIds = new Set(event.votes.map(v => v.userId));
-      const totalVoted = event.expectedParticipants.filter(p => p.hasVoted).length || votedUserIds.size;
-      const votingPercentage = totalExpected > 0 ? (totalVoted / totalExpected) * 100 : 0;
+      const votedUserIds = new Set(event.votes.map((v) => v.userId));
+      const totalVoted =
+        event.expectedParticipants.filter((p) => p.hasVoted).length ||
+        votedUserIds.size;
+      const votingPercentage =
+        totalExpected > 0 ? (totalVoted / totalExpected) * 100 : 0;
 
       result.push({
         id: event.id,
@@ -295,7 +317,9 @@ export class LineBotService implements OnModuleInit {
   /**
    * 取得活動主辦人資訊
    */
-  private async getEventHostInfo(ownerId: string | null): Promise<{ displayName: string; pictureUrl?: string | null }> {
+  private async getEventHostInfo(
+    ownerId: string | null,
+  ): Promise<{ displayName: string; pictureUrl?: string | null }> {
     if (!ownerId) {
       return { displayName: '未知主辦人' };
     }
@@ -326,23 +350,24 @@ export class LineBotService implements OnModuleInit {
     lineGroupDbId: string,
   ): Promise<Array<{ lineUserId: string; displayName: string | null }>> {
     // 取得活動的預期參與者中還沒投票的人
-    const unvotedParticipants = await this.prisma.eventExpectedParticipant.findMany({
-      where: {
-        eventId,
-        hasVoted: false,
-        lineUserId: { not: null },
-      },
-      select: {
-        lineUserId: true,
-      },
-    });
+    const unvotedParticipants =
+      await this.prisma.eventExpectedParticipant.findMany({
+        where: {
+          eventId,
+          hasVoted: false,
+          lineUserId: { not: null },
+        },
+        select: {
+          lineUserId: true,
+        },
+      });
 
     if (unvotedParticipants.length === 0) {
       return [];
     }
 
     const lineUserIds = unvotedParticipants
-      .map(p => p.lineUserId)
+      .map((p) => p.lineUserId)
       .filter((id): id is string => id !== null);
 
     // 取得這些 LINE 使用者在群組中的資訊

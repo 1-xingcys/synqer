@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Test, TestingModule } from '@nestjs/testing';
 import { LineGroupService } from './line-group.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -5,8 +7,6 @@ import { LineApiService } from './line-api.service';
 
 describe('LineGroupService', () => {
   let service: LineGroupService;
-  let prismaService: jest.Mocked<PrismaService>;
-  let lineApiService: jest.Mocked<LineApiService>;
 
   const mockPrismaService = {
     lineGroup: {
@@ -43,8 +43,6 @@ describe('LineGroupService', () => {
     }).compile();
 
     service = module.get<LineGroupService>(LineGroupService);
-    prismaService = module.get(PrismaService);
-    lineApiService = module.get(LineApiService);
 
     jest.clearAllMocks();
   });
@@ -69,7 +67,9 @@ describe('LineGroupService', () => {
 
       const result = await service.upsertGroup('line-group-123', true);
 
-      expect(mockLineApiService.getGroupSummary).toHaveBeenCalledWith('line-group-123');
+      expect(mockLineApiService.getGroupSummary).toHaveBeenCalledWith(
+        'line-group-123',
+      );
       expect(mockPrismaService.lineGroup.upsert).toHaveBeenCalledWith({
         where: { lineGroupId: 'line-group-123' },
         update: expect.objectContaining({
@@ -85,7 +85,9 @@ describe('LineGroupService', () => {
     });
 
     it('should handle getGroupSummary failure gracefully', async () => {
-      mockLineApiService.getGroupSummary.mockRejectedValue(new Error('API Error'));
+      mockLineApiService.getGroupSummary.mockRejectedValue(
+        new Error('API Error'),
+      );
 
       mockPrismaService.lineGroup.upsert.mockResolvedValue({
         id: 'db-group-id',
@@ -122,7 +124,9 @@ describe('LineGroupService', () => {
 
   describe('deactivateGroup', () => {
     it('should mark group as inactive', async () => {
-      mockPrismaService.lineGroup.updateMany.mockResolvedValue({ count: 1 } as any);
+      mockPrismaService.lineGroup.updateMany.mockResolvedValue({
+        count: 1,
+      } as any);
 
       await service.deactivateGroup('line-group-123');
 
@@ -142,7 +146,9 @@ describe('LineGroupService', () => {
         lineGroupId: 'line-group-123',
       };
 
-      mockPrismaService.lineGroup.findUnique.mockResolvedValue(existingGroup as any);
+      mockPrismaService.lineGroup.findUnique.mockResolvedValue(
+        existingGroup as any,
+      );
 
       const result = await service.ensureGroupExists('line-group-123');
 
@@ -191,7 +197,11 @@ describe('LineGroupService', () => {
         displayName: 'Test User',
       } as any);
 
-      const result = await service.upsertMember('db-group-id', 'line-user-123', true);
+      const result = await service.upsertMember(
+        'db-group-id',
+        'line-user-123',
+        true,
+      );
 
       expect(mockLineApiService.getGroupMemberProfile).toHaveBeenCalledWith(
         'line-group-123',
@@ -220,7 +230,7 @@ describe('LineGroupService', () => {
         userId: 'linked-user-id',
       } as any);
 
-      const result = await service.upsertMember('db-group-id', 'line-user-123', true);
+      await service.upsertMember('db-group-id', 'line-user-123', true);
 
       expect(mockPrismaService.lineGroupMember.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -250,19 +260,23 @@ describe('LineGroupService', () => {
 
   describe('deactivateMembers', () => {
     it('should mark members as inactive', async () => {
-      mockPrismaService.lineGroupMember.updateMany.mockResolvedValue({ count: 2 } as any);
+      mockPrismaService.lineGroupMember.updateMany.mockResolvedValue({
+        count: 2,
+      } as any);
 
       await service.deactivateMembers('db-group-id', ['user-1', 'user-2']);
 
-      expect(mockPrismaService.lineGroupMember.updateMany).toHaveBeenCalledWith({
-        where: {
-          lineGroupId: 'db-group-id',
-          lineUserId: { in: ['user-1', 'user-2'] },
+      expect(mockPrismaService.lineGroupMember.updateMany).toHaveBeenCalledWith(
+        {
+          where: {
+            lineGroupId: 'db-group-id',
+            lineUserId: { in: ['user-1', 'user-2'] },
+          },
+          data: expect.objectContaining({
+            isActive: false,
+          }),
         },
-        data: expect.objectContaining({
-          isActive: false,
-        }),
-      });
+      );
     });
   });
 
@@ -303,7 +317,9 @@ describe('LineGroupService', () => {
         },
       ];
 
-      mockPrismaService.lineGroupMember.findMany.mockResolvedValue(mockMembers as any);
+      mockPrismaService.lineGroupMember.findMany.mockResolvedValue(
+        mockMembers as any,
+      );
 
       const result = await service.getGroupMembers('db-group-id');
 
@@ -333,7 +349,9 @@ describe('LineGroupService', () => {
         ],
       };
 
-      mockPrismaService.lineGroup.findUnique.mockResolvedValue(mockGroup as any);
+      mockPrismaService.lineGroup.findUnique.mockResolvedValue(
+        mockGroup as any,
+      );
 
       const result = await service.getGroupByLineGroupId('line-group-123');
 
@@ -356,21 +374,28 @@ describe('LineGroupService', () => {
 
   describe('linkUserToMembers', () => {
     it('should update all group members and expected participants', async () => {
-      mockPrismaService.lineGroupMember.updateMany.mockResolvedValue({ count: 2 } as any);
-      mockPrismaService.eventExpectedParticipant.updateMany.mockResolvedValue({ count: 1 } as any);
+      mockPrismaService.lineGroupMember.updateMany.mockResolvedValue({
+        count: 2,
+      } as any);
+      mockPrismaService.eventExpectedParticipant.updateMany.mockResolvedValue({
+        count: 1,
+      } as any);
 
       await service.linkUserToMembers('user-id', 'line-user-id');
 
-      expect(mockPrismaService.lineGroupMember.updateMany).toHaveBeenCalledWith({
-        where: { lineUserId: 'line-user-id' },
-        data: { userId: 'user-id' },
-      });
+      expect(mockPrismaService.lineGroupMember.updateMany).toHaveBeenCalledWith(
+        {
+          where: { lineUserId: 'line-user-id' },
+          data: { userId: 'user-id' },
+        },
+      );
 
-      expect(mockPrismaService.eventExpectedParticipant.updateMany).toHaveBeenCalledWith({
+      expect(
+        mockPrismaService.eventExpectedParticipant.updateMany,
+      ).toHaveBeenCalledWith({
         where: { lineUserId: 'line-user-id' },
         data: { userId: 'user-id' },
       });
     });
   });
 });
-

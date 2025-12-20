@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Test, TestingModule } from '@nestjs/testing';
 import { LineBotController } from './line-bot.controller';
 import { LineBotService } from './line-bot.service';
@@ -8,7 +10,6 @@ import type { WebhookRequestBody, WebhookEvent } from './dto/webhook-event.dto';
 
 describe('LineBotController', () => {
   let controller: LineBotController;
-  let lineBotService: jest.Mocked<LineBotService>;
 
   const mockLineBotService = {
     verifySignature: jest.fn(),
@@ -25,7 +26,6 @@ describe('LineBotController', () => {
     }).compile();
 
     controller = module.get<LineBotController>(LineBotController);
-    lineBotService = module.get(LineBotService);
 
     jest.clearAllMocks();
   });
@@ -42,14 +42,15 @@ describe('LineBotController', () => {
       } as unknown as RawBodyRequest<Request>;
     };
 
-    const createMockEvent = (type: string): WebhookEvent => ({
-      type: type as any,
-      mode: 'active',
-      timestamp: Date.now(),
-      source: { type: 'group', groupId: 'group-123' },
-      webhookEventId: 'event-1',
-      deliveryContext: { isRedelivery: false },
-    } as WebhookEvent);
+    const createMockEvent = (type: string): WebhookEvent =>
+      ({
+        type: type as any,
+        mode: 'active',
+        timestamp: Date.now(),
+        source: { type: 'group', groupId: 'group-123' },
+        webhookEventId: 'event-1',
+        deliveryContext: { isRedelivery: false },
+      }) as WebhookEvent;
 
     it('should return empty object for valid webhook', () => {
       const body: WebhookRequestBody = {
@@ -255,4 +256,3 @@ describe('LineBotController', () => {
     });
   });
 });
-
