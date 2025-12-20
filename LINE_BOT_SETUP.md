@@ -8,6 +8,8 @@
 2. **成員活動偵測**：透過訊息、加入/離開事件追蹤成員
 3. **OAuth 關聯**：當使用者透過 LINE OAuth 登入後，自動關聯其群組成員身份
 4. **投票提醒**：活動擁有者可以透過 Bot 在群組中標註未投票的成員
+5. **@Mention 查詢活動**：當群組成員 @Synqer 時，Bot 會顯示該群組所有進行中的活動
+6. **LIFF 整合**：使用者點擊 Flex Message 按鈕後，會在 LINE 內開啟網頁並自動登入
 
 ## 重要概念：兩個 Channel
 
@@ -20,7 +22,7 @@ LINE Messaging API 和 LINE Login 是**兩個完全不同的 Channel**，有不�
 
 ## 環境變數設定
 
-在 `.env` 檔案中設定：
+### 後端 Backend `.env`
 
 ```env
 # ========== LINE BOT (Messaging API Channel) ==========
@@ -33,8 +35,24 @@ LINE_LOGIN_CHANNEL_ID=your_login_channel_id
 LINE_LOGIN_CHANNEL_SECRET=your_login_channel_secret
 LINE_LOGIN_REDIRECT_URI=https://your-domain.com/auth/line/callback
 
+# ========== LINE LIFF ==========
+# LIFF URL 用於 Flex Message 中的連結
+# 格式：https://liff.line.me/你的LIFF_ID
+LINE_LIFF_URL=https://liff.line.me/1234567890-xxxxxxxx
+
 # ========== 其他 ==========
 WEB_ORIGIN=http://localhost:3000
+```
+
+### 前端 Frontend `.env.local`
+
+```env
+# API 端點
+NEXT_PUBLIC_API=http://localhost:3001
+
+# LINE LIFF ID（從 LINE Developers Console 取得）
+# 格式：1234567890-xxxxxxxx
+NEXT_PUBLIC_LINE_LIFF_ID=1234567890-xxxxxxxx
 ```
 
 ## LINE Developers Console 設定
@@ -57,7 +75,24 @@ WEB_ORIGIN=http://localhost:3000
    - 開啟 **Use webhook**
    - 關閉 **Auto-reply messages** 和 **Greeting messages**
 
-### 3. Bot 權限設定
+### 3. 建立 LIFF App（用於 LINE 內開啟網頁）
+
+LIFF (LINE Front-end Framework) 讓使用者可以在 LINE App 內開啟網頁，並自動取得使用者身份。
+
+1. 在 **LINE Login Channel** 中，點選 **LIFF** 頁籤
+2. 點擊 **Add** 新增一個 LIFF App
+3. 設定以下項目：
+   - **LIFF app name**：Synqer（或你的應用名稱）
+   - **Size**：選擇 `Full`（全螢幕）
+   - **Endpoint URL**：你的前端網址，例如 `https://your-frontend-domain.com`
+   - **Scope**：勾選 `profile` 和 `openid`
+   - **Bot link feature**：選擇 `Off` 或依需求設定
+4. 新增後，記錄 **LIFF ID**（格式：`1234567890-xxxxxxxx`）
+5. 將 LIFF ID 設定到環境變數
+
+**重要**：LIFF 是建立在 LINE Login Channel 之下，不是 Messaging API Channel。
+
+### 4. Bot 權限設定
 
 在 LINE Official Account Manager 設定：
 - **允許 Bot 加入群組**
@@ -188,6 +223,37 @@ POST /events/:eventId/remind
 
 因此，群組成員列表可能不完整，需要隨時間累積。當使用者透過 LINE OAuth 登入後，系統會自動將其與群組成員記錄關聯。
 
+## @Mention 活動查詢功能
+
+當群組成員在群組中 @Synqer（標註 Bot）時，Bot 會：
+
+1. **查詢該群組所有進行中的活動**（非 COMPLETED 狀態）
+2. **為每個活動發送 Flex Message**，包含：
+   - 主辦人資訊（displayName + pictureUrl）
+   - 活動標題與描述
+   - 狀態標籤（投票中/投票截止/時間已定）
+   - 時間資訊（依狀態顯示不同內容）
+   - 投票進度（僅限 VOTING 狀態）
+   - 操作按鈕（透過 LIFF 開啟對應頁面）
+3. **對於投票中的活動**，如果有人還沒投票，會額外發送提醒訊息
+
+### Flex Message 按鈕連結
+
+| 狀態 | 按鈕文字 | 連結頁面 |
+|------|---------|---------|
+| VOTING | 前往投票 | `/joined/[eventId]` |
+| VOTING_ENDED | 投票結果 | `/joined/[eventId]/results` |
+| CONFIRMED | 查看活動 | `/joined/[eventId]` |
+
+### LIFF 自動登入流程
+
+1. 使用者點擊 Flex Message 按鈕
+2. LINE App 開啟 LIFF 網頁
+3. 前端自動取得 LIFF Access Token
+4. 前端將 Access Token 送到後端 `/auth/liff/login`
+5. 後端驗證 Token 並建立 Session
+6. 使用者自動登入，可直接操作
+
 ## 測試
 
 1. 將 Bot 加入測試群組
@@ -195,4 +261,6 @@ POST /events/:eventId/remind
 3. 在群組中發言，確認成員被記錄
 4. 建立活動並指定預期參與者
 5. 測試提醒功能
+6. 在群組中 @Synqer，確認 Bot 回覆活動列表
+7. 點擊 Flex Message 按鈕，確認 LIFF 自動登入正常
 

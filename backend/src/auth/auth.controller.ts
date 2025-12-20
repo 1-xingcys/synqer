@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Query,
+  Body,
   Redirect,
   Session,
   Req,
@@ -12,6 +13,7 @@ import {
   UseGuards,
   InternalServerErrorException,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import type { SessionData } from 'express-session';
@@ -98,6 +100,55 @@ export class AuthController {
     } catch (error) {
       console.error('LINE OAuth error:', error);
       return { url: `${process.env.WEB_ORIGIN}?error=auth_failed` };
+    }
+  }
+
+  // LIFF Login - 使用 LIFF Access Token 登入
+  @Post('liff/login')
+  @HttpCode(HttpStatus.OK)
+  async liffLogin(
+    @Body('accessToken') accessToken: string,
+    @Session() session: SessionData,
+  ): Promise<{
+    id: string;
+    displayName: string | null;
+    primaryEmail: string | null;
+    avatarUrl: string | null;
+    providers: string[];
+  }> {
+    if (!accessToken) {
+      throw new BadRequestException('accessToken is required');
+    }
+
+    try {
+      const { user } = await this.authService.handleLiffLogin(accessToken);
+
+      // Store user ID in session
+      session.userId = user.id.toString();
+
+      // Fetch user with identities to get providers
+      const userWithIdentities = await this.usersService.findUserById(user.id);
+
+      if (!userWithIdentities) {
+        throw new BadRequestException('User not found after LIFF login');
+      }
+
+      // Return user info
+      return {
+        id: userWithIdentities.id,
+        displayName: userWithIdentities.displayName,
+        primaryEmail: userWithIdentities.primaryEmail,
+        avatarUrl: userWithIdentities.avatarUrl,
+        providers: userWithIdentities.identities.map(
+          (identity) => identity.provider,
+        ),
+      };
+    } catch (error) {
+      console.error('LIFF login error:', error);
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('LIFF login failed');
     }
   }
 
