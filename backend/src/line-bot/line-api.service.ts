@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import * as crypto from 'crypto';
+import { FlexMessage } from './flex-message.service';
 
 export interface LineProfile {
   userId: string;
@@ -14,6 +15,13 @@ export interface LineGroupSummary {
   groupName: string;
   pictureUrl?: string;
 }
+
+/**
+ * LINE 訊息類型
+ */
+export type LineMessage =
+  | { type: 'text'; text: string }
+  | FlexMessage;
 
 /**
  * LINE Messaging API 呼叫服務
@@ -72,26 +80,65 @@ export class LineApiService {
   }
 
   /**
-   * 推送訊息到群組
+   * 推送文字訊息到群組（保持向後兼容）
    */
   async pushMessage(to: string, message: string): Promise<void> {
-    try {
-      await axios.post(
-        `${this.baseUrl}/bot/message/push`,
-        {
-          to,
-          messages: [{ type: 'text', text: message }],
-        },
-        {
-          headers: {
-            ...this.getAuthHeaders(),
-            'Content-Type': 'application/json',
+    await this.pushMessages(to, [{ type: 'text', text: message }]);
+  }
+
+  /**
+   * 推送多個訊息到群組（支援 Flex Message）
+   * LINE API 限制單次最多 5 則訊息
+   */
+  async pushMessages(to: string, messages: LineMessage[]): Promise<void> {
+    if (messages.length === 0) return;
+
+    // LINE 限制單次最多 5 則訊息，需分批發送
+    const chunkSize = 5;
+    for (let i = 0; i < messages.length; i += chunkSize) {
+      const chunk = messages.slice(i, i + chunkSize);
+      try {
+        await axios.post(
+          `${this.baseUrl}/bot/message/push`,
+          {
+            to,
+            messages: chunk,
           },
-        },
-      );
+          {
+            headers: {
+              ...this.getAuthHeaders(),
+              'Content-Type': 'application/json',
+            },
+          },
+        );
+      } catch (error) {
+        this.logger.error(`Failed to push messages to: ${to}`, error);
+        throw error;
+      }
+    }
+  }
+
+  /**
+   * 取得 Bot 自己的資訊
+   */
+  async getBotInfo(): Promise<{ userId: string; displayName: string; pictureUrl?: string } | null> {
+    try {
+      const response = await axios.get<{
+        userId: string;
+        basicId: string;
+        displayName: string;
+        pictureUrl?: string;
+        chatMode: string;
+        markAsReadMode: string;
+      }>(`${this.baseUrl}/bot/info`, { headers: this.getAuthHeaders() });
+      return {
+        userId: response.data.userId,
+        displayName: response.data.displayName,
+        pictureUrl: response.data.pictureUrl,
+      };
     } catch (error) {
-      this.logger.error(`Failed to push message to: ${to}`, error);
-      throw error;
+      this.logger.error('Failed to get bot info', error);
+      return null;
     }
   }
 
