@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { IoCopyOutline } from "react-icons/io5";
 import {
@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { getLiff } from "@/lib/liff";
 
 interface Event {
   id: string;
@@ -34,9 +35,30 @@ interface EventInfoProps {
 export default function EventInfo({ event, participants }: EventInfoProps) {
   const t = useTranslations("event");
   const [copied, setCopied] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string>("");
+
+  useEffect(() => {
+    const getShareUrl = async () => {
+      const liff = await getLiff();
+      if (liff && liff.isInClient()) {
+        // 在 LIFF 環境中，使用 permanentLink 取得可分享的連結
+        try {
+          const permanentLink = liff.permanentLink.createUrl();
+          setShareUrl(permanentLink);
+        } catch {
+          // 如果無法取得 permanentLink，使用當前 URL
+          setShareUrl(window.location.href);
+        }
+      } else {
+        setShareUrl(window.location.href);
+      }
+    };
+    void getShareUrl();
+  }, []);
 
   const handleCopyLink = () => {
-    void navigator.clipboard.writeText(window.location.href).then(() => {
+    const urlToCopy = shareUrl || window.location.href;
+    void navigator.clipboard.writeText(urlToCopy).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
