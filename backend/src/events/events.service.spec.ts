@@ -1,3 +1,12 @@
+/* eslint-disable @typescript-eslint/unbound-method */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
+/* eslint-disable @typescript-eslint/require-await */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventsService } from './events.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,7 +22,11 @@ import {
   EventQueryService,
   EventCreationService,
 } from './services';
-import { NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { VoteEventDto, VoteMode } from './dto/vote-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -190,11 +203,15 @@ describe('EventsService', () => {
       };
       const expectedStatus = ParticipantStatus.VOTED;
 
-      eventStatusService.computeParticipantStatus.mockReturnValue(expectedStatus);
+      eventStatusService.computeParticipantStatus.mockReturnValue(
+        expectedStatus,
+      );
 
       const result = service.computeParticipantStatus(participant);
 
-      expect(eventStatusService.computeParticipantStatus).toHaveBeenCalledWith(participant);
+      expect(eventStatusService.computeParticipantStatus).toHaveBeenCalledWith(
+        participant,
+      );
       expect(result).toBe(expectedStatus);
     });
   });
@@ -228,17 +245,26 @@ describe('EventsService', () => {
 
       const result = await service.create(createEventDto, userId);
 
-      expect(eventCreationService.create).toHaveBeenCalledWith(createEventDto, userId);
+      expect(eventCreationService.create).toHaveBeenCalledWith(
+        createEventDto,
+        userId,
+      );
       expect(result).toEqual(expectedResult);
     });
 
     it('should create event without userId', async () => {
-      const resultWithoutUser = { ...expectedResult, meta: { ...expectedResult.meta, expectedParticipants: 0 } };
+      const resultWithoutUser = {
+        ...expectedResult,
+        meta: { ...expectedResult.meta, expectedParticipants: 0 },
+      };
       eventCreationService.create.mockResolvedValue(resultWithoutUser);
 
       const result = await service.create(createEventDto);
 
-      expect(eventCreationService.create).toHaveBeenCalledWith(createEventDto, undefined);
+      expect(eventCreationService.create).toHaveBeenCalledWith(
+        createEventDto,
+        undefined,
+      );
       expect(result.meta.expectedParticipants).toBe(0);
     });
   });
@@ -276,7 +302,9 @@ describe('EventsService', () => {
         },
       ];
 
-      eventQueryService.findAttendedEvents.mockResolvedValue(expectedEvents as any);
+      eventQueryService.findAttendedEvents.mockResolvedValue(
+        expectedEvents as any,
+      );
 
       const result = await service.findAttendedEvents(userId);
 
@@ -308,7 +336,9 @@ describe('EventsService', () => {
     it('should throw NotFoundException when event not found', async () => {
       eventQueryService.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('non-existent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('non-existent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -322,11 +352,15 @@ describe('EventsService', () => {
         unvotedParticipants: [],
       };
 
-      eventParticipantService.getUnvotedParticipants.mockResolvedValue(expectedResult as any);
+      eventParticipantService.getUnvotedParticipants.mockResolvedValue(
+        expectedResult as any,
+      );
 
       const result = await service.getUnvotedParticipants(eventId);
 
-      expect(eventParticipantService.getUnvotedParticipants).toHaveBeenCalledWith(eventId);
+      expect(
+        eventParticipantService.getUnvotedParticipants,
+      ).toHaveBeenCalledWith(eventId);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -349,7 +383,11 @@ describe('EventsService', () => {
 
       const result = await service.vote(eventId, userId, voteDto);
 
-      expect(eventVoteService.vote).toHaveBeenCalledWith(eventId, userId, voteDto);
+      expect(eventVoteService.vote).toHaveBeenCalledWith(
+        eventId,
+        userId,
+        voteDto,
+      );
       expect(result).toEqual(expectedResult);
     });
   });
@@ -371,7 +409,10 @@ describe('EventsService', () => {
 
       const result = await service.findOneHosted(eventId, userId);
 
-      expect(eventQueryService.findOneHosted).toHaveBeenCalledWith(eventId, userId);
+      expect(eventQueryService.findOneHosted).toHaveBeenCalledWith(
+        eventId,
+        userId,
+      );
       expect(result).toEqual(expectedResult);
     });
 
@@ -426,7 +467,10 @@ describe('EventsService', () => {
 
       const result = await service.update(eventId, userId, updateDto);
 
-      expect(eventAuthorizationService.verifyOwner).toHaveBeenCalledWith(eventId, userId);
+      expect(eventAuthorizationService.verifyOwner).toHaveBeenCalledWith(
+        eventId,
+        userId,
+      );
       expect(prismaService.event.update).toHaveBeenCalled();
       expect(result.title).toBe('Updated Title');
     });
@@ -481,7 +525,10 @@ describe('EventsService', () => {
 
       const result = await service.remove(eventId, userId);
 
-      expect(eventAuthorizationService.verifyOwner).toHaveBeenCalledWith(eventId, userId);
+      expect(eventAuthorizationService.verifyOwner).toHaveBeenCalledWith(
+        eventId,
+        userId,
+      );
       expect(prismaService.event.delete).toHaveBeenCalledWith({
         where: { id: eventId },
       });
@@ -493,7 +540,9 @@ describe('EventsService', () => {
         new ForbiddenException('You are not the owner of this event'),
       );
 
-      await expect(service.remove('event-1', 'user-1')).rejects.toThrow(ForbiddenException);
+      await expect(service.remove('event-1', 'user-1')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
@@ -515,11 +564,16 @@ describe('EventsService', () => {
 
       eventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockPrismaService.event.update.mockResolvedValue(mockUpdatedEvent as any);
-      eventStatusService.computeEventStatus.mockReturnValue(EventStatus.CONFIRMED);
+      eventStatusService.computeEventStatus.mockReturnValue(
+        EventStatus.CONFIRMED,
+      );
 
       const result = await service.confirmEventTime(eventId, userId, dto);
 
-      expect(eventAuthorizationService.verifyOwner).toHaveBeenCalledWith(eventId, userId);
+      expect(eventAuthorizationService.verifyOwner).toHaveBeenCalledWith(
+        eventId,
+        userId,
+      );
       expect(result.id).toBe(eventId);
       expect(result.status).toBe(EventStatus.CONFIRMED);
     });
@@ -534,9 +588,9 @@ describe('EventsService', () => {
 
       eventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
 
-      await expect(service.confirmEventTime(eventId, userId, dto)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.confirmEventTime(eventId, userId, dto),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -554,11 +608,16 @@ describe('EventsService', () => {
 
       eventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockPrismaService.event.update.mockResolvedValue(mockUpdatedEvent as any);
-      eventStatusService.computeEventStatus.mockReturnValue(EventStatus.VOTING_ENDED);
+      eventStatusService.computeEventStatus.mockReturnValue(
+        EventStatus.VOTING_ENDED,
+      );
 
       const result = await service.cancelConfirmedTime(eventId, userId);
 
-      expect(eventAuthorizationService.verifyOwner).toHaveBeenCalledWith(eventId, userId);
+      expect(eventAuthorizationService.verifyOwner).toHaveBeenCalledWith(
+        eventId,
+        userId,
+      );
       expect(result.id).toBe(eventId);
       expect(result.status).toBe(EventStatus.VOTING_ENDED);
     });
@@ -569,10 +628,7 @@ describe('EventsService', () => {
       const eventId = 'event-1';
       const userId = 'user-1';
       const dto: UpdateParticipantsDto = {
-        participants: [
-          { userId: 'user-2' },
-          { lineUserId: 'line-user-1' },
-        ],
+        participants: [{ userId: 'user-2' }, { lineUserId: 'line-user-1' }],
       };
 
       eventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
@@ -588,7 +644,10 @@ describe('EventsService', () => {
 
       const result = await service.updateParticipants(eventId, userId, dto);
 
-      expect(eventAuthorizationService.verifyOwner).toHaveBeenCalledWith(eventId, userId);
+      expect(eventAuthorizationService.verifyOwner).toHaveBeenCalledWith(
+        eventId,
+        userId,
+      );
       expect(result.success).toBe(true);
       expect(result.count).toBe(2);
     });
@@ -604,11 +663,15 @@ describe('EventsService', () => {
         status: EventStatus.VOTING,
       };
 
-      eventQueryService.getEventPublicInfo.mockResolvedValue(expectedResult as any);
+      eventQueryService.getEventPublicInfo.mockResolvedValue(
+        expectedResult as any,
+      );
 
       const result = await service.getEventPublicInfo(eventId);
 
-      expect(eventQueryService.getEventPublicInfo).toHaveBeenCalledWith(eventId);
+      expect(eventQueryService.getEventPublicInfo).toHaveBeenCalledWith(
+        eventId,
+      );
       expect(result).toEqual(expectedResult);
     });
 
@@ -630,14 +693,15 @@ describe('EventsService', () => {
         hasVoted: true,
       };
 
-      eventParticipantService.checkParticipantStatus.mockResolvedValue(expectedResult);
+      eventParticipantService.checkParticipantStatus.mockResolvedValue(
+        expectedResult,
+      );
 
       const result = await service.checkParticipantStatus(eventId, userId);
 
-      expect(eventParticipantService.checkParticipantStatus).toHaveBeenCalledWith(
-        eventId,
-        userId,
-      );
+      expect(
+        eventParticipantService.checkParticipantStatus,
+      ).toHaveBeenCalledWith(eventId, userId);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -656,7 +720,10 @@ describe('EventsService', () => {
 
       const result = await service.joinEvent(eventId, userId);
 
-      expect(eventParticipantService.joinEvent).toHaveBeenCalledWith(eventId, userId);
+      expect(eventParticipantService.joinEvent).toHaveBeenCalledWith(
+        eventId,
+        userId,
+      );
       expect(result).toEqual(expectedResult);
     });
   });

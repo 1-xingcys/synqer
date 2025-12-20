@@ -4,7 +4,6 @@ import { EventsController } from './events.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { LineBotModule } from '../line-bot/line-bot.module';
 import {
-  EventStatusService,
   TimeSlotService,
   EventParticipantService,
   EventVoteService,
@@ -19,7 +18,6 @@ import {
   controllers: [EventsController],
   providers: [
     EventsService,
-    EventStatusService,
     TimeSlotService,
     EventParticipantService,
     EventVoteService,

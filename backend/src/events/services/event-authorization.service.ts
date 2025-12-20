@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 /**
@@ -52,12 +56,12 @@ export class EventAuthorizationService {
   async getEventAndVerifyOwner<T extends { ownerId: string | null }>(
     eventId: string,
     userId: string,
-    select?: any,
+    select?: Record<string, boolean>,
   ): Promise<T> {
-    const event = await this.prisma.event.findUnique({
+    const event = (await this.prisma.event.findUnique({
       where: { id: eventId },
       ...(select && { select }),
-    }) as T | null;
+    })) as T | null;
 
     if (!event) {
       throw new NotFoundException(`Event ${eventId} not found`);
@@ -70,4 +74,3 @@ export class EventAuthorizationService {
     return event;
   }
 }
-

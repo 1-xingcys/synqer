@@ -18,6 +18,12 @@ import { EventStatusService } from '../events/services/event-status.service';
     FlexMessageService,
     EventStatusService,
   ],
-  exports: [LineBotService, LineApiService, LineGroupService, FlexMessageService],
+  exports: [
+    LineBotService,
+    LineApiService,
+    LineGroupService,
+    FlexMessageService,
+    EventStatusService,
+  ],
 })
 export class LineBotModule {}

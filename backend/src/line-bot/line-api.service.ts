@@ -19,9 +19,7 @@ export interface LineGroupSummary {
 /**
  * LINE 訊息類型
  */
-export type LineMessage =
-  | { type: 'text'; text: string }
-  | FlexMessage;
+export type LineMessage = { type: 'text'; text: string } | FlexMessage;
 
 /**
  * LINE Messaging API 呼叫服務
@@ -121,7 +119,11 @@ export class LineApiService {
   /**
    * 取得 Bot 自己的資訊
    */
-  async getBotInfo(): Promise<{ userId: string; displayName: string; pictureUrl?: string } | null> {
+  async getBotInfo(): Promise<{
+    userId: string;
+    displayName: string;
+    pictureUrl?: string;
+  } | null> {
     try {
       const response = await axios.get<{
         userId: string;

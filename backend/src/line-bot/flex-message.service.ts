@@ -405,7 +405,10 @@ export class FlexMessageService {
   /**
    * 取得狀態配置
    */
-  private getStatusConfig(status: EventStatus): { label: string; color: string } {
+  private getStatusConfig(status: EventStatus): {
+    label: string;
+    color: string;
+  } {
     switch (status) {
       case EventStatus.VOTING:
         return { label: '投票中', color: '#06C755' }; // LINE Green
@@ -539,7 +542,7 @@ export class FlexMessageService {
   buildVoteReminderMessage(
     eventTitle: string,
     unvotedMembers: Array<{ lineUserId: string; displayName: string | null }>,
-  ): { type: 'text'; text: string; } {
+  ): { type: 'text'; text: string } {
     // 建構 mention 文字
     const mentions = unvotedMembers
       .map((m) => m.displayName || '成員')
@@ -553,4 +556,3 @@ export class FlexMessageService {
     };
   }
 }
-

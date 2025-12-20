@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventStatusService, EventStatus } from './event-status.service';
+import { EventStatusService } from './event-status.service';
 
 /**
  * 活動數據轉換服務
@@ -11,7 +11,13 @@ export class EventMapperService {
   /**
    * 轉換 votes 數據為簡化格式
    */
-  mapVotes(votes: Array<{ slotId: string; userId: string; user: { displayName: string | null } }>) {
+  mapVotes(
+    votes: Array<{
+      slotId: string;
+      userId: string;
+      user: { displayName: string | null };
+    }>,
+  ) {
     return votes.map((vote) => ({
       slotId: vote.slotId,
       userId: vote.userId,
@@ -22,8 +28,13 @@ export class EventMapperService {
   /**
    * 從 votes 中提取參與者列表
    */
-  extractParticipants(votes: Array<{ userId: string; user: { displayName: string | null } }>) {
-    const participantsMap = new Map<string, { userId: string; displayName: string }>();
+  extractParticipants(
+    votes: Array<{ userId: string; user: { displayName: string | null } }>,
+  ) {
+    const participantsMap = new Map<
+      string,
+      { userId: string; displayName: string }
+    >();
     votes.forEach((vote) => {
       if (!participantsMap.has(vote.userId)) {
         participantsMap.set(vote.userId, {
@@ -66,7 +77,8 @@ export class EventMapperService {
   ) {
     const totalExpected = expectedParticipants.length || participants.length;
     const totalVoted = participants.filter((p) => p.hasVoted).length;
-    const votingPercentage = totalExpected > 0 ? (totalVoted / totalExpected) * 100 : 0;
+    const votingPercentage =
+      totalExpected > 0 ? (totalVoted / totalExpected) * 100 : 0;
 
     return {
       totalExpected,
@@ -162,4 +174,3 @@ export class EventMapperService {
     };
   }
 }
-

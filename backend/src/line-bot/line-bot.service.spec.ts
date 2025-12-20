@@ -1,19 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { LineBotService } from './line-bot.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { LineApiService } from './line-api.service';
 import { LineGroupService } from './line-group.service';
-import { FlexMessageService, EventInfo } from './flex-message.service';
-import { EventStatusService, EventStatus } from '../events/services/event-status.service';
-import { MessageEvent, MentionObject } from './dto/webhook-event.dto';
+import { FlexMessageService } from './flex-message.service';
+import {
+  EventStatusService,
+  EventStatus,
+} from '../events/services/event-status.service';
+import { MessageEvent } from './dto/webhook-event.dto';
 
 describe('LineBotService', () => {
   let service: LineBotService;
-  let prismaService: jest.Mocked<PrismaService>;
-  let lineApiService: jest.Mocked<LineApiService>;
-  let lineGroupService: jest.Mocked<LineGroupService>;
-  let flexMessageService: jest.Mocked<FlexMessageService>;
-  let eventStatusService: jest.Mocked<EventStatusService>;
 
   const mockPrismaService = {
     lineGroup: {
@@ -84,11 +84,6 @@ describe('LineBotService', () => {
     }).compile();
 
     service = module.get<LineBotService>(LineBotService);
-    prismaService = module.get(PrismaService);
-    lineApiService = module.get(LineApiService);
-    lineGroupService = module.get(LineGroupService);
-    flexMessageService = module.get(FlexMessageService);
-    eventStatusService = module.get(EventStatusService);
 
     jest.clearAllMocks();
   });
@@ -123,7 +118,10 @@ describe('LineBotService', () => {
 
       const result = service.verifySignature('body', 'signature');
 
-      expect(mockLineApiService.verifySignature).toHaveBeenCalledWith('body', 'signature');
+      expect(mockLineApiService.verifySignature).toHaveBeenCalledWith(
+        'body',
+        'signature',
+      );
       expect(result).toBe(true);
     });
   });
@@ -143,7 +141,10 @@ describe('LineBotService', () => {
 
       await service.handleWebhookEvents([joinEvent]);
 
-      expect(mockLineGroupService.upsertGroup).toHaveBeenCalledWith('group-123', true);
+      expect(mockLineGroupService.upsertGroup).toHaveBeenCalledWith(
+        'group-123',
+        true,
+      );
     });
 
     it('should handle leave event', async () => {
@@ -160,7 +161,9 @@ describe('LineBotService', () => {
 
       await service.handleWebhookEvents([leaveEvent]);
 
-      expect(mockLineGroupService.deactivateGroup).toHaveBeenCalledWith('group-123');
+      expect(mockLineGroupService.deactivateGroup).toHaveBeenCalledWith(
+        'group-123',
+      );
     });
 
     it('should handle memberJoined event', async () => {
@@ -176,13 +179,21 @@ describe('LineBotService', () => {
         },
       };
 
-      mockLineGroupService.ensureGroupExists.mockResolvedValue({ id: 'db-group-id' } as any);
+      mockLineGroupService.ensureGroupExists.mockResolvedValue({
+        id: 'db-group-id',
+      } as any);
       mockLineGroupService.upsertMember.mockResolvedValue({} as any);
 
       await service.handleWebhookEvents([memberJoinedEvent]);
 
-      expect(mockLineGroupService.ensureGroupExists).toHaveBeenCalledWith('group-123');
-      expect(mockLineGroupService.upsertMember).toHaveBeenCalledWith('db-group-id', 'user-1', true);
+      expect(mockLineGroupService.ensureGroupExists).toHaveBeenCalledWith(
+        'group-123',
+      );
+      expect(mockLineGroupService.upsertMember).toHaveBeenCalledWith(
+        'db-group-id',
+        'user-1',
+        true,
+      );
     });
 
     it('should handle memberLeft event', async () => {
@@ -198,12 +209,17 @@ describe('LineBotService', () => {
         },
       };
 
-      mockPrismaService.lineGroup.findUnique.mockResolvedValue({ id: 'db-group-id' } as any);
+      mockPrismaService.lineGroup.findUnique.mockResolvedValue({
+        id: 'db-group-id',
+      } as any);
       mockLineGroupService.deactivateMembers.mockResolvedValue({} as any);
 
       await service.handleWebhookEvents([memberLeftEvent]);
 
-      expect(mockLineGroupService.deactivateMembers).toHaveBeenCalledWith('db-group-id', ['user-1']);
+      expect(mockLineGroupService.deactivateMembers).toHaveBeenCalledWith(
+        'db-group-id',
+        ['user-1'],
+      );
     });
 
     it('should handle message event without mention', async () => {
@@ -217,13 +233,21 @@ describe('LineBotService', () => {
         message: { id: 'msg-1', type: 'text', text: 'Hello' },
       };
 
-      mockLineGroupService.ensureGroupExists.mockResolvedValue({ id: 'db-group-id' } as any);
+      mockLineGroupService.ensureGroupExists.mockResolvedValue({
+        id: 'db-group-id',
+      } as any);
       mockLineGroupService.upsertMember.mockResolvedValue({} as any);
 
       await service.handleWebhookEvents([messageEvent]);
 
-      expect(mockLineGroupService.ensureGroupExists).toHaveBeenCalledWith('group-123');
-      expect(mockLineGroupService.upsertMember).toHaveBeenCalledWith('db-group-id', 'user-1', true);
+      expect(mockLineGroupService.ensureGroupExists).toHaveBeenCalledWith(
+        'group-123',
+      );
+      expect(mockLineGroupService.upsertMember).toHaveBeenCalledWith(
+        'db-group-id',
+        'user-1',
+        true,
+      );
       // 沒有 mention，不應該發送訊息
       expect(mockLineApiService.pushMessages).not.toHaveBeenCalled();
     });
@@ -264,7 +288,9 @@ describe('LineBotService', () => {
   });
 
   describe('handleMessage with @mention', () => {
-    const createMessageEventWithMention = (botUserId: string): MessageEvent => ({
+    const createMessageEventWithMention = (
+      botUserId: string,
+    ): MessageEvent => ({
       type: 'message',
       mode: 'active',
       timestamp: Date.now(),
@@ -276,7 +302,9 @@ describe('LineBotService', () => {
         type: 'text',
         text: '@Synqer show events',
         mention: {
-          mentionees: [{ index: 0, length: 7, type: 'user', userId: botUserId }],
+          mentionees: [
+            { index: 0, length: 7, type: 'user', userId: botUserId },
+          ],
         },
       },
     });
@@ -315,7 +343,9 @@ describe('LineBotService', () => {
       ];
 
       mockPrismaService.event.findMany.mockResolvedValue(mockEvents as any);
-      mockEventStatusService.computeEventStatus.mockReturnValue(EventStatus.VOTING);
+      mockEventStatusService.computeEventStatus.mockReturnValue(
+        EventStatus.VOTING,
+      );
       mockPrismaService.user.findUnique.mockResolvedValue({
         displayName: 'Host Name',
         avatarUrl: 'https://example.com/avatar.jpg',
@@ -328,7 +358,9 @@ describe('LineBotService', () => {
       ] as any);
 
       const mockFlexMessage = { type: 'flex', altText: 'Test', contents: {} };
-      mockFlexMessageService.buildEventFlexMessage.mockReturnValue(mockFlexMessage as any);
+      mockFlexMessageService.buildEventFlexMessage.mockReturnValue(
+        mockFlexMessage as any,
+      );
       mockFlexMessageService.buildVoteReminderMessage.mockReturnValue({
         type: 'text',
         text: '投票提醒',
@@ -392,7 +424,9 @@ describe('LineBotService', () => {
           type: 'text',
           text: '@Other hello',
           mention: {
-            mentionees: [{ index: 0, length: 6, type: 'user', userId: 'other-user-id' }],
+            mentionees: [
+              { index: 0, length: 6, type: 'user', userId: 'other-user-id' },
+            ],
           },
         },
       };
@@ -428,7 +462,9 @@ describe('LineBotService', () => {
       ];
 
       mockPrismaService.event.findMany.mockResolvedValue(mockEvents as any);
-      mockEventStatusService.computeEventStatus.mockReturnValue(EventStatus.COMPLETED);
+      mockEventStatusService.computeEventStatus.mockReturnValue(
+        EventStatus.COMPLETED,
+      );
 
       mockLineApiService.pushMessage.mockResolvedValue(undefined);
 
@@ -436,7 +472,9 @@ describe('LineBotService', () => {
       await service.handleWebhookEvents([event]);
 
       // COMPLETED 的活動應該被過濾掉
-      expect(mockFlexMessageService.buildEventFlexMessage).not.toHaveBeenCalled();
+      expect(
+        mockFlexMessageService.buildEventFlexMessage,
+      ).not.toHaveBeenCalled();
       expect(mockLineApiService.pushMessage).toHaveBeenCalledWith(
         'group-123',
         '目前這個群組沒有進行中的活動喔！',
@@ -470,7 +508,9 @@ describe('LineBotService', () => {
       ];
 
       mockPrismaService.event.findMany.mockResolvedValue(mockEvents as any);
-      mockEventStatusService.computeEventStatus.mockReturnValue(EventStatus.VOTING);
+      mockEventStatusService.computeEventStatus.mockReturnValue(
+        EventStatus.VOTING,
+      );
       mockPrismaService.user.findUnique.mockResolvedValue({
         displayName: 'Host',
         avatarUrl: null,
@@ -485,7 +525,9 @@ describe('LineBotService', () => {
       ] as any);
 
       const mockFlexMessage = { type: 'flex', altText: 'Test', contents: {} };
-      mockFlexMessageService.buildEventFlexMessage.mockReturnValue(mockFlexMessage as any);
+      mockFlexMessageService.buildEventFlexMessage.mockReturnValue(
+        mockFlexMessage as any,
+      );
       mockFlexMessageService.buildVoteReminderMessage.mockReturnValue({
         type: 'text',
         text: '投票提醒',
@@ -498,10 +540,11 @@ describe('LineBotService', () => {
 
       // 應該發送 Flex Message 和投票提醒
       expect(mockFlexMessageService.buildEventFlexMessage).toHaveBeenCalled();
-      expect(mockFlexMessageService.buildVoteReminderMessage).toHaveBeenCalledWith(
-        'Voting Event',
-        [{ lineUserId: 'unvoted-line-user', displayName: 'Unvoted User' }],
-      );
+      expect(
+        mockFlexMessageService.buildVoteReminderMessage,
+      ).toHaveBeenCalledWith('Voting Event', [
+        { lineUserId: 'unvoted-line-user', displayName: 'Unvoted User' },
+      ]);
       expect(mockLineApiService.pushMessages).toHaveBeenCalledTimes(2);
     });
 
@@ -529,7 +572,9 @@ describe('LineBotService', () => {
       ];
 
       mockPrismaService.event.findMany.mockResolvedValue(mockEvents as any);
-      mockEventStatusService.computeEventStatus.mockReturnValue(EventStatus.VOTING);
+      mockEventStatusService.computeEventStatus.mockReturnValue(
+        EventStatus.VOTING,
+      );
       mockPrismaService.user.findUnique.mockResolvedValue({
         displayName: 'Host',
         avatarUrl: null,
@@ -539,7 +584,9 @@ describe('LineBotService', () => {
       mockPrismaService.eventExpectedParticipant.findMany.mockResolvedValue([]);
 
       const mockFlexMessage = { type: 'flex', altText: 'Test', contents: {} };
-      mockFlexMessageService.buildEventFlexMessage.mockReturnValue(mockFlexMessage as any);
+      mockFlexMessageService.buildEventFlexMessage.mockReturnValue(
+        mockFlexMessage as any,
+      );
 
       mockLineApiService.pushMessages.mockResolvedValue(undefined);
 
@@ -547,7 +594,9 @@ describe('LineBotService', () => {
       await service.handleWebhookEvents([event]);
 
       // 應該只發送 Flex Message，不發送投票提醒
-      expect(mockFlexMessageService.buildVoteReminderMessage).not.toHaveBeenCalled();
+      expect(
+        mockFlexMessageService.buildVoteReminderMessage,
+      ).not.toHaveBeenCalled();
       expect(mockLineApiService.pushMessages).toHaveBeenCalledTimes(1);
     });
   });
@@ -567,11 +616,15 @@ describe('LineBotService', () => {
   describe('getGroupMembers', () => {
     it('should delegate to LineGroupService', async () => {
       const mockMembers = [{ id: 'member-1' }];
-      mockLineGroupService.getGroupMembers.mockResolvedValue(mockMembers as any);
+      mockLineGroupService.getGroupMembers.mockResolvedValue(
+        mockMembers as any,
+      );
 
       const result = await service.getGroupMembers('group-id');
 
-      expect(mockLineGroupService.getGroupMembers).toHaveBeenCalledWith('group-id');
+      expect(mockLineGroupService.getGroupMembers).toHaveBeenCalledWith(
+        'group-id',
+      );
       expect(result).toEqual(mockMembers);
     });
   });
@@ -579,11 +632,15 @@ describe('LineBotService', () => {
   describe('getGroupByLineGroupId', () => {
     it('should delegate to LineGroupService', async () => {
       const mockGroup = { id: 'group-1', lineGroupId: 'line-group-123' };
-      mockLineGroupService.getGroupByLineGroupId.mockResolvedValue(mockGroup as any);
+      mockLineGroupService.getGroupByLineGroupId.mockResolvedValue(
+        mockGroup as any,
+      );
 
       const result = await service.getGroupByLineGroupId('line-group-123');
 
-      expect(mockLineGroupService.getGroupByLineGroupId).toHaveBeenCalledWith('line-group-123');
+      expect(mockLineGroupService.getGroupByLineGroupId).toHaveBeenCalledWith(
+        'line-group-123',
+      );
       expect(result).toEqual(mockGroup);
     });
   });
@@ -606,15 +663,22 @@ describe('LineBotService', () => {
       } as any);
 
       mockLineApiService.pushMessage.mockResolvedValue(undefined);
-      mockPrismaService.eventExpectedParticipant.updateMany.mockResolvedValue({ count: 2 } as any);
+      mockPrismaService.eventExpectedParticipant.updateMany.mockResolvedValue({
+        count: 2,
+      } as any);
 
-      await service.sendVoteReminder('event-1', 'db-group-id', ['line-user-1', 'line-user-2']);
+      await service.sendVoteReminder('event-1', 'db-group-id', [
+        'line-user-1',
+        'line-user-2',
+      ]);
 
       expect(mockLineApiService.pushMessage).toHaveBeenCalledWith(
         'line-group-123',
         expect.stringContaining('投票提醒'),
       );
-      expect(mockPrismaService.eventExpectedParticipant.updateMany).toHaveBeenCalled();
+      expect(
+        mockPrismaService.eventExpectedParticipant.updateMany,
+      ).toHaveBeenCalled();
     });
 
     it('should throw error if group not found', async () => {
@@ -667,4 +731,3 @@ describe('LineBotService', () => {
     });
   });
 });
-
