@@ -68,6 +68,9 @@ export default tseslint.config(
       'react/prop-types': 'off', // 使用 TypeScript 所以不需要 prop-types
       'react-hooks/rules-of-hooks': 'error', // 強制 Hook 使用規則
       'react-hooks/exhaustive-deps': 'warn', // 警告 Hook 依賴項問題
+
+      // Tailwind CSS 相關規則
+      '@next/next/no-html-link-for-pages': 'off', // 使用 next-intl 的 Link
     },
   },
 );
