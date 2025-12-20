@@ -239,4 +239,63 @@ export class AuthService {
       data: { userId },
     });
   }
+
+  /**
+   * LIFF Token 登入
+   * 使用 LIFF Access Token 驗證並登入使用者
+   *
+   * @param accessToken - LIFF Access Token
+   * @returns User 資訊
+   */
+  async handleLiffLogin(accessToken: string) {
+    // 1. 使用 LINE API 驗證 access token 並取得使用者資訊
+    const verifyResponse = await axios.get(
+      'https://api.line.me/oauth2/v2.1/verify',
+      {
+        params: { access_token: accessToken },
+      },
+    );
+
+    const { client_id, expires_in } = verifyResponse.data as {
+      client_id: string;
+      expires_in: number;
+    };
+
+    // 驗證 client_id 是否為我們的 LIFF App 所屬的 Channel
+    // LIFF 使用的是 LINE Login Channel
+    if (client_id !== process.env.LINE_LOGIN_CHANNEL_ID) {
+      throw new UnauthorizedException('Invalid LIFF access token');
+    }
+
+    if (expires_in <= 0) {
+      throw new UnauthorizedException('LIFF access token expired');
+    }
+
+    // 2. 取得使用者 Profile
+    const profileResponse = await axios.get('https://api.line.me/v2/profile', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const { userId, displayName, pictureUrl } = profileResponse.data as {
+      userId: string;
+      displayName: string;
+      pictureUrl?: string;
+    };
+
+    // 3. Upsert user（與 LINE OAuth 登入相同邏輯）
+    const user = await this.usersService.upsertUserFromIdentity(
+      'line',
+      userId,
+      undefined, // LIFF 無法取得 email
+      displayName,
+      pictureUrl,
+    );
+
+    // 4. 關聯 LINE userId 到所有群組成員記錄
+    await this.linkUserToGroupMembers(user.id, userId);
+
+    return { user };
+  }
 }
