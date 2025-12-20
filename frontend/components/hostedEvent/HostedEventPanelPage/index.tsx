@@ -10,7 +10,6 @@ import {
   VotedParticipantList,
   PendingParticipantList,
 } from "./ParticipantList";
-import { QuickActions } from "./QuickActions";
 
 export default function HostedEventPanelPage() {
   const params = useParams();
@@ -70,8 +69,6 @@ export default function HostedEventPanelPage() {
         <VotedParticipantList participants={votedParticipants} />
         <PendingParticipantList participants={pendingParticipants} />
       </div>
-
-      <QuickActions eventId={eventId} />
     </div>
   );
 }
