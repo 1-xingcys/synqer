@@ -1,9 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { User } from "@/types/auth";
+import {
+  getLiffAccessToken,
+  initializeLiff,
+  isLiffEnabled,
+  liffLogin,
+} from "@/lib/liff";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const liffAttemptedRef = useRef(false);
 
   const fetchUser = useCallback(async () => {
     try {
@@ -17,6 +24,49 @@ export function useAuth() {
       if (response.ok) {
         const userData = (await response.json()) as User;
         setUser(userData);
+        return;
+      }
+
+      if (!liffAttemptedRef.current && isLiffEnabled()) {
+        liffAttemptedRef.current = true;
+
+        const liffState = await initializeLiff();
+
+        if (!liffState.isInitialized) {
+          setUser(null);
+          return;
+        }
+
+        if (liffState.isInClient && !liffState.isLoggedIn) {
+          await liffLogin(window.location.href);
+          return;
+        }
+
+        if (liffState.isLoggedIn) {
+          const accessToken = await getLiffAccessToken();
+          if (accessToken) {
+            const loginResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API}/auth/liff/login`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({ accessToken }),
+              },
+            );
+
+            if (loginResponse.ok) {
+              const userData = (await loginResponse.json()) as User;
+              setUser(userData);
+              return;
+            }
+          }
+        }
+
+        setUser(null);
+        return;
       } else {
         setUser(null);
       }
