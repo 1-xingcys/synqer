@@ -55,10 +55,21 @@ export interface MessageEvent extends BaseEvent {
   message: MessageObject;
 }
 
+// Mention object in text messages
+export interface MentionObject {
+  mentionees: Array<{
+    index: number; // Position in the text
+    length: number; // Length of the mention text
+    type: 'user' | 'all';
+    userId?: string; // Only for type: 'user'
+  }>;
+}
+
 interface MessageObject {
   id: string;
   type: 'text' | 'image' | 'video' | 'audio' | 'file' | 'location' | 'sticker';
   text?: string;
+  mention?: MentionObject; // Mention info for text messages
 }
 
 // Bot joins a group
