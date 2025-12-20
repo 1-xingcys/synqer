@@ -326,4 +326,3 @@ export async function isLiffLoggedIn(): Promise<boolean> {
   const liff = await getLiff();
   return liff?.isLoggedIn() ?? false;
 }
-

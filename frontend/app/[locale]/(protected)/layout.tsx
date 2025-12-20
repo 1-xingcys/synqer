@@ -173,7 +173,9 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
         router.replace(`/login?redirect=${encodeURIComponent(redirectPath)}`);
       } catch (err) {
         console.error("Auth check failed:", err);
-        setAuthError(err instanceof Error ? err.message : "Authentication failed");
+        setAuthError(
+          err instanceof Error ? err.message : "Authentication failed",
+        );
         const redirectPath = pathname || "/";
         router.replace(`/login?redirect=${encodeURIComponent(redirectPath)}`);
       }
@@ -190,7 +192,9 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
           <div className="w-8 h-8 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
           <p className="text-zinc-600 dark:text-zinc-400">{t("loading")}</p>
           {authError && (
-            <p className="text-sm text-red-500 dark:text-red-400">{authError}</p>
+            <p className="text-sm text-red-500 dark:text-red-400">
+              {authError}
+            </p>
           )}
         </div>
       </div>
