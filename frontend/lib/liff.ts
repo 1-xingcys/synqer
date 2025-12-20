@@ -32,8 +32,8 @@ export interface LiffProfile {
  * LIFF Context 資訊
  */
 export interface LiffContext {
-  type: "utou" | "room" | "group" | "none" | "external";
-  viewType?: "full" | "tall" | "compact";
+  type: "utou" | "room" | "group" | "none" | "external" | "square_chat";
+  viewType?: "full" | "tall" | "compact" | "frame" | "full-flex";
   userId?: string;
   utouId?: string;
   roomId?: string;
