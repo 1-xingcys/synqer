@@ -78,6 +78,76 @@ async function loadLiffSdk(): Promise<typeof import("@line/liff").default> {
 }
 
 /**
+ * 從 URL 中取得 liff.state 參數中的路徑
+ * 當使用 https://liff.line.me/{liffId}/{path} 格式時，
+ * LINE 會把 {path} 存在 liff.state query parameter 中
+ */
+export function getLiffStatePath(): string | null {
+  if (typeof window === "undefined") return null;
+
+  const url = new URL(window.location.href);
+  const liffState = url.searchParams.get("liff.state");
+
+  if (!liffState) return null;
+
+  // liff.state 可能是 URL 編碼的路徑
+  try {
+    const decodedState = decodeURIComponent(liffState);
+    // 確保是一個路徑（以 / 開頭）
+    if (decodedState.startsWith("/")) {
+      return decodedState;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 處理 LIFF 路徑重定向
+ * 如果 URL 中有 liff.state 參數且包含路徑，就重定向到該路徑
+ * @returns 如果需要重定向，返回目標路徑；否則返回 null
+ */
+export function handleLiffPathRedirect(): string | null {
+  const liffPath = getLiffStatePath();
+
+  if (!liffPath) return null;
+
+  // 取得目前的 pathname
+  const currentPathname = window.location.pathname;
+
+  // 支持的 locales
+  const locales = ["en", "zh-TW"];
+  const localePattern = new RegExp(`^/(${locales.join("|")})`);
+
+  // 檢查是否只有 locale 前綴（例如 /zh-TW 或 /en）
+  const localeOnlyPattern = /^\/[a-z]{2}(-[A-Z]{2})?\/?$/;
+  const isOnRootWithLocale = localeOnlyPattern.test(currentPathname);
+
+  // 如果目前在根路徑（或只有 locale）且 liff.state 有其他路徑，需要重定向
+  if (isOnRootWithLocale || currentPathname === "/") {
+    // 檢查 liffPath 是否已經包含 locale 前綴
+    const liffPathHasLocale = localePattern.test(liffPath);
+
+    if (liffPathHasLocale) {
+      // liff.state 已經包含 locale，直接使用
+      return liffPath;
+    }
+
+    // liff.state 不包含 locale，需要加上當前的 locale
+    const localeMatch = currentPathname.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)/);
+    const locale = localeMatch ? localeMatch[1] : "";
+
+    // 建立目標路徑
+    const targetPath = locale ? `/${locale}${liffPath}` : liffPath;
+
+    return targetPath;
+  }
+
+  return null;
+}
+
+/**
  * 初始化 LIFF
  *
  * @returns LIFF 初始化狀態

@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { DebugWrapper } from "@/components/DebugConsole/DebugWrapper";
+import { LiffPathHandler } from "@/components/LiffPathHandler";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
@@ -51,9 +52,11 @@ export default async function LocaleLayout({
       >
         <ThemeProvider>
           <NextIntlClientProvider messages={messages}>
-            <AuthProvider>
-              <DebugWrapper>{children}</DebugWrapper>
-            </AuthProvider>
+            <LiffPathHandler>
+              <AuthProvider>
+                <DebugWrapper>{children}</DebugWrapper>
+              </AuthProvider>
+            </LiffPathHandler>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>
