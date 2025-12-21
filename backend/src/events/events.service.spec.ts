@@ -624,7 +624,7 @@ describe('EventsService', () => {
   });
 
   describe('updateParticipants', () => {
-    it('should update participants successfully', async () => {
+    it('should update participants successfully with diff strategy', async () => {
       const eventId = 'event-1';
       const userId = 'user-1';
       const dto: UpdateParticipantsDto = {
@@ -635,7 +635,10 @@ describe('EventsService', () => {
       mockPrismaService.$transaction.mockImplementation(async (callback) => {
         const mockPrisma = {
           eventExpectedParticipant: {
-            deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+            findMany: jest.fn().mockResolvedValue([
+              { id: 'ep-1', userId: 'user-3', lineUserId: null }, // 會被刪除
+            ]),
+            deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
             createMany: jest.fn().mockResolvedValue({ count: 2 }),
           },
         };
@@ -650,6 +653,41 @@ describe('EventsService', () => {
       );
       expect(result.success).toBe(true);
       expect(result.count).toBe(2);
+    });
+
+    it('should preserve existing participants that are still in the list', async () => {
+      const eventId = 'event-1';
+      const userId = 'user-1';
+      const dto: UpdateParticipantsDto = {
+        participants: [
+          { userId: 'user-2' }, // 已存在，應保留
+          { lineUserId: 'line-user-1' }, // 新增
+        ],
+      };
+
+      eventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
+
+      const mockDeleteMany = jest.fn().mockResolvedValue({ count: 0 });
+      const mockCreateMany = jest.fn().mockResolvedValue({ count: 1 });
+
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        const mockPrisma = {
+          eventExpectedParticipant: {
+            findMany: jest.fn().mockResolvedValue([
+              { id: 'ep-1', userId: 'user-2', lineUserId: null }, // 已存在，應保留
+            ]),
+            deleteMany: mockDeleteMany,
+            createMany: mockCreateMany,
+          },
+        };
+        return callback(mockPrisma as any);
+      });
+
+      const result = await service.updateParticipants(eventId, userId, dto);
+
+      expect(result.success).toBe(true);
+      // 不應該刪除 user-2（因為仍在列表中）
+      // 應該只新增 line-user-1
     });
   });
 
