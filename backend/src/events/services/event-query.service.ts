@@ -66,12 +66,20 @@ export class EventQueryService {
         expectedParticipants: {
           select: {
             id: true,
+            userId: true,
           },
         },
         votes: {
-          where: { userId },
-          select: { id: true },
-          take: 1,
+          select: {
+            userId: true,
+          },
+        },
+        owner: {
+          select: {
+            id: true,
+            displayName: true,
+            avatarUrl: true,
+          },
         },
       },
       orderBy: {
@@ -79,10 +87,34 @@ export class EventQueryService {
       },
     });
 
-    return events.map((event) => ({
-      ...this.eventMapper.mapEventToList(event),
-      hasVoted: event.votes.length > 0,
-    }));
+    return events.map((event) => {
+      const expectedParticipantCount = event.expectedParticipants.length;
+
+      // 從 votes 表建立已投票的 userId Set（與 findOne 相同的做法）
+      const votedUserIds = new Set<string>(event.votes.map((v) => v.userId));
+
+      // 計算 expectedParticipants 中已投票的人數
+      const votedCount = event.expectedParticipants.filter(
+        (p) => p.userId && votedUserIds.has(p.userId),
+      ).length;
+
+      // 檢查當前用戶是否已投票
+      const hasVoted = votedUserIds.has(userId);
+
+      return {
+        ...this.eventMapper.mapEventToList(event),
+        hasVoted,
+        expectedParticipantCount,
+        votedCount,
+        host: event.owner
+          ? {
+              id: event.owner.id,
+              displayName: event.owner.displayName,
+              avatarUrl: event.owner.avatarUrl,
+            }
+          : null,
+      };
+    });
   }
 
   /**
