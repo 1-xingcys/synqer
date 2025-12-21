@@ -257,16 +257,33 @@
   "createEvent": {
     "title": "建立新活動",
     "description": "建立一個新的活動來收集參與者的可用時間",
-    "requiredNote": "必填欄位標記有星號 (*)",
     "general": {
       "title": "General",
       "host": "Host",
-      "hostDescription": "選擇活動的主辦者",
+      "hostDescription": "你是這個活動的主辦者",
       "eventName": "Event name",
       "eventNamePlaceholder": "例如：團隊聚餐時間投票",
       "description": "Description",
       "descriptionPlaceholder": "選填，描述這個活動的目的和內容",
-      "characters": "字元"
+      "characters": "字元",
+      "charLimitReached": "（已達上限）"
+    },
+    "lineGroup": {
+      "selectGroup": "LINE 群組",
+      "selectGroupHint": "選擇 LINE 群組以邀請成員",
+      "noGroupSelected": "未選擇群組",
+      "unnamedGroup": "未命名群組",
+      "noGroups": "沒有可用的 LINE 群組，請先將 Bot 加入群組",
+      "members": "位成員",
+      "selectMembers": "選擇成員",
+      "selectMembersHint": "選擇要邀請參加活動的成員",
+      "selectAll": "全選",
+      "clearAll": "清除",
+      "selected": "已選",
+      "noMembers": "此群組中沒有成員",
+      "unknownMember": "未知成員",
+      "notRegistered": "尚未註冊",
+      "registered": "已註冊"
     },
     "configuration": {
       "title": "Configuration",
@@ -275,10 +292,18 @@
       "selectDate": "選擇日期",
       "startTime": "開始時間",
       "endTime": "結束時間",
-      "timeDescription": "每日活動的時間範圍",
       "slotDuration": "時間間隔",
       "minutes": "分鐘",
-      "slotDurationDescription": "每個時段的持續時間"
+      "slotDurationDescription": "每個時段的持續時間",
+      "timeError": "開始時間必須早於結束時間"
+    },
+    "votingDeadline": {
+      "title": "Voting Deadline",
+      "description": "設定參與者投票的截止時間",
+      "date": "截止日期",
+      "time": "截止時間",
+      "autoSync": "自動與活動開始時間同步",
+      "error": "投票截止時間必須在活動開始時間之前或同時"
     },
     "cancel": "取消",
     "create": "建立活動",

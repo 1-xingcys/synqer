@@ -257,16 +257,33 @@
   "createEvent": {
     "title": "Create a new event",
     "description": "Create a new event to collect participants' available times",
-    "requiredNote": "Required fields are marked with an asterisk (*)",
     "general": {
       "title": "General",
       "host": "Host",
-      "hostDescription": "Choose who will host this event",
+      "hostDescription": "You are the host of this event",
       "eventName": "Event name",
       "eventNamePlaceholder": "e.g., Team dinner time poll",
       "description": "Description",
       "descriptionPlaceholder": "Optional. Describe the purpose and content of this event",
-      "characters": "characters"
+      "characters": "characters",
+      "charLimitReached": "(limit reached)"
+    },
+    "lineGroup": {
+      "selectGroup": "LINE Group",
+      "selectGroupHint": "Select a LINE group to invite members",
+      "noGroupSelected": "No group selected",
+      "unnamedGroup": "Unnamed Group",
+      "noGroups": "No LINE groups available. Add the bot to a group first.",
+      "members": "members",
+      "selectMembers": "Select Members",
+      "selectMembersHint": "Select members to invite to this event",
+      "selectAll": "Select All",
+      "clearAll": "Clear",
+      "selected": "selected",
+      "noMembers": "No members found in this group",
+      "unknownMember": "Unknown Member",
+      "notRegistered": "Not registered",
+      "registered": "Registered"
     },
     "configuration": {
       "title": "Configuration",
@@ -275,10 +292,18 @@
       "selectDate": "Select date",
       "startTime": "Start time",
       "endTime": "End time",
-      "timeDescription": "Daily time range for the event",
       "slotDuration": "Time slot duration",
       "minutes": "minutes",
-      "slotDurationDescription": "Duration of each time slot"
+      "slotDurationDescription": "Duration of each time slot",
+      "timeError": "Start time must be earlier than end time"
+    },
+    "votingDeadline": {
+      "title": "Voting Deadline",
+      "description": "Set a deadline for participants to submit their votes",
+      "date": "Deadline date",
+      "time": "Deadline time",
+      "autoSync": "Auto-synced with event start time",
+      "error": "Voting deadline must be before or at the event start time"
     },
     "cancel": "Cancel",
     "create": "Create event",
