@@ -1,8 +1,12 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { LineApiService, LineMessage } from './line-api.service';
-import { LineGroupService } from './line-group.service';
-import { FlexMessageService, EventInfo } from './flex-message.service';
+import {
+  LineApiService,
+  LineMessage,
+  LineGroupService,
+  FlexMessageService,
+  EventInfo,
+} from './services';
 import {
   EventStatusService,
   EventStatus,
@@ -441,13 +445,16 @@ export class LineBotService implements OnModuleInit {
       throw new Error('Event not found');
     }
 
-    const mentions = unvotedMembers
-      .map((m) => m.displayName || '成員')
-      .join('、');
+    // 使用 buildVoteReminderMessage 建構帶有真正 mention 的訊息
+    const reminderMsg = this.flexMessage.buildVoteReminderMessage(
+      event.title || '未命名活動',
+      unvotedMembers.map((m) => ({
+        lineUserId: m.lineUserId,
+        displayName: m.displayName,
+      })),
+    );
 
-    const message = `📢 投票提醒\n\n${mentions}，活動「${event.title || '未命名活動'}」還在等你投票唷！\n\n請點擊以下連結參與投票：\n${process.env.WEB_ORIGIN}/events/${eventId}`;
-
-    await this.lineApi.pushMessage(group.lineGroupId, message);
+    await this.lineApi.pushMessages(group.lineGroupId, [reminderMsg]);
 
     await this.prisma.eventExpectedParticipant.updateMany({
       where: {

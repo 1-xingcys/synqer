@@ -3,9 +3,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { LineBotService } from './line-bot.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { LineApiService } from './line-api.service';
-import { LineGroupService } from './line-group.service';
-import { FlexMessageService } from './flex-message.service';
+import {
+  LineApiService,
+  LineGroupService,
+  FlexMessageService,
+} from './services';
 import {
   EventStatusService,
   EventStatus,
@@ -362,8 +364,14 @@ describe('LineBotService', () => {
         mockFlexMessage as any,
       );
       mockFlexMessageService.buildVoteReminderMessage.mockReturnValue({
-        type: 'text',
-        text: '投票提醒',
+        type: 'textV2',
+        text: '{user0}，投票提醒',
+        substitution: {
+          user0: {
+            type: 'mention',
+            mentionee: { type: 'user', userId: 'unvoted-user' },
+          },
+        },
       });
 
       mockLineApiService.pushMessages.mockResolvedValue(undefined);
@@ -529,8 +537,14 @@ describe('LineBotService', () => {
         mockFlexMessage as any,
       );
       mockFlexMessageService.buildVoteReminderMessage.mockReturnValue({
-        type: 'text',
-        text: '投票提醒',
+        type: 'textV2',
+        text: '{user0}，投票提醒',
+        substitution: {
+          user0: {
+            type: 'mention',
+            mentionee: { type: 'user', userId: 'unvoted-line-user' },
+          },
+        },
       });
 
       mockLineApiService.pushMessages.mockResolvedValue(undefined);
@@ -646,7 +660,7 @@ describe('LineBotService', () => {
   });
 
   describe('sendVoteReminder', () => {
-    it('should send reminder to unvoted members', async () => {
+    it('should send reminder to unvoted members using buildVoteReminderMessage', async () => {
       mockPrismaService.lineGroup.findUnique.mockResolvedValue({
         id: 'db-group-id',
         lineGroupId: 'line-group-123',
@@ -662,7 +676,24 @@ describe('LineBotService', () => {
         title: 'Test Event',
       } as any);
 
-      mockLineApiService.pushMessage.mockResolvedValue(undefined);
+      const mockReminderMessage = {
+        type: 'textV2',
+        text: '{user0}、{user1}，投票提醒',
+        substitution: {
+          user0: {
+            type: 'mention',
+            mentionee: { type: 'user', userId: 'line-user-1' },
+          },
+          user1: {
+            type: 'mention',
+            mentionee: { type: 'user', userId: 'line-user-2' },
+          },
+        },
+      };
+      mockFlexMessageService.buildVoteReminderMessage.mockReturnValue(
+        mockReminderMessage,
+      );
+      mockLineApiService.pushMessages.mockResolvedValue(undefined);
       mockPrismaService.eventExpectedParticipant.updateMany.mockResolvedValue({
         count: 2,
       } as any);
@@ -672,9 +703,15 @@ describe('LineBotService', () => {
         'line-user-2',
       ]);
 
-      expect(mockLineApiService.pushMessage).toHaveBeenCalledWith(
+      expect(
+        mockFlexMessageService.buildVoteReminderMessage,
+      ).toHaveBeenCalledWith('Test Event', [
+        { lineUserId: 'line-user-1', displayName: 'User 1' },
+        { lineUserId: 'line-user-2', displayName: 'User 2' },
+      ]);
+      expect(mockLineApiService.pushMessages).toHaveBeenCalledWith(
         'line-group-123',
-        expect.stringContaining('投票提醒'),
+        [mockReminderMessage],
       );
       expect(
         mockPrismaService.eventExpectedParticipant.updateMany,
