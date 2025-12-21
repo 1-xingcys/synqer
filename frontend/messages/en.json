@@ -236,6 +236,45 @@
     "unavailable": "Unavailable",
     "peopleCount": "{count} people"
   },
+  "joinedEvents": {
+    "title": "Joined Events",
+    "description": "Events you're participating in",
+    "loading": "Loading events...",
+    "error": "Failed to load events",
+    "tabs": {
+      "overview": "Overview",
+      "voting": "Voting",
+      "votingEnded": "Voting Ended",
+      "confirmed": "Confirmed",
+      "completed": "Completed"
+    },
+    "sections": {
+      "voting": "Voting Events",
+      "votingEnded": "Voting Ended",
+      "confirmed": "Confirmed Events",
+      "completed": "Completed Events"
+    },
+    "empty": {
+      "all": "No events yet",
+      "allDescription": "When someone invites you to an event, it will appear here",
+      "voting": "No voting events",
+      "votingDescription": "Events waiting for your vote will appear here",
+      "votingEnded": "No events with ended voting",
+      "votingEndedDescription": "Events where voting has ended will appear here",
+      "confirmed": "No confirmed events",
+      "confirmedDescription": "Events with confirmed times will appear here",
+      "completed": "No completed events",
+      "completedDescription": "Past events will appear here"
+    },
+    "viewMore": "View more {type} events",
+    "showingEvents": "Showing {start}-{end} of {total} events",
+    "voted": "Voted",
+    "notVoted": "Not voted",
+    "untitled": "Untitled Event",
+    "unknownHost": "Unknown",
+    "copyLink": "Copy event link",
+    "copied": "Copied!"
+  },
   "eventStatus": {
     "voting": "Voting",
     "votingEnded": "Voting Ended",

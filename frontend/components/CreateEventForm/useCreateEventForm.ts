@@ -286,8 +286,7 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
           startDate: formatDate(formData.startDate),
           endDate: formatDate(formData.endDate),
           startTime: formData.startTime,
-          endTime:
-            formData.endTime === "24:00" ? "23:59" : formData.endTime,
+          endTime: formData.endTime,
           slotDurationMin: 15, // Fixed at 15 minutes
           timeZone: formData.timeZone,
           votingDeadline: votingDeadlineISO,
