@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { DebugWrapper } from "@/components/DebugConsole/DebugWrapper";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
@@ -50,7 +51,9 @@ export default async function LocaleLayout({
       >
         <ThemeProvider>
           <NextIntlClientProvider messages={messages}>
-            <AuthProvider>{children}</AuthProvider>
+            <AuthProvider>
+              <DebugWrapper>{children}</DebugWrapper>
+            </AuthProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

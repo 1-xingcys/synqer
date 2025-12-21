@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -11,13 +12,13 @@ export default function LandingPage() {
   const router = useRouter();
   const { user, loading } = useAuthContext();
 
-  const handleGetStarted = () => {
+  const handleGetStarted = useCallback(() => {
     if (user) {
       router.push("/joined");
     } else {
       router.push("/login");
     }
-  };
+  }, [user, router]);
 
   if (loading) {
     return (

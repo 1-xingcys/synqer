@@ -68,11 +68,36 @@ export function useLiff(): UseLiffReturn {
   const [profile, setProfile] = useState<LiffProfile | null>(null);
   const [context, setContext] = useState<LiffContext | null>(null);
 
-  // 初始化 LIFF
+  // 初始化 LIFF - Only initialize if we have LIFF params in URL or haven't initialized yet
   useEffect(() => {
     let mounted = true;
 
     const init = async () => {
+      // Check if URL has LIFF-related parameters (OAuth callback or LIFF launch)
+      const url = new URL(window.location.href);
+      const hasLiffParams =
+        url.searchParams.has("liff.state") ||
+        url.searchParams.has("code") ||
+        url.hash.includes("access_token") ||
+        url.hash.includes("id_token");
+
+      // Check if LIFF SDK thinks we're in LINE client
+      const isInLineClient = /Line/i.test(navigator.userAgent);
+
+      // Only initialize LIFF if:
+      // 1. We're on the landing page (/) with LIFF params, OR
+      // 2. We're in LINE client and on the landing page
+      const shouldInit =
+        hasLiffParams ||
+        (isInLineClient && window.location.pathname.match(/^\/[a-z]{2}\/?$/));
+
+      if (!shouldInit) {
+        if (mounted) {
+          setIsLoading(false);
+        }
+        return;
+      }
+
       // 檢查是否有設定 LIFF ID
       if (!isLiffEnabled()) {
         if (mounted) {
@@ -90,7 +115,9 @@ export function useLiff(): UseLiffReturn {
       try {
         const liffState = await initializeLiff();
 
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
 
         setState(liffState);
 
@@ -186,4 +213,3 @@ export function useLiff(): UseLiffReturn {
 }
 
 export default useLiff;
-

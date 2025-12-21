@@ -34,6 +34,14 @@ export class LineBotService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    // 檢查環境變數是否已設定
+    if (!process.env.LINE_CHANNEL_ACCESS_TOKEN) {
+      this.logger.warn(
+        'LINE_CHANNEL_ACCESS_TOKEN not set, skipping bot initialization',
+      );
+      return;
+    }
+
     // 初始化時取得 Bot 自己的 userId
     try {
       const botInfo = await this.lineApi.getBotInfo();
