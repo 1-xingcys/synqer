@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl";
 import { useCreateEventForm } from "./useCreateEventForm";
 import { GeneralSection } from "./GeneralSection";
-import { LineGroupSection } from "./LineGroupSection";
 import { ConfigurationSection } from "./ConfigurationSection";
 import { VotingDeadlineSection } from "./VotingDeadlineSection";
 import { FormActions } from "./FormActions";
@@ -35,10 +34,10 @@ export default function CreateEventForm() {
     <div className="max-w-4xl mx-auto py-8 pr-4">
       {/* Header */}
       <div className="md:ml-6 lg:ml-18">
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-zinc-100 mb-1">
+        <h1 className="text-2xl font-semibold text-foreground mb-1">
           {t("createEvent.title")}
         </h1>
-        <p className="text-sm text-gray-600 dark:text-zinc-400">
+        <p className="text-sm text-muted-foreground">
           {t("createEvent.description")}
         </p>
       </div>
@@ -48,7 +47,7 @@ export default function CreateEventForm() {
         <div className="relative">
           {/* Connecting line from step 1 to last step */}
           <div
-            className="absolute left-[0.8rem] lg:left-[2.3rem] w-0.5 bg-gray-300 dark:bg-zinc-600"
+            className="absolute left-[0.8rem] lg:left-[2.3rem] w-0.5 bg-border"
             style={{
               top: "3rem",
               bottom: "1.5rem",
@@ -56,7 +55,7 @@ export default function CreateEventForm() {
             }}
           />
 
-          {/* Section 1: General */}
+          {/* Section 1: General (includes LINE Group Selection) */}
           <GeneralSection
             title={formData.title}
             description={formData.description}
@@ -64,24 +63,11 @@ export default function CreateEventForm() {
             descriptionCharCount={descriptionCharCount}
             onTitleChange={updateTitle}
             onDescriptionChange={updateDescription}
+            selectedLineGroupId={formData.lineGroupId}
+            selectedLineUserIds={formData.selectedLineUserIds}
+            onLineGroupChange={handleLineGroupChange}
+            onLineMembersChange={handleSelectedMembersChange}
           />
-
-          {/* LINE Group Selection (only for LINE users) */}
-          <div className="rounded-lg py-2 lg:px-6 bg-white dark:bg-zinc-900 relative">
-            <div className="flex items-start gap-6">
-              {/* Empty space for alignment */}
-              <div className="shrink-0 w-7" />
-              {/* Content */}
-              <div className="flex-1">
-                <LineGroupSection
-                  selectedGroupId={formData.lineGroupId}
-                  selectedMemberIds={formData.selectedLineUserIds}
-                  onGroupChange={handleLineGroupChange}
-                  onMembersChange={handleSelectedMembersChange}
-                />
-              </div>
-            </div>
-          </div>
 
           {/* Section 2: Configuration */}
           <ConfigurationSection
@@ -89,6 +75,7 @@ export default function CreateEventForm() {
             endDate={formData.endDate}
             startTime={formData.startTime}
             endTime={formData.endTime}
+            hasTimeError={!!validationErrors.startTime}
             onStartDateChange={handleStartDateChange}
             onEndDateChange={handleEndDateChange}
             onStartTimeChange={handleStartTimeChange}

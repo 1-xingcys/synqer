@@ -1,9 +1,15 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { TITLE_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from "./types";
+import { cn } from "@/lib/utils";
+import { LineGroupSection } from "./LineGroupSection";
 
 interface GeneralSectionProps {
   title: string;
@@ -12,6 +18,11 @@ interface GeneralSectionProps {
   descriptionCharCount: number;
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
+  // LINE Group props
+  selectedLineGroupId: string | null;
+  selectedLineUserIds: string[];
+  onLineGroupChange: (groupId: string | null) => void;
+  onLineMembersChange: (memberIds: string[]) => void;
 }
 
 export function GeneralSection({
@@ -21,6 +32,10 @@ export function GeneralSection({
   descriptionCharCount,
   onTitleChange,
   onDescriptionChange,
+  selectedLineGroupId,
+  selectedLineUserIds,
+  onLineGroupChange,
+  onLineMembersChange,
 }: GeneralSectionProps) {
   const t = useTranslations();
   const { user } = useAuthContext();
@@ -30,9 +45,7 @@ export function GeneralSection({
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      // Reset height to auto to get the correct scrollHeight
       textarea.style.height = "auto";
-      // Set height to scrollHeight, with min height of 80px
       textarea.style.height = `${Math.max(80, textarea.scrollHeight)}px`;
     }
   }, [description]);
@@ -45,7 +58,7 @@ export function GeneralSection({
       <div className="flex items-start gap-6">
         {/* Step Number */}
         <div className="shrink-0 flex flex-col items-center relative z-10">
-          <div className="w-7 h-7 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-semibold text-sm">
+          <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
             1
           </div>
         </div>
@@ -53,7 +66,7 @@ export function GeneralSection({
         {/* Content */}
         <div className="flex-1 space-y-4">
           <div>
-            <h2 className="text-base font-semibold text-gray-900 dark:text-zinc-100 mb-1">
+            <h2 className="text-base font-semibold text-foreground mb-1">
               {t("createEvent.general.title")}
             </h2>
           </div>
@@ -61,63 +74,54 @@ export function GeneralSection({
           {/* Host and Event Name side by side */}
           <div className="flex flex-col md:flex-row gap-4">
             {/* Host - Fixed width */}
-            <div className="w-full md:w-48 shrink-0">
-              <label className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1.5">
+            <div className="w-full md:w-48 shrink-0 space-y-1.5">
+              <Label>
                 {t("createEvent.general.host")}{" "}
-                <span className="text-red-500">*</span>
-              </label>
-              <div className="flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-200 dark:border-zinc-700 rounded-md bg-gray-50 dark:bg-zinc-800/50">
-                {/* Avatar */}
-                {user?.avatarUrl ? (
-                  <img
-                    src={user.avatarUrl}
-                    alt={user.displayName || "User"}
-                    className="w-6 h-6 rounded-full object-cover"
+                <span className="text-destructive">*</span>
+              </Label>
+              <div className="flex items-center gap-2 px-3 h-9 border border-input rounded-md bg-muted/50">
+                <Avatar className="h-5 w-5">
+                  <AvatarImage
+                    src={user?.avatarUrl || undefined}
+                    alt={user?.displayName || "User"}
                   />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white text-xs font-medium">
+                  <AvatarFallback className="text-xs">
                     {(user?.displayName || user?.primaryEmail || "U")
                       .charAt(0)
                       .toUpperCase()}
-                  </div>
-                )}
-                <span className="text-gray-900 dark:text-zinc-100 truncate">
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-sm text-foreground truncate">
                   {user?.displayName || user?.primaryEmail || "You"}
                 </span>
               </div>
-              <p className="mt-1 text-xs text-gray-500 dark:text-zinc-400">
+              <p className="text-xs text-muted-foreground">
                 {t("createEvent.general.hostDescription")}
               </p>
             </div>
 
             {/* Event Name - Takes remaining space */}
-            <div className="flex-1">
-              <label
-                htmlFor="title"
-                className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1.5"
-              >
+            <div className="flex-1 space-y-1.5">
+              <Label htmlFor="title">
                 {t("createEvent.general.eventName")}{" "}
-                <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
+                <span className="text-destructive">*</span>
+              </Label>
+              <Input
                 id="title"
-                required
                 value={title}
                 onChange={(e) => onTitleChange(e.target.value)}
-                className={`w-full px-3 py-1.5 text-sm border rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  isOverTitleLimit
-                    ? "border-red-400 dark:border-red-500"
-                    : "border-gray-300 dark:border-zinc-700"
-                }`}
                 placeholder={t("createEvent.general.eventNamePlaceholder")}
+                className={cn(
+                  isOverTitleLimit && "border-destructive focus-visible:ring-destructive/20",
+                )}
               />
               <p
-                className={`mt-1 text-xs ${
+                className={cn(
+                  "text-xs",
                   isOverTitleLimit
-                    ? "text-red-500 dark:text-red-400"
-                    : "text-gray-500 dark:text-zinc-400"
-                }`}
+                    ? "text-destructive"
+                    : "text-muted-foreground",
+                )}
               >
                 {titleCharCount} / {TITLE_MAX_LENGTH}{" "}
                 {t("createEvent.general.characters")}
@@ -131,32 +135,30 @@ export function GeneralSection({
           </div>
 
           {/* Description */}
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-xs font-medium text-gray-700 dark:text-zinc-300 mb-1.5"
-            >
+          <div className="space-y-1.5">
+            <Label htmlFor="description">
               {t("createEvent.general.description")}
-            </label>
-            <textarea
+            </Label>
+            <Textarea
               ref={textareaRef}
               id="description"
               value={description}
               onChange={(e) => onDescriptionChange(e.target.value)}
-              className={`w-full px-3 py-1.5 text-sm border rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none overflow-hidden ${
-                isOverDescriptionLimit
-                  ? "border-red-400 dark:border-red-500"
-                  : "border-gray-300 dark:border-zinc-700"
-              }`}
               placeholder={t("createEvent.general.descriptionPlaceholder")}
+              className={cn(
+                "resize-none overflow-hidden",
+                isOverDescriptionLimit &&
+                  "border-destructive focus-visible:ring-destructive/20",
+              )}
               style={{ minHeight: "80px" }}
             />
             <p
-              className={`mt-1 text-xs ${
+              className={cn(
+                "text-xs",
                 isOverDescriptionLimit
-                  ? "text-red-500 dark:text-red-400"
-                  : "text-gray-500 dark:text-zinc-400"
-              }`}
+                  ? "text-destructive"
+                  : "text-muted-foreground",
+              )}
             >
               {descriptionCharCount} / {DESCRIPTION_MAX_LENGTH}{" "}
               {t("createEvent.general.characters")}
@@ -167,6 +169,14 @@ export function GeneralSection({
               )}
             </p>
           </div>
+
+          {/* LINE Group Selection (only for LINE users) */}
+          <LineGroupSection
+            selectedGroupId={selectedLineGroupId}
+            selectedMemberIds={selectedLineUserIds}
+            onGroupChange={onLineGroupChange}
+            onMembersChange={onLineMembersChange}
+          />
         </div>
       </div>
     </div>

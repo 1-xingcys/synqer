@@ -292,10 +292,10 @@
       "selectDate": "Select date",
       "startTime": "Start time",
       "endTime": "End time",
-      "timeDescription": "Daily time range for the event",
       "slotDuration": "Time slot duration",
       "minutes": "minutes",
-      "slotDurationDescription": "Duration of each time slot"
+      "slotDurationDescription": "Duration of each time slot",
+      "timeError": "Start time must be earlier than end time"
     },
     "votingDeadline": {
       "title": "Voting Deadline",

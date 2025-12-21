@@ -144,17 +144,6 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
     setFormData((prev) => {
       const newData = { ...prev, startTime: value };
 
-      // Validate: startTime must be < endTime
-      const startMinutes = parseTimeToMinutes(value);
-      const endMinutes = parseTimeToMinutes(prev.endTime);
-      if (startMinutes >= endMinutes) {
-        // Adjust end time to be 15 minutes after start time
-        const newEndMinutes = Math.min(startMinutes + 15, 24 * 60);
-        const hours = Math.floor(newEndMinutes / 60);
-        const mins = newEndMinutes % 60;
-        newData.endTime = `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-      }
-
       // Sync voting deadline time if not manually set
       if (!prev.votingDeadlineManuallySet) {
         newData.votingDeadlineTime = value;
@@ -166,27 +155,10 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
 
   // ===== Handle end time change =====
   const handleEndTimeChange = useCallback((value: string) => {
-    setFormData((prev) => {
-      const newData = { ...prev, endTime: value };
-
-      // Validate: endTime must be > startTime
-      const startMinutes = parseTimeToMinutes(prev.startTime);
-      const endMinutes = parseTimeToMinutes(value);
-      if (endMinutes <= startMinutes) {
-        // Adjust start time to be 15 minutes before end time
-        const newStartMinutes = Math.max(endMinutes - 15, 0);
-        const hours = Math.floor(newStartMinutes / 60);
-        const mins = newStartMinutes % 60;
-        newData.startTime = `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-
-        // Sync voting deadline time if not manually set
-        if (!prev.votingDeadlineManuallySet) {
-          newData.votingDeadlineTime = newData.startTime;
-        }
-      }
-
-      return newData;
-    });
+    setFormData((prev) => ({
+      ...prev,
+      endTime: value,
+    }));
   }, []);
 
   // ===== Handle voting deadline date change =====
@@ -231,6 +203,14 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
     // Title is required
     if (!formData.title.trim()) {
       errors.title = "required";
+    }
+
+    // Time validation: startTime must be < endTime
+    const startMinutes = parseTimeToMinutes(formData.startTime);
+    const endMinutes = parseTimeToMinutes(formData.endTime);
+    if (startMinutes >= endMinutes) {
+      errors.startTime = "startTimeNotBeforeEndTime";
+      errors.endTime = "startTimeNotBeforeEndTime";
     }
 
     // Voting deadline validation

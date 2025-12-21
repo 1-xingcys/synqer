@@ -106,7 +106,7 @@ export function DebugProvider({
   const [extraInfo, setExtraInfo] = useState<
     Record<string, string | boolean | null | undefined>
   >({});
-  const [showPanel, setShowPanel] = useState(true);
+  const [showPanel, setShowPanel] = useState(false);
 
   // 訂閱全域日誌更新
   useEffect(() => {

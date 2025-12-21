@@ -292,10 +292,10 @@
       "selectDate": "選擇日期",
       "startTime": "開始時間",
       "endTime": "結束時間",
-      "timeDescription": "每日活動的時間範圍",
       "slotDuration": "時間間隔",
       "minutes": "分鐘",
-      "slotDurationDescription": "每個時段的持續時間"
+      "slotDurationDescription": "每個時段的持續時間",
+      "timeError": "開始時間必須早於結束時間"
     },
     "votingDeadline": {
       "title": "Voting Deadline",
