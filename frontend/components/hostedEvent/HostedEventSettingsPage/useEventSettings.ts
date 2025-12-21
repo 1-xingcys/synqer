@@ -18,7 +18,7 @@ const initialFormData: EventSettingsFormData = {
   startDate: null,
   endDate: null,
   startTime: "00:00",
-  endTime: "23:59",
+  endTime: "24:00",
   slotDurationMin: 15,
 };
 
