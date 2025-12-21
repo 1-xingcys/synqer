@@ -3,6 +3,7 @@ import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LiffProvider } from "@/contexts/LiffContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { DebugWrapper } from "@/components/DebugConsole/DebugWrapper";
 import { LiffPathHandler } from "@/components/LiffPathHandler";
@@ -52,11 +53,13 @@ export default async function LocaleLayout({
       >
         <ThemeProvider>
           <NextIntlClientProvider messages={messages}>
-            <LiffPathHandler>
-              <AuthProvider>
-                <DebugWrapper>{children}</DebugWrapper>
-              </AuthProvider>
-            </LiffPathHandler>
+            <LiffProvider>
+              <LiffPathHandler>
+                <AuthProvider>
+                  <DebugWrapper>{children}</DebugWrapper>
+                </AuthProvider>
+              </LiffPathHandler>
+            </LiffProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>
