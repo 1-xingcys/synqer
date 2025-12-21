@@ -77,7 +77,7 @@ export class EventVoteService {
           });
         }
 
-        // 5. 更新 expectedParticipants 的 hasVoted 狀態
+        // 5. 更新 EventExpectedParticipant 的 hasVoted 狀態
         await prisma.eventExpectedParticipant.updateMany({
           where: {
             eventId,
@@ -88,7 +88,7 @@ export class EventVoteService {
           },
         });
 
-        return { availableSlotIds, isLineGroupEvent: !!event.lineGroupId };
+        return { availableSlotIds };
       },
     );
 
