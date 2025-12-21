@@ -154,7 +154,9 @@ export class EventCreationService {
       throw new BadRequestException('Invalid end date');
     }
     if (start > end) {
-      throw new BadRequestException('Start date must be before or equal to end date');
+      throw new BadRequestException(
+        'Start date must be before or equal to end date',
+      );
     }
   }
 
@@ -246,11 +248,20 @@ export class EventCreationService {
       userId?: string;
     }> = [];
 
-    // 自動將創建者加入為參與者
+    // 查詢創建者的 LINE userId
+    let creatorLineUserId: string | undefined;
     if (userId) {
+      const creatorAuthIdentity = await prisma.authIdentity.findFirst({
+        where: { userId, provider: 'line' },
+        select: { providerUserId: true },
+      });
+      creatorLineUserId = creatorAuthIdentity?.providerUserId;
+
+      // 自動將創建者加入為參與者（包含 lineUserId）
       participantData.push({
         eventId,
         userId,
+        lineUserId: creatorLineUserId,
       });
     }
 
@@ -272,11 +283,11 @@ export class EventCreationService {
       );
 
       expectedLineUserIds.forEach((lineUserId) => {
-        const linkedUserId = linkedMap.get(lineUserId);
         // 如果創建者也在 LINE 群組中，避免重複添加
-        if (linkedUserId && linkedUserId === userId) {
+        if (creatorLineUserId && lineUserId === creatorLineUserId) {
           return; // 跳過，因為已經在上面添加了
         }
+        const linkedUserId = linkedMap.get(lineUserId);
         participantData.push({
           eventId,
           lineUserId,

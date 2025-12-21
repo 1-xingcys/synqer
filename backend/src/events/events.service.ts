@@ -265,6 +265,7 @@ export class EventsService {
 
   /**
    * 更新活動的預期參與者
+   * 採用差異更新策略：只新增/刪除有變動的參與者，保留現有參與者的狀態（如 hasVoted）
    */
   async updateParticipants(
     eventId: string,
@@ -275,23 +276,69 @@ export class EventsService {
 
     // 使用 transaction 確保一致性
     await this.prisma.$transaction(async (prisma: Prisma.TransactionClient) => {
-      // 刪除現有的預期參與者
-      await prisma.eventExpectedParticipant.deleteMany({
-        where: { eventId },
+      // 取得現有的預期參與者
+      const existingParticipants =
+        await prisma.eventExpectedParticipant.findMany({
+          where: { eventId },
+          select: {
+            id: true,
+            lineUserId: true,
+            userId: true,
+          },
+        });
+
+      // 建立現有參與者的識別 key（使用 lineUserId 或 userId）
+      const existingKeys = new Map<string, string>();
+      existingParticipants.forEach((p) => {
+        const key = p.lineUserId || p.userId || '';
+        if (key) {
+          existingKeys.set(key, p.id);
+        }
       });
 
-      // 建立新的預期參與者
-      const participantsData = dto.participants
-        .filter((p) => p.lineUserId || p.userId)
-        .map((p) => ({
-          eventId,
-          lineUserId: p.lineUserId || null,
-          userId: p.userId || null,
-        }));
+      // 建立新參與者的識別 key 集合
+      const newParticipants = dto.participants.filter(
+        (p) => p.lineUserId || p.userId,
+      );
+      const newKeys = new Set<string>();
+      newParticipants.forEach((p) => {
+        const key = p.lineUserId || p.userId || '';
+        if (key) {
+          newKeys.add(key);
+        }
+      });
 
-      if (participantsData.length > 0) {
+      // 找出需要刪除的參與者（在現有中但不在新的中）
+      const toDeleteIds: string[] = [];
+      existingKeys.forEach((id, key) => {
+        if (!newKeys.has(key)) {
+          toDeleteIds.push(id);
+        }
+      });
+
+      // 找出需要新增的參與者（在新的中但不在現有中）
+      const toAdd = newParticipants.filter((p) => {
+        const key = p.lineUserId || p.userId || '';
+        return !existingKeys.has(key);
+      });
+
+      // 執行刪除
+      if (toDeleteIds.length > 0) {
+        await prisma.eventExpectedParticipant.deleteMany({
+          where: {
+            id: { in: toDeleteIds },
+          },
+        });
+      }
+
+      // 執行新增
+      if (toAdd.length > 0) {
         await prisma.eventExpectedParticipant.createMany({
-          data: participantsData,
+          data: toAdd.map((p) => ({
+            eventId,
+            lineUserId: p.lineUserId || null,
+            userId: p.userId || null,
+          })),
         });
       }
     });

@@ -113,7 +113,11 @@ export function useEventDetail(eventId: string) {
     );
 
     if (!response.ok) {
-      throw new Error("Failed to save votes");
+      const errorData = (await response.json().catch(() => ({}))) as {
+        message?: string;
+      };
+      const errorMessage = errorData.message || "Failed to save votes";
+      alert(errorMessage);
     }
 
     // 重新載入資料以更新 heatmap
