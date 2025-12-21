@@ -4,6 +4,7 @@ import { LineBotService } from './line-bot.service';
 import { LineApiService } from './line-api.service';
 import { LineGroupService } from './line-group.service';
 import { FlexMessageService } from './flex-message.service';
+import { RichMenuService } from './rich-menu.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UsersModule } from '../users/users.module';
 import { EventStatusService } from '../events/services/event-status.service';
@@ -16,6 +17,7 @@ import { EventStatusService } from '../events/services/event-status.service';
     LineApiService,
     LineGroupService,
     FlexMessageService,
+    RichMenuService,
     EventStatusService,
   ],
   exports: [
@@ -23,6 +25,7 @@ import { EventStatusService } from '../events/services/event-status.service';
     LineApiService,
     LineGroupService,
     FlexMessageService,
+    RichMenuService,
     EventStatusService,
   ],
 })

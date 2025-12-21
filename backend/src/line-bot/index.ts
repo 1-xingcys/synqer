@@ -4,4 +4,5 @@ export * from './line-bot.controller';
 export * from './line-api.service';
 export * from './line-group.service';
 export * from './flex-message.service';
+export * from './rich-menu.service';
 export * from './dto/webhook-event.dto';
