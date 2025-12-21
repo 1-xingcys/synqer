@@ -14,10 +14,12 @@ import {
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { LogOutIcon } from "lucide-react";
+import { useLiff } from "@/hooks/useLiff";
 
 export default function UserMenu() {
   const t = useTranslations();
   const { user, logout } = useAuthContext();
+  const { isInClient: isInLiff } = useLiff();
 
   if (!user) return null;
 
@@ -61,15 +63,20 @@ export default function UserMenu() {
         <DropdownMenuSeparator />
         <LanguageSwitcher asSubmenu />
         <ThemeSwitcher asSubmenu />
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => void logout()}
-          variant="destructive"
-          className="cursor-pointer"
-        >
-          <LogOutIcon className="mr-2 h-4 w-4" />
-          {t("auth.logout")}
-        </DropdownMenuItem>
+        {/* 在 LIFF 環境中不顯示登出按鈕，保持始終登入狀態 */}
+        {!isInLiff && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => void logout()}
+              variant="destructive"
+              className="cursor-pointer"
+            >
+              <LogOutIcon className="mr-2 h-4 w-4" />
+              {t("auth.logout")}
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
