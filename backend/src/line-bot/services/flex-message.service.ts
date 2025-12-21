@@ -570,7 +570,7 @@ export class FlexMessageService {
 
     // 組合 mention 文字
     const mentionsText = mentionPlaceholders.join('、');
-    const text = `📢 投票提醒\n\n${mentionsText}，活動「${eventTitle}」還在等你投票唷！\n\n趕快點擊上方按鈕參與投票吧～`;
+    const text = `📢 投票提醒\n\n${mentionsText}尚未在「${eventTitle}」活動投票！\n\n趕快點擊上方按鈕參與投票吧～`;
 
     return {
       type: 'textV2',
