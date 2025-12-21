@@ -1,133 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
-import { initializeLiff, isLiffEnabled, type LiffState } from "@/lib/liff";
-
-// Debug 日誌類型
-interface DebugLog {
-  time: string;
-  message: string;
-  data?: unknown;
-}
-
-// Debug Panel Props
-interface DebugPanelProps {
-  title: string;
-  logs: DebugLog[];
-  liffState: LiffState | null;
-  extraInfo: Record<string, unknown>;
-  onHide: () => void;
-}
-
-// Debug UI 組件 - 移到組件外部
-function DebugPanel({
-  title,
-  logs,
-  liffState,
-  extraInfo,
-  onHide,
-}: DebugPanelProps) {
-  return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-black/90 text-white text-xs max-h-[50vh] overflow-auto">
-      <div className="flex items-center justify-between p-2 bg-zinc-800 sticky top-0">
-        <span className="font-bold">🔧 {title}</span>
-        <button onClick={onHide} className="px-2 py-1 bg-red-600 rounded">
-          Hide
-        </button>
-      </div>
-      <div className="p-2 space-y-2">
-        <div className="grid grid-cols-2 gap-2 p-2 bg-zinc-800 rounded">
-          {Object.entries(extraInfo).map(([key, val]) => {
-            const value = val as string | boolean | null | undefined;
-            let displayValue: string;
-            if (typeof value === "object" && value !== null) {
-              displayValue = JSON.stringify(value);
-            } else if (value === null || value === undefined) {
-              displayValue = "null";
-            } else {
-              displayValue = String(value);
-            }
-            return (
-              <div key={key}>
-                <span className="text-zinc-400">{key}:</span>{" "}
-                <span
-                  className={
-                    value === true || value === "authenticated"
-                      ? "text-green-400"
-                      : value === false || value === "null"
-                        ? "text-red-400"
-                        : "text-zinc-300"
-                  }
-                >
-                  {displayValue}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-        {liffState && (
-          <div className="p-2 bg-zinc-800 rounded">
-            <div className="font-bold mb-1">LIFF State:</div>
-            <div className="grid grid-cols-2 gap-1">
-              <div>
-                isInitialized:{" "}
-                <span
-                  className={
-                    liffState.isInitialized ? "text-green-400" : "text-red-400"
-                  }
-                >
-                  {String(liffState.isInitialized)}
-                </span>
-              </div>
-              <div>
-                isInClient:{" "}
-                <span
-                  className={
-                    liffState.isInClient ? "text-green-400" : "text-yellow-400"
-                  }
-                >
-                  {String(liffState.isInClient)}
-                </span>
-              </div>
-              <div>
-                isLoggedIn:{" "}
-                <span
-                  className={
-                    liffState.isLoggedIn ? "text-green-400" : "text-red-400"
-                  }
-                >
-                  {String(liffState.isLoggedIn)}
-                </span>
-              </div>
-              {liffState.error && (
-                <div className="col-span-2 text-red-400">
-                  Error: {liffState.error.message}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        <div className="p-2 bg-zinc-800 rounded">
-          <div className="font-bold mb-1">Logs:</div>
-          {logs.map((log, i) => (
-            <div key={i} className="py-0.5 border-b border-zinc-700">
-              <span className="text-zinc-500">[{log.time}]</span> {log.message}
-              {log.data !== undefined && (
-                <pre className="text-zinc-400 ml-4 text-[10px]">
-                  {JSON.stringify(log.data, null, 2)}
-                </pre>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function LandingPage() {
   const t = useTranslations("landing");
@@ -135,84 +12,18 @@ export default function LandingPage() {
   const router = useRouter();
   const { user, loading } = useAuthContext();
 
-  // Debug 狀態
-  const [debugLogs, setDebugLogs] = useState<DebugLog[]>([]);
-  const [showDebug, setShowDebug] = useState(false);
-  const [liffState, setLiffState] = useState<LiffState | null>(null);
-  const [currentUrl] = useState(() =>
-    typeof window !== "undefined" ? window.location.href : "",
-  );
-
-  const addLog = useCallback((message: string, data?: unknown) => {
-    const time = new Date().toLocaleTimeString();
-    setDebugLogs((prev) => [...prev, { time, message, data }]);
-    console.log(`[Landing ${time}]`, message, data ?? "");
-  }, []);
-
-  // 初始化時檢查 LIFF 狀態
-  useEffect(() => {
-    const checkLiff = async () => {
-      addLog("Landing page mounted", {
-        isLiffEnabled: isLiffEnabled(),
-        userAgent: navigator.userAgent,
-        href: window.location.href,
-      });
-
-      if (isLiffEnabled()) {
-        addLog("Initializing LIFF for debug...");
-        const state = await initializeLiff();
-        setLiffState(state);
-        addLog("LIFF state", {
-          isInitialized: state.isInitialized,
-          isInClient: state.isInClient,
-          isLoggedIn: state.isLoggedIn,
-          error: state.error?.message,
-        });
-      }
-    };
-
-    void checkLiff();
-  }, [addLog]);
-
-  // 監控 user 和 loading 變化
-  useEffect(() => {
-    console.log("[Landing] Auth state changed", {
-      user: user?.id ?? null,
-      loading,
-    });
-  }, [user, loading]);
-
-  const handleGetStarted = () => {
-    addLog("Get Started clicked", { hasUser: !!user });
+  const handleGetStarted = useCallback(() => {
     if (user) {
-      addLog("Navigating to /joined");
       router.push("/joined");
     } else {
-      addLog("Navigating to /login");
       router.push("/login");
     }
-  };
-
-  const extraInfo = {
-    Loading: loading,
-    User: user ? user.displayName || user.id : "null",
-    "LIFF Enabled": isLiffEnabled() ? "Yes" : "No",
-    URL: currentUrl,
-  };
+  }, [user, router]);
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
         <p className="text-zinc-600 dark:text-zinc-400">{commonT("loading")}</p>
-        {showDebug && (
-          <DebugPanel
-            title="Landing Page Debug"
-            logs={debugLogs}
-            liffState={liffState}
-            extraInfo={extraInfo}
-            onHide={() => setShowDebug(false)}
-          />
-        )}
       </div>
     );
   }
@@ -328,15 +139,6 @@ export default function LandingPage() {
           </div>
         </div>
       </main>
-      {showDebug && (
-        <DebugPanel
-          title="Landing Page Debug"
-          logs={debugLogs}
-          liffState={liffState}
-          extraInfo={extraInfo}
-          onHide={() => setShowDebug(false)}
-        />
-      )}
     </div>
   );
 }
