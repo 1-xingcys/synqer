@@ -22,17 +22,32 @@ interface Event {
   timeZone: string;
 }
 
-interface Participant {
-  userId: string;
-  displayName: string;
+interface ExpectedParticipant {
+  id: string;
+  lineUserId?: string;
+  userId?: string;
+  hasVoted: boolean;
+  reminderSentAt?: string;
+  user?: {
+    id: string;
+    displayName?: string;
+    avatarUrl?: string;
+  };
+  lineGroupMember?: {
+    displayName?: string;
+    pictureUrl?: string;
+  };
 }
 
 interface EventInfoProps {
   event: Event;
-  participants: Participant[];
+  expectedParticipants: ExpectedParticipant[];
 }
 
-export default function EventInfo({ event, participants }: EventInfoProps) {
+export default function EventInfo({
+  event,
+  expectedParticipants,
+}: EventInfoProps) {
   const t = useTranslations("event");
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
@@ -201,22 +216,28 @@ export default function EventInfo({ event, participants }: EventInfoProps) {
             </p>
             <div className="flex items-center gap-2">
               <p className="text-sm font-semibold text-gray-700 dark:text-zinc-200">
-                {participants.length} {t("participantUnit")}
+                {expectedParticipants.length} {t("participantUnit")}
               </p>
-              {participants.length > 0 && (
+              {expectedParticipants.length > 0 && (
                 <div className="flex -space-x-2 overflow-hidden">
                   {/* 簡單的頭像示意，增加視覺豐富度，但保持簡約 */}
-                  {participants.slice(0, 3).map((p) => (
-                    <div
-                      key={p.userId}
-                      className="h-5 w-5 rounded-full ring-2 ring-white dark:ring-zinc-900 bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-[10px] text-gray-500 dark:text-zinc-300 font-bold"
-                    >
-                      {p.displayName[0]?.toUpperCase()}
-                    </div>
-                  ))}
-                  {participants.length > 3 && (
+                  {expectedParticipants.slice(0, 3).map((p) => {
+                    const displayName =
+                      p.user?.displayName ||
+                      p.lineGroupMember?.displayName ||
+                      "?";
+                    return (
+                      <div
+                        key={p.id}
+                        className="h-5 w-5 rounded-full ring-2 ring-white dark:ring-zinc-900 bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-[10px] text-gray-500 dark:text-zinc-300 font-bold"
+                      >
+                        {displayName[0]?.toUpperCase()}
+                      </div>
+                    );
+                  })}
+                  {expectedParticipants.length > 3 && (
                     <div className="h-5 w-5 rounded-full ring-2 ring-white dark:ring-zinc-900 bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-[8px] text-gray-400 dark:text-zinc-500 font-bold">
-                      +{participants.length - 3}
+                      +{expectedParticipants.length - 3}
                     </div>
                   )}
                 </div>

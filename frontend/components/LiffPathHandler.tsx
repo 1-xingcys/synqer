@@ -30,7 +30,7 @@ export function LiffPathHandler({
   // 使用 "pending" | "redirecting" | "done" 三種狀態
   // 初始值是 "pending"，這樣 SSR 和 CSR 初始渲染會一致
   const [status, setStatus] = useState<"pending" | "redirecting" | "done">(
-    "pending"
+    "pending",
   );
 
   useEffect(() => {
@@ -96,4 +96,3 @@ export function LiffPathHandler({
   // status === "done"
   return children;
 }
-

@@ -77,7 +77,7 @@ export default function JoinedEventPage() {
     : [];
 
   // Calculate voting stats
-  const totalParticipants = eventDetailData.participants.length;
+  const totalParticipants = eventDetailData.expectedParticipants.length;
   const votedParticipants = new Set(eventDetailData.votes.map((v) => v.userId))
     .size;
 
@@ -109,7 +109,7 @@ export default function JoinedEventPage() {
       {/* Event Info */}
       <EventInfo
         event={eventDetailData.event}
-        participants={eventDetailData.participants}
+        expectedParticipants={eventDetailData.expectedParticipants}
       />
 
       {/* Quick Navigation Cards */}
