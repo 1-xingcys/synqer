@@ -92,7 +92,9 @@ export function useAuth() {
   }, []);
 
   useEffect(() => {
+    log("useAuth initialize start");
     void fetchUser();
+    log("useAuth initialized end");
   }, [fetchUser]);
 
   const logout = async () => {
