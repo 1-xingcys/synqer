@@ -18,7 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prepare": "husky"
+    "prepare": "husky",
+    "reset-rich-menu": "ts-node scripts/reset-rich-menu.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -29,6 +30,8 @@
     "@types/express-session": "^1.18.2",
     "@types/jsonwebtoken": "^9.0.10",
     "axios": "^1.13.2",
+    "canvas": "^3.2.0",
+    "dotenv": "^17.2.3",
     "express-session": "^1.18.2",
     "jsonwebtoken": "^9.0.2",
     "prisma": "^6.19.0",
