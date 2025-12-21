@@ -1,22 +1,51 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "@/i18n/routing";
-import { CreateEventFormData, initialFormData } from "./types";
+import {
+  CreateEventFormData,
+  initialFormData,
+  TITLE_MAX_LENGTH,
+  DESCRIPTION_MAX_LENGTH,
+  countCharacters,
+  truncateToMaxChars,
+  parseTimeToMinutes,
+  combineDateAndTime,
+} from "./types";
+
+interface ValidationErrors {
+  title?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
+  votingDeadline?: string;
+}
 
 interface UseCreateEventFormReturn {
   formData: CreateEventFormData;
   loading: boolean;
-  endDateManuallySet: boolean;
-  updateField: <K extends keyof CreateEventFormData>(
-    field: K,
-    value: CreateEventFormData[K],
-  ) => void;
+  validationErrors: ValidationErrors;
+  // Field updates
+  updateTitle: (value: string) => void;
+  updateDescription: (value: string) => void;
   handleStartDateChange: (date: Date | null) => void;
   handleEndDateChange: (date: Date | null) => void;
+  handleStartTimeChange: (value: string) => void;
+  handleEndTimeChange: (value: string) => void;
+  handleVotingDeadlineDateChange: (date: Date | null) => void;
+  handleVotingDeadlineTimeChange: (value: string) => void;
+  // LINE group
+  handleLineGroupChange: (groupId: string | null) => void;
+  handleSelectedMembersChange: (lineUserIds: string[]) => void;
+  // Form actions
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   handleCancel: () => void;
+  // Computed
   isFormValid: boolean;
+  titleCharCount: number;
+  descriptionCharCount: number;
 }
 
 export function useCreateEventForm(): UseCreateEventFormReturn {
@@ -24,41 +53,219 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] =
     useState<CreateEventFormData>(initialFormData);
-  const [endDateManuallySet, setEndDateManuallySet] = useState(false);
 
-  // Update a single field
-  const updateField = useCallback(
-    <K extends keyof CreateEventFormData>(
-      field: K,
-      value: CreateEventFormData[K],
-    ) => {
-      setFormData((prev) => ({ ...prev, [field]: value }));
-    },
-    [],
+  // ===== Character counts =====
+  const titleCharCount = useMemo(
+    () => countCharacters(formData.title),
+    [formData.title],
+  );
+  const descriptionCharCount = useMemo(
+    () => countCharacters(formData.description),
+    [formData.description],
   );
 
-  // Handle start date change with auto-fill logic
-  const handleStartDateChange = useCallback(
-    (date: Date | null) => {
-      setFormData((prev) => {
-        const newData = { ...prev, startDate: date };
-        // Auto-fill end date if it's the first time setting start date
-        if (date && !endDateManuallySet && !prev.endDate) {
-          newData.endDate = date;
-        }
-        return newData;
-      });
-    },
-    [endDateManuallySet],
-  );
-
-  // Handle end date change
-  const handleEndDateChange = useCallback((date: Date | null) => {
-    setFormData((prev) => ({ ...prev, endDate: date }));
-    setEndDateManuallySet(true);
+  // ===== Title update with character limit =====
+  const updateTitle = useCallback((value: string) => {
+    const charCount = countCharacters(value);
+    if (charCount <= TITLE_MAX_LENGTH) {
+      setFormData((prev) => ({ ...prev, title: value }));
+    } else {
+      // Truncate to max chars
+      const truncated = truncateToMaxChars(value, TITLE_MAX_LENGTH);
+      setFormData((prev) => ({ ...prev, title: truncated }));
+    }
   }, []);
 
-  // Format date to YYYY-MM-DD
+  // ===== Description update with character limit =====
+  const updateDescription = useCallback((value: string) => {
+    const charCount = countCharacters(value);
+    if (charCount <= DESCRIPTION_MAX_LENGTH) {
+      setFormData((prev) => ({ ...prev, description: value }));
+    } else {
+      // Truncate to max chars
+      const truncated = truncateToMaxChars(value, DESCRIPTION_MAX_LENGTH);
+      setFormData((prev) => ({ ...prev, description: truncated }));
+    }
+  }, []);
+
+  // ===== Handle start date change =====
+  const handleStartDateChange = useCallback((date: Date | null) => {
+    setFormData((prev) => {
+      const newData = { ...prev, startDate: date };
+
+      // If end date is before start date, update it
+      if (date && prev.endDate && prev.endDate < date) {
+        newData.endDate = date;
+      }
+      // If end date is null, set it to start date
+      if (date && !prev.endDate) {
+        newData.endDate = date;
+      }
+
+      // Sync voting deadline if not manually set
+      if (!prev.votingDeadlineManuallySet && date) {
+        newData.votingDeadline = date;
+        newData.votingDeadlineTime = prev.startTime;
+      }
+
+      return newData;
+    });
+  }, []);
+
+  // ===== Handle end date change =====
+  const handleEndDateChange = useCallback((date: Date | null) => {
+    setFormData((prev) => {
+      const newData = { ...prev, endDate: date };
+
+      // If start date is after end date, update it
+      if (date && prev.startDate && prev.startDate > date) {
+        newData.startDate = date;
+        // Also sync voting deadline if not manually set
+        if (!prev.votingDeadlineManuallySet) {
+          newData.votingDeadline = date;
+          newData.votingDeadlineTime = prev.startTime;
+        }
+      }
+      // If start date is null, set it to end date
+      if (date && !prev.startDate) {
+        newData.startDate = date;
+        if (!prev.votingDeadlineManuallySet) {
+          newData.votingDeadline = date;
+          newData.votingDeadlineTime = prev.startTime;
+        }
+      }
+
+      return newData;
+    });
+  }, []);
+
+  // ===== Handle start time change =====
+  const handleStartTimeChange = useCallback((value: string) => {
+    setFormData((prev) => {
+      const newData = { ...prev, startTime: value };
+
+      // Validate: startTime must be < endTime
+      const startMinutes = parseTimeToMinutes(value);
+      const endMinutes = parseTimeToMinutes(prev.endTime);
+      if (startMinutes >= endMinutes) {
+        // Adjust end time to be 15 minutes after start time
+        const newEndMinutes = Math.min(startMinutes + 15, 24 * 60);
+        const hours = Math.floor(newEndMinutes / 60);
+        const mins = newEndMinutes % 60;
+        newData.endTime = `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+      }
+
+      // Sync voting deadline time if not manually set
+      if (!prev.votingDeadlineManuallySet) {
+        newData.votingDeadlineTime = value;
+      }
+
+      return newData;
+    });
+  }, []);
+
+  // ===== Handle end time change =====
+  const handleEndTimeChange = useCallback((value: string) => {
+    setFormData((prev) => {
+      const newData = { ...prev, endTime: value };
+
+      // Validate: endTime must be > startTime
+      const startMinutes = parseTimeToMinutes(prev.startTime);
+      const endMinutes = parseTimeToMinutes(value);
+      if (endMinutes <= startMinutes) {
+        // Adjust start time to be 15 minutes before end time
+        const newStartMinutes = Math.max(endMinutes - 15, 0);
+        const hours = Math.floor(newStartMinutes / 60);
+        const mins = newStartMinutes % 60;
+        newData.startTime = `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+
+        // Sync voting deadline time if not manually set
+        if (!prev.votingDeadlineManuallySet) {
+          newData.votingDeadlineTime = newData.startTime;
+        }
+      }
+
+      return newData;
+    });
+  }, []);
+
+  // ===== Handle voting deadline date change =====
+  const handleVotingDeadlineDateChange = useCallback((date: Date | null) => {
+    setFormData((prev) => ({
+      ...prev,
+      votingDeadline: date,
+      votingDeadlineManuallySet: true,
+    }));
+  }, []);
+
+  // ===== Handle voting deadline time change =====
+  const handleVotingDeadlineTimeChange = useCallback((value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      votingDeadlineTime: value,
+      votingDeadlineManuallySet: true,
+    }));
+  }, []);
+
+  // ===== Handle LINE group change =====
+  const handleLineGroupChange = useCallback((groupId: string | null) => {
+    setFormData((prev) => ({
+      ...prev,
+      lineGroupId: groupId,
+      selectedLineUserIds: [], // Reset selection when group changes
+    }));
+  }, []);
+
+  // ===== Handle selected members change =====
+  const handleSelectedMembersChange = useCallback((lineUserIds: string[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedLineUserIds: lineUserIds,
+    }));
+  }, []);
+
+  // ===== Validation =====
+  const validationErrors = useMemo((): ValidationErrors => {
+    const errors: ValidationErrors = {};
+
+    // Title is required
+    if (!formData.title.trim()) {
+      errors.title = "required";
+    }
+
+    // Voting deadline validation
+    if (
+      formData.startDate &&
+      formData.votingDeadline &&
+      formData.votingDeadlineManuallySet
+    ) {
+      const startDateTime = combineDateAndTime(
+        formData.startDate,
+        formData.startTime,
+      );
+      const deadlineDateTime = combineDateAndTime(
+        formData.votingDeadline,
+        formData.votingDeadlineTime,
+      );
+
+      if (deadlineDateTime > startDateTime) {
+        errors.votingDeadline = "deadlineAfterStart";
+      }
+    }
+
+    return errors;
+  }, [formData]);
+
+  // ===== Form validation =====
+  // Start/End date are no longer required
+  const isFormValid = useMemo(() => {
+    return (
+      formData.title.trim() !== "" &&
+      Object.keys(validationErrors).length === 0
+    );
+  }, [formData.title, validationErrors]);
+
+  // ===== Format date to YYYY-MM-DD =====
   const formatDate = (date: Date): string => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -66,7 +273,7 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
     return `${year}-${month}-${day}`;
   };
 
-  // Handle form submission
+  // ===== Handle form submission =====
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -83,15 +290,32 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
           throw new Error("NEXT_PUBLIC_API is not set");
         }
 
+        // Build voting deadline ISO string if set
+        let votingDeadlineISO: string | undefined;
+        if (formData.votingDeadline) {
+          const deadlineDateTime = combineDateAndTime(
+            formData.votingDeadline,
+            formData.votingDeadlineTime,
+          );
+          votingDeadlineISO = deadlineDateTime.toISOString();
+        }
+
         const payload = {
           title: formData.title,
           description: formData.description || undefined,
           startDate: formatDate(formData.startDate),
           endDate: formatDate(formData.endDate),
           startTime: formData.startTime,
-          endTime: formData.endTime,
-          slotDurationMin: formData.slotDurationMin,
+          endTime:
+            formData.endTime === "24:00" ? "23:59" : formData.endTime,
+          slotDurationMin: 15, // Fixed at 15 minutes
           timeZone: formData.timeZone,
+          votingDeadline: votingDeadlineISO,
+          lineGroupId: formData.lineGroupId || undefined,
+          expectedLineUserIds:
+            formData.selectedLineUserIds.length > 0
+              ? formData.selectedLineUserIds
+              : undefined,
         };
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API}/events`, {
@@ -104,7 +328,11 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to create event");
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            (errorData as { message?: string }).message ||
+              "Failed to create event",
+          );
         }
 
         const result = (await response.json()) as { eventId: string };
@@ -119,25 +347,29 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
     [formData, router],
   );
 
-  // Handle cancel
+  // ===== Handle cancel =====
   const handleCancel = useCallback(() => {
     router.back();
   }, [router]);
 
-  // Check if form is valid
-  const isFormValid = Boolean(
-    formData.title && formData.startDate && formData.endDate,
-  );
-
   return {
     formData,
     loading,
-    endDateManuallySet,
-    updateField,
+    validationErrors,
+    updateTitle,
+    updateDescription,
     handleStartDateChange,
     handleEndDateChange,
+    handleStartTimeChange,
+    handleEndTimeChange,
+    handleVotingDeadlineDateChange,
+    handleVotingDeadlineTimeChange,
+    handleLineGroupChange,
+    handleSelectedMembersChange,
     handleSubmit,
     handleCancel,
     isFormValid,
+    titleCharCount,
+    descriptionCharCount,
   };
 }

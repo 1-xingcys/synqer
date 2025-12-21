@@ -7,15 +7,27 @@ import {
   Max,
   IsArray,
   IsISO8601,
+  MaxLength,
+  Matches,
 } from 'class-validator';
+
+// Character limits (same as frontend)
+export const TITLE_MAX_LENGTH = 50;
+export const DESCRIPTION_MAX_LENGTH = 500;
 
 export class CreateEventDto {
   @IsOptional()
   @IsString()
+  @MaxLength(TITLE_MAX_LENGTH, {
+    message: `Title must be at most ${TITLE_MAX_LENGTH} characters`,
+  })
   title?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(DESCRIPTION_MAX_LENGTH, {
+    message: `Description must be at most ${DESCRIPTION_MAX_LENGTH} characters`,
+  })
   description?: string;
 
   @IsDateString()
@@ -25,10 +37,16 @@ export class CreateEventDto {
   endDate: string; // "2025-08-15"
 
   @IsString()
+  @Matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+    message: 'startTime must be in HH:mm format (00:00-23:59)',
+  })
   startTime: string; // "09:00"
 
   @IsString()
-  endTime: string; // "18:00"
+  @Matches(/^(([01]?[0-9]|2[0-3]):[0-5][0-9]|24:00)$/, {
+    message: 'endTime must be in HH:mm format (00:00-24:00)',
+  })
+  endTime: string; // "18:00" or "24:00"
 
   @IsOptional()
   @IsInt()
