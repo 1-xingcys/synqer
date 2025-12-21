@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Test, TestingModule } from '@nestjs/testing';
 import { LineGroupService } from './line-group.service';
-import { PrismaService } from '../prisma/prisma.service';
 import { LineApiService } from './line-api.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 describe('LineGroupService', () => {
   let service: LineGroupService;

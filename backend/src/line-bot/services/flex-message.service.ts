@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventStatus } from '../events/services/event-status.service';
+import { EventStatus } from '../../events/services/event-status.service';
 
 /**
  * LINE Flex Message 類型定義
@@ -536,23 +536,52 @@ export class FlexMessageService {
   }
 
   /**
-   * 建構投票提醒訊息（帶有 mentions）
-   * 注意：LINE Messaging API 的 mention 需要使用特殊格式
+   * 建構投票提醒訊息（使用 textV2 格式真正提及未投票使用者）
+   * @see https://developers.line.biz/en/reference/messaging-api/#text-message
    */
   buildVoteReminderMessage(
     eventTitle: string,
     unvotedMembers: Array<{ lineUserId: string; displayName: string | null }>,
-  ): { type: 'text'; text: string } {
-    // 建構 mention 文字
-    const mentions = unvotedMembers
-      .map((m) => m.displayName || '成員')
-      .join('、');
+  ): {
+    type: 'textV2';
+    text: string;
+    substitution: {
+      [key: string]: {
+        type: 'mention';
+        mentionee: { type: 'user'; userId: string };
+      };
+    };
+  } {
+    // 建構 substitution 物件，用於真正的 mention
+    const substitution: {
+      [key: string]: {
+        type: 'mention';
+        mentionee: { type: 'user'; userId: string };
+      };
+    } = {};
 
-    const text = `📢 投票提醒\n\n${mentions}，活動「${eventTitle}」還在等你投票唷！\n\n趕快點擊上方按鈕參與投票吧～`;
+    // 建構 mention placeholder 和對應的 substitution
+    const mentionPlaceholders: string[] = [];
+    unvotedMembers.forEach((member, index) => {
+      const placeholder = `{user${index}}`;
+      mentionPlaceholders.push(placeholder);
+      substitution[`user${index}`] = {
+        type: 'mention',
+        mentionee: {
+          type: 'user',
+          userId: member.lineUserId,
+        },
+      };
+    });
+
+    // 組合 mention 文字
+    const mentionsText = mentionPlaceholders.join('、');
+    const text = `📢 投票提醒\n\n${mentionsText}，活動「${eventTitle}」還在等你投票唷！\n\n趕快點擊上方按鈕參與投票吧～`;
 
     return {
-      type: 'text',
+      type: 'textV2',
       text,
+      substitution,
     };
   }
 }

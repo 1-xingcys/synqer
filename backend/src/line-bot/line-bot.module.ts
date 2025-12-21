@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { LineBotController } from './line-bot.controller';
 import { LineBotService } from './line-bot.service';
-import { LineApiService } from './line-api.service';
-import { LineGroupService } from './line-group.service';
-import { FlexMessageService } from './flex-message.service';
-import { RichMenuService } from './rich-menu.service';
+import {
+  LineApiService,
+  LineGroupService,
+  FlexMessageService,
+  RichMenuService,
+} from './services';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UsersModule } from '../users/users.module';
 import { EventStatusService } from '../events/services/event-status.service';

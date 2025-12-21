@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
 import { FlexMessageService, EventInfo } from './flex-message.service';
-import { EventStatus } from '../events/services/event-status.service';
+import { EventStatus } from '../../events/services/event-status.service';
 
 describe('FlexMessageService', () => {
   let service: FlexMessageService;
@@ -221,7 +221,7 @@ describe('FlexMessageService', () => {
   });
 
   describe('buildVoteReminderMessage', () => {
-    it('should build a text message with member names', () => {
+    it('should build a textV2 message with mention substitution', () => {
       const members = [
         { lineUserId: 'user-1', displayName: 'Alice' },
         { lineUserId: 'user-2', displayName: 'Bob' },
@@ -229,30 +229,42 @@ describe('FlexMessageService', () => {
 
       const result = service.buildVoteReminderMessage('Test Event', members);
 
-      expect(result.type).toBe('text');
-      expect(result.text).toContain('Alice');
-      expect(result.text).toContain('Bob');
+      expect(result.type).toBe('textV2');
+      expect(result.text).toContain('{user0}');
+      expect(result.text).toContain('{user1}');
       expect(result.text).toContain('Test Event');
       expect(result.text).toContain('📢 投票提醒');
+
+      // 驗證 substitution 物件
+      expect(result.substitution).toBeDefined();
+      expect(result.substitution.user0).toEqual({
+        type: 'mention',
+        mentionee: { type: 'user', userId: 'user-1' },
+      });
+      expect(result.substitution.user1).toEqual({
+        type: 'mention',
+        mentionee: { type: 'user', userId: 'user-2' },
+      });
     });
 
-    it('should use "成員" for members without displayName', () => {
+    it('should create correct substitution for each member', () => {
       const members = [
-        { lineUserId: 'user-1', displayName: null },
-        { lineUserId: 'user-2', displayName: 'Bob' },
+        { lineUserId: 'line-user-abc', displayName: null },
+        { lineUserId: 'line-user-xyz', displayName: 'Bob' },
       ];
 
       const result = service.buildVoteReminderMessage('Test Event', members);
 
-      expect(result.text).toContain('成員');
-      expect(result.text).toContain('Bob');
+      expect(result.substitution.user0.mentionee.userId).toBe('line-user-abc');
+      expect(result.substitution.user1.mentionee.userId).toBe('line-user-xyz');
     });
 
     it('should handle empty member list', () => {
       const result = service.buildVoteReminderMessage('Test Event', []);
 
-      expect(result.type).toBe('text');
+      expect(result.type).toBe('textV2');
       expect(result.text).toContain('Test Event');
+      expect(Object.keys(result.substitution)).toHaveLength(0);
     });
   });
 

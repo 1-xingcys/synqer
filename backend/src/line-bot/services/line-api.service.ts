@@ -19,7 +19,30 @@ export interface LineGroupSummary {
 /**
  * LINE 訊息類型
  */
-export type LineMessage = { type: 'text'; text: string } | FlexMessage;
+export interface TextMessage {
+  type: 'text';
+  text: string;
+}
+
+/**
+ * LINE Text Message with mention substitution
+ * @see https://developers.line.biz/en/reference/messaging-api/#text-message
+ */
+export interface TextMessageV2 {
+  type: 'textV2';
+  text: string;
+  substitution?: {
+    [key: string]: {
+      type: 'mention';
+      mentionee: {
+        type: 'user';
+        userId: string;
+      };
+    };
+  };
+}
+
+export type LineMessage = TextMessage | TextMessageV2 | FlexMessage;
 
 /**
  * LINE Messaging API 呼叫服務

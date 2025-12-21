@@ -15,7 +15,7 @@ import {
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
 import { LineBotService } from './line-bot.service';
-import { RichMenuService } from './rich-menu.service';
+import { RichMenuService } from './services';
 import type { WebhookRequestBody } from './dto/webhook-event.dto';
 import { SessionAuthGuard } from '../auth/guards';
 
