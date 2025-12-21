@@ -27,10 +27,11 @@ export function LiffPathHandler({
 }: {
   children: React.ReactNode;
 }): React.ReactNode {
-  // 使用 "pending" | "redirecting" | "done" 三種狀態
-  // 初始值是 "pending"，這樣 SSR 和 CSR 初始渲染會一致
-  const [status, setStatus] = useState<"pending" | "redirecting" | "done">(
-    "pending",
+  // 使用 "checking" | "redirecting" | "done" 三種狀態
+  // 初始值是 "checking"，在確認不需要重定向之前不渲染 children
+  // 這可以避免在重定向過程中載入不必要的 chunks
+  const [status, setStatus] = useState<"checking" | "redirecting" | "done">(
+    "checking",
   );
 
   useEffect(() => {
@@ -77,15 +78,9 @@ export function LiffPathHandler({
     void handleLiffPath();
   }, []);
 
-  // SSR 和 CSR 初始渲染都是 "pending"，直接渲染 children
-  // 這樣可以避免 hydration mismatch
-  // useEffect 會在 client-side hydration 後執行，處理 liff.state 重定向
-  if (status === "pending") {
-    return children;
-  }
-
-  // 正在重定向時顯示 loading
-  if (status === "redirecting") {
+  // 正在檢查或重定向時顯示 loading
+  // 這可以避免在重定向過程中載入 children 的 chunks，防止 "Failed to load chunk" 錯誤
+  if (status === "checking" || status === "redirecting") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
         <div className="w-8 h-8 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
