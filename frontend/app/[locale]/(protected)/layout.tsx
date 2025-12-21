@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import Header from "@/components/Header";
 import Sidebar from "@/components/ui/Sidebar";
 import { SidebarProvider, useSidebar } from "@/contexts/SidebarContext";
-import { LiffProvider } from "@/contexts/LiffContext";
 import {
   initializeLiff,
   getLiffAccessToken,
@@ -189,10 +188,8 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
   // 通過驗證，渲染佈局
   return (
-    <LiffProvider>
-      <SidebarProvider>
-        <ProtectedLayoutContent>{children}</ProtectedLayoutContent>
-      </SidebarProvider>
-    </LiffProvider>
+    <SidebarProvider>
+      <ProtectedLayoutContent>{children}</ProtectedLayoutContent>
+    </SidebarProvider>
   );
 }
