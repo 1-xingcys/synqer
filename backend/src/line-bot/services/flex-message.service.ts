@@ -290,12 +290,6 @@ export class FlexMessageService {
       spacing: 'sm',
       contents: [
         {
-          type: 'text',
-          text: '⏰',
-          size: 'sm',
-          flex: 0,
-        } as FlexText,
-        {
           type: 'box',
           layout: 'vertical',
           flex: 1,
@@ -332,7 +326,7 @@ export class FlexMessageService {
             contents: [
               {
                 type: 'text',
-                text: '📊 投票進度',
+                text: '投票進度',
                 size: 'xs',
                 color: '#999999',
                 flex: 1,
