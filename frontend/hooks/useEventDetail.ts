@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import type { VoteMode } from "@/components/JoinedEventPage/VotingGrid";
+import {
+  EventStatus,
+  ConfirmedTimeRange,
+  ParticipantStatus,
+} from "@/types/event";
 
 interface TimeSlot {
   id: string;
@@ -27,6 +32,7 @@ interface ExpectedParticipant {
   userId?: string;
   hasVoted: boolean;
   reminderSentAt?: string;
+  status?: ParticipantStatus;
   user?: {
     id: string;
     displayName?: string;
@@ -48,6 +54,10 @@ interface Event {
   endMinuteOfDay: number;
   slotDurationMin: number;
   timeZone: string;
+  status: EventStatus;
+  confirmedSlotIds: string[];
+  confirmedTimeRanges: ConfirmedTimeRange[];
+  votingDeadline?: string;
 }
 
 export interface EventDetailData {

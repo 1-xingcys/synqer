@@ -68,6 +68,11 @@
     "viewEvent": "Vote",
     "backToJoined": "Back to Joined Events",
     "backToEvent": "Back to Event",
+    "tabs": {
+      "overview": "Overview",
+      "participants": "Participants",
+      "results": "Results"
+    },
     "votingStatus": "Your Vote",
     "voted": "Voted",
     "notVoted": "Not Voted Yet",
@@ -100,9 +105,9 @@
     "available": "available",
     "voteModeLabel": "Choose voting method",
     "voteModeAvailable": "Select available times",
-    "voteModeAvailableDesc": "Mark when you're free, unselected = unavailable",
+    "voteModeAvailableDesc": "Mark when you're free",
     "voteModeUnavailable": "Select unavailable times",
-    "voteModeUnavailableDesc": "Mark when you're busy, unselected = available",
+    "voteModeUnavailableDesc": "Mark when you're busy",
     "selectAvailableMode": "Select your available times",
     "selectUnavailableMode": "Select your unavailable times",
     "dragToSelectAvailable": "Drag to select times you're available, or click dates to select entire days",
@@ -324,6 +329,15 @@
     "votingEnded": "Voting Ended",
     "confirmed": "Confirmed",
     "completed": "Completed"
+  },
+  "eventInfo": {
+    "deadline": "Deadline",
+    "statusDesc": {
+      "voting": "Vote for your available times before the deadline",
+      "votingEnded": "Voting has ended, waiting for host to confirm time",
+      "confirmed": "Event time has been confirmed",
+      "completed": "This event has ended"
+    }
   },
   "participantStatus": {
     "voted": "Voted",
