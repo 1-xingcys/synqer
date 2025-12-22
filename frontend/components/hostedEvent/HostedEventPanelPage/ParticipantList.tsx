@@ -9,6 +9,7 @@ interface VotedParticipant {
   userId: string;
   displayName: string;
   hasVoted: boolean;
+  pictureUrl?: string | null;
 }
 
 interface PendingParticipant {
@@ -53,9 +54,19 @@ export function VotedParticipantList({
               key={participant.userId}
               className="flex items-center gap-3 py-2"
             >
-              <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 text-sm font-medium">
-                {participant.displayName[0]?.toUpperCase()}
-              </div>
+              {participant.pictureUrl ? (
+                <Image
+                  src={participant.pictureUrl}
+                  alt={participant.displayName}
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 rounded-full"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 text-sm font-medium">
+                  {participant.displayName[0]?.toUpperCase()}
+                </div>
+              )}
               <span className="text-sm text-zinc-700 dark:text-zinc-300">
                 {participant.displayName}
               </span>
