@@ -354,6 +354,14 @@
     "notVoted": "Not Voted",
     "notRegistered": "Not Registered"
   },
+  "joinedParticipants": {
+    "filterAll": "All",
+    "filterVoted": "Voted",
+    "filterNotVoted": "Not Voted",
+    "searchPlaceholder": "Search participants...",
+    "noSearchResults": "No matching participants found",
+    "noParticipants": "No participants yet"
+  },
   "language": "English",
   "theme": {
     "title": "Theme",

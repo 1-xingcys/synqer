@@ -354,6 +354,14 @@
     "notVoted": "未投票",
     "notRegistered": "未註冊"
   },
+  "joinedParticipants": {
+    "filterAll": "全部",
+    "filterVoted": "已投票",
+    "filterNotVoted": "未投票",
+    "searchPlaceholder": "搜尋參與者...",
+    "noSearchResults": "找不到符合的參與者",
+    "noParticipants": "尚無參與者"
+  },
   "language": "語言",
   "theme": {
     "title": "主題",
