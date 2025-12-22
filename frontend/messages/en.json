@@ -135,6 +135,29 @@
       "showOnGrid": "Show events on grid",
       "legendCalendarEvent": "Calendar event"
     },
+    "votingEnded": {
+      "title": "Voting Has Ended",
+      "description": "The voting period has ended. Please wait for the host to confirm the event time."
+    },
+    "confirmed": {
+      "title": "Event Time Confirmed",
+      "description": "The host has confirmed the event time.",
+      "eventTime": "Event Time"
+    },
+    "untitledEvent": "Untitled Event",
+    "addToCalendar": {
+      "title": "Add to Google Calendar",
+      "description": "Save the event time to your calendar",
+      "add": "Add",
+      "addAll": "Add All",
+      "addAllShort": "All",
+      "hint": "Opens Google Calendar in a new tab"
+    },
+    "completed": {
+      "title": "Event Completed",
+      "description": "This event has ended."
+    },
+    "viewResults": "View Results",
     "results": {
       "allParticipants": "All Participants",
       "noParticipants": "No Participants",
