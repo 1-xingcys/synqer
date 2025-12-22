@@ -5,3 +5,4 @@ export { GridLegend } from "./GridLegend";
 export { DateHeader } from "./DateHeader";
 export { TimeSlotCell } from "./TimeSlotCell";
 export { GoogleCalendarPanel } from "./GoogleCalendarPanel";
+export { DatePagination } from "./DatePagination";
