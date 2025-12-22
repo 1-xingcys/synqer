@@ -8,8 +8,9 @@ import {
   useLineGroupMembers,
   LineGroupMember,
 } from "@/hooks/useLineGroups";
-import { Users, UserPlus, Check } from "lucide-react";
+import { Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -243,16 +244,16 @@ function MemberRow({
 
       {/* Linked user indicator */}
       {!member.isLinked && (
-        <div className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
-          <UserPlus className="w-3 h-3" />
-          {t("createEvent.lineGroup.notRegistered")}
-        </div>
+        <StatusBadge
+          variant="notRegistered"
+          label={t("createEvent.lineGroup.notRegistered")}
+        />
       )}
       {member.isLinked && member.linkedUser && (
-        <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-          <Check className="w-3 h-3" />
-          {t("createEvent.lineGroup.registered")}
-        </div>
+        <StatusBadge
+          variant="registered"
+          label={t("createEvent.lineGroup.registered")}
+        />
       )}
     </label>
   );
