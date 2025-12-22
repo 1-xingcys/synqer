@@ -25,9 +25,12 @@ export default function CreateEventForm() {
     handleSelectedMembersChange,
     handleSubmit,
     handleCancel,
+    confirmCancel,
+    cancelConfirmCancel,
     isFormValid,
     titleCharCount,
     descriptionCharCount,
+    showCancelConfirm,
   } = useCreateEventForm();
 
   return (
@@ -99,7 +102,10 @@ export default function CreateEventForm() {
         <FormActions
           loading={loading}
           isFormValid={isFormValid}
+          showCancelConfirm={showCancelConfirm}
           onCancel={handleCancel}
+          onConfirmCancel={confirmCancel}
+          onCancelConfirmCancel={cancelConfirmCancel}
         />
       </form>
     </div>

@@ -11,6 +11,7 @@ import {
   truncateToMaxChars,
   parseTimeToMinutes,
   combineDateAndTime,
+  getToday,
 } from "./types";
 
 interface ValidationErrors {
@@ -42,10 +43,14 @@ interface UseCreateEventFormReturn {
   // Form actions
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   handleCancel: () => void;
+  confirmCancel: () => void;
+  cancelConfirmCancel: () => void;
   // Computed
   isFormValid: boolean;
   titleCharCount: number;
   descriptionCharCount: number;
+  hasUnsavedChanges: boolean;
+  showCancelConfirm: boolean;
 }
 
 export function useCreateEventForm(): UseCreateEventFormReturn {
@@ -53,6 +58,7 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] =
     useState<CreateEventFormData>(initialFormData);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   // ===== Character counts =====
   const titleCharCount = useMemo(
@@ -324,10 +330,47 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
     [formData, router],
   );
 
+  // ===== Check if form has unsaved changes =====
+  const hasUnsavedChanges = useMemo(() => {
+    const today = getToday();
+    const isSameDay = (d1: Date | null, d2: Date | null) => {
+      if (!d1 || !d2) return d1 === d2;
+      return d1.toDateString() === d2.toDateString();
+    };
+
+    // Check if any field differs from initial values
+    return (
+      formData.title.trim() !== "" ||
+      formData.description.trim() !== "" ||
+      !isSameDay(formData.startDate, today) ||
+      !isSameDay(formData.endDate, today) ||
+      formData.startTime !== "00:00" ||
+      formData.endTime !== "24:00" ||
+      formData.votingDeadlineManuallySet ||
+      formData.lineGroupId !== null ||
+      formData.selectedLineUserIds.length > 0
+    );
+  }, [formData]);
+
   // ===== Handle cancel =====
   const handleCancel = useCallback(() => {
+    if (hasUnsavedChanges) {
+      setShowCancelConfirm(true);
+    } else {
+      router.back();
+    }
+  }, [hasUnsavedChanges, router]);
+
+  // ===== Confirm cancel =====
+  const confirmCancel = useCallback(() => {
+    setShowCancelConfirm(false);
     router.back();
   }, [router]);
+
+  // ===== Cancel the confirm dialog =====
+  const cancelConfirmCancel = useCallback(() => {
+    setShowCancelConfirm(false);
+  }, []);
 
   return {
     formData,
@@ -345,8 +388,12 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
     handleSelectedMembersChange,
     handleSubmit,
     handleCancel,
+    confirmCancel,
+    cancelConfirmCancel,
     isFormValid,
     titleCharCount,
     descriptionCharCount,
+    hasUnsavedChanges,
+    showCancelConfirm,
   };
 }
