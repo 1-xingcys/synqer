@@ -2,18 +2,22 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import EventRow, { EventRowData } from "./EventRow";
+import EventRow, {
+  EventRowData,
+  HostedEventRowData,
+  EventCategory,
+} from "./EventRow";
 import { ChevronRight } from "lucide-react";
-
-type EventCategory = "voting" | "votingEnded" | "confirmed" | "completed";
 
 interface EventSectionProps {
   title: string;
-  events: EventRowData[];
+  events: (EventRowData | HostedEventRowData)[];
   category: EventCategory;
   showViewMore?: boolean;
   viewMoreHref?: string;
   limit?: number;
+  mode?: "joined" | "hosted";
+  translationNamespace?: string;
 }
 
 export default function EventSection({
@@ -23,9 +27,11 @@ export default function EventSection({
   showViewMore = false,
   viewMoreHref,
   limit,
+  mode = "joined",
+  translationNamespace = "joinedEvents",
 }: EventSectionProps) {
-  const t = useTranslations("joinedEvents");
-  
+  const t = useTranslations(translationNamespace);
+
   const displayEvents = limit ? events.slice(0, limit) : events;
   const hasMore = limit ? events.length > limit : false;
 
@@ -61,6 +67,8 @@ export default function EventSection({
             key={event.id}
             event={event}
             variant={category}
+            mode={mode}
+            translationNamespace={translationNamespace}
           />
         ))}
       </div>
@@ -80,4 +88,3 @@ export default function EventSection({
     </div>
   );
 }
-

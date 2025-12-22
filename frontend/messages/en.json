@@ -275,6 +275,44 @@
     "copyLink": "Copy event link",
     "copied": "Copied!"
   },
+  "hostedEvents": {
+    "title": "Hosted Events",
+    "description": "Manage events that you host",
+    "loading": "Loading events...",
+    "error": "Failed to load events",
+    "tabs": {
+      "overview": "Overview",
+      "voting": "Voting",
+      "votingEnded": "Voting Ended",
+      "confirmed": "Confirmed",
+      "completed": "Completed"
+    },
+    "sections": {
+      "voting": "Voting Events",
+      "votingEnded": "Voting Ended",
+      "confirmed": "Confirmed Events",
+      "completed": "Completed Events"
+    },
+    "empty": {
+      "all": "No events yet",
+      "allDescription": "Create your first event to get started",
+      "voting": "No voting events",
+      "votingDescription": "Events in voting phase will appear here",
+      "votingEnded": "No events with ended voting",
+      "votingEndedDescription": "Events where voting has ended will appear here",
+      "confirmed": "No confirmed events",
+      "confirmedDescription": "Events with confirmed times will appear here",
+      "completed": "No completed events",
+      "completedDescription": "Past events will appear here"
+    },
+    "viewMore": "View more {type} events",
+    "showingEvents": "Showing {start}-{end} of {total} events",
+    "allVoted": "All voted",
+    "votingInProgress": "Voting in progress",
+    "untitled": "Untitled Event",
+    "copyLink": "Copy event link",
+    "copied": "Copied!"
+  },
   "eventStatus": {
     "voting": "Voting",
     "votingEnded": "Voting Ended",

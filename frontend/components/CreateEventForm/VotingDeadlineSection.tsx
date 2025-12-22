@@ -25,7 +25,7 @@ export function VotingDeadlineSection({
   startDate,
   startTime,
   isManuallySet,
-  hasError,
+  hasError: _hasError,
   onDeadlineDateChange,
   onDeadlineTimeChange,
 }: VotingDeadlineSectionProps) {

@@ -95,15 +95,13 @@ function DesktopTimePicker({
   hasError,
 }: TimePickerProps) {
   const [open, setOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(value);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState("");
   const [inputError, setInputError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Update input value when prop changes
-  useEffect(() => {
-    setInputValue(value);
-    setInputError(null);
-  }, [value]);
+  // Display value: use editValue when editing, otherwise use prop value
+  const inputValue = isEditing ? editValue : value;
 
   // Generate all valid time options
   const timeOptions = useMemo(() => {
@@ -167,7 +165,10 @@ function DesktopTimePicker({
           return { valid: false, error: "小時必須在 00-24 之間" };
         }
         if (h === 0 && m === 0) {
-          return { valid: false, error: "結束時間 00:00 無效，請選擇 00:15 以後" };
+          return {
+            valid: false,
+            error: "結束時間 00:00 無效，請選擇 00:15 以後",
+          };
         }
         if (h === 24 && m !== 0) {
           return { valid: false, error: "24 時只能選擇 24:00" };
@@ -182,7 +183,10 @@ function DesktopTimePicker({
   // Handle input change
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
-    setInputValue(newValue);
+    if (!isEditing) {
+      setIsEditing(true);
+    }
+    setEditValue(newValue);
 
     // Clear error while typing
     if (inputError) {
@@ -190,10 +194,16 @@ function DesktopTimePicker({
     }
   };
 
+  // Handle input focus
+  const handleInputFocus = () => {
+    setIsEditing(true);
+    setEditValue(value);
+  };
+
   // Handle input blur - validate and apply
   const handleInputBlur = () => {
     // Normalize input (add leading zero if needed)
-    let normalizedValue = inputValue.trim();
+    let normalizedValue = editValue.trim();
 
     // Try to fix common input patterns
     const shortMatch = normalizedValue.match(/^(\d):(\d{2})$/);
@@ -207,19 +217,18 @@ function DesktopTimePicker({
       const [h, m] = normalizedValue.split(":").map(Number);
       const formatted = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
       onChange(formatted);
-      setInputValue(formatted);
       setInputError(null);
     } else {
       setInputError(validation.error || "無效的時間");
-      // Revert to last valid value
-      setInputValue(value);
     }
+    // Exit editing mode
+    setIsEditing(false);
   };
 
   // Handle option select from dropdown
   const handleOptionSelect = (time: string) => {
     onChange(time);
-    setInputValue(time);
+    setIsEditing(false);
     setInputError(null);
     setOpen(false);
   };
@@ -230,7 +239,7 @@ function DesktopTimePicker({
       handleInputBlur();
       setOpen(false);
     } else if (e.key === "Escape") {
-      setInputValue(value);
+      setIsEditing(false);
       setInputError(null);
       setOpen(false);
     }
@@ -247,7 +256,10 @@ function DesktopTimePicker({
               onChange={handleInputChange}
               onBlur={handleInputBlur}
               onKeyDown={handleKeyDown}
-              onFocus={() => setOpen(true)}
+              onFocus={() => {
+                handleInputFocus();
+                setOpen(true);
+              }}
               disabled={disabled}
               placeholder="HH:MM"
               className={cn(
@@ -274,7 +286,8 @@ function DesktopTimePicker({
                 type="button"
                 className={cn(
                   "w-full px-3 py-2 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors",
-                  time === value && "bg-accent text-accent-foreground font-medium",
+                  time === value &&
+                    "bg-accent text-accent-foreground font-medium",
                 )}
                 onClick={() => handleOptionSelect(time)}
               >
@@ -302,26 +315,45 @@ function MobileTimePicker({
 }: TimePickerProps) {
   const [open, setOpen] = useState(false);
   const pickerContainerRef = useRef<HTMLDivElement>(null);
+  const [localPickerValue, setLocalPickerValue] = useState<{
+    hour: string;
+    minute: string;
+  } | null>(null);
 
-  // Parse current value
-  const [hourStr, minuteStr] = value.split(":");
-  const hour = parseInt(hourStr, 10);
-  const minute = parseInt(minuteStr, 10);
-
-  // Picker state
-  const [pickerValue, setPickerValue] = useState({
-    hour: hour.toString().padStart(2, "0"),
-    minute: minute.toString().padStart(2, "0"),
-  });
-
-  // Update picker value when prop changes
-  useEffect(() => {
+  // Parse current value from prop
+  const propValue = useMemo(() => {
     const [h, m] = value.split(":");
-    setPickerValue({
-      hour: h,
-      minute: m,
-    });
+    return { hour: h, minute: m };
   }, [value]);
+
+  // Use local value when editing (drawer open), otherwise use prop value
+  const pickerValue = localPickerValue ?? propValue;
+
+  // Reset local picker value when drawer opens
+  const handleOpenChange = (isOpen: boolean) => {
+    if (isOpen) {
+      setLocalPickerValue(propValue);
+    } else {
+      setLocalPickerValue(null);
+    }
+    setOpen(isOpen);
+  };
+
+  // Setter that updates local picker value
+  const setPickerValue = (
+    newValue:
+      | { hour: string; minute: string }
+      | ((prev: { hour: string; minute: string }) => {
+          hour: string;
+          minute: string;
+        }),
+  ) => {
+    if (typeof newValue === "function") {
+      setLocalPickerValue((prev) => newValue(prev ?? propValue));
+    } else {
+      setLocalPickerValue(newValue);
+    }
+  };
 
   // Prevent page scroll when touching the picker
   useEffect(() => {
@@ -383,7 +415,7 @@ function MobileTimePicker({
     newValue: { hour: string; minute: string },
     key: string,
   ) => {
-    let updatedValue = { ...newValue };
+    const updatedValue = { ...newValue };
 
     if (key === "hour") {
       const validMinutes = getMinuteOptions(newValue.hour);
@@ -399,16 +431,15 @@ function MobileTimePicker({
   const handleConfirm = () => {
     const newTime = `${pickerValue.hour}:${pickerValue.minute}`;
     onChange(newTime);
+    setLocalPickerValue(null);
     setOpen(false);
   };
 
-  // Format display value
-  const displayValue = useMemo(() => {
-    return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-  }, [hour, minute]);
+  // Format display value - always use prop value for display
+  const displayValue = value;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"

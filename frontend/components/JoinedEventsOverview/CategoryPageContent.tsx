@@ -3,9 +3,10 @@
 import { useTranslations } from "next-intl";
 import { useAttendedEvents } from "@/hooks/useAttendedEvents";
 import { useFilteredAttendedEvents } from "@/hooks/useFilteredAttendedEvents";
-import EventListWithPagination from "./EventListWithPagination";
-
-type EventCategory = "voting" | "votingEnded" | "confirmed" | "completed";
+import {
+  EventListWithPagination,
+  EventCategory,
+} from "@/components/eventCommon/EventsOverview";
 
 interface CategoryPageContentProps {
   category: EventCategory;
@@ -44,7 +45,8 @@ export default function CategoryPageContent({
       events={categoryEvents}
       category={category}
       pageSize={10}
+      mode="joined"
+      translationNamespace="joinedEvents"
     />
   );
 }
-

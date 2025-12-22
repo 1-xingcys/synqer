@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { EventStatus, AttendedEventListItem } from "@/types/event";
-import { EventRowHost } from "@/components/JoinedEventsOverview/EventRow";
+import { EventRowHost } from "@/components/eventCommon/EventsOverview";
 
 export interface ExtendedAttendedEvent extends AttendedEventListItem {
   host?: EventRowHost | null;
@@ -19,7 +19,7 @@ interface FilteredEvents {
 
 /**
  * Sort events based on the category's ordering rules
- * 
+ *
  * Voting: Unvoted first, then by deadline (closer = higher priority)
  * Voting Ended: By start date (closer = higher priority)
  * Confirmed: By confirmed start date (closer = higher priority)
@@ -27,7 +27,7 @@ interface FilteredEvents {
  */
 function sortEvents(
   events: ExtendedAttendedEvent[],
-  category: EventCategory
+  category: EventCategory,
 ): ExtendedAttendedEvent[] {
   const now = new Date().getTime();
 
@@ -39,8 +39,12 @@ function sortEvents(
           return a.hasVoted ? 1 : -1;
         }
         // Then by deadline (closer to now = higher priority)
-        const deadlineA = a.votingDeadline ? new Date(a.votingDeadline).getTime() : Infinity;
-        const deadlineB = b.votingDeadline ? new Date(b.votingDeadline).getTime() : Infinity;
+        const deadlineA = a.votingDeadline
+          ? new Date(a.votingDeadline).getTime()
+          : Infinity;
+        const deadlineB = b.votingDeadline
+          ? new Date(b.votingDeadline).getTime()
+          : Infinity;
         // Closer deadline = smaller difference from now = higher priority
         return Math.abs(deadlineA - now) - Math.abs(deadlineB - now);
       }
@@ -54,15 +58,25 @@ function sortEvents(
 
       case "confirmed": {
         // By confirmed start date (closer to now = higher priority)
-        const confirmedStartA = a.confirmedStartTime ? new Date(a.confirmedStartTime).getTime() : Infinity;
-        const confirmedStartB = b.confirmedStartTime ? new Date(b.confirmedStartTime).getTime() : Infinity;
-        return Math.abs(confirmedStartA - now) - Math.abs(confirmedStartB - now);
+        const confirmedStartA = a.confirmedStartTime
+          ? new Date(a.confirmedStartTime).getTime()
+          : Infinity;
+        const confirmedStartB = b.confirmedStartTime
+          ? new Date(b.confirmedStartTime).getTime()
+          : Infinity;
+        return (
+          Math.abs(confirmedStartA - now) - Math.abs(confirmedStartB - now)
+        );
       }
 
       case "completed": {
         // By confirmed end date (closer to now = higher priority)
-        const confirmedEndA = a.confirmedEndTime ? new Date(a.confirmedEndTime).getTime() : Infinity;
-        const confirmedEndB = b.confirmedEndTime ? new Date(b.confirmedEndTime).getTime() : Infinity;
+        const confirmedEndA = a.confirmedEndTime
+          ? new Date(a.confirmedEndTime).getTime()
+          : Infinity;
+        const confirmedEndB = b.confirmedEndTime
+          ? new Date(b.confirmedEndTime).getTime()
+          : Infinity;
         return Math.abs(confirmedEndA - now) - Math.abs(confirmedEndB - now);
       }
 
@@ -75,7 +89,9 @@ function sortEvents(
 /**
  * Hook to filter and sort attended events by status
  */
-export function useFilteredAttendedEvents(events: ExtendedAttendedEvent[]): FilteredEvents {
+export function useFilteredAttendedEvents(
+  events: ExtendedAttendedEvent[],
+): FilteredEvents {
   return useMemo(() => {
     const filtered: FilteredEvents = {
       voting: [],
@@ -118,7 +134,7 @@ export function useFilteredAttendedEvents(events: ExtendedAttendedEvent[]): Filt
 export function paginateEvents<T>(
   events: T[],
   page: number,
-  pageSize: number
+  pageSize: number,
 ): { items: T[]; totalPages: number; totalItems: number } {
   const totalItems = events.length;
   const totalPages = Math.ceil(totalItems / pageSize);
@@ -127,4 +143,3 @@ export function paginateEvents<T>(
 
   return { items, totalPages, totalItems };
 }
-

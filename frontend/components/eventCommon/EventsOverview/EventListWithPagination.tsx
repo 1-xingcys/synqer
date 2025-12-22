@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import EventRow, { EventRowData } from "./EventRow";
+import EventRow, {
+  EventRowData,
+  HostedEventRowData,
+  EventCategory,
+} from "./EventRow";
 import {
   Pagination,
   PaginationContent,
@@ -15,30 +19,37 @@ import {
 import { paginateEvents } from "@/hooks/useFilteredAttendedEvents";
 import EmptyState from "./EmptyState";
 
-type EventCategory = "voting" | "votingEnded" | "confirmed" | "completed";
-
 interface EventListWithPaginationProps {
-  events: EventRowData[];
+  events: (EventRowData | HostedEventRowData)[];
   category: EventCategory;
   pageSize?: number;
+  mode?: "joined" | "hosted";
+  translationNamespace?: string;
 }
 
 export default function EventListWithPagination({
   events,
   category,
   pageSize = 10,
+  mode = "joined",
+  translationNamespace = "joinedEvents",
 }: EventListWithPaginationProps) {
-  const t = useTranslations("joinedEvents");
+  const t = useTranslations(translationNamespace);
   const [currentPage, setCurrentPage] = useState(1);
 
   const { items, totalPages, totalItems } = paginateEvents(
     events,
     currentPage,
-    pageSize
+    pageSize,
   );
 
   if (events.length === 0) {
-    return <EmptyState category={category} />;
+    return (
+      <EmptyState
+        category={category}
+        translationNamespace={translationNamespace}
+      />
+    );
   }
 
   // Generate pagination items
@@ -92,7 +103,13 @@ export default function EventListWithPagination({
       {/* Events List */}
       <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
         {items.map((event) => (
-          <EventRow key={event.id} event={event} variant={category} />
+          <EventRow
+            key={event.id}
+            event={event}
+            variant={category}
+            mode={mode}
+            translationNamespace={translationNamespace}
+          />
         ))}
       </div>
 
@@ -103,7 +120,9 @@ export default function EventListWithPagination({
             <PaginationItem>
               <PaginationPrevious
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                className={
+                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                }
               />
             </PaginationItem>
 
@@ -121,13 +140,19 @@ export default function EventListWithPagination({
                     {item}
                   </PaginationLink>
                 </PaginationItem>
-              )
+              ),
             )}
 
             <PaginationItem>
               <PaginationNext
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
               />
             </PaginationItem>
           </PaginationContent>
@@ -136,4 +161,3 @@ export default function EventListWithPagination({
     </div>
   );
 }
-

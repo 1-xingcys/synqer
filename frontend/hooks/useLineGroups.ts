@@ -108,7 +108,9 @@ export function useLineGroupMembers(groupId: string | null) {
       } catch (err) {
         if (!cancelled) {
           console.error("Error fetching group members:", err);
-          setError(err instanceof Error ? err.message : "Failed to load members");
+          setError(
+            err instanceof Error ? err.message : "Failed to load members",
+          );
         }
       } finally {
         if (!cancelled) {
@@ -126,7 +128,7 @@ export function useLineGroupMembers(groupId: string | null) {
 
   const refetch = useCallback(async () => {
     if (!groupId || !process.env.NEXT_PUBLIC_API) return;
-    
+
     setLoading(true);
     try {
       const response = await fetch(

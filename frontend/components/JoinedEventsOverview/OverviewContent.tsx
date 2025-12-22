@@ -3,8 +3,10 @@
 import { useTranslations } from "next-intl";
 import { useAttendedEvents } from "@/hooks/useAttendedEvents";
 import { useFilteredAttendedEvents } from "@/hooks/useFilteredAttendedEvents";
-import EventSection from "./EventSection";
-import EmptyState from "./EmptyState";
+import {
+  EventSection,
+  EmptyState,
+} from "@/components/eventCommon/EventsOverview";
 
 const TOP_N = 5;
 
@@ -39,7 +41,7 @@ export default function OverviewContent() {
     filteredEvents.completed.length > 0;
 
   if (!hasAnyEvents) {
-    return <EmptyState category="all" />;
+    return <EmptyState category="all" translationNamespace="joinedEvents" />;
   }
 
   return (
@@ -53,6 +55,8 @@ export default function OverviewContent() {
           showViewMore={filteredEvents.voting.length > TOP_N}
           viewMoreHref="/joined/voting"
           limit={undefined} // Show all voting events
+          mode="joined"
+          translationNamespace="joinedEvents"
         />
       )}
 
@@ -65,6 +69,8 @@ export default function OverviewContent() {
           showViewMore={true}
           viewMoreHref="/joined/voting-ended"
           limit={TOP_N}
+          mode="joined"
+          translationNamespace="joinedEvents"
         />
       )}
 
@@ -77,6 +83,8 @@ export default function OverviewContent() {
           showViewMore={true}
           viewMoreHref="/joined/confirmed"
           limit={TOP_N}
+          mode="joined"
+          translationNamespace="joinedEvents"
         />
       )}
 
@@ -89,9 +97,10 @@ export default function OverviewContent() {
           showViewMore={true}
           viewMoreHref="/joined/completed"
           limit={TOP_N}
+          mode="joined"
+          translationNamespace="joinedEvents"
         />
       )}
     </div>
   );
 }
-

@@ -54,7 +54,7 @@ const PaginationLink = ({
         size,
       }),
       "cursor-pointer",
-      className
+      className,
     )}
     {...props}
   />
@@ -117,4 +117,3 @@ export {
   PaginationNext,
   PaginationPrevious,
 };
-
