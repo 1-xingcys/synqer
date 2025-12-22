@@ -1,14 +1,14 @@
 "use client";
 
 interface VotingProgressProps {
-  title?: string;
+  title: string;
   votingPercentage: number;
   totalVoted: number;
   totalExpected: number;
 }
 
 export function VotingProgress({
-  title = "Voting Progress",
+  title,
   votingPercentage,
   totalVoted,
   totalExpected,

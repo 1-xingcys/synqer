@@ -142,11 +142,8 @@ export default function JoinedEventParticipantsPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          {t("joined.participants")}
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
           {eventDetailData.event.title || t("event.untitled")}
-        </p>
+        </h1>
       </div>
 
       {/* Voting Progress */}

@@ -56,6 +56,7 @@ export default function HostedEventPanelPage() {
       />
 
       <VotingProgress
+        title={t("hosted.votingProgress")}
         votingPercentage={votingStats.votingPercentage}
         totalVoted={votingStats.totalVoted}
         totalExpected={votingStats.totalExpected}
