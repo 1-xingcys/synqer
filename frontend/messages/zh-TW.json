@@ -147,6 +147,9 @@
     "totalExpected": "預期參與者",
     "totalVoted": "已投票",
     "votingProgress": "投票進度",
+    "decideTime": "決定活動時間",
+    "editTime": "修改活動時間",
+    "timeConfirmed": "已確認 {count} 個時段",
     "votedParticipants": "已投票的參與者",
     "pendingParticipants": "等待投票的參與者",
     "noVotesYet": "尚無投票",
@@ -234,7 +237,10 @@
     "slotDetails": "時段詳情",
     "available": "有空",
     "unavailable": "沒空",
-    "peopleCount": "{count} 人"
+    "peopleCount": "{count} 人",
+    "confirmedTime": {
+      "moreRanges": "(+{count} 個時段)"
+    }
   },
   "joinedEvents": {
     "title": "加入的活動",
@@ -330,6 +336,19 @@
     "light": "淺色",
     "dark": "深色",
     "system": "系統預設"
+  },
+  "confirmTime": {
+    "title": "決定活動時間",
+    "editTitle": "修改活動時間",
+    "description": "點擊時段來選擇確認的活動時間，顏色越深表示越多人有空",
+    "selectTimeSlots": "選擇活動時段",
+    "clickToSelect": "點擊格子選擇要確認的時段",
+    "selectedSlots": "已選擇 {count} 個時段",
+    "clearSelection": "清除選擇",
+    "selectAtLeastOne": "請至少選擇一個時段",
+    "saveFailed": "儲存失敗，請重試",
+    "confirm": "確認時間",
+    "selected": "已選擇"
   },
   "createEvent": {
     "title": "建立新活動",

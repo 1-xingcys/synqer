@@ -57,27 +57,17 @@ function sortEvents(
       }
 
       case "confirmed": {
-        // By confirmed start date (closer to now = higher priority)
-        const confirmedStartA = a.confirmedStartTime
-          ? new Date(a.confirmedStartTime).getTime()
-          : Infinity;
-        const confirmedStartB = b.confirmedStartTime
-          ? new Date(b.confirmedStartTime).getTime()
-          : Infinity;
-        return (
-          Math.abs(confirmedStartA - now) - Math.abs(confirmedStartB - now)
-        );
+        // By start date (closer to now = higher priority)
+        const startA = new Date(a.startDate).getTime();
+        const startB = new Date(b.startDate).getTime();
+        return Math.abs(startA - now) - Math.abs(startB - now);
       }
 
       case "completed": {
-        // By confirmed end date (closer to now = higher priority)
-        const confirmedEndA = a.confirmedEndTime
-          ? new Date(a.confirmedEndTime).getTime()
-          : Infinity;
-        const confirmedEndB = b.confirmedEndTime
-          ? new Date(b.confirmedEndTime).getTime()
-          : Infinity;
-        return Math.abs(confirmedEndA - now) - Math.abs(confirmedEndB - now);
+        // By end date (closer to now = higher priority)
+        const endA = new Date(a.endDate).getTime();
+        const endB = new Date(b.endDate).getTime();
+        return Math.abs(endA - now) - Math.abs(endB - now);
       }
 
       default:

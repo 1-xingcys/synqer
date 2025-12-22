@@ -44,8 +44,12 @@ export class EventsService {
    */
   computeEventStatus(event: {
     votingDeadline: Date | null;
-    confirmedStartTime: Date | null;
-    confirmedEndTime: Date | null;
+    confirmedTimeSlots?: Array<{
+      slotId: string;
+      date: Date;
+      startMinute: number;
+      endMinute: number;
+    }>;
   }): EventStatus {
     return this.eventStatusService.computeEventStatus(event);
   }
@@ -201,6 +205,7 @@ export class EventsService {
 
   /**
    * 確認活動時間（僅限活動擁有者）
+   * 以 timeSlot 為單位儲存確認的時段
    */
   async confirmEventTime(
     eventId: string,
@@ -209,32 +214,72 @@ export class EventsService {
   ) {
     await this.eventAuthorizationService.verifyOwner(eventId, userId);
 
-    const confirmedStartTime = new Date(dto.confirmedStartTime);
-    const confirmedEndTime = new Date(dto.confirmedEndTime);
-
-    // 驗證結束時間必須在開始時間之後
-    if (confirmedEndTime <= confirmedStartTime) {
-      throw new BadRequestException(
-        'Confirmed end time must be after confirmed start time',
-      );
-    }
-
-    const updatedEvent = await this.prisma.event.update({
-      where: { id: eventId },
-      data: {
-        confirmedStartTime,
-        confirmedEndTime,
+    // 驗證所有 slotIds 都屬於這個活動
+    const slots = await this.prisma.eventTimeSlot.findMany({
+      where: {
+        id: { in: dto.slotIds },
+        eventId,
       },
     });
 
+    if (slots.length !== dto.slotIds.length) {
+      throw new BadRequestException(
+        'Some slot IDs are invalid or do not belong to this event',
+      );
+    }
+
+    // 使用 transaction 更新確認的時段
+    await this.prisma.$transaction(async (prisma: Prisma.TransactionClient) => {
+      // 刪除現有的確認時段
+      await prisma.confirmedEventTimeSlot.deleteMany({
+        where: { eventId },
+      });
+
+      // 新增新的確認時段
+      await prisma.confirmedEventTimeSlot.createMany({
+        data: dto.slotIds.map((slotId) => ({
+          eventId,
+          slotId,
+        })),
+      });
+    });
+
+    // 查詢更新後的資料
+    const updatedEvent = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        confirmedTimeSlots: {
+          include: {
+            slot: {
+              select: {
+                id: true,
+                date: true,
+                startMinute: true,
+                endMinute: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!updatedEvent) {
+      throw new BadRequestException('Event not found');
+    }
+
+    const confirmedTimeSlots = updatedEvent.confirmedTimeSlots.map((cts) => ({
+      slotId: cts.slotId,
+      date: cts.slot.date,
+      startMinute: cts.slot.startMinute,
+      endMinute: cts.slot.endMinute,
+    }));
+
     return {
       id: updatedEvent.id,
-      confirmedStartTime: updatedEvent.confirmedStartTime,
-      confirmedEndTime: updatedEvent.confirmedEndTime,
+      confirmedSlotIds: dto.slotIds,
       status: this.eventStatusService.computeEventStatus({
         votingDeadline: updatedEvent.votingDeadline,
-        confirmedStartTime: updatedEvent.confirmedStartTime,
-        confirmedEndTime: updatedEvent.confirmedEndTime,
+        confirmedTimeSlots,
       }),
     };
   }
@@ -245,20 +290,24 @@ export class EventsService {
   async cancelConfirmedTime(eventId: string, userId: string) {
     await this.eventAuthorizationService.verifyOwner(eventId, userId);
 
-    const updatedEvent = await this.prisma.event.update({
-      where: { id: eventId },
-      data: {
-        confirmedStartTime: null,
-        confirmedEndTime: null,
-      },
+    // 刪除所有確認的時段
+    await this.prisma.confirmedEventTimeSlot.deleteMany({
+      where: { eventId },
     });
+
+    const updatedEvent = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!updatedEvent) {
+      throw new BadRequestException('Event not found');
+    }
 
     return {
       id: updatedEvent.id,
       status: this.eventStatusService.computeEventStatus({
         votingDeadline: updatedEvent.votingDeadline,
-        confirmedStartTime: updatedEvent.confirmedStartTime,
-        confirmedEndTime: updatedEvent.confirmedEndTime,
+        confirmedTimeSlots: [],
       }),
     };
   }

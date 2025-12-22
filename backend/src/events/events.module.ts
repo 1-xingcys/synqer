@@ -3,6 +3,7 @@ import { EventsService } from './events.service';
 import { EventsController } from './events.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { LineBotModule } from '../line-bot/line-bot.module';
+import { ConfirmedTimeModule } from '../confirmed-time';
 import {
   TimeSlotService,
   EventParticipantService,
@@ -14,7 +15,7 @@ import {
 } from './services';
 
 @Module({
-  imports: [PrismaModule, LineBotModule],
+  imports: [PrismaModule, LineBotModule, ConfirmedTimeModule],
   controllers: [EventsController],
   providers: [
     EventsService,

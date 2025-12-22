@@ -1,12 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { EventStatusService } from './event-status.service';
+import {
+  ConfirmedTimeService,
+  ConfirmedTimeSlotData,
+  ConfirmedTimeRange,
+} from '../../confirmed-time';
+
+// 確認時段的資料結構（重新導出以保持向後兼容）
+export type ConfirmedTimeSlot = ConfirmedTimeSlotData;
 
 /**
  * 活動數據轉換服務
  */
 @Injectable()
 export class EventMapperService {
-  constructor(private eventStatusService: EventStatusService) {}
+  constructor(
+    private eventStatusService: EventStatusService,
+    private confirmedTimeService: ConfirmedTimeService,
+  ) {}
 
   /**
    * 轉換 votes 數據為簡化格式
@@ -88,6 +99,33 @@ export class EventMapperService {
   }
 
   /**
+   * 將確認時段轉換為狀態計算所需的格式
+   */
+  private mapConfirmedSlotsForStatus(confirmedTimeSlots?: ConfirmedTimeSlot[]) {
+    if (!confirmedTimeSlots || confirmedTimeSlots.length === 0) {
+      return undefined;
+    }
+    return confirmedTimeSlots.map((cts) => ({
+      slotId: cts.slotId,
+      date: cts.slot.date,
+      startMinute: cts.slot.startMinute,
+      endMinute: cts.slot.endMinute,
+    }));
+  }
+
+  /**
+   * 將確認時段轉換為時間範圍
+   */
+  mapConfirmedTimeRanges(
+    confirmedTimeSlots?: ConfirmedTimeSlot[],
+  ): ConfirmedTimeRange[] {
+    if (!confirmedTimeSlots || confirmedTimeSlots.length === 0) {
+      return [];
+    }
+    return this.confirmedTimeService.mergeToTimeRanges(confirmedTimeSlots);
+  }
+
+  /**
    * 映射事件為列表項格式
    */
   mapEventToList(
@@ -99,12 +137,17 @@ export class EventMapperService {
       endDate: Date;
       createdAt: Date;
       votingDeadline: Date | null;
-      confirmedStartTime: Date | null;
-      confirmedEndTime: Date | null;
       expectedParticipants?: Array<{ id: string }>;
+      confirmedTimeSlots?: ConfirmedTimeSlot[];
     },
     includeStatus = true,
   ) {
+    const confirmedSlotIds =
+      event.confirmedTimeSlots?.map((cts) => cts.slotId) || [];
+    const confirmedTimeRanges = this.mapConfirmedTimeRanges(
+      event.confirmedTimeSlots,
+    );
+
     const base = {
       id: event.id,
       title: event.title,
@@ -113,8 +156,8 @@ export class EventMapperService {
       endDate: event.endDate,
       createdAt: event.createdAt,
       votingDeadline: event.votingDeadline,
-      confirmedStartTime: event.confirmedStartTime,
-      confirmedEndTime: event.confirmedEndTime,
+      confirmedSlotIds,
+      confirmedTimeRanges,
     };
 
     if (includeStatus) {
@@ -123,8 +166,9 @@ export class EventMapperService {
         participantCount: event.expectedParticipants?.length || 0,
         status: this.eventStatusService.computeEventStatus({
           votingDeadline: event.votingDeadline,
-          confirmedStartTime: event.confirmedStartTime,
-          confirmedEndTime: event.confirmedEndTime,
+          confirmedTimeSlots: this.mapConfirmedSlotsForStatus(
+            event.confirmedTimeSlots,
+          ),
         }),
       };
     }
@@ -148,9 +192,14 @@ export class EventMapperService {
     lineGroupId: string | null;
     ownerId: string | null;
     votingDeadline: Date | null;
-    confirmedStartTime: Date | null;
-    confirmedEndTime: Date | null;
+    confirmedTimeSlots?: ConfirmedTimeSlot[];
   }) {
+    const confirmedSlotIds =
+      event.confirmedTimeSlots?.map((cts) => cts.slotId) || [];
+    const confirmedTimeRanges = this.mapConfirmedTimeRanges(
+      event.confirmedTimeSlots,
+    );
+
     return {
       id: event.id,
       title: event.title,
@@ -164,12 +213,13 @@ export class EventMapperService {
       lineGroupId: event.lineGroupId,
       ownerId: event.ownerId,
       votingDeadline: event.votingDeadline,
-      confirmedStartTime: event.confirmedStartTime,
-      confirmedEndTime: event.confirmedEndTime,
+      confirmedSlotIds,
+      confirmedTimeRanges,
       status: this.eventStatusService.computeEventStatus({
         votingDeadline: event.votingDeadline,
-        confirmedStartTime: event.confirmedStartTime,
-        confirmedEndTime: event.confirmedEndTime,
+        confirmedTimeSlots: this.mapConfirmedSlotsForStatus(
+          event.confirmedTimeSlots,
+        ),
       }),
     };
   }

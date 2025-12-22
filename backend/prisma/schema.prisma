@@ -121,10 +121,6 @@ model Event {
   // 投票截止時間
   votingDeadline DateTime?
 
-  // Host 確定的最終活動時間
-  confirmedStartTime DateTime?
-  confirmedEndTime   DateTime?
-
   // LINE 群組關聯（可選）
   lineGroupId String?
   lineGroup   LineGroup? @relation(fields: [lineGroupId], references: [id], onDelete: SetNull)
@@ -135,6 +131,7 @@ model Event {
   slots                EventTimeSlot[]
   votes                EventVote[]
   expectedParticipants EventExpectedParticipant[]
+  confirmedTimeSlots   ConfirmedEventTimeSlot[]
 
   @@index([lineGroupId])
   @@index([ownerId])
@@ -173,8 +170,9 @@ model EventTimeSlot {
   endMinute   Int // 當天的結束分鐘
   index       Int // 用於表格排序定位
 
-  event Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  votes EventVote[]
+  event          Event                    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  votes          EventVote[]
+  confirmedSlots ConfirmedEventTimeSlot[]
 
   @@index([eventId])
   @@index([eventId, date])
@@ -196,4 +194,18 @@ model EventVote {
   @@index([eventId])
   @@index([slotId])
   @@index([userId])
+}
+
+// Host 確認的活動時段
+model ConfirmedEventTimeSlot {
+  id        String   @id @default(cuid())
+  eventId   String
+  slotId    String
+  createdAt DateTime @default(now())
+
+  event Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  slot  EventTimeSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, slotId])
+  @@index([eventId])
 }

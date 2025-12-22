@@ -11,7 +11,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { AttendedEventListItem, EventListItem } from "@/types/event";
+import {
+  AttendedEventListItem,
+  EventListItem,
+  ConfirmedTimeRange,
+} from "@/types/event";
 import {
   Check,
   Clock,
@@ -21,6 +25,7 @@ import {
   Users,
   Vote,
 } from "lucide-react";
+import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { format } from "date-fns";
 
 export interface EventRowHost {
@@ -33,6 +38,7 @@ export interface EventRowData extends AttendedEventListItem {
   host?: EventRowHost | null;
   expectedParticipantCount?: number;
   votedCount?: number;
+  confirmedTimeRanges: ConfirmedTimeRange[];
 }
 
 // For hosted events, we use a simpler type (no hasVoted field needed)
@@ -88,14 +94,7 @@ export default function EventRow({
 
   // Format time range based on variant
   const getTimeRange = () => {
-    if (variant === "confirmed" || variant === "completed") {
-      if (event.confirmedStartTime && event.confirmedEndTime) {
-        return {
-          start: new Date(event.confirmedStartTime),
-          end: new Date(event.confirmedEndTime),
-        };
-      }
-    }
+    // 使用活動的日期範圍
     return {
       start: new Date(event.startDate),
       end: new Date(event.endDate),
@@ -252,7 +251,18 @@ export default function EventRow({
 
         {/* Time Range */}
         <div className="text-sm text-zinc-500 dark:text-zinc-400 shrink-0 min-w-[160px]">
-          {formatDateRange()}
+          {variant === "confirmed" || variant === "completed" ? (
+            event.confirmedTimeRanges?.length > 0 ? (
+              <ConfirmedTimeDisplay
+                timeRanges={event.confirmedTimeRanges}
+                preview
+              />
+            ) : (
+              formatDateRange()
+            )
+          ) : (
+            formatDateRange()
+          )}
         </div>
 
         {/* Vote Count */}
@@ -323,7 +333,20 @@ export default function EventRow({
               )}
 
               {/* Date */}
-              <span>{formatDateRange()}</span>
+              <span>
+                {variant === "confirmed" || variant === "completed" ? (
+                  event.confirmedTimeRanges?.length > 0 ? (
+                    <ConfirmedTimeDisplay
+                      timeRanges={event.confirmedTimeRanges}
+                      preview
+                    />
+                  ) : (
+                    formatDateRange()
+                  )
+                ) : (
+                  formatDateRange()
+                )}
+              </span>
 
               {/* Vote Count */}
               <div className="flex items-center gap-1">

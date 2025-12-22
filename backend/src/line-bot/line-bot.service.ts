@@ -7,10 +7,8 @@ import {
   FlexMessageService,
   EventInfo,
 } from './services';
-import {
-  EventStatusService,
-  EventStatus,
-} from '../events/services/event-status.service';
+import { EventStatusService, EventStatus } from '../events/services';
+import { ConfirmedTimeService } from '../confirmed-time';
 import {
   WebhookEvent,
   MessageEvent,
@@ -35,6 +33,7 @@ export class LineBotService implements OnModuleInit {
     private lineGroup: LineGroupService,
     private flexMessage: FlexMessageService,
     private eventStatusService: EventStatusService,
+    private confirmedTimeService: ConfirmedTimeService,
   ) {}
 
   async onModuleInit() {
@@ -274,6 +273,18 @@ export class LineBotService implements OnModuleInit {
             userId: true,
           },
         },
+        confirmedTimeSlots: {
+          include: {
+            slot: {
+              select: {
+                id: true,
+                date: true,
+                startMinute: true,
+                endMinute: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -283,10 +294,22 @@ export class LineBotService implements OnModuleInit {
     const result: EventInfo[] = [];
 
     for (const event of events) {
+      // 合併成時間範圍（使用原始資料結構）
+      const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
+        event.confirmedTimeSlots,
+      );
+
+      // 建構確認時段資訊（用於 EventInfo 和狀態計算）
+      const confirmedTimeSlots = event.confirmedTimeSlots.map((cts) => ({
+        slotId: cts.slotId,
+        date: cts.slot.date,
+        startMinute: cts.slot.startMinute,
+        endMinute: cts.slot.endMinute,
+      }));
+
       const status = this.eventStatusService.computeEventStatus({
         votingDeadline: event.votingDeadline,
-        confirmedStartTime: event.confirmedStartTime,
-        confirmedEndTime: event.confirmedEndTime,
+        confirmedTimeSlots,
       });
 
       // 排除已結束的活動
@@ -312,8 +335,8 @@ export class LineBotService implements OnModuleInit {
         description: event.description,
         status,
         votingDeadline: event.votingDeadline,
-        confirmedStartTime: event.confirmedStartTime,
-        confirmedEndTime: event.confirmedEndTime,
+        confirmedTimeSlots,
+        confirmedTimeRanges,
         host,
         votingStats: {
           totalExpected,

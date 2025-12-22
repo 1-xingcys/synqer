@@ -54,8 +54,8 @@ export default function HostedEventPanelPage() {
         description={event.description}
         startDate={event.startDate}
         endDate={event.endDate}
-        confirmedStartTime={event.confirmedStartTime}
-        confirmedEndTime={event.confirmedEndTime}
+        confirmedSlotIds={event.confirmedSlotIds}
+        confirmedTimeRanges={event.confirmedTimeRanges}
         status={event.status}
       />
 

@@ -5,7 +5,6 @@ import { AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "./DatePicker";
 import { TimePicker } from "./TimePicker";
-import { RESTRICT_START_DATE_TO_TODAY } from "./types";
 
 interface ConfigurationSectionProps {
   startDate: Date | null;
@@ -35,7 +34,6 @@ export function ConfigurationSection({
   // Min date for date picker (currently unused but kept for future use)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const _minDate = RESTRICT_START_DATE_TO_TODAY ? today : undefined;
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">

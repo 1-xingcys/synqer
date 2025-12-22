@@ -30,6 +30,18 @@ export class EventQueryService {
             id: true,
           },
         },
+        confirmedTimeSlots: {
+          include: {
+            slot: {
+              select: {
+                id: true,
+                date: true,
+                startMinute: true,
+                endMinute: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -79,6 +91,18 @@ export class EventQueryService {
             id: true,
             displayName: true,
             avatarUrl: true,
+          },
+        },
+        confirmedTimeSlots: {
+          include: {
+            slot: {
+              select: {
+                id: true,
+                date: true,
+                startMinute: true,
+                endMinute: true,
+              },
+            },
           },
         },
       },
@@ -155,6 +179,18 @@ export class EventQueryService {
             },
           },
         },
+        confirmedTimeSlots: {
+          include: {
+            slot: {
+              select: {
+                id: true,
+                date: true,
+                startMinute: true,
+                endMinute: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -220,6 +256,18 @@ export class EventQueryService {
             },
           },
         },
+        confirmedTimeSlots: {
+          include: {
+            slot: {
+              select: {
+                id: true,
+                date: true,
+                startMinute: true,
+                endMinute: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -278,6 +326,18 @@ export class EventQueryService {
         expectedParticipants: {
           select: { id: true },
         },
+        confirmedTimeSlots: {
+          include: {
+            slot: {
+              select: {
+                id: true,
+                date: true,
+                startMinute: true,
+                endMinute: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -285,13 +345,19 @@ export class EventQueryService {
       return null;
     }
 
+    const confirmedTimeSlots = event.confirmedTimeSlots.map((cts) => ({
+      slotId: cts.slotId,
+      date: cts.slot.date,
+      startMinute: cts.slot.startMinute,
+      endMinute: cts.slot.endMinute,
+    }));
+
     return {
       ...this.eventMapper.mapEventToList(event, false),
       participantCount: event.expectedParticipants.length,
       status: this.eventStatusService.computeEventStatus({
         votingDeadline: event.votingDeadline,
-        confirmedStartTime: event.confirmedStartTime,
-        confirmedEndTime: event.confirmedEndTime,
+        confirmedTimeSlots,
       }),
     };
   }

@@ -136,6 +136,25 @@ interface FlexAction {
 }
 
 /**
+ * 確認的時段資訊
+ */
+export interface ConfirmedSlotInfo {
+  slotId: string;
+  date: Date;
+  startMinute: number;
+  endMinute: number;
+}
+
+/**
+ * 合併後的時間範圍
+ */
+export interface ConfirmedTimeRange {
+  startTime: Date;
+  endTime: Date;
+  slotIds: string[];
+}
+
+/**
  * 事件資訊（用於建構 Flex Message）
  */
 export interface EventInfo {
@@ -144,8 +163,8 @@ export interface EventInfo {
   description: string | null;
   status: EventStatus;
   votingDeadline: Date | null;
-  confirmedStartTime: Date | null;
-  confirmedEndTime: Date | null;
+  confirmedTimeSlots: ConfirmedSlotInfo[];
+  confirmedTimeRanges: ConfirmedTimeRange[];
   host: {
     displayName: string;
     pictureUrl?: string | null;
@@ -438,13 +457,14 @@ export class FlexMessageService {
         };
 
       case EventStatus.CONFIRMED:
-        if (event.confirmedStartTime && event.confirmedEndTime) {
+        if (event.confirmedTimeRanges.length > 0) {
+          // 使用合併後的時間範圍來顯示
+          const timeStr = this.formatConfirmedTimeRanges(
+            event.confirmedTimeRanges,
+          );
           return {
             label: '活動時間',
-            value: this.formatDateTimeRange(
-              event.confirmedStartTime,
-              event.confirmedEndTime,
-            ),
+            value: timeStr,
           };
         }
         return { label: '活動時間', value: '時間已確定' };
@@ -527,6 +547,29 @@ export class FlexMessageService {
       const endWeekday = weekdays[endDate.getDay()];
       return `${month}/${day}（${weekday}）${startHours}:${startMinutes} ~ ${endMonth}/${endDay}（${endWeekday}）${endHours}:${endMinutes}`;
     }
+  }
+
+  /**
+   * 格式化確認的時間範圍（用於 Flex Message 顯示）
+   * 如果只有一個範圍，顯示完整時間
+   * 如果有多個範圍，顯示第一個 + 其他 n 個時段
+   */
+  private formatConfirmedTimeRanges(ranges: ConfirmedTimeRange[]): string {
+    if (ranges.length === 0) {
+      return '時間已確定';
+    }
+
+    const firstRange = ranges[0];
+    const firstRangeStr = this.formatDateTimeRange(
+      firstRange.startTime,
+      firstRange.endTime,
+    );
+
+    if (ranges.length === 1) {
+      return firstRangeStr;
+    }
+
+    return `${firstRangeStr}\n(+${ranges.length - 1} 個時段)`;
   }
 
   /**
