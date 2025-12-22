@@ -2,15 +2,20 @@
 
 import { useTranslations } from "next-intl";
 import { Vote, Clock, CheckCircle, CircleCheck, Calendar } from "lucide-react";
+import { EventCategory } from "./EventRow";
 
-type EventCategory = "voting" | "votingEnded" | "confirmed" | "completed" | "all";
+type EmptyStateCategory = EventCategory | "all";
 
 interface EmptyStateProps {
-  category?: EventCategory;
+  category?: EmptyStateCategory;
+  translationNamespace?: string;
 }
 
-export default function EmptyState({ category = "all" }: EmptyStateProps) {
-  const t = useTranslations("joinedEvents");
+export default function EmptyState({
+  category = "all",
+  translationNamespace = "joinedEvents",
+}: EmptyStateProps) {
+  const t = useTranslations(translationNamespace);
 
   const getIcon = () => {
     switch (category) {
@@ -19,11 +24,17 @@ export default function EmptyState({ category = "all" }: EmptyStateProps) {
       case "votingEnded":
         return <Clock className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />;
       case "confirmed":
-        return <CheckCircle className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />;
+        return (
+          <CheckCircle className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
+        );
       case "completed":
-        return <CircleCheck className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />;
+        return (
+          <CircleCheck className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
+        );
       default:
-        return <Calendar className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />;
+        return (
+          <Calendar className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
+        );
     }
   };
 
@@ -67,9 +78,7 @@ export default function EmptyState({ category = "all" }: EmptyStateProps) {
       <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2">
         {title}
       </h3>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">
-        {description}
-      </p>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">{description}</p>
     </div>
   );
 }

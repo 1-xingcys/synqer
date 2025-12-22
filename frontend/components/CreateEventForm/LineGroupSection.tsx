@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
@@ -38,9 +38,8 @@ export function LineGroupSection({
   const t = useTranslations();
   const { user } = useAuthContext();
   const { groups, loading: groupsLoading } = useLineGroups();
-  const { members, loading: membersLoading } = useLineGroupMembers(
-    selectedGroupId,
-  );
+  const { members, loading: membersLoading } =
+    useLineGroupMembers(selectedGroupId);
 
   // Check if user has LINE provider
   const isLineUser = user?.providers?.includes("line");
@@ -118,7 +117,8 @@ export function LineGroupSection({
             </SelectItem>
             {groups.map((group) => (
               <SelectItem key={group.id} value={group.id}>
-                {group.groupName || t("createEvent.lineGroup.unnamedGroup")} ({group.memberCount})
+                {group.groupName || t("createEvent.lineGroup.unnamedGroup")} (
+                {group.memberCount})
               </SelectItem>
             ))}
           </SelectContent>

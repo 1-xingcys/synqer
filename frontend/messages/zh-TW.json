@@ -275,6 +275,44 @@
     "copyLink": "複製活動連結",
     "copied": "已複製！"
   },
+  "hostedEvents": {
+    "title": "主辦的活動",
+    "description": "管理您主辦的活動",
+    "loading": "載入活動中...",
+    "error": "載入活動失敗",
+    "tabs": {
+      "overview": "總覽",
+      "voting": "投票中",
+      "votingEnded": "投票結束",
+      "confirmed": "時間已定",
+      "completed": "活動結束"
+    },
+    "sections": {
+      "voting": "投票中的活動",
+      "votingEnded": "投票結束",
+      "confirmed": "時間已定的活動",
+      "completed": "已結束的活動"
+    },
+    "empty": {
+      "all": "尚無活動",
+      "allDescription": "建立您的第一個活動來開始",
+      "voting": "沒有投票中的活動",
+      "votingDescription": "正在投票的活動會顯示在這裡",
+      "votingEnded": "沒有投票結束的活動",
+      "votingEndedDescription": "投票已結束的活動會顯示在這裡",
+      "confirmed": "沒有時間已定的活動",
+      "confirmedDescription": "已確認時間的活動會顯示在這裡",
+      "completed": "沒有已結束的活動",
+      "completedDescription": "過去的活動會顯示在這裡"
+    },
+    "viewMore": "查看更多{type}",
+    "showingEvents": "顯示 {start}-{end}，共 {total} 個活動",
+    "allVoted": "全部已投票",
+    "votingInProgress": "投票進行中",
+    "untitled": "未命名活動",
+    "copyLink": "複製活動連結",
+    "copied": "已複製！"
+  },
   "eventStatus": {
     "voting": "投票中",
     "votingEnded": "投票結束",

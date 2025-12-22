@@ -240,8 +240,7 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
   // Start/End date are no longer required
   const isFormValid = useMemo(() => {
     return (
-      formData.title.trim() !== "" &&
-      Object.keys(validationErrors).length === 0
+      formData.title.trim() !== "" && Object.keys(validationErrors).length === 0
     );
   }, [formData.title, validationErrors]);
 
@@ -307,11 +306,10 @@ export function useCreateEventForm(): UseCreateEventFormReturn {
         });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(
-            (errorData as { message?: string }).message ||
-              "Failed to create event",
-          );
+          const errorData = (await response.json().catch(() => ({}))) as {
+            message?: string;
+          };
+          throw new Error(errorData.message || "Failed to create event");
         }
 
         const result = (await response.json()) as { eventId: string };

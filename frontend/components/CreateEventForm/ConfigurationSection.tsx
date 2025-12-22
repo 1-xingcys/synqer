@@ -32,10 +32,10 @@ export function ConfigurationSection({
 }: ConfigurationSectionProps) {
   const t = useTranslations();
 
-  // Min date for date picker
+  // Min date for date picker (currently unused but kept for future use)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const minDate = RESTRICT_START_DATE_TO_TODAY ? today : undefined;
+  const _minDate = RESTRICT_START_DATE_TO_TODAY ? today : undefined;
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">

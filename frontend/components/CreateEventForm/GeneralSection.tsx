@@ -112,7 +112,8 @@ export function GeneralSection({
                 onChange={(e) => onTitleChange(e.target.value)}
                 placeholder={t("createEvent.general.eventNamePlaceholder")}
                 className={cn(
-                  isOverTitleLimit && "border-destructive focus-visible:ring-destructive/20",
+                  isOverTitleLimit &&
+                    "border-destructive focus-visible:ring-destructive/20",
                 )}
               />
               <p
