@@ -18,31 +18,42 @@ import {
 
 export type { VotingGridProps, VoteMode };
 
-// Hook to calculate dates per page based on screen width
-function useDatesPerPage() {
+// Hook to calculate dates per page and slot height based on screen width
+function useResponsiveGrid() {
   const [datesPerPage, setDatesPerPage] = useState(7);
+  const [slotHeight, setSlotHeight] = useState("2.75rem"); // Default to desktop
 
   useEffect(() => {
-    const calculateDatesPerPage = () => {
+    const calculateValues = () => {
       const width = window.innerWidth;
-      if (width < 480) return 3;
-      if (width < 640) return 4;
-      if (width < 768) return 5;
-      if (width < 1024) return 7;
-      return 7;
+      // sm breakpoint is 640px
+      const isMobile = width < 640;
+      
+      // Dates per page
+      let dates = 7;
+      if (width < 400) dates = 5;
+      else if (width < 640) dates = 5;
+      else if (width < 768) dates = 6;
+      else if (width < 1024) dates = 7;
+      
+      // Slot height: h-10 (2.5rem) on mobile, h-11 (2.75rem) on desktop
+      const height = isMobile ? "2.5rem" : "2.75rem";
+      
+      setDatesPerPage(dates);
+      setSlotHeight(height);
     };
 
-    setDatesPerPage(calculateDatesPerPage());
+    calculateValues();
 
     const handleResize = () => {
-      setDatesPerPage(calculateDatesPerPage());
+      calculateValues();
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  return datesPerPage;
+  return { datesPerPage, slotHeight };
 }
 
 export default function VotingGrid({
@@ -56,7 +67,7 @@ export default function VotingGrid({
   const [saving, setSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const gridRef = useRef<HTMLDivElement>(null);
-  const datesPerPage = useDatesPerPage();
+  const { datesPerPage, slotHeight } = useResponsiveGrid();
 
   // Use voting selection hook
   const {
@@ -77,6 +88,7 @@ export default function VotingGrid({
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
+    handleClick,
     selectEntireDay,
     clearSelection,
     selectAll,
@@ -154,7 +166,7 @@ export default function VotingGrid({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Google Calendar Integration */}
       <GoogleCalendarPanel
         eventId={eventId}
@@ -196,7 +208,7 @@ export default function VotingGrid({
       {/* Grid */}
       <div
         ref={gridRef}
-        className="select-none transition-opacity duration-200"
+        className="select-none transition-opacity duration-200 touch-none"
         onMouseUp={handleMouseUp}
         onMouseLeave={() => setHoveredSlot(null)}
       >
@@ -208,53 +220,77 @@ export default function VotingGrid({
             onSelectDay={selectEntireDay}
           />
 
-          {/* Time slots grid */}
-          <div className="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-hidden relative">
-            {timeSlots.map((timeSlot, timeIndex) => (
-              <div key={timeIndex} className="flex">
-                {/* Time label */}
-                <div className="w-16 sm:w-20 shrink-0 px-1 sm:px-2 py-2 sm:py-3 text-xs font-medium text-gray-500 dark:text-zinc-400 bg-gray-50 dark:bg-zinc-800/50 border-r border-gray-200 dark:border-zinc-700 flex items-center">
-                  {formatTime(timeSlot.startMinute)}
+          {/* Time slots grid with time points at boundaries */}
+          <div className="flex">
+            {/* Time column - shows time points at boundaries */}
+            <div className="w-9 sm:w-14 shrink-0 relative border-r border-gray-200 dark:border-zinc-700 rounded-l-lg">
+              {timeSlots.map((timeSlot, timeIndex) => (
+                <div
+                  key={timeIndex}
+                  className="h-10 sm:h-11 relative"
+                >
+                  {/* Time label at top boundary */}
+                  <span className="absolute -top-2 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
+                    {formatTime(timeSlot.startMinute)}
+                  </span>
                 </div>
-                {/* Slot cells */}
-                {paginatedDates.map((dateKey, dateIndex) => {
-                  const slot = slotsByDate[dateKey][timeIndex];
-                  const isSelected = displaySelection.has(slot.id);
-                  const voters = getVotersForSlot(slot.id);
-                  const isHovered = hoveredSlot === slot.id;
-                  const isLongPressed = longPressSlot === slot.id;
-                  const inRectangle = isSlotInRectangle(slot.id);
-                  const slotCalendarEvents =
-                    calendarEventsForSlot.get(slot.id) || [];
+              ))}
+              {/* Last time label at bottom */}
+              {timeSlots.length > 0 && (
+                <span className="absolute bottom-0.5 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
+                  {formatTime(timeSlots[timeSlots.length - 1].endMinute)}
+                </span>
+              )}
+            </div>
 
-                  return (
-                    <TimeSlotCell
-                      key={slot.id}
-                      slot={slot}
-                      dateIndex={dateIndex}
-                      timeIndex={timeIndex}
-                      isSelected={isSelected}
-                      isHovered={isHovered}
-                      isLongPressed={isLongPressed}
-                      isDragging={isDragging}
-                      inRectangle={inRectangle}
-                      rectangleBounds={rectangleBounds}
-                      voteMode={voteMode}
-                      voters={voters}
-                      slotCalendarEvents={slotCalendarEvents}
-                      showCalendarOnGrid={showCalendarOnGrid}
-                      isEventStartInSlot={isEventStartInSlot}
-                      getEventSpanFromSlot={getEventSpanFromSlot}
-                      onMouseDown={handleMouseDown}
-                      onMouseEnter={handleMouseEnter}
-                      onTouchStart={handleTouchStart}
-                      onTouchMove={handleTouchMove}
-                      onTouchEnd={handleTouchEnd}
-                    />
-                  );
-                })}
-              </div>
-            ))}
+            {/* Slots grid - CSS variable for slot height used by calendar event overlay */}
+            <div 
+              className="flex-1 border border-gray-200 dark:border-zinc-700 rounded-r-lg overflow-hidden"
+              style={{ "--slot-height": slotHeight } as React.CSSProperties}
+            >
+              {timeSlots.map((timeSlot, timeIndex) => (
+                <div key={timeIndex} className="flex">
+                  {/* Slot cells */}
+                  {paginatedDates.map((dateKey, dateIndex) => {
+                    const slot = slotsByDate[dateKey][timeIndex];
+                    const isSelected = displaySelection.has(slot.id);
+                    const voters = getVotersForSlot(slot.id);
+                    const isHovered = hoveredSlot === slot.id;
+                    const isLongPressed = longPressSlot === slot.id;
+                    const inRectangle = isSlotInRectangle(slot.id);
+                    const slotCalendarEvents =
+                      calendarEventsForSlot.get(slot.id) || [];
+
+                    return (
+                      <TimeSlotCell
+                        key={slot.id}
+                        slot={slot}
+                        dateIndex={dateIndex}
+                        timeIndex={timeIndex}
+                        isSelected={isSelected}
+                        isHovered={isHovered}
+                        isLongPressed={isLongPressed}
+                        isDragging={isDragging}
+                        inRectangle={inRectangle}
+                        rectangleBounds={rectangleBounds}
+                        voteMode={voteMode}
+                        voters={voters}
+                        slotCalendarEvents={slotCalendarEvents}
+                        showCalendarOnGrid={showCalendarOnGrid}
+                        isEventStartInSlot={isEventStartInSlot}
+                        getEventSpanFromSlot={getEventSpanFromSlot}
+                        onMouseDown={handleMouseDown}
+                        onMouseEnter={handleMouseEnter}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                        onClick={handleClick}
+                      />
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

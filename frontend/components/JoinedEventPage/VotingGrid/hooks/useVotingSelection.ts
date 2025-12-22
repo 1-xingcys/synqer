@@ -37,9 +37,10 @@ interface UseVotingSelectionReturn {
   handleMouseDown: (slotId: string, e: React.MouseEvent) => void;
   handleMouseEnter: (slotId: string) => void;
   handleMouseUp: () => void;
-  handleTouchStart: (slotId: string) => void;
+  handleTouchStart: (slotId: string, e: React.TouchEvent) => void;
   handleTouchMove: (e: React.TouchEvent) => void;
   handleTouchEnd: () => void;
+  handleClick: (slotId: string) => void;
   selectEntireDay: (dateKey: string) => void;
   clearSelection: () => void;
   selectAll: () => void;
@@ -99,6 +100,7 @@ export function useVotingSelection({
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
+    handleClick,
     isSlotInRectangle,
     getRectangleBounds,
     resetBaseSelection,
@@ -166,6 +168,7 @@ export function useVotingSelection({
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
+    handleClick,
     selectEntireDay,
     clearSelection,
     selectAll,

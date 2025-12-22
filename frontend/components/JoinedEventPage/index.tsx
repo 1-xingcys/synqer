@@ -103,7 +103,7 @@ export default function JoinedEventPage() {
       />
 
       {/* Voting Grid */}
-      <div className="bg-white dark:bg-zinc-900 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-800 p-6">
+      <div className="bg-white dark:bg-zinc-900 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-800 p-2 sm:p-6">
         <VotingGrid
           slots={eventDetailData.slots}
           votes={eventDetailData.votes}
