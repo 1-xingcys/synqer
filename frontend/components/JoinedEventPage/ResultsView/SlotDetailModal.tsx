@@ -5,6 +5,14 @@ import { useEffect, useRef } from "react";
 import { Vote, Participant } from "./types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
+export interface SlotRangeInfo {
+  startDate: string;
+  endDate: string;
+  startTime: number;
+  endTime: number;
+  slotIds: string[];
+}
+
 interface SlotDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -14,6 +22,11 @@ interface SlotDetailModalProps {
   nonVoters: Participant[];
   totalFiltered: number;
   isRange?: boolean;
+  // Host-only props for adding to event time
+  canAddToEventTime?: boolean;
+  isVotingPhase?: boolean;
+  onAddToEventTime?: (info: SlotRangeInfo) => void;
+  rangeInfo?: SlotRangeInfo;
 }
 
 export function SlotDetailModal({
@@ -25,8 +38,13 @@ export function SlotDetailModal({
   nonVoters,
   totalFiltered,
   isRange = false,
+  canAddToEventTime = false,
+  isVotingPhase = false,
+  onAddToEventTime,
+  rangeInfo,
 }: SlotDetailModalProps) {
   const t = useTranslations("joined");
+  const tHosted = useTranslations("hosted");
   const modalRef = useRef<HTMLDivElement>(null);
   
   // Detect if it's a range based on dateLabel containing "~"
@@ -52,6 +70,13 @@ export function SlotDetailModal({
       };
     }
   }, [isOpen]);
+
+  const handleAddToEventTime = () => {
+    if (onAddToEventTime && rangeInfo) {
+      onAddToEventTime(rangeInfo);
+      onClose();
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -229,18 +254,39 @@ export function SlotDetailModal({
             )}
           </div>
 
-          {/* Footer on mobile */}
-          <div className="sm:hidden px-5 py-3 border-t border-gray-100 dark:border-zinc-800">
-            <button
-              onClick={onClose}
-              className="w-full py-2.5 text-sm font-medium text-gray-700 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors"
-            >
-              {t("results.close")}
-            </button>
+          {/* Footer - Add to Event Time (for Host) or Close (mobile) */}
+          <div className="px-5 py-3 border-t border-gray-100 dark:border-zinc-800">
+            {canAddToEventTime && onAddToEventTime && rangeInfo ? (
+              <div className="space-y-2">
+                <button
+                  onClick={handleAddToEventTime}
+                  className="w-full py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  {tHosted("addToEventTime.button")}
+                </button>
+                {isVotingPhase && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 text-center flex items-center justify-center gap-1">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {tHosted("addToEventTime.votingHint")}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={onClose}
+                className="sm:hidden w-full py-2.5 text-sm font-medium text-gray-700 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors"
+              >
+                {t("results.close")}
+              </button>
+            )}
           </div>
         </div>
       </div>
     </>
   );
 }
-
