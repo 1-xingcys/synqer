@@ -18,8 +18,9 @@ function formatTimeRange(range: ConfirmedTimeRange, locale: string): string {
   const startDate = new Date(range.startTime);
   const endDate = new Date(range.endTime);
 
-  const dateFormatter = new Intl.DateTimeFormat(locale, {
-    month: "numeric",
+  // 使用 short month 格式 (Dec 25)
+  const dateFormatter = new Intl.DateTimeFormat("en", {
+    month: "short",
     day: "numeric",
     weekday: "short",
   });
