@@ -440,17 +440,6 @@ function MobileTimePicker({
   // Format display value - always use prop value for display
   const displayValue = value;
 
-  const handleOpenChange = (nextOpen: boolean) => {
-    setOpen(nextOpen);
-    if (nextOpen) {
-      const [h, m] = value.split(":");
-      setPickerValue({
-        hour: h,
-        minute: m,
-      });
-    }
-  };
-
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
