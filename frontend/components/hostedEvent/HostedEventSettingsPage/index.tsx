@@ -30,7 +30,7 @@ export default function HostedEventSettingsPage() {
     toggleDeleteConfirm,
   } = useEventSettings(eventId);
 
-  if (loading) {
+  if (loading && (!eventData || !earliestSlot || !formData)) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
         <p className="text-zinc-600 dark:text-zinc-400">
