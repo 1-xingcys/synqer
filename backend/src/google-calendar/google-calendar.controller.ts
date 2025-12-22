@@ -58,12 +58,12 @@ export class GoogleCalendarController {
       );
 
       // Redirect to frontend with success message
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = process.env.WEB_ORIGIN;
       const redirectUrl = result.redirect || '/settings';
       res.redirect(`${frontendUrl}${redirectUrl}?calendar_connected=true`);
     } catch {
       // Redirect to frontend with error message
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = process.env.WEB_ORIGIN;
       res.redirect(`${frontendUrl}/settings?calendar_error=true`);
     }
   }

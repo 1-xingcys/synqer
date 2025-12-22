@@ -135,6 +135,29 @@
       "showOnGrid": "在時間表上顯示行程",
       "legendCalendarEvent": "日曆行程"
     },
+    "votingEnded": {
+      "title": "投票已結束",
+      "description": "投票時間已結束，請等待主辦者確認活動時間。"
+    },
+    "confirmed": {
+      "title": "活動時間已確認",
+      "description": "主辦者已確認活動時間。",
+      "eventTime": "活動時間"
+    },
+    "untitledEvent": "未命名活動",
+    "addToCalendar": {
+      "title": "加入 Google 日曆",
+      "description": "將活動時間儲存到你的日曆",
+      "add": "加入",
+      "addAll": "全部加入",
+      "addAllShort": "全部",
+      "hint": "將在新分頁中開啟 Google 日曆"
+    },
+    "completed": {
+      "title": "活動已結束",
+      "description": "此活動已結束。"
+    },
+    "viewResults": "查看結果",
     "results": {
       "allParticipants": "所有參與者",
       "noParticipants": "無參與者",
