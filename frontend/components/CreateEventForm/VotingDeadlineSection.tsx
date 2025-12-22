@@ -4,8 +4,8 @@ import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { DatePicker } from "./DatePicker";
-import { TimePicker } from "./TimePicker";
+import { DatePicker } from "@/components/eventCommon/DatePicker";
+import { TimePicker } from "@/components/eventCommon/TimePicker";
 import { combineDateAndTime } from "./types";
 
 interface VotingDeadlineSectionProps {
