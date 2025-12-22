@@ -293,18 +293,10 @@ export default function VotingGrid({
         markConflictsAsUnavailable={markConflictsAsUnavailable}
       />
 
-      {/* Top Bar: Mode Toggle + Granularity + Save */}
+      {/* Top Bar: Mode Toggle + Save */}
       <div className="flex items-start sm:items-center justify-between gap-2 sm:gap-3">
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Vote Mode Toggle */}
-          <VoteModeToggle voteMode={voteMode} onModeChange={setVoteMode} />
-          
-          {/* Granularity Selector */}
-          <GranularitySelector 
-            granularity={granularity} 
-            onChange={setGranularity} 
-          />
-        </div>
+        {/* Vote Mode Toggle */}
+        <VoteModeToggle voteMode={voteMode} onModeChange={setVoteMode} />
 
         {/* Save Button */}
         <VotingHeader saving={saving} onSave={() => void handleSave()} />
@@ -316,6 +308,17 @@ export default function VotingGrid({
         onClear={clearSelection}
         onSelectAll={selectAll}
       />
+
+      {/* Granularity Selector */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-500 dark:text-zinc-400">
+          View
+        </span>
+        <GranularitySelector 
+          granularity={granularity} 
+          onChange={setGranularity} 
+        />
+      </div>
 
       {/* Date Pagination */}
       <DatePagination
