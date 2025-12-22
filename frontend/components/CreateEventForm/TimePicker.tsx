@@ -230,6 +230,7 @@ function DesktopTimePicker({
     onChange(time);
     setIsEditing(false);
     setInputError(null);
+    setIsEditing(false);
     setOpen(false);
   };
 
@@ -241,6 +242,7 @@ function DesktopTimePicker({
     } else if (e.key === "Escape") {
       setIsEditing(false);
       setInputError(null);
+      setIsEditing(false);
       setOpen(false);
     }
   };
@@ -275,7 +277,7 @@ function DesktopTimePicker({
           </div>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[var(--radix-popover-trigger-width)] p-0"
+          className="w-(--radix-popover-trigger-width) p-0"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
@@ -437,6 +439,17 @@ function MobileTimePicker({
 
   // Format display value - always use prop value for display
   const displayValue = value;
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (nextOpen) {
+      const [h, m] = value.split(":");
+      setPickerValue({
+        hour: h,
+        minute: m,
+      });
+    }
+  };
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
