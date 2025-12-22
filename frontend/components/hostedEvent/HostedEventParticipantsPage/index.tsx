@@ -33,6 +33,7 @@ export default function HostedEventParticipantsPage() {
     addAllMembers,
     saveParticipants,
     isSelected,
+    isHost,
   } = useParticipantsState(eventId);
 
   useEffect(() => {
@@ -74,6 +75,7 @@ export default function HostedEventParticipantsPage() {
     saving,
     saveSuccess,
     onSave: () => void saveParticipants(),
+    isHost,
   };
 
   return (

@@ -33,6 +33,8 @@ interface DesktopLayoutProps {
   saving: boolean;
   saveSuccess: boolean;
   onSave: () => void;
+  // Host protection
+  isHost: (userId?: string) => boolean;
 }
 
 export function DesktopLayout({
@@ -53,6 +55,7 @@ export function DesktopLayout({
   saving,
   saveSuccess,
   onSave,
+  isHost,
 }: DesktopLayoutProps) {
   const t = useTranslations();
 
@@ -168,19 +171,27 @@ export function DesktopLayout({
             <EmptyState type="noParticipants" />
           ) : (
             <div className="space-y-1 max-h-80 overflow-y-auto">
-              {selectedParticipants.map((participant, index) => (
-                <ParticipantRow
-                  key={`${participant.lineUserId || participant.userId || index}`}
-                  displayName={participant.displayName}
-                  pictureUrl={participant.pictureUrl}
-                  isSelected={true}
-                  isRegistered={!!participant.userId}
-                  hasVoted={participant.hasVoted}
-                  showStatus={true}
-                  variant="selected"
-                  onRemove={() => onRemoveParticipant(index)}
-                />
-              ))}
+              {selectedParticipants.map((participant, index) => {
+                const participantIsHost = isHost(participant.userId);
+                return (
+                  <ParticipantRow
+                    key={`${participant.lineUserId || participant.userId || index}`}
+                    displayName={participant.displayName}
+                    pictureUrl={participant.pictureUrl}
+                    isSelected={true}
+                    isRegistered={!!participant.userId}
+                    hasVoted={participant.hasVoted}
+                    showStatus={true}
+                    variant="selected"
+                    onRemove={
+                      participantIsHost
+                        ? undefined
+                        : () => onRemoveParticipant(index)
+                    }
+                    isHost={participantIsHost}
+                  />
+                );
+              })}
             </div>
           )}
 

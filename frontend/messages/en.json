@@ -189,7 +189,9 @@
       "addParticipantsHint": "Search for users or select from LINE groups",
       "notRegistered": "Not registered",
       "voted": "Voted",
-      "notVotedYet": "Not voted yet"
+      "notVotedYet": "Not voted yet",
+      "host": "Host",
+      "saveSuccess": "Saved"
     },
     "settingsPage": {
       "title": "Event Settings",

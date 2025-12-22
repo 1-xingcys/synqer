@@ -124,10 +124,31 @@ export function useParticipantsState(eventId: string) {
     [isSelected, clearResults],
   );
 
-  // Remove a participant
-  const removeParticipant = useCallback((index: number) => {
-    setSelectedParticipants((prev) => prev.filter((_, i) => i !== index));
-  }, []);
+  // Get host userId
+  const hostUserId = eventData?.event.ownerId;
+
+  // Check if a participant is the host
+  const isHost = useCallback(
+    (userId?: string): boolean => {
+      return !!(hostUserId && userId === hostUserId);
+    },
+    [hostUserId],
+  );
+
+  // Remove a participant (cannot remove host)
+  const removeParticipant = useCallback(
+    (index: number) => {
+      setSelectedParticipants((prev) => {
+        const participant = prev[index];
+        // Cannot remove host
+        if (participant?.userId && isHost(participant.userId)) {
+          return prev;
+        }
+        return prev.filter((_, i) => i !== index);
+      });
+    },
+    [isHost],
+  );
 
   // Add all members from group
   const addAllMembers = useCallback(() => {
@@ -241,5 +262,6 @@ export function useParticipantsState(eventId: string) {
     addAllMembers,
     saveParticipants,
     isSelected,
+    isHost,
   };
 }

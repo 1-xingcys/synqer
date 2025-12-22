@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Check, Plus, X } from "lucide-react";
+import { Check, Plus, X, Crown } from "lucide-react";
 import { StatusBadge } from "@/components/ui/badge";
 import { useTranslations } from "next-intl";
 
@@ -15,6 +15,7 @@ interface ParticipantRowProps {
   onAdd?: () => void;
   onRemove?: () => void;
   variant?: "add" | "selected" | "toggle";
+  isHost?: boolean;
 }
 
 export function ParticipantRow({
@@ -27,6 +28,7 @@ export function ParticipantRow({
   onAdd,
   onRemove,
   variant = "toggle",
+  isHost = false,
 }: ParticipantRowProps) {
   const t = useTranslations();
 
@@ -103,7 +105,15 @@ export function ParticipantRow({
       </div>
 
       {/* Action Icon */}
-      {variant === "selected" && onRemove && (
+      {variant === "selected" && isHost && (
+        <div
+          className="p-1.5 text-amber-500"
+          title={t("hosted.participantsPage.host")}
+        >
+          <Crown className="w-4 h-4" />
+        </div>
+      )}
+      {variant === "selected" && !isHost && onRemove && (
         <button
           onClick={(e) => {
             e.stopPropagation();

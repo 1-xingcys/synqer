@@ -189,7 +189,9 @@
       "addParticipantsHint": "搜尋使用者或從 LINE 群組選擇",
       "notRegistered": "尚未註冊",
       "voted": "已投票",
-      "notVotedYet": "尚未投票"
+      "notVotedYet": "尚未投票",
+      "host": "主辦人",
+      "saveSuccess": "已儲存"
     },
     "settingsPage": {
       "title": "活動設定",

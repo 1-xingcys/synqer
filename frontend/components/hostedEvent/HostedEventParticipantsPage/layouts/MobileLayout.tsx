@@ -33,6 +33,8 @@ interface MobileLayoutProps {
   saving: boolean;
   saveSuccess: boolean;
   onSave: () => void;
+  // Host protection
+  isHost: (userId?: string) => boolean;
 }
 
 export function MobileLayout({
@@ -52,6 +54,7 @@ export function MobileLayout({
   saving,
   saveSuccess,
   onSave,
+  isHost,
 }: MobileLayoutProps) {
   const t = useTranslations();
 
@@ -117,6 +120,7 @@ export function MobileLayout({
                         p.lineUserId === item.lineUserId ||
                         (item.userId && p.userId === item.userId),
                     );
+                    const participantIsHost = isHost(item.userId);
                     return (
                       <ParticipantRow
                         key={item.id}
@@ -127,14 +131,19 @@ export function MobileLayout({
                         hasVoted={selectedP?.hasVoted}
                         showStatus={true}
                         variant="selected"
-                        onRemove={() => {
-                          const idx = selectedParticipants.findIndex(
-                            (p) =>
-                              p.lineUserId === item.lineUserId ||
-                              (item.userId && p.userId === item.userId),
-                          );
-                          if (idx !== -1) onRemoveParticipant(idx);
-                        }}
+                        isHost={participantIsHost}
+                        onRemove={
+                          participantIsHost
+                            ? undefined
+                            : () => {
+                                const idx = selectedParticipants.findIndex(
+                                  (p) =>
+                                    p.lineUserId === item.lineUserId ||
+                                    (item.userId && p.userId === item.userId),
+                                );
+                                if (idx !== -1) onRemoveParticipant(idx);
+                              }
+                        }
                       />
                     );
                   })}
@@ -203,19 +212,27 @@ export function MobileLayout({
                     <SectionSeparator
                       label={t("hosted.participantsPage.selected")}
                     />
-                    {selectedParticipants.map((participant, index) => (
-                      <ParticipantRow
-                        key={`${participant.lineUserId || participant.userId || index}`}
-                        displayName={participant.displayName}
-                        pictureUrl={participant.pictureUrl}
-                        isSelected={true}
-                        isRegistered={!!participant.userId}
-                        hasVoted={participant.hasVoted}
-                        showStatus={true}
-                        variant="selected"
-                        onRemove={() => onRemoveParticipant(index)}
-                      />
-                    ))}
+                    {selectedParticipants.map((participant, index) => {
+                      const participantIsHost = isHost(participant.userId);
+                      return (
+                        <ParticipantRow
+                          key={`${participant.lineUserId || participant.userId || index}`}
+                          displayName={participant.displayName}
+                          pictureUrl={participant.pictureUrl}
+                          isSelected={true}
+                          isRegistered={!!participant.userId}
+                          hasVoted={participant.hasVoted}
+                          showStatus={true}
+                          variant="selected"
+                          isHost={participantIsHost}
+                          onRemove={
+                            participantIsHost
+                              ? undefined
+                              : () => onRemoveParticipant(index)
+                          }
+                        />
+                      );
+                    })}
                   </>
                 )}
               </>
