@@ -117,16 +117,29 @@ export class EventQueryService {
     return events.map((event) => {
       const expectedParticipantCount = event.expectedParticipants.length;
 
-      // 從 votes 表建立已投票的 userId Set（與 findOne 相同的做法）
-      const votedUserIds = new Set<string>(event.votes.map((v) => v.userId));
+      // 取得未被移除的預期參與者的 userId 集合
+      const activeParticipantUserIds = new Set<string>(
+        event.expectedParticipants
+          .filter((ep) => ep.userId)
+          .map((ep) => ep.userId as string),
+      );
+
+      // 過濾 votes，只保留未被移除的預期參與者的投票
+      const filteredVotes = event.votes.filter((v) =>
+        activeParticipantUserIds.has(v.userId),
+      );
+
+      // 從過濾後的 votes 表建立已投票的 userId Set
+      const votedUserIds = new Set<string>(filteredVotes.map((v) => v.userId));
 
       // 計算 expectedParticipants 中已投票的人數
       const votedCount = event.expectedParticipants.filter(
         (p) => p.userId && votedUserIds.has(p.userId),
       ).length;
 
-      // 檢查當前用戶是否已投票
-      const hasVoted = votedUserIds.has(userId);
+      // 檢查當前用戶是否已投票（且未被移除）
+      const hasVoted =
+        activeParticipantUserIds.has(userId) && votedUserIds.has(userId);
 
       return {
         ...this.eventMapper.mapEventToList(event),
@@ -202,9 +215,21 @@ export class EventQueryService {
       return null;
     }
 
-    const votes = this.eventMapper.mapVotes(event.votes);
-    const participants = this.eventMapper.extractParticipants(event.votes);
-    const votedUserIds = new Set<string>(event.votes.map((v) => v.userId));
+    // 取得未被移除的預期參與者的 userId 集合
+    const activeParticipantUserIds = new Set<string>(
+      event.expectedParticipants
+        .filter((ep) => ep.userId)
+        .map((ep) => ep.userId as string),
+    );
+
+    // 過濾 votes，只保留未被移除的預期參與者的投票
+    const filteredVotes = event.votes.filter((v) =>
+      activeParticipantUserIds.has(v.userId),
+    );
+
+    const votes = this.eventMapper.mapVotes(filteredVotes);
+    const participants = this.eventMapper.extractParticipants(filteredVotes);
+    const votedUserIds = new Set<string>(filteredVotes.map((v) => v.userId));
 
     const expectedParticipants =
       await this.eventParticipantService.enrichExpectedParticipants(
@@ -285,11 +310,22 @@ export class EventQueryService {
       return null; // 權限檢查由調用者處理
     }
 
-    const votes = this.eventMapper.mapVotes(event.votes);
-    const participants = this.eventMapper.extractParticipantsForHost(
-      event.votes,
+    // 取得未被移除的預期參與者的 userId 集合
+    const activeParticipantUserIds = new Set<string>(
+      event.expectedParticipants
+        .filter((ep) => ep.userId)
+        .map((ep) => ep.userId as string),
     );
-    const votedUserIds = new Set<string>(event.votes.map((v) => v.userId));
+
+    // 過濾 votes，只保留未被移除的預期參與者的投票
+    const filteredVotes = event.votes.filter((v) =>
+      activeParticipantUserIds.has(v.userId),
+    );
+
+    const votes = this.eventMapper.mapVotes(filteredVotes);
+    const participants =
+      this.eventMapper.extractParticipantsForHost(filteredVotes);
+    const votedUserIds = new Set<string>(filteredVotes.map((v) => v.userId));
 
     const lineUserIds = event.expectedParticipants
       .filter((ep) => ep.lineUserId)
