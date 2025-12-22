@@ -6,3 +6,4 @@ export { DateHeader } from "./DateHeader";
 export { TimeSlotCell } from "./TimeSlotCell";
 export { GoogleCalendarPanel } from "./GoogleCalendarPanel";
 export { DatePagination } from "./DatePagination";
+export { GranularitySelector } from "./GranularitySelector";

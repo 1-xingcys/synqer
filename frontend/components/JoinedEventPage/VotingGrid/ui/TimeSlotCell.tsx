@@ -1,49 +1,62 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { TimeSlot, VoteMode, CalendarEvent, RectangleBounds } from "../types";
+import { TimeSlot, VoteMode, CalendarEvent } from "../types";
 import { formatEventTime } from "../utils";
+
+interface MergedRectBounds {
+  minRow: number;
+  maxRow: number;
+  minDate: number;
+  maxDate: number;
+}
 
 interface TimeSlotCellProps {
   slot: TimeSlot;
+  rowIndex: number;
   dateIndex: number;
-  timeIndex: number;
   isSelected: boolean;
+  isPartiallySelected?: boolean;
   isHovered: boolean;
   isLongPressed: boolean;
   isDragging: boolean;
   inRectangle: boolean;
-  rectangleBounds: RectangleBounds | null;
+  mergedRectBounds: MergedRectBounds | null;
   voteMode: VoteMode;
   voters: string[];
   slotCalendarEvents: CalendarEvent[];
   showCalendarOnGrid: boolean;
-  isEventStartInSlot: (slotId: string, event: CalendarEvent) => boolean;
-  getEventSpanFromSlot: (slotId: string, event: CalendarEvent) => number;
-  onMouseDown: (slotId: string, e: React.MouseEvent) => void;
-  onMouseEnter: (slotId: string) => void;
-  onTouchStart: (slotId: string, e: React.TouchEvent) => void;
+  // For merged rows: check if event starts in this merged row
+  isEventStartInMergedRow?: (event: CalendarEvent) => boolean;
+  // For merged rows: get span in merged rows (not 15-min slots)
+  getEventSpanInMergedRows?: (event: CalendarEvent) => number;
+  mergedSlotIds?: string[]; // IDs of all slots in this merged cell
+  onMouseDown: (e: React.MouseEvent) => void;
+  onMouseEnter: () => void;
+  onTouchStart: (e: React.TouchEvent) => void;
   onTouchMove: (e: React.TouchEvent) => void;
   onTouchEnd: () => void;
-  onClick: (slotId: string) => void;
+  onClick: () => void;
 }
 
 export function TimeSlotCell({
   slot,
+  rowIndex,
   dateIndex,
-  timeIndex,
   isSelected,
+  isPartiallySelected = false,
   isHovered,
   isLongPressed,
   isDragging,
   inRectangle,
-  rectangleBounds,
+  mergedRectBounds,
   voteMode,
   voters,
   slotCalendarEvents,
   showCalendarOnGrid,
-  isEventStartInSlot,
-  getEventSpanFromSlot,
+  isEventStartInMergedRow,
+  getEventSpanInMergedRows,
+  mergedSlotIds,
   onMouseDown,
   onMouseEnter,
   onTouchStart,
@@ -58,11 +71,11 @@ export function TimeSlotCell({
   // Determine border style for rectangle selection
   // Only show blue border on the outer edges of the selection rectangle
   let borderClasses = "border-r border-b border-gray-100 dark:border-zinc-800";
-  if (isDragging && rectangleBounds && inRectangle) {
-    const isTopEdge = timeIndex === rectangleBounds.minTime;
-    const isBottomEdge = timeIndex === rectangleBounds.maxTime;
-    const isLeftEdge = dateIndex === rectangleBounds.minDate;
-    const isRightEdge = dateIndex === rectangleBounds.maxDate;
+  if (isDragging && mergedRectBounds && inRectangle) {
+    const isTopEdge = rowIndex === mergedRectBounds.minRow;
+    const isBottomEdge = rowIndex === mergedRectBounds.maxRow;
+    const isLeftEdge = dateIndex === mergedRectBounds.minDate;
+    const isRightEdge = dateIndex === mergedRectBounds.maxDate;
 
     // Build border classes - only outer edges get blue border
     const borders = [];
@@ -82,12 +95,18 @@ export function TimeSlotCell({
     borderClasses = borders.filter(Boolean).join(" ");
   }
 
-  // Determine background color based on vote mode
+  // Determine background color based on selection state and vote mode
   const getBackgroundClass = () => {
     if (isSelected) {
       return voteMode === "available"
         ? "bg-emerald-500 dark:bg-emerald-600"
         : "bg-rose-500 dark:bg-rose-600";
+    }
+    if (isPartiallySelected) {
+      // Striped pattern for partial selection
+      return voteMode === "available"
+        ? "bg-emerald-200 dark:bg-emerald-800/50"
+        : "bg-rose-200 dark:bg-rose-800/50";
     }
     return "bg-white dark:bg-zinc-900";
   };
@@ -95,10 +114,13 @@ export function TimeSlotCell({
   return (
     <div
       data-slot-id={slot.id}
-      onClick={() => onClick(slot.id)}
-      onMouseDown={(e) => onMouseDown(slot.id, e)}
-      onMouseEnter={() => onMouseEnter(slot.id)}
-      onTouchStart={(e) => onTouchStart(slot.id, e)}
+      data-row-index={rowIndex}
+      data-date-index={dateIndex}
+      data-merged-slot-ids={mergedSlotIds?.join(",")}
+      onClick={onClick}
+      onMouseDown={onMouseDown}
+      onMouseEnter={onMouseEnter}
+      onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       className={`
@@ -106,18 +128,31 @@ export function TimeSlotCell({
         cursor-pointer transition-colors duration-75
         ${borderClasses}
         ${getBackgroundClass()}
-        ${!isDragging && isHovered && !isSelected ? "bg-gray-50 dark:bg-zinc-800" : ""}
+        ${!isDragging && isHovered && !isSelected && !isPartiallySelected ? "bg-gray-50 dark:bg-zinc-800" : ""}
       `}
     >
+      {/* Partial selection indicator - diagonal stripes */}
+      {isPartiallySelected && (
+        <div 
+          className="absolute inset-0 pointer-events-none opacity-30"
+          style={{
+            backgroundImage: voteMode === "available"
+              ? "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(16, 185, 129, 0.4) 4px, rgba(16, 185, 129, 0.4) 8px)"
+              : "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(244, 63, 94, 0.4) 4px, rgba(244, 63, 94, 0.4) 8px)",
+          }}
+        />
+      )}
+
       {/* Calendar events overlay - border style */}
       {showCalendarOnGrid && slotCalendarEvents.length > 0 && (
         <div className="absolute inset-0 pointer-events-none overflow-visible">
           {slotCalendarEvents.slice(0, 2).map((event, idx) => {
-            const isStart = isEventStartInSlot(slot.id, event);
-            const span = isStart ? getEventSpanFromSlot(slot.id, event) : 0;
+            // Use merged row functions if available, otherwise skip
+            const isStart = isEventStartInMergedRow ? isEventStartInMergedRow(event) : false;
+            const span = isStart && getEventSpanInMergedRows ? getEventSpanInMergedRows(event) : 0;
 
-            // Only render on the start slot
-            if (!isStart) return null;
+            // Only render on the start row
+            if (!isStart || span === 0) return null;
 
             const borderColors = [
               "border-orange-500 dark:border-orange-400",
@@ -129,7 +164,6 @@ export function TimeSlotCell({
             ];
 
             // Use CSS variable for slot height (set on parent grid container)
-            // h-10 = 2.5rem (40px)
             const offset = idx === 0 ? 4 : 8;
 
             return (
@@ -140,7 +174,7 @@ export function TimeSlotCell({
                 }`}
                 style={{
                   top: idx === 0 ? "2px" : "4px",
-                  // Use CSS variable for precise height calculation
+                  // Use CSS variable for precise height calculation (span = merged rows count)
                   height: `calc(${span} * var(--slot-height, 2.5rem) - ${offset}px)`,
                   zIndex: 10 + idx,
                 }}
@@ -174,6 +208,10 @@ export function TimeSlotCell({
               ? voteMode === "available"
                 ? "bg-emerald-600 dark:bg-emerald-700 text-white"
                 : "bg-rose-600 dark:bg-rose-700 text-white"
+              : isPartiallySelected
+              ? voteMode === "available"
+                ? "bg-emerald-400 dark:bg-emerald-600 text-white"
+                : "bg-rose-400 dark:bg-rose-600 text-white"
               : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400"
           }`}
         >
