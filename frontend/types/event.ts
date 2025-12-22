@@ -13,6 +13,13 @@ export enum ParticipantStatus {
   NOT_REGISTERED = "NOT_REGISTERED", // 還沒註冊（只有 LINE 使用者）
 }
 
+// 合併後的時間範圍（連續時段合併成一個範圍）
+export interface ConfirmedTimeRange {
+  startTime: string; // ISO 8601 格式
+  endTime: string; // ISO 8601 格式
+  slotIds: string[];
+}
+
 // 活動列表項目（用於 hosted 和 joined 頁面）
 export interface EventListItem {
   id: string;
@@ -23,8 +30,8 @@ export interface EventListItem {
   createdAt: string;
   participantCount: number;
   votingDeadline: string | null;
-  confirmedStartTime: string | null;
-  confirmedEndTime: string | null;
+  confirmedSlotIds: string[];
+  confirmedTimeRanges: ConfirmedTimeRange[];
   status: EventStatus;
 }
 

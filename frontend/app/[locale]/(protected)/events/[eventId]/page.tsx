@@ -6,7 +6,8 @@ import { useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/routing";
 import { format } from "date-fns";
 import { EventStatusBadge } from "@/components/eventCommon/EventStatusBadge";
-import { EventStatus } from "@/types/event";
+import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
+import { EventStatus, ConfirmedTimeRange } from "@/types/event";
 
 interface EventPublicInfo {
   id: string;
@@ -15,8 +16,8 @@ interface EventPublicInfo {
   startDate: string;
   endDate: string;
   votingDeadline: string | null;
-  confirmedStartTime: string | null;
-  confirmedEndTime: string | null;
+  confirmedSlotIds: string[];
+  confirmedTimeRanges: ConfirmedTimeRange[];
   status: EventStatus;
   participantCount: number;
 }
@@ -316,38 +317,37 @@ export default function EventJoinPage() {
                 </div>
               )}
 
-              {/* Confirmed Time */}
-              {eventInfo.confirmedStartTime && eventInfo.confirmedEndTime && (
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <svg
-                      className="w-4 h-4 text-green-600 dark:text-green-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
+              {/* Confirmed Time Slots */}
+              {eventInfo.confirmedTimeRanges &&
+                eventInfo.confirmedTimeRanges.length > 0 && (
+                  <div className="flex items-start gap-3 text-sm">
+                    <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+                      <svg
+                        className="w-4 h-4 text-green-600 dark:text-green-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-zinc-500 dark:text-zinc-400 text-xs">
+                        {t("eventJoin.confirmedTime")}
+                      </p>
+                      <div className="text-zinc-900 dark:text-zinc-100 font-medium">
+                        <ConfirmedTimeDisplay
+                          timeRanges={eventInfo.confirmedTimeRanges}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-zinc-500 dark:text-zinc-400 text-xs">
-                      {t("eventJoin.confirmedTime")}
-                    </p>
-                    <p className="text-zinc-900 dark:text-zinc-100 font-medium">
-                      {format(
-                        new Date(eventInfo.confirmedStartTime),
-                        "MMM d, yyyy HH:mm",
-                      )}{" "}
-                      - {format(new Date(eventInfo.confirmedEndTime), "HH:mm")}
-                    </p>
-                  </div>
-                </div>
-              )}
+                )}
 
               {/* Participants */}
               <div className="flex items-center gap-3 text-sm">

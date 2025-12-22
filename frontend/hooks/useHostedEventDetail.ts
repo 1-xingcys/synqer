@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { EventStatus, ParticipantStatus } from "@/types/event";
+import {
+  EventStatus,
+  ParticipantStatus,
+  ConfirmedTimeRange,
+} from "@/types/event";
 
 interface TimeSlot {
   id: string;
@@ -45,8 +49,8 @@ interface Event {
   ownerId?: string;
   lineGroupId?: string;
   votingDeadline?: string;
-  confirmedStartTime?: string;
-  confirmedEndTime?: string;
+  confirmedSlotIds: string[];
+  confirmedTimeRanges: ConfirmedTimeRange[];
   status: EventStatus;
 }
 
