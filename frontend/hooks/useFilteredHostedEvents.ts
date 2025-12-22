@@ -59,12 +59,15 @@ function sortHostedEvents(
 
       case "confirmed": {
         // By confirmed start date (closer to now = higher priority)
-        const confirmedStartA = a.confirmedStartTime
-          ? new Date(a.confirmedStartTime).getTime()
-          : Infinity;
-        const confirmedStartB = b.confirmedStartTime
-          ? new Date(b.confirmedStartTime).getTime()
-          : Infinity;
+        // Use the first confirmedTimeRange's startTime
+        const confirmedStartA =
+          a.confirmedTimeRanges && a.confirmedTimeRanges.length > 0
+            ? new Date(a.confirmedTimeRanges[0].startTime).getTime()
+            : Infinity;
+        const confirmedStartB =
+          b.confirmedTimeRanges && b.confirmedTimeRanges.length > 0
+            ? new Date(b.confirmedTimeRanges[0].startTime).getTime()
+            : Infinity;
         return (
           Math.abs(confirmedStartA - now) - Math.abs(confirmedStartB - now)
         );
@@ -72,12 +75,19 @@ function sortHostedEvents(
 
       case "completed": {
         // By confirmed end date (closer to now = higher priority)
-        const confirmedEndA = a.confirmedEndTime
-          ? new Date(a.confirmedEndTime).getTime()
-          : Infinity;
-        const confirmedEndB = b.confirmedEndTime
-          ? new Date(b.confirmedEndTime).getTime()
-          : Infinity;
+        // Use the last confirmedTimeRange's endTime
+        const confirmedEndA =
+          a.confirmedTimeRanges && a.confirmedTimeRanges.length > 0
+            ? new Date(
+                a.confirmedTimeRanges[a.confirmedTimeRanges.length - 1].endTime,
+              ).getTime()
+            : Infinity;
+        const confirmedEndB =
+          b.confirmedTimeRanges && b.confirmedTimeRanges.length > 0
+            ? new Date(
+                b.confirmedTimeRanges[b.confirmedTimeRanges.length - 1].endTime,
+              ).getTime()
+            : Infinity;
         return Math.abs(confirmedEndA - now) - Math.abs(confirmedEndB - now);
       }
 
