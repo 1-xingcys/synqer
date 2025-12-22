@@ -314,7 +314,9 @@ export class EventsService {
 
   /**
    * 更新活動的預期參與者
-   * 採用差異更新策略：只新增/刪除有變動的參與者，保留現有參與者的狀態（如 hasVoted）
+   * 採用軟刪除策略：移除的參與者標記 isRemoved = true，保留投票紀錄
+   * 重新加入的參與者會恢復 isRemoved = false
+   * 注意：Host 不能被移除
    */
   async updateParticipants(
     eventId: string,
@@ -323,9 +325,18 @@ export class EventsService {
   ) {
     await this.eventAuthorizationService.verifyOwner(eventId, userId);
 
+    // 確保 host 在參與者列表中（不能移除自己）
+    const hostInParticipants = dto.participants.some(
+      (p) => p.userId === userId,
+    );
+    if (!hostInParticipants) {
+      // 自動將 host 加入參與者列表
+      dto.participants.push({ userId });
+    }
+
     // 使用 transaction 確保一致性
     await this.prisma.$transaction(async (prisma: Prisma.TransactionClient) => {
-      // 取得現有的預期參與者
+      // 取得現有的所有預期參與者（包含已移除的）
       const existingParticipants =
         await prisma.eventExpectedParticipant.findMany({
           where: { eventId },
@@ -333,15 +344,23 @@ export class EventsService {
             id: true,
             lineUserId: true,
             userId: true,
+            isRemoved: true,
           },
         });
 
-      // 建立現有參與者的識別 key（使用 lineUserId 或 userId）
-      const existingKeys = new Map<string, string>();
+      // 建立現有參與者的識別 key -> { id, isRemoved }
+      const existingKeys = new Map<
+        string,
+        { id: string; isRemoved: boolean; userId: string | null }
+      >();
       existingParticipants.forEach((p) => {
         const key = p.lineUserId || p.userId || '';
         if (key) {
-          existingKeys.set(key, p.id);
+          existingKeys.set(key, {
+            id: p.id,
+            isRemoved: p.isRemoved,
+            userId: p.userId,
+          });
         }
       });
 
@@ -357,11 +376,21 @@ export class EventsService {
         }
       });
 
-      // 找出需要刪除的參與者（在現有中但不在新的中）
-      const toDeleteIds: string[] = [];
-      existingKeys.forEach((id, key) => {
-        if (!newKeys.has(key)) {
-          toDeleteIds.push(id);
+      // 找出需要標記為移除的參與者（在現有中且未移除，但不在新的中）
+      // 注意：Host 不能被移除
+      const toRemoveIds: string[] = [];
+      // 找出需要恢復的參與者（在現有中且已移除，但在新的中）
+      const toRestoreIds: string[] = [];
+
+      existingKeys.forEach((info, key) => {
+        if (!newKeys.has(key) && !info.isRemoved) {
+          // 需要移除，但不能移除 host
+          if (info.userId !== userId) {
+            toRemoveIds.push(info.id);
+          }
+        } else if (newKeys.has(key) && info.isRemoved) {
+          // 需要恢復
+          toRestoreIds.push(info.id);
         }
       });
 
@@ -371,11 +400,26 @@ export class EventsService {
         return !existingKeys.has(key);
       });
 
-      // 執行刪除
-      if (toDeleteIds.length > 0) {
-        await prisma.eventExpectedParticipant.deleteMany({
+      // 執行軟刪除（標記 isRemoved = true）
+      if (toRemoveIds.length > 0) {
+        await prisma.eventExpectedParticipant.updateMany({
           where: {
-            id: { in: toDeleteIds },
+            id: { in: toRemoveIds },
+          },
+          data: {
+            isRemoved: true,
+          },
+        });
+      }
+
+      // 執行恢復（標記 isRemoved = false）
+      if (toRestoreIds.length > 0) {
+        await prisma.eventExpectedParticipant.updateMany({
+          where: {
+            id: { in: toRestoreIds },
+          },
+          data: {
+            isRemoved: false,
           },
         });
       }

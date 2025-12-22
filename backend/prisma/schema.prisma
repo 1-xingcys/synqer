@@ -156,6 +156,9 @@ model EventExpectedParticipant {
   reminderSentAt DateTime?
   hasVoted       Boolean   @default(false)
 
+  // 軟刪除：標記此參與者是否已被移除
+  isRemoved Boolean @default(false)
+
   @@unique([eventId, lineUserId])
   @@unique([eventId, userId])
   @@index([eventId])

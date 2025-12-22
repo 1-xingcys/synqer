@@ -164,25 +164,35 @@
     "reminderSent": "Reminder sent!",
     "participantsPage": {
       "title": "Manage Participants",
-      "description": "Add participants by searching registered users or from LINE groups",
+      "description": "Search and add registered users as participants",
+      "descriptionLineGroup": "Add participants from LINE group",
       "searchUsers": "Search Users",
       "lineGroups": "LINE Groups",
       "searchPlaceholder": "Search by name or email...",
+      "filterMembers": "Filter group members...",
       "searchHint": "Enter at least 2 characters to search",
       "noResults": "No users found",
       "selectLineGroup": "Select a LINE Group",
       "noLineGroups": "No LINE groups available",
       "noLineGroupsHint": "Add the LINE Bot to a group to see it here",
-      "addFromGroup": "Add from this group",
+      "addFromGroup": "Add from group",
       "addAll": "Add All",
       "groupMembers": "Group Members",
       "members": "members",
       "selectedParticipants": "Selected Participants",
+      "selectedCount": "{count} participants selected",
+      "selected": "Added",
+      "notSelected": "Not added",
       "removeParticipant": "Remove",
       "saveParticipants": "Save Participants",
       "noParticipants": "No participants added yet",
       "addParticipantsHint": "Search for users or select from LINE groups",
-      "notRegistered": "Not registered"
+      "notRegistered": "Not registered",
+      "voted": "Voted",
+      "notVotedYet": "Not voted yet",
+      "host": "Host",
+      "saveSuccess": "Saved",
+      "unsavedChanges": "Unsaved changes"
     },
     "settingsPage": {
       "title": "Event Settings",
@@ -343,6 +353,14 @@
     "voted": "Voted",
     "notVoted": "Not Voted",
     "notRegistered": "Not Registered"
+  },
+  "joinedParticipants": {
+    "filterAll": "All",
+    "filterVoted": "Voted",
+    "filterNotVoted": "Not Voted",
+    "searchPlaceholder": "Search participants...",
+    "noSearchResults": "No matching participants found",
+    "noParticipants": "No participants yet"
   },
   "language": "English",
   "theme": {

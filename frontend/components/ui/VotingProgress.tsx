@@ -1,25 +1,23 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-
 interface VotingProgressProps {
+  title: string;
   votingPercentage: number;
   totalVoted: number;
   totalExpected: number;
 }
 
 export function VotingProgress({
+  title,
   votingPercentage,
   totalVoted,
   totalExpected,
 }: VotingProgressProps) {
-  const t = useTranslations("hosted");
-
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-          {t("votingProgress")}
+          {title}
         </h2>
         <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
           {totalVoted} / {totalExpected}

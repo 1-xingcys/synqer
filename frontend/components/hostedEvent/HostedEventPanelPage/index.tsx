@@ -3,13 +3,8 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
-import { ParticipantStatus } from "@/types/event";
 import { EventHeader } from "./EventHeader";
-import { VotingProgress } from "./VotingProgress";
-import {
-  VotedParticipantList,
-  PendingParticipantList,
-} from "./ParticipantList";
+import { VotingProgress } from "@/components/ui/VotingProgress";
 
 export default function HostedEventPanelPage() {
   const params = useParams();
@@ -37,7 +32,7 @@ export default function HostedEventPanelPage() {
     );
   }
 
-  const { event, participants, votingStats, expectedParticipants } = data;
+  const { event, votingStats, expectedParticipants } = data;
 
   // 建立 userId -> pictureUrl 的映射
   const pictureUrlMap = new Map<string, string | undefined>();
@@ -46,20 +41,6 @@ export default function HostedEventPanelPage() {
       pictureUrlMap.set(p.userId, p.pictureUrl);
     }
   });
-
-  // 將 pictureUrl 加入 votedParticipants
-  const votedParticipants = participants
-    .filter((p) => p.hasVoted)
-    .map((p) => ({
-      ...p,
-      pictureUrl: pictureUrlMap.get(p.userId),
-    }));
-
-  const pendingParticipants = expectedParticipants.filter(
-    (p) =>
-      p.status === ParticipantStatus.NOT_VOTED ||
-      p.status === ParticipantStatus.NOT_REGISTERED,
-  );
 
   return (
     <div className="space-y-6">
@@ -75,15 +56,11 @@ export default function HostedEventPanelPage() {
       />
 
       <VotingProgress
+        title={t("hosted.votingProgress")}
         votingPercentage={votingStats.votingPercentage}
         totalVoted={votingStats.totalVoted}
         totalExpected={votingStats.totalExpected}
       />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <VotedParticipantList participants={votedParticipants} />
-        <PendingParticipantList participants={pendingParticipants} />
-      </div>
     </div>
   );
 }

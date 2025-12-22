@@ -263,8 +263,10 @@ export class LineBotService implements OnModuleInit {
       },
       include: {
         expectedParticipants: {
+          where: { isRemoved: false },
           select: {
             id: true,
+            userId: true,
             hasVoted: true,
           },
         },
@@ -320,12 +322,25 @@ export class LineBotService implements OnModuleInit {
       // 取得 Host 資訊
       const host = await this.getEventHostInfo(event.ownerId);
 
+      // 取得未被移除的預期參與者的 userId 集合
+      const activeParticipantUserIds = new Set<string>(
+        event.expectedParticipants
+          .filter((ep) => ep.userId)
+          .map((ep) => ep.userId as string),
+      );
+
+      // 過濾 votes，只保留未被移除的預期參與者的投票
+      const filteredVotes = event.votes.filter((v) =>
+        activeParticipantUserIds.has(v.userId),
+      );
+
       // 計算投票統計
       const totalExpected = event.expectedParticipants.length;
-      const votedUserIds = new Set(event.votes.map((v) => v.userId));
+      const votedUserIds = new Set(filteredVotes.map((v) => v.userId));
       const totalVoted =
-        event.expectedParticipants.filter((p) => p.hasVoted).length ||
-        votedUserIds.size;
+        event.expectedParticipants.filter(
+          (p) => p.userId && votedUserIds.has(p.userId),
+        ).length || votedUserIds.size;
       const votingPercentage =
         totalExpected > 0 ? (totalVoted / totalExpected) * 100 : 0;
 
