@@ -403,6 +403,12 @@
     },
     "cancel": "Cancel",
     "create": "Create event",
-    "creating": "Creating..."
+    "creating": "Creating...",
+    "cancelConfirm": {
+      "title": "Discard changes?",
+      "description": "Your entered data will be lost. This action cannot be undone.",
+      "keepEditing": "Keep editing",
+      "discard": "Discard"
+    }
   }
 }
