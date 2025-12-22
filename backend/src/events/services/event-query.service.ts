@@ -26,6 +26,7 @@ export class EventQueryService {
       },
       include: {
         expectedParticipants: {
+          where: { isRemoved: false },
           select: {
             id: true,
           },
@@ -69,6 +70,7 @@ export class EventQueryService {
             expectedParticipants: {
               some: {
                 userId,
+                isRemoved: false,
               },
             },
           },
@@ -76,6 +78,7 @@ export class EventQueryService {
       },
       include: {
         expectedParticipants: {
+          where: { isRemoved: false },
           select: {
             id: true,
             userId: true,
@@ -169,6 +172,7 @@ export class EventQueryService {
           },
         },
         expectedParticipants: {
+          where: { isRemoved: false },
           include: {
             user: {
               select: {
@@ -247,6 +251,7 @@ export class EventQueryService {
           },
         },
         expectedParticipants: {
+          where: { isRemoved: false },
           include: {
             user: {
               select: {
@@ -325,6 +330,7 @@ export class EventQueryService {
       where: { id: eventId },
       include: {
         expectedParticipants: {
+          where: { isRemoved: false },
           select: { id: true },
         },
         confirmedTimeSlots: {

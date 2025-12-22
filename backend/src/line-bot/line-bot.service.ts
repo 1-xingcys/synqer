@@ -263,6 +263,7 @@ export class LineBotService implements OnModuleInit {
       },
       include: {
         expectedParticipants: {
+          where: { isRemoved: false },
           select: {
             id: true,
             hasVoted: true,
