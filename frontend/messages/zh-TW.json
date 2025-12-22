@@ -191,7 +191,8 @@
       "voted": "已投票",
       "notVotedYet": "尚未投票",
       "host": "主辦人",
-      "saveSuccess": "已儲存"
+      "saveSuccess": "已儲存",
+      "unsavedChanges": "有未儲存的變更"
     },
     "settingsPage": {
       "title": "活動設定",

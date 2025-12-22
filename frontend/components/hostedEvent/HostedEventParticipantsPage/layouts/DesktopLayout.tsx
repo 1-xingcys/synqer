@@ -35,6 +35,8 @@ interface DesktopLayoutProps {
   onSave: () => void;
   // Host protection
   isHost: (userId?: string) => boolean;
+  // Unsaved changes
+  hasUnsavedChanges: boolean;
 }
 
 export function DesktopLayout({
@@ -56,6 +58,7 @@ export function DesktopLayout({
   saveSuccess,
   onSave,
   isHost,
+  hasUnsavedChanges,
 }: DesktopLayoutProps) {
   const t = useTranslations();
 
@@ -158,9 +161,16 @@ export function DesktopLayout({
       {/* Right Panel - Selected Participants */}
       <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
         <div className="border-b border-zinc-200 dark:border-zinc-800 px-6 py-4 flex items-center justify-between">
-          <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
-            {t("hosted.participantsPage.selectedParticipants")}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+              {t("hosted.participantsPage.selectedParticipants")}
+            </h3>
+            {hasUnsavedChanges && (
+              <span className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full">
+                {t("hosted.participantsPage.unsavedChanges")}
+              </span>
+            )}
+          </div>
           <span className="text-sm text-zinc-500 dark:text-zinc-400">
             ({selectedParticipants.length})
           </span>

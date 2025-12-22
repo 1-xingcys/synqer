@@ -25,6 +25,7 @@ export default function HostedEventParticipantsPage() {
     searchQuery,
     saving,
     saveSuccess,
+    hasUnsavedChanges,
     filteredLineGroupList,
     setSearchQuery,
     addMember,
@@ -76,6 +77,7 @@ export default function HostedEventParticipantsPage() {
     saveSuccess,
     onSave: () => void saveParticipants(),
     isHost,
+    hasUnsavedChanges,
   };
 
   return (

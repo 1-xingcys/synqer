@@ -191,7 +191,8 @@
       "voted": "Voted",
       "notVotedYet": "Not voted yet",
       "host": "Host",
-      "saveSuccess": "Saved"
+      "saveSuccess": "Saved",
+      "unsavedChanges": "Unsaved changes"
     },
     "settingsPage": {
       "title": "Event Settings",

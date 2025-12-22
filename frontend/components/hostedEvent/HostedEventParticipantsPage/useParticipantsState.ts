@@ -33,6 +33,9 @@ export function useParticipantsState(eventId: string) {
   const [selectedParticipants, setSelectedParticipants] = useState<
     SelectedParticipant[]
   >([]);
+  const [initialParticipants, setInitialParticipants] = useState<
+    SelectedParticipant[]
+  >([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -40,17 +43,17 @@ export function useParticipantsState(eventId: string) {
   // Initialize selected participants from event data
   useEffect(() => {
     if (eventData?.expectedParticipants) {
-      setSelectedParticipants(
-        eventData.expectedParticipants.map((p) => ({
-          id: p.id,
-          lineUserId: p.lineUserId,
-          userId: p.userId,
-          displayName: p.displayName || "Unknown",
-          pictureUrl: p.pictureUrl,
-          hasVoted: p.hasVoted,
-          status: p.status,
-        })),
-      );
+      const participants = eventData.expectedParticipants.map((p) => ({
+        id: p.id,
+        lineUserId: p.lineUserId,
+        userId: p.userId,
+        displayName: p.displayName || "Unknown",
+        pictureUrl: p.pictureUrl,
+        hasVoted: p.hasVoted,
+        status: p.status,
+      }));
+      setSelectedParticipants(participants);
+      setInitialParticipants(participants);
     }
   }, [eventData]);
 
@@ -236,6 +239,20 @@ export function useParticipantsState(eventId: string) {
     );
   }, [lineGroupParticipantList, searchQuery]);
 
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = useMemo(() => {
+    if (selectedParticipants.length !== initialParticipants.length) {
+      return true;
+    }
+    // Compare by lineUserId and userId
+    const initialSet = new Set(
+      initialParticipants.map((p) => `${p.lineUserId || ""}-${p.userId || ""}`),
+    );
+    return selectedParticipants.some(
+      (p) => !initialSet.has(`${p.lineUserId || ""}-${p.userId || ""}`),
+    );
+  }, [selectedParticipants, initialParticipants]);
+
   return {
     // State
     eventData,
@@ -250,6 +267,7 @@ export function useParticipantsState(eventId: string) {
     searchQuery,
     saving,
     saveSuccess,
+    hasUnsavedChanges,
 
     // Computed
     filteredLineGroupList,

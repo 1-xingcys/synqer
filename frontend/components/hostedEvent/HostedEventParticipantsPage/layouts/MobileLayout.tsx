@@ -35,6 +35,8 @@ interface MobileLayoutProps {
   onSave: () => void;
   // Host protection
   isHost: (userId?: string) => boolean;
+  // Unsaved changes
+  hasUnsavedChanges: boolean;
 }
 
 export function MobileLayout({
@@ -55,6 +57,7 @@ export function MobileLayout({
   saveSuccess,
   onSave,
   isHost,
+  hasUnsavedChanges,
 }: MobileLayoutProps) {
   const t = useTranslations();
 
@@ -110,6 +113,13 @@ export function MobileLayout({
               {/* Selected Members */}
               {selectedInGroup.length > 0 && (
                 <>
+                  {hasUnsavedChanges && (
+                    <div className="mb-2 px-2">
+                      <span className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full">
+                        {t("hosted.participantsPage.unsavedChanges")}
+                      </span>
+                    </div>
+                  )}
                   <SectionSeparator
                     label={t("hosted.participantsPage.selected")}
                   />
@@ -209,6 +219,13 @@ export function MobileLayout({
                   <EmptyState type="noParticipants" />
                 ) : (
                   <>
+                    {hasUnsavedChanges && (
+                      <div className="mb-2 px-2">
+                        <span className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full">
+                          {t("hosted.participantsPage.unsavedChanges")}
+                        </span>
+                      </div>
+                    )}
                     <SectionSeparator
                       label={t("hosted.participantsPage.selected")}
                     />
