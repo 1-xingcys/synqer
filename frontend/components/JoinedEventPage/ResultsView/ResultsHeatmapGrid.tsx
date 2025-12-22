@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { TimeSlot, Vote, Participant, TimeGranularity, MergedTimeRow } from "./types";
+import { TimeSlot, Vote, Participant, TimeGranularity, MergedTimeRow, SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
 import { DatePagination } from "../VotingGrid/ui/DatePagination";
@@ -14,6 +14,10 @@ interface ResultsHeatmapGridProps {
   participants: Participant[];
   selectedParticipants: Set<string>;
   maxVotes: number;
+  // Host-only props for adding time ranges to event time
+  canAddToEventTime?: boolean;
+  isVotingPhase?: boolean;
+  onAddToEventTime?: (info: SlotRangeInfo, availableCount: number) => void;
 }
 
 interface CellPosition {
@@ -161,6 +165,9 @@ export function ResultsHeatmapGrid({
   participants,
   selectedParticipants,
   maxVotes,
+  canAddToEventTime = false,
+  isVotingPhase = false,
+  onAddToEventTime,
 }: ResultsHeatmapGridProps) {
   const t = useTranslations("joined");
   const gridRef = useRef<HTMLDivElement>(null);
@@ -181,6 +188,7 @@ export function ResultsHeatmapGrid({
     timeLabel: string;
     voters: Vote[];
     nonVoters: Participant[];
+    rangeInfo: SlotRangeInfo;
   } | null>(null);
 
   // Group slots by date
@@ -394,11 +402,27 @@ export function ResultsHeatmapGrid({
     };
   }, [getRectangleBounds, paginatedDates, mergedRows]);
 
+  // Get all slot IDs from selection range cells
+  const getSlotIdsFromCells = useCallback(
+    (cells: SelectionRange["cells"]): string[] => {
+      const slotIds: string[] = [];
+      cells.forEach(({ dateKey, slotIndices }) => {
+        slotIndices.forEach((idx) => {
+          const slot = slotsByDate[dateKey]?.[idx];
+          if (slot) slotIds.push(slot.id);
+        });
+      });
+      return slotIds;
+    },
+    [slotsByDate]
+  );
+
   // Show modal with selection data
   const showModalForSelection = useCallback(
     (range: SelectionRange) => {
       const voters = getVotersForRange(range.cells);
       const nonVoters = getNonVotersForRange(range.cells);
+      const slotIds = getSlotIdsFromCells(range.cells);
 
       // Format date label
       let dateLabel: string;
@@ -416,9 +440,16 @@ export function ResultsHeatmapGrid({
         timeLabel,
         voters,
         nonVoters,
+        rangeInfo: {
+          startDate: range.startDate,
+          endDate: range.endDate,
+          startTime: range.startTime,
+          endTime: range.endTime,
+          slotIds,
+        },
       });
     },
-    [getVotersForRange, getNonVotersForRange]
+    [getVotersForRange, getNonVotersForRange, getSlotIdsFromCells]
   );
 
   // Handle single cell click
@@ -725,6 +756,14 @@ export function ResultsHeatmapGrid({
           voters={modalData.voters}
           nonVoters={modalData.nonVoters}
           totalFiltered={selectedParticipants.size}
+          canAddToEventTime={canAddToEventTime}
+          isVotingPhase={isVotingPhase}
+          rangeInfo={modalData.rangeInfo}
+          onAddToEventTime={
+            onAddToEventTime
+              ? (info) => onAddToEventTime(info, modalData.voters.length)
+              : undefined
+          }
         />
       )}
     </div>

@@ -2,17 +2,20 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { TimeSlot, Vote, Participant, ResultsViewProps } from "./types";
+import { TimeSlot, Vote, Participant, ResultsViewProps, SlotRangeInfo } from "./types";
 import { ParticipantFilter } from "./ParticipantFilter";
 import { HeatMapLegend } from "./HeatMapLegend";
 import { ResultsHeatmapGrid } from "./ResultsHeatmapGrid";
 
-export type { ResultsViewProps };
+export type { ResultsViewProps, SlotRangeInfo };
 
 export default function ResultsView({
   slots,
   votes,
   participants,
+  canAddToEventTime = false,
+  isVotingPhase = false,
+  onAddToEventTime,
 }: ResultsViewProps) {
   const t = useTranslations("joined");
 
@@ -115,6 +118,9 @@ export default function ResultsView({
             participants={participants}
             selectedParticipants={selectedParticipants}
             maxVotes={maxVotes}
+            canAddToEventTime={canAddToEventTime}
+            isVotingPhase={isVotingPhase}
+            onAddToEventTime={onAddToEventTime}
           />
         )}
       </div>

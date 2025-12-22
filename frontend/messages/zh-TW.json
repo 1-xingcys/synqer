@@ -185,6 +185,47 @@
     "allVoted": "所有參與者都已投票！",
     "sendReminder": "發送提醒",
     "reminderSent": "提醒已發送！",
+    "currentResults": "目前投票結果",
+    "selectTimeHint": "選擇時間區間加入活動時間",
+    "confirmError": "確認時間失敗，請重試。",
+    "deadline": {
+      "title": "距離截止時間",
+      "notSet": "未設定截止時間",
+      "expired": "投票已截止",
+      "days": "天",
+      "hours": "小時",
+      "minutes": "分鐘",
+      "urgent": "緊急",
+      "endingSoon": "即將截止"
+    },
+    "statusInfo": {
+      "voting_ended": "投票已結束，請決定活動時間。",
+      "confirmed": "活動時間已確認。",
+      "completed": "此活動已結束。"
+    },
+    "selectedTimes": {
+      "title": "已選擇的活動時間",
+      "slotsCount": "{count} 個時段",
+      "available": "可參加",
+      "slots": "個時段",
+      "remove": "移除",
+      "votingNotEnded": "注意：投票尚未結束，參與者仍可繼續投票。",
+      "confirming": "確認中...",
+      "confirmButton": "確認活動時間"
+    },
+    "addToEventTime": {
+      "button": "加入活動時間",
+      "votingHint": "投票仍在進行中"
+    },
+    "confirmDialog": {
+      "title": "確認活動時間",
+      "description": "確定要將這 {count} 個時段設為活動時間嗎？",
+      "votingWarning": "確定要現在確認活動時間嗎？",
+      "votingWarningDetail": "投票尚未結束，現在確認將會在所有參與者完成投票前決定活動時間。",
+      "cancel": "取消",
+      "confirm": "確認",
+      "confirming": "確認中..."
+    },
     "participantsPage": {
       "title": "管理參與者",
       "description": "搜尋已註冊的使用者並新增為參與者",
