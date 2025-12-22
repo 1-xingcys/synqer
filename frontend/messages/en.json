@@ -147,6 +147,9 @@
     "totalExpected": "Expected Participants",
     "totalVoted": "Voted",
     "votingProgress": "Voting Progress",
+    "decideTime": "Decide Event Time",
+    "editTime": "Edit Event Time",
+    "timeConfirmed": "{count} slots confirmed",
     "votedParticipants": "Voted Participants",
     "pendingParticipants": "Pending Participants",
     "noVotesYet": "No votes yet",
@@ -234,7 +237,10 @@
     "slotDetails": "Slot Details",
     "available": "Available",
     "unavailable": "Unavailable",
-    "peopleCount": "{count} people"
+    "peopleCount": "{count} people",
+    "confirmedTime": {
+      "moreRanges": "(+{count} more)"
+    }
   },
   "joinedEvents": {
     "title": "Joined Events",
@@ -330,6 +336,19 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "confirmTime": {
+    "title": "Decide Event Time",
+    "editTitle": "Edit Event Time",
+    "description": "Click on time slots to select confirmed event times. Darker colors indicate more people are available.",
+    "selectTimeSlots": "Select Time Slots",
+    "clickToSelect": "Click on cells to select time slots to confirm",
+    "selectedSlots": "{count} slots selected",
+    "clearSelection": "Clear selection",
+    "selectAtLeastOne": "Please select at least one time slot",
+    "saveFailed": "Failed to save, please try again",
+    "confirm": "Confirm Time",
+    "selected": "Selected"
   },
   "createEvent": {
     "title": "Create a new event",
