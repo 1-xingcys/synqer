@@ -134,6 +134,29 @@
       "connectHint": "連結你的 Google 日曆來自動偵測時間衝突",
       "showOnGrid": "在時間表上顯示行程",
       "legendCalendarEvent": "日曆行程"
+    },
+    "results": {
+      "allParticipants": "所有參與者",
+      "noParticipants": "無參與者",
+      "oneParticipant": "1 位參與者",
+      "participantsSelected": "已選 {count} 人",
+      "searchParticipants": "搜尋參與者...",
+      "selectAll": "全選",
+      "clearAll": "清除",
+      "noParticipantsFound": "找不到參與者",
+      "legendLabel": "有空人數",
+      "legendDescription": "（共選 {count} 人）",
+      "showingAvailability": "顯示 {count}/{total} 位參與者的時間",
+      "noParticipantsSelected": "未選擇參與者",
+      "selectParticipantsHint": "使用上方的篩選器來選擇要顯示哪些參與者的時間。",
+      "clickToSeeWho": "點擊任一時段查看誰有空",
+      "granularity": "顯示間隔",
+      "available": "有空",
+      "availableParticipants": "有空",
+      "unavailableParticipants": "沒空",
+      "noOneAvailable": "沒有人有空",
+      "close": "關閉",
+      "rangeHint": "顯示所有選取時段都有空的人"
     }
   },
   "hosted": {

@@ -134,6 +134,29 @@
       "connectHint": "Connect your Google Calendar to automatically detect time conflicts",
       "showOnGrid": "Show events on grid",
       "legendCalendarEvent": "Calendar event"
+    },
+    "results": {
+      "allParticipants": "All Participants",
+      "noParticipants": "No Participants",
+      "oneParticipant": "1 Participant",
+      "participantsSelected": "{count} Selected",
+      "searchParticipants": "Search participants...",
+      "selectAll": "Select All",
+      "clearAll": "Clear",
+      "noParticipantsFound": "No participants found",
+      "legendLabel": "Availability",
+      "legendDescription": "of {count} selected",
+      "showingAvailability": "Showing availability for {count} of {total} participants",
+      "noParticipantsSelected": "No Participants Selected",
+      "selectParticipantsHint": "Use the filter above to select which participants' availability to display.",
+      "clickToSeeWho": "Click on any time slot to see who's available",
+      "granularity": "View",
+      "available": "available",
+      "availableParticipants": "Available",
+      "unavailableParticipants": "Not Available",
+      "noOneAvailable": "No one is available",
+      "close": "Close",
+      "rangeHint": "Showing people available for ALL selected time slots"
     }
   },
   "hosted": {
