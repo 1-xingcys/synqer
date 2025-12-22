@@ -169,6 +169,7 @@ export class EventParticipantService {
       user: {
         id: string;
         displayName: string | null;
+        avatarUrl: string | null;
       } | null;
     }>,
     votedUserIds: Set<string>,
@@ -220,7 +221,7 @@ export class EventParticipantService {
         userId: ep.userId || undefined,
         displayName:
           ep.user?.displayName || lineMember?.displayName || undefined,
-        pictureUrl: lineMember?.pictureUrl || undefined,
+        pictureUrl: ep.user?.avatarUrl || lineMember?.pictureUrl || undefined,
         hasVoted,
         status: participantStatus,
       };

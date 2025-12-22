@@ -252,6 +252,7 @@ export class EventQueryService {
               select: {
                 id: true,
                 displayName: true,
+                avatarUrl: true,
               },
             },
           },
