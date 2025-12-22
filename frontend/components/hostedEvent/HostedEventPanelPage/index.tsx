@@ -39,7 +39,22 @@ export default function HostedEventPanelPage() {
 
   const { event, participants, votingStats, expectedParticipants } = data;
 
-  const votedParticipants = participants.filter((p) => p.hasVoted);
+  // 建立 userId -> pictureUrl 的映射
+  const pictureUrlMap = new Map<string, string | undefined>();
+  expectedParticipants.forEach((p) => {
+    if (p.userId && p.pictureUrl) {
+      pictureUrlMap.set(p.userId, p.pictureUrl);
+    }
+  });
+
+  // 將 pictureUrl 加入 votedParticipants
+  const votedParticipants = participants
+    .filter((p) => p.hasVoted)
+    .map((p) => ({
+      ...p,
+      pictureUrl: pictureUrlMap.get(p.userId),
+    }));
+
   const pendingParticipants = expectedParticipants.filter(
     (p) =>
       p.status === ParticipantStatus.NOT_VOTED ||
