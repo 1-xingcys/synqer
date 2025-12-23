@@ -6,7 +6,6 @@ import { Link } from "@/i18n/routing";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useMemo, useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import { VotingProgress } from "@/components/ui/VotingProgress";
 import { FilterTabs } from "./FilterTabs";
 import { SearchInput } from "./SearchInput";
