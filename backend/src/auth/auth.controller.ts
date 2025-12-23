@@ -44,6 +44,7 @@ export class AuthController {
     @Query('code') code: string,
     @Query('state') state: string,
     @Session() session: SessionData,
+    @Req() req: Request,
   ) {
     try {
       const { user, redirect } = await this.authService.handleGoogleCallback(
@@ -53,6 +54,14 @@ export class AuthController {
 
       // Store user ID in session
       session.userId = user.id.toString();
+
+      // 等待 session 保存完成，確保 cookie 正確發送
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err: Error | null) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
 
       // Redirect to frontend
       const redirectUrl = redirect
@@ -81,6 +90,7 @@ export class AuthController {
     @Query('code') code: string,
     @Query('state') state: string,
     @Session() session: SessionData,
+    @Req() req: Request,
   ) {
     try {
       const { user, redirect } = await this.authService.handleLineCallback(
@@ -90,6 +100,14 @@ export class AuthController {
 
       // Store user ID in session
       session.userId = user.id.toString();
+
+      // 等待 session 保存完成，確保 cookie 正確發送
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err: Error | null) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
 
       // Redirect to frontend
       const redirectUrl = redirect
@@ -109,6 +127,7 @@ export class AuthController {
   async liffLogin(
     @Body('accessToken') accessToken: string,
     @Session() session: SessionData,
+    @Req() req: Request,
   ): Promise<{
     id: string;
     displayName: string | null;
@@ -125,6 +144,14 @@ export class AuthController {
 
       // Store user ID in session
       session.userId = user.id.toString();
+
+      // 等待 session 保存完成，確保 cookie 正確發送
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err: Error | null) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
 
       // Fetch user with identities to get providers
       const userWithIdentities = await this.usersService.findUserById(user.id);
@@ -194,8 +221,14 @@ export class AuthController {
       });
     });
 
-    // Clear the session cookie
-    res.clearCookie('connect.sid');
+    // Clear the session cookie with the same domain as it was set
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.clearCookie('connect.sid', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      domain: isProduction ? '.synqer.club' : undefined,
+    });
 
     // Return response body (NestJS will serialize and send it)
     return { message: 'Logged out successfully' };
