@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   TimeSlot,
   Vote,
@@ -12,12 +12,12 @@ import {
 } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
-import { DatePagination } from "../VotingGrid/ui/DatePagination";
+import { DatePagination } from "@/components/JoinedEventPage/VotingGrid/ui/DatePagination";
 import {
   formatTime,
   formatDateHeader,
   groupSlotsByDate,
-} from "../VotingGrid/utils";
+} from "@/components/JoinedEventPage/VotingGrid/utils";
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];
@@ -29,6 +29,8 @@ interface ResultsHeatmapGridProps {
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;
   onAddToEventTime?: (info: SlotRangeInfo, availableCount: number) => void;
+  // Selected slot IDs to display with border highlight
+  selectedSlotIds?: Set<string>;
 }
 
 interface CellPosition {
@@ -179,8 +181,10 @@ export function ResultsHeatmapGrid({
   canAddToEventTime = false,
   isVotingPhase = false,
   onAddToEventTime,
+  selectedSlotIds,
 }: ResultsHeatmapGridProps) {
   const t = useTranslations("joined");
+  const locale = useLocale();
   const gridRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [granularity, setGranularity] = useState<TimeGranularity>(15);
@@ -241,18 +245,39 @@ export function ResultsHeatmapGrid({
     );
   }, [filteredVotes]);
 
-  // Get vote count for merged row (union of all voters across all slots)
+  // Get vote count for merged row (intersection - voters available for ALL slots in the merged row)
   const getVoteCountForMergedRow = useCallback(
     (slotIndices: number[], dateKey: string): number => {
-      const voterIds = new Set<string>();
+      if (slotIndices.length === 0) return 0;
+
+      // Get all slot IDs for this merged row
+      const slotIds: string[] = [];
       slotIndices.forEach((idx) => {
         const slot = slotsByDate[dateKey]?.[idx];
-        if (slot) {
-          const slotVotes = votesBySlot[slot.id] || [];
-          slotVotes.forEach((v) => voterIds.add(v.userId));
+        if (slot) slotIds.push(slot.id);
+      });
+
+      if (slotIds.length === 0) return 0;
+
+      // Count how many times each voter appears across all slots
+      const voterCounts = new Map<string, number>();
+      slotIds.forEach((slotId) => {
+        const slotVotes = votesBySlot[slotId] || [];
+        slotVotes.forEach((vote) => {
+          voterCounts.set(vote.userId, (voterCounts.get(vote.userId) || 0) + 1);
+        });
+      });
+
+      // Only count voters who are available for ALL slots in the merged row
+      const totalSlots = slotIds.length;
+      let count = 0;
+      voterCounts.forEach((voteCount) => {
+        if (voteCount === totalSlots) {
+          count++;
         }
       });
-      return voterIds.size;
+
+      return count;
     },
     [slotsByDate, votesBySlot],
   );
@@ -306,6 +331,64 @@ export function ResultsHeatmapGrid({
       );
     },
     [getVotersForRange, participants, selectedParticipants],
+  );
+
+  // Check if a merged row cell contains any selected slots
+  const isMergedCellSelected = useCallback(
+    (slotIndices: number[], dateKey: string): boolean => {
+      if (!selectedSlotIds || selectedSlotIds.size === 0) return false;
+      return slotIndices.some((idx) => {
+        const slot = slotsByDate[dateKey]?.[idx];
+        return slot && selectedSlotIds.has(slot.id);
+      });
+    },
+    [slotsByDate, selectedSlotIds],
+  );
+
+  // Get selected cell boundaries for border rendering
+  const getSelectedCellBoundaries = useCallback(
+    (
+      rowIndex: number,
+      dateIndex: number,
+      slotIndices: number[],
+      dateKey: string,
+    ): {
+      isTop: boolean;
+      isBottom: boolean;
+      isLeft: boolean;
+      isRight: boolean;
+    } => {
+      if (!selectedSlotIds || selectedSlotIds.size === 0) {
+        return { isTop: false, isBottom: false, isLeft: false, isRight: false };
+      }
+
+      const isSelected = isMergedCellSelected(slotIndices, dateKey);
+      if (!isSelected) {
+        return { isTop: false, isBottom: false, isLeft: false, isRight: false };
+      }
+
+      // Check adjacent cells
+      const checkAdjacentSelected = (rIdx: number, dIdx: number): boolean => {
+        const adjDateKey = paginatedDates[dIdx];
+        const adjRow = mergedRows[rIdx];
+        if (!adjDateKey || !adjRow) return false;
+        return isMergedCellSelected(adjRow.slotIndices, adjDateKey);
+      };
+
+      const isTop =
+        rowIndex === 0 || !checkAdjacentSelected(rowIndex - 1, dateIndex);
+      const isBottom =
+        rowIndex === mergedRows.length - 1 ||
+        !checkAdjacentSelected(rowIndex + 1, dateIndex);
+      const isLeft =
+        dateIndex === 0 || !checkAdjacentSelected(rowIndex, dateIndex - 1);
+      const isRight =
+        dateIndex === paginatedDates.length - 1 ||
+        !checkAdjacentSelected(rowIndex, dateIndex + 1);
+
+      return { isTop, isBottom, isLeft, isRight };
+    },
+    [selectedSlotIds, isMergedCellSelected, paginatedDates, mergedRows],
   );
 
   // Calculate rectangle bounds from drag start/end
@@ -362,14 +445,18 @@ export function ResultsHeatmapGrid({
   );
 
   // Format date for modal
-  const formatDateForModal = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const formatDateForModal = useCallback(
+    (dateStr: string) => {
+      const date = new Date(dateStr);
+      const dateLocale = locale === "zh-TW" ? "zh-TW" : "en-US";
+      return date.toLocaleDateString(dateLocale, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+    },
+    [locale],
+  );
 
   // Get selection range data
   const getSelectionRange = useCallback((): SelectionRange | null => {
@@ -456,7 +543,12 @@ export function ResultsHeatmapGrid({
         },
       });
     },
-    [getVotersForRange, getNonVotersForRange, getSlotIdsFromCells],
+    [
+      getVotersForRange,
+      getNonVotersForRange,
+      getSlotIdsFromCells,
+      formatDateForModal,
+    ],
   );
 
   // Handle single cell click
@@ -634,7 +726,7 @@ export function ResultsHeatmapGrid({
           <div className="flex">
             <div className="w-9 sm:w-14 shrink-0" />
             {paginatedDates.map((dateKey) => {
-              const { weekday, day, month } = formatDateHeader(dateKey);
+              const { weekday, day, month } = formatDateHeader(dateKey, locale);
               return (
                 <div
                   key={dateKey}
@@ -689,7 +781,19 @@ export function ResultsHeatmapGrid({
                     const inSelection =
                       isDragging && isInDragRectangle(rowIndex, dateIndex);
 
-                    // Determine border classes for selection rectangle
+                    // Check if this cell is part of selected event times
+                    const isSelectedEventTime = isMergedCellSelected(
+                      row.slotIndices,
+                      dateKey,
+                    );
+                    const selectedBoundaries = getSelectedCellBoundaries(
+                      rowIndex,
+                      dateIndex,
+                      row.slotIndices,
+                      dateKey,
+                    );
+
+                    // Determine border classes for selection rectangle (drag selection)
                     let selectionBorderClasses = "";
                     if (isDragging && rectBounds && inSelection) {
                       const isTop = rowIndex === rectBounds.minRow;
@@ -704,6 +808,29 @@ export function ResultsHeatmapGrid({
                       if (isLeft) borders.push("border-l-2 border-l-blue-500");
                       if (isRight) borders.push("border-r-2 border-r-blue-500");
                       selectionBorderClasses = borders.join(" ");
+                    }
+
+                    // Determine border classes for selected event times (persistent highlight)
+                    let selectedEventTimeBorderClasses = "";
+                    if (isSelectedEventTime && !inSelection) {
+                      const borders = [];
+                      if (selectedBoundaries.isTop)
+                        borders.push(
+                          "border-t-2 border-t-orange-500 dark:border-t-orange-400",
+                        );
+                      if (selectedBoundaries.isBottom)
+                        borders.push(
+                          "border-b-2 border-b-orange-500 dark:border-b-orange-400",
+                        );
+                      if (selectedBoundaries.isLeft)
+                        borders.push(
+                          "border-l-2 border-l-orange-500 dark:border-l-orange-400",
+                        );
+                      if (selectedBoundaries.isRight)
+                        borders.push(
+                          "border-r-2 border-r-orange-500 dark:border-r-orange-400",
+                        );
+                      selectedEventTimeBorderClasses = borders.join(" ");
                     }
 
                     return (
@@ -726,19 +853,25 @@ export function ResultsHeatmapGrid({
                         className={`
                           flex-1 min-w-0 h-10 sm:h-11 relative
                           cursor-pointer transition-all duration-75
-                          ${!inSelection ? "border-r border-b border-gray-100 dark:border-zinc-800" : ""}
+                          ${!inSelection && !isSelectedEventTime ? "border-r border-b border-gray-100 dark:border-zinc-800" : ""}
                           ${colors.bg}
                           ${inSelection ? `bg-blue-200 dark:bg-blue-800/50 ${selectionBorderClasses}` : ""}
+                          ${isSelectedEventTime && !inSelection ? selectedEventTimeBorderClasses : ""}
                           ${!isDragging ? "hover:ring-2 hover:ring-blue-400 dark:hover:ring-blue-500 hover:z-10" : ""}
                         `}
                       >
+                        {/* Selected event time indicator */}
+                        {isSelectedEventTime && !inSelection && (
+                          <div className="absolute inset-0 bg-orange-100/50 dark:bg-orange-900/30 pointer-events-none" />
+                        )}
+
                         {/* Vote count */}
                         {hasVotes && !inSelection && (
                           <div
                             className={`
                               absolute inset-0 flex items-center justify-center
                               text-xs sm:text-sm font-semibold
-                              ${colors.text}
+                              ${isSelectedEventTime ? "text-orange-700 dark:text-orange-300" : colors.text}
                             `}
                           >
                             {voteCount}

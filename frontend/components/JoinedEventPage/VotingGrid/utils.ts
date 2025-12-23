@@ -7,14 +7,25 @@ export const formatTime = (minutes: number): string => {
   return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
 };
 
+// Map app locale to date-fns locale string
+const getDateLocale = (locale: string): string => {
+  const localeMap: Record<string, string> = {
+    "zh-TW": "zh-TW",
+    en: "en-US",
+  };
+  return localeMap[locale] || locale;
+};
+
 // Format date header information
 export const formatDateHeader = (
   dateStr: string,
+  locale: string = "en",
 ): { weekday: string; day: number; month: string } => {
   const date = new Date(dateStr);
-  const weekday = date.toLocaleDateString(undefined, { weekday: "short" });
+  const dateLocale = getDateLocale(locale);
+  const weekday = date.toLocaleDateString(dateLocale, { weekday: "short" });
   const day = date.getDate();
-  const month = date.toLocaleDateString(undefined, { month: "short" });
+  const month = date.toLocaleDateString(dateLocale, { month: "short" });
   return { weekday, day, month };
 };
 

@@ -1,2 +1,2 @@
-export { DesktopLayout } from "./DesktopLayout";
-export { MobileLayout } from "./MobileLayout";
+export { ActiveLayout } from "./ActiveLayout";
+export { ReadOnlyLayout } from "./ReadOnlyLayout";

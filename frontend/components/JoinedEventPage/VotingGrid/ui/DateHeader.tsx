@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import { formatDateHeader } from "../utils";
 
 interface DateHeaderProps {
@@ -13,13 +14,15 @@ export function DateHeader({
   isDayFullySelected,
   onSelectDay,
 }: DateHeaderProps) {
+  const locale = useLocale();
+
   return (
     <div className="flex">
       {/* Time column header - matches time column width */}
       <div className="w-9 sm:w-14 shrink-0" />
       {/* Date columns */}
       {dates.map((dateKey) => {
-        const { weekday, day, month } = formatDateHeader(dateKey);
+        const { weekday, day, month } = formatDateHeader(dateKey, locale);
         const isFullySelected = isDayFullySelected(dateKey);
         return (
           <button

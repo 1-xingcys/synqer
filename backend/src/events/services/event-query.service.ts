@@ -29,6 +29,12 @@ export class EventQueryService {
           where: { isRemoved: false },
           select: {
             id: true,
+            userId: true,
+          },
+        },
+        votes: {
+          select: {
+            userId: true,
           },
         },
         confirmedTimeSlots: {
@@ -49,7 +55,35 @@ export class EventQueryService {
       },
     });
 
-    return events.map((event) => this.eventMapper.mapEventToList(event));
+    return events.map((event) => {
+      const expectedParticipantCount = event.expectedParticipants.length;
+
+      // 取得未被移除的預期參與者的 userId 集合
+      const activeParticipantUserIds = new Set<string>(
+        event.expectedParticipants
+          .filter((ep) => ep.userId)
+          .map((ep) => ep.userId as string),
+      );
+
+      // 過濾 votes，只保留未被移除的預期參與者的投票
+      const filteredVotes = event.votes.filter((v) =>
+        activeParticipantUserIds.has(v.userId),
+      );
+
+      // 從過濾後的 votes 表建立已投票的 userId Set
+      const votedUserIds = new Set<string>(filteredVotes.map((v) => v.userId));
+
+      // 計算 expectedParticipants 中已投票的人數
+      const votedCount = event.expectedParticipants.filter(
+        (p) => p.userId && votedUserIds.has(p.userId),
+      ).length;
+
+      return {
+        ...this.eventMapper.mapEventToList(event),
+        expectedParticipantCount,
+        votedCount,
+      };
+    });
   }
 
   /**

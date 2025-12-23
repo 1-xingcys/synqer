@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
+import { useHostedEventContext } from "@/contexts/HostedEventContext";
 import {
   useLineGroupMembers,
   type LineGroupMember,
@@ -14,7 +14,7 @@ export function useParticipantsState(eventId: string) {
     data: eventData,
     loading: eventLoading,
     refetch,
-  } = useHostedEventDetail(eventId);
+  } = useHostedEventContext();
 
   // Determine mode based on event's lineGroupId
   const eventMode: EventMode = eventData?.event.lineGroupId

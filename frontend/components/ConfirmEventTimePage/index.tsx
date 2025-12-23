@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useRouter, Link } from "@/i18n/routing";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { useMemo, useState, useCallback, useEffect } from "react";
@@ -20,10 +20,20 @@ interface Vote {
   userDisplayName: string;
 }
 
+// Map app locale to date-fns locale string
+const getDateLocale = (locale: string): string => {
+  const localeMap: Record<string, string> = {
+    "zh-TW": "zh-TW",
+    en: "en-US",
+  };
+  return localeMap[locale] || locale;
+};
+
 export default function ConfirmEventTimePage() {
   const params = useParams();
   const eventId = params.eventId as string;
   const t = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
 
   const { data, loading, error, refetch } = useHostedEventDetail(eventId);
@@ -94,9 +104,10 @@ export default function ConfirmEventTimePage() {
 
   const formatDateHeader = (dateStr: string) => {
     const date = new Date(dateStr);
-    const weekday = date.toLocaleDateString(undefined, { weekday: "short" });
+    const dateLocale = getDateLocale(locale);
+    const weekday = date.toLocaleDateString(dateLocale, { weekday: "short" });
     const day = date.getDate();
-    const month = date.toLocaleDateString(undefined, { month: "short" });
+    const month = date.toLocaleDateString(dateLocale, { month: "short" });
     return { weekday, day, month };
   };
 

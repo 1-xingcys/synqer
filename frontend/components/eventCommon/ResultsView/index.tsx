@@ -16,6 +16,7 @@ export default function ResultsView({
   canAddToEventTime = false,
   isVotingPhase = false,
   onAddToEventTime,
+  selectedSlotIds,
 }: ResultsViewProps) {
   const t = useTranslations("joined");
 
@@ -121,6 +122,7 @@ export default function ResultsView({
             canAddToEventTime={canAddToEventTime}
             isVotingPhase={isVotingPhase}
             onAddToEventTime={onAddToEventTime}
+            selectedSlotIds={selectedSlotIds}
           />
         )}
       </div>

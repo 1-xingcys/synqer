@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { IoCopyOutline } from "react-icons/io5";
 import {
   Tooltip,
@@ -49,6 +49,7 @@ export default function EventInfo({
   expectedParticipants,
 }: EventInfoProps) {
   const t = useTranslations("event");
+  const locale = useLocale();
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState<string>("");
 
@@ -87,7 +88,8 @@ export default function EventInfo({
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString(undefined, {
+    const dateLocale = locale === "zh-TW" ? "zh-TW" : "en-US";
+    return date.toLocaleDateString(dateLocale, {
       year: "numeric",
       month: "long",
       day: "numeric",

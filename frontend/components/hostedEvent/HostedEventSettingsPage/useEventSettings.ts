@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
+import { useHostedEventContext } from "@/contexts/HostedEventContext";
 
 export interface VotingDeadlineFormData {
   deadlineDate: Date | null;
@@ -9,7 +9,7 @@ export interface VotingDeadlineFormData {
 
 export function useEventSettings(eventId: string) {
   const router = useRouter();
-  const { data: eventData, loading, refetch } = useHostedEventDetail(eventId);
+  const { data: eventData, loading, refetch } = useHostedEventContext();
 
   const [formData, setFormData] = useState<VotingDeadlineFormData>({
     deadlineDate: null,

@@ -24,6 +24,8 @@ interface VotingDeadlinePickerProps {
   onDateChange: (date: Date | null) => void;
   /** 時間變更回調 */
   onTimeChange: (time: string) => void;
+  /** 是否禁用 */
+  disabled?: boolean;
 }
 
 /**
@@ -39,6 +41,7 @@ export function VotingDeadlinePicker({
   errorMessage,
   onDateChange,
   onTimeChange,
+  disabled = false,
 }: VotingDeadlinePickerProps) {
   const t = useTranslations();
 
@@ -67,7 +70,7 @@ export function VotingDeadlinePicker({
   const showError = hasError || isOverMaxTime;
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4 ${disabled ? "pointer-events-none" : ""}`}>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -78,6 +81,7 @@ export function VotingDeadlinePicker({
             onChange={onDateChange}
             placeholder={t("createEvent.configuration.selectDate")}
             maxDate={maxDate || undefined}
+            disabled={disabled}
           />
         </div>
 
@@ -90,12 +94,13 @@ export function VotingDeadlinePicker({
             onChange={onTimeChange}
             type="start"
             hasError={showError}
+            disabled={disabled}
           />
         </div>
       </div>
 
       {/* Error message */}
-      {showError && (
+      {showError && !disabled && (
         <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
           <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
           <p className="text-sm text-destructive">

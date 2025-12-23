@@ -35,6 +35,8 @@ export interface ResultsViewProps {
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;
   onAddToEventTime?: (info: SlotRangeInfo, availableCount: number) => void;
+  // Selected slot IDs to display with border highlight
+  selectedSlotIds?: Set<string>;
 }
 
 export type TimeGranularity = 15 | 30 | 60;

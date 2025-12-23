@@ -105,6 +105,7 @@
     "backToEvent": "返回活動",
     "tabs": {
       "overview": "總覽",
+      "vote": "投票",
       "participants": "參與者",
       "results": "結果分析"
     },
@@ -120,7 +121,29 @@
     "votersForSlot": "誰有空",
     "noVoters": "尚無人",
     "participants": "參與者",
-    "results": "結果分析",
+    "results": {
+      "allParticipants": "所有參與者",
+      "noParticipants": "無參與者",
+      "oneParticipant": "1 位參與者",
+      "participantsSelected": "已選 {count} 人",
+      "searchParticipants": "搜尋參與者...",
+      "selectAll": "全選",
+      "clearAll": "清除",
+      "noParticipantsFound": "找不到參與者",
+      "legendLabel": "有空人數",
+      "legendDescription": "（共選 {count} 人）",
+      "showingAvailability": "顯示 {count}/{total} 位參與者的時間",
+      "noParticipantsSelected": "未選擇參與者",
+      "selectParticipantsHint": "使用上方的篩選器來選擇要顯示哪些參與者的時間。",
+      "clickToSeeWho": "點擊任一時段查看誰有空",
+      "granularity": "顯示間隔",
+      "available": "有空",
+      "availableParticipants": "有空",
+      "unavailableParticipants": "沒空",
+      "noOneAvailable": "沒有人有空",
+      "close": "關閉",
+      "rangeHint": "顯示所有選取時段都有空的人"
+    },
     "viewResultsDescription": "查看時段分析",
     "votingProgress": "投票進度",
     "votedParticipants": "已投票",
@@ -192,30 +215,7 @@
       "title": "活動已結束",
       "description": "此活動已結束。"
     },
-    "viewResults": "查看結果",
-    "results": {
-      "allParticipants": "所有參與者",
-      "noParticipants": "無參與者",
-      "oneParticipant": "1 位參與者",
-      "participantsSelected": "已選 {count} 人",
-      "searchParticipants": "搜尋參與者...",
-      "selectAll": "全選",
-      "clearAll": "清除",
-      "noParticipantsFound": "找不到參與者",
-      "legendLabel": "有空人數",
-      "legendDescription": "（共選 {count} 人）",
-      "showingAvailability": "顯示 {count}/{total} 位參與者的時間",
-      "noParticipantsSelected": "未選擇參與者",
-      "selectParticipantsHint": "使用上方的篩選器來選擇要顯示哪些參與者的時間。",
-      "clickToSeeWho": "點擊任一時段查看誰有空",
-      "granularity": "顯示間隔",
-      "available": "有空",
-      "availableParticipants": "有空",
-      "unavailableParticipants": "沒空",
-      "noOneAvailable": "沒有人有空",
-      "close": "關閉",
-      "rangeHint": "顯示所有選取時段都有空的人"
-    }
+    "viewResults": "查看結果"
   },
   "hosted": {
     "title": "主辦的活動",
@@ -230,6 +230,7 @@
     "settings": "設定",
     "overview": "總覽",
     "backToHosted": "返回主辦活動",
+    "eventNotFound": "找不到活動",
     "totalExpected": "預期參與者",
     "totalVoted": "已投票",
     "votingProgress": "投票進度",
@@ -244,7 +245,20 @@
     "sendReminder": "發送提醒",
     "reminderSent": "提醒已發送！",
     "currentResults": "目前投票結果",
-    "selectTimeHint": "選擇時間區間加入活動時間",
+    "selectTimeHint": "點選或拖曳選擇時間區間",
+    "confirmedEventTime": "已設定的活動時間",
+    "confirmedTimeHint": "如需修改，請先重新設定再選擇新的時間",
+    "selectEventTimeNow": "請選擇活動時間",
+    "votingEndedSelectHint": "投票已結束，請選擇活動時間後確認",
+    "pleaseSelectEventTime": "投票已結束，請盡快選擇並確認活動時間，讓參與者知道活動何時舉行。",
+    "resetEventTime": "重新設定",
+    "resetting": "重新設定中...",
+    "resetError": "重新設定失敗，請重試。",
+    "resetConfirm": {
+      "title": "確定要重新設定嗎？",
+      "description": "這將清除目前已確認的活動時間，活動狀態會退回到「投票結束」，您需要重新選擇並確認活動時間。",
+      "confirm": "確定重新設定"
+    },
     "confirmError": "確認時間失敗，請重試。",
     "deadline": {
       "title": "距離截止時間",
@@ -261,15 +275,21 @@
       "confirmed": "活動時間已確認。",
       "completed": "此活動已結束。"
     },
-    "selectedTimes": {
-      "title": "已選擇的活動時間",
-      "slotsCount": "{count} 個時段",
-      "available": "可參加",
-      "slots": "個時段",
+    "eventTimeSelector": {
+      "confirmedTitle": "已確認的活動時間",
+      "selectingTitle": "選擇活動時間",
+      "emptyTitle": "活動時間",
+      "emptyHint": "從下方投票結果中點選或拖曳選擇時段",
+      "votingEndedWarning": "投票已結束，請盡快選擇並確認活動時間",
+      "votingNotEnded": "投票尚未結束，確認後將提前決定活動時間",
+      "reset": "重新選擇",
       "remove": "移除",
-      "votingNotEnded": "注意：投票尚未結束，參與者仍可繼續投票。",
+      "confirm": "確認活動時間",
       "confirming": "確認中...",
-      "confirmButton": "確認活動時間"
+      "cancel": "取消",
+      "resetConfirmTitle": "重新選擇活動時間？",
+      "resetConfirmDesc": "這將清除已確認的時間，活動狀態會退回「投票結束」",
+      "resetConfirm": "確定重選"
     },
     "addToEventTime": {
       "button": "加入活動時間",
@@ -314,7 +334,9 @@
       "notVotedYet": "尚未投票",
       "host": "主辦人",
       "saveSuccess": "已儲存",
-      "unsavedChanges": "有未儲存的變更"
+      "unsavedChanges": "有未儲存的變更",
+      "votingEndedDescription": "投票已結束，無法修改參與者名單",
+      "participants": "參與者名單"
     },
     "settingsPage": {
       "title": "活動設定",
@@ -329,7 +351,8 @@
       "dangerZone": "Danger Zone",
       "deleteEvent": "刪除活動",
       "deleteWarning": "此操作無法復原。所有投票和資料將被永久刪除。",
-      "confirmDelete": "您確定要刪除此活動嗎？"
+      "confirmDelete": "您確定要刪除此活動嗎？",
+      "votingEndedDescription": "投票已結束，無法修改投票截止時間"
     }
   },
   "eventJoin": {
@@ -469,7 +492,9 @@
       "votingEnded": "投票已結束，等待主辦者確認時間",
       "confirmed": "活動時間已確認",
       "completed": "此活動已結束"
-    }
+    },
+    "hostedEventHint": "你是這個活動的主辦者",
+    "goToEvent": "投票頁面"
   },
   "participantStatus": {
     "voted": "已投票",

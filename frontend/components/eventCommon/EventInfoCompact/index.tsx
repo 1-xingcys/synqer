@@ -5,6 +5,8 @@ import { EventStatus, ConfirmedTimeRange } from "@/types/event";
 import { EventStatusBadge } from "@/components/eventCommon/EventStatusBadge";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { format, isPast, differenceInHours } from "date-fns";
+import { Link } from "@/i18n/routing";
+import { ExternalLink } from "lucide-react";
 
 interface EventInfoCompactProps {
   title?: string | null;
@@ -17,6 +19,10 @@ interface EventInfoCompactProps {
   hasVoted?: boolean;
   confirmedTimeRanges?: ConfirmedTimeRange[];
   votingDeadline?: string | null;
+  /** 是否為 hosted 頁面（不顯示 Status Description，顯示前往按鈕） */
+  isHosted?: boolean;
+  /** 活動 ID（用於前往按鈕） */
+  eventId?: string;
 }
 
 export function EventInfoCompact({
@@ -30,6 +36,8 @@ export function EventInfoCompact({
   hasVoted,
   confirmedTimeRanges = [],
   votingDeadline,
+  isHosted = false,
+  eventId,
 }: EventInfoCompactProps) {
   const t = useTranslations();
 
@@ -50,14 +58,6 @@ export function EventInfoCompact({
     !isPast(deadlineDate) &&
     differenceInHours(deadlineDate, new Date()) < 24;
   const isDeadlinePast = deadlineDate && isPast(deadlineDate);
-
-  // Status descriptions
-  const statusDescriptions: Record<EventStatus, string> = {
-    [EventStatus.VOTING]: t("eventInfo.statusDesc.voting"),
-    [EventStatus.VOTING_ENDED]: t("eventInfo.statusDesc.votingEnded"),
-    [EventStatus.CONFIRMED]: t("eventInfo.statusDesc.confirmed"),
-    [EventStatus.COMPLETED]: t("eventInfo.statusDesc.completed"),
-  };
 
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-5">
@@ -112,6 +112,19 @@ export function EventInfoCompact({
                 {t("joined.notVoted")}
               </span>
             )}
+          </div>
+        )}
+
+        {/* Go to Event Button */}
+        {isHosted && eventId && (
+          <div className="flex items-center justify-end">
+            <Link
+              href={`/joined/${eventId}`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+            >
+              {t("eventInfo.goToEvent")}
+              <ExternalLink className="w-3.5 h-3.5" />
+            </Link>
           </div>
         )}
       </div>
@@ -203,13 +216,6 @@ export function EventInfoCompact({
             </span>
           </div>
         )}
-      </div>
-
-      {/* Status Description */}
-      <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-        <p className="text-xs text-zinc-500 dark:text-zinc-500">
-          {statusDescriptions[status]}
-        </p>
       </div>
     </div>
   );

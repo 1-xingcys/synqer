@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { VotingDeadlinePicker } from "@/components/eventCommon/VotingDeadlinePicker";
 import { useEventSettings } from "./useEventSettings";
 import { DangerZone } from "./DangerZone";
+import { EventStatus } from "@/types/event";
 
 export default function HostedEventSettingsPage() {
   const params = useParams();
@@ -40,6 +41,12 @@ export default function HostedEventSettingsPage() {
     );
   }
 
+  // Check if voting is no longer allowed (vote ended, confirmed, complete)
+  const isVotingDisabled =
+    eventData?.event.status === EventStatus.VOTING_ENDED ||
+    eventData?.event.status === EventStatus.CONFIRMED ||
+    eventData?.event.status === EventStatus.COMPLETED;
+
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Page Header */}
@@ -55,14 +62,18 @@ export default function HostedEventSettingsPage() {
       </div>
 
       {/* Voting Deadline Section */}
-      <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden">
+      <div
+        className={`border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden ${isVotingDisabled ? "opacity-60" : ""}`}
+      >
         {/* Section Header */}
         <div className="px-4 py-3 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-700">
           <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
             {t("createEvent.votingDeadline.title")}
           </h2>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-            {t("createEvent.votingDeadline.description")}
+            {isVotingDisabled
+              ? t("hosted.settingsPage.votingEndedDescription")
+              : t("createEvent.votingDeadline.description")}
           </p>
         </div>
 
@@ -76,24 +87,27 @@ export default function HostedEventSettingsPage() {
             hasError={!isDeadlineValid}
             onDateChange={updateDeadlineDate}
             onTimeChange={updateDeadlineTime}
+            disabled={isVotingDisabled}
           />
 
           {/* Save Button */}
-          <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-            {saveSuccess && (
-              <span className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
-                <Check className="w-4 h-4" />
-                {t("hosted.settingsPage.saved")}
-              </span>
-            )}
+          {!isVotingDisabled && (
+            <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+              {saveSuccess && (
+                <span className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
+                  <Check className="w-4 h-4" />
+                  {t("hosted.settingsPage.saved")}
+                </span>
+              )}
 
-            <Button
-              onClick={() => void handleSave()}
-              disabled={saving || !isDeadlineValid}
-            >
-              {saving ? t("common.saving") : t("common.save")}
-            </Button>
-          </div>
+              <Button
+                onClick={() => void handleSave()}
+                disabled={saving || !isDeadlineValid}
+              >
+                {saving ? t("common.saving") : t("common.save")}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useEventDetail } from "@/hooks/useEventDetail";
-import ResultsView from "@/components/JoinedEventPage/ResultsView";
+import ResultsView from "@/components/eventCommon/ResultsView";
 import { useMemo } from "react";
 
 export default function JoinedEventResultsPage() {
@@ -97,16 +97,6 @@ export default function JoinedEventResultsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-xl sm:text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          {tJoined("tabs.results")}
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-          {eventDetailData.event.title || t("untitled")}
-        </p>
-      </div>
-
       {/* Results View with HeatMap */}
       <ResultsView
         slots={eventDetailData.slots}

@@ -105,6 +105,7 @@
     "backToEvent": "Back to Event",
     "tabs": {
       "overview": "Overview",
+      "vote": "Vote",
       "participants": "Participants",
       "results": "Results"
     },
@@ -120,7 +121,29 @@
     "votersForSlot": "Who's available",
     "noVoters": "No one yet",
     "participants": "Participants",
-    "results": "Results",
+    "results": {
+      "allParticipants": "All Participants",
+      "noParticipants": "No Participants",
+      "oneParticipant": "1 Participant",
+      "participantsSelected": "{count} Selected",
+      "searchParticipants": "Search participants...",
+      "selectAll": "Select All",
+      "clearAll": "Clear",
+      "noParticipantsFound": "No participants found",
+      "legendLabel": "Availability",
+      "legendDescription": "of {count} selected",
+      "showingAvailability": "Showing availability for {count} of {total} participants",
+      "noParticipantsSelected": "No Participants Selected",
+      "selectParticipantsHint": "Use the filter above to select which participants' availability to display.",
+      "clickToSeeWho": "Click on any time slot to see who's available",
+      "granularity": "View",
+      "available": "available",
+      "availableParticipants": "Available",
+      "unavailableParticipants": "Not Available",
+      "noOneAvailable": "No one is available",
+      "close": "Close",
+      "rangeHint": "Showing people available for ALL selected time slots"
+    },
     "viewResultsDescription": "View availability analysis",
     "votingProgress": "Voting Progress",
     "votedParticipants": "Voted",
@@ -192,30 +215,7 @@
       "title": "Event Completed",
       "description": "This event has ended."
     },
-    "viewResults": "View Results",
-    "results": {
-      "allParticipants": "All Participants",
-      "noParticipants": "No Participants",
-      "oneParticipant": "1 Participant",
-      "participantsSelected": "{count} Selected",
-      "searchParticipants": "Search participants...",
-      "selectAll": "Select All",
-      "clearAll": "Clear",
-      "noParticipantsFound": "No participants found",
-      "legendLabel": "Availability",
-      "legendDescription": "of {count} selected",
-      "showingAvailability": "Showing availability for {count} of {total} participants",
-      "noParticipantsSelected": "No Participants Selected",
-      "selectParticipantsHint": "Use the filter above to select which participants' availability to display.",
-      "clickToSeeWho": "Click on any time slot to see who's available",
-      "granularity": "View",
-      "available": "available",
-      "availableParticipants": "Available",
-      "unavailableParticipants": "Not Available",
-      "noOneAvailable": "No one is available",
-      "close": "Close",
-      "rangeHint": "Showing people available for ALL selected time slots"
-    }
+    "viewResults": "View Results"
   },
   "hosted": {
     "title": "Hosted Events",
@@ -230,6 +230,7 @@
     "settings": "Settings",
     "overview": "Overview",
     "backToHosted": "Back to Hosted Events",
+    "eventNotFound": "Event not found",
     "totalExpected": "Expected Participants",
     "totalVoted": "Voted",
     "votingProgress": "Voting Progress",
@@ -244,7 +245,20 @@
     "sendReminder": "Send Reminder",
     "reminderSent": "Reminder sent!",
     "currentResults": "Current Results",
-    "selectTimeHint": "Select a time range to add to event time",
+    "selectTimeHint": "Click or drag to select time slots",
+    "confirmedEventTime": "Confirmed Event Time",
+    "confirmedTimeHint": "To modify, reset first and select new time slots",
+    "selectEventTimeNow": "Select Event Time",
+    "votingEndedSelectHint": "Voting has ended. Please select and confirm the event time",
+    "pleaseSelectEventTime": "Voting has ended. Please select and confirm the event time so participants know when the event will be held.",
+    "resetEventTime": "Reset",
+    "resetting": "Resetting...",
+    "resetError": "Failed to reset. Please try again.",
+    "resetConfirm": {
+      "title": "Reset Event Time?",
+      "description": "This will clear the confirmed event time and revert the event status to 'Voting Ended'. You will need to select and confirm a new time.",
+      "confirm": "Reset"
+    },
     "confirmError": "Failed to confirm time. Please try again.",
     "deadline": {
       "title": "Time Until Deadline",
@@ -261,15 +275,21 @@
       "confirmed": "Event time has been confirmed.",
       "completed": "This event has been completed."
     },
-    "selectedTimes": {
-      "title": "Selected Event Times",
-      "slotsCount": "{count} time slots",
-      "available": "available",
-      "slots": "slots",
+    "eventTimeSelector": {
+      "confirmedTitle": "Confirmed Event Time",
+      "selectingTitle": "Select Event Time",
+      "emptyTitle": "Event Time",
+      "emptyHint": "Click or drag to select time slots from the results below",
+      "votingEndedWarning": "Voting has ended. Please select and confirm the event time",
+      "votingNotEnded": "Voting hasn't ended. Confirming now will finalize the time early",
+      "reset": "Reset",
       "remove": "Remove",
-      "votingNotEnded": "Note: Voting hasn't ended yet. Participants can still vote.",
+      "confirm": "Confirm Event Time",
       "confirming": "Confirming...",
-      "confirmButton": "Confirm Event Time"
+      "cancel": "Cancel",
+      "resetConfirmTitle": "Reset Event Time?",
+      "resetConfirmDesc": "This will clear the confirmed time and revert to 'Voting Ended' status",
+      "resetConfirm": "Reset"
     },
     "addToEventTime": {
       "button": "Add to Event Time",
@@ -314,7 +334,9 @@
       "notVotedYet": "Not voted yet",
       "host": "Host",
       "saveSuccess": "Saved",
-      "unsavedChanges": "Unsaved changes"
+      "unsavedChanges": "Unsaved changes",
+      "votingEndedDescription": "Voting has ended, participant list cannot be modified",
+      "participants": "Participants"
     },
     "settingsPage": {
       "title": "Event Settings",
@@ -329,7 +351,8 @@
       "dangerZone": "Danger Zone",
       "deleteEvent": "Delete Event",
       "deleteWarning": "This action cannot be undone. All votes and data will be permanently deleted.",
-      "confirmDelete": "Are you sure you want to delete this event?"
+      "confirmDelete": "Are you sure you want to delete this event?",
+      "votingEndedDescription": "Voting has ended, voting deadline cannot be modified"
     }
   },
   "eventJoin": {
@@ -469,7 +492,9 @@
       "votingEnded": "Voting has ended, waiting for host to confirm time",
       "confirmed": "Event time has been confirmed",
       "completed": "This event has ended"
-    }
+    },
+    "hostedEventHint": "You are the host of this event",
+    "goToEvent": "Go To Vote Page"
   },
   "participantStatus": {
     "voted": "Voted",

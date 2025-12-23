@@ -2,16 +2,15 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useParticipantsState } from "./useParticipantsState";
-import { DesktopLayout, MobileLayout } from "./layouts";
+import { ActiveLayout, ReadOnlyLayout } from "./layouts";
 import { useEffect } from "react";
+import { EventStatus } from "@/types/event";
 
 export default function HostedEventParticipantsPage() {
   const params = useParams();
   const eventId = params.eventId as string;
   const t = useTranslations();
-  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   const {
     eventData,
@@ -31,7 +30,6 @@ export default function HostedEventParticipantsPage() {
     addMember,
     addUser,
     removeParticipant,
-    addAllMembers,
     saveParticipants,
     isSelected,
     isHost,
@@ -59,6 +57,35 @@ export default function HostedEventParticipantsPage() {
     );
   }
 
+  // Check if voting is no longer allowed (vote ended, confirmed, complete)
+  const isVotingDisabled =
+    eventData.event.status === EventStatus.VOTING_ENDED ||
+    eventData.event.status === EventStatus.CONFIRMED ||
+    eventData.event.status === EventStatus.COMPLETED;
+
+  // If voting is disabled, show read-only view
+  if (isVotingDisabled) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="max-w-xl mx-auto">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            {t("hosted.participantsPage.title")}
+          </h2>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+            {t("hosted.participantsPage.votingEndedDescription")}
+          </p>
+        </div>
+
+        {/* Read-only participant list */}
+        <ReadOnlyLayout
+          selectedParticipants={selectedParticipants}
+          isHost={isHost}
+        />
+      </div>
+    );
+  }
+
   const commonProps = {
     eventMode,
     searchQuery,
@@ -81,7 +108,7 @@ export default function HostedEventParticipantsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-xl mx-auto">
       {/* Header */}
       <div>
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
@@ -94,12 +121,7 @@ export default function HostedEventParticipantsPage() {
         </p>
       </div>
 
-      {/* Layout */}
-      {isDesktop ? (
-        <DesktopLayout {...commonProps} onAddAllMembers={addAllMembers} />
-      ) : (
-        <MobileLayout {...commonProps} />
-      )}
+      <ActiveLayout {...commonProps} />
     </div>
   );
 }

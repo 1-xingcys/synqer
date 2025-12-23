@@ -95,7 +95,7 @@ export function SlotDetailModal({
       >
         <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-zinc-800 bg-gradient-to-r from-gray-50 to-transparent dark:from-zinc-800/50 dark:to-transparent">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-zinc-800 bg-linear-to-r from-gray-50 to-transparent dark:from-zinc-800/50 dark:to-transparent">
             <div>
               <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
                 {dateLabel}
@@ -209,7 +209,7 @@ export function SlotDetailModal({
                           src={voter.pictureUrl}
                           alt={voter.userDisplayName}
                         />
-                        <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-emerald-600 text-white text-sm font-semibold">
+                        <AvatarFallback className="bg-linear-to-br from-emerald-400 to-emerald-600 text-white text-sm font-semibold">
                           {voter.userDisplayName[0]?.toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -250,7 +250,7 @@ export function SlotDetailModal({
                           src={participant.pictureUrl}
                           alt={participant.displayName}
                         />
-                        <AvatarFallback className="bg-gradient-to-br from-gray-300 to-gray-400 dark:from-zinc-600 dark:to-zinc-700 text-white text-sm font-semibold">
+                        <AvatarFallback className="bg-linear-to-br from-gray-300 to-gray-400 dark:from-zinc-600 dark:to-zinc-700 text-white text-sm font-semibold">
                           {participant.displayName[0]?.toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
