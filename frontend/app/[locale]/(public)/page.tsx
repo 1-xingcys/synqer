@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default function LandingPage() {
   const t = useTranslations("landing");
@@ -29,11 +30,11 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-zinc-50 to-white dark:from-black dark:to-zinc-900">
+    <div className="min-h-screen flex flex-col bg-linear-to-b from-zinc-50 to-white dark:from-black dark:to-zinc-900">
       <Header variant="public" />
 
       {/* Hero Section */}
-      <main className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
+      <main className="flex-1 pt-32 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
             <h2 className="text-5xl sm:text-6xl font-bold text-zinc-900 dark:text-zinc-100 mb-6">
@@ -139,6 +140,8 @@ export default function LandingPage() {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
