@@ -127,25 +127,7 @@ export default function JoinedEventParticipantsPage() {
   };
 
   return (
-    <div className="py-8 space-y-6">
-      {/* Back button */}
-      <div className="mb-4">
-        <Link
-          href={`/joined/${eventId}`}
-          className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>{t("joined.backToEvent")}</span>
-        </Link>
-      </div>
-
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          {eventDetailData.event.title || t("event.untitled")}
-        </h1>
-      </div>
-
+    <div className="py-4 space-y-6">
       {/* Voting Progress */}
       <VotingProgress
         title={t("joined.votingProgress")}

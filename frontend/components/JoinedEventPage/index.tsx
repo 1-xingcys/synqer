@@ -9,6 +9,7 @@ import VotingGrid from "@/components/JoinedEventPage/VotingGrid";
 import { EventStatus } from "@/types/event";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { AddToCalendarPanel } from "@/components/JoinedEventPage/AddToCalendarPanel";
+import { StatusDescription } from "@/components/eventCommon/StatusDescription";
 
 export default function JoinedEventPage() {
   const params = useParams();
@@ -36,6 +37,9 @@ export default function JoinedEventPage() {
 
   return (
     <div className="space-y-6">
+      {/* Status Description */}
+      <StatusDescription status={event.status} />
+
       {/* Voting Grid - only shown during VOTING status */}
       {canVote && (
         <div className="bg-white dark:bg-zinc-900 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-800 p-2 sm:p-6">

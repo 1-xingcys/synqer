@@ -105,6 +105,7 @@
     "backToEvent": "Back to Event",
     "tabs": {
       "overview": "Overview",
+      "vote": "Vote",
       "participants": "Participants",
       "results": "Results"
     },
@@ -474,7 +475,7 @@
       "completed": "This event has ended"
     },
     "hostedEventHint": "You are the host of this event",
-    "goToEvent": "Go To Vote"
+    "goToEvent": "Go To Vote Page"
   },
   "participantStatus": {
     "voted": "Voted",

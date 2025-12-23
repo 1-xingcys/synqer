@@ -14,6 +14,7 @@ import {
   useJoinedEventContext,
 } from "@/contexts/JoinedEventContext";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { EventStatus } from "@/types/event";
 
 interface JoinedEventLayoutProps {
   children: ReactNode;
@@ -25,27 +26,6 @@ function JoinedEventLayoutContent({ children }: JoinedEventLayoutProps) {
   const eventId = params.eventId as string;
   const { data, loading, error } = useJoinedEventContext();
   const { user } = useAuthContext();
-
-  const tabs = [
-    {
-      id: "overview",
-      label: t("joined.tabs.overview"),
-      href: `/joined/${eventId}`,
-      icon: NavIcons.overview,
-    },
-    {
-      id: "participants",
-      label: t("joined.tabs.participants"),
-      href: `/joined/${eventId}/participants`,
-      icon: NavIcons.participants,
-    },
-    {
-      id: "results",
-      label: t("joined.tabs.results"),
-      href: `/joined/${eventId}/results`,
-      icon: NavIcons.results,
-    },
-  ];
 
   if (loading) {
     return (
@@ -102,6 +82,31 @@ function JoinedEventLayoutContent({ children }: JoinedEventLayoutProps) {
           p.hasVoted,
       )
     : false;
+
+  // Determine if voting is active
+  const isVoting = event.status === EventStatus.VOTING;
+
+  // Generate tabs with dynamic overview label
+  const tabs = [
+    {
+      id: "overview",
+      label: isVoting ? t("joined.tabs.vote") : t("joined.tabs.overview"),
+      href: `/joined/${eventId}`,
+      icon: NavIcons.overview,
+    },
+    {
+      id: "participants",
+      label: t("joined.tabs.participants"),
+      href: `/joined/${eventId}/participants`,
+      icon: NavIcons.participants,
+    },
+    {
+      id: "results",
+      label: t("joined.tabs.results"),
+      href: `/joined/${eventId}/results`,
+      icon: NavIcons.results,
+    },
+  ];
 
   return (
     <div className="py-8 space-y-6">

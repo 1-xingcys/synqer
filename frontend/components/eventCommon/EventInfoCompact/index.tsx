@@ -59,14 +59,6 @@ export function EventInfoCompact({
     differenceInHours(deadlineDate, new Date()) < 24;
   const isDeadlinePast = deadlineDate && isPast(deadlineDate);
 
-  // Status descriptions
-  const statusDescriptions: Record<EventStatus, string> = {
-    [EventStatus.VOTING]: t("eventInfo.statusDesc.voting"),
-    [EventStatus.VOTING_ENDED]: t("eventInfo.statusDesc.votingEnded"),
-    [EventStatus.CONFIRMED]: t("eventInfo.statusDesc.confirmed"),
-    [EventStatus.COMPLETED]: t("eventInfo.statusDesc.completed"),
-  };
-
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-5">
       {/* Header Row: Title + Status | Voted Badge */}
@@ -225,15 +217,6 @@ export function EventInfoCompact({
           </div>
         )}
       </div>
-
-      {/* Status Description or Go to Event Button */}
-      {!isHosted && (
-        <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800">
-          <p className="text-xs text-zinc-500 dark:text-zinc-500">
-            {statusDescriptions[status]}
-          </p>
-        </div>
-      )}
     </div>
   );
 }
