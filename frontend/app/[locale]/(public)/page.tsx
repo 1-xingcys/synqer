@@ -405,17 +405,24 @@ export default function LandingPage() {
             {/* Desktop Layout - Horizontal with connecting lines */}
             <div className="hidden lg:block">
               <div className="relative flex justify-between items-start max-w-5xl mx-auto">
-                {/* Horizontal connecting line */}
+                {/* Horizontal connecting line - Light mode */}
                 <div 
-                  className="absolute top-6 left-[calc(12.5%+1.75rem)] right-[calc(12.5%+1.75rem)] h-0.5"
+                  className="absolute top-6 left-[calc(12.5%+1.75rem)] right-[calc(12.5%+1.75rem)] h-0.5 dark:hidden"
                   style={{
                     background: "linear-gradient(to right, #93c5fd 0%, #93c5fd 25%, #fcd34d 25%, #fcd34d 50%, #86efac 50%, #86efac 75%, #a1a1aa 75%, #a1a1aa 100%)"
+                  }}
+                />
+                {/* Horizontal connecting line - Dark mode */}
+                <div 
+                  className="absolute top-6 left-[calc(12.5%+1.75rem)] right-[calc(12.5%+1.75rem)] h-0.5 hidden dark:block"
+                  style={{
+                    background: "linear-gradient(to right, #1d4ed8 0%, #1d4ed8 25%, #d97706 25%, #d97706 50%, #15803d 50%, #15803d 75%, #52525b 75%, #52525b 100%)"
                   }}
                 />
 
                 {/* Step 1 */}
                 <div className="relative flex flex-col items-center text-center w-1/4 px-4">
-                  <div className="relative z-10 w-12 h-12 bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-800 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-300 text-lg font-bold mb-4">
+                  <div className="relative z-10 w-12 h-12 bg-blue-100 dark:bg-zinc-900 border-2 border-blue-200 dark:border-blue-500 rounded-full flex items-center justify-center text-blue-700 dark:text-blue-400 text-lg font-bold mb-4">
                     1
                   </div>
                   <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
@@ -428,7 +435,7 @@ export default function LandingPage() {
 
                 {/* Step 2 */}
                 <div className="relative flex flex-col items-center text-center w-1/4 px-4">
-                  <div className="relative z-10 w-12 h-12 bg-amber-100 dark:bg-amber-900/30 border-2 border-amber-200 dark:border-amber-800 rounded-full flex items-center justify-center text-amber-700 dark:text-amber-300 text-lg font-bold mb-4">
+                  <div className="relative z-10 w-12 h-12 bg-amber-100 dark:bg-zinc-900 border-2 border-amber-200 dark:border-amber-500 rounded-full flex items-center justify-center text-amber-700 dark:text-amber-400 text-lg font-bold mb-4">
                     2
                   </div>
                   <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
@@ -441,7 +448,7 @@ export default function LandingPage() {
 
                 {/* Step 3 */}
                 <div className="relative flex flex-col items-center text-center w-1/4 px-4">
-                  <div className="relative z-10 w-12 h-12 bg-green-100 dark:bg-green-900/30 border-2 border-green-200 dark:border-green-800 rounded-full flex items-center justify-center text-green-700 dark:text-green-300 text-lg font-bold mb-4">
+                  <div className="relative z-10 w-12 h-12 bg-green-100 dark:bg-zinc-900 border-2 border-green-200 dark:border-green-500 rounded-full flex items-center justify-center text-green-700 dark:text-green-400 text-lg font-bold mb-4">
                     3
                   </div>
                   <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
@@ -454,7 +461,7 @@ export default function LandingPage() {
 
                 {/* Step 4 */}
                 <div className="relative flex flex-col items-center text-center w-1/4 px-4">
-                  <div className="relative z-10 w-12 h-12 bg-zinc-100 dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 rounded-full flex items-center justify-center text-zinc-600 dark:text-zinc-400 text-lg font-bold mb-4">
+                  <div className="relative z-10 w-12 h-12 bg-zinc-100 dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-500 rounded-full flex items-center justify-center text-zinc-600 dark:text-zinc-400 text-lg font-bold mb-4">
                     4
                   </div>
                   <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
