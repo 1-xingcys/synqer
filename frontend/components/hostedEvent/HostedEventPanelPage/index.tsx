@@ -10,7 +10,7 @@ import { VotingProgress } from "@/components/ui/VotingProgress";
 import { EventStatus } from "@/types/event";
 import ResultsView, {
   SlotRangeInfo,
-} from "@/components/JoinedEventPage/ResultsView";
+} from "@/components/eventCommon/ResultsView";
 import { DeadlineCountdown } from "./DeadlineCountdown";
 import { SelectedEventTimes, SelectedTimeRange } from "./SelectedEventTimes";
 import { ConfirmTimeDialog } from "./ConfirmTimeDialog";

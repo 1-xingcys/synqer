@@ -248,7 +248,7 @@ export function ParticipantFilter({
                           src={participant.pictureUrl}
                           alt={participant.displayName}
                         />
-                        <AvatarFallback className="bg-gradient-to-br from-gray-200 to-gray-300 dark:from-zinc-600 dark:to-zinc-700 text-xs font-semibold text-gray-600 dark:text-zinc-300">
+                        <AvatarFallback className="bg-linear-to-br from-gray-200 to-gray-300 dark:from-zinc-600 dark:to-zinc-700 text-xs font-semibold text-gray-600 dark:text-zinc-300">
                           {participant.displayName[0]?.toUpperCase()}
                         </AvatarFallback>
                       </Avatar>

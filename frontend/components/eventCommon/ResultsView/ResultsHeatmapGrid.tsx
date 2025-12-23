@@ -12,12 +12,12 @@ import {
 } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
-import { DatePagination } from "../VotingGrid/ui/DatePagination";
+import { DatePagination } from "@/components/JoinedEventPage/VotingGrid/ui/DatePagination";
 import {
   formatTime,
   formatDateHeader,
   groupSlotsByDate,
-} from "../VotingGrid/utils";
+} from "@/components/JoinedEventPage/VotingGrid/utils";
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];

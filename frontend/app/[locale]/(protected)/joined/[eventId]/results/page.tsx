@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useEventDetail } from "@/hooks/useEventDetail";
-import ResultsView from "@/components/JoinedEventPage/ResultsView";
+import ResultsView from "@/components/eventCommon/ResultsView";
 import { useMemo } from "react";
 
 export default function JoinedEventResultsPage() {
