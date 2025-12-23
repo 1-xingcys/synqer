@@ -278,7 +278,7 @@ export function useMergedRowDragSelection({
       const rowIndexStr = element?.getAttribute("data-row-index");
       const dateIndexStr = element?.getAttribute("data-date-index");
 
-      if (rowIndexStr !== null && dateIndexStr !== null) {
+      if (rowIndexStr != null && dateIndexStr != null) {
         const rowIndex = parseInt(rowIndexStr, 10);
         const dateIndex = parseInt(dateIndexStr, 10);
         if (!isNaN(rowIndex) && !isNaN(dateIndex)) {
