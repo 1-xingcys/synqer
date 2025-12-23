@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   TimeSlot,
   Vote,
@@ -181,6 +181,7 @@ export function ResultsHeatmapGrid({
   onAddToEventTime,
 }: ResultsHeatmapGridProps) {
   const t = useTranslations("joined");
+  const locale = useLocale();
   const gridRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [granularity, setGranularity] = useState<TimeGranularity>(15);
@@ -362,14 +363,18 @@ export function ResultsHeatmapGrid({
   );
 
   // Format date for modal
-  const formatDateForModal = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(undefined, {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const formatDateForModal = useCallback(
+    (dateStr: string) => {
+      const date = new Date(dateStr);
+      const dateLocale = locale === "zh-TW" ? "zh-TW" : "en-US";
+      return date.toLocaleDateString(dateLocale, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      });
+    },
+    [locale],
+  );
 
   // Get selection range data
   const getSelectionRange = useCallback((): SelectionRange | null => {
@@ -456,7 +461,12 @@ export function ResultsHeatmapGrid({
         },
       });
     },
-    [getVotersForRange, getNonVotersForRange, getSlotIdsFromCells],
+    [
+      getVotersForRange,
+      getNonVotersForRange,
+      getSlotIdsFromCells,
+      formatDateForModal,
+    ],
   );
 
   // Handle single cell click
@@ -634,7 +644,7 @@ export function ResultsHeatmapGrid({
           <div className="flex">
             <div className="w-9 sm:w-14 shrink-0" />
             {paginatedDates.map((dateKey) => {
-              const { weekday, day, month } = formatDateHeader(dateKey);
+              const { weekday, day, month } = formatDateHeader(dateKey, locale);
               return (
                 <div
                   key={dateKey}
