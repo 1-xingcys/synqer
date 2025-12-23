@@ -19,14 +19,7 @@ async function bootstrap() {
   app.set('trust proxy', 1);
 
   // Configure session
-  const cookieSameSite =
-    process.env.COOKIE_SAMESITE ??
-    (process.env.NODE_ENV === 'production' ? 'none' : 'lax');
-  const cookieSecure =
-    process.env.COOKIE_SECURE === 'true' ||
-    process.env.NODE_ENV === 'production' ||
-    cookieSameSite === 'none';
-
+  const isProduction = process.env.NODE_ENV === 'production';
   app.use(
     session({
       secret: process.env.SESSION_SECRET as string,
@@ -34,9 +27,11 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: cookieSecure,
+        secure: isProduction,
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        sameSite: cookieSameSite as 'lax' | 'none' | 'strict',
+        sameSite: isProduction ? 'none' : 'lax',
+        // 設定 domain 讓 cookie 可以在所有子域名共享 (synqer.club, api.synqer.club)
+        domain: isProduction ? '.synqer.club' : undefined,
       },
     }),
   );
