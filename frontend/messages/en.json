@@ -245,7 +245,20 @@
     "sendReminder": "Send Reminder",
     "reminderSent": "Reminder sent!",
     "currentResults": "Current Results",
-    "selectTimeHint": "Select a time range to add to event time",
+    "selectTimeHint": "Click or drag to select time slots",
+    "confirmedEventTime": "Confirmed Event Time",
+    "confirmedTimeHint": "To modify, reset first and select new time slots",
+    "selectEventTimeNow": "Select Event Time",
+    "votingEndedSelectHint": "Voting has ended. Please select and confirm the event time",
+    "pleaseSelectEventTime": "Voting has ended. Please select and confirm the event time so participants know when the event will be held.",
+    "resetEventTime": "Reset",
+    "resetting": "Resetting...",
+    "resetError": "Failed to reset. Please try again.",
+    "resetConfirm": {
+      "title": "Reset Event Time?",
+      "description": "This will clear the confirmed event time and revert the event status to 'Voting Ended'. You will need to select and confirm a new time.",
+      "confirm": "Reset"
+    },
     "confirmError": "Failed to confirm time. Please try again.",
     "deadline": {
       "title": "Time Until Deadline",
@@ -264,9 +277,8 @@
     },
     "selectedTimes": {
       "title": "Selected Event Times",
-      "slotsCount": "{count} time slots",
-      "available": "available",
-      "slots": "slots",
+      "empty": "No time slots selected. Select from the results below.",
+      "confirmed": "Confirmed",
       "remove": "Remove",
       "votingNotEnded": "Note: Voting hasn't ended yet. Participants can still vote.",
       "confirming": "Confirming...",

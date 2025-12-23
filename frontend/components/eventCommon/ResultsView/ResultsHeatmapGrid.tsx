@@ -29,6 +29,8 @@ interface ResultsHeatmapGridProps {
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;
   onAddToEventTime?: (info: SlotRangeInfo, availableCount: number) => void;
+  // Selected slot IDs to display with border highlight
+  selectedSlotIds?: Set<string>;
 }
 
 interface CellPosition {
@@ -179,6 +181,7 @@ export function ResultsHeatmapGrid({
   canAddToEventTime = false,
   isVotingPhase = false,
   onAddToEventTime,
+  selectedSlotIds,
 }: ResultsHeatmapGridProps) {
   const t = useTranslations("joined");
   const locale = useLocale();
@@ -328,6 +331,64 @@ export function ResultsHeatmapGrid({
       );
     },
     [getVotersForRange, participants, selectedParticipants],
+  );
+
+  // Check if a merged row cell contains any selected slots
+  const isMergedCellSelected = useCallback(
+    (slotIndices: number[], dateKey: string): boolean => {
+      if (!selectedSlotIds || selectedSlotIds.size === 0) return false;
+      return slotIndices.some((idx) => {
+        const slot = slotsByDate[dateKey]?.[idx];
+        return slot && selectedSlotIds.has(slot.id);
+      });
+    },
+    [slotsByDate, selectedSlotIds],
+  );
+
+  // Get selected cell boundaries for border rendering
+  const getSelectedCellBoundaries = useCallback(
+    (
+      rowIndex: number,
+      dateIndex: number,
+      slotIndices: number[],
+      dateKey: string,
+    ): {
+      isTop: boolean;
+      isBottom: boolean;
+      isLeft: boolean;
+      isRight: boolean;
+    } => {
+      if (!selectedSlotIds || selectedSlotIds.size === 0) {
+        return { isTop: false, isBottom: false, isLeft: false, isRight: false };
+      }
+
+      const isSelected = isMergedCellSelected(slotIndices, dateKey);
+      if (!isSelected) {
+        return { isTop: false, isBottom: false, isLeft: false, isRight: false };
+      }
+
+      // Check adjacent cells
+      const checkAdjacentSelected = (rIdx: number, dIdx: number): boolean => {
+        const adjDateKey = paginatedDates[dIdx];
+        const adjRow = mergedRows[rIdx];
+        if (!adjDateKey || !adjRow) return false;
+        return isMergedCellSelected(adjRow.slotIndices, adjDateKey);
+      };
+
+      const isTop =
+        rowIndex === 0 || !checkAdjacentSelected(rowIndex - 1, dateIndex);
+      const isBottom =
+        rowIndex === mergedRows.length - 1 ||
+        !checkAdjacentSelected(rowIndex + 1, dateIndex);
+      const isLeft =
+        dateIndex === 0 || !checkAdjacentSelected(rowIndex, dateIndex - 1);
+      const isRight =
+        dateIndex === paginatedDates.length - 1 ||
+        !checkAdjacentSelected(rowIndex, dateIndex + 1);
+
+      return { isTop, isBottom, isLeft, isRight };
+    },
+    [selectedSlotIds, isMergedCellSelected, paginatedDates, mergedRows],
   );
 
   // Calculate rectangle bounds from drag start/end
@@ -720,7 +781,19 @@ export function ResultsHeatmapGrid({
                     const inSelection =
                       isDragging && isInDragRectangle(rowIndex, dateIndex);
 
-                    // Determine border classes for selection rectangle
+                    // Check if this cell is part of selected event times
+                    const isSelectedEventTime = isMergedCellSelected(
+                      row.slotIndices,
+                      dateKey,
+                    );
+                    const selectedBoundaries = getSelectedCellBoundaries(
+                      rowIndex,
+                      dateIndex,
+                      row.slotIndices,
+                      dateKey,
+                    );
+
+                    // Determine border classes for selection rectangle (drag selection)
                     let selectionBorderClasses = "";
                     if (isDragging && rectBounds && inSelection) {
                       const isTop = rowIndex === rectBounds.minRow;
@@ -735,6 +808,29 @@ export function ResultsHeatmapGrid({
                       if (isLeft) borders.push("border-l-2 border-l-blue-500");
                       if (isRight) borders.push("border-r-2 border-r-blue-500");
                       selectionBorderClasses = borders.join(" ");
+                    }
+
+                    // Determine border classes for selected event times (persistent highlight)
+                    let selectedEventTimeBorderClasses = "";
+                    if (isSelectedEventTime && !inSelection) {
+                      const borders = [];
+                      if (selectedBoundaries.isTop)
+                        borders.push(
+                          "border-t-2 border-t-orange-500 dark:border-t-orange-400",
+                        );
+                      if (selectedBoundaries.isBottom)
+                        borders.push(
+                          "border-b-2 border-b-orange-500 dark:border-b-orange-400",
+                        );
+                      if (selectedBoundaries.isLeft)
+                        borders.push(
+                          "border-l-2 border-l-orange-500 dark:border-l-orange-400",
+                        );
+                      if (selectedBoundaries.isRight)
+                        borders.push(
+                          "border-r-2 border-r-orange-500 dark:border-r-orange-400",
+                        );
+                      selectedEventTimeBorderClasses = borders.join(" ");
                     }
 
                     return (
@@ -757,19 +853,25 @@ export function ResultsHeatmapGrid({
                         className={`
                           flex-1 min-w-0 h-10 sm:h-11 relative
                           cursor-pointer transition-all duration-75
-                          ${!inSelection ? "border-r border-b border-gray-100 dark:border-zinc-800" : ""}
+                          ${!inSelection && !isSelectedEventTime ? "border-r border-b border-gray-100 dark:border-zinc-800" : ""}
                           ${colors.bg}
                           ${inSelection ? `bg-blue-200 dark:bg-blue-800/50 ${selectionBorderClasses}` : ""}
+                          ${isSelectedEventTime && !inSelection ? selectedEventTimeBorderClasses : ""}
                           ${!isDragging ? "hover:ring-2 hover:ring-blue-400 dark:hover:ring-blue-500 hover:z-10" : ""}
                         `}
                       >
+                        {/* Selected event time indicator */}
+                        {isSelectedEventTime && !inSelection && (
+                          <div className="absolute inset-0 bg-orange-100/50 dark:bg-orange-900/30 pointer-events-none" />
+                        )}
+
                         {/* Vote count */}
                         {hasVotes && !inSelection && (
                           <div
                             className={`
                               absolute inset-0 flex items-center justify-center
                               text-xs sm:text-sm font-semibold
-                              ${colors.text}
+                              ${isSelectedEventTime ? "text-orange-700 dark:text-orange-300" : colors.text}
                             `}
                           >
                             {voteCount}

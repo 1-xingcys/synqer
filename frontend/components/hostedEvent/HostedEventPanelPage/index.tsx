@@ -2,159 +2,58 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useMemo, useState, useCallback } from "react";
-import { useRouter } from "@/i18n/routing";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
 import { VotingProgress } from "@/components/ui/VotingProgress";
 import { EventStatus } from "@/types/event";
-import ResultsView, {
-  SlotRangeInfo,
-} from "@/components/eventCommon/ResultsView";
+import ResultsView from "@/components/eventCommon/ResultsView";
 import { DeadlineCountdown } from "./DeadlineCountdown";
-import { SelectedEventTimes, SelectedTimeRange } from "./SelectedEventTimes";
+import { SelectedEventTimes } from "./SelectedEventTimes";
 import { ConfirmTimeDialog } from "./ConfirmTimeDialog";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
+import { ResultsSectionHeader } from "./ResultsSectionHeader";
+import {
+  useEventTimeSelection,
+  useEventTimeConfirmation,
+  useParticipantsData,
+} from "./hooks";
 
 export default function HostedEventPanelPage() {
   const params = useParams();
   const eventId = params.eventId as string;
   const t = useTranslations();
-  const router = useRouter();
   const { data, refetch } = useHostedEventContext();
 
-  // State for selected event times
-  const [selectedTimeRanges, setSelectedTimeRanges] = useState<
-    SelectedTimeRange[]
-  >([]);
-  const [isConfirming, setIsConfirming] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [confirmError, setConfirmError] = useState<string | null>(null);
+  // Participants and votes data
+  const { participantsWithAvatars, votesWithAvatars, totalParticipants } =
+    useParticipantsData(data);
 
-  // Transform participants to include avatar info for ResultsView
-  const participantsWithAvatars = useMemo(() => {
-    if (!data) return [];
+  // Event time confirmation/reset logic
+  const {
+    isConfirming,
+    confirmError,
+    showConfirmDialog,
+    setShowConfirmDialog,
+    handleConfirmClick,
+    handleConfirmEventTime,
+    isResetMode,
+    isResetting,
+    resetError,
+    handleResetEventTime,
+  } = useEventTimeConfirmation({
+    eventId,
+    eventStatus: data?.event.status ?? EventStatus.VOTING,
+    getAllSelectedSlotIds: () => selection.getAllSelectedSlotIds(),
+    clearSelections: () => selection.clearSelections(),
+    refetch,
+  });
 
-    return data.expectedParticipants.map((p) => ({
-      userId: p.userId || p.id,
-      displayName: p.displayName || "Unknown",
-      pictureUrl: p.pictureUrl,
-    }));
-  }, [data]);
-
-  // Create a mapping of userId to pictureUrl for votes
-  const pictureUrlMap = useMemo(() => {
-    const map = new Map<string, string | undefined>();
-    participantsWithAvatars.forEach((p) => {
-      if (p.userId) {
-        map.set(p.userId, p.pictureUrl);
-      }
-    });
-    return map;
-  }, [participantsWithAvatars]);
-
-  // Transform votes to include avatar info
-  const votesWithAvatars = useMemo(() => {
-    if (!data) return [];
-
-    return data.votes.map((vote) => ({
-      ...vote,
-      pictureUrl: pictureUrlMap.get(vote.userId),
-    }));
-  }, [data, pictureUrlMap]);
-
-  // Handle adding a time range to selected event times
-  const handleAddToEventTime = useCallback(
-    (info: SlotRangeInfo, availableCount: number) => {
-      // Generate a unique ID for this range
-      const rangeId = `${info.startDate}-${info.startTime}-${info.endDate}-${info.endTime}`;
-
-      // Check if this range already exists (to prevent duplicates)
-      const exists = selectedTimeRanges.some((r) => r.id === rangeId);
-      if (exists) return;
-
-      const newRange: SelectedTimeRange = {
-        id: rangeId,
-        startDate: info.startDate,
-        endDate: info.endDate,
-        startTime: info.startTime,
-        endTime: info.endTime,
-        slotIds: info.slotIds,
-        availableCount,
-        totalParticipants: participantsWithAvatars.length,
-      };
-
-      setSelectedTimeRanges((prev) => [...prev, newRange]);
-      setConfirmError(null);
-    },
-    [selectedTimeRanges, participantsWithAvatars.length],
-  );
-
-  // Handle removing a time range
-  const handleRemoveTimeRange = useCallback((id: string) => {
-    setSelectedTimeRanges((prev) => prev.filter((r) => r.id !== id));
-  }, []);
-
-  // Get all slot IDs from selected ranges
-  const getAllSelectedSlotIds = useCallback(() => {
-    const slotIdSet = new Set<string>();
-    selectedTimeRanges.forEach((range) => {
-      range.slotIds.forEach((id) => slotIdSet.add(id));
-    });
-    return Array.from(slotIdSet);
-  }, [selectedTimeRanges]);
-
-  // Handle actual confirmation to backend
-  const handleConfirmEventTime = useCallback(async () => {
-    setIsConfirming(true);
-    setConfirmError(null);
-
-    try {
-      const slotIds = getAllSelectedSlotIds();
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirm-time`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ slotIds }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to confirm time");
-      }
-
-      // Success - refetch data and clear selection
-      await refetch();
-      setSelectedTimeRanges([]);
-      setShowConfirmDialog(false);
-
-      // Optionally redirect to the event page
-      router.push(`/hosted/${eventId}`);
-    } catch {
-      setConfirmError(t("hosted.confirmError"));
-    } finally {
-      setIsConfirming(false);
-    }
-  }, [eventId, getAllSelectedSlotIds, refetch, router, t]);
-
-  // Handle confirm button click
-  const handleConfirmClick = useCallback(() => {
-    if (!data) return;
-
-    const isVotingPhase = data.event.status === EventStatus.VOTING;
-
-    if (isVotingPhase) {
-      // Show confirmation dialog for voting phase
-      setShowConfirmDialog(true);
-    } else {
-      // Direct confirm for voting-ended phase
-      void handleConfirmEventTime();
-    }
-  }, [data, handleConfirmEventTime]);
+  // Event time selection logic
+  const selection = useEventTimeSelection({
+    totalParticipants,
+    confirmedSlotIds: data?.event.confirmedSlotIds,
+    confirmedTimeRanges: data?.event.confirmedTimeRanges,
+    isResetMode,
+  });
 
   // Loading and error states are handled by the layout
   if (!data) {
@@ -167,6 +66,9 @@ export default function HostedEventPanelPage() {
   const isConfirmed = event.status === EventStatus.CONFIRMED;
   const isCompleted = event.status === EventStatus.COMPLETED;
   const showResultsView = isVotingPhase || isVotingEnded || isConfirmed;
+  // hasConfirmedTime should be false when in reset mode
+  const hasConfirmedTime =
+    !isResetMode && event.confirmedSlotIds && event.confirmedSlotIds.length > 0;
 
   return (
     <div className="space-y-6">
@@ -196,22 +98,23 @@ export default function HostedEventPanelPage() {
         />
       )}
 
-      {/* Selected Event Times (shown above results when there are selections) */}
-      {showResultsView && selectedTimeRanges.length > 0 && (
+      {/* Selected Event Times (always shown when results view is visible) */}
+      {showResultsView && (
         <SelectedEventTimes
-          selectedRanges={selectedTimeRanges}
-          onRemove={handleRemoveTimeRange}
+          selectedRanges={selection.allTimeRanges}
+          onRemove={selection.removeTimeRange}
           onConfirm={handleConfirmClick}
           isVotingPhase={isVotingPhase}
           isConfirming={isConfirming}
+          hasUserSelection={selection.hasUserSelection}
         />
       )}
 
-      {/* Error message */}
-      {confirmError && (
+      {/* Error messages */}
+      {(confirmError || resetError) && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
           <p className="text-red-600 dark:text-red-400 text-sm">
-            {confirmError}
+            {confirmError || resetError}
           </p>
         </div>
       )}
@@ -220,14 +123,13 @@ export default function HostedEventPanelPage() {
       {showResultsView && (
         <>
           {/* Results Section Header */}
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              {t("hosted.currentResults")}
-            </h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              {t("hosted.selectTimeHint")}
-            </p>
-          </div>
+          <ResultsSectionHeader
+            hasConfirmedTime={!!hasConfirmedTime}
+            isVotingEnded={isVotingEnded}
+            hasAnySelection={selection.hasAnySelection}
+            isResetting={isResetting}
+            onReset={() => void handleResetEventTime()}
+          />
 
           {/* Results View with HeatMap */}
           <ResultsView
@@ -236,7 +138,8 @@ export default function HostedEventPanelPage() {
             participants={participantsWithAvatars}
             canAddToEventTime={true}
             isVotingPhase={isVotingPhase}
-            onAddToEventTime={handleAddToEventTime}
+            onAddToEventTime={selection.addTimeRange}
+            selectedSlotIds={selection.selectedSlotIdsSet}
           />
         </>
       )}
@@ -302,7 +205,7 @@ export default function HostedEventPanelPage() {
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={() => void handleConfirmEventTime()}
         isVotingPhase={isVotingPhase}
-        slotsCount={getAllSelectedSlotIds().length}
+        slotsCount={selection.getAllSelectedSlotIds().length}
         isConfirming={isConfirming}
       />
     </div>

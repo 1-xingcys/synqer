@@ -53,13 +53,13 @@ export function EventDetailNav({ tabs }: EventDetailNavProps) {
             key={tab.id}
             href={tab.href}
             className={`
-              inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors
-              ${
-                activeTab === tab.id
-                  ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                  : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-600"
-              }
-            `}
+                inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors
+                ${
+                  activeTab === tab.id
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-600"
+                }
+              `}
           >
             {tab.icon}
             {tab.label}

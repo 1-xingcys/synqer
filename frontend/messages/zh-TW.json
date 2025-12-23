@@ -245,7 +245,20 @@
     "sendReminder": "發送提醒",
     "reminderSent": "提醒已發送！",
     "currentResults": "目前投票結果",
-    "selectTimeHint": "選擇時間區間加入活動時間",
+    "selectTimeHint": "點選或拖曳選擇時間區間",
+    "confirmedEventTime": "已設定的活動時間",
+    "confirmedTimeHint": "如需修改，請先重新設定再選擇新的時間",
+    "selectEventTimeNow": "請選擇活動時間",
+    "votingEndedSelectHint": "投票已結束，請選擇活動時間後確認",
+    "pleaseSelectEventTime": "投票已結束，請盡快選擇並確認活動時間，讓參與者知道活動何時舉行。",
+    "resetEventTime": "重新設定",
+    "resetting": "重新設定中...",
+    "resetError": "重新設定失敗，請重試。",
+    "resetConfirm": {
+      "title": "確定要重新設定嗎？",
+      "description": "這將清除目前已確認的活動時間，活動狀態會退回到「投票結束」，您需要重新選擇並確認活動時間。",
+      "confirm": "確定重新設定"
+    },
     "confirmError": "確認時間失敗，請重試。",
     "deadline": {
       "title": "距離截止時間",
@@ -264,9 +277,8 @@
     },
     "selectedTimes": {
       "title": "已選擇的活動時間",
-      "slotsCount": "{count} 個時段",
-      "available": "可參加",
-      "slots": "個時段",
+      "empty": "尚未選擇任何時段，請從下方結果中選擇",
+      "confirmed": "已確認",
       "remove": "移除",
       "votingNotEnded": "注意：投票尚未結束，參與者仍可繼續投票。",
       "confirming": "確認中...",
