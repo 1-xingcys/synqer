@@ -314,7 +314,9 @@
       "notVotedYet": "Not voted yet",
       "host": "Host",
       "saveSuccess": "Saved",
-      "unsavedChanges": "Unsaved changes"
+      "unsavedChanges": "Unsaved changes",
+      "votingEndedDescription": "Voting has ended, participant list cannot be modified",
+      "participants": "Participants"
     },
     "settingsPage": {
       "title": "Event Settings",
@@ -329,7 +331,8 @@
       "dangerZone": "Danger Zone",
       "deleteEvent": "Delete Event",
       "deleteWarning": "This action cannot be undone. All votes and data will be permanently deleted.",
-      "confirmDelete": "Are you sure you want to delete this event?"
+      "confirmDelete": "Are you sure you want to delete this event?",
+      "votingEndedDescription": "Voting has ended, voting deadline cannot be modified"
     }
   },
   "eventJoin": {

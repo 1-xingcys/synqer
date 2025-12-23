@@ -314,7 +314,9 @@
       "notVotedYet": "尚未投票",
       "host": "主辦人",
       "saveSuccess": "已儲存",
-      "unsavedChanges": "有未儲存的變更"
+      "unsavedChanges": "有未儲存的變更",
+      "votingEndedDescription": "投票已結束，無法修改參與者名單",
+      "participants": "參與者名單"
     },
     "settingsPage": {
       "title": "活動設定",
@@ -329,7 +331,8 @@
       "dangerZone": "Danger Zone",
       "deleteEvent": "刪除活動",
       "deleteWarning": "此操作無法復原。所有投票和資料將被永久刪除。",
-      "confirmDelete": "您確定要刪除此活動嗎？"
+      "confirmDelete": "您確定要刪除此活動嗎？",
+      "votingEndedDescription": "投票已結束，無法修改投票截止時間"
     }
   },
   "eventJoin": {
