@@ -50,5 +50,5 @@ ENV DATABASE_URL="file:/app/data/production.db"
 EXPOSE 8080
 
 # 启动应用
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
 
