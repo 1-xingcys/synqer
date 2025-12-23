@@ -1,12 +1,14 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { LineApiService, LineMessage } from './line-api.service';
-import { LineGroupService } from './line-group.service';
-import { FlexMessageService, EventInfo } from './flex-message.service';
 import {
-  EventStatusService,
-  EventStatus,
-} from '../events/services/event-status.service';
+  LineApiService,
+  LineMessage,
+  LineGroupService,
+  FlexMessageService,
+  EventInfo,
+} from './services';
+import { EventStatusService, EventStatus } from '../events/services';
+import { ConfirmedTimeService } from '../confirmed-time';
 import {
   WebhookEvent,
   MessageEvent,
@@ -31,9 +33,18 @@ export class LineBotService implements OnModuleInit {
     private lineGroup: LineGroupService,
     private flexMessage: FlexMessageService,
     private eventStatusService: EventStatusService,
+    private confirmedTimeService: ConfirmedTimeService,
   ) {}
 
   async onModuleInit() {
+    // 檢查環境變數是否已設定
+    if (!process.env.LINE_CHANNEL_ACCESS_TOKEN) {
+      this.logger.warn(
+        'LINE_CHANNEL_ACCESS_TOKEN not set, skipping bot initialization',
+      );
+      return;
+    }
+
     // 初始化時取得 Bot 自己的 userId
     try {
       const botInfo = await this.lineApi.getBotInfo();
@@ -252,14 +263,28 @@ export class LineBotService implements OnModuleInit {
       },
       include: {
         expectedParticipants: {
+          where: { isRemoved: false },
           select: {
             id: true,
+            userId: true,
             hasVoted: true,
           },
         },
         votes: {
           select: {
             userId: true,
+          },
+        },
+        confirmedTimeSlots: {
+          include: {
+            slot: {
+              select: {
+                id: true,
+                date: true,
+                startMinute: true,
+                endMinute: true,
+              },
+            },
           },
         },
       },
@@ -271,10 +296,22 @@ export class LineBotService implements OnModuleInit {
     const result: EventInfo[] = [];
 
     for (const event of events) {
+      // 合併成時間範圍（使用原始資料結構）
+      const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
+        event.confirmedTimeSlots,
+      );
+
+      // 建構確認時段資訊（用於 EventInfo 和狀態計算）
+      const confirmedTimeSlots = event.confirmedTimeSlots.map((cts) => ({
+        slotId: cts.slotId,
+        date: cts.slot.date,
+        startMinute: cts.slot.startMinute,
+        endMinute: cts.slot.endMinute,
+      }));
+
       const status = this.eventStatusService.computeEventStatus({
         votingDeadline: event.votingDeadline,
-        confirmedStartTime: event.confirmedStartTime,
-        confirmedEndTime: event.confirmedEndTime,
+        confirmedTimeSlots,
       });
 
       // 排除已結束的活動
@@ -285,12 +322,25 @@ export class LineBotService implements OnModuleInit {
       // 取得 Host 資訊
       const host = await this.getEventHostInfo(event.ownerId);
 
+      // 取得未被移除的預期參與者的 userId 集合
+      const activeParticipantUserIds = new Set<string>(
+        event.expectedParticipants
+          .filter((ep) => ep.userId)
+          .map((ep) => ep.userId as string),
+      );
+
+      // 過濾 votes，只保留未被移除的預期參與者的投票
+      const filteredVotes = event.votes.filter((v) =>
+        activeParticipantUserIds.has(v.userId),
+      );
+
       // 計算投票統計
       const totalExpected = event.expectedParticipants.length;
-      const votedUserIds = new Set(event.votes.map((v) => v.userId));
+      const votedUserIds = new Set(filteredVotes.map((v) => v.userId));
       const totalVoted =
-        event.expectedParticipants.filter((p) => p.hasVoted).length ||
-        votedUserIds.size;
+        event.expectedParticipants.filter(
+          (p) => p.userId && votedUserIds.has(p.userId),
+        ).length || votedUserIds.size;
       const votingPercentage =
         totalExpected > 0 ? (totalVoted / totalExpected) * 100 : 0;
 
@@ -300,8 +350,8 @@ export class LineBotService implements OnModuleInit {
         description: event.description,
         status,
         votingDeadline: event.votingDeadline,
-        confirmedStartTime: event.confirmedStartTime,
-        confirmedEndTime: event.confirmedEndTime,
+        confirmedTimeSlots,
+        confirmedTimeRanges,
         host,
         votingStats: {
           totalExpected,
@@ -433,13 +483,16 @@ export class LineBotService implements OnModuleInit {
       throw new Error('Event not found');
     }
 
-    const mentions = unvotedMembers
-      .map((m) => m.displayName || '成員')
-      .join('、');
+    // 使用 buildVoteReminderMessage 建構帶有真正 mention 的訊息
+    const reminderMsg = this.flexMessage.buildVoteReminderMessage(
+      event.title || '未命名活動',
+      unvotedMembers.map((m) => ({
+        lineUserId: m.lineUserId,
+        displayName: m.displayName,
+      })),
+    );
 
-    const message = `📢 投票提醒\n\n${mentions}，活動「${event.title || '未命名活動'}」還在等你投票唷！\n\n請點擊以下連結參與投票：\n${process.env.WEB_ORIGIN}/events/${eventId}`;
-
-    await this.lineApi.pushMessage(group.lineGroupId, message);
+    await this.lineApi.pushMessages(group.lineGroupId, [reminderMsg]);
 
     await this.prisma.eventExpectedParticipant.updateMany({
       where: {

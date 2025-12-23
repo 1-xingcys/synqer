@@ -3,6 +3,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { LineBotController } from './line-bot.controller';
 import { LineBotService } from './line-bot.service';
+import { RichMenuService } from './services';
 import { BadRequestException } from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
@@ -19,10 +20,20 @@ describe('LineBotController', () => {
     sendVoteReminder: jest.fn(),
   };
 
+  const mockRichMenuService = {
+    listRichMenus: jest.fn(),
+    getDefaultRichMenuId: jest.fn(),
+    deleteRichMenu: jest.fn(),
+    cancelDefaultRichMenu: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [LineBotController],
-      providers: [{ provide: LineBotService, useValue: mockLineBotService }],
+      providers: [
+        { provide: LineBotService, useValue: mockLineBotService },
+        { provide: RichMenuService, useValue: mockRichMenuService },
+      ],
     }).compile();
 
     controller = module.get<LineBotController>(LineBotController);

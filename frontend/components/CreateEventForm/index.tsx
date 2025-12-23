@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useCreateEventForm } from "./useCreateEventForm";
 import { GeneralSection } from "./GeneralSection";
 import { ConfigurationSection } from "./ConfigurationSection";
+import { VotingDeadlineSection } from "./VotingDeadlineSection";
 import { FormActions } from "./FormActions";
 
 export default function CreateEventForm() {
@@ -11,35 +12,45 @@ export default function CreateEventForm() {
   const {
     formData,
     loading,
-    updateField,
+    validationErrors,
+    updateTitle,
+    updateDescription,
     handleStartDateChange,
     handleEndDateChange,
+    handleStartTimeChange,
+    handleEndTimeChange,
+    handleVotingDeadlineDateChange,
+    handleVotingDeadlineTimeChange,
+    handleLineGroupChange,
+    handleSelectedMembersChange,
     handleSubmit,
     handleCancel,
+    confirmCancel,
+    cancelConfirmCancel,
     isFormValid,
+    titleCharCount,
+    descriptionCharCount,
+    showCancelConfirm,
   } = useCreateEventForm();
 
   return (
     <div className="max-w-4xl mx-auto py-8 pr-4">
       {/* Header */}
       <div className="md:ml-6 lg:ml-18">
-        <h1 className="text-2xl font-semibold text-gray-900 dark:text-zinc-100 mb-1">
+        <h1 className="text-2xl font-semibold text-foreground mb-1">
           {t("createEvent.title")}
         </h1>
-        <p className="text-sm text-gray-600 dark:text-zinc-400">
+        <p className="text-sm text-muted-foreground">
           {t("createEvent.description")}
-        </p>
-        <p className="text-sm text-gray-600 dark:text-zinc-400">
-          {t("createEvent.requiredNote")}
         </p>
       </div>
 
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-8">
         {/* Wrapper for sections with connecting line */}
         <div className="relative">
-          {/* Connecting line from step 1 bottom to Configuration section bottom */}
+          {/* Connecting line from step 1 to last step */}
           <div
-            className="absolute left-[0.8rem] lg:left-[2.3rem] w-0.5 bg-gray-300 dark:bg-zinc-600"
+            className="absolute left-[0.8rem] lg:left-[2.3rem] w-0.5 bg-border"
             style={{
               top: "3rem",
               bottom: "1.5rem",
@@ -47,12 +58,18 @@ export default function CreateEventForm() {
             }}
           />
 
-          {/* Section 1: General */}
+          {/* Section 1: General (includes LINE Group Selection) */}
           <GeneralSection
             title={formData.title}
             description={formData.description}
-            onTitleChange={(value) => updateField("title", value)}
-            onDescriptionChange={(value) => updateField("description", value)}
+            titleCharCount={titleCharCount}
+            descriptionCharCount={descriptionCharCount}
+            onTitleChange={updateTitle}
+            onDescriptionChange={updateDescription}
+            selectedLineGroupId={formData.lineGroupId}
+            selectedLineUserIds={formData.selectedLineUserIds}
+            onLineGroupChange={handleLineGroupChange}
+            onLineMembersChange={handleSelectedMembersChange}
           />
 
           {/* Section 2: Configuration */}
@@ -61,14 +78,23 @@ export default function CreateEventForm() {
             endDate={formData.endDate}
             startTime={formData.startTime}
             endTime={formData.endTime}
-            slotDurationMin={formData.slotDurationMin}
+            hasTimeError={!!validationErrors.startTime}
             onStartDateChange={handleStartDateChange}
             onEndDateChange={handleEndDateChange}
-            onStartTimeChange={(value) => updateField("startTime", value)}
-            onEndTimeChange={(value) => updateField("endTime", value)}
-            onSlotDurationChange={(value) =>
-              updateField("slotDurationMin", value)
-            }
+            onStartTimeChange={handleStartTimeChange}
+            onEndTimeChange={handleEndTimeChange}
+          />
+
+          {/* Section 3: Voting Deadline */}
+          <VotingDeadlineSection
+            votingDeadline={formData.votingDeadline}
+            votingDeadlineTime={formData.votingDeadlineTime}
+            startDate={formData.startDate}
+            startTime={formData.startTime}
+            isManuallySet={formData.votingDeadlineManuallySet}
+            hasError={!!validationErrors.votingDeadline}
+            onDeadlineDateChange={handleVotingDeadlineDateChange}
+            onDeadlineTimeChange={handleVotingDeadlineTimeChange}
           />
         </div>
 
@@ -76,7 +102,10 @@ export default function CreateEventForm() {
         <FormActions
           loading={loading}
           isFormValid={isFormValid}
+          showCancelConfirm={showCancelConfirm}
           onCancel={handleCancel}
+          onConfirmCancel={confirmCancel}
+          onCancelConfirmCancel={cancelConfirmCancel}
         />
       </form>
     </div>

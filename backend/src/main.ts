@@ -19,6 +19,14 @@ async function bootstrap() {
   app.set('trust proxy', 1);
 
   // Configure session
+  const cookieSameSite =
+    process.env.COOKIE_SAMESITE ??
+    (process.env.NODE_ENV === 'production' ? 'none' : 'lax');
+  const cookieSecure =
+    process.env.COOKIE_SECURE === 'true' ||
+    process.env.NODE_ENV === 'production' ||
+    cookieSameSite === 'none';
+
   app.use(
     session({
       secret: process.env.SESSION_SECRET as string,
@@ -26,9 +34,9 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: cookieSecure,
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        sameSite: cookieSameSite as 'lax' | 'none' | 'strict',
       },
     }),
   );

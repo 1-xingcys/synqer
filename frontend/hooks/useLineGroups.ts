@@ -74,47 +74,83 @@ export function useLineGroupMembers(groupId: string | null) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchMembers = useCallback(async () => {
+  useEffect(() => {
+    // Reset members when groupId becomes null
     if (!groupId) {
-      setMembers([]);
+      setMembers((prev) => (prev.length === 0 ? prev : []));
       return;
     }
 
-    try {
-      if (!process.env.NEXT_PUBLIC_API) {
-        throw new Error("NEXT_PUBLIC_API is not set");
+    let cancelled = false;
+
+    const fetchMembers = async () => {
+      try {
+        if (!process.env.NEXT_PUBLIC_API) {
+          throw new Error("NEXT_PUBLIC_API is not set");
+        }
+        setLoading(true);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API}/line-bot/groups/${groupId}/members`,
+          {
+            credentials: "include",
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch group members");
+        }
+
+        const data = (await response.json()) as LineGroupMember[];
+        if (!cancelled) {
+          setMembers(data);
+          setError(null);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Error fetching group members:", err);
+          setError(
+            err instanceof Error ? err.message : "Failed to load members",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-      setLoading(true);
+    };
+
+    void fetchMembers();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [groupId]);
+
+  const refetch = useCallback(async () => {
+    if (!groupId || !process.env.NEXT_PUBLIC_API) return;
+
+    setLoading(true);
+    try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API}/line-bot/groups/${groupId}/members`,
-        {
-          credentials: "include",
-        },
+        { credentials: "include" },
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch group members");
+      if (response.ok) {
+        const data = (await response.json()) as LineGroupMember[];
+        setMembers(data);
+        setError(null);
       }
-
-      const data = (await response.json()) as LineGroupMember[];
-      setMembers(data);
-      setError(null);
     } catch (err) {
-      console.error("Error fetching group members:", err);
       setError(err instanceof Error ? err.message : "Failed to load members");
     } finally {
       setLoading(false);
     }
   }, [groupId]);
 
-  useEffect(() => {
-    void fetchMembers();
-  }, [fetchMembers]);
-
   return {
     members,
     loading,
     error,
-    refetch: fetchMembers,
+    refetch,
   };
 }

@@ -23,6 +23,7 @@ model User {
   lineGroupMemberships     LineGroupMember[]
   expectedParticipants     EventExpectedParticipant[]
   googleCalendarConnection GoogleCalendarConnection?
+  ownedEvents              Event[]                    @relation("OwnedEvents")
 }
 
 model AuthIdentity {
@@ -42,16 +43,16 @@ model AuthIdentity {
 // 注意：這是獨立於登入 OAuth 的，用於存取 Google Calendar API
 // 同一個 Google 帳號可以被多個 User 連結（因為同一個人可能有 Google + LINE 兩個帳號）
 model GoogleCalendarConnection {
-  id                 String   @id @default(cuid())
-  userId             String
-  googleAccountId    String   // Google 帳號的 sub (unique identifier)
-  googleEmail        String?  // Google 帳號的 email（便於顯示）
-  accessToken        String   @db.Text // Access Token
-  refreshToken       String?  @db.Text // Refresh Token
-  tokenExpiresAt     DateTime // Access Token 過期時間
-  scope              String   // 授權的 scope
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id              String   @id @default(cuid())
+  userId          String
+  googleAccountId String // Google 帳號的 sub (unique identifier)
+  googleEmail     String? // Google 帳號的 email（便於顯示）
+  accessToken     String   @db.Text // Access Token
+  refreshToken    String?  @db.Text // Refresh Token
+  tokenExpiresAt  DateTime // Access Token 過期時間
+  scope           String // 授權的 scope
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -77,15 +78,15 @@ model LineGroup {
 
 // LINE 群組成員（透過事件偵測到的成員）
 model LineGroupMember {
-  id           String   @id @default(cuid())
-  lineGroupId  String
-  lineUserId   String // LINE 的 userId
-  displayName  String? // 透過 getProfile 取得的名稱
-  pictureUrl   String? // 透過 getProfile 取得的頭像
-  isActive     Boolean  @default(true) // 是否仍在群組中
-  firstSeenAt  DateTime @default(now()) // 首次偵測到的時間
-  lastSeenAt   DateTime @default(now()) // 最後活動時間
-  leftAt       DateTime? // 離開群組的時間
+  id          String    @id @default(cuid())
+  lineGroupId String
+  lineUserId  String // LINE 的 userId
+  displayName String? // 透過 getProfile 取得的名稱
+  pictureUrl  String? // 透過 getProfile 取得的頭像
+  isActive    Boolean   @default(true) // 是否仍在群組中
+  firstSeenAt DateTime  @default(now()) // 首次偵測到的時間
+  lastSeenAt  DateTime  @default(now()) // 最後活動時間
+  leftAt      DateTime? // 離開群組的時間
 
   lineGroup LineGroup @relation(fields: [lineGroupId], references: [id], onDelete: Cascade)
 
@@ -103,7 +104,8 @@ model Event {
   id          String  @id @default(cuid())
   title       String?
   description String?
-  ownerId     String? // 預留：未來可用於權限管理
+  ownerId     String? // 活動擁有者
+  owner       User?   @relation("OwnedEvents", fields: [ownerId], references: [id], onDelete: SetNull)
 
   // 投票日期範圍（可投票的日期選項）
   startDate DateTime
@@ -119,10 +121,6 @@ model Event {
   // 投票截止時間
   votingDeadline DateTime?
 
-  // Host 確定的最終活動時間
-  confirmedStartTime DateTime?
-  confirmedEndTime   DateTime?
-
   // LINE 群組關聯（可選）
   lineGroupId String?
   lineGroup   LineGroup? @relation(fields: [lineGroupId], references: [id], onDelete: SetNull)
@@ -133,8 +131,10 @@ model Event {
   slots                EventTimeSlot[]
   votes                EventVote[]
   expectedParticipants EventExpectedParticipant[]
+  confirmedTimeSlots   ConfirmedEventTimeSlot[]
 
   @@index([lineGroupId])
+  @@index([ownerId])
 }
 
 // 預期應該投票的參與者
@@ -148,13 +148,16 @@ model EventExpectedParticipant {
 
   // 或透過已 OAuth 的使用者指定
   userId String?
-  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   // 用於追蹤提醒狀態
   reminderSentAt DateTime?
   hasVoted       Boolean   @default(false)
+
+  // 軟刪除：標記此參與者是否已被移除
+  isRemoved Boolean @default(false)
 
   @@unique([eventId, lineUserId])
   @@unique([eventId, userId])
@@ -170,8 +173,9 @@ model EventTimeSlot {
   endMinute   Int // 當天的結束分鐘
   index       Int // 用於表格排序定位
 
-  event Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  votes EventVote[]
+  event          Event                    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  votes          EventVote[]
+  confirmedSlots ConfirmedEventTimeSlot[]
 
   @@index([eventId])
   @@index([eventId, date])
@@ -193,4 +197,18 @@ model EventVote {
   @@index([eventId])
   @@index([slotId])
   @@index([userId])
+}
+
+// Host 確認的活動時段
+model ConfirmedEventTimeSlot {
+  id        String   @id @default(cuid())
+  eventId   String
+  slotId    String
+  createdAt DateTime @default(now())
+
+  event Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  slot  EventTimeSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, slotId])
+  @@index([eventId])
 }

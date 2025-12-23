@@ -3,8 +3,14 @@
 import { Link } from "@/i18n/routing";
 import { format } from "date-fns";
 import { EventStatusBadge } from "@/components/eventCommon/EventStatusBadge";
-import { EventStatus } from "@/types/event";
+import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
+import { EventStatus, ConfirmedTimeRange } from "@/types/event";
 import { useTranslations } from "next-intl";
+import { debugLog } from "@/components/DebugConsole";
+import { useEffect } from "react";
+
+const log = (message: string, data?: unknown) =>
+  debugLog("EventHeader", message, data);
 
 interface EventHeaderProps {
   eventId: string;
@@ -12,8 +18,8 @@ interface EventHeaderProps {
   description?: string | null;
   startDate: string;
   endDate: string;
-  confirmedStartTime?: string | null;
-  confirmedEndTime?: string | null;
+  confirmedSlotIds: string[];
+  confirmedTimeRanges: ConfirmedTimeRange[];
   status: EventStatus;
 }
 
@@ -23,11 +29,96 @@ export function EventHeader({
   description,
   startDate,
   endDate,
-  confirmedStartTime,
-  confirmedEndTime,
+  confirmedSlotIds,
+  confirmedTimeRanges,
   status,
 }: EventHeaderProps) {
   const t = useTranslations();
+
+  const hasConfirmedTime = confirmedSlotIds.length > 0;
+
+  useEffect(() => {
+    log("EventHeader", status);
+  }, [status]);
+
+  const renderActionButton = () => {
+    switch (status) {
+      case EventStatus.VOTING:
+        // 投票中：顯示投票按鈕
+        return (
+          <Link
+            href={`/joined/${eventId}`}
+            className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            {t("joined.viewEvent")}
+          </Link>
+        );
+      case EventStatus.VOTING_ENDED:
+        // 投票截止：根據是否已選擇時間顯示不同按鈕
+        return (
+          <Link
+            href={`/hosted/${eventId}/confirm`}
+            className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm font-medium"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            {hasConfirmedTime ? t("hosted.editTime") : t("hosted.decideTime")}
+          </Link>
+        );
+      case EventStatus.CONFIRMED:
+        // 已確認：顯示修改活動時間按鈕
+        return (
+          <Link
+            href={`/hosted/${eventId}/confirm`}
+            className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+            {t("hosted.editTime")}
+          </Link>
+        );
+      case EventStatus.COMPLETED:
+        // 已結束：不顯示按鈕
+        return null;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
@@ -62,7 +153,7 @@ export function EventHeader({
               {format(new Date(startDate), "MMM d")} -{" "}
               {format(new Date(endDate), "MMM d, yyyy")}
             </span>
-            {confirmedStartTime && confirmedEndTime && (
+            {hasConfirmedTime && (
               <span className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
                 <svg
                   className="w-4 h-4"
@@ -74,34 +165,15 @@ export function EventHeader({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={1.5}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                {format(new Date(confirmedStartTime), "MMM d, HH:mm")} -{" "}
-                {format(new Date(confirmedEndTime), "HH:mm")}
+                <ConfirmedTimeDisplay timeRanges={confirmedTimeRanges} />
               </span>
             )}
           </div>
         </div>
-        <Link
-          href={`/joined/${eventId}`}
-          className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-        >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          {t("joined.viewEvent")}
-        </Link>
+        {renderActionButton()}
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 {
+  "settings": "Settings",
   "common": {
     "welcome": "Welcome",
     "hello": "Hello",
@@ -12,11 +13,16 @@
   },
   "landing": {
     "gotoDashboard": "Go to Dashboard",
+    "gotoApp": "Go to App",
     "signIn": "Sign In",
     "hero": {
-      "title": "Manage Your Events Effortlessly",
-      "subtitle": "Synqer makes event management simple and efficient, so you can focus on what matters most",
-      "getStarted": "Get Started"
+      "badge": "Smart Event Scheduling",
+      "titlePart1": "Schedule Together,",
+      "titlePart2": "Effortlessly",
+      "subtitle": "Stop the endless back-and-forth. Let everyone vote on the best time and sync it to your calendar in seconds.",
+      "getStarted": "Get Started Free",
+      "learnMore": "Learn More",
+      "scroll": "Scroll to explore"
     },
     "features": {
       "events": {
@@ -31,6 +37,35 @@
         "title": "Simple to Use",
         "description": "Intuitive interface design lets you get started immediately, no complex learning curve"
       }
+    },
+    "howItWorks": {
+      "title": "How It Works",
+      "subtitle": "Schedule your events in just 4 simple steps",
+      "step1": {
+        "title": "Create Event",
+        "description": "Set up your event with possible time slots that work for you"
+      },
+      "step2": {
+        "title": "Invite Participants",
+        "description": "Share the event link or use LINE to invite your friends"
+      },
+      "step3": {
+        "title": "Collect Votes",
+        "description": "Participants vote on their available times"
+      },
+      "step4": {
+        "title": "Confirm Time",
+        "description": "Choose the best time slot and add it to your calendar"
+      }
+    },
+    "lineIntegration": {
+      "title": "Seamless LINE Integration",
+      "description": "Connect with Synqer through LINE for the ultimate convenience. Create events, receive notifications, and manage everything right from your favorite messaging app.",
+      "feature1": "Create and manage events directly in LINE groups",
+      "feature2": "Get instant notifications when participants vote",
+      "feature3": "Quick access to all your events via LINE menu",
+      "scanQR": "Scan to add our LINE Official Account",
+      "addFriend": "Add Friend"
     }
   },
   "auth": {
@@ -68,6 +103,12 @@
     "viewEvent": "Vote",
     "backToJoined": "Back to Joined Events",
     "backToEvent": "Back to Event",
+    "tabs": {
+      "overview": "Overview",
+      "vote": "Vote",
+      "participants": "Participants",
+      "results": "Results"
+    },
     "votingStatus": "Your Vote",
     "voted": "Voted",
     "notVoted": "Not Voted Yet",
@@ -80,7 +121,29 @@
     "votersForSlot": "Who's available",
     "noVoters": "No one yet",
     "participants": "Participants",
-    "results": "Results",
+    "results": {
+      "allParticipants": "All Participants",
+      "noParticipants": "No Participants",
+      "oneParticipant": "1 Participant",
+      "participantsSelected": "{count} Selected",
+      "searchParticipants": "Search participants...",
+      "selectAll": "Select All",
+      "clearAll": "Clear",
+      "noParticipantsFound": "No participants found",
+      "legendLabel": "Availability",
+      "legendDescription": "of {count} selected",
+      "showingAvailability": "Showing availability for {count} of {total} participants",
+      "noParticipantsSelected": "No Participants Selected",
+      "selectParticipantsHint": "Use the filter above to select which participants' availability to display.",
+      "clickToSeeWho": "Click on any time slot to see who's available",
+      "granularity": "View",
+      "available": "available",
+      "availableParticipants": "Available",
+      "unavailableParticipants": "Not Available",
+      "noOneAvailable": "No one is available",
+      "close": "Close",
+      "rangeHint": "Showing people available for ALL selected time slots"
+    },
     "viewResultsDescription": "View availability analysis",
     "votingProgress": "Voting Progress",
     "votedParticipants": "Voted",
@@ -100,9 +163,9 @@
     "available": "available",
     "voteModeLabel": "Choose voting method",
     "voteModeAvailable": "Select available times",
-    "voteModeAvailableDesc": "Mark when you're free, unselected = unavailable",
+    "voteModeAvailableDesc": "Mark when you're free",
     "voteModeUnavailable": "Select unavailable times",
-    "voteModeUnavailableDesc": "Mark when you're busy, unselected = available",
+    "voteModeUnavailableDesc": "Mark when you're busy",
     "selectAvailableMode": "Select your available times",
     "selectUnavailableMode": "Select your unavailable times",
     "dragToSelectAvailable": "Drag to select times you're available, or click dates to select entire days",
@@ -129,7 +192,30 @@
       "connectHint": "Connect your Google Calendar to automatically detect time conflicts",
       "showOnGrid": "Show events on grid",
       "legendCalendarEvent": "Calendar event"
-    }
+    },
+    "votingEnded": {
+      "title": "Voting Has Ended",
+      "description": "The voting period has ended. Please wait for the host to confirm the event time."
+    },
+    "confirmed": {
+      "title": "Event Time Confirmed",
+      "description": "The host has confirmed the event time.",
+      "eventTime": "Event Time"
+    },
+    "untitledEvent": "Untitled Event",
+    "addToCalendar": {
+      "title": "Add to Google Calendar",
+      "description": "Save the event time to your calendar",
+      "add": "Add",
+      "addAll": "Add All",
+      "addAllShort": "All",
+      "hint": "Opens Google Calendar in a new tab"
+    },
+    "completed": {
+      "title": "Event Completed",
+      "description": "This event has ended."
+    },
+    "viewResults": "View Results"
   },
   "hosted": {
     "title": "Hosted Events",
@@ -144,9 +230,13 @@
     "settings": "Settings",
     "overview": "Overview",
     "backToHosted": "Back to Hosted Events",
+    "eventNotFound": "Event not found",
     "totalExpected": "Expected Participants",
     "totalVoted": "Voted",
     "votingProgress": "Voting Progress",
+    "decideTime": "Decide Event Time",
+    "editTime": "Edit Event Time",
+    "timeConfirmed": "{count} slots confirmed",
     "votedParticipants": "Voted Participants",
     "pendingParticipants": "Pending Participants",
     "noVotesYet": "No votes yet",
@@ -154,27 +244,99 @@
     "allVoted": "All participants have voted!",
     "sendReminder": "Send Reminder",
     "reminderSent": "Reminder sent!",
+    "currentResults": "Current Results",
+    "selectTimeHint": "Click or drag to select time slots",
+    "confirmedEventTime": "Confirmed Event Time",
+    "confirmedTimeHint": "To modify, reset first and select new time slots",
+    "selectEventTimeNow": "Select Event Time",
+    "votingEndedSelectHint": "Voting has ended. Please select and confirm the event time",
+    "pleaseSelectEventTime": "Voting has ended. Please select and confirm the event time so participants know when the event will be held.",
+    "resetEventTime": "Reset",
+    "resetting": "Resetting...",
+    "resetError": "Failed to reset. Please try again.",
+    "resetConfirm": {
+      "title": "Reset Event Time?",
+      "description": "This will clear the confirmed event time and revert the event status to 'Voting Ended'. You will need to select and confirm a new time.",
+      "confirm": "Reset"
+    },
+    "confirmError": "Failed to confirm time. Please try again.",
+    "deadline": {
+      "title": "Time Until Deadline",
+      "notSet": "No deadline set",
+      "expired": "Voting has ended",
+      "days": "days",
+      "hours": "hrs",
+      "minutes": "min",
+      "urgent": "Urgent",
+      "endingSoon": "Ending Soon"
+    },
+    "statusInfo": {
+      "voting_ended": "Voting has ended. Please decide the event time.",
+      "confirmed": "Event time has been confirmed.",
+      "completed": "This event has been completed."
+    },
+    "eventTimeSelector": {
+      "confirmedTitle": "Confirmed Event Time",
+      "selectingTitle": "Select Event Time",
+      "emptyTitle": "Event Time",
+      "emptyHint": "Click or drag to select time slots from the results below",
+      "votingEndedWarning": "Voting has ended. Please select and confirm the event time",
+      "votingNotEnded": "Voting hasn't ended. Confirming now will finalize the time early",
+      "reset": "Reset",
+      "remove": "Remove",
+      "confirm": "Confirm Event Time",
+      "confirming": "Confirming...",
+      "cancel": "Cancel",
+      "resetConfirmTitle": "Reset Event Time?",
+      "resetConfirmDesc": "This will clear the confirmed time and revert to 'Voting Ended' status",
+      "resetConfirm": "Reset"
+    },
+    "addToEventTime": {
+      "button": "Add to Event Time",
+      "votingHint": "Voting is still in progress"
+    },
+    "confirmDialog": {
+      "title": "Confirm Event Time",
+      "description": "Are you sure you want to confirm {count} time slots as the event time?",
+      "votingWarning": "Are you sure you want to confirm the event time now?",
+      "votingWarningDetail": "Voting hasn't ended yet. Confirming now will set the event time before all participants have voted.",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "confirming": "Confirming..."
+    },
     "participantsPage": {
       "title": "Manage Participants",
-      "description": "Add participants by searching registered users or from LINE groups",
+      "description": "Search and add registered users as participants",
+      "descriptionLineGroup": "Add participants from LINE group",
       "searchUsers": "Search Users",
       "lineGroups": "LINE Groups",
       "searchPlaceholder": "Search by name or email...",
+      "filterMembers": "Filter group members...",
       "searchHint": "Enter at least 2 characters to search",
       "noResults": "No users found",
       "selectLineGroup": "Select a LINE Group",
       "noLineGroups": "No LINE groups available",
       "noLineGroupsHint": "Add the LINE Bot to a group to see it here",
-      "addFromGroup": "Add from this group",
+      "addFromGroup": "Add from group",
       "addAll": "Add All",
       "groupMembers": "Group Members",
       "members": "members",
       "selectedParticipants": "Selected Participants",
+      "selectedCount": "{count} participants selected",
+      "selected": "Added",
+      "notSelected": "Not added",
       "removeParticipant": "Remove",
       "saveParticipants": "Save Participants",
       "noParticipants": "No participants added yet",
       "addParticipantsHint": "Search for users or select from LINE groups",
-      "notRegistered": "Not registered"
+      "notRegistered": "Not registered",
+      "voted": "Voted",
+      "notVotedYet": "Not voted yet",
+      "host": "Host",
+      "saveSuccess": "Saved",
+      "unsavedChanges": "Unsaved changes",
+      "votingEndedDescription": "Voting has ended, participant list cannot be modified",
+      "participants": "Participants"
     },
     "settingsPage": {
       "title": "Event Settings",
@@ -189,7 +351,8 @@
       "dangerZone": "Danger Zone",
       "deleteEvent": "Delete Event",
       "deleteWarning": "This action cannot be undone. All votes and data will be permanently deleted.",
-      "confirmDelete": "Are you sure you want to delete this event?"
+      "confirmDelete": "Are you sure you want to delete this event?",
+      "votingEndedDescription": "Voting has ended, voting deadline cannot be modified"
     }
   },
   "eventJoin": {
@@ -234,7 +397,87 @@
     "slotDetails": "Slot Details",
     "available": "Available",
     "unavailable": "Unavailable",
-    "peopleCount": "{count} people"
+    "peopleCount": "{count} people",
+    "confirmedTime": {
+      "moreRanges": "(+{count} more)"
+    }
+  },
+  "joinedEvents": {
+    "title": "Joined Events",
+    "description": "Events you're participating in",
+    "loading": "Loading events...",
+    "error": "Failed to load events",
+    "tabs": {
+      "overview": "Overview",
+      "voting": "Voting",
+      "votingEnded": "Voting Ended",
+      "confirmed": "Confirmed",
+      "completed": "Completed"
+    },
+    "sections": {
+      "voting": "Voting Events",
+      "votingEnded": "Voting Ended",
+      "confirmed": "Confirmed Events",
+      "completed": "Completed Events"
+    },
+    "empty": {
+      "all": "No events yet",
+      "allDescription": "When someone invites you to an event, it will appear here",
+      "voting": "No voting events",
+      "votingDescription": "Events waiting for your vote will appear here",
+      "votingEnded": "No events with ended voting",
+      "votingEndedDescription": "Events where voting has ended will appear here",
+      "confirmed": "No confirmed events",
+      "confirmedDescription": "Events with confirmed times will appear here",
+      "completed": "No completed events",
+      "completedDescription": "Past events will appear here"
+    },
+    "viewMore": "View more {type} events",
+    "showingEvents": "Showing {start}-{end} of {total} events",
+    "voted": "Voted",
+    "notVoted": "Not voted",
+    "untitled": "Untitled Event",
+    "unknownHost": "Unknown",
+    "copyLink": "Copy event link",
+    "copied": "Copied!"
+  },
+  "hostedEvents": {
+    "title": "Hosted Events",
+    "description": "Manage events that you host",
+    "loading": "Loading events...",
+    "error": "Failed to load events",
+    "tabs": {
+      "overview": "Overview",
+      "voting": "Voting",
+      "votingEnded": "Voting Ended",
+      "confirmed": "Confirmed",
+      "completed": "Completed"
+    },
+    "sections": {
+      "voting": "Voting Events",
+      "votingEnded": "Voting Ended",
+      "confirmed": "Confirmed Events",
+      "completed": "Completed Events"
+    },
+    "empty": {
+      "all": "No events yet",
+      "allDescription": "Create your first event to get started",
+      "voting": "No voting events",
+      "votingDescription": "Events in voting phase will appear here",
+      "votingEnded": "No events with ended voting",
+      "votingEndedDescription": "Events where voting has ended will appear here",
+      "confirmed": "No confirmed events",
+      "confirmedDescription": "Events with confirmed times will appear here",
+      "completed": "No completed events",
+      "completedDescription": "Past events will appear here"
+    },
+    "viewMore": "View more {type} events",
+    "showingEvents": "Showing {start}-{end} of {total} events",
+    "allVoted": "All voted",
+    "votingInProgress": "Voting in progress",
+    "untitled": "Untitled Event",
+    "copyLink": "Copy event link",
+    "copied": "Copied!"
   },
   "eventStatus": {
     "voting": "Voting",
@@ -242,10 +485,29 @@
     "confirmed": "Confirmed",
     "completed": "Completed"
   },
+  "eventInfo": {
+    "deadline": "Deadline",
+    "statusDesc": {
+      "voting": "Vote for your available times before the deadline",
+      "votingEnded": "Voting has ended, waiting for host to confirm time",
+      "confirmed": "Event time has been confirmed",
+      "completed": "This event has ended"
+    },
+    "hostedEventHint": "You are the host of this event",
+    "goToEvent": "Go To Vote Page"
+  },
   "participantStatus": {
     "voted": "Voted",
     "notVoted": "Not Voted",
     "notRegistered": "Not Registered"
+  },
+  "joinedParticipants": {
+    "filterAll": "All",
+    "filterVoted": "Voted",
+    "filterNotVoted": "Not Voted",
+    "searchPlaceholder": "Search participants...",
+    "noSearchResults": "No matching participants found",
+    "noParticipants": "No participants yet"
   },
   "language": "English",
   "theme": {
@@ -254,19 +516,185 @@
     "dark": "Dark",
     "system": "System"
   },
+  "confirmTime": {
+    "title": "Decide Event Time",
+    "editTitle": "Edit Event Time",
+    "description": "Click on time slots to select confirmed event times. Darker colors indicate more people are available.",
+    "selectTimeSlots": "Select Time Slots",
+    "clickToSelect": "Click on cells to select time slots to confirm",
+    "selectedSlots": "{count} slots selected",
+    "clearSelection": "Clear selection",
+    "selectAtLeastOne": "Please select at least one time slot",
+    "saveFailed": "Failed to save, please try again",
+    "confirm": "Confirm Time",
+    "selected": "Selected"
+  },
+  "footer": {
+    "email": "Email",
+    "lineOfficialAccount": "LINE Official Account",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfUse": "Terms of Use",
+    "copyright": "© 2025 Synqer. All rights reserved."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: December 23, 2025",
+    "intro": "At Synqer, we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect your personal information when you use our event scheduling service.",
+    "sections": {
+      "collection": {
+        "title": "Information We Collect",
+        "description": "We collect information you provide directly to us, including:",
+        "items": [
+          "Account information (name, email address, profile picture) from your Google or LINE account",
+          "Event data (event names, descriptions, time slots, voting preferences)",
+          "Calendar information when you connect your Google Calendar",
+          "LINE group membership data when you use LINE integration features"
+        ]
+      },
+      "usage": {
+        "title": "How We Use Your Information",
+        "description": "We use the information we collect to:",
+        "items": [
+          "Provide, maintain, and improve our services",
+          "Process your event scheduling and voting activities",
+          "Sync with your calendar to show availability conflicts",
+          "Send notifications about events you're participating in",
+          "Communicate with you about service updates"
+        ]
+      },
+      "thirdParty": {
+        "title": "Third-Party Services",
+        "description": "We integrate with the following third-party services:",
+        "items": [
+          "Google (for authentication and calendar integration)",
+          "LINE (for authentication and group messaging features)",
+          "These services have their own privacy policies governing their use of your data"
+        ]
+      },
+      "security": {
+        "title": "Data Security",
+        "description": "We implement appropriate security measures to protect your personal information. All data transmission is encrypted using SSL/TLS. We do not sell your personal information to third parties."
+      },
+      "rights": {
+        "title": "Your Rights",
+        "description": "You have the right to:",
+        "items": [
+          "Access the personal information we hold about you",
+          "Request correction of inaccurate data",
+          "Request deletion of your account and associated data",
+          "Disconnect third-party service integrations at any time"
+        ]
+      },
+      "updates": {
+        "title": "Policy Updates",
+        "description": "We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new Privacy Policy on this page and updating the \"Last updated\" date."
+      }
+    },
+    "contact": {
+      "title": "Contact Us",
+      "description": "If you have any questions about this Privacy Policy or our data practices, please contact us at:"
+    },
+    "backToHome": "Back to Home"
+  },
+  "terms": {
+    "title": "Terms of Use",
+    "lastUpdated": "Last updated: December 23, 2025",
+    "intro": "Welcome to Synqer. By accessing or using our service, you agree to be bound by these Terms of Use. Please read them carefully.",
+    "sections": {
+      "acceptance": {
+        "title": "Acceptance of Terms",
+        "description": "By creating an account or using Synqer, you agree to these Terms of Use and our Privacy Policy. If you do not agree to these terms, please do not use our service."
+      },
+      "services": {
+        "title": "Our Services",
+        "description": "Synqer provides an event scheduling platform that allows you to:",
+        "items": [
+          "Create and manage events with customizable time slots",
+          "Collect availability votes from participants",
+          "Integrate with Google Calendar to view scheduling conflicts",
+          "Connect with LINE groups for easy participant invitations",
+          "Confirm and communicate event times to all participants"
+        ]
+      },
+      "account": {
+        "title": "Account Responsibilities",
+        "description": "When using Synqer, you agree to:",
+        "items": [
+          "Provide accurate and complete information",
+          "Maintain the security of your account credentials",
+          "Notify us immediately of any unauthorized access",
+          "Accept responsibility for all activities under your account"
+        ]
+      },
+      "conduct": {
+        "title": "User Conduct",
+        "description": "You agree not to:",
+        "items": [
+          "Use the service for any unlawful purpose",
+          "Harass, abuse, or harm other users",
+          "Attempt to gain unauthorized access to our systems",
+          "Interfere with or disrupt the service",
+          "Upload malicious content or spam",
+          "Violate any applicable laws or regulations"
+        ]
+      },
+      "intellectual": {
+        "title": "Intellectual Property",
+        "description": "Synqer and its original content, features, and functionality are owned by Synqer and are protected by copyright, trademark, and other intellectual property laws. You retain ownership of any content you create using our service."
+      },
+      "disclaimer": {
+        "title": "Disclaimer of Warranties",
+        "description": "Synqer is provided \"as is\" and \"as available\" without warranties of any kind, either express or implied. We do not guarantee that the service will be uninterrupted, secure, or error-free."
+      },
+      "liability": {
+        "title": "Limitation of Liability",
+        "description": "To the fullest extent permitted by law, Synqer shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the service."
+      },
+      "termination": {
+        "title": "Termination",
+        "description": "We reserve the right to suspend or terminate your account at any time for violations of these Terms of Use. You may also delete your account at any time through the service settings."
+      },
+      "changes": {
+        "title": "Changes to Terms",
+        "description": "We may update these Terms of Use from time to time. Continued use of the service after any changes constitutes your acceptance of the new terms."
+      }
+    },
+    "contact": {
+      "title": "Contact Us",
+      "description": "If you have any questions about these Terms of Use, please contact us at:"
+    },
+    "backToHome": "Back to Home"
+  },
   "createEvent": {
     "title": "Create a new event",
     "description": "Create a new event to collect participants' available times",
-    "requiredNote": "Required fields are marked with an asterisk (*)",
     "general": {
       "title": "General",
       "host": "Host",
-      "hostDescription": "Choose who will host this event",
+      "hostDescription": "You are the host of this event",
       "eventName": "Event name",
       "eventNamePlaceholder": "e.g., Team dinner time poll",
       "description": "Description",
       "descriptionPlaceholder": "Optional. Describe the purpose and content of this event",
-      "characters": "characters"
+      "characters": "characters",
+      "charLimitReached": "(limit reached)"
+    },
+    "lineGroup": {
+      "selectGroup": "LINE Group",
+      "selectGroupHint": "Select a LINE group to invite members",
+      "noGroupSelected": "No group selected",
+      "unnamedGroup": "Unnamed Group",
+      "noGroups": "No LINE groups available. Add the bot to a group first.",
+      "members": "members",
+      "selectMembers": "Select Members",
+      "selectMembersHint": "Select members to invite to this event",
+      "selectAll": "Select All",
+      "clearAll": "Clear",
+      "selected": "selected",
+      "noMembers": "No members found in this group",
+      "unknownMember": "Unknown Member",
+      "notRegistered": "Not registered",
+      "registered": "Registered"
     },
     "configuration": {
       "title": "Configuration",
@@ -275,13 +703,27 @@
       "selectDate": "Select date",
       "startTime": "Start time",
       "endTime": "End time",
-      "timeDescription": "Daily time range for the event",
       "slotDuration": "Time slot duration",
       "minutes": "minutes",
-      "slotDurationDescription": "Duration of each time slot"
+      "slotDurationDescription": "Duration of each time slot",
+      "timeError": "Start time must be earlier than end time"
+    },
+    "votingDeadline": {
+      "title": "Voting Deadline",
+      "description": "Set a deadline for participants to submit their votes",
+      "date": "Deadline date",
+      "time": "Deadline time",
+      "autoSync": "Auto-synced with event start time",
+      "error": "Voting deadline must be before or at the event start time"
     },
     "cancel": "Cancel",
     "create": "Create event",
-    "creating": "Creating..."
+    "creating": "Creating...",
+    "cancelConfirm": {
+      "title": "Discard changes?",
+      "description": "Your entered data will be lost. This action cannot be undone.",
+      "keepEditing": "Keep editing",
+      "discard": "Discard"
+    }
   }
 }

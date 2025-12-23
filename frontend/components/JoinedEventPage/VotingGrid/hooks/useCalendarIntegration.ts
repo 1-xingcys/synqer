@@ -18,16 +18,15 @@ interface UseCalendarIntegrationReturn {
   calendarEvents: CalendarEvent[];
   conflictingSlotIds: string[];
   loadingCalendar: boolean;
-  showCalendarPanel: boolean;
   showCalendarOnGrid: boolean;
 
   // Computed
   calendarEventsForSlot: Map<string, CalendarEvent[]>;
 
   // Actions
-  setShowCalendarPanel: React.Dispatch<React.SetStateAction<boolean>>;
   setShowCalendarOnGrid: React.Dispatch<React.SetStateAction<boolean>>;
   connectCalendar: () => void;
+  disconnectCalendar: () => Promise<void>;
   loadCalendarConflicts: () => Promise<void>;
   isEventStartInSlot: (slotId: string, event: CalendarEvent) => boolean;
   getEventSpanFromSlot: (slotId: string, event: CalendarEvent) => number;
@@ -42,13 +41,13 @@ export function useCalendarIntegration({
     status: calendarStatus,
     loading: calendarLoading,
     connect: connectCalendar,
+    disconnect: disconnectCalendar,
     getConflictingSlots,
   } = useGoogleCalendar();
 
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [conflictingSlotIds, setConflictingSlotIds] = useState<string[]>([]);
   const [loadingCalendar, setLoadingCalendar] = useState(false);
-  const [showCalendarPanel, setShowCalendarPanel] = useState(false);
   const [showCalendarOnGrid, setShowCalendarOnGrid] = useState(true);
 
   // Map calendar events to slots
@@ -77,15 +76,10 @@ export function useCalendarIntegration({
 
   // Auto-load calendar conflicts when connected
   useEffect(() => {
-    if (calendarStatus?.connected && eventId && showCalendarPanel) {
+    if (calendarStatus?.connected && eventId) {
       void loadCalendarConflicts();
     }
-  }, [
-    calendarStatus?.connected,
-    eventId,
-    showCalendarPanel,
-    loadCalendarConflicts,
-  ]);
+  }, [calendarStatus?.connected, eventId, loadCalendarConflicts]);
 
   // Check if this slot is the first occurrence of an event in its row
   const isEventStartInSlot = useCallback(
@@ -139,16 +133,15 @@ export function useCalendarIntegration({
     calendarEvents,
     conflictingSlotIds,
     loadingCalendar,
-    showCalendarPanel,
     showCalendarOnGrid,
 
     // Computed
     calendarEventsForSlot,
 
     // Actions
-    setShowCalendarPanel,
     setShowCalendarOnGrid,
     connectCalendar,
+    disconnectCalendar,
     loadCalendarConflicts,
     isEventStartInSlot,
     getEventSpanFromSlot,

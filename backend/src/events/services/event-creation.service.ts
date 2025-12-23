@@ -1,7 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-import { CreateEventDto } from '../dto/create-event.dto';
+import {
+  CreateEventDto,
+  TITLE_MAX_LENGTH,
+  DESCRIPTION_MAX_LENGTH,
+} from '../dto/create-event.dto';
 import { TimeSlotService } from './time-slot.service';
 
 /**
@@ -32,9 +36,21 @@ export class EventCreationService {
       expectedLineUserIds,
     } = createEventDto;
 
+    // ===== Validation =====
+    this.validateCharacterLimits(title, description);
+    this.validateDates(startDate, endDate);
+    this.validateTimes(startTime, endTime);
+    if (votingDeadline) {
+      this.validateVotingDeadline(votingDeadline, startDate, startTime);
+    }
+
     // 解析時間為分鐘數
     const startMinuteOfDay = this.timeSlotService.parseTimeToMinutes(startTime);
-    const endMinuteOfDay = this.timeSlotService.parseTimeToMinutes(endTime);
+    // Handle "24:00" as end of day
+    const endMinuteOfDay =
+      endTime === '24:00'
+        ? 24 * 60
+        : this.timeSlotService.parseTimeToMinutes(endTime);
 
     // 解析日期
     const startDateObj = new Date(startDate);
@@ -109,6 +125,82 @@ export class EventCreationService {
   }
 
   /**
+   * 驗證字數限制
+   */
+  private validateCharacterLimits(title?: string, description?: string) {
+    if (title && [...title].length > TITLE_MAX_LENGTH) {
+      throw new BadRequestException(
+        `Title must be at most ${TITLE_MAX_LENGTH} characters`,
+      );
+    }
+    if (description && [...description].length > DESCRIPTION_MAX_LENGTH) {
+      throw new BadRequestException(
+        `Description must be at most ${DESCRIPTION_MAX_LENGTH} characters`,
+      );
+    }
+  }
+
+  /**
+   * 驗證日期範圍
+   */
+  private validateDates(startDate: string, endDate: string) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start.getTime())) {
+      throw new BadRequestException('Invalid start date');
+    }
+    if (isNaN(end.getTime())) {
+      throw new BadRequestException('Invalid end date');
+    }
+    if (start > end) {
+      throw new BadRequestException(
+        'Start date must be before or equal to end date',
+      );
+    }
+  }
+
+  /**
+   * 驗證時間範圍
+   */
+  private validateTimes(startTime: string, endTime: string) {
+    const startMinutes = this.timeSlotService.parseTimeToMinutes(startTime);
+    const endMinutes =
+      endTime === '24:00'
+        ? 24 * 60
+        : this.timeSlotService.parseTimeToMinutes(endTime);
+
+    if (startMinutes >= endMinutes) {
+      throw new BadRequestException('Start time must be before end time');
+    }
+  }
+
+  /**
+   * 驗證投票截止時間
+   */
+  private validateVotingDeadline(
+    votingDeadline: string,
+    startDate: string,
+    startTime: string,
+  ) {
+    const deadline = new Date(votingDeadline);
+    if (isNaN(deadline.getTime())) {
+      throw new BadRequestException('Invalid voting deadline');
+    }
+
+    // Combine start date and time
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const eventStart = new Date(startDate);
+    eventStart.setHours(hours, minutes, 0, 0);
+
+    if (deadline > eventStart) {
+      throw new BadRequestException(
+        'Voting deadline must be before or at the event start time',
+      );
+    }
+  }
+
+  /**
    * 創建時間槽
    */
   private async createTimeSlots(
@@ -156,11 +248,20 @@ export class EventCreationService {
       userId?: string;
     }> = [];
 
-    // 自動將創建者加入為參與者
+    // 查詢創建者的 LINE userId
+    let creatorLineUserId: string | undefined;
     if (userId) {
+      const creatorAuthIdentity = await prisma.authIdentity.findFirst({
+        where: { userId, provider: 'line' },
+        select: { providerUserId: true },
+      });
+      creatorLineUserId = creatorAuthIdentity?.providerUserId;
+
+      // 自動將創建者加入為參與者（包含 lineUserId）
       participantData.push({
         eventId,
         userId,
+        lineUserId: creatorLineUserId,
       });
     }
 
@@ -182,11 +283,11 @@ export class EventCreationService {
       );
 
       expectedLineUserIds.forEach((lineUserId) => {
-        const linkedUserId = linkedMap.get(lineUserId);
         // 如果創建者也在 LINE 群組中，避免重複添加
-        if (linkedUserId && linkedUserId === userId) {
+        if (creatorLineUserId && lineUserId === creatorLineUserId) {
           return; // 跳過，因為已經在上面添加了
         }
+        const linkedUserId = linkedMap.get(lineUserId);
         participantData.push({
           eventId,
           lineUserId,

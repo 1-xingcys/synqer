@@ -1,4 +1,5 @@
 {
+  "settings": "設定",
   "common": {
     "welcome": "歡迎",
     "hello": "你好",
@@ -12,11 +13,16 @@
   },
   "landing": {
     "gotoDashboard": "前往控制台",
+    "gotoApp": "前往 App",
     "signIn": "登入",
     "hero": {
-      "title": "輕鬆管理您的活動",
-      "subtitle": "Synqer 讓活動管理變得簡單而有效率，讓您專注於最重要的事情",
-      "getStarted": "開始使用"
+      "badge": "智慧活動排程",
+      "titlePart1": "一起投票，",
+      "titlePart2": "輕鬆搞定",
+      "subtitle": "告別繁瑣的時間協調。讓大家投票選出最佳時間，一鍵同步到行事曆。",
+      "getStarted": "免費開始使用",
+      "learnMore": "了解更多",
+      "scroll": "滑動探索更多"
     },
     "features": {
       "events": {
@@ -31,6 +37,35 @@
         "title": "簡單易用",
         "description": "直觀的介面設計，讓您立即上手，無需複雜的學習過程"
       }
+    },
+    "howItWorks": {
+      "title": "使用流程",
+      "subtitle": "只需 4 個簡單步驟即可安排您的活動",
+      "step1": {
+        "title": "建立活動",
+        "description": "設定活動並加入您方便的時段選項"
+      },
+      "step2": {
+        "title": "邀請參與者",
+        "description": "分享活動連結或使用 LINE 邀請您的朋友"
+      },
+      "step3": {
+        "title": "收集投票",
+        "description": "參與者投票選擇他們有空的時間"
+      },
+      "step4": {
+        "title": "確認時間",
+        "description": "選擇最佳時段並加入您的行事曆"
+      }
+    },
+    "lineIntegration": {
+      "title": "無縫 LINE 整合",
+      "description": "透過 LINE 連結 Synqer，享受極致便利。直接在您最愛的通訊軟體中建立活動、接收通知並管理一切。",
+      "feature1": "在 LINE 群組中直接建立和管理活動",
+      "feature2": "參與者投票時即時收到通知",
+      "feature3": "透過 LINE 選單快速存取所有活動",
+      "scanQR": "掃描 QR Code 加入我們的 LINE 官方帳號",
+      "addFriend": "加入好友"
     }
   },
   "auth": {
@@ -68,6 +103,12 @@
     "viewEvent": "投票",
     "backToJoined": "返回加入的活動",
     "backToEvent": "返回活動",
+    "tabs": {
+      "overview": "總覽",
+      "vote": "投票",
+      "participants": "參與者",
+      "results": "結果分析"
+    },
     "votingStatus": "您的投票",
     "voted": "已投票",
     "notVoted": "尚未投票",
@@ -80,7 +121,29 @@
     "votersForSlot": "誰有空",
     "noVoters": "尚無人",
     "participants": "參與者",
-    "results": "結果分析",
+    "results": {
+      "allParticipants": "所有參與者",
+      "noParticipants": "無參與者",
+      "oneParticipant": "1 位參與者",
+      "participantsSelected": "已選 {count} 人",
+      "searchParticipants": "搜尋參與者...",
+      "selectAll": "全選",
+      "clearAll": "清除",
+      "noParticipantsFound": "找不到參與者",
+      "legendLabel": "有空人數",
+      "legendDescription": "（共選 {count} 人）",
+      "showingAvailability": "顯示 {count}/{total} 位參與者的時間",
+      "noParticipantsSelected": "未選擇參與者",
+      "selectParticipantsHint": "使用上方的篩選器來選擇要顯示哪些參與者的時間。",
+      "clickToSeeWho": "點擊任一時段查看誰有空",
+      "granularity": "顯示間隔",
+      "available": "有空",
+      "availableParticipants": "有空",
+      "unavailableParticipants": "沒空",
+      "noOneAvailable": "沒有人有空",
+      "close": "關閉",
+      "rangeHint": "顯示所有選取時段都有空的人"
+    },
     "viewResultsDescription": "查看時段分析",
     "votingProgress": "投票進度",
     "votedParticipants": "已投票",
@@ -100,9 +163,9 @@
     "available": "有空",
     "voteModeLabel": "選擇投票方式",
     "voteModeAvailable": "投「可以」的時間",
-    "voteModeAvailableDesc": "選擇你有空的時段，其他時段視為不行",
+    "voteModeAvailableDesc": "選擇你有空的時段",
     "voteModeUnavailable": "投「不行」的時間",
-    "voteModeUnavailableDesc": "選擇你不行的時段，其他時段視為可以",
+    "voteModeUnavailableDesc": "選擇你不行的時段",
     "selectAvailableMode": "選擇你可以的時間",
     "selectUnavailableMode": "選擇你不行的時間",
     "dragToSelectAvailable": "拖曳選取你「可以」的時段，或點擊日期選取整天",
@@ -129,7 +192,30 @@
       "connectHint": "連結你的 Google 日曆來自動偵測時間衝突",
       "showOnGrid": "在時間表上顯示行程",
       "legendCalendarEvent": "日曆行程"
-    }
+    },
+    "votingEnded": {
+      "title": "投票已結束",
+      "description": "投票時間已結束，請等待主辦者確認活動時間。"
+    },
+    "confirmed": {
+      "title": "活動時間已確認",
+      "description": "主辦者已確認活動時間。",
+      "eventTime": "活動時間"
+    },
+    "untitledEvent": "未命名活動",
+    "addToCalendar": {
+      "title": "加入 Google 日曆",
+      "description": "將活動時間儲存到你的日曆",
+      "add": "加入",
+      "addAll": "全部加入",
+      "addAllShort": "全部",
+      "hint": "將在新分頁中開啟 Google 日曆"
+    },
+    "completed": {
+      "title": "活動已結束",
+      "description": "此活動已結束。"
+    },
+    "viewResults": "查看結果"
   },
   "hosted": {
     "title": "主辦的活動",
@@ -144,9 +230,13 @@
     "settings": "設定",
     "overview": "總覽",
     "backToHosted": "返回主辦活動",
+    "eventNotFound": "找不到活動",
     "totalExpected": "預期參與者",
     "totalVoted": "已投票",
     "votingProgress": "投票進度",
+    "decideTime": "決定活動時間",
+    "editTime": "修改活動時間",
+    "timeConfirmed": "已確認 {count} 個時段",
     "votedParticipants": "已投票的參與者",
     "pendingParticipants": "等待投票的參與者",
     "noVotesYet": "尚無投票",
@@ -154,27 +244,99 @@
     "allVoted": "所有參與者都已投票！",
     "sendReminder": "發送提醒",
     "reminderSent": "提醒已發送！",
+    "currentResults": "目前投票結果",
+    "selectTimeHint": "點選或拖曳選擇時間區間",
+    "confirmedEventTime": "已設定的活動時間",
+    "confirmedTimeHint": "如需修改，請先重新設定再選擇新的時間",
+    "selectEventTimeNow": "請選擇活動時間",
+    "votingEndedSelectHint": "投票已結束，請選擇活動時間後確認",
+    "pleaseSelectEventTime": "投票已結束，請盡快選擇並確認活動時間，讓參與者知道活動何時舉行。",
+    "resetEventTime": "重新設定",
+    "resetting": "重新設定中...",
+    "resetError": "重新設定失敗，請重試。",
+    "resetConfirm": {
+      "title": "確定要重新設定嗎？",
+      "description": "這將清除目前已確認的活動時間，活動狀態會退回到「投票結束」，您需要重新選擇並確認活動時間。",
+      "confirm": "確定重新設定"
+    },
+    "confirmError": "確認時間失敗，請重試。",
+    "deadline": {
+      "title": "距離截止時間",
+      "notSet": "未設定截止時間",
+      "expired": "投票已截止",
+      "days": "天",
+      "hours": "小時",
+      "minutes": "分鐘",
+      "urgent": "緊急",
+      "endingSoon": "即將截止"
+    },
+    "statusInfo": {
+      "voting_ended": "投票已結束，請決定活動時間。",
+      "confirmed": "活動時間已確認。",
+      "completed": "此活動已結束。"
+    },
+    "eventTimeSelector": {
+      "confirmedTitle": "已確認的活動時間",
+      "selectingTitle": "選擇活動時間",
+      "emptyTitle": "活動時間",
+      "emptyHint": "從下方投票結果中點選或拖曳選擇時段",
+      "votingEndedWarning": "投票已結束，請盡快選擇並確認活動時間",
+      "votingNotEnded": "投票尚未結束，確認後將提前決定活動時間",
+      "reset": "重新選擇",
+      "remove": "移除",
+      "confirm": "確認活動時間",
+      "confirming": "確認中...",
+      "cancel": "取消",
+      "resetConfirmTitle": "重新選擇活動時間？",
+      "resetConfirmDesc": "這將清除已確認的時間，活動狀態會退回「投票結束」",
+      "resetConfirm": "確定重選"
+    },
+    "addToEventTime": {
+      "button": "加入活動時間",
+      "votingHint": "投票仍在進行中"
+    },
+    "confirmDialog": {
+      "title": "確認活動時間",
+      "description": "確定要將這 {count} 個時段設為活動時間嗎？",
+      "votingWarning": "確定要現在確認活動時間嗎？",
+      "votingWarningDetail": "投票尚未結束，現在確認將會在所有參與者完成投票前決定活動時間。",
+      "cancel": "取消",
+      "confirm": "確認",
+      "confirming": "確認中..."
+    },
     "participantsPage": {
       "title": "管理參與者",
-      "description": "透過搜尋已註冊的使用者或從 LINE 群組新增參與者",
+      "description": "搜尋已註冊的使用者並新增為參與者",
+      "descriptionLineGroup": "從 LINE 群組中新增參與者",
       "searchUsers": "搜尋使用者",
       "lineGroups": "LINE 群組",
       "searchPlaceholder": "以名稱或電子郵件搜尋...",
+      "filterMembers": "篩選群組成員...",
       "searchHint": "輸入至少 2 個字元開始搜尋",
       "noResults": "找不到使用者",
       "selectLineGroup": "選擇 LINE 群組",
       "noLineGroups": "沒有可用的 LINE 群組",
       "noLineGroupsHint": "將 LINE Bot 加入群組後即可在此看到",
-      "addFromGroup": "從此群組新增",
+      "addFromGroup": "從群組新增",
       "addAll": "全部新增",
       "groupMembers": "群組成員",
       "members": "位成員",
       "selectedParticipants": "已選擇的參與者",
+      "selectedCount": "已選擇 {count} 位參與者",
+      "selected": "已加入",
+      "notSelected": "未加入",
       "removeParticipant": "移除",
       "saveParticipants": "儲存參與者",
       "noParticipants": "尚未新增任何參與者",
       "addParticipantsHint": "搜尋使用者或從 LINE 群組選擇",
-      "notRegistered": "尚未註冊"
+      "notRegistered": "尚未註冊",
+      "voted": "已投票",
+      "notVotedYet": "尚未投票",
+      "host": "主辦人",
+      "saveSuccess": "已儲存",
+      "unsavedChanges": "有未儲存的變更",
+      "votingEndedDescription": "投票已結束，無法修改參與者名單",
+      "participants": "參與者名單"
     },
     "settingsPage": {
       "title": "活動設定",
@@ -189,7 +351,8 @@
       "dangerZone": "Danger Zone",
       "deleteEvent": "刪除活動",
       "deleteWarning": "此操作無法復原。所有投票和資料將被永久刪除。",
-      "confirmDelete": "您確定要刪除此活動嗎？"
+      "confirmDelete": "您確定要刪除此活動嗎？",
+      "votingEndedDescription": "投票已結束，無法修改投票截止時間"
     }
   },
   "eventJoin": {
@@ -234,7 +397,87 @@
     "slotDetails": "時段詳情",
     "available": "有空",
     "unavailable": "沒空",
-    "peopleCount": "{count} 人"
+    "peopleCount": "{count} 人",
+    "confirmedTime": {
+      "moreRanges": "(+{count} 個時段)"
+    }
+  },
+  "joinedEvents": {
+    "title": "加入的活動",
+    "description": "您正在參與的活動",
+    "loading": "載入活動中...",
+    "error": "載入活動失敗",
+    "tabs": {
+      "overview": "總覽",
+      "voting": "投票中",
+      "votingEnded": "投票結束",
+      "confirmed": "時間已定",
+      "completed": "活動結束"
+    },
+    "sections": {
+      "voting": "投票中的活動",
+      "votingEnded": "投票結束",
+      "confirmed": "時間已定的活動",
+      "completed": "已結束的活動"
+    },
+    "empty": {
+      "all": "尚無活動",
+      "allDescription": "當有人邀請您參加活動時，它會出現在這裡",
+      "voting": "沒有投票中的活動",
+      "votingDescription": "等待您投票的活動會顯示在這裡",
+      "votingEnded": "沒有投票結束的活動",
+      "votingEndedDescription": "投票已結束的活動會顯示在這裡",
+      "confirmed": "沒有時間已定的活動",
+      "confirmedDescription": "已確認時間的活動會顯示在這裡",
+      "completed": "沒有已結束的活動",
+      "completedDescription": "過去的活動會顯示在這裡"
+    },
+    "viewMore": "查看更多{type}",
+    "showingEvents": "顯示 {start}-{end}，共 {total} 個活動",
+    "voted": "已投票",
+    "notVoted": "未投票",
+    "untitled": "未命名活動",
+    "unknownHost": "未知",
+    "copyLink": "複製活動連結",
+    "copied": "已複製！"
+  },
+  "hostedEvents": {
+    "title": "主辦的活動",
+    "description": "管理您主辦的活動",
+    "loading": "載入活動中...",
+    "error": "載入活動失敗",
+    "tabs": {
+      "overview": "總覽",
+      "voting": "投票中",
+      "votingEnded": "投票結束",
+      "confirmed": "時間已定",
+      "completed": "活動結束"
+    },
+    "sections": {
+      "voting": "投票中的活動",
+      "votingEnded": "投票結束",
+      "confirmed": "時間已定的活動",
+      "completed": "已結束的活動"
+    },
+    "empty": {
+      "all": "尚無活動",
+      "allDescription": "建立您的第一個活動來開始",
+      "voting": "沒有投票中的活動",
+      "votingDescription": "正在投票的活動會顯示在這裡",
+      "votingEnded": "沒有投票結束的活動",
+      "votingEndedDescription": "投票已結束的活動會顯示在這裡",
+      "confirmed": "沒有時間已定的活動",
+      "confirmedDescription": "已確認時間的活動會顯示在這裡",
+      "completed": "沒有已結束的活動",
+      "completedDescription": "過去的活動會顯示在這裡"
+    },
+    "viewMore": "查看更多{type}",
+    "showingEvents": "顯示 {start}-{end}，共 {total} 個活動",
+    "allVoted": "全部已投票",
+    "votingInProgress": "投票進行中",
+    "untitled": "未命名活動",
+    "copyLink": "複製活動連結",
+    "copied": "已複製！"
   },
   "eventStatus": {
     "voting": "投票中",
@@ -242,10 +485,29 @@
     "confirmed": "時間已定",
     "completed": "活動結束"
   },
+  "eventInfo": {
+    "deadline": "截止時間",
+    "statusDesc": {
+      "voting": "在截止時間前投票選擇你可以的時間",
+      "votingEnded": "投票已結束，等待主辦者確認時間",
+      "confirmed": "活動時間已確認",
+      "completed": "此活動已結束"
+    },
+    "hostedEventHint": "你是這個活動的主辦者",
+    "goToEvent": "投票頁面"
+  },
   "participantStatus": {
     "voted": "已投票",
     "notVoted": "未投票",
     "notRegistered": "未註冊"
+  },
+  "joinedParticipants": {
+    "filterAll": "全部",
+    "filterVoted": "已投票",
+    "filterNotVoted": "未投票",
+    "searchPlaceholder": "搜尋參與者...",
+    "noSearchResults": "找不到符合的參與者",
+    "noParticipants": "尚無參與者"
   },
   "language": "語言",
   "theme": {
@@ -254,19 +516,185 @@
     "dark": "深色",
     "system": "系統預設"
   },
+  "confirmTime": {
+    "title": "決定活動時間",
+    "editTitle": "修改活動時間",
+    "description": "點擊時段來選擇確認的活動時間，顏色越深表示越多人有空",
+    "selectTimeSlots": "選擇活動時段",
+    "clickToSelect": "點擊格子選擇要確認的時段",
+    "selectedSlots": "已選擇 {count} 個時段",
+    "clearSelection": "清除選擇",
+    "selectAtLeastOne": "請至少選擇一個時段",
+    "saveFailed": "儲存失敗，請重試",
+    "confirm": "確認時間",
+    "selected": "已選擇"
+  },
+  "footer": {
+    "email": "電子郵件",
+    "lineOfficialAccount": "LINE 官方帳號",
+    "privacyPolicy": "隱私權政策",
+    "termsOfUse": "使用條款",
+    "copyright": "© 2025 Synqer. All rights reserved."
+  },
+  "privacy": {
+    "title": "隱私權政策",
+    "lastUpdated": "最後更新：2024 年 12 月 23 日",
+    "intro": "Synqer 非常重視您的隱私。本隱私權政策說明我們在您使用活動排程服務時，如何收集、使用和保護您的個人資訊。",
+    "sections": {
+      "collection": {
+        "title": "我們收集的資訊",
+        "description": "我們收集您直接提供給我們的資訊，包括：",
+        "items": [
+          "帳號資訊（姓名、電子郵件、個人頭像）來自您的 Google 或 LINE 帳號",
+          "活動資料（活動名稱、描述、時段、投票偏好）",
+          "當您連結 Google 日曆時的行事曆資訊",
+          "當您使用 LINE 整合功能時的 LINE 群組成員資料"
+        ]
+      },
+      "usage": {
+        "title": "我們如何使用您的資訊",
+        "description": "我們使用收集的資訊來：",
+        "items": [
+          "提供、維護和改進我們的服務",
+          "處理您的活動排程和投票活動",
+          "同步您的行事曆以顯示時間衝突",
+          "發送您參與活動的相關通知",
+          "就服務更新與您溝通"
+        ]
+      },
+      "thirdParty": {
+        "title": "第三方服務",
+        "description": "我們整合以下第三方服務：",
+        "items": [
+          "Google（用於驗證和日曆整合）",
+          "LINE（用於驗證和群組訊息功能）",
+          "這些服務有各自的隱私權政策規範其對您資料的使用"
+        ]
+      },
+      "security": {
+        "title": "資料安全",
+        "description": "我們實施適當的安全措施來保護您的個人資訊。所有資料傳輸都使用 SSL/TLS 加密。我們不會將您的個人資訊出售給第三方。"
+      },
+      "rights": {
+        "title": "您的權利",
+        "description": "您有權：",
+        "items": [
+          "存取我們持有的您的個人資訊",
+          "要求更正不正確的資料",
+          "要求刪除您的帳號及相關資料",
+          "隨時中斷第三方服務整合"
+        ]
+      },
+      "updates": {
+        "title": "政策更新",
+        "description": "我們可能不時更新本隱私權政策。如有重大變更，我們將在本頁面發布新的隱私權政策並更新「最後更新」日期以通知您。"
+      }
+    },
+    "contact": {
+      "title": "聯繫我們",
+      "description": "如果您對本隱私權政策或我們的資料實務有任何疑問，請透過以下方式聯繫我們："
+    },
+    "backToHome": "返回首頁"
+  },
+  "terms": {
+    "title": "使用條款",
+    "lastUpdated": "最後更新：2024 年 12 月 23 日",
+    "intro": "歡迎使用 Synqer。存取或使用我們的服務即表示您同意受本使用條款的約束。請仔細閱讀。",
+    "sections": {
+      "acceptance": {
+        "title": "接受條款",
+        "description": "建立帳號或使用 Synqer 即表示您同意本使用條款和我們的隱私權政策。如果您不同意這些條款，請勿使用我們的服務。"
+      },
+      "services": {
+        "title": "我們的服務",
+        "description": "Synqer 提供活動排程平台，讓您可以：",
+        "items": [
+          "建立和管理具有可自訂時段的活動",
+          "收集參與者的可用時間投票",
+          "整合 Google 日曆以查看排程衝突",
+          "連結 LINE 群組以便邀請參與者",
+          "確認並向所有參與者傳達活動時間"
+        ]
+      },
+      "account": {
+        "title": "帳號責任",
+        "description": "使用 Synqer 時，您同意：",
+        "items": [
+          "提供準確完整的資訊",
+          "維護您帳號憑證的安全",
+          "立即通知我們任何未經授權的存取",
+          "對您帳號下的所有活動負責"
+        ]
+      },
+      "conduct": {
+        "title": "使用者行為",
+        "description": "您同意不會：",
+        "items": [
+          "將服務用於任何非法目的",
+          "騷擾、虐待或傷害其他使用者",
+          "嘗試未經授權存取我們的系統",
+          "干擾或中斷服務",
+          "上傳惡意內容或垃圾訊息",
+          "違反任何適用法律或法規"
+        ]
+      },
+      "intellectual": {
+        "title": "智慧財產權",
+        "description": "Synqer 及其原創內容、功能和特性為 Synqer 所有，受著作權、商標及其他智慧財產權法律保護。您保留使用我們服務建立的任何內容的所有權。"
+      },
+      "disclaimer": {
+        "title": "免責聲明",
+        "description": "Synqer 以「現況」和「可用狀態」提供，不提供任何明示或暗示的保證。我們不保證服務不會中斷、安全或無錯誤。"
+      },
+      "liability": {
+        "title": "責任限制",
+        "description": "在法律允許的最大範圍內，Synqer 對於因您使用或無法使用服務而產生的任何間接、附帶、特殊、後果性或懲罰性損害不承擔責任。"
+      },
+      "termination": {
+        "title": "終止",
+        "description": "我們保留因違反本使用條款而隨時暫停或終止您帳號的權利。您也可以隨時透過服務設定刪除您的帳號。"
+      },
+      "changes": {
+        "title": "條款變更",
+        "description": "我們可能不時更新本使用條款。在任何變更後繼續使用服務即表示您接受新條款。"
+      }
+    },
+    "contact": {
+      "title": "聯繫我們",
+      "description": "如果您對本使用條款有任何疑問，請透過以下方式聯繫我們："
+    },
+    "backToHome": "返回首頁"
+  },
   "createEvent": {
     "title": "建立新活動",
     "description": "建立一個新的活動來收集參與者的可用時間",
-    "requiredNote": "必填欄位標記有星號 (*)",
     "general": {
       "title": "General",
       "host": "Host",
-      "hostDescription": "選擇活動的主辦者",
+      "hostDescription": "你是這個活動的主辦者",
       "eventName": "Event name",
       "eventNamePlaceholder": "例如：團隊聚餐時間投票",
       "description": "Description",
       "descriptionPlaceholder": "選填，描述這個活動的目的和內容",
-      "characters": "字元"
+      "characters": "字元",
+      "charLimitReached": "（已達上限）"
+    },
+    "lineGroup": {
+      "selectGroup": "LINE 群組",
+      "selectGroupHint": "選擇 LINE 群組以邀請成員",
+      "noGroupSelected": "未選擇群組",
+      "unnamedGroup": "未命名群組",
+      "noGroups": "沒有可用的 LINE 群組，請先將 Bot 加入群組",
+      "members": "位成員",
+      "selectMembers": "選擇成員",
+      "selectMembersHint": "選擇要邀請參加活動的成員",
+      "selectAll": "全選",
+      "clearAll": "清除",
+      "selected": "已選",
+      "noMembers": "此群組中沒有成員",
+      "unknownMember": "未知成員",
+      "notRegistered": "尚未註冊",
+      "registered": "已註冊"
     },
     "configuration": {
       "title": "Configuration",
@@ -275,13 +703,27 @@
       "selectDate": "選擇日期",
       "startTime": "開始時間",
       "endTime": "結束時間",
-      "timeDescription": "每日活動的時間範圍",
       "slotDuration": "時間間隔",
       "minutes": "分鐘",
-      "slotDurationDescription": "每個時段的持續時間"
+      "slotDurationDescription": "每個時段的持續時間",
+      "timeError": "開始時間必須早於結束時間"
+    },
+    "votingDeadline": {
+      "title": "Voting Deadline",
+      "description": "設定參與者投票的截止時間",
+      "date": "截止日期",
+      "time": "截止時間",
+      "autoSync": "自動與活動開始時間同步",
+      "error": "投票截止時間必須在活動開始時間之前或同時"
     },
     "cancel": "取消",
     "create": "建立活動",
-    "creating": "建立中..."
+    "creating": "建立中...",
+    "cancelConfirm": {
+      "title": "確定要取消嗎？",
+      "description": "您已輸入的資料將會遺失，此操作無法復原。",
+      "keepEditing": "繼續編輯",
+      "discard": "捨棄變更"
+    }
   }
 }

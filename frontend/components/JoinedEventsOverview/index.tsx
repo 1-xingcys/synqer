@@ -1,58 +1,24 @@
-"use client";
+// Re-export shared components from eventCommon
+export {
+  EventRow,
+  EventSection,
+  EventListWithPagination,
+  EmptyState,
+  EventsLayout,
+} from "@/components/eventCommon/EventsOverview";
 
-import { useTranslations } from "next-intl";
-import { useAttendedEvents } from "@/hooks/useAttendedEvents";
-import EmptyState from "./EmptyState";
-import EventCard from "@/components/eventCommon/EventCard";
+// Re-export types from eventCommon
+export type {
+  EventRowData,
+  HostedEventRowData,
+  EventRowHost,
+  EventCategory,
+} from "@/components/eventCommon/EventsOverview";
 
-export default function JoinedEventsOverview() {
-  const t = useTranslations();
-  const { events, loading, error } = useAttendedEvents();
+// Export joined-specific components
+export { default as JoinedEventsLayout } from "./JoinedEventsLayout";
+export { default as OverviewContent } from "./OverviewContent";
+export { default as CategoryPageContent } from "./CategoryPageContent";
 
-  if (loading) {
-    return (
-      <div className="py-8">
-        <div className="flex items-center justify-center min-h-[40vh]">
-          <p className="text-zinc-600 dark:text-zinc-400">
-            {t("dashboard.loadingEvents")}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="py-8">
-        <div className="flex items-center justify-center min-h-[40vh]">
-          <p className="text-red-600 dark:text-red-400">
-            {t("dashboard.errorLoadingEvents")}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="py-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          {t("joined.title")}
-        </h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
-          {t("joined.description")}
-        </p>
-      </div>
-
-      {events.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <div className="grid gap-4">
-          {events.map((event) => (
-            <EventCard key={event.id} event={event} variant="joined" />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+// Default export is now the OverviewContent for backwards compatibility
+export { default } from "./OverviewContent";

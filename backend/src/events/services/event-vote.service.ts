@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { VoteEventDto, VoteMode } from '../dto/vote-event.dto';
@@ -22,6 +22,23 @@ export class EventVoteService {
     // 使用 transaction 保證一致性
     const result = await this.prisma.$transaction(
       async (prisma: Prisma.TransactionClient) => {
+        // 0. 檢查活動是否存在及投票是否已截止
+        const event = await prisma.event.findUnique({
+          where: { id: eventId },
+          select: {
+            votingDeadline: true,
+            lineGroupId: true,
+          },
+        });
+
+        if (!event) {
+          throw new BadRequestException('活動不存在');
+        }
+
+        if (event.votingDeadline && new Date() > event.votingDeadline) {
+          throw new BadRequestException('投票已截止');
+        }
+
         // 1. 刪除該 user 在此 event 的舊投票
         await prisma.eventVote.deleteMany({
           where: {
@@ -59,6 +76,17 @@ export class EventVoteService {
             })),
           });
         }
+
+        // 5. 更新 EventExpectedParticipant 的 hasVoted 狀態
+        await prisma.eventExpectedParticipant.updateMany({
+          where: {
+            eventId,
+            userId,
+          },
+          data: {
+            hasVoted: true,
+          },
+        });
 
         return { availableSlotIds };
       },

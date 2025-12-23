@@ -15,6 +15,10 @@ import {
   type LiffProfile,
   type LiffContext,
 } from "@/lib/liff";
+import { debugLog } from "@/components/DebugConsole";
+
+const log = (message: string, data?: unknown) =>
+  debugLog("useLiff", message, data);
 
 export interface UseLiffReturn {
   // 狀態
@@ -73,6 +77,29 @@ export function useLiff(): UseLiffReturn {
     let mounted = true;
 
     const init = async () => {
+      // Check if URL has LIFF-related parameters (OAuth callback or LIFF launch)
+      const url = new URL(window.location.href);
+      const hasLiffParams =
+        url.searchParams.has("liff.state") ||
+        url.searchParams.has("code") ||
+        url.hash.includes("access_token") ||
+        url.hash.includes("id_token");
+
+      // Check if we're in LINE client (by User-Agent)
+      const isInLineClient = /Line/i.test(navigator.userAgent);
+
+      // Initialize LIFF if:
+      // 1. We have LIFF params in URL (OAuth callback), OR
+      // 2. We're in LINE client (any page)
+      const shouldInit = hasLiffParams || isInLineClient;
+
+      if (!shouldInit) {
+        if (mounted) {
+          setIsLoading(false);
+        }
+        return;
+      }
+
       // 檢查是否有設定 LIFF ID
       if (!isLiffEnabled()) {
         if (mounted) {
@@ -90,7 +117,9 @@ export function useLiff(): UseLiffReturn {
       try {
         const liffState = await initializeLiff();
 
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
 
         setState(liffState);
 
@@ -127,7 +156,9 @@ export function useLiff(): UseLiffReturn {
       }
     };
 
+    log("init start");
     void init();
+    log("init end");
 
     return () => {
       mounted = false;
@@ -186,4 +217,3 @@ export function useLiff(): UseLiffReturn {
 }
 
 export default useLiff;
-

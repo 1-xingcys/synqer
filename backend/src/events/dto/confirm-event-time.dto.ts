@@ -1,9 +1,8 @@
-import { IsISO8601 } from 'class-validator';
+import { IsArray, IsString, ArrayMinSize } from 'class-validator';
 
 export class ConfirmEventTimeDto {
-  @IsISO8601()
-  confirmedStartTime: string; // "2025-08-14T10:00:00.000Z"
-
-  @IsISO8601()
-  confirmedEndTime: string; // "2025-08-14T12:00:00.000Z"
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMinSize(1)
+  slotIds: string[]; // 確認的時段 ID 陣列
 }

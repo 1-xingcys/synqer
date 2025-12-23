@@ -6,6 +6,17 @@ export interface TimeSlot {
   index: number;
 }
 
+// Time granularity options (in minutes)
+export type TimeGranularity = 15 | 30 | 60;
+
+// Merged time row represents one or more 15-min slots combined
+export interface MergedTimeRow {
+  startMinute: number;
+  endMinute: number;
+  slotIndices: number[]; // indices of the original 15-min slots
+  height: number; // relative height (1 = 15min, 2 = 30min, 4 = 60min)
+}
+
 export interface Vote {
   slotId: string;
   userId: string;

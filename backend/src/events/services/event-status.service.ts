@@ -15,6 +15,14 @@ export enum ParticipantStatus {
   NOT_REGISTERED = 'NOT_REGISTERED', // 還沒註冊（只有 LINE 使用者）
 }
 
+// 確認時段資訊
+interface ConfirmedSlotInfo {
+  slotId: string;
+  date: Date;
+  startMinute: number;
+  endMinute: number;
+}
+
 /**
  * 活動和參與者狀態計算服務
  */
@@ -22,24 +30,27 @@ export enum ParticipantStatus {
 export class EventStatusService {
   /**
    * 根據活動資訊計算活動狀態
+   * @param event 活動資訊，包含 confirmedTimeSlots（已確認的時段）
    */
   computeEventStatus(event: {
     votingDeadline: Date | null;
-    confirmedStartTime: Date | null;
-    confirmedEndTime: Date | null;
+    confirmedTimeSlots?: ConfirmedSlotInfo[];
   }): EventStatus {
     const now = new Date();
+    const hasConfirmedSlots =
+      event.confirmedTimeSlots && event.confirmedTimeSlots.length > 0;
 
-    // 如果有確認的活動時間
-    if (event.confirmedStartTime && event.confirmedEndTime) {
-      // 檢查活動是否已結束
-      if (now > event.confirmedEndTime) {
+    // 如果有確認的活動時段
+    if (hasConfirmedSlots) {
+      // 找出最晚的時段結束時間
+      const latestEndTime = this.getLatestEndTime(event.confirmedTimeSlots!);
+      if (latestEndTime && now > latestEndTime) {
         return EventStatus.COMPLETED;
       }
       return EventStatus.CONFIRMED;
     }
 
-    // 如果沒有確認的活動時間，檢查投票截止時間
+    // 如果沒有確認的活動時段，檢查投票截止時間
     if (event.votingDeadline) {
       if (now > event.votingDeadline) {
         return EventStatus.VOTING_ENDED;
@@ -48,6 +59,28 @@ export class EventStatusService {
 
     // 預設狀態：正在投票
     return EventStatus.VOTING;
+  }
+
+  /**
+   * 計算確認時段中最晚的結束時間
+   */
+  private getLatestEndTime(slots: ConfirmedSlotInfo[]): Date | null {
+    if (slots.length === 0) return null;
+
+    let latestEnd: Date | null = null;
+
+    for (const slot of slots) {
+      const slotDate = new Date(slot.date);
+      const endHours = Math.floor(slot.endMinute / 60);
+      const endMins = slot.endMinute % 60;
+      slotDate.setHours(endHours, endMins, 0, 0);
+
+      if (!latestEnd || slotDate > latestEnd) {
+        latestEnd = slotDate;
+      }
+    }
+
+    return latestEnd;
   }
 
   /**

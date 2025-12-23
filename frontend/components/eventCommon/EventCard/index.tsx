@@ -3,10 +3,10 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { EventStatusBadge } from "@/components/eventCommon/EventStatusBadge";
-import { EventStatus } from "@/types/event";
+import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
+import { EventStatus, ConfirmedTimeRange } from "@/types/event";
 import DateRange from "./DateRange";
 import ParticipantCount from "./ParticipantCount";
-import ConfirmedTime from "./ConfirmedTime";
 import VotingStatusBadge from "./VotingStatusBadge";
 import ActionButton from "./ActionButton";
 
@@ -19,7 +19,8 @@ export interface EventCardProps {
     endDate: string;
     participantCount: number;
     status: EventStatus;
-    confirmedStartTime?: string | null;
+    confirmedSlotIds?: string[];
+    confirmedTimeRanges?: ConfirmedTimeRange[];
     hasVoted?: boolean;
   };
   variant: "hosted" | "joined";
@@ -52,9 +53,28 @@ export default function EventCard({ event, variant }: EventCardProps) {
           <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-zinc-500 dark:text-zinc-400">
             <DateRange startDate={event.startDate} endDate={event.endDate} />
             <ParticipantCount count={event.participantCount} />
-            {event.confirmedStartTime && (
-              <ConfirmedTime confirmedStartTime={event.confirmedStartTime} />
-            )}
+            {event.confirmedTimeRanges &&
+              event.confirmedTimeRanges.length > 0 && (
+                <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                  <svg
+                    className="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <ConfirmedTimeDisplay
+                    timeRanges={event.confirmedTimeRanges}
+                    preview
+                  />
+                </span>
+              )}
           </div>
         </div>
         <div className="shrink-0 flex flex-col items-end gap-2">

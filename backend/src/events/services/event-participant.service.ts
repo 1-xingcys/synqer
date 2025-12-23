@@ -24,6 +24,7 @@ export class EventParticipantService {
           distinct: ['userId'],
         },
         expectedParticipants: {
+          where: { isRemoved: false },
           include: {
             user: {
               select: {
@@ -169,6 +170,7 @@ export class EventParticipantService {
       user: {
         id: string;
         displayName: string | null;
+        avatarUrl: string | null;
       } | null;
     }>,
     votedUserIds: Set<string>,
@@ -220,7 +222,7 @@ export class EventParticipantService {
         userId: ep.userId || undefined,
         displayName:
           ep.user?.displayName || lineMember?.displayName || undefined,
-        pictureUrl: lineMember?.pictureUrl || undefined,
+        pictureUrl: ep.user?.avatarUrl || lineMember?.pictureUrl || undefined,
         hasVoted,
         status: participantStatus,
       };
@@ -239,12 +241,13 @@ export class EventParticipantService {
       throw new NotFoundException(`Event ${eventId} not found`);
     }
 
-    // 檢查是否已經是預期參與者
+    // 檢查是否已經是預期參與者（且未被移除）
     const existingParticipant =
       await this.prisma.eventExpectedParticipant.findFirst({
         where: {
           eventId,
           userId,
+          isRemoved: false,
         },
       });
 
@@ -274,7 +277,7 @@ export class EventParticipantService {
       throw new NotFoundException(`Event ${eventId} not found`);
     }
 
-    // 檢查是否已經是參與者
+    // 檢查是否已經是參與者（包含已移除的）
     const existingParticipant =
       await this.prisma.eventExpectedParticipant.findFirst({
         where: {
@@ -284,6 +287,19 @@ export class EventParticipantService {
       });
 
     if (existingParticipant) {
+      // 如果已被移除，則恢復
+      if (existingParticipant.isRemoved) {
+        await this.prisma.eventExpectedParticipant.update({
+          where: { id: existingParticipant.id },
+          data: { isRemoved: false },
+        });
+        return {
+          success: true,
+          alreadyJoined: false,
+          message: 'Successfully rejoined the event',
+        };
+      }
+
       return {
         success: true,
         alreadyJoined: true,

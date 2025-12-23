@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Delete,
   Body,
   Headers,
   Param,
@@ -14,12 +15,16 @@ import {
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
 import { LineBotService } from './line-bot.service';
+import { RichMenuService } from './services';
 import type { WebhookRequestBody } from './dto/webhook-event.dto';
 import { SessionAuthGuard } from '../auth/guards';
 
 @Controller('line-bot')
 export class LineBotController {
-  constructor(private readonly lineBotService: LineBotService) {}
+  constructor(
+    private readonly lineBotService: LineBotService,
+    private readonly richMenuService: RichMenuService,
+  ) {}
 
   /**
    * LINE Webhook 端點
@@ -112,5 +117,55 @@ export class LineBotController {
     await this.lineBotService.sendVoteReminder(eventId, groupId, lineUserIds);
 
     return { success: true, reminded: lineUserIds.length };
+  }
+
+  // ============ Rich Menu 管理端點 ============
+  // 注意：Rich Menu 的創建與設定請使用 scripts/reset-rich-menu.ts
+
+  /**
+   * 取得所有 Rich Menu 列表
+   */
+  @Get('rich-menu')
+  @UseGuards(SessionAuthGuard)
+  async listRichMenus() {
+    const richMenus = await this.richMenuService.listRichMenus();
+    const defaultRichMenuId = await this.richMenuService.getDefaultRichMenuId();
+
+    return {
+      richMenus,
+      defaultRichMenuId,
+    };
+  }
+
+  /**
+   * 刪除指定的 Rich Menu
+   */
+  @Delete('rich-menu/:richMenuId')
+  @UseGuards(SessionAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async deleteRichMenu(@Param('richMenuId') richMenuId: string) {
+    const success = await this.richMenuService.deleteRichMenu(richMenuId);
+
+    if (!success) {
+      throw new BadRequestException('Failed to delete Rich Menu');
+    }
+
+    return { success: true };
+  }
+
+  /**
+   * 取消預設 Rich Menu
+   */
+  @Delete('rich-menu/default')
+  @UseGuards(SessionAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async cancelDefaultRichMenu() {
+    const success = await this.richMenuService.cancelDefaultRichMenu();
+
+    if (!success) {
+      throw new BadRequestException('Failed to cancel default Rich Menu');
+    }
+
+    return { success: true };
   }
 }

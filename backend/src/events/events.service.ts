@@ -44,8 +44,12 @@ export class EventsService {
    */
   computeEventStatus(event: {
     votingDeadline: Date | null;
-    confirmedStartTime: Date | null;
-    confirmedEndTime: Date | null;
+    confirmedTimeSlots?: Array<{
+      slotId: string;
+      date: Date;
+      startMinute: number;
+      endMinute: number;
+    }>;
   }): EventStatus {
     return this.eventStatusService.computeEventStatus(event);
   }
@@ -201,6 +205,7 @@ export class EventsService {
 
   /**
    * 確認活動時間（僅限活動擁有者）
+   * 以 timeSlot 為單位儲存確認的時段
    */
   async confirmEventTime(
     eventId: string,
@@ -209,32 +214,72 @@ export class EventsService {
   ) {
     await this.eventAuthorizationService.verifyOwner(eventId, userId);
 
-    const confirmedStartTime = new Date(dto.confirmedStartTime);
-    const confirmedEndTime = new Date(dto.confirmedEndTime);
-
-    // 驗證結束時間必須在開始時間之後
-    if (confirmedEndTime <= confirmedStartTime) {
-      throw new BadRequestException(
-        'Confirmed end time must be after confirmed start time',
-      );
-    }
-
-    const updatedEvent = await this.prisma.event.update({
-      where: { id: eventId },
-      data: {
-        confirmedStartTime,
-        confirmedEndTime,
+    // 驗證所有 slotIds 都屬於這個活動
+    const slots = await this.prisma.eventTimeSlot.findMany({
+      where: {
+        id: { in: dto.slotIds },
+        eventId,
       },
     });
 
+    if (slots.length !== dto.slotIds.length) {
+      throw new BadRequestException(
+        'Some slot IDs are invalid or do not belong to this event',
+      );
+    }
+
+    // 使用 transaction 更新確認的時段
+    await this.prisma.$transaction(async (prisma: Prisma.TransactionClient) => {
+      // 刪除現有的確認時段
+      await prisma.confirmedEventTimeSlot.deleteMany({
+        where: { eventId },
+      });
+
+      // 新增新的確認時段
+      await prisma.confirmedEventTimeSlot.createMany({
+        data: dto.slotIds.map((slotId) => ({
+          eventId,
+          slotId,
+        })),
+      });
+    });
+
+    // 查詢更新後的資料
+    const updatedEvent = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        confirmedTimeSlots: {
+          include: {
+            slot: {
+              select: {
+                id: true,
+                date: true,
+                startMinute: true,
+                endMinute: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!updatedEvent) {
+      throw new BadRequestException('Event not found');
+    }
+
+    const confirmedTimeSlots = updatedEvent.confirmedTimeSlots.map((cts) => ({
+      slotId: cts.slotId,
+      date: cts.slot.date,
+      startMinute: cts.slot.startMinute,
+      endMinute: cts.slot.endMinute,
+    }));
+
     return {
       id: updatedEvent.id,
-      confirmedStartTime: updatedEvent.confirmedStartTime,
-      confirmedEndTime: updatedEvent.confirmedEndTime,
+      confirmedSlotIds: dto.slotIds,
       status: this.eventStatusService.computeEventStatus({
         votingDeadline: updatedEvent.votingDeadline,
-        confirmedStartTime: updatedEvent.confirmedStartTime,
-        confirmedEndTime: updatedEvent.confirmedEndTime,
+        confirmedTimeSlots,
       }),
     };
   }
@@ -245,26 +290,33 @@ export class EventsService {
   async cancelConfirmedTime(eventId: string, userId: string) {
     await this.eventAuthorizationService.verifyOwner(eventId, userId);
 
-    const updatedEvent = await this.prisma.event.update({
-      where: { id: eventId },
-      data: {
-        confirmedStartTime: null,
-        confirmedEndTime: null,
-      },
+    // 刪除所有確認的時段
+    await this.prisma.confirmedEventTimeSlot.deleteMany({
+      where: { eventId },
     });
+
+    const updatedEvent = await this.prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!updatedEvent) {
+      throw new BadRequestException('Event not found');
+    }
 
     return {
       id: updatedEvent.id,
       status: this.eventStatusService.computeEventStatus({
         votingDeadline: updatedEvent.votingDeadline,
-        confirmedStartTime: updatedEvent.confirmedStartTime,
-        confirmedEndTime: updatedEvent.confirmedEndTime,
+        confirmedTimeSlots: [],
       }),
     };
   }
 
   /**
    * 更新活動的預期參與者
+   * 採用軟刪除策略：移除的參與者標記 isRemoved = true，保留投票紀錄
+   * 重新加入的參與者會恢復 isRemoved = false
+   * 注意：Host 不能被移除
    */
   async updateParticipants(
     eventId: string,
@@ -273,25 +325,113 @@ export class EventsService {
   ) {
     await this.eventAuthorizationService.verifyOwner(eventId, userId);
 
+    // 確保 host 在參與者列表中（不能移除自己）
+    const hostInParticipants = dto.participants.some(
+      (p) => p.userId === userId,
+    );
+    if (!hostInParticipants) {
+      // 自動將 host 加入參與者列表
+      dto.participants.push({ userId });
+    }
+
     // 使用 transaction 確保一致性
     await this.prisma.$transaction(async (prisma: Prisma.TransactionClient) => {
-      // 刪除現有的預期參與者
-      await prisma.eventExpectedParticipant.deleteMany({
-        where: { eventId },
+      // 取得現有的所有預期參與者（包含已移除的）
+      const existingParticipants =
+        await prisma.eventExpectedParticipant.findMany({
+          where: { eventId },
+          select: {
+            id: true,
+            lineUserId: true,
+            userId: true,
+            isRemoved: true,
+          },
+        });
+
+      // 建立現有參與者的識別 key -> { id, isRemoved }
+      const existingKeys = new Map<
+        string,
+        { id: string; isRemoved: boolean; userId: string | null }
+      >();
+      existingParticipants.forEach((p) => {
+        const key = p.lineUserId || p.userId || '';
+        if (key) {
+          existingKeys.set(key, {
+            id: p.id,
+            isRemoved: p.isRemoved,
+            userId: p.userId,
+          });
+        }
       });
 
-      // 建立新的預期參與者
-      const participantsData = dto.participants
-        .filter((p) => p.lineUserId || p.userId)
-        .map((p) => ({
-          eventId,
-          lineUserId: p.lineUserId || null,
-          userId: p.userId || null,
-        }));
+      // 建立新參與者的識別 key 集合
+      const newParticipants = dto.participants.filter(
+        (p) => p.lineUserId || p.userId,
+      );
+      const newKeys = new Set<string>();
+      newParticipants.forEach((p) => {
+        const key = p.lineUserId || p.userId || '';
+        if (key) {
+          newKeys.add(key);
+        }
+      });
 
-      if (participantsData.length > 0) {
+      // 找出需要標記為移除的參與者（在現有中且未移除，但不在新的中）
+      // 注意：Host 不能被移除
+      const toRemoveIds: string[] = [];
+      // 找出需要恢復的參與者（在現有中且已移除，但在新的中）
+      const toRestoreIds: string[] = [];
+
+      existingKeys.forEach((info, key) => {
+        if (!newKeys.has(key) && !info.isRemoved) {
+          // 需要移除，但不能移除 host
+          if (info.userId !== userId) {
+            toRemoveIds.push(info.id);
+          }
+        } else if (newKeys.has(key) && info.isRemoved) {
+          // 需要恢復
+          toRestoreIds.push(info.id);
+        }
+      });
+
+      // 找出需要新增的參與者（在新的中但不在現有中）
+      const toAdd = newParticipants.filter((p) => {
+        const key = p.lineUserId || p.userId || '';
+        return !existingKeys.has(key);
+      });
+
+      // 執行軟刪除（標記 isRemoved = true）
+      if (toRemoveIds.length > 0) {
+        await prisma.eventExpectedParticipant.updateMany({
+          where: {
+            id: { in: toRemoveIds },
+          },
+          data: {
+            isRemoved: true,
+          },
+        });
+      }
+
+      // 執行恢復（標記 isRemoved = false）
+      if (toRestoreIds.length > 0) {
+        await prisma.eventExpectedParticipant.updateMany({
+          where: {
+            id: { in: toRestoreIds },
+          },
+          data: {
+            isRemoved: false,
+          },
+        });
+      }
+
+      // 執行新增
+      if (toAdd.length > 0) {
         await prisma.eventExpectedParticipant.createMany({
-          data: participantsData,
+          data: toAdd.map((p) => ({
+            eventId,
+            lineUserId: p.lineUserId || null,
+            userId: p.userId || null,
+          })),
         });
       }
     });

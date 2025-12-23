@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 
 interface DangerZoneProps {
   showDeleteConfirm: boolean;
@@ -20,60 +21,53 @@ export function DangerZone({
   const t = useTranslations();
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-red-200 dark:border-red-900/50 p-6">
-      <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">
-        {t("hosted.settingsPage.dangerZone")}
-      </h3>
-      <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
-        {t("hosted.settingsPage.deleteWarning")}
-      </p>
-      {!showDeleteConfirm ? (
-        <button
-          onClick={onDeleteClick}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-        >
-          {t("hosted.settingsPage.deleteEvent")}
-        </button>
-      ) : (
-        <DeleteConfirmation
-          deleting={deleting}
-          onConfirm={onConfirmDelete}
-          onCancel={onCancelDelete}
-        />
-      )}
-    </div>
-  );
-}
+    <div className="border border-red-200 dark:border-red-900/50 rounded-lg overflow-hidden">
+      {/* Header */}
+      <div className="px-4 py-3 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-700">
+        <h3 className="text-base font-semibold text-red-600 dark:text-red-400">
+          {t("hosted.settingsPage.dangerZone")}
+        </h3>
+      </div>
 
-function DeleteConfirmation({
-  deleting,
-  onConfirm,
-  onCancel,
-}: {
-  deleting: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  const t = useTranslations();
+      {/* Content */}
+      <div className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex-1 min-w-0 pr-4">
+            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+              {t("hosted.settingsPage.deleteEvent")}
+            </p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {t("hosted.settingsPage.deleteWarning")}
+            </p>
+          </div>
 
-  return (
-    <div className="flex items-center gap-3">
-      <p className="text-sm text-red-600 dark:text-red-400">
-        {t("hosted.settingsPage.confirmDelete")}
-      </p>
-      <button
-        onClick={onConfirm}
-        disabled={deleting}
-        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors text-sm font-medium"
-      >
-        {deleting ? t("common.loading") : t("common.delete")}
-      </button>
-      <button
-        onClick={onCancel}
-        className="px-4 py-2 bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors text-sm font-medium"
-      >
-        {t("common.cancel")}
-      </button>
+          {!showDeleteConfirm ? (
+            <Button
+              variant="outline"
+              onClick={onDeleteClick}
+              className="shrink-0 border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 dark:hover:border-red-700"
+            >
+              {t("hosted.settingsPage.deleteEvent")}
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-sm text-red-600 dark:text-red-400 mr-2">
+                {t("hosted.settingsPage.confirmDelete")}
+              </span>
+              <Button
+                variant="destructive"
+                onClick={onConfirmDelete}
+                disabled={deleting}
+              >
+                {deleting ? t("common.loading") : t("common.delete")}
+              </Button>
+              <Button variant="outline" onClick={onCancelDelete}>
+                {t("common.cancel")}
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

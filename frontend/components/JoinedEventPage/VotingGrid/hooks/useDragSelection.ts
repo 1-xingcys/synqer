@@ -28,9 +28,10 @@ interface UseDragSelectionReturn {
   handleMouseDown: (slotId: string, e: React.MouseEvent) => void;
   handleMouseEnter: (slotId: string) => void;
   handleMouseUp: () => void;
-  handleTouchStart: (slotId: string) => void;
+  handleTouchStart: (slotId: string, e: React.TouchEvent) => void;
   handleTouchMove: (e: React.TouchEvent) => void;
   handleTouchEnd: () => void;
+  handleClick: (slotId: string) => void;
   isSlotInRectangle: (slotId: string) => boolean;
   getRectangleBounds: () => {
     minDate: number;
@@ -137,7 +138,15 @@ export function useDragSelection({
   );
 
   const handleMouseUp = useCallback(() => {
-    if (isDragging && dragStart && dragEnd) {
+    // Only apply selection if we dragged to a different cell
+    // Single click on same cell is handled by onClick
+    const isSameCell =
+      dragStart &&
+      dragEnd &&
+      dragStart.dateIndex === dragEnd.dateIndex &&
+      dragStart.timeIndex === dragEnd.timeIndex;
+
+    if (isDragging && dragStart && dragEnd && !isSameCell) {
       setSelectedSlots(previewSelection);
       setBaseSelection(previewSelection);
     }
@@ -146,9 +155,27 @@ export function useDragSelection({
     setDragEnd(null);
   }, [isDragging, dragStart, dragEnd, previewSelection, setSelectedSlots]);
 
+  // Simple click handler for single slot toggle
+  const handleClick = useCallback(
+    (slotId: string) => {
+      setSelectedSlots((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(slotId)) {
+          newSet.delete(slotId);
+        } else {
+          newSet.add(slotId);
+        }
+        return newSet;
+      });
+    },
+    [setSelectedSlots],
+  );
+
   // Touch handlers
   const handleTouchStart = useCallback(
-    (slotId: string) => {
+    (slotId: string, e: React.TouchEvent) => {
+      e.preventDefault();
+
       longPressTimer.current = setTimeout(() => {
         setLongPressSlot(slotId);
       }, 500);
@@ -193,7 +220,15 @@ export function useDragSelection({
       longPressTimer.current = null;
     }
 
-    if (isDragging && dragStart && dragEnd) {
+    // Only apply selection if we dragged to a different cell
+    // Single tap on same cell is handled by onClick
+    const isSameCell =
+      dragStart &&
+      dragEnd &&
+      dragStart.dateIndex === dragEnd.dateIndex &&
+      dragStart.timeIndex === dragEnd.timeIndex;
+
+    if (isDragging && dragStart && dragEnd && !isSameCell) {
       setSelectedSlots(previewSelection);
       setBaseSelection(previewSelection);
     }
@@ -246,6 +281,7 @@ export function useDragSelection({
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
+    handleClick,
     isSlotInRectangle,
     getRectangleBounds,
     resetBaseSelection,

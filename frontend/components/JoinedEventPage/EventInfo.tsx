@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useState, useEffect } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { IoCopyOutline } from "react-icons/io5";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { getLiff } from "@/lib/liff";
 
 interface Event {
   id: string;
@@ -21,22 +22,59 @@ interface Event {
   timeZone: string;
 }
 
-interface Participant {
-  userId: string;
-  displayName: string;
+interface ExpectedParticipant {
+  id: string;
+  lineUserId?: string;
+  userId?: string;
+  hasVoted: boolean;
+  reminderSentAt?: string;
+  user?: {
+    id: string;
+    displayName?: string;
+    avatarUrl?: string;
+  };
+  lineGroupMember?: {
+    displayName?: string;
+    pictureUrl?: string;
+  };
 }
 
 interface EventInfoProps {
   event: Event;
-  participants: Participant[];
+  expectedParticipants: ExpectedParticipant[];
 }
 
-export default function EventInfo({ event, participants }: EventInfoProps) {
+export default function EventInfo({
+  event,
+  expectedParticipants,
+}: EventInfoProps) {
   const t = useTranslations("event");
+  const locale = useLocale();
   const [copied, setCopied] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string>("");
+
+  useEffect(() => {
+    const getShareUrl = async () => {
+      const liff = await getLiff();
+      if (liff && liff.isInClient()) {
+        // 在 LIFF 環境中，使用 permanentLink 取得可分享的連結
+        try {
+          const permanentLink = liff.permanentLink.createUrl();
+          setShareUrl(permanentLink);
+        } catch {
+          // 如果無法取得 permanentLink，使用當前 URL
+          setShareUrl(window.location.href);
+        }
+      } else {
+        setShareUrl(window.location.href);
+      }
+    };
+    void getShareUrl();
+  }, []);
 
   const handleCopyLink = () => {
-    void navigator.clipboard.writeText(window.location.href).then(() => {
+    const urlToCopy = shareUrl || window.location.href;
+    void navigator.clipboard.writeText(urlToCopy).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -50,7 +88,8 @@ export default function EventInfo({ event, participants }: EventInfoProps) {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString(undefined, {
+    const dateLocale = locale === "zh-TW" ? "zh-TW" : "en-US";
+    return date.toLocaleDateString(dateLocale, {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -179,22 +218,28 @@ export default function EventInfo({ event, participants }: EventInfoProps) {
             </p>
             <div className="flex items-center gap-2">
               <p className="text-sm font-semibold text-gray-700 dark:text-zinc-200">
-                {participants.length} {t("participantUnit")}
+                {expectedParticipants.length} {t("participantUnit")}
               </p>
-              {participants.length > 0 && (
+              {expectedParticipants.length > 0 && (
                 <div className="flex -space-x-2 overflow-hidden">
                   {/* 簡單的頭像示意，增加視覺豐富度，但保持簡約 */}
-                  {participants.slice(0, 3).map((p) => (
-                    <div
-                      key={p.userId}
-                      className="h-5 w-5 rounded-full ring-2 ring-white dark:ring-zinc-900 bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-[10px] text-gray-500 dark:text-zinc-300 font-bold"
-                    >
-                      {p.displayName[0]?.toUpperCase()}
-                    </div>
-                  ))}
-                  {participants.length > 3 && (
+                  {expectedParticipants.slice(0, 3).map((p) => {
+                    const displayName =
+                      p.user?.displayName ||
+                      p.lineGroupMember?.displayName ||
+                      "?";
+                    return (
+                      <div
+                        key={p.id}
+                        className="h-5 w-5 rounded-full ring-2 ring-white dark:ring-zinc-900 bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-[10px] text-gray-500 dark:text-zinc-300 font-bold"
+                      >
+                        {displayName[0]?.toUpperCase()}
+                      </div>
+                    );
+                  })}
+                  {expectedParticipants.length > 3 && (
                     <div className="h-5 w-5 rounded-full ring-2 ring-white dark:ring-zinc-900 bg-gray-100 dark:bg-zinc-800 flex items-center justify-center text-[8px] text-gray-400 dark:text-zinc-500 font-bold">
-                      +{participants.length - 3}
+                      +{expectedParticipants.length - 3}
                     </div>
                   )}
                 </div>
