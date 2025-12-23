@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { SlotRangeInfo } from "@/components/eventCommon/ResultsView";
-import { SelectedTimeRange } from "../SelectedEventTimes";
+import { SelectedTimeRange } from "../EventTimeSelector";
 import { ConfirmedTimeRange } from "@/types/event";
 
 interface UseEventTimeSelectionOptions {

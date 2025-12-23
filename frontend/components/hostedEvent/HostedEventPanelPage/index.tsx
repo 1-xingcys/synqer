@@ -7,10 +7,9 @@ import { VotingProgress } from "@/components/ui/VotingProgress";
 import { EventStatus } from "@/types/event";
 import ResultsView from "@/components/eventCommon/ResultsView";
 import { DeadlineCountdown } from "./DeadlineCountdown";
-import { SelectedEventTimes } from "./SelectedEventTimes";
+import { EventTimeSelector } from "./EventTimeSelector";
 import { ConfirmTimeDialog } from "./ConfirmTimeDialog";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
-import { ResultsSectionHeader } from "./ResultsSectionHeader";
 import {
   useEventTimeSelection,
   useEventTimeConfirmation,
@@ -98,18 +97,6 @@ export default function HostedEventPanelPage() {
         />
       )}
 
-      {/* Selected Event Times (always shown when results view is visible) */}
-      {showResultsView && (
-        <SelectedEventTimes
-          selectedRanges={selection.allTimeRanges}
-          onRemove={selection.removeTimeRange}
-          onConfirm={handleConfirmClick}
-          isVotingPhase={isVotingPhase}
-          isConfirming={isConfirming}
-          hasUserSelection={selection.hasUserSelection}
-        />
-      )}
-
       {/* Error messages */}
       {(confirmError || resetError) && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
@@ -119,16 +106,21 @@ export default function HostedEventPanelPage() {
         </div>
       )}
 
-      {/* Results Section */}
+      {/* Event Time Selector & Results Section */}
       {showResultsView && (
         <>
-          {/* Results Section Header */}
-          <ResultsSectionHeader
-            hasConfirmedTime={!!hasConfirmedTime}
-            isVotingEnded={isVotingEnded}
-            hasAnySelection={selection.hasAnySelection}
-            isResetting={isResetting}
+          {/* Event Time Selector - Combined header and time list */}
+          <EventTimeSelector
+            selectedRanges={selection.allTimeRanges}
+            onRemove={selection.removeTimeRange}
+            onConfirm={handleConfirmClick}
             onReset={() => void handleResetEventTime()}
+            isVotingPhase={isVotingPhase}
+            isVotingEnded={isVotingEnded}
+            isConfirming={isConfirming}
+            isResetting={isResetting}
+            hasUserSelection={selection.hasUserSelection}
+            hasConfirmedTime={!!hasConfirmedTime}
           />
 
           {/* Results View with HeatMap */}

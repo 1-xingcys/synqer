@@ -275,14 +275,21 @@
       "confirmed": "Event time has been confirmed.",
       "completed": "This event has been completed."
     },
-    "selectedTimes": {
-      "title": "Selected Event Times",
-      "empty": "No time slots selected. Select from the results below.",
-      "confirmed": "Confirmed",
+    "eventTimeSelector": {
+      "confirmedTitle": "Confirmed Event Time",
+      "selectingTitle": "Select Event Time",
+      "emptyTitle": "Event Time",
+      "emptyHint": "Click or drag to select time slots from the results below",
+      "votingEndedWarning": "Voting has ended. Please select and confirm the event time",
+      "votingNotEnded": "Voting hasn't ended. Confirming now will finalize the time early",
+      "reset": "Reset",
       "remove": "Remove",
-      "votingNotEnded": "Note: Voting hasn't ended yet. Participants can still vote.",
+      "confirm": "Confirm Event Time",
       "confirming": "Confirming...",
-      "confirmButton": "Confirm Event Time"
+      "cancel": "Cancel",
+      "resetConfirmTitle": "Reset Event Time?",
+      "resetConfirmDesc": "This will clear the confirmed time and revert to 'Voting Ended' status",
+      "resetConfirm": "Reset"
     },
     "addToEventTime": {
       "button": "Add to Event Time",

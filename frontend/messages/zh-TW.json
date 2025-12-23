@@ -275,14 +275,21 @@
       "confirmed": "活動時間已確認。",
       "completed": "此活動已結束。"
     },
-    "selectedTimes": {
-      "title": "已選擇的活動時間",
-      "empty": "尚未選擇任何時段，請從下方結果中選擇",
-      "confirmed": "已確認",
+    "eventTimeSelector": {
+      "confirmedTitle": "已確認的活動時間",
+      "selectingTitle": "選擇活動時間",
+      "emptyTitle": "活動時間",
+      "emptyHint": "從下方投票結果中點選或拖曳選擇時段",
+      "votingEndedWarning": "投票已結束，請盡快選擇並確認活動時間",
+      "votingNotEnded": "投票尚未結束，確認後將提前決定活動時間",
+      "reset": "重新選擇",
       "remove": "移除",
-      "votingNotEnded": "注意：投票尚未結束，參與者仍可繼續投票。",
+      "confirm": "確認活動時間",
       "confirming": "確認中...",
-      "confirmButton": "確認活動時間"
+      "cancel": "取消",
+      "resetConfirmTitle": "重新選擇活動時間？",
+      "resetConfirmDesc": "這將清除已確認的時間，活動狀態會退回「投票結束」",
+      "resetConfirm": "確定重選"
     },
     "addToEventTime": {
       "button": "加入活動時間",
