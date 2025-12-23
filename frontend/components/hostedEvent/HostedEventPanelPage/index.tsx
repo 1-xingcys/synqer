@@ -217,6 +217,8 @@ export default function HostedEventPanelPage() {
         status={event.status}
         confirmedTimeRanges={event.confirmedTimeRanges}
         votingDeadline={event.votingDeadline}
+        isHosted={true}
+        eventId={eventId}
       />
 
       {/* Voting Phase Content */}

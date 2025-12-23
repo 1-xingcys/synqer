@@ -120,7 +120,29 @@
     "votersForSlot": "Who's available",
     "noVoters": "No one yet",
     "participants": "Participants",
-    "results": "Results",
+    "results": {
+      "allParticipants": "All Participants",
+      "noParticipants": "No Participants",
+      "oneParticipant": "1 Participant",
+      "participantsSelected": "{count} Selected",
+      "searchParticipants": "Search participants...",
+      "selectAll": "Select All",
+      "clearAll": "Clear",
+      "noParticipantsFound": "No participants found",
+      "legendLabel": "Availability",
+      "legendDescription": "of {count} selected",
+      "showingAvailability": "Showing availability for {count} of {total} participants",
+      "noParticipantsSelected": "No Participants Selected",
+      "selectParticipantsHint": "Use the filter above to select which participants' availability to display.",
+      "clickToSeeWho": "Click on any time slot to see who's available",
+      "granularity": "View",
+      "available": "available",
+      "availableParticipants": "Available",
+      "unavailableParticipants": "Not Available",
+      "noOneAvailable": "No one is available",
+      "close": "Close",
+      "rangeHint": "Showing people available for ALL selected time slots"
+    },
     "viewResultsDescription": "View availability analysis",
     "votingProgress": "Voting Progress",
     "votedParticipants": "Voted",
@@ -192,30 +214,7 @@
       "title": "Event Completed",
       "description": "This event has ended."
     },
-    "viewResults": "View Results",
-    "results": {
-      "allParticipants": "All Participants",
-      "noParticipants": "No Participants",
-      "oneParticipant": "1 Participant",
-      "participantsSelected": "{count} Selected",
-      "searchParticipants": "Search participants...",
-      "selectAll": "Select All",
-      "clearAll": "Clear",
-      "noParticipantsFound": "No participants found",
-      "legendLabel": "Availability",
-      "legendDescription": "of {count} selected",
-      "showingAvailability": "Showing availability for {count} of {total} participants",
-      "noParticipantsSelected": "No Participants Selected",
-      "selectParticipantsHint": "Use the filter above to select which participants' availability to display.",
-      "clickToSeeWho": "Click on any time slot to see who's available",
-      "granularity": "View",
-      "available": "available",
-      "availableParticipants": "Available",
-      "unavailableParticipants": "Not Available",
-      "noOneAvailable": "No one is available",
-      "close": "Close",
-      "rangeHint": "Showing people available for ALL selected time slots"
-    }
+    "viewResults": "View Results"
   },
   "hosted": {
     "title": "Hosted Events",
@@ -472,7 +471,9 @@
       "votingEnded": "Voting has ended, waiting for host to confirm time",
       "confirmed": "Event time has been confirmed",
       "completed": "This event has ended"
-    }
+    },
+    "hostedEventHint": "You are the host of this event",
+    "goToEvent": "Go To Vote"
   },
   "participantStatus": {
     "voted": "Voted",

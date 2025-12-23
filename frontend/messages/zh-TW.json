@@ -120,7 +120,29 @@
     "votersForSlot": "誰有空",
     "noVoters": "尚無人",
     "participants": "參與者",
-    "results": "結果分析",
+    "results": {
+      "allParticipants": "所有參與者",
+      "noParticipants": "無參與者",
+      "oneParticipant": "1 位參與者",
+      "participantsSelected": "已選 {count} 人",
+      "searchParticipants": "搜尋參與者...",
+      "selectAll": "全選",
+      "clearAll": "清除",
+      "noParticipantsFound": "找不到參與者",
+      "legendLabel": "有空人數",
+      "legendDescription": "（共選 {count} 人）",
+      "showingAvailability": "顯示 {count}/{total} 位參與者的時間",
+      "noParticipantsSelected": "未選擇參與者",
+      "selectParticipantsHint": "使用上方的篩選器來選擇要顯示哪些參與者的時間。",
+      "clickToSeeWho": "點擊任一時段查看誰有空",
+      "granularity": "顯示間隔",
+      "available": "有空",
+      "availableParticipants": "有空",
+      "unavailableParticipants": "沒空",
+      "noOneAvailable": "沒有人有空",
+      "close": "關閉",
+      "rangeHint": "顯示所有選取時段都有空的人"
+    },
     "viewResultsDescription": "查看時段分析",
     "votingProgress": "投票進度",
     "votedParticipants": "已投票",
@@ -192,30 +214,7 @@
       "title": "活動已結束",
       "description": "此活動已結束。"
     },
-    "viewResults": "查看結果",
-    "results": {
-      "allParticipants": "所有參與者",
-      "noParticipants": "無參與者",
-      "oneParticipant": "1 位參與者",
-      "participantsSelected": "已選 {count} 人",
-      "searchParticipants": "搜尋參與者...",
-      "selectAll": "全選",
-      "clearAll": "清除",
-      "noParticipantsFound": "找不到參與者",
-      "legendLabel": "有空人數",
-      "legendDescription": "（共選 {count} 人）",
-      "showingAvailability": "顯示 {count}/{total} 位參與者的時間",
-      "noParticipantsSelected": "未選擇參與者",
-      "selectParticipantsHint": "使用上方的篩選器來選擇要顯示哪些參與者的時間。",
-      "clickToSeeWho": "點擊任一時段查看誰有空",
-      "granularity": "顯示間隔",
-      "available": "有空",
-      "availableParticipants": "有空",
-      "unavailableParticipants": "沒空",
-      "noOneAvailable": "沒有人有空",
-      "close": "關閉",
-      "rangeHint": "顯示所有選取時段都有空的人"
-    }
+    "viewResults": "查看結果"
   },
   "hosted": {
     "title": "主辦的活動",
@@ -472,7 +471,9 @@
       "votingEnded": "投票已結束，等待主辦者確認時間",
       "confirmed": "活動時間已確認",
       "completed": "此活動已結束"
-    }
+    },
+    "hostedEventHint": "你是這個活動的主辦者",
+    "goToEvent": "前往投票"
   },
   "participantStatus": {
     "voted": "已投票",
