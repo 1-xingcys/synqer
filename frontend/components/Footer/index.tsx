@@ -3,18 +3,17 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function Footer() {
   const t = useTranslations("footer");
 
   return (
     <footer className="w-full bg-zinc-100 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* Main Content Row */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Left Section: Logo + Social Icons */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             {/* Logo */}
             <Link
               href="/"
@@ -23,8 +22,8 @@ export default function Footer() {
               <Image
                 src="/synqer.png"
                 alt="Synqer Logo"
-                width={32}
-                height={32}
+                width={30}
+                height={30}
                 className="object-contain"
               />
               <span
@@ -79,8 +78,8 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Right Section: Links + Language Switcher */}
-          <div className="flex items-center gap-6">
+          {/* Right Section: Links */}
+          <div className="flex items-center gap-4">
             {/* Navigation Links */}
             <nav className="flex items-center gap-4">
               <Link
@@ -97,15 +96,12 @@ export default function Footer() {
                 {t("termsOfUse")}
               </Link>
             </nav>
-
-            {/* Language Switcher */}
-            <LanguageSwitcher />
           </div>
         </div>
 
         {/* Copyright */}
-        <div className="mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-          <p className="text-center text-zinc-500 dark:text-zinc-500 text-sm">
+        <div className="mt-4 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+          <p className="text-center text-zinc-500 dark:text-zinc-500 text-xs">
             {t("copyright")}
           </p>
         </div>
