@@ -8,7 +8,8 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # 安装依赖（包括 devDependencies，因为需要构建工具）
-RUN npm ci
+# 使用 --ignore-scripts 跳过 canvas 的原生编译
+RUN npm ci --ignore-scripts
 
 # 复制源代码
 COPY . .
