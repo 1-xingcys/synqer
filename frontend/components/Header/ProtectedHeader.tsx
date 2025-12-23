@@ -50,7 +50,7 @@ export default function ProtectedHeader({
               </svg>
             </button>
             {/* Logo - 位置與 PublicHeader 對齊 */}
-            <Logo height={40} href="/joined" />
+            <Logo height={30} href="/" />
           </div>
 
           {/* 中間內容（可選） */}
