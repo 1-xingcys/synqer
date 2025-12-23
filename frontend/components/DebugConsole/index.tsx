@@ -12,7 +12,7 @@ import type { LiffState } from "@/lib/liff";
 
 // ========== 設定 ==========
 // 設為 true 啟用 Debug Console，設為 false 關閉
-export const DEBUG_ENABLED = true;
+export const DEBUG_ENABLED = false;
 
 // ========== 全域日誌存儲 ==========
 export interface DebugLog {

@@ -5,6 +5,8 @@ steps:
       - 'build'
       - '--build-arg'
       - 'NEXT_PUBLIC_API=${_NEXT_PUBLIC_API}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_LINE_LIFF_ID=${_NEXT_PUBLIC_LINE_LIFF_ID}'
       - '--tag'
       - '${_IMAGE_NAME}:${_TAG}'
       - '.'
@@ -21,7 +23,8 @@ steps:
 substitutions:
   _IMAGE_NAME: 'asia-east1-docker.pkg.dev/no-invite-478215/no-invite/frontend'
   _TAG: 'latest'  # 默认使用 latest，可以通过命令行覆盖
-  _NEXT_PUBLIC_API: 'https://backend-130274261356.asia-east1.run.app'
+  _NEXT_PUBLIC_API: 'https://api.synqer.club'
+  _NEXT_PUBLIC_LINE_LIFF_ID: '2008645248-vuHdSplU'
 
 # 镜像输出
 images:
