@@ -48,7 +48,14 @@ function GoogleCalendarIcon({ className = "w-5 h-5" }: { className?: string }) {
         strokeWidth="2"
         strokeLinecap="round"
       />
-      <rect x="7" y="12" width="3" height="3" rx="0.5" fill={GoogleColors.red} />
+      <rect
+        x="7"
+        y="12"
+        width="3"
+        height="3"
+        rx="0.5"
+        fill={GoogleColors.red}
+      />
       <rect
         x="11"
         y="12"
@@ -57,7 +64,14 @@ function GoogleCalendarIcon({ className = "w-5 h-5" }: { className?: string }) {
         rx="0.5"
         fill={GoogleColors.yellow}
       />
-      <rect x="7" y="16" width="3" height="2" rx="0.5" fill={GoogleColors.green} />
+      <rect
+        x="7"
+        y="16"
+        width="3"
+        height="2"
+        rx="0.5"
+        fill={GoogleColors.green}
+      />
       <rect
         x="11"
         y="16"
@@ -270,7 +284,8 @@ export function GoogleCalendarPanel({
                         d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
                       />
                     </svg>
-                    {tJoined("googleCalendar.markAsUnavailable")} ({conflictingSlotIds.length} slots)
+                    {tJoined("googleCalendar.markAsUnavailable")} (
+                    {conflictingSlotIds.length} slots)
                   </button>
                 )}
               </div>

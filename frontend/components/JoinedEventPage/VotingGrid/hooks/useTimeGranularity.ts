@@ -15,7 +15,7 @@ interface UseTimeGranularityReturn {
 
 /**
  * Hook to calculate merged time rows based on granularity
- * 
+ *
  * Example: If time range is 8:30~11:15 and granularity is 60min:
  * - 8:30~9:00 (30min remainder at start)
  * - 9:00~10:00 (60min)
@@ -41,7 +41,7 @@ export function useTimeGranularity({
     const result: MergedTimeRow[] = [];
     const startMinute = timeSlots[0].startMinute;
     const endMinute = timeSlots[timeSlots.length - 1].endMinute;
-    
+
     // Find the first minute that aligns with granularity
     // e.g., for granularity=60, find first :00 minute
     // e.g., for granularity=30, find first :00 or :30 minute
@@ -52,15 +52,17 @@ export function useTimeGranularity({
     };
 
     const firstAlignedMinute = findNextAlignedMinute(startMinute);
-    
+
     let currentMinute = startMinute;
     let currentSlotIndex = 0;
 
     // Handle leading remainder (if start doesn't align with granularity)
     if (currentMinute < firstAlignedMinute && firstAlignedMinute <= endMinute) {
       const slotIndices: number[] = [];
-      while (currentSlotIndex < timeSlots.length && 
-             timeSlots[currentSlotIndex].startMinute < firstAlignedMinute) {
+      while (
+        currentSlotIndex < timeSlots.length &&
+        timeSlots[currentSlotIndex].startMinute < firstAlignedMinute
+      ) {
         slotIndices.push(currentSlotIndex);
         currentSlotIndex++;
       }
@@ -79,12 +81,15 @@ export function useTimeGranularity({
     while (currentSlotIndex < timeSlots.length) {
       const chunkStartMinute = currentMinute;
       const chunkEndMinute = Math.min(currentMinute + granularity, endMinute);
-      
+
       // Check if we have enough slots for a full granularity chunk
       const slotsNeeded = granularity / 15;
       const remainingSlots = timeSlots.length - currentSlotIndex;
-      
-      if (remainingSlots >= slotsNeeded && chunkEndMinute - chunkStartMinute === granularity) {
+
+      if (
+        remainingSlots >= slotsNeeded &&
+        chunkEndMinute - chunkStartMinute === granularity
+      ) {
         // Full chunk
         const slotIndices: number[] = [];
         for (let i = 0; i < slotsNeeded; i++) {
@@ -129,4 +134,3 @@ export function useTimeGranularity({
     getSlotIndicesForRow,
   };
 }
-

@@ -40,7 +40,7 @@ export function SelectedEventTimes({
   const formatDateRange = (startDate: string, endDate: string) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     if (startDate === endDate) {
       return format(start, "M/d (EEE)");
     }
@@ -51,7 +51,10 @@ export function SelectedEventTimes({
     return null;
   }
 
-  const totalSlots = selectedRanges.reduce((acc, r) => acc + r.slotIds.length, 0);
+  const totalSlots = selectedRanges.reduce(
+    (acc, r) => acc + r.slotIds.length,
+    0,
+  );
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800 overflow-hidden">
@@ -110,10 +113,13 @@ export function SelectedEventTimes({
                       clipRule="evenodd"
                     />
                   </svg>
-                  {range.availableCount}/{range.totalParticipants} {t("selectedTimes.available")}
+                  {range.availableCount}/{range.totalParticipants}{" "}
+                  {t("selectedTimes.available")}
                 </span>
                 <span className="text-zinc-300 dark:text-zinc-600">|</span>
-                <span>{range.slotIds.length} {t("selectedTimes.slots")}</span>
+                <span>
+                  {range.slotIds.length} {t("selectedTimes.slots")}
+                </span>
               </div>
             </div>
             <button
@@ -121,8 +127,18 @@ export function SelectedEventTimes({
               className="ml-3 p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               title={t("selectedTimes.remove")}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -133,8 +149,18 @@ export function SelectedEventTimes({
       <div className="px-4 py-3 border-t border-blue-200 dark:border-blue-800 bg-blue-100/30 dark:bg-blue-900/20">
         {isVotingPhase && (
           <p className="text-xs text-amber-600 dark:text-amber-400 mb-3 flex items-center gap-1.5">
-            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <svg
+              className="w-4 h-4 shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
             </svg>
             {t("selectedTimes.votingNotEnded")}
           </p>
@@ -151,8 +177,18 @@ export function SelectedEventTimes({
             </>
           ) : (
             <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
               {t("selectedTimes.confirmButton")}
             </>
@@ -162,4 +198,3 @@ export function SelectedEventTimes({
     </div>
   );
 }
-

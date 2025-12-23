@@ -19,10 +19,11 @@ export default function JoinedEventResultsPage() {
   // Transform participants to include avatar info
   const participantsWithAvatars = useMemo(() => {
     if (!eventDetailData) return [];
-    
+
     return eventDetailData.expectedParticipants.map((p) => ({
       userId: p.userId || p.user?.id || p.id,
-      displayName: p.user?.displayName || p.lineGroupMember?.displayName || "Unknown",
+      displayName:
+        p.user?.displayName || p.lineGroupMember?.displayName || "Unknown",
       pictureUrl: p.user?.avatarUrl || p.lineGroupMember?.pictureUrl,
     }));
   }, [eventDetailData]);
@@ -41,7 +42,7 @@ export default function JoinedEventResultsPage() {
   // Transform votes to include avatar info
   const votesWithAvatars = useMemo(() => {
     if (!eventDetailData) return [];
-    
+
     return eventDetailData.votes.map((vote) => ({
       ...vote,
       pictureUrl: pictureUrlMap.get(vote.userId),

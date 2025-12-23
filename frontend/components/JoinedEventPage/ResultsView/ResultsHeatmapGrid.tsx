@@ -2,11 +2,22 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { TimeSlot, Vote, Participant, TimeGranularity, MergedTimeRow, SlotRangeInfo } from "./types";
+import {
+  TimeSlot,
+  Vote,
+  Participant,
+  TimeGranularity,
+  MergedTimeRow,
+  SlotRangeInfo,
+} from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
 import { DatePagination } from "../VotingGrid/ui/DatePagination";
-import { formatTime, formatDateHeader, groupSlotsByDate } from "../VotingGrid/utils";
+import {
+  formatTime,
+  formatDateHeader,
+  groupSlotsByDate,
+} from "../VotingGrid/utils";
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];
@@ -36,7 +47,7 @@ interface SelectionRange {
 // Hook to calculate merged time rows based on granularity
 function useMergedRows(
   timeSlots: TimeSlot[],
-  granularity: TimeGranularity
+  granularity: TimeGranularity,
 ): MergedTimeRow[] {
   return useMemo(() => {
     if (timeSlots.length === 0) return [];
@@ -196,17 +207,21 @@ export function ResultsHeatmapGrid({
   const dates = useMemo(() => Object.keys(slotsByDate).sort(), [slotsByDate]);
   const timeSlots = useMemo(
     () => (dates.length > 0 ? slotsByDate[dates[0]] : []),
-    [dates, slotsByDate]
+    [dates, slotsByDate],
   );
 
   // Merged rows for granularity
   const mergedRows = useMergedRows(timeSlots, granularity);
 
+  // Clamp currentPage to valid range
+  const maxPage = Math.max(0, Math.ceil(dates.length / datesPerPage) - 1);
+  const clampedCurrentPage = Math.min(currentPage, maxPage);
+
   // Paginated dates
   const paginatedDates = useMemo(() => {
-    const startIdx = currentPage * datesPerPage;
+    const startIdx = clampedCurrentPage * datesPerPage;
     return dates.slice(startIdx, startIdx + datesPerPage);
-  }, [dates, currentPage, datesPerPage]);
+  }, [dates, clampedCurrentPage, datesPerPage]);
 
   // Filter votes based on selected participants
   const filteredVotes = useMemo(() => {
@@ -222,7 +237,7 @@ export function ResultsHeatmapGrid({
         acc[vote.slotId].push(vote);
         return acc;
       },
-      {} as Record<string, Vote[]>
+      {} as Record<string, Vote[]>,
     );
   }, [filteredVotes]);
 
@@ -239,7 +254,7 @@ export function ResultsHeatmapGrid({
       });
       return voterIds.size;
     },
-    [slotsByDate, votesBySlot]
+    [slotsByDate, votesBySlot],
   );
 
   // Get voters for a selection range (intersection - available for ALL selected slots)
@@ -278,7 +293,7 @@ export function ResultsHeatmapGrid({
         .filter(({ count }) => count === totalSlots)
         .map(({ vote }) => vote);
     },
-    [slotsByDate, votesBySlot]
+    [slotsByDate, votesBySlot],
   );
 
   // Get non-voters for a selection range
@@ -287,19 +302,11 @@ export function ResultsHeatmapGrid({
       const voters = getVotersForRange(cells);
       const voterIds = new Set(voters.map((v) => v.userId));
       return participants.filter(
-        (p) => selectedParticipants.has(p.userId) && !voterIds.has(p.userId)
+        (p) => selectedParticipants.has(p.userId) && !voterIds.has(p.userId),
       );
     },
-    [getVotersForRange, participants, selectedParticipants]
+    [getVotersForRange, participants, selectedParticipants],
   );
-
-  // Reset page when dates change
-  useEffect(() => {
-    const maxPage = Math.max(0, Math.ceil(dates.length / datesPerPage) - 1);
-    if (currentPage > maxPage) {
-      setCurrentPage(maxPage);
-    }
-  }, [datesPerPage, dates.length, currentPage]);
 
   // Calculate rectangle bounds from drag start/end
   const getRectangleBounds = useCallback(() => {
@@ -324,7 +331,7 @@ export function ResultsHeatmapGrid({
         dateIndex <= bounds.maxDate
       );
     },
-    [getRectangleBounds]
+    [getRectangleBounds],
   );
 
   // Get cell position from touch/mouse coordinates
@@ -351,7 +358,7 @@ export function ResultsHeatmapGrid({
       }
       return null;
     },
-    []
+    [],
   );
 
   // Format date for modal
@@ -414,7 +421,7 @@ export function ResultsHeatmapGrid({
       });
       return slotIds;
     },
-    [slotsByDate]
+    [slotsByDate],
   );
 
   // Show modal with selection data
@@ -449,7 +456,7 @@ export function ResultsHeatmapGrid({
         },
       });
     },
-    [getVotersForRange, getNonVotersForRange, getSlotIdsFromCells]
+    [getVotersForRange, getNonVotersForRange, getSlotIdsFromCells],
   );
 
   // Handle single cell click
@@ -474,7 +481,7 @@ export function ResultsHeatmapGrid({
 
       showModalForSelection(range);
     },
-    [mergedRows, showModalForSelection]
+    [mergedRows, showModalForSelection],
   );
 
   // Touch handlers
@@ -486,7 +493,7 @@ export function ResultsHeatmapGrid({
       setDragStart({ rowIndex, dateIndex });
       setDragEnd({ rowIndex, dateIndex });
     },
-    []
+    [],
   );
 
   const handleTouchMove = useCallback(
@@ -510,7 +517,7 @@ export function ResultsHeatmapGrid({
         }
       }
     },
-    [dragStart, isDragging, getCellFromPoint]
+    [dragStart, isDragging, getCellFromPoint],
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -539,7 +546,7 @@ export function ResultsHeatmapGrid({
       setDragStart({ rowIndex, dateIndex });
       setDragEnd({ rowIndex, dateIndex });
     },
-    []
+    [],
   );
 
   const handleMouseMove = useCallback(
@@ -561,7 +568,7 @@ export function ResultsHeatmapGrid({
         }
       }
     },
-    [dragStart, isDragging, getCellFromPoint]
+    [dragStart, isDragging, getCellFromPoint],
   );
 
   const handleMouseUp = useCallback(() => {
@@ -608,7 +615,7 @@ export function ResultsHeatmapGrid({
       {/* Date Pagination */}
       <DatePagination
         dates={dates}
-        currentPage={currentPage}
+        currentPage={clampedCurrentPage}
         datesPerPage={datesPerPage}
         onPageChange={setCurrentPage}
       />
@@ -675,11 +682,12 @@ export function ResultsHeatmapGrid({
                   {paginatedDates.map((dateKey, dateIndex) => {
                     const voteCount = getVoteCountForMergedRow(
                       row.slotIndices,
-                      dateKey
+                      dateKey,
                     );
                     const colors = getHeatmapClasses(voteCount, maxVotes);
                     const hasVotes = voteCount > 0;
-                    const inSelection = isDragging && isInDragRectangle(rowIndex, dateIndex);
+                    const inSelection =
+                      isDragging && isInDragRectangle(rowIndex, dateIndex);
 
                     // Determine border classes for selection rectangle
                     let selectionBorderClasses = "";
@@ -691,7 +699,8 @@ export function ResultsHeatmapGrid({
 
                       const borders = [];
                       if (isTop) borders.push("border-t-2 border-t-blue-500");
-                      if (isBottom) borders.push("border-b-2 border-b-blue-500");
+                      if (isBottom)
+                        borders.push("border-b-2 border-b-blue-500");
                       if (isLeft) borders.push("border-l-2 border-l-blue-500");
                       if (isRight) borders.push("border-r-2 border-r-blue-500");
                       selectionBorderClasses = borders.join(" ");
@@ -706,8 +715,12 @@ export function ResultsHeatmapGrid({
                         onClick={() =>
                           handleCellClick(dateKey, rowIndex, row.slotIndices)
                         }
-                        onMouseDown={(e) => handleMouseDown(rowIndex, dateIndex, e)}
-                        onTouchStart={(e) => handleTouchStart(rowIndex, dateIndex, e)}
+                        onMouseDown={(e) =>
+                          handleMouseDown(rowIndex, dateIndex, e)
+                        }
+                        onTouchStart={(e) =>
+                          handleTouchStart(rowIndex, dateIndex, e)
+                        }
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
                         className={`

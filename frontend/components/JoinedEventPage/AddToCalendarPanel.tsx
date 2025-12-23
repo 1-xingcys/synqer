@@ -43,7 +43,14 @@ function GoogleCalendarIcon({ className = "w-5 h-5" }: { className?: string }) {
         strokeWidth="2"
         strokeLinecap="round"
       />
-      <rect x="7" y="12" width="3" height="3" rx="0.5" fill={GoogleColors.red} />
+      <rect
+        x="7"
+        y="12"
+        width="3"
+        height="3"
+        rx="0.5"
+        fill={GoogleColors.red}
+      />
       <rect
         x="11"
         y="12"
@@ -52,7 +59,14 @@ function GoogleCalendarIcon({ className = "w-5 h-5" }: { className?: string }) {
         rx="0.5"
         fill={GoogleColors.yellow}
       />
-      <rect x="7" y="16" width="3" height="2" rx="0.5" fill={GoogleColors.green} />
+      <rect
+        x="7"
+        y="16"
+        width="3"
+        height="2"
+        rx="0.5"
+        fill={GoogleColors.green}
+      />
       <rect
         x="11"
         y="16"
@@ -105,7 +119,7 @@ function generateGoogleCalendarUrl(
   title: string,
   description: string | undefined,
   startTime: string,
-  endTime: string
+  endTime: string,
 ): string {
   const baseUrl = "https://calendar.google.com/calendar/render";
   const params = new URLSearchParams({
@@ -137,7 +151,7 @@ export function AddToCalendarPanel({
       eventTitle || t("untitledEvent"),
       eventDescription || undefined,
       range.startTime,
-      range.endTime
+      range.endTime,
     );
     window.open(url, "_blank", "noopener,noreferrer");
   };
@@ -145,10 +159,10 @@ export function AddToCalendarPanel({
   const formatTimeRange = (range: ConfirmedTimeRange) => {
     const start = new Date(range.startTime);
     const end = new Date(range.endTime);
-    
+
     // Check if same day
     const sameDay = format(start, "yyyy-MM-dd") === format(end, "yyyy-MM-dd");
-    
+
     if (sameDay) {
       return `${format(start, "M/d (EEE)")} ${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
     }
@@ -174,7 +188,6 @@ export function AddToCalendarPanel({
               </p>
             </div>
           </div>
-
         </div>
 
         {/* Time Ranges */}
@@ -215,8 +228,18 @@ export function AddToCalendarPanel({
 
         {/* Hint */}
         <p className="text-[11px] text-gray-400 dark:text-zinc-500 flex items-center gap-1">
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           {t("addToCalendar.hint")}
         </p>
@@ -224,4 +247,3 @@ export function AddToCalendarPanel({
     </div>
   );
 }
-

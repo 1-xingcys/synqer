@@ -179,4 +179,3 @@ export function DeadlineCountdown({ votingDeadline }: DeadlineCountdownProps) {
     </div>
   );
 }
-

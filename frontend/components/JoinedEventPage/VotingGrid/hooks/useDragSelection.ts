@@ -140,8 +140,10 @@ export function useDragSelection({
   const handleMouseUp = useCallback(() => {
     // Only apply selection if we dragged to a different cell
     // Single click on same cell is handled by onClick
-    const isSameCell = dragStart && dragEnd && 
-      dragStart.dateIndex === dragEnd.dateIndex && 
+    const isSameCell =
+      dragStart &&
+      dragEnd &&
+      dragStart.dateIndex === dragEnd.dateIndex &&
       dragStart.timeIndex === dragEnd.timeIndex;
 
     if (isDragging && dragStart && dragEnd && !isSameCell) {
@@ -173,7 +175,7 @@ export function useDragSelection({
   const handleTouchStart = useCallback(
     (slotId: string, e: React.TouchEvent) => {
       e.preventDefault();
-      
+
       longPressTimer.current = setTimeout(() => {
         setLongPressSlot(slotId);
       }, 500);
@@ -220,8 +222,10 @@ export function useDragSelection({
 
     // Only apply selection if we dragged to a different cell
     // Single tap on same cell is handled by onClick
-    const isSameCell = dragStart && dragEnd && 
-      dragStart.dateIndex === dragEnd.dateIndex && 
+    const isSameCell =
+      dragStart &&
+      dragEnd &&
+      dragStart.dateIndex === dragEnd.dateIndex &&
       dragStart.timeIndex === dragEnd.timeIndex;
 
     if (isDragging && dragStart && dragEnd && !isSameCell) {

@@ -39,7 +39,9 @@ export function VoteModeToggle({
               d="M5 13l4 4L19 7"
             />
           </svg>
-          <span className="hidden sm:inline">{tJoined("voteModeAvailable")}</span>
+          <span className="hidden sm:inline">
+            {tJoined("voteModeAvailable")}
+          </span>
         </button>
         <button
           onClick={() => onModeChange("unavailable")}
@@ -62,7 +64,9 @@ export function VoteModeToggle({
               d="M6 18L18 6M6 6l12 12"
             />
           </svg>
-          <span className="hidden sm:inline">{tJoined("voteModeUnavailable")}</span>
+          <span className="hidden sm:inline">
+            {tJoined("voteModeUnavailable")}
+          </span>
         </button>
       </div>
 

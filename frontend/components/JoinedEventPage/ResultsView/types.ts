@@ -45,4 +45,3 @@ export interface MergedTimeRow {
   slotIndices: number[];
   height: number;
 }
-

@@ -46,21 +46,20 @@ export function DatePagination({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     };
 
     if (isDropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isDropdownOpen]);
-
-  // Close dropdown when page changes
-  useEffect(() => {
-    setIsDropdownOpen(false);
-  }, [currentPage]);
 
   if (totalPages <= 1) return null;
 
@@ -130,36 +129,38 @@ export function DatePagination({
           {/* Dropdown menu */}
           {isDropdownOpen && (
             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 z-50 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 py-0.5 max-h-[240px] overflow-y-auto">
-              {pageRanges.map(({ pageIdx, startDate: pStart, endDate: pEnd }) => (
-                <button
-                  key={pageIdx}
-                  onClick={() => handlePageSelect(pageIdx)}
-                  className={`w-full px-3 py-1.5 text-xs sm:text-sm text-left transition-colors flex items-center justify-between gap-2 whitespace-nowrap ${
-                    pageIdx === currentPage
-                      ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                      : "hover:bg-zinc-50 dark:hover:bg-zinc-700/50 text-zinc-600 dark:text-zinc-300"
-                  }`}
-                >
-                  <span>
-                    {formatPageDate(pStart)} ~ {formatPageDate(pEnd)}
-                  </span>
-                  {pageIdx === currentPage && (
-                    <svg
-                      className="w-3.5 h-3.5 text-blue-500 shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  )}
-                </button>
-              ))}
+              {pageRanges.map(
+                ({ pageIdx, startDate: pStart, endDate: pEnd }) => (
+                  <button
+                    key={pageIdx}
+                    onClick={() => handlePageSelect(pageIdx)}
+                    className={`w-full px-3 py-1.5 text-xs sm:text-sm text-left transition-colors flex items-center justify-between gap-2 whitespace-nowrap ${
+                      pageIdx === currentPage
+                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                        : "hover:bg-zinc-50 dark:hover:bg-zinc-700/50 text-zinc-600 dark:text-zinc-300"
+                    }`}
+                  >
+                    <span>
+                      {formatPageDate(pStart)} ~ {formatPageDate(pEnd)}
+                    </span>
+                    {pageIdx === currentPage && (
+                      <svg
+                        className="w-3.5 h-3.5 text-blue-500 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                ),
+              )}
             </div>
           )}
         </div>

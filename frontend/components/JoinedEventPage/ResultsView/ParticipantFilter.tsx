@@ -30,7 +30,7 @@ export function ParticipantFilter({
     if (!searchQuery.trim()) return participants;
     const query = searchQuery.toLowerCase();
     return participants.filter((p) =>
-      p.displayName.toLowerCase().includes(query)
+      p.displayName.toLowerCase().includes(query),
     );
   }, [participants, searchQuery]);
 
@@ -47,7 +47,8 @@ export function ParticipantFilter({
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isOpen]);
 
@@ -75,7 +76,7 @@ export function ParticipantFilter({
     if (noneSelected) return t("results.noParticipants");
     if (selectedParticipants.size === 1) {
       const selected = participants.find((p) =>
-        selectedParticipants.has(p.userId)
+        selectedParticipants.has(p.userId),
       );
       return selected?.displayName ?? t("results.oneParticipant");
     }
@@ -198,7 +199,9 @@ export function ParticipantFilter({
             ) : (
               <div className="py-1">
                 {filteredParticipants.map((participant) => {
-                  const isSelected = selectedParticipants.has(participant.userId);
+                  const isSelected = selectedParticipants.has(
+                    participant.userId,
+                  );
                   return (
                     <button
                       key={participant.userId}
@@ -270,4 +273,3 @@ export function ParticipantFilter({
     </div>
   );
 }
-

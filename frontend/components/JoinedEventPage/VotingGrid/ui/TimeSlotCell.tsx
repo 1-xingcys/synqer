@@ -79,19 +79,31 @@ export function TimeSlotCell({
 
     // Build border classes - only outer edges get blue border
     const borders = [];
-    
+
     // Top border: blue if top edge, else transparent (no internal lines)
-    borders.push(isTopEdge ? "border-t-2 border-t-blue-500 dark:border-t-blue-400" : "");
-    
+    borders.push(
+      isTopEdge ? "border-t-2 border-t-blue-500 dark:border-t-blue-400" : "",
+    );
+
     // Bottom border: blue if bottom edge, else normal grid line
-    borders.push(isBottomEdge ? "border-b-2 border-b-blue-500 dark:border-b-blue-400" : "border-b border-b-gray-100 dark:border-b-zinc-800");
-    
+    borders.push(
+      isBottomEdge
+        ? "border-b-2 border-b-blue-500 dark:border-b-blue-400"
+        : "border-b border-b-gray-100 dark:border-b-zinc-800",
+    );
+
     // Left border: blue if left edge, else transparent (no internal lines)
-    borders.push(isLeftEdge ? "border-l-2 border-l-blue-500 dark:border-l-blue-400" : "");
-    
+    borders.push(
+      isLeftEdge ? "border-l-2 border-l-blue-500 dark:border-l-blue-400" : "",
+    );
+
     // Right border: blue if right edge, else normal grid line
-    borders.push(isRightEdge ? "border-r-2 border-r-blue-500 dark:border-r-blue-400" : "border-r border-r-gray-100 dark:border-r-zinc-800");
-    
+    borders.push(
+      isRightEdge
+        ? "border-r-2 border-r-blue-500 dark:border-r-blue-400"
+        : "border-r border-r-gray-100 dark:border-r-zinc-800",
+    );
+
     borderClasses = borders.filter(Boolean).join(" ");
   }
 
@@ -133,12 +145,13 @@ export function TimeSlotCell({
     >
       {/* Partial selection indicator - diagonal stripes */}
       {isPartiallySelected && (
-        <div 
+        <div
           className="absolute inset-0 pointer-events-none opacity-30"
           style={{
-            backgroundImage: voteMode === "available"
-              ? "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(16, 185, 129, 0.4) 4px, rgba(16, 185, 129, 0.4) 8px)"
-              : "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(244, 63, 94, 0.4) 4px, rgba(244, 63, 94, 0.4) 8px)",
+            backgroundImage:
+              voteMode === "available"
+                ? "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(16, 185, 129, 0.4) 4px, rgba(16, 185, 129, 0.4) 8px)"
+                : "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(244, 63, 94, 0.4) 4px, rgba(244, 63, 94, 0.4) 8px)",
           }}
         />
       )}
@@ -148,8 +161,13 @@ export function TimeSlotCell({
         <div className="absolute inset-0 pointer-events-none overflow-visible">
           {slotCalendarEvents.slice(0, 2).map((event, idx) => {
             // Use merged row functions if available, otherwise skip
-            const isStart = isEventStartInMergedRow ? isEventStartInMergedRow(event) : false;
-            const span = isStart && getEventSpanInMergedRows ? getEventSpanInMergedRows(event) : 0;
+            const isStart = isEventStartInMergedRow
+              ? isEventStartInMergedRow(event)
+              : false;
+            const span =
+              isStart && getEventSpanInMergedRows
+                ? getEventSpanInMergedRows(event)
+                : 0;
 
             // Only render on the start row
             if (!isStart || span === 0) return null;
@@ -181,11 +199,13 @@ export function TimeSlotCell({
                 title={`${event.summary}\n${formatEventTime(event, tJoined("googleCalendar.allDay"))}`}
               >
                 {/* Event title badge at top */}
-                <div 
+                <div
                   className={`absolute top-0.5 sm:top-1 left-0 right-0 flex justify-center`}
                   style={{ zIndex: 15 + idx }}
                 >
-                  <span className={`px-1 text-[8px] sm:text-xs font-medium ${textColors[idx % textColors.length]} rounded truncate max-w-full leading-tight`}>
+                  <span
+                    className={`px-1 text-[8px] sm:text-xs font-medium ${textColors[idx % textColors.length]} rounded truncate max-w-full leading-tight`}
+                  >
                     {event.summary}
                   </span>
                 </div>
@@ -209,10 +229,10 @@ export function TimeSlotCell({
                 ? "bg-emerald-600 dark:bg-emerald-700 text-white"
                 : "bg-rose-600 dark:bg-rose-700 text-white"
               : isPartiallySelected
-              ? voteMode === "available"
-                ? "bg-emerald-400 dark:bg-emerald-600 text-white"
-                : "bg-rose-400 dark:bg-rose-600 text-white"
-              : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400"
+                ? voteMode === "available"
+                  ? "bg-emerald-400 dark:bg-emerald-600 text-white"
+                  : "bg-rose-400 dark:bg-rose-600 text-white"
+                : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400"
           }`}
         >
           {voters.length}
