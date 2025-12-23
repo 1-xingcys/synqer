@@ -4,8 +4,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMemo, useState, useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
-import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
-import { EventInfoCompact } from "@/components/eventCommon/EventInfoCompact";
+import { useHostedEventContext } from "@/contexts/HostedEventContext";
 import { VotingProgress } from "@/components/ui/VotingProgress";
 import { EventStatus } from "@/types/event";
 import ResultsView, {
@@ -21,7 +20,7 @@ export default function HostedEventPanelPage() {
   const eventId = params.eventId as string;
   const t = useTranslations();
   const router = useRouter();
-  const { data, loading, error, refetch } = useHostedEventDetail(eventId);
+  const { data, refetch } = useHostedEventContext();
 
   // State for selected event times
   const [selectedTimeRanges, setSelectedTimeRanges] = useState<
@@ -157,44 +156,9 @@ export default function HostedEventPanelPage() {
     }
   }, [data, handleConfirmEventTime]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-zinc-600 dark:text-zinc-400">
-            {t("common.loading")}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
-            <svg
-              className="w-8 h-8 text-red-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-          </div>
-          <p className="text-red-600 dark:text-red-400">
-            {error || t("event.notFound")}
-          </p>
-        </div>
-      </div>
-    );
+  // Loading and error states are handled by the layout
+  if (!data) {
+    return null;
   }
 
   const { event, slots, votingStats } = data;
@@ -206,21 +170,6 @@ export default function HostedEventPanelPage() {
 
   return (
     <div className="space-y-6">
-      {/* Event Info Compact */}
-      <EventInfoCompact
-        title={event.title}
-        description={event.description}
-        startDate={event.startDate}
-        endDate={event.endDate}
-        startMinuteOfDay={event.startMinuteOfDay}
-        endMinuteOfDay={event.endMinuteOfDay}
-        status={event.status}
-        confirmedTimeRanges={event.confirmedTimeRanges}
-        votingDeadline={event.votingDeadline}
-        isHosted={true}
-        eventId={eventId}
-      />
-
       {/* Voting Phase Content */}
       {isVotingPhase && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

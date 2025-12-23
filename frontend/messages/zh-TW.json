@@ -229,6 +229,7 @@
     "settings": "設定",
     "overview": "總覽",
     "backToHosted": "返回主辦活動",
+    "eventNotFound": "找不到活動",
     "totalExpected": "預期參與者",
     "totalVoted": "已投票",
     "votingProgress": "投票進度",

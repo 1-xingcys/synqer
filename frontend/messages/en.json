@@ -229,6 +229,7 @@
     "settings": "Settings",
     "overview": "Overview",
     "backToHosted": "Back to Hosted Events",
+    "eventNotFound": "Event not found",
     "totalExpected": "Expected Participants",
     "totalVoted": "Voted",
     "votingProgress": "Voting Progress",
