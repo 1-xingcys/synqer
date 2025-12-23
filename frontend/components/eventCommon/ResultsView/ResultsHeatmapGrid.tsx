@@ -242,18 +242,39 @@ export function ResultsHeatmapGrid({
     );
   }, [filteredVotes]);
 
-  // Get vote count for merged row (union of all voters across all slots)
+  // Get vote count for merged row (intersection - voters available for ALL slots in the merged row)
   const getVoteCountForMergedRow = useCallback(
     (slotIndices: number[], dateKey: string): number => {
-      const voterIds = new Set<string>();
+      if (slotIndices.length === 0) return 0;
+
+      // Get all slot IDs for this merged row
+      const slotIds: string[] = [];
       slotIndices.forEach((idx) => {
         const slot = slotsByDate[dateKey]?.[idx];
-        if (slot) {
-          const slotVotes = votesBySlot[slot.id] || [];
-          slotVotes.forEach((v) => voterIds.add(v.userId));
+        if (slot) slotIds.push(slot.id);
+      });
+
+      if (slotIds.length === 0) return 0;
+
+      // Count how many times each voter appears across all slots
+      const voterCounts = new Map<string, number>();
+      slotIds.forEach((slotId) => {
+        const slotVotes = votesBySlot[slotId] || [];
+        slotVotes.forEach((vote) => {
+          voterCounts.set(vote.userId, (voterCounts.get(vote.userId) || 0) + 1);
+        });
+      });
+
+      // Only count voters who are available for ALL slots in the merged row
+      const totalSlots = slotIds.length;
+      let count = 0;
+      voterCounts.forEach((voteCount) => {
+        if (voteCount === totalSlots) {
+          count++;
         }
       });
-      return voterIds.size;
+
+      return count;
     },
     [slotsByDate, votesBySlot],
   );
