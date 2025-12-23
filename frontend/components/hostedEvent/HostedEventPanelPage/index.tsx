@@ -8,7 +8,9 @@ import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { EventInfoCompact } from "@/components/eventCommon/EventInfoCompact";
 import { VotingProgress } from "@/components/ui/VotingProgress";
 import { EventStatus } from "@/types/event";
-import ResultsView, { SlotRangeInfo } from "@/components/JoinedEventPage/ResultsView";
+import ResultsView, {
+  SlotRangeInfo,
+} from "@/components/JoinedEventPage/ResultsView";
 import { DeadlineCountdown } from "./DeadlineCountdown";
 import { SelectedEventTimes, SelectedTimeRange } from "./SelectedEventTimes";
 import { ConfirmTimeDialog } from "./ConfirmTimeDialog";
@@ -21,7 +23,9 @@ export default function HostedEventPanelPage() {
   const { data, loading, error, refetch } = useHostedEventDetail(eventId);
 
   // State for selected event times
-  const [selectedTimeRanges, setSelectedTimeRanges] = useState<SelectedTimeRange[]>([]);
+  const [selectedTimeRanges, setSelectedTimeRanges] = useState<
+    SelectedTimeRange[]
+  >([]);
   const [isConfirming, setIsConfirming] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmError, setConfirmError] = useState<string | null>(null);
@@ -63,7 +67,7 @@ export default function HostedEventPanelPage() {
     (info: SlotRangeInfo, availableCount: number) => {
       // Generate a unique ID for this range
       const rangeId = `${info.startDate}-${info.startTime}-${info.endDate}-${info.endTime}`;
-      
+
       // Check if this range already exists (to prevent duplicates)
       const exists = selectedTimeRanges.some((r) => r.id === rangeId);
       if (exists) return;
@@ -82,7 +86,7 @@ export default function HostedEventPanelPage() {
       setSelectedTimeRanges((prev) => [...prev, newRange]);
       setConfirmError(null);
     },
-    [selectedTimeRanges, participantsWithAvatars.length]
+    [selectedTimeRanges, participantsWithAvatars.length],
   );
 
   // Handle removing a time range
@@ -99,29 +103,14 @@ export default function HostedEventPanelPage() {
     return Array.from(slotIdSet);
   }, [selectedTimeRanges]);
 
-  // Handle confirm button click
-  const handleConfirmClick = useCallback(() => {
-    if (!data) return;
-    
-    const isVotingPhase = data.event.status === EventStatus.VOTING;
-    
-    if (isVotingPhase) {
-      // Show confirmation dialog for voting phase
-      setShowConfirmDialog(true);
-    } else {
-      // Direct confirm for voting-ended phase
-      void handleConfirmEventTime();
-    }
-  }, [data]);
-
   // Handle actual confirmation to backend
-  const handleConfirmEventTime = async () => {
+  const handleConfirmEventTime = useCallback(async () => {
     setIsConfirming(true);
     setConfirmError(null);
 
     try {
       const slotIds = getAllSelectedSlotIds();
-      
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirm-time`,
         {
@@ -131,7 +120,7 @@ export default function HostedEventPanelPage() {
           },
           credentials: "include",
           body: JSON.stringify({ slotIds }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -142,7 +131,7 @@ export default function HostedEventPanelPage() {
       await refetch();
       setSelectedTimeRanges([]);
       setShowConfirmDialog(false);
-      
+
       // Optionally redirect to the event page
       router.push(`/hosted/${eventId}`);
     } catch {
@@ -150,7 +139,22 @@ export default function HostedEventPanelPage() {
     } finally {
       setIsConfirming(false);
     }
-  };
+  }, [eventId, getAllSelectedSlotIds, refetch, router, t]);
+
+  // Handle confirm button click
+  const handleConfirmClick = useCallback(() => {
+    if (!data) return;
+
+    const isVotingPhase = data.event.status === EventStatus.VOTING;
+
+    if (isVotingPhase) {
+      // Show confirmation dialog for voting phase
+      setShowConfirmDialog(true);
+    } else {
+      // Direct confirm for voting-ended phase
+      void handleConfirmEventTime();
+    }
+  }, [data, handleConfirmEventTime]);
 
   if (loading) {
     return (
@@ -252,7 +256,9 @@ export default function HostedEventPanelPage() {
       {/* Error message */}
       {confirmError && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
-          <p className="text-red-600 dark:text-red-400 text-sm">{confirmError}</p>
+          <p className="text-red-600 dark:text-red-400 text-sm">
+            {confirmError}
+          </p>
         </div>
       )}
 

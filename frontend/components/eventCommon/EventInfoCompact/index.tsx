@@ -199,8 +199,7 @@ export function EventInfoCompact({
               />
             </svg>
             <span className="text-xs font-medium">
-              {t("eventInfo.deadline")}:{" "}
-              {format(deadlineDate, "M/d HH:mm")}
+              {t("eventInfo.deadline")}: {format(deadlineDate, "M/d HH:mm")}
             </span>
           </div>
         )}

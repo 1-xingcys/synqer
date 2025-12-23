@@ -12,7 +12,7 @@ interface HeatMapLegendProps {
 export function getHeatmapColor(
   voteCount: number,
   maxVotes: number,
-  forLegend: boolean = false
+  forLegend: boolean = false,
 ): { bg: string; text: string } {
   if (voteCount === 0) {
     return {
@@ -24,7 +24,7 @@ export function getHeatmapColor(
   // Calculate intensity from 1-5 based on ratio
   const ratio = voteCount / maxVotes;
   let intensity: number;
-  
+
   if (ratio <= 0.2) intensity = 1;
   else if (ratio <= 0.4) intensity = 2;
   else if (ratio <= 0.6) intensity = 3;
@@ -65,7 +65,7 @@ export function getHeatmapColor(
 // Get dynamic heatmap classes based on actual values
 export function getHeatmapClasses(
   voteCount: number,
-  maxVotes: number
+  maxVotes: number,
 ): { bg: string; text: string } {
   if (maxVotes === 0 || voteCount === 0) {
     return {
@@ -115,7 +115,7 @@ export function HeatMapLegend({
     if (maxVotes === 0) return [{ value: 0, label: "0" }];
 
     const steps: { value: number; label: string }[] = [];
-    
+
     // Always start with 0
     steps.push({ value: 0, label: "0" });
 
@@ -137,8 +137,8 @@ export function HeatMapLegend({
         Math.ceil(maxVotes * 0.75),
         maxVotes,
       ];
-      
-      const uniqueBreakpoints = [...new Set(breakpoints)].filter(b => b > 0);
+
+      const uniqueBreakpoints = [...new Set(breakpoints)].filter((b) => b > 0);
       uniqueBreakpoints.forEach((bp) => {
         steps.push({ value: bp, label: bp.toString() });
       });
@@ -189,4 +189,3 @@ export function HeatMapLegend({
     </div>
   );
 }
-

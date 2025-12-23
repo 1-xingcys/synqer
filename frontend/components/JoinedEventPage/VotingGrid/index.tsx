@@ -2,8 +2,19 @@
 
 import { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { VotingGridProps, Vote, VoteMode, TimeGranularity, CalendarEvent } from "./types";
-import { useVotingSelection, useCalendarIntegration, useTimeGranularity, useMergedRowDragSelection } from "./hooks";
+import {
+  VotingGridProps,
+  Vote,
+  VoteMode,
+  TimeGranularity,
+  CalendarEvent,
+} from "./types";
+import {
+  useVotingSelection,
+  useCalendarIntegration,
+  useTimeGranularity,
+  useMergedRowDragSelection,
+} from "./hooks";
 import { groupVotesBySlot, formatTime } from "./utils";
 import {
   VotingHeader,
@@ -29,17 +40,17 @@ function useResponsiveGrid() {
       const width = window.innerWidth;
       // sm breakpoint is 640px
       const isMobile = width < 640;
-      
+
       // Dates per page
       let dates = 7;
       if (width < 400) dates = 5;
       else if (width < 640) dates = 5;
       else if (width < 768) dates = 6;
       else if (width < 1024) dates = 7;
-      
+
       // Slot height: h-10 (2.5rem) on mobile, h-11 (2.75rem) on desktop
       const height = isMobile ? "2.5rem" : "2.75rem";
-      
+
       setDatesPerPage(dates);
       setSlotHeight(height);
     };
@@ -311,12 +322,10 @@ export default function VotingGrid({
 
       {/* Granularity Selector */}
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 dark:text-zinc-400">
-          View
-        </span>
-        <GranularitySelector 
-          granularity={granularity} 
-          onChange={setGranularity} 
+        <span className="text-xs text-gray-500 dark:text-zinc-400">View</span>
+        <GranularitySelector
+          granularity={granularity}
+          onChange={setGranularity}
         />
       </div>
 
@@ -348,10 +357,7 @@ export default function VotingGrid({
             {/* Time column - shows time points at boundaries */}
             <div className="w-9 sm:w-14 shrink-0 relative border-r border-gray-200 dark:border-zinc-700 rounded-l-lg">
               {mergedRows.map((row, rowIndex) => (
-                <div
-                  key={rowIndex}
-                  className="h-10 sm:h-11 relative"
-                >
+                <div key={rowIndex} className="h-10 sm:h-11 relative">
                   {/* Time label at top boundary */}
                   <span className="absolute -top-2 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
                     {formatTime(row.startMinute)}
@@ -367,7 +373,7 @@ export default function VotingGrid({
             </div>
 
             {/* Slots grid - CSS variable for slot height used by calendar event overlay */}
-            <div 
+            <div
               className="flex-1 border border-gray-200 dark:border-zinc-700 rounded-r-lg overflow-hidden"
               style={{ "--slot-height": slotHeight } as React.CSSProperties}
             >
@@ -378,31 +384,49 @@ export default function VotingGrid({
                     // Get all slot IDs for this merged row
                     const slotIds = row.slotIndices
                       .map((idx) => slotsByDate[dateKey]?.[idx]?.id)
-                      .filter(Boolean) as string[];
-                    
+                      .filter(Boolean);
+
                     // Use first slot for basic props
                     const firstSlotIdx = row.slotIndices[0];
                     const firstSlot = slotsByDate[dateKey]?.[firstSlotIdx];
-                    
+
                     if (!firstSlot) return null;
 
-                    const isSelected = isMergedRowSelected(row.slotIndices, dateKey);
-                    const isPartiallySelected = isMergedRowPartiallySelected(row.slotIndices, dateKey);
-                    const voters = getVotersForMergedRow(row.slotIndices, dateKey);
-                    const isHovered = hoveredCell?.rowIndex === rowIndex && hoveredCell?.dateIndex === dateIndex;
-                    const isLongPressed = longPressCell?.rowIndex === rowIndex && longPressCell?.dateIndex === dateIndex;
-                    
+                    const isSelected = isMergedRowSelected(
+                      row.slotIndices,
+                      dateKey,
+                    );
+                    const isPartiallySelected = isMergedRowPartiallySelected(
+                      row.slotIndices,
+                      dateKey,
+                    );
+                    const voters = getVotersForMergedRow(
+                      row.slotIndices,
+                      dateKey,
+                    );
+                    const isHovered =
+                      hoveredCell?.rowIndex === rowIndex &&
+                      hoveredCell?.dateIndex === dateIndex;
+                    const isLongPressed =
+                      longPressCell?.rowIndex === rowIndex &&
+                      longPressCell?.dateIndex === dateIndex;
+
                     // Check if this merged cell is in the drag rectangle
                     const inRectangle = isInDragRectangle(rowIndex, dateIndex);
 
                     // Get calendar events for all slots in this merged row
-                    const mergedCalendarEvents = row.slotIndices.flatMap((idx) => {
-                      const slot = slotsByDate[dateKey]?.[idx];
-                      return slot ? (calendarEventsForSlot.get(slot.id) || []) : [];
-                    });
+                    const mergedCalendarEvents = row.slotIndices.flatMap(
+                      (idx) => {
+                        const slot = slotsByDate[dateKey]?.[idx];
+                        return slot
+                          ? calendarEventsForSlot.get(slot.id) || []
+                          : [];
+                      },
+                    );
                     // Deduplicate events by id
                     const uniqueCalendarEvents = mergedCalendarEvents.filter(
-                      (event, index, self) => self.findIndex((e) => e.id === event.id) === index
+                      (event, index, self) =>
+                        self.findIndex((e) => e.id === event.id) === index,
                     );
 
                     return (
@@ -422,12 +446,22 @@ export default function VotingGrid({
                         voters={voters}
                         slotCalendarEvents={uniqueCalendarEvents}
                         showCalendarOnGrid={showCalendarOnGrid}
-                        isEventStartInMergedRow={(event) => isEventStartInMergedRow(rowIndex, dateKey, event)}
-                        getEventSpanInMergedRows={(event) => getEventSpanInMergedRows(rowIndex, dateKey, event)}
+                        isEventStartInMergedRow={(event) =>
+                          isEventStartInMergedRow(rowIndex, dateKey, event)
+                        }
+                        getEventSpanInMergedRows={(event) =>
+                          getEventSpanInMergedRows(rowIndex, dateKey, event)
+                        }
                         mergedSlotIds={slotIds}
-                        onMouseDown={(e) => handleMergedMouseDown(rowIndex, dateIndex, e)}
-                        onMouseEnter={() => handleMergedMouseEnter(rowIndex, dateIndex)}
-                        onTouchStart={(e) => handleMergedTouchStart(rowIndex, dateIndex, e)}
+                        onMouseDown={(e) =>
+                          handleMergedMouseDown(rowIndex, dateIndex, e)
+                        }
+                        onMouseEnter={() =>
+                          handleMergedMouseEnter(rowIndex, dateIndex)
+                        }
+                        onTouchStart={(e) =>
+                          handleMergedTouchStart(rowIndex, dateIndex, e)
+                        }
                         onTouchMove={handleMergedTouchMove}
                         onTouchEnd={handleMergedTouchEnd}
                         onClick={() => handleMergedClick(rowIndex, dateIndex)}

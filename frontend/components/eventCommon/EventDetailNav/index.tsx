@@ -27,13 +27,14 @@ export function EventDetailNav({
   const getActiveTabId = () => {
     // Find the tab whose href matches the current path most specifically
     // Sort by href length descending to match more specific routes first
-    const sortedTabs = [...tabs].sort(
-      (a, b) => b.href.length - a.href.length
-    );
+    const sortedTabs = [...tabs].sort((a, b) => b.href.length - a.href.length);
     for (const tab of sortedTabs) {
       if (pathname?.endsWith(tab.href.split("/").pop() || "")) {
         // Check if we're on an exact match for sub-routes
-        if (tab.href.includes("/participants") && pathname?.endsWith("/participants")) {
+        if (
+          tab.href.includes("/participants") &&
+          pathname?.endsWith("/participants")
+        ) {
           return tab.id;
         }
         if (tab.href.includes("/results") && pathname?.endsWith("/results")) {
@@ -170,5 +171,3 @@ export const NavIcons = {
     </svg>
   ),
 };
-
-

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { TimeSlot, Vote, Participant, ResultsViewProps, SlotRangeInfo } from "./types";
+import { ResultsViewProps, SlotRangeInfo } from "./types";
 import { ParticipantFilter } from "./ParticipantFilter";
 import { HeatMapLegend } from "./HeatMapLegend";
 import { ResultsHeatmapGrid } from "./ResultsHeatmapGrid";
@@ -21,7 +21,7 @@ export default function ResultsView({
 
   // Initialize with all participants selected
   const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(
-    () => new Set(participants.map((p) => p.userId))
+    () => new Set(participants.map((p) => p.userId)),
   );
 
   // Filter votes based on selected participants
@@ -46,7 +46,7 @@ export default function ResultsView({
     // Find max unique voters per slot
     return Math.max(
       ...Object.values(votesBySlot).map((voters) => voters.size),
-      1
+      1,
     );
   }, [filteredVotes]);
 
@@ -132,4 +132,3 @@ export default function ResultsView({
     </div>
   );
 }
-
