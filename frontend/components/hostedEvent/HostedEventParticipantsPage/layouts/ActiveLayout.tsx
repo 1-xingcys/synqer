@@ -39,7 +39,7 @@ interface MobileLayoutProps {
   hasUnsavedChanges: boolean;
 }
 
-export function MobileLayout({
+export function ActiveLayout({
   eventMode,
   searchQuery,
   onSearchChange,
