@@ -17,7 +17,7 @@ export default function LoginPage({
   return (
     <div className="flex flex-col min-h-screen bg-zinc-50 font-sans dark:bg-black">
       <Header variant="public" />
-      <main className="flex-1 flex w-full max-w-md mx-auto flex-col items-center justify-center gap-8 px-4 py-32">
+      <main className="min-h-screen flex w-full max-w-md mx-auto flex-col items-center justify-center gap-8 px-4 py-32">
         <div className="w-full space-y-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-black dark:text-white">
