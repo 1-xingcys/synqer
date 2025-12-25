@@ -46,17 +46,17 @@ export default function PrivacyPolicyPage() {
                   {t("sections.collection.description")}
                 </p>
                 <ul className="space-y-2">
-                  {(
-                    t.raw("sections.collection.items") as string[]
-                  ).map((item: string, index: number) => (
-                    <li
-                      key={index}
-                      className="flex items-start gap-2 text-zinc-600 dark:text-zinc-300"
-                    >
-                      <span className="text-blue-500 mt-1">•</span>
-                      {item}
-                    </li>
-                  ))}
+                  {(t.raw("sections.collection.items") as string[]).map(
+                    (item: string, index: number) => (
+                      <li
+                        key={index}
+                        className="flex items-start gap-2 text-zinc-600 dark:text-zinc-300"
+                      >
+                        <span className="text-blue-500 mt-1">•</span>
+                        {item}
+                      </li>
+                    ),
+                  )}
                 </ul>
               </div>
             </section>
@@ -83,7 +83,7 @@ export default function PrivacyPolicyPage() {
                         <span className="text-purple-500 mt-1">•</span>
                         {item}
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </div>
@@ -102,17 +102,17 @@ export default function PrivacyPolicyPage() {
                   {t("sections.thirdParty.description")}
                 </p>
                 <ul className="space-y-2">
-                  {(
-                    t.raw("sections.thirdParty.items") as string[]
-                  ).map((item: string, index: number) => (
-                    <li
-                      key={index}
-                      className="flex items-start gap-2 text-zinc-600 dark:text-zinc-300"
-                    >
-                      <span className="text-green-500 mt-1">•</span>
-                      {item}
-                    </li>
-                  ))}
+                  {(t.raw("sections.thirdParty.items") as string[]).map(
+                    (item: string, index: number) => (
+                      <li
+                        key={index}
+                        className="flex items-start gap-2 text-zinc-600 dark:text-zinc-300"
+                      >
+                        <span className="text-green-500 mt-1">•</span>
+                        {item}
+                      </li>
+                    ),
+                  )}
                 </ul>
               </div>
             </section>
@@ -154,7 +154,7 @@ export default function PrivacyPolicyPage() {
                         <span className="text-rose-500 mt-1">•</span>
                         {item}
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </div>
@@ -234,4 +234,3 @@ export default function PrivacyPolicyPage() {
     </div>
   );
 }
-

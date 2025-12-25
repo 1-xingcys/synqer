@@ -19,16 +19,19 @@ function formatTimeRange(range: ConfirmedTimeRange, locale: string): string {
   const endDate = new Date(range.endTime);
 
   // 使用 short month 格式 (Dec 25)
+  // 後端使用 UTC 時間儲存，前端顯示時也要用 UTC
   const dateFormatter = new Intl.DateTimeFormat("en", {
     month: "short",
     day: "numeric",
     weekday: "short",
+    timeZone: "UTC",
   });
 
   const timeFormatter = new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
+    timeZone: "UTC",
   });
 
   const startDateStr = dateFormatter.format(startDate);

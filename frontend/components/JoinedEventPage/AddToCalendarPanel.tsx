@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { ConfirmedTimeRange } from "@/types/event";
-import { format } from "date-fns";
 
 interface AddToCalendarPanelProps {
   eventTitle: string;
@@ -104,12 +103,26 @@ function GoogleGIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 /**
  * Format date for Google Calendar URL
- * Format: YYYYMMDDTHHMMSSZ (for UTC) or YYYYMMDDTHHMMSS (for local)
+ * Format: YYYYMMDDTHHMMSS (不帶時區後綴)
+ *
+ * 後端儲存的時間概念：startMinute=540 代表「當天 09:00」
+ * 後端用 setUTCHours 儲存，所以 date string 是 "2025-12-31T09:00:00Z"
+ * 但這個 09:00 實際上是「使用者想要的時間」，不是真正的 UTC
+ *
+ * Google Calendar URL 如果不帶 Z 後綴，會當作使用者 Calendar 的時區
+ * 所以我們直接用 UTC 的數值（09:00）但不加 Z，讓 Google 用使用者的時區解讀
  */
 function formatGoogleCalendarDate(dateStr: string): string {
   const date = new Date(dateStr);
-  // Format as local time without timezone suffix
-  return format(date, "yyyyMMdd'T'HHmmss");
+  // 用 UTC 方法取得數值（這些數值代表使用者想要的時間）
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  const hours = String(date.getUTCHours()).padStart(2, "0");
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+  const seconds = String(date.getUTCSeconds()).padStart(2, "0");
+  // 不加 Z 後綴，讓 Google Calendar 用使用者的 Calendar 時區解讀
+  return `${year}${month}${day}T${hours}${minutes}${seconds}`;
 }
 
 /**
@@ -160,17 +173,33 @@ export function AddToCalendarPanel({
     const start = new Date(range.startTime);
     const end = new Date(range.endTime);
 
-    // Check if same day
-    const sameDay = format(start, "yyyy-MM-dd") === format(end, "yyyy-MM-dd");
+    // 後端使用 UTC 時間儲存，前端顯示時也要用 UTC
+    const dateFormatter = new Intl.DateTimeFormat("en", {
+      month: "numeric",
+      day: "numeric",
+      weekday: "short",
+      timeZone: "UTC",
+    });
+    const timeFormatter = new Intl.DateTimeFormat("en", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "UTC",
+    });
+
+    const sameDay =
+      start.getUTCFullYear() === end.getUTCFullYear() &&
+      start.getUTCMonth() === end.getUTCMonth() &&
+      start.getUTCDate() === end.getUTCDate();
 
     if (sameDay) {
-      return `${format(start, "M/d (EEE)")} ${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
+      return `${dateFormatter.format(start)} ${timeFormatter.format(start)} - ${timeFormatter.format(end)}`;
     }
-    return `${format(start, "M/d HH:mm")} - ${format(end, "M/d HH:mm")}`;
+    return `${dateFormatter.format(start)} ${timeFormatter.format(start)} - ${dateFormatter.format(end)} ${timeFormatter.format(end)}`;
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 via-white to-green-50 dark:from-zinc-800/80 dark:via-zinc-800/60 dark:to-zinc-800/80 rounded-xl border border-blue-100 dark:border-zinc-700 p-3 sm:p-4">
+    <div className="bg-linear-to-r from-blue-50 via-white to-green-50 dark:from-zinc-800/80 dark:via-zinc-800/60 dark:to-zinc-800/80 rounded-xl border border-blue-100 dark:border-zinc-700 p-3 sm:p-4">
       <div className="flex flex-col gap-3">
         {/* Header Row */}
         <div className="flex items-center justify-between gap-2">

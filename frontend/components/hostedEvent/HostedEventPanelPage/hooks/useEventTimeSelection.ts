@@ -48,12 +48,13 @@ export function useEventTimeSelection({
       const startDate = new Date(range.startTime);
       const endDate = new Date(range.endTime);
 
+      // 後端使用 UTC 時間儲存，需要用 UTC 方法取得時間
       return {
         id: `confirmed-${range.slotIds.join("-")}`,
         startDate: startDate.toISOString().split("T")[0],
         endDate: endDate.toISOString().split("T")[0],
-        startTime: startDate.getHours() * 60 + startDate.getMinutes(),
-        endTime: endDate.getHours() * 60 + endDate.getMinutes(),
+        startTime: startDate.getUTCHours() * 60 + startDate.getUTCMinutes(),
+        endTime: endDate.getUTCHours() * 60 + endDate.getUTCMinutes(),
         slotIds: range.slotIds,
         availableCount: 0, // 已確認的時間不需要顯示 available
         totalParticipants,
