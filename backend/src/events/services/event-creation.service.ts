@@ -177,6 +177,7 @@ export class EventCreationService {
 
   /**
    * 驗證投票截止時間
+   * 使用 setUTCHours 確保在任何伺服器時區都能正確處理時間
    */
   private validateVotingDeadline(
     votingDeadline: string,
@@ -191,7 +192,7 @@ export class EventCreationService {
     // Combine start date and time
     const [hours, minutes] = startTime.split(':').map(Number);
     const eventStart = new Date(startDate);
-    eventStart.setHours(hours, minutes, 0, 0);
+    eventStart.setUTCHours(hours, minutes, 0, 0);
 
     if (deadline > eventStart) {
       throw new BadRequestException(

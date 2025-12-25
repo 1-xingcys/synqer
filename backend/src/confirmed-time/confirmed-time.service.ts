@@ -1,27 +1,8 @@
 import { Injectable } from '@nestjs/common';
-
-/**
- * 確認時段的原始資料結構
- */
-export interface ConfirmedTimeSlotData {
-  slotId: string;
-  slot: {
-    id: string;
-    date: Date;
-    startMinute: number;
-    endMinute: number;
-  };
-}
-
-/**
- * 合併後的時間範圍
- * 連續的時段會被合併成一個範圍
- */
-export interface ConfirmedTimeRange {
-  startTime: Date; // 開始時間（完整的 DateTime）
-  endTime: Date; // 結束時間（完整的 DateTime）
-  slotIds: string[]; // 包含的時段 ID
-}
+import {
+  ConfirmedTimeSlotData,
+  ConfirmedTimeRange,
+} from './confirmed-time.interface';
 
 /**
  * 確認時間處理服務
@@ -91,12 +72,14 @@ export class ConfirmedTimeService {
 
   /**
    * 建立完整的 DateTime
+   * 使用 setUTCHours 確保在任何伺服器時區都能正確處理時間
+   * （資料庫中的 date 欄位是 UTC 時間）
    */
   private createDateTime(date: Date, minuteOfDay: number): Date {
     const result = new Date(date);
     const hours = Math.floor(minuteOfDay / 60);
     const minutes = minuteOfDay % 60;
-    result.setHours(hours, minutes, 0, 0);
+    result.setUTCHours(hours, minutes, 0, 0);
     return result;
   }
 
@@ -147,22 +130,22 @@ export class ConfirmedTimeService {
   }
 
   private formatDate(date: Date): string {
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
+    const month = date.getUTCMonth() + 1;
+    const day = date.getUTCDate();
     return `${month}/${day}`;
   }
 
   private formatTime(date: Date): string {
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const hours = date.getUTCHours().toString().padStart(2, '0');
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
   }
 
   private isSameDay(date1: Date, date2: Date): boolean {
     return (
-      date1.getFullYear() === date2.getFullYear() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getDate() === date2.getDate()
+      date1.getUTCFullYear() === date2.getUTCFullYear() &&
+      date1.getUTCMonth() === date2.getUTCMonth() &&
+      date1.getUTCDate() === date2.getUTCDate()
     );
   }
 }

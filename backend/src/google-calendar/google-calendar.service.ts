@@ -7,53 +7,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 import axios from 'axios';
 import * as jwt from 'jsonwebtoken';
-
-interface PKCEData {
-  codeVerifier: string;
-  codeChallenge: string;
-  redirect?: string;
-}
-
-interface GoogleTokenResponse {
-  access_token: string;
-  refresh_token?: string;
-  expires_in: number;
-  scope: string;
-  token_type: string;
-  id_token?: string;
-}
-
-interface GoogleIdTokenPayload {
-  aud: string;
-  iss: string;
-  exp: number;
-  sub: string;
-  email?: string;
-  name?: string;
-  picture?: string;
-}
-
-interface CalendarEvent {
-  id: string;
-  summary: string;
-  description?: string;
-  start: {
-    dateTime?: string;
-    date?: string;
-    timeZone?: string;
-  };
-  end: {
-    dateTime?: string;
-    date?: string;
-    timeZone?: string;
-  };
-  status: string;
-}
-
-interface CalendarEventsResponse {
-  items: CalendarEvent[];
-  nextPageToken?: string;
-}
+import {
+  PKCEData,
+  GoogleTokenResponse,
+  GoogleIdTokenPayload,
+  GoogleCalendarEventsResponse,
+  CalendarEventDto,
+  CalendarConnectionStatus,
+  CalendarConflictResult,
+} from './google-api.types';
 
 @Injectable()
 export class GoogleCalendarService {
@@ -211,9 +173,7 @@ export class GoogleCalendarService {
   /**
    * 取得當前用戶的 Google Calendar 連結狀態
    */
-  async getConnectionStatus(
-    userId: string,
-  ): Promise<{ connected: boolean; googleEmail?: string; connectedAt?: Date }> {
+  async getConnectionStatus(userId: string): Promise<CalendarConnectionStatus> {
     const connection = await this.prisma.googleCalendarConnection.findUnique({
       where: { userId },
     });
@@ -331,16 +291,7 @@ export class GoogleCalendarService {
     timeMin: Date,
     timeMax: Date,
     timeZone = 'Asia/Taipei',
-  ): Promise<
-    Array<{
-      id: string;
-      summary: string;
-      description?: string;
-      startTime: Date;
-      endTime: Date;
-      isAllDay: boolean;
-    }>
-  > {
+  ): Promise<CalendarEventDto[]> {
     const accessToken = await this.getValidAccessToken(userId);
 
     const params = new URLSearchParams({
@@ -353,7 +304,7 @@ export class GoogleCalendarService {
     });
 
     try {
-      const response = await axios.get<CalendarEventsResponse>(
+      const response = await axios.get<GoogleCalendarEventsResponse>(
         `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params}`,
         {
           headers: {
@@ -399,16 +350,7 @@ export class GoogleCalendarService {
   async getConflictingSlots(
     userId: string,
     eventId: string,
-  ): Promise<{
-    calendarEvents: Array<{
-      id: string;
-      summary: string;
-      startTime: Date;
-      endTime: Date;
-      isAllDay: boolean;
-    }>;
-    conflictingSlotIds: string[];
-  }> {
+  ): Promise<CalendarConflictResult> {
     // Get the event details
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
@@ -434,14 +376,15 @@ export class GoogleCalendarService {
 
     for (const slot of event.slots) {
       // Convert slot time to actual datetime
+      // 使用 setUTCHours 確保在任何伺服器時區都能正確處理時間
       const slotDate = new Date(slot.date);
       const slotStart = new Date(slotDate);
-      slotStart.setHours(0, 0, 0, 0);
-      slotStart.setMinutes(slot.startMinute);
+      slotStart.setUTCHours(0, 0, 0, 0);
+      slotStart.setUTCMinutes(slot.startMinute);
 
       const slotEnd = new Date(slotDate);
-      slotEnd.setHours(0, 0, 0, 0);
-      slotEnd.setMinutes(slot.endMinute);
+      slotEnd.setUTCHours(0, 0, 0, 0);
+      slotEnd.setUTCMinutes(slot.endMinute);
 
       // Check if any calendar event conflicts with this slot
       for (const calEvent of calendarEvents) {

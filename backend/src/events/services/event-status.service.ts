@@ -63,6 +63,7 @@ export class EventStatusService {
 
   /**
    * 計算確認時段中最晚的結束時間
+   * 使用 setUTCHours 確保在任何伺服器時區都能正確處理時間
    */
   private getLatestEndTime(slots: ConfirmedSlotInfo[]): Date | null {
     if (slots.length === 0) return null;
@@ -73,7 +74,7 @@ export class EventStatusService {
       const slotDate = new Date(slot.date);
       const endHours = Math.floor(slot.endMinute / 60);
       const endMins = slot.endMinute % 60;
-      slotDate.setHours(endHours, endMins, 0, 0);
+      slotDate.setUTCHours(endHours, endMins, 0, 0);
 
       if (!latestEnd || slotDate > latestEnd) {
         latestEnd = slotDate;
