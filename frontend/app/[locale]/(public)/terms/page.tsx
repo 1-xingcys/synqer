@@ -70,7 +70,7 @@ export default function TermsOfUsePage() {
                         <span className="text-purple-500 mt-1">•</span>
                         {item}
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </div>
@@ -98,7 +98,7 @@ export default function TermsOfUsePage() {
                         <span className="text-green-500 mt-1">•</span>
                         {item}
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </div>
@@ -126,7 +126,7 @@ export default function TermsOfUsePage() {
                         <span className="text-amber-500 mt-1">•</span>
                         {item}
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </div>
@@ -266,4 +266,3 @@ export default function TermsOfUsePage() {
     </div>
   );
 }
-

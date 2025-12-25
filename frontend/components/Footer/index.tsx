@@ -29,7 +29,8 @@ export default function Footer() {
               <span
                 className="text-xl font-bold bg-clip-text text-transparent"
                 style={{
-                  backgroundImage: "linear-gradient(to right, #6780c7, #78b0e0)",
+                  backgroundImage:
+                    "linear-gradient(to right, #6780c7, #78b0e0)",
                 }}
               >
                 Synqer

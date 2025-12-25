@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { ConfirmedTimeRange } from "@/types/event";
+import { format } from "date-fns";
 
 interface AddToCalendarPanelProps {
   eventTitle: string;
@@ -185,7 +186,7 @@ export function AddToCalendarPanel({
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-50 via-white to-green-50 dark:from-zinc-800/80 dark:via-zinc-800/60 dark:to-zinc-800/80 rounded-xl border border-blue-100 dark:border-zinc-700 p-3 sm:p-4">
+    <div className="bg-linear-to-r from-blue-50 via-white to-green-50 dark:from-zinc-800/80 dark:via-zinc-800/60 dark:to-zinc-800/80 rounded-xl border border-blue-100 dark:border-zinc-700 p-3 sm:p-4">
       <div className="flex flex-col gap-3">
         {/* Header Row */}
         <div className="flex items-center justify-between gap-2">
