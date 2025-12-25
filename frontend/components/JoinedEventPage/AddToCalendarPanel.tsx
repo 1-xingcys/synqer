@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { ConfirmedTimeRange } from "@/types/event";
-import { format } from "date-fns";
 
 interface AddToCalendarPanelProps {
   eventTitle: string;
@@ -160,13 +159,29 @@ export function AddToCalendarPanel({
     const start = new Date(range.startTime);
     const end = new Date(range.endTime);
 
-    // Check if same day
-    const sameDay = format(start, "yyyy-MM-dd") === format(end, "yyyy-MM-dd");
+    // 後端使用 UTC 時間儲存，前端顯示時也要用 UTC
+    const dateFormatter = new Intl.DateTimeFormat("en", {
+      month: "numeric",
+      day: "numeric",
+      weekday: "short",
+      timeZone: "UTC",
+    });
+    const timeFormatter = new Intl.DateTimeFormat("en", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "UTC",
+    });
+
+    const sameDay =
+      start.getUTCFullYear() === end.getUTCFullYear() &&
+      start.getUTCMonth() === end.getUTCMonth() &&
+      start.getUTCDate() === end.getUTCDate();
 
     if (sameDay) {
-      return `${format(start, "M/d (EEE)")} ${format(start, "HH:mm")} - ${format(end, "HH:mm")}`;
+      return `${dateFormatter.format(start)} ${timeFormatter.format(start)} - ${timeFormatter.format(end)}`;
     }
-    return `${format(start, "M/d HH:mm")} - ${format(end, "M/d HH:mm")}`;
+    return `${dateFormatter.format(start)} ${timeFormatter.format(start)} - ${dateFormatter.format(end)} ${timeFormatter.format(end)}`;
   };
 
   return (
