@@ -7,8 +7,8 @@ import nestjsTyped from '@darraghor/eslint-plugin-nestjs-typed';
 
 export default tseslint.config(
   {
-    // 忽略 eslint 配置檔案本身
-    ignores: ['eslint.config.mjs'],
+    // 忽略 eslint 配置檔案本身和測試檔案
+    ignores: ['eslint.config.mjs', '**/*.spec.ts', '**/*.e2e-spec.ts'],
   },
   // 使用 ESLint 推薦的基本規則
   eslint.configs.recommended,
