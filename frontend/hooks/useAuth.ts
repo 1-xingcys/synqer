@@ -22,9 +22,11 @@ export function useAuth() {
         throw new Error("NEXT_PUBLIC_API is not set");
       }
 
+      log("Fetching /auth/me...");
       const response = await fetch(`${process.env.NEXT_PUBLIC_API}/auth/me`, {
         credentials: "include",
       });
+      log("/auth/me response", { status: response.status });
 
       if (response.ok) {
         const userData = (await response.json()) as User;
@@ -34,12 +36,21 @@ export function useAuth() {
         return;
       }
 
+      log("Session invalid, checking LIFF...", {
+        liffAttempted: liffAttemptedRef.current,
+        liffEnabled: isLiffEnabled(),
+        liffId: process.env.NEXT_PUBLIC_LINE_LIFF_ID,
+      });
+
       if (!liffAttemptedRef.current && isLiffEnabled()) {
         liffAttemptedRef.current = true;
 
+        log("Initializing LIFF...");
         const liffState = await initializeLiff();
+        log("LIFF state", liffState);
 
         if (!liffState.isInitialized) {
+          log("LIFF init failed", { error: liffState.error?.message });
           setUser(null);
           setLoading(false);
           return;
@@ -53,9 +64,12 @@ export function useAuth() {
         }
 
         if (liffState.isLoggedIn) {
+          log("LIFF logged in, getting access token...");
           const accessToken = await getLiffAccessToken();
+          log("Access token", { hasToken: !!accessToken });
 
           if (accessToken) {
+            log("Calling /auth/liff/login...");
             const loginResponse = await fetch(
               `${process.env.NEXT_PUBLIC_API}/auth/liff/login`,
               {
@@ -65,6 +79,7 @@ export function useAuth() {
                 body: JSON.stringify({ accessToken }),
               },
             );
+            log("/auth/liff/login response", { status: loginResponse.status });
 
             if (loginResponse.ok) {
               const userData = (await loginResponse.json()) as User;
@@ -72,14 +87,25 @@ export function useAuth() {
               setUser(userData);
               setLoading(false);
               return;
+            } else {
+              const errorText = await loginResponse.text();
+              log("LIFF login failed", {
+                status: loginResponse.status,
+                error: errorText,
+              });
             }
           }
+        } else {
+          log("LIFF not logged in and not in client", {
+            isInClient: liffState.isInClient,
+          });
         }
 
         setUser(null);
         setLoading(false);
         return;
       } else {
+        log("LIFF already attempted or not enabled");
         setUser(null);
         setLoading(false);
       }
