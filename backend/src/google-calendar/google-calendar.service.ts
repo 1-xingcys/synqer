@@ -434,14 +434,15 @@ export class GoogleCalendarService {
 
     for (const slot of event.slots) {
       // Convert slot time to actual datetime
+      // 使用 setUTCHours 確保在任何伺服器時區都能正確處理時間
       const slotDate = new Date(slot.date);
       const slotStart = new Date(slotDate);
-      slotStart.setHours(0, 0, 0, 0);
-      slotStart.setMinutes(slot.startMinute);
+      slotStart.setUTCHours(0, 0, 0, 0);
+      slotStart.setUTCMinutes(slot.startMinute);
 
       const slotEnd = new Date(slotDate);
-      slotEnd.setHours(0, 0, 0, 0);
-      slotEnd.setMinutes(slot.endMinute);
+      slotEnd.setUTCHours(0, 0, 0, 0);
+      slotEnd.setUTCMinutes(slot.endMinute);
 
       // Check if any calendar event conflicts with this slot
       for (const calEvent of calendarEvents) {

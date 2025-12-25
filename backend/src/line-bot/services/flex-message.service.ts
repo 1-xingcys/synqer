@@ -508,43 +508,48 @@ export class FlexMessageService {
 
   /**
    * 格式化日期時間
+   * 使用 UTC 方法確保在任何伺服器時區都能正確處理時間
    */
   private formatDateTime(date: Date): string {
     const d = new Date(date);
-    const month = d.getMonth() + 1;
-    const day = d.getDate();
-    const hours = d.getHours().toString().padStart(2, '0');
-    const minutes = d.getMinutes().toString().padStart(2, '0');
+    const month = d.getUTCMonth() + 1;
+    const day = d.getUTCDate();
+    const hours = d.getUTCHours().toString().padStart(2, '0');
+    const minutes = d.getUTCMinutes().toString().padStart(2, '0');
     const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-    const weekday = weekdays[d.getDay()];
+    const weekday = weekdays[d.getUTCDay()];
 
     return `${month}/${day}（${weekday}）${hours}:${minutes}`;
   }
 
   /**
    * 格式化日期時間範圍
+   * 使用 UTC 方法確保在任何伺服器時區都能正確處理時間
    */
   private formatDateTimeRange(start: Date, end: Date): string {
     const startDate = new Date(start);
     const endDate = new Date(end);
 
-    const month = startDate.getMonth() + 1;
-    const day = startDate.getDate();
+    const month = startDate.getUTCMonth() + 1;
+    const day = startDate.getUTCDate();
     const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
-    const weekday = weekdays[startDate.getDay()];
+    const weekday = weekdays[startDate.getUTCDay()];
 
-    const startHours = startDate.getHours().toString().padStart(2, '0');
-    const startMinutes = startDate.getMinutes().toString().padStart(2, '0');
-    const endHours = endDate.getHours().toString().padStart(2, '0');
-    const endMinutes = endDate.getMinutes().toString().padStart(2, '0');
+    const startHours = startDate.getUTCHours().toString().padStart(2, '0');
+    const startMinutes = startDate.getUTCMinutes().toString().padStart(2, '0');
+    const endHours = endDate.getUTCHours().toString().padStart(2, '0');
+    const endMinutes = endDate.getUTCMinutes().toString().padStart(2, '0');
 
     // 檢查是否跨天
-    if (startDate.toDateString() === endDate.toDateString()) {
+    if (
+      startDate.toUTCString().slice(0, 16) ===
+      endDate.toUTCString().slice(0, 16)
+    ) {
       return `${month}/${day}（${weekday}）${startHours}:${startMinutes} ~ ${endHours}:${endMinutes}`;
     } else {
-      const endMonth = endDate.getMonth() + 1;
-      const endDay = endDate.getDate();
-      const endWeekday = weekdays[endDate.getDay()];
+      const endMonth = endDate.getUTCMonth() + 1;
+      const endDay = endDate.getUTCDate();
+      const endWeekday = weekdays[endDate.getUTCDay()];
       return `${month}/${day}（${weekday}）${startHours}:${startMinutes} ~ ${endMonth}/${endDay}（${endWeekday}）${endHours}:${endMinutes}`;
     }
   }
