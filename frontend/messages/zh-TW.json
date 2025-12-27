@@ -324,6 +324,7 @@
       "selectedParticipants": "已選擇的參與者",
       "selectedCount": "已選擇 {count} 位參與者",
       "selected": "已加入",
+      "joinedViaLink": "透過連結加入",
       "notSelected": "未加入",
       "removeParticipant": "移除",
       "saveParticipants": "儲存參與者",

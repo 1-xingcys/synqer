@@ -324,6 +324,7 @@
       "selectedParticipants": "Selected Participants",
       "selectedCount": "{count} participants selected",
       "selected": "Added",
+      "joinedViaLink": "Joined via link",
       "notSelected": "Not added",
       "removeParticipant": "Remove",
       "saveParticipants": "Save Participants",

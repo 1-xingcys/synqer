@@ -19,12 +19,12 @@ interface LineGroupParticipantsViewProps {
   onAddMember: (member: LineGroupMember) => void;
   members: LineGroupMember[];
   selectedParticipants: SelectedParticipant[];
-  onRemoveParticipant: (index: number) => void;
   saving: boolean;
   saveSuccess: boolean;
   onSave: () => void;
   isHost: (userId?: string) => boolean;
   hasUnsavedChanges: boolean;
+  getRemoveHandler: (item: ParticipantListItem) => (() => void) | undefined;
 }
 
 export function LineGroupParticipantsView({
@@ -35,21 +35,25 @@ export function LineGroupParticipantsView({
   onAddMember,
   members,
   selectedParticipants,
-  onRemoveParticipant,
   saving,
   saveSuccess,
   onSave,
   isHost,
   hasUnsavedChanges,
+  getRemoveHandler,
 }: LineGroupParticipantsViewProps) {
   const t = useTranslations();
 
-  // Show selected first, then unselected
-  const selectedInGroup = filteredLineGroupList.filter(
-    (item) => item.isSelected,
+  // Separate selected participants: from group vs joined via link
+  const selectedFromGroup = filteredLineGroupList.filter(
+    (item) => item.isSelected && item.isFromGroup,
   );
+  const selectedViaLink = filteredLineGroupList.filter(
+    (item) => item.isSelected && !item.isFromGroup,
+  );
+  // Unselected members (only group members can be added)
   const unselectedInGroup = filteredLineGroupList.filter(
-    (item) => !item.isSelected,
+    (item) => !item.isSelected && item.isFromGroup,
   );
 
   return (
@@ -74,19 +78,19 @@ export function LineGroupParticipantsView({
         </div>
       ) : (
         <div className="p-2">
-          {/* Selected Members */}
-          {selectedInGroup.length > 0 && (
+          {hasUnsavedChanges && <UnsavedChangesBadge />}
+
+          {/* Selected Members from Group */}
+          {selectedFromGroup.length > 0 && (
             <>
-              {hasUnsavedChanges && <UnsavedChangesBadge />}
               <SectionSeparator label={t("hosted.participantsPage.selected")} />
-              {selectedInGroup.map((item) => {
+              {selectedFromGroup.map((item) => {
                 // Find the corresponding selected participant to get hasVoted
                 const selectedP = selectedParticipants.find(
                   (p) =>
                     p.lineUserId === item.lineUserId ||
                     (item.userId && p.userId === item.userId),
                 );
-                const participantIsHost = isHost(item.userId);
                 return (
                   <ParticipantRow
                     key={item.id}
@@ -97,26 +101,38 @@ export function LineGroupParticipantsView({
                     hasVoted={selectedP?.hasVoted}
                     showStatus={true}
                     variant="selected"
-                    isHost={participantIsHost}
-                    onRemove={
-                      participantIsHost
-                        ? undefined
-                        : () => {
-                            const idx = selectedParticipants.findIndex(
-                              (p) =>
-                                p.lineUserId === item.lineUserId ||
-                                (item.userId && p.userId === item.userId),
-                            );
-                            if (idx !== -1) onRemoveParticipant(idx);
-                          }
-                    }
+                    isHost={isHost(item.userId)}
+                    onRemove={getRemoveHandler(item)}
                   />
                 );
               })}
             </>
           )}
 
-          {/* Unselected Members */}
+          {/* Selected Members via Link (not in group) */}
+          {selectedViaLink.length > 0 && (
+            <>
+              <SectionSeparator
+                label={t("hosted.participantsPage.joinedViaLink")}
+              />
+              {selectedViaLink.map((item) => (
+                <ParticipantRow
+                  key={item.id}
+                  displayName={item.displayName}
+                  pictureUrl={item.pictureUrl}
+                  isSelected={true}
+                  isRegistered={item.isRegistered}
+                  hasVoted={item.hasVoted}
+                  showStatus={true}
+                  variant="selected"
+                  isHost={isHost(item.userId)}
+                  onRemove={getRemoveHandler(item)}
+                />
+              ))}
+            </>
+          )}
+
+          {/* Unselected Members (only group members) */}
           {unselectedInGroup.length > 0 && (
             <>
               <SectionSeparator

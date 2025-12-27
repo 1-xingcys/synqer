@@ -22,9 +22,9 @@ export function LineGroupParticipants() {
     filteredLineGroupList,
     setSearchQuery,
     addMember,
-    removeParticipant,
     saveParticipants,
     isHost,
+    getRemoveHandler,
   } = useLineGroupParticipantsState(eventId);
 
   if (eventLoading) {
@@ -57,12 +57,12 @@ export function LineGroupParticipants() {
         onAddMember={addMember}
         members={members}
         selectedParticipants={selectedParticipants}
-        onRemoveParticipant={removeParticipant}
         saving={saving}
         saveSuccess={saveSuccess}
         onSave={() => void saveParticipants()}
         isHost={isHost}
         hasUnsavedChanges={hasUnsavedChanges}
+        getRemoveHandler={getRemoveHandler}
       />
     </div>
   );

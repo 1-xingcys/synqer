@@ -161,6 +161,9 @@ export function useLineGroupParticipantsState(eventId: string) {
   const lineGroupParticipantList = useMemo((): ParticipantListItem[] => {
     const list: ParticipantListItem[] = [];
 
+    // Track which selected participants are from the group
+    const includedParticipantKeys = new Set<string>();
+
     // Add all members with selection status
     members.forEach((member) => {
       const selected = isSelected(member.lineUserId, member.linkedUser?.id);
@@ -173,11 +176,45 @@ export function useLineGroupParticipantsState(eventId: string) {
         pictureUrl: member.linkedUser?.avatarUrl || member.pictureUrl,
         isSelected: selected,
         isRegistered: member.isLinked,
+        isFromGroup: true,
       });
+
+      // Track this member as included
+      if (member.lineUserId) {
+        includedParticipantKeys.add(`line:${member.lineUserId}`);
+      }
+      if (member.linkedUser?.id) {
+        includedParticipantKeys.add(`user:${member.linkedUser.id}`);
+      }
+    });
+
+    // Add selected participants who are NOT in the group (joined via link)
+    selectedParticipants.forEach((participant) => {
+      const isIncluded =
+        (participant.lineUserId &&
+          includedParticipantKeys.has(`line:${participant.lineUserId}`)) ||
+        (participant.userId &&
+          includedParticipantKeys.has(`user:${participant.userId}`));
+
+      if (!isIncluded) {
+        list.push({
+          id:
+            participant.id ||
+            `external-${participant.lineUserId || participant.userId}`,
+          lineUserId: participant.lineUserId,
+          userId: participant.userId,
+          displayName: participant.displayName,
+          pictureUrl: participant.pictureUrl,
+          isSelected: true,
+          isRegistered: !!participant.userId, // Has userId means registered
+          hasVoted: participant.hasVoted,
+          isFromGroup: false,
+        });
+      }
     });
 
     return list;
-  }, [members, isSelected]);
+  }, [members, isSelected, selectedParticipants]);
 
   // Filter list based on search query
   const filteredLineGroupList = useMemo(() => {
@@ -203,6 +240,22 @@ export function useLineGroupParticipantsState(eventId: string) {
     );
   }, [selectedParticipants, initialParticipants]);
 
+  // Get remove handler for a participant (returns undefined if host)
+  const getRemoveHandler = useCallback(
+    (item: ParticipantListItem) => {
+      if (isHost(item.userId)) return undefined;
+      return () => {
+        const idx = selectedParticipants.findIndex(
+          (p) =>
+            p.lineUserId === item.lineUserId ||
+            (item.userId && p.userId === item.userId),
+        );
+        if (idx !== -1) removeParticipant(idx);
+      };
+    },
+    [isHost, selectedParticipants, removeParticipant],
+  );
+
   return {
     eventData,
     eventLoading,
@@ -216,10 +269,10 @@ export function useLineGroupParticipantsState(eventId: string) {
     filteredLineGroupList,
     setSearchQuery,
     addMember,
-    removeParticipant,
     addAllMembers,
     saveParticipants,
     isSelected,
     isHost,
+    getRemoveHandler,
   };
 }
