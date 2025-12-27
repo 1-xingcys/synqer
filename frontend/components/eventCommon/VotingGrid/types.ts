@@ -1,3 +1,5 @@
+import { VoteMode } from "@/types/event";
+
 export interface TimeSlot {
   id: string;
   date: string;
@@ -36,8 +38,6 @@ export interface CalendarEvent {
   endTime: string;
   isAllDay: boolean;
 }
-
-export type VoteMode = "available" | "unavailable";
 
 export interface GridPosition {
   dateIndex: number;

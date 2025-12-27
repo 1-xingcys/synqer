@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { TimeSlot, VoteMode, CalendarEvent } from "../types";
+import { TimeSlot, CalendarEvent } from "../types";
+import { VoteMode } from "@/types/event";
 import { formatEventTime } from "../utils";
 
 interface MergedRectBounds {
@@ -110,13 +111,13 @@ export function TimeSlotCell({
   // Determine background color based on selection state and vote mode
   const getBackgroundClass = () => {
     if (isSelected) {
-      return voteMode === "available"
+      return voteMode === VoteMode.AVAILABLE
         ? "bg-emerald-500 dark:bg-emerald-600"
         : "bg-rose-500 dark:bg-rose-600";
     }
     if (isPartiallySelected) {
       // Striped pattern for partial selection
-      return voteMode === "available"
+      return voteMode === VoteMode.AVAILABLE
         ? "bg-emerald-200 dark:bg-emerald-800/50"
         : "bg-rose-200 dark:bg-rose-800/50";
     }
@@ -149,7 +150,7 @@ export function TimeSlotCell({
           className="absolute inset-0 pointer-events-none opacity-30"
           style={{
             backgroundImage:
-              voteMode === "available"
+              voteMode === VoteMode.AVAILABLE
                 ? "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(16, 185, 129, 0.4) 4px, rgba(16, 185, 129, 0.4) 8px)"
                 : "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(244, 63, 94, 0.4) 4px, rgba(244, 63, 94, 0.4) 8px)",
           }}
@@ -225,11 +226,11 @@ export function TimeSlotCell({
         <div
           className={`absolute bottom-1 right-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
             isSelected
-              ? voteMode === "available"
+              ? voteMode === VoteMode.AVAILABLE
                 ? "bg-emerald-600 dark:bg-emerald-700 text-white"
                 : "bg-rose-600 dark:bg-rose-700 text-white"
               : isPartiallySelected
-                ? voteMode === "available"
+                ? voteMode === VoteMode.AVAILABLE
                   ? "bg-emerald-400 dark:bg-emerald-600 text-white"
                   : "bg-rose-400 dark:bg-rose-600 text-white"
                 : "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400"

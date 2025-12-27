@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback } from "react";
-import { TimeSlot, VoteMode, GridPosition } from "../types";
+import { TimeSlot, GridPosition } from "../types";
+import { VoteMode } from "@/types/event";
 import { useSlotGrid } from "./useSlotGrid";
 import { useSlotSelection } from "./useSlotSelection";
 import { useDragSelection } from "./useDragSelection";

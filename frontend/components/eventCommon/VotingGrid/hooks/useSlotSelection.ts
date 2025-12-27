@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { TimeSlot, VoteMode } from "../types";
+import { TimeSlot } from "../types";
+import { VoteMode } from "@/types/event";
 
 interface UseSlotSelectionProps {
   slots: TimeSlot[];
@@ -32,7 +33,7 @@ export function useSlotSelection({
   const [selectedSlots, setSelectedSlots] = useState<Set<string>>(
     new Set(initialSelectedIds),
   );
-  const [voteMode, setVoteModeState] = useState<VoteMode>("available");
+  const [voteMode, setVoteModeState] = useState<VoteMode>(VoteMode.AVAILABLE);
 
   // Check if a day is fully selected
   const isDayFullySelected = useCallback(
@@ -95,7 +96,7 @@ export function useSlotSelection({
   // Apply conflicts from calendar
   const applyConflicts = useCallback(
     (conflictingSlotIds: string[]) => {
-      if (voteMode === "unavailable") {
+      if (voteMode === VoteMode.UNAVAILABLE) {
         setSelectedSlots((prev) => {
           const newSelection = new Set(prev);
           conflictingSlotIds.forEach((id) => newSelection.add(id));

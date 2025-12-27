@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { VoteMode } from "../types";
+import { VoteMode } from "@/types/event";
 
 interface VoteModeToggleProps {
   voteMode: VoteMode;
@@ -19,9 +19,9 @@ export function VoteModeToggle({
       {/* Toggle buttons */}
       <div className="inline-flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
         <button
-          onClick={() => onModeChange("available")}
+          onClick={() => onModeChange(VoteMode.AVAILABLE)}
           className={`w-12 h-8 sm:w-auto sm:h-auto flex items-center justify-center gap-1.5 sm:gap-2 sm:px-3 sm:py-1.5 rounded-md text-sm font-medium transition-all ${
-            voteMode === "available"
+            voteMode === VoteMode.AVAILABLE
               ? "bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
               : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
           }`}
@@ -44,9 +44,9 @@ export function VoteModeToggle({
           </span>
         </button>
         <button
-          onClick={() => onModeChange("unavailable")}
+          onClick={() => onModeChange(VoteMode.UNAVAILABLE)}
           className={`w-12 h-8 sm:w-auto sm:h-auto flex items-center justify-center gap-1.5 sm:gap-2 sm:px-3 sm:py-1.5 rounded-md text-sm font-medium transition-all ${
-            voteMode === "unavailable"
+            voteMode === VoteMode.UNAVAILABLE
               ? "bg-white dark:bg-zinc-900 text-rose-600 dark:text-rose-400 shadow-sm"
               : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
           }`}
@@ -72,7 +72,7 @@ export function VoteModeToggle({
 
       {/* Mobile description text - absolute positioned */}
       <p className="sm:hidden absolute left-0 top-full text-xs whitespace-nowrap">
-        {voteMode === "available" ? (
+        {voteMode === VoteMode.AVAILABLE ? (
           <span className="text-emerald-600 dark:text-emerald-400">
             {tJoined("voteModeAvailableDesc")}
           </span>

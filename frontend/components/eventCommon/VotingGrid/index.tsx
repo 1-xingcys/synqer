@@ -2,13 +2,7 @@
 
 import { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import {
-  VotingGridProps,
-  Vote,
-  VoteMode,
-  TimeGranularity,
-  CalendarEvent,
-} from "./types";
+import { VotingGridProps, Vote, TimeGranularity, CalendarEvent } from "./types";
 import {
   useVotingSelection,
   useCalendarIntegration,
@@ -28,7 +22,7 @@ import {
   GranularitySelector,
 } from "./ui";
 
-export type { VotingGridProps, VoteMode };
+export type { VotingGridProps };
 
 // Hook to calculate dates per page and slot height based on screen width
 function useResponsiveGrid() {

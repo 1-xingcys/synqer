@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { VoteMode, CalendarEvent } from "../types";
+import { CalendarEvent } from "../types";
+import { VoteMode } from "@/types/event";
 
 interface GridLegendProps {
   voteMode: VoteMode;
@@ -18,7 +19,7 @@ export function GridLegend({
 
   return (
     <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs text-gray-500 dark:text-zinc-400">
-      {voteMode === "available" ? (
+      {voteMode === VoteMode.AVAILABLE ? (
         <>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-emerald-500 dark:bg-emerald-600" />
