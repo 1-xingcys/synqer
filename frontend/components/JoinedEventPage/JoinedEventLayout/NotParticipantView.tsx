@@ -8,10 +8,7 @@ interface NotParticipantViewProps {
   eventTitle?: string;
 }
 
-export function NotParticipantView({
-  eventId,
-  eventTitle,
-}: NotParticipantViewProps) {
+export function NotParticipantView({ eventTitle }: NotParticipantViewProps) {
   const t = useTranslations();
 
   return (
