@@ -2,17 +2,14 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import EventRow, {
-  EventRowData,
-  HostedEventRowData,
-  EventCategory,
-} from "./EventRow";
+import EventRow, { EventRowData, HostedEventRowData } from "./EventRow";
 import { ChevronRight } from "lucide-react";
+import { EventStatus } from "@/types/event";
 
 interface EventSectionProps {
   title: string;
   events: (EventRowData | HostedEventRowData)[];
-  category: EventCategory;
+  category: EventStatus;
   showViewMore?: boolean;
   viewMoreHref?: string;
   limit?: number;
@@ -39,11 +36,11 @@ export default function EventSection({
     return null;
   }
 
-  const categoryTitles: Record<EventCategory, string> = {
-    voting: t("tabs.voting"),
-    votingEnded: t("tabs.votingEnded"),
-    confirmed: t("tabs.confirmed"),
-    completed: t("tabs.completed"),
+  const categoryTitles: Record<EventStatus, string> = {
+    [EventStatus.VOTING]: t("tabs.voting"),
+    [EventStatus.VOTING_ENDED]: t("tabs.votingEnded"),
+    [EventStatus.CONFIRMED]: t("tabs.confirmed"),
+    [EventStatus.COMPLETED]: t("tabs.completed"),
   };
 
   return (

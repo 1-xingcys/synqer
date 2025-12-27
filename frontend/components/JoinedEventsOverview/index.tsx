@@ -5,6 +5,7 @@ export {
   EventListWithPagination,
   EmptyState,
   EventsLayout,
+  EventStatus,
 } from "@/components/eventCommon/EventsOverview";
 
 // Re-export types from eventCommon
@@ -12,7 +13,6 @@ export type {
   EventRowData,
   HostedEventRowData,
   EventRowHost,
-  EventCategory,
 } from "@/components/eventCommon/EventsOverview";
 
 // Export joined-specific components

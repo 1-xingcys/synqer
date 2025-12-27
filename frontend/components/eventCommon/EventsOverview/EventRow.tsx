@@ -15,6 +15,7 @@ import {
   AttendedEventListItem,
   EventListItem,
   ConfirmedTimeRange,
+  EventStatus,
 } from "@/types/event";
 import {
   Check,
@@ -48,15 +49,9 @@ export interface HostedEventRowData extends EventListItem {
   votedCount?: number;
 }
 
-export type EventCategory =
-  | "voting"
-  | "votingEnded"
-  | "confirmed"
-  | "completed";
-
 interface EventRowProps {
   event: EventRowData | HostedEventRowData;
-  variant: EventCategory;
+  variant: EventStatus;
   mode?: "joined" | "hosted";
   translationNamespace?: string;
 }
@@ -120,7 +115,7 @@ export default function EventRow({
 
   // Render the status icon based on mode and variant
   const renderStatusIcon = () => {
-    if (isJoined && variant === "voting") {
+    if (isJoined && variant === EventStatus.VOTING) {
       // For joined voting events, show personal vote status
       return (
         <TooltipProvider>
@@ -148,7 +143,7 @@ export default function EventRow({
       );
     }
 
-    if (!isJoined && variant === "voting") {
+    if (!isJoined && variant === EventStatus.VOTING) {
       // For hosted voting events, show voting progress indicator
       const allVoted = votedCount >= expectedCount && expectedCount > 0;
       return (
@@ -178,13 +173,13 @@ export default function EventRow({
     }
 
     // For other variants, show event status icon
-    if (variant === "votingEnded") {
+    if (variant === EventStatus.VOTING_ENDED) {
       return <Clock className="w-4 h-4 text-zinc-400" />;
     }
-    if (variant === "confirmed") {
+    if (variant === EventStatus.CONFIRMED) {
       return <Calendar className="w-4 h-4 text-blue-500" />;
     }
-    if (variant === "completed") {
+    if (variant === EventStatus.COMPLETED) {
       return <CheckCheck className="w-4 h-4 text-emerald-500" />;
     }
     return null;
@@ -251,7 +246,8 @@ export default function EventRow({
 
         {/* Time Range */}
         <div className="text-sm text-zinc-500 dark:text-zinc-400 shrink-0 min-w-[160px]">
-          {variant === "confirmed" || variant === "completed" ? (
+          {variant === EventStatus.CONFIRMED ||
+          variant === EventStatus.COMPLETED ? (
             event.confirmedTimeRanges?.length > 0 ? (
               <ConfirmedTimeDisplay
                 timeRanges={event.confirmedTimeRanges}
@@ -334,7 +330,8 @@ export default function EventRow({
 
               {/* Date */}
               <span>
-                {variant === "confirmed" || variant === "completed" ? (
+                {variant === EventStatus.CONFIRMED ||
+                variant === EventStatus.COMPLETED ? (
                   event.confirmedTimeRanges?.length > 0 ? (
                     <ConfirmedTimeDisplay
                       timeRanges={event.confirmedTimeRanges}

@@ -3,13 +3,11 @@ import { EventStatus } from "@/types/event";
 import { ExtendedHostedEvent, toHostedEventRowData } from "./useHostedEvents";
 import { HostedEventRowData } from "@/components/eventCommon/EventsOverview";
 
-type EventCategory = "voting" | "votingEnded" | "confirmed" | "completed";
-
 interface FilteredHostedEvents {
-  voting: HostedEventRowData[];
-  votingEnded: HostedEventRowData[];
-  confirmed: HostedEventRowData[];
-  completed: HostedEventRowData[];
+  [EventStatus.VOTING]: HostedEventRowData[];
+  [EventStatus.VOTING_ENDED]: HostedEventRowData[];
+  [EventStatus.CONFIRMED]: HostedEventRowData[];
+  [EventStatus.COMPLETED]: HostedEventRowData[];
 }
 
 /**
@@ -22,13 +20,13 @@ interface FilteredHostedEvents {
  */
 function sortHostedEvents(
   events: HostedEventRowData[],
-  category: EventCategory,
+  category: EventStatus,
 ): HostedEventRowData[] {
   const now = new Date().getTime();
 
   return [...events].sort((a, b) => {
     switch (category) {
-      case "voting": {
+      case EventStatus.VOTING: {
         // Events where not everyone has voted come first
         const aAllVoted =
           (a.votedCount ?? 0) >=
@@ -50,14 +48,14 @@ function sortHostedEvents(
         return Math.abs(deadlineA - now) - Math.abs(deadlineB - now);
       }
 
-      case "votingEnded": {
+      case EventStatus.VOTING_ENDED: {
         // By start date (closer to now = higher priority)
         const startA = new Date(a.startDate).getTime();
         const startB = new Date(b.startDate).getTime();
         return Math.abs(startA - now) - Math.abs(startB - now);
       }
 
-      case "confirmed": {
+      case EventStatus.CONFIRMED: {
         // By confirmed start date (closer to now = higher priority)
         // Use the first confirmedTimeRange's startTime
         const confirmedStartA =
@@ -73,7 +71,7 @@ function sortHostedEvents(
         );
       }
 
-      case "completed": {
+      case EventStatus.COMPLETED: {
         // By confirmed end date (closer to now = higher priority)
         // Use the last confirmedTimeRange's endTime
         const confirmedEndA =
@@ -105,10 +103,10 @@ export function useFilteredHostedEvents(
 ): FilteredHostedEvents {
   return useMemo(() => {
     const filtered: FilteredHostedEvents = {
-      voting: [],
-      votingEnded: [],
-      confirmed: [],
-      completed: [],
+      [EventStatus.VOTING]: [],
+      [EventStatus.VOTING_ENDED]: [],
+      [EventStatus.CONFIRMED]: [],
+      [EventStatus.COMPLETED]: [],
     };
 
     // Categorize events by status and convert to row data
@@ -116,26 +114,38 @@ export function useFilteredHostedEvents(
       const rowData = toHostedEventRowData(event);
       switch (event.status) {
         case EventStatus.VOTING:
-          filtered.voting.push(rowData);
+          filtered[EventStatus.VOTING].push(rowData);
           break;
         case EventStatus.VOTING_ENDED:
-          filtered.votingEnded.push(rowData);
+          filtered[EventStatus.VOTING_ENDED].push(rowData);
           break;
         case EventStatus.CONFIRMED:
-          filtered.confirmed.push(rowData);
+          filtered[EventStatus.CONFIRMED].push(rowData);
           break;
         case EventStatus.COMPLETED:
-          filtered.completed.push(rowData);
+          filtered[EventStatus.COMPLETED].push(rowData);
           break;
       }
     });
 
     // Sort each category
     return {
-      voting: sortHostedEvents(filtered.voting, "voting"),
-      votingEnded: sortHostedEvents(filtered.votingEnded, "votingEnded"),
-      confirmed: sortHostedEvents(filtered.confirmed, "confirmed"),
-      completed: sortHostedEvents(filtered.completed, "completed"),
+      [EventStatus.VOTING]: sortHostedEvents(
+        filtered[EventStatus.VOTING],
+        EventStatus.VOTING,
+      ),
+      [EventStatus.VOTING_ENDED]: sortHostedEvents(
+        filtered[EventStatus.VOTING_ENDED],
+        EventStatus.VOTING_ENDED,
+      ),
+      [EventStatus.CONFIRMED]: sortHostedEvents(
+        filtered[EventStatus.CONFIRMED],
+        EventStatus.CONFIRMED,
+      ),
+      [EventStatus.COMPLETED]: sortHostedEvents(
+        filtered[EventStatus.COMPLETED],
+        EventStatus.COMPLETED,
+      ),
     };
   }, [events]);
 }

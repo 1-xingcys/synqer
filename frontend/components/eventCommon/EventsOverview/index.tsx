@@ -10,5 +10,7 @@ export type {
   EventRowData,
   HostedEventRowData,
   EventRowHost,
-  EventCategory,
 } from "./EventRow";
+
+// Re-export EventStatus from types/event for convenience
+export { EventStatus } from "@/types/event";

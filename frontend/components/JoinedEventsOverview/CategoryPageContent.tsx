@@ -3,13 +3,11 @@
 import { useTranslations } from "next-intl";
 import { useAttendedEvents } from "@/hooks/useAttendedEvents";
 import { useFilteredAttendedEvents } from "@/hooks/useFilteredAttendedEvents";
-import {
-  EventListWithPagination,
-  EventCategory,
-} from "@/components/eventCommon/EventsOverview";
+import { EventListWithPagination } from "@/components/eventCommon/EventsOverview";
+import { EventStatus } from "@/types/event";
 
 interface CategoryPageContentProps {
-  category: EventCategory;
+  category: EventStatus;
 }
 
 export default function CategoryPageContent({

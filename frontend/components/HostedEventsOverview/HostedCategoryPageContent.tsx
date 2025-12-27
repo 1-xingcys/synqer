@@ -3,15 +3,13 @@
 import { useTranslations } from "next-intl";
 import { useHostedEvents } from "@/hooks/useHostedEvents";
 import { useFilteredHostedEvents } from "@/hooks/useFilteredHostedEvents";
-import {
-  EventListWithPagination,
-  EventCategory,
-} from "@/components/eventCommon/EventsOverview";
+import { EventListWithPagination } from "@/components/eventCommon/EventsOverview";
+import { EventStatus } from "@/types/event";
 
 const TRANSLATION_NS = "hostedEvents";
 
 interface HostedCategoryPageContentProps {
-  category: EventCategory;
+  category: EventStatus;
 }
 
 export default function HostedCategoryPageContent({
