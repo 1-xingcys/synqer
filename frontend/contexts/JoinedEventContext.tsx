@@ -2,7 +2,7 @@
 
 import { createContext, useContext, ReactNode } from "react";
 import { useEventDetail, EventDetailData } from "@/hooks/useEventDetail";
-import type { VoteMode } from "@/components/JoinedEventPage/VotingGrid";
+import type { VoteMode } from "@/components/joinedEvent/JoinedEventPage/VotingGrid";
 
 interface JoinedEventContextType {
   data: EventDetailData | null;

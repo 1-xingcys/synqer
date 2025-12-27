@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import type { VoteMode } from "@/components/JoinedEventPage/VotingGrid";
+import type { VoteMode } from "@/components/joinedEvent/JoinedEventPage/VotingGrid";
 import {
   EventStatus,
   ConfirmedTimeRange,
