@@ -92,23 +92,13 @@ export class EventQueryService {
   async findAttendedEvents(userId: string) {
     const events = await this.prisma.event.findMany({
       where: {
-        OR: [
-          {
-            votes: {
-              some: {
-                userId,
-              },
-            },
+        // 只顯示使用者是未被移除的預期參與者的活動
+        expectedParticipants: {
+          some: {
+            userId,
+            isRemoved: false,
           },
-          {
-            expectedParticipants: {
-              some: {
-                userId,
-                isRemoved: false,
-              },
-            },
-          },
-        ],
+        },
       },
       include: {
         expectedParticipants: {
