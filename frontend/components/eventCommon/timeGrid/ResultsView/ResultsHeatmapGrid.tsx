@@ -5,7 +5,10 @@ import { useTranslations, useLocale } from "next-intl";
 import { SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
-import { DatePagination } from "@/components/eventCommon/timeGrid/ui/DatePagination";
+import {
+  DatePagination,
+  GranularitySelector,
+} from "@/components/eventCommon/timeGrid/ui";
 import {
   formatTime,
   formatDateHeader,
@@ -537,21 +540,10 @@ export function ResultsHeatmapGrid({
         <span className="text-xs text-gray-500 dark:text-zinc-400">
           {t("results.granularity")}
         </span>
-        <div className="flex items-center gap-1 bg-gray-100 dark:bg-zinc-800 rounded-lg p-0.5">
-          {([15, 30, 60] as TimeGranularity[]).map((g) => (
-            <button
-              key={g}
-              onClick={() => setGranularity(g)}
-              className={`px-2 py-1 text-xs font-medium rounded-md transition-colors ${
-                granularity === g
-                  ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm"
-                  : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
-              }`}
-            >
-              {g}m
-            </button>
-          ))}
-        </div>
+        <GranularitySelector
+          granularity={granularity}
+          onChange={setGranularity}
+        />
       </div>
 
       {/* Date Pagination */}
