@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { VotingDeadlinePicker } from "@/components/eventCommon/VotingDeadlinePicker";
+import { VotingDeadlinePicker } from "./VotingDeadlinePicker";
 import { useEventSettings } from "./useEventSettings";
 import { DangerZone } from "./DangerZone";
 import { EventStatus } from "@/types/event";
