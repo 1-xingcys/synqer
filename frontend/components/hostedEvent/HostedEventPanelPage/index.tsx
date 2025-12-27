@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
 import { VotingProgress } from "@/components/ui/VotingProgress";
 import { EventStatus } from "@/types/event";
-import ResultsView from "@/components/eventCommon/ResultsView";
+import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
 import { DeadlineCountdown } from "./DeadlineCountdown";
 import { EventTimeSelector } from "./EventTimeSelector";
 import { ConfirmTimeDialog } from "./ConfirmTimeDialog";

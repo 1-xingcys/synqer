@@ -1,6 +1,6 @@
 "use client";
 
-import ResultsView from "@/components/eventCommon/ResultsView";
+import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
 import { useJoinedEventResults } from "./useJoinedEventResults";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorView } from "./ErrorView";
