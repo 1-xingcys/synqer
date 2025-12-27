@@ -1,3 +1,9 @@
+// Re-export shared types from common hooks
+export type {
+  TimeGranularity,
+  MergedTimeRow,
+} from "@/components/eventCommon/hooks";
+
 export interface TimeSlot {
   id: string;
   date: string;
@@ -37,13 +43,4 @@ export interface ResultsViewProps {
   onAddToEventTime?: (info: SlotRangeInfo, availableCount: number) => void;
   // Selected slot IDs to display with border highlight
   selectedSlotIds?: Set<string>;
-}
-
-export type TimeGranularity = 15 | 30 | 60;
-
-export interface MergedTimeRow {
-  startMinute: number;
-  endMinute: number;
-  slotIndices: number[];
-  height: number;
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useMemo, useCallback, useEffect } from "react";
+import { useState, useRef, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { VotingGridProps, Vote, TimeGranularity, CalendarEvent } from "./types";
+import { VotingGridProps, Vote, CalendarEvent } from "./types";
 import {
   useVotingSelection,
   useCalendarIntegration,
@@ -21,46 +21,13 @@ import {
   DatePagination,
   GranularitySelector,
 } from "./ui";
+import {
+  useResponsiveGrid,
+  usePaginatedDates,
+  type TimeGranularity,
+} from "@/components/eventCommon/hooks";
 
 export type { VotingGridProps };
-
-// Hook to calculate dates per page and slot height based on screen width
-function useResponsiveGrid() {
-  const [datesPerPage, setDatesPerPage] = useState(7);
-  const [slotHeight, setSlotHeight] = useState("2.75rem"); // Default to desktop
-
-  useEffect(() => {
-    const calculateValues = () => {
-      const width = window.innerWidth;
-      // sm breakpoint is 640px
-      const isMobile = width < 640;
-
-      // Dates per page
-      let dates = 7;
-      if (width < 400) dates = 5;
-      else if (width < 640) dates = 5;
-      else if (width < 768) dates = 6;
-      else if (width < 1024) dates = 7;
-
-      // Slot height: h-10 (2.5rem) on mobile, h-11 (2.75rem) on desktop
-      const height = isMobile ? "2.5rem" : "2.75rem";
-
-      setDatesPerPage(dates);
-      setSlotHeight(height);
-    };
-
-    calculateValues();
-
-    const handleResize = () => {
-      calculateValues();
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  return { datesPerPage, slotHeight };
-}
 
 export default function VotingGrid({
   slots,
@@ -71,7 +38,6 @@ export default function VotingGrid({
 }: VotingGridProps) {
   const t = useTranslations("event");
   const [saving, setSaving] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
   const [granularity, setGranularity] = useState<TimeGranularity>(15);
   const gridRef = useRef<HTMLDivElement>(null);
   const { datesPerPage, slotHeight } = useResponsiveGrid();
@@ -98,11 +64,11 @@ export default function VotingGrid({
     granularity,
   });
 
-  // Paginated dates (moved up because useMergedRowDragSelection needs it)
-  const paginatedDates = useMemo(() => {
-    const startIdx = currentPage * datesPerPage;
-    return dates.slice(startIdx, startIdx + datesPerPage);
-  }, [dates, currentPage, datesPerPage]);
+  // Use paginated dates hook
+  const { paginatedDates, currentPage, setCurrentPage } = usePaginatedDates({
+    dates,
+    datesPerPage,
+  });
 
   // Use merged row drag selection hook
   const {
@@ -141,14 +107,6 @@ export default function VotingGrid({
     connectCalendar,
     disconnectCalendar,
   } = useCalendarIntegration({ eventId, slots, slotsByDate });
-
-  // Reset page when datesPerPage changes
-  useEffect(() => {
-    const maxPage = Math.max(0, Math.ceil(dates.length / datesPerPage) - 1);
-    if (currentPage > maxPage) {
-      setCurrentPage(maxPage);
-    }
-  }, [datesPerPage, dates.length, currentPage]);
 
   // Group votes by slot
   const votesBySlot = useMemo(() => groupVotesBySlot(votes), [votes]);

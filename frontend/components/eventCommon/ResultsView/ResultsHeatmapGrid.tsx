@@ -1,15 +1,8 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import {
-  TimeSlot,
-  Vote,
-  Participant,
-  TimeGranularity,
-  MergedTimeRow,
-  SlotRangeInfo,
-} from "./types";
+import { TimeSlot, Vote, Participant, SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
 import { DatePagination } from "@/components/eventCommon/VotingGrid/ui/DatePagination";
@@ -18,6 +11,12 @@ import {
   formatDateHeader,
   groupSlotsByDate,
 } from "@/components/eventCommon/VotingGrid/utils";
+import {
+  useResponsiveGrid,
+  usePaginatedDates,
+  useMergedRows,
+  type TimeGranularity,
+} from "@/components/eventCommon/hooks";
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];
@@ -46,132 +45,6 @@ interface SelectionRange {
   endTime: number;
 }
 
-// Hook to calculate merged time rows based on granularity
-function useMergedRows(
-  timeSlots: TimeSlot[],
-  granularity: TimeGranularity,
-): MergedTimeRow[] {
-  return useMemo(() => {
-    if (timeSlots.length === 0) return [];
-    if (granularity === 15) {
-      return timeSlots.map((slot, index) => ({
-        startMinute: slot.startMinute,
-        endMinute: slot.endMinute,
-        slotIndices: [index],
-        height: 1,
-      }));
-    }
-
-    const result: MergedTimeRow[] = [];
-    const startMinute = timeSlots[0].startMinute;
-    const endMinute = timeSlots[timeSlots.length - 1].endMinute;
-
-    const findNextAlignedMinute = (minute: number): number => {
-      const remainder = minute % granularity;
-      if (remainder === 0) return minute;
-      return minute + (granularity - remainder);
-    };
-
-    const firstAlignedMinute = findNextAlignedMinute(startMinute);
-    let currentMinute = startMinute;
-    let currentSlotIndex = 0;
-
-    // Handle leading remainder
-    if (currentMinute < firstAlignedMinute && firstAlignedMinute <= endMinute) {
-      const slotIndices: number[] = [];
-      while (
-        currentSlotIndex < timeSlots.length &&
-        timeSlots[currentSlotIndex].startMinute < firstAlignedMinute
-      ) {
-        slotIndices.push(currentSlotIndex);
-        currentSlotIndex++;
-      }
-      if (slotIndices.length > 0) {
-        result.push({
-          startMinute: currentMinute,
-          endMinute: firstAlignedMinute,
-          slotIndices,
-          height: slotIndices.length,
-        });
-      }
-      currentMinute = firstAlignedMinute;
-    }
-
-    // Handle main aligned chunks
-    while (currentSlotIndex < timeSlots.length) {
-      const chunkStartMinute = currentMinute;
-      const chunkEndMinute = Math.min(currentMinute + granularity, endMinute);
-      const slotsNeeded = granularity / 15;
-      const remainingSlots = timeSlots.length - currentSlotIndex;
-
-      if (
-        remainingSlots >= slotsNeeded &&
-        chunkEndMinute - chunkStartMinute === granularity
-      ) {
-        const slotIndices: number[] = [];
-        for (let i = 0; i < slotsNeeded; i++) {
-          slotIndices.push(currentSlotIndex + i);
-        }
-        result.push({
-          startMinute: chunkStartMinute,
-          endMinute: chunkEndMinute,
-          slotIndices,
-          height: slotsNeeded,
-        });
-        currentSlotIndex += slotsNeeded;
-        currentMinute = chunkEndMinute;
-      } else {
-        const slotIndices: number[] = [];
-        while (currentSlotIndex < timeSlots.length) {
-          slotIndices.push(currentSlotIndex);
-          currentSlotIndex++;
-        }
-        if (slotIndices.length > 0) {
-          result.push({
-            startMinute: chunkStartMinute,
-            endMinute: timeSlots[slotIndices[slotIndices.length - 1]].endMinute,
-            slotIndices,
-            height: slotIndices.length,
-          });
-        }
-        break;
-      }
-    }
-
-    return result;
-  }, [timeSlots, granularity]);
-}
-
-// Hook for responsive grid
-function useResponsiveGrid() {
-  const [datesPerPage, setDatesPerPage] = useState(7);
-  const [slotHeight, setSlotHeight] = useState("2.75rem");
-
-  useEffect(() => {
-    const calculateValues = () => {
-      const width = window.innerWidth;
-      const isMobile = width < 640;
-
-      let dates = 7;
-      if (width < 400) dates = 5;
-      else if (width < 640) dates = 5;
-      else if (width < 768) dates = 6;
-      else if (width < 1024) dates = 7;
-
-      const height = isMobile ? "2.5rem" : "2.75rem";
-
-      setDatesPerPage(dates);
-      setSlotHeight(height);
-    };
-
-    calculateValues();
-    window.addEventListener("resize", calculateValues);
-    return () => window.removeEventListener("resize", calculateValues);
-  }, []);
-
-  return { datesPerPage, slotHeight };
-}
-
 export function ResultsHeatmapGrid({
   slots,
   votes,
@@ -186,7 +59,6 @@ export function ResultsHeatmapGrid({
   const t = useTranslations("joined");
   const locale = useLocale();
   const gridRef = useRef<HTMLDivElement>(null);
-  const [currentPage, setCurrentPage] = useState(0);
   const [granularity, setGranularity] = useState<TimeGranularity>(15);
   const { datesPerPage, slotHeight } = useResponsiveGrid();
 
@@ -214,18 +86,14 @@ export function ResultsHeatmapGrid({
     [dates, slotsByDate],
   );
 
-  // Merged rows for granularity
-  const mergedRows = useMergedRows(timeSlots, granularity);
+  // Merged rows for granularity (using shared hook)
+  const { mergedRows } = useMergedRows({ timeSlots, granularity });
 
-  // Clamp currentPage to valid range
-  const maxPage = Math.max(0, Math.ceil(dates.length / datesPerPage) - 1);
-  const clampedCurrentPage = Math.min(currentPage, maxPage);
-
-  // Paginated dates
-  const paginatedDates = useMemo(() => {
-    const startIdx = clampedCurrentPage * datesPerPage;
-    return dates.slice(startIdx, startIdx + datesPerPage);
-  }, [dates, clampedCurrentPage, datesPerPage]);
+  // Use paginated dates hook (handles page clamping automatically)
+  const { paginatedDates, currentPage, setCurrentPage } = usePaginatedDates({
+    dates,
+    datesPerPage,
+  });
 
   // Filter votes based on selected participants
   const filteredVotes = useMemo(() => {
@@ -707,7 +575,7 @@ export function ResultsHeatmapGrid({
       {/* Date Pagination */}
       <DatePagination
         dates={dates}
-        currentPage={clampedCurrentPage}
+        currentPage={currentPage}
         datesPerPage={datesPerPage}
         onPageChange={setCurrentPage}
       />
