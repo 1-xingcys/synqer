@@ -489,7 +489,13 @@ export default function LandingPage() {
             {/* Mobile Layout - Vertical Timeline (like create event form) */}
             <div className="lg:hidden relative max-w-md mx-auto">
               {/* Vertical connecting line */}
-              <div className="absolute left-5 top-10 bottom-10 w-0.5 bg-linear-to-b from-blue-300 via-amber-300 via-green-300 to-zinc-300 dark:from-blue-700 dark:via-amber-700 dark:via-green-700 dark:to-zinc-600" />
+              <div
+                className="absolute left-5 top-10 bottom-10 w-0.5"
+                style={{
+                  background:
+                    "linear-gradient(to bottom, #93c5fd, #fcd34d, #86efac, #d4d4d8)",
+                }}
+              />
 
               {/* Step 1 */}
               <div className="relative flex items-start gap-4 pb-8">
@@ -637,7 +643,7 @@ export default function LandingPage() {
 
           {/* LINE Integration Section */}
           <div className="pb-24">
-            <div className="bg-gradient-to-br from-[#06C755]/10 to-[#06C755]/5 dark:from-[#06C755]/20 dark:to-[#06C755]/5 rounded-2xl p-8 md:p-12">
+            <div className="bg-linear-to-br from-[#06C755]/10 to-[#06C755]/5 dark:from-[#06C755]/20 dark:to-[#06C755]/5 rounded-2xl p-8 md:p-12">
               <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
                 {/* Text Content */}
                 <div className="flex-1 text-center md:text-left">
