@@ -145,6 +145,12 @@
       "rangeHint": "Showing people available for ALL selected time slots"
     },
     "viewResultsDescription": "View availability analysis",
+    "notParticipant": {
+      "title": "You're not a participant",
+      "description": "You're not currently a participant of this event. Please join the event through the event link to view details.",
+      "joinEvent": "Go to join event",
+      "backToOverview": "Back to event list"
+    },
     "votingProgress": "Voting Progress",
     "votedParticipants": "Voted",
     "pendingParticipants": "Pending",
