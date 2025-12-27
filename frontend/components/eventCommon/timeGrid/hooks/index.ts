@@ -5,3 +5,5 @@ export { useSlotSelection } from "./useSlotSelection";
 export { useDragSelection } from "./useDragSelection";
 export { useMergedRowDragSelection } from "./useMergedRowDragSelection";
 export { useMergedRows } from "./useMergedRows";
+export { useResponsiveGrid } from "./useResponsiveGrid";
+export { usePaginatedDates } from "./usePaginatedDates";

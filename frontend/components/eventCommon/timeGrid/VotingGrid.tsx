@@ -2,12 +2,14 @@
 
 import { useState, useRef, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { VotingGridProps, Vote, CalendarEvent } from "./types";
+import { VotingGridProps, Vote, CalendarEvent, TimeGranularity } from "./types";
 import {
   useVotingSelection,
   useCalendarIntegration,
   useMergedRowDragSelection,
   useMergedRows,
+  useResponsiveGrid,
+  usePaginatedDates,
 } from "./hooks";
 import { groupVotesBySlot, formatTime } from "./utils";
 import {
@@ -21,11 +23,6 @@ import {
   DatePagination,
   GranularitySelector,
 } from "./ui";
-import {
-  useResponsiveGrid,
-  usePaginatedDates,
-} from "@/components/eventCommon/hooks";
-import { TimeGranularity } from "./types";
 
 export type { VotingGridProps };
 

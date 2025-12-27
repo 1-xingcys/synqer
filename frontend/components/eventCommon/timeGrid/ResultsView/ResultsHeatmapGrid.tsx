@@ -11,11 +11,7 @@ import {
   formatDateHeader,
   groupSlotsByDate,
 } from "@/components/eventCommon/timeGrid/utils";
-import {
-  useResponsiveGrid,
-  usePaginatedDates,
-} from "@/components/eventCommon/hooks";
-import { useMergedRows } from "../hooks";
+import { useResponsiveGrid, usePaginatedDates, useMergedRows } from "../hooks";
 import { TimeGranularity } from "../types";
 
 interface ResultsHeatmapGridProps {
