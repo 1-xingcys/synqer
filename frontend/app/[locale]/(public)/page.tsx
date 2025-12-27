@@ -376,7 +376,7 @@ export default function LandingPage() {
             </span>
             <br />
             <span
-              className="bg-clip-text text-transparent bg-[length:200%_auto]"
+              className="bg-clip-text text-transparent bg-size-[200%_auto]"
               style={{
                 backgroundImage:
                   "linear-gradient(to right, #6780c7, #78b0e0, #6780c7)",
@@ -412,7 +412,7 @@ export default function LandingPage() {
               />
               {/* Shine effect */}
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               </div>
               {/* Button content */}
               <span className="relative flex items-center gap-2">
