@@ -1,3 +1,3 @@
-export { LineGroupView } from "./LineGroupView";
-export { SearchView } from "./SearchView";
-export { ReadOnlyView } from "./ReadOnlyView";
+export { LineGroupParticipantsView } from "./LineGroupParticipantsView";
+export { DefaultParticipantsView } from "./DefaultParticipantsView";
+export { ReadOnlyParticipantsView } from "./ReadOnlyParticipantsView";

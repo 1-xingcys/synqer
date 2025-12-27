@@ -11,7 +11,7 @@ import {
 import { SelectedParticipant } from "../types";
 import { SearchedUser } from "@/hooks/useUserSearch";
 
-interface SearchViewProps {
+interface DefaultParticipantsViewProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   searchResults: SearchedUser[];
@@ -27,7 +27,7 @@ interface SearchViewProps {
   hasUnsavedChanges: boolean;
 }
 
-export function SearchView({
+export function DefaultParticipantsView({
   searchQuery,
   onSearchChange,
   searchResults,
@@ -41,7 +41,7 @@ export function SearchView({
   onSave,
   isHost,
   hasUnsavedChanges,
-}: SearchViewProps) {
+}: DefaultParticipantsViewProps) {
   const t = useTranslations();
 
   const isSearching = searchQuery.length >= 2;
