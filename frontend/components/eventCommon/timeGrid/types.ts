@@ -1,10 +1,13 @@
 import { VoteMode } from "@/types/event";
 
-// Re-export shared types from common hooks
-export type {
-  TimeGranularity,
-  MergedTimeRow,
-} from "@/components/eventCommon/hooks";
+export type TimeGranularity = 15 | 30 | 60;
+
+export interface MergedTimeRow {
+  startMinute: number;
+  endMinute: number;
+  slotIndices: number[]; // indices of the original 15-min slots
+  height: number; // relative height (1 = 15min, 2 = 30min, 4 = 60min)
+}
 
 export interface TimeSlot {
   id: string;

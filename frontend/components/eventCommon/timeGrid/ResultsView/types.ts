@@ -1,9 +1,3 @@
-// Re-export shared types from common hooks
-export type {
-  TimeGranularity,
-  MergedTimeRow,
-} from "@/components/eventCommon/hooks";
-
 export interface TimeSlot {
   id: string;
   date: string;

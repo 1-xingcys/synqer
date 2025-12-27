@@ -24,8 +24,8 @@ import {
 import {
   useResponsiveGrid,
   usePaginatedDates,
-  TimeGranularity,
 } from "@/components/eventCommon/hooks";
+import { TimeGranularity } from "./types";
 
 export type { VotingGridProps };
 
