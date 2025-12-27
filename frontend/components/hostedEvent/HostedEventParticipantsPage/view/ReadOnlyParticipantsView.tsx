@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { Crown } from "lucide-react";
+import { StatusBadge } from "@/components/ui/badge";
 import { SelectedParticipant } from "../types";
 
 interface ReadOnlyParticipantsViewProps {
@@ -56,23 +58,35 @@ export function ReadOnlyParticipantsView({
                     )}
                   </div>
 
-                  {/* Name */}
+                  {/* Name and Status */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                       {participant.displayName}
-                      {isHost(participant.userId) && (
-                        <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">
-                          ({t("hosted.participantsPage.host")})
-                        </span>
-                      )}
                     </p>
+                    <div className="mt-0.5">
+                      {participant.hasVoted !== undefined &&
+                        (participant.hasVoted ? (
+                          <StatusBadge
+                            variant="voted"
+                            label={t("hosted.participantsPage.voted")}
+                          />
+                        ) : (
+                          <StatusBadge
+                            variant="notVoted"
+                            label={t("hosted.participantsPage.notVotedYet")}
+                          />
+                        ))}
+                    </div>
                   </div>
 
-                  {/* Voted status */}
-                  {participant.hasVoted && (
-                    <span className="text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
-                      {t("hosted.participantsPage.voted")}
-                    </span>
+                  {/* Host icon */}
+                  {isHost(participant.userId) && (
+                    <div
+                      className="p-1.5 text-amber-500"
+                      title={t("hosted.participantsPage.host")}
+                    >
+                      <Crown className="w-4 h-4" />
+                    </div>
                   )}
                 </div>
               ))}
