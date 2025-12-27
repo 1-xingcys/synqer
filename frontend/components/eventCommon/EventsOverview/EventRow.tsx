@@ -23,7 +23,14 @@ import {
 } from "lucide-react";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { format } from "date-fns";
-import { EventRowProps } from "./types";
+import { EventRowData, HostedEventRowData } from "./types";
+
+interface EventRowProps {
+  event: EventRowData | HostedEventRowData;
+  variant: EventStatus;
+  mode?: "joined" | "hosted";
+  translationNamespace?: string;
+}
 
 export default function EventRow({
   event,

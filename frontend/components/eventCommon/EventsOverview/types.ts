@@ -2,7 +2,6 @@ import {
   AttendedEventListItem,
   EventListItem,
   ConfirmedTimeRange,
-  EventStatus,
 } from "@/types/event";
 
 export interface EventRowHost {
@@ -23,11 +22,4 @@ export interface HostedEventRowData extends EventListItem {
   host?: EventRowHost | null;
   expectedParticipantCount?: number;
   votedCount?: number;
-}
-
-export interface EventRowProps {
-  event: EventRowData | HostedEventRowData;
-  variant: EventStatus;
-  mode?: "joined" | "hosted";
-  translationNamespace?: string;
 }
