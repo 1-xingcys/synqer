@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import EventRow, { EventRowData, HostedEventRowData } from "./EventRow";
+import EventRow from "./EventRow";
+import { EventRowData, HostedEventRowData } from "./types";
 import {
   Pagination,
   PaginationContent,

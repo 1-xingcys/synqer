@@ -11,12 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  AttendedEventListItem,
-  EventListItem,
-  ConfirmedTimeRange,
-  EventStatus,
-} from "@/types/event";
+import { EventStatus } from "@/types/event";
 import {
   Check,
   Clock,
@@ -28,33 +23,7 @@ import {
 } from "lucide-react";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { format } from "date-fns";
-
-export interface EventRowHost {
-  id: string;
-  displayName: string | null;
-  avatarUrl: string | null;
-}
-
-export interface EventRowData extends AttendedEventListItem {
-  host?: EventRowHost | null;
-  expectedParticipantCount?: number;
-  votedCount?: number;
-  confirmedTimeRanges: ConfirmedTimeRange[];
-}
-
-// For hosted events, we use a simpler type (no hasVoted field needed)
-export interface HostedEventRowData extends EventListItem {
-  host?: EventRowHost | null;
-  expectedParticipantCount?: number;
-  votedCount?: number;
-}
-
-interface EventRowProps {
-  event: EventRowData | HostedEventRowData;
-  variant: EventStatus;
-  mode?: "joined" | "hosted";
-  translationNamespace?: string;
-}
+import { EventRowProps } from "./types";
 
 export default function EventRow({
   event,

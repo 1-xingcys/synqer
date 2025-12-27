@@ -2,7 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import EventRow, { EventRowData, HostedEventRowData } from "./EventRow";
+import EventRow from "./EventRow";
+import { EventRowData, HostedEventRowData } from "./types";
 import { ChevronRight } from "lucide-react";
 import { EventStatus } from "@/types/event";
 
