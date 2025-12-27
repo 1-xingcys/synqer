@@ -145,6 +145,12 @@
       "rangeHint": "顯示所有選取時段都有空的人"
     },
     "viewResultsDescription": "查看時段分析",
+    "notParticipant": {
+      "title": "您尚未加入此活動",
+      "description": "您目前不是這個活動的參與者。請透過活動連結加入活動後，才能查看詳細資訊。",
+      "joinEvent": "前往加入活動",
+      "backToOverview": "返回活動列表"
+    },
     "votingProgress": "投票進度",
     "votedParticipants": "已投票",
     "pendingParticipants": "等待中",
@@ -324,6 +330,7 @@
       "selectedParticipants": "已選擇的參與者",
       "selectedCount": "已選擇 {count} 位參與者",
       "selected": "已加入",
+      "joinedViaLink": "透過連結加入",
       "notSelected": "未加入",
       "removeParticipant": "移除",
       "saveParticipants": "儲存參與者",

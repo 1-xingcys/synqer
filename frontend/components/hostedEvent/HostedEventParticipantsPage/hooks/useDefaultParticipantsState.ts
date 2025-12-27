@@ -2,27 +2,16 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
-import {
-  useLineGroupMembers,
-  type LineGroupMember,
-} from "@/hooks/useLineGroups";
 import { useUserSearch, type SearchedUser } from "@/hooks/useUserSearch";
-import { SelectedParticipant, EventMode, ParticipantListItem } from "./types";
+import { SelectedParticipant } from "../types";
 
-export function useParticipantsState(eventId: string) {
+export function useDefaultParticipantsState(eventId: string) {
   const {
     data: eventData,
     loading: eventLoading,
     refetch,
   } = useHostedEventContext();
 
-  // Determine mode based on event's lineGroupId
-  const eventMode: EventMode = eventData?.event.lineGroupId
-    ? "lineGroup"
-    : "search";
-  const lineGroupId = eventData?.event.lineGroupId || null;
-
-  const { members, loading: membersLoading } = useLineGroupMembers(lineGroupId);
   const {
     results: searchResults,
     loading: searchLoading,
@@ -57,10 +46,8 @@ export function useParticipantsState(eventId: string) {
     }
   }, [eventData]);
 
-  // Debounced search for search mode
+  // Debounced search
   useEffect(() => {
-    if (eventMode !== "search") return;
-
     const timer = setTimeout(() => {
       if (searchQuery.length >= 2) {
         void search(searchQuery);
@@ -69,45 +56,20 @@ export function useParticipantsState(eventId: string) {
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, search, clearResults, eventMode]);
+  }, [searchQuery, search, clearResults]);
 
-  // Check if a member/user is already selected
+  // Check if a user is already selected
   const isSelected = useCallback(
-    (lineUserId?: string, userId?: string) => {
-      return selectedParticipants.some(
-        (p) =>
-          (lineUserId && p.lineUserId === lineUserId) ||
-          (userId && p.userId === userId),
-      );
+    (userId?: string) => {
+      return selectedParticipants.some((p) => userId && p.userId === userId);
     },
     [selectedParticipants],
-  );
-
-  // Add a LINE group member
-  const addMember = useCallback(
-    (member: LineGroupMember) => {
-      if (isSelected(member.lineUserId, member.linkedUser?.id)) {
-        return;
-      }
-
-      setSelectedParticipants((prev) => [
-        ...prev,
-        {
-          lineUserId: member.lineUserId,
-          userId: member.linkedUser?.id,
-          displayName:
-            member.linkedUser?.displayName || member.displayName || "Unknown",
-          pictureUrl: member.linkedUser?.avatarUrl || member.pictureUrl,
-        },
-      ]);
-    },
-    [isSelected],
   );
 
   // Add a searched user
   const addUser = useCallback(
     (user: SearchedUser) => {
-      if (isSelected(undefined, user.id)) {
+      if (isSelected(user.id)) {
         return;
       }
 
@@ -120,7 +82,7 @@ export function useParticipantsState(eventId: string) {
         },
       ]);
 
-      // Clear search after adding in search mode
+      // Clear search after adding
       setSearchQuery("");
       clearResults();
     },
@@ -152,23 +114,6 @@ export function useParticipantsState(eventId: string) {
     },
     [isHost],
   );
-
-  // Add all members from group
-  const addAllMembers = useCallback(() => {
-    const newParticipants: SelectedParticipant[] = [];
-    members.forEach((member) => {
-      if (!isSelected(member.lineUserId, member.linkedUser?.id)) {
-        newParticipants.push({
-          lineUserId: member.lineUserId,
-          userId: member.linkedUser?.id,
-          displayName:
-            member.linkedUser?.displayName || member.displayName || "Unknown",
-          pictureUrl: member.linkedUser?.avatarUrl || member.pictureUrl,
-        });
-      }
-    });
-    setSelectedParticipants((prev) => [...prev, ...newParticipants]);
-  }, [members, isSelected]);
 
   // Save participants
   const saveParticipants = useCallback(async () => {
@@ -205,40 +150,6 @@ export function useParticipantsState(eventId: string) {
     }
   }, [eventId, selectedParticipants, refetch]);
 
-  // Build participant list for LINE group mode
-  const lineGroupParticipantList = useMemo((): ParticipantListItem[] => {
-    if (eventMode !== "lineGroup") return [];
-
-    const list: ParticipantListItem[] = [];
-
-    // Add all members with selection status
-    members.forEach((member) => {
-      const selected = isSelected(member.lineUserId, member.linkedUser?.id);
-      list.push({
-        id: member.id,
-        lineUserId: member.lineUserId,
-        userId: member.linkedUser?.id,
-        displayName:
-          member.linkedUser?.displayName || member.displayName || "Unknown",
-        pictureUrl: member.linkedUser?.avatarUrl || member.pictureUrl,
-        isSelected: selected,
-        isRegistered: member.isLinked,
-      });
-    });
-
-    return list;
-  }, [eventMode, members, isSelected]);
-
-  // Filter list based on search query (for LINE group mode)
-  const filteredLineGroupList = useMemo(() => {
-    if (!searchQuery.trim()) return lineGroupParticipantList;
-
-    const query = searchQuery.toLowerCase();
-    return lineGroupParticipantList.filter((p) =>
-      p.displayName.toLowerCase().includes(query),
-    );
-  }, [lineGroupParticipantList, searchQuery]);
-
   // Check if there are unsaved changes
   const hasUnsavedChanges = useMemo(() => {
     if (selectedParticipants.length !== initialParticipants.length) {
@@ -254,13 +165,8 @@ export function useParticipantsState(eventId: string) {
   }, [selectedParticipants, initialParticipants]);
 
   return {
-    // State
     eventData,
     eventLoading,
-    eventMode,
-    lineGroupId,
-    members,
-    membersLoading,
     searchResults,
     searchLoading,
     selectedParticipants,
@@ -268,16 +174,9 @@ export function useParticipantsState(eventId: string) {
     saving,
     saveSuccess,
     hasUnsavedChanges,
-
-    // Computed
-    filteredLineGroupList,
-
-    // Actions
     setSearchQuery,
-    addMember,
     addUser,
     removeParticipant,
-    addAllMembers,
     saveParticipants,
     isSelected,
     isHost,
