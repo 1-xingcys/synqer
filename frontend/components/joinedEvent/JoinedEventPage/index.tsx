@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
-import VotingGrid from "@/components/joinedEvent/JoinedEventPage/VotingGrid";
+import VotingGrid from "@/components/eventCommon/VotingGrid";
 import { EventStatus } from "@/types/event";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { AddToCalendarPanel } from "@/components/joinedEvent/JoinedEventPage/AddToCalendarPanel";
