@@ -19,6 +19,7 @@ export interface ParticipantListItem {
   isSelected: boolean;
   isRegistered: boolean;
   hasVoted?: boolean;
+  isFromGroup: boolean; // 是否為群組成員
 }
 
 export type EventMode = "lineGroup" | "search";

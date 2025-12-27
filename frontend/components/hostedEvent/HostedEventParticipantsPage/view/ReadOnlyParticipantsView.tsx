@@ -4,15 +4,15 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { SelectedParticipant } from "../types";
 
-interface ReadOnlyLayoutProps {
+interface ReadOnlyParticipantsViewProps {
   selectedParticipants: SelectedParticipant[];
   isHost: (userId?: string) => boolean;
 }
 
-export function ReadOnlyLayout({
+export function ReadOnlyParticipantsView({
   selectedParticipants,
   isHost,
-}: ReadOnlyLayoutProps) {
+}: ReadOnlyParticipantsViewProps) {
   const t = useTranslations();
 
   return (
