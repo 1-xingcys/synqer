@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useParticipantsState } from "./useParticipantsState";
-import { ActiveLayout, ReadOnlyLayout } from "./layouts";
+import { LineGroupLayout, SearchLayout, ReadOnlyLayout } from "./layouts";
 import { useEffect } from "react";
 import { EventStatus } from "@/types/event";
 
@@ -86,27 +86,6 @@ export default function HostedEventParticipantsPage() {
     );
   }
 
-  const commonProps = {
-    eventMode,
-    searchQuery,
-    onSearchChange: setSearchQuery,
-    searchResults,
-    searchLoading,
-    onAddUser: addUser,
-    isUserSelected: (userId: string) => isSelected(undefined, userId),
-    filteredLineGroupList,
-    membersLoading,
-    onAddMember: addMember,
-    members,
-    selectedParticipants,
-    onRemoveParticipant: removeParticipant,
-    saving,
-    saveSuccess,
-    onSave: () => void saveParticipants(),
-    isHost,
-    hasUnsavedChanges,
-  };
-
   return (
     <div className="space-y-6 max-w-xl mx-auto">
       {/* Header */}
@@ -121,7 +100,39 @@ export default function HostedEventParticipantsPage() {
         </p>
       </div>
 
-      <ActiveLayout {...commonProps} />
+      {eventMode === "lineGroup" ? (
+        <LineGroupLayout
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filteredLineGroupList={filteredLineGroupList}
+          membersLoading={membersLoading}
+          onAddMember={addMember}
+          members={members}
+          selectedParticipants={selectedParticipants}
+          onRemoveParticipant={removeParticipant}
+          saving={saving}
+          saveSuccess={saveSuccess}
+          onSave={() => void saveParticipants()}
+          isHost={isHost}
+          hasUnsavedChanges={hasUnsavedChanges}
+        />
+      ) : (
+        <SearchLayout
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchResults={searchResults}
+          searchLoading={searchLoading}
+          onAddUser={addUser}
+          isUserSelected={(userId: string) => isSelected(undefined, userId)}
+          selectedParticipants={selectedParticipants}
+          onRemoveParticipant={removeParticipant}
+          saving={saving}
+          saveSuccess={saveSuccess}
+          onSave={() => void saveParticipants()}
+          isHost={isHost}
+          hasUnsavedChanges={hasUnsavedChanges}
+        />
+      )}
     </div>
   );
 }
