@@ -11,14 +11,15 @@ import {
   useResponsiveGrid,
   usePaginatedDates,
 } from "./hooks";
-import { groupVotesBySlot, formatTime } from "./utils";
+import { groupVotesBySlot } from "./utils";
 import {
   VotingHeader,
   VoteModeToggle,
   SelectionInfoBar,
   GridLegend,
   DateHeader,
-  TimeSlotCell,
+  TimeColumn,
+  SlotMatrix,
   GoogleCalendarPanel,
   DatePagination,
   GranularitySelector,
@@ -130,29 +131,6 @@ export default function VotingGrid({
       return Array.from(allVoters);
     },
     [slotsByDate, getVotersForSlot],
-  );
-
-  // Check if all slots in merged row are selected
-  const isMergedRowSelected = useCallback(
-    (slotIndices: number[], dateKey: string): boolean => {
-      return slotIndices.every((idx) => {
-        const slot = slotsByDate[dateKey]?.[idx];
-        return slot && displaySelection.has(slot.id);
-      });
-    },
-    [slotsByDate, displaySelection],
-  );
-
-  // Check if any slot in merged row is selected (partial)
-  const isMergedRowPartiallySelected = useCallback(
-    (slotIndices: number[], dateKey: string): boolean => {
-      const selectedCount = slotIndices.filter((idx) => {
-        const slot = slotsByDate[dateKey]?.[idx];
-        return slot && displaySelection.has(slot.id);
-      }).length;
-      return selectedCount > 0 && selectedCount < slotIndices.length;
-    },
-    [slotsByDate, displaySelection],
   );
 
   // Get rectangle bounds for visual overlay
@@ -303,123 +281,34 @@ export default function VotingGrid({
 
           {/* Time slots grid with time points at boundaries */}
           <div className="flex">
-            {/* Time column - shows time points at boundaries */}
-            <div className="w-9 sm:w-14 shrink-0 relative border-r border-gray-200 dark:border-zinc-700 rounded-l-lg">
-              {mergedRows.map((row, rowIndex) => (
-                <div key={rowIndex} className="h-10 sm:h-11 relative">
-                  {/* Time label at top boundary */}
-                  <span className="absolute -top-2 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
-                    {formatTime(row.startMinute)}
-                  </span>
-                </div>
-              ))}
-              {/* Last time label */}
-              {mergedRows.length > 0 && (
-                <span className="absolute bottom-0.5 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
-                  {formatTime(mergedRows[mergedRows.length - 1].endMinute)}
-                </span>
-              )}
-            </div>
+            {/* Time column */}
+            <TimeColumn mergedRows={mergedRows} />
 
-            {/* Slots grid - CSS variable for slot height used by calendar event overlay */}
-            <div
-              className="flex-1 border border-gray-200 dark:border-zinc-700 rounded-r-lg overflow-hidden"
-              style={{ "--slot-height": slotHeight } as React.CSSProperties}
-            >
-              {mergedRows.map((row, rowIndex) => (
-                <div key={rowIndex} className="flex">
-                  {/* Merged slot cells */}
-                  {paginatedDates.map((dateKey, dateIndex) => {
-                    // Get all slot IDs for this merged row
-                    const slotIds = row.slotIndices
-                      .map((idx) => slotsByDate[dateKey]?.[idx]?.id)
-                      .filter(Boolean);
-
-                    // Use first slot for basic props
-                    const firstSlotIdx = row.slotIndices[0];
-                    const firstSlot = slotsByDate[dateKey]?.[firstSlotIdx];
-
-                    if (!firstSlot) return null;
-
-                    const isSelected = isMergedRowSelected(
-                      row.slotIndices,
-                      dateKey,
-                    );
-                    const isPartiallySelected = isMergedRowPartiallySelected(
-                      row.slotIndices,
-                      dateKey,
-                    );
-                    const voters = getVotersForMergedRow(
-                      row.slotIndices,
-                      dateKey,
-                    );
-                    const isHovered =
-                      hoveredCell?.rowIndex === rowIndex &&
-                      hoveredCell?.dateIndex === dateIndex;
-                    const isLongPressed =
-                      longPressCell?.rowIndex === rowIndex &&
-                      longPressCell?.dateIndex === dateIndex;
-
-                    // Check if this merged cell is in the drag rectangle
-                    const inRectangle = isInDragRectangle(rowIndex, dateIndex);
-
-                    // Get calendar events for all slots in this merged row
-                    const mergedCalendarEvents = row.slotIndices.flatMap(
-                      (idx) => {
-                        const slot = slotsByDate[dateKey]?.[idx];
-                        return slot
-                          ? calendarEventsForSlot.get(slot.id) || []
-                          : [];
-                      },
-                    );
-                    // Deduplicate events by id
-                    const uniqueCalendarEvents = mergedCalendarEvents.filter(
-                      (event, index, self) =>
-                        self.findIndex((e) => e.id === event.id) === index,
-                    );
-
-                    return (
-                      <TimeSlotCell
-                        key={`${dateKey}-${rowIndex}`}
-                        slot={firstSlot}
-                        rowIndex={rowIndex}
-                        dateIndex={dateIndex}
-                        isSelected={isSelected}
-                        isPartiallySelected={isPartiallySelected}
-                        isHovered={isHovered}
-                        isLongPressed={isLongPressed}
-                        isDragging={isDragging}
-                        inRectangle={inRectangle}
-                        mergedRectBounds={mergedRectBounds}
-                        voteMode={voteMode}
-                        voters={voters}
-                        slotCalendarEvents={uniqueCalendarEvents}
-                        showCalendarOnGrid={showCalendarOnGrid}
-                        isEventStartInMergedRow={(event) =>
-                          isEventStartInMergedRow(rowIndex, dateKey, event)
-                        }
-                        getEventSpanInMergedRows={(event) =>
-                          getEventSpanInMergedRows(rowIndex, dateKey, event)
-                        }
-                        mergedSlotIds={slotIds}
-                        onMouseDown={(e) =>
-                          handleMergedMouseDown(rowIndex, dateIndex, e)
-                        }
-                        onMouseEnter={() =>
-                          handleMergedMouseEnter(rowIndex, dateIndex)
-                        }
-                        onTouchStart={(e) =>
-                          handleMergedTouchStart(rowIndex, dateIndex, e)
-                        }
-                        onTouchMove={handleMergedTouchMove}
-                        onTouchEnd={handleMergedTouchEnd}
-                        onClick={() => handleMergedClick(rowIndex, dateIndex)}
-                      />
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+            {/* Slots grid */}
+            <SlotMatrix
+              mergedRows={mergedRows}
+              paginatedDates={paginatedDates}
+              slotsByDate={slotsByDate}
+              displaySelection={displaySelection}
+              voteMode={voteMode}
+              isDragging={isDragging}
+              hoveredCell={hoveredCell}
+              longPressCell={longPressCell}
+              mergedRectBounds={mergedRectBounds}
+              slotHeight={slotHeight}
+              showCalendarOnGrid={showCalendarOnGrid}
+              calendarEventsForSlot={calendarEventsForSlot}
+              isInDragRectangle={isInDragRectangle}
+              getVotersForMergedRow={getVotersForMergedRow}
+              isEventStartInMergedRow={isEventStartInMergedRow}
+              getEventSpanInMergedRows={getEventSpanInMergedRows}
+              onMouseDown={handleMergedMouseDown}
+              onMouseEnter={handleMergedMouseEnter}
+              onTouchStart={handleMergedTouchStart}
+              onTouchMove={handleMergedTouchMove}
+              onTouchEnd={handleMergedTouchEnd}
+              onClick={handleMergedClick}
+            />
           </div>
         </div>
       </div>
