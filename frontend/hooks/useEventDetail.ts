@@ -91,8 +91,7 @@ export function useEventDetail(eventId: string) {
 
       const eventData = (await response.json()) as EventDetailData;
       setData(eventData);
-    } catch (err) {
-      console.error("載入活動失敗:", err);
+    } catch {
       setError("載入活動失敗");
     } finally {
       setLoading(false);
