@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import type { VoteMode } from "@/components/JoinedEventPage/VotingGrid";
 import {
   EventStatus,
   ConfirmedTimeRange,
   ParticipantStatus,
+  VoteMode,
 } from "@/types/event";
 
 interface TimeSlot {
@@ -91,8 +91,7 @@ export function useEventDetail(eventId: string) {
 
       const eventData = (await response.json()) as EventDetailData;
       setData(eventData);
-    } catch (err) {
-      console.error("載入活動失敗:", err);
+    } catch {
       setError("載入活動失敗");
     } finally {
       setLoading(false);
@@ -105,7 +104,7 @@ export function useEventDetail(eventId: string) {
 
   const saveVotes = async (
     selectedSlotIds: string[],
-    voteMode: VoteMode = "available",
+    voteMode: VoteMode = VoteMode.AVAILABLE,
   ) => {
     if (!process.env.NEXT_PUBLIC_API) {
       throw new Error("NEXT_PUBLIC_API is not set");

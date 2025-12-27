@@ -1,3 +1,3 @@
-import JoinedEventLayout from "@/components/JoinedEventPage/JoinedEventLayout";
+import JoinedEventLayout from "@/components/joinedEvent/JoinedEventLayout";
 
 export default JoinedEventLayout;

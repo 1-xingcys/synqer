@@ -26,8 +26,7 @@ export function useMyEvents() {
       const data = (await response.json()) as EventListItem[];
       setEvents(data);
       setError(null);
-    } catch (err) {
-      console.error("Error fetching events:", err);
+    } catch {
       setError("Failed to load events");
     } finally {
       setLoading(false);

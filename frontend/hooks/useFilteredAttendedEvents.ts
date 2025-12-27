@@ -8,13 +8,11 @@ export interface ExtendedAttendedEvent extends AttendedEventListItem {
   votedCount?: number;
 }
 
-type EventCategory = "voting" | "votingEnded" | "confirmed" | "completed";
-
 interface FilteredEvents {
-  voting: ExtendedAttendedEvent[];
-  votingEnded: ExtendedAttendedEvent[];
-  confirmed: ExtendedAttendedEvent[];
-  completed: ExtendedAttendedEvent[];
+  [EventStatus.VOTING]: ExtendedAttendedEvent[];
+  [EventStatus.VOTING_ENDED]: ExtendedAttendedEvent[];
+  [EventStatus.CONFIRMED]: ExtendedAttendedEvent[];
+  [EventStatus.COMPLETED]: ExtendedAttendedEvent[];
 }
 
 /**
@@ -27,13 +25,13 @@ interface FilteredEvents {
  */
 function sortEvents(
   events: ExtendedAttendedEvent[],
-  category: EventCategory,
+  category: EventStatus,
 ): ExtendedAttendedEvent[] {
   const now = new Date().getTime();
 
   return [...events].sort((a, b) => {
     switch (category) {
-      case "voting": {
+      case EventStatus.VOTING: {
         // Unvoted first
         if (a.hasVoted !== b.hasVoted) {
           return a.hasVoted ? 1 : -1;
@@ -49,21 +47,21 @@ function sortEvents(
         return Math.abs(deadlineA - now) - Math.abs(deadlineB - now);
       }
 
-      case "votingEnded": {
+      case EventStatus.VOTING_ENDED: {
         // By start date (closer to now = higher priority)
         const startA = new Date(a.startDate).getTime();
         const startB = new Date(b.startDate).getTime();
         return Math.abs(startA - now) - Math.abs(startB - now);
       }
 
-      case "confirmed": {
+      case EventStatus.CONFIRMED: {
         // By start date (closer to now = higher priority)
         const startA = new Date(a.startDate).getTime();
         const startB = new Date(b.startDate).getTime();
         return Math.abs(startA - now) - Math.abs(startB - now);
       }
 
-      case "completed": {
+      case EventStatus.COMPLETED: {
         // By end date (closer to now = higher priority)
         const endA = new Date(a.endDate).getTime();
         const endB = new Date(b.endDate).getTime();
@@ -84,36 +82,48 @@ export function useFilteredAttendedEvents(
 ): FilteredEvents {
   return useMemo(() => {
     const filtered: FilteredEvents = {
-      voting: [],
-      votingEnded: [],
-      confirmed: [],
-      completed: [],
+      [EventStatus.VOTING]: [],
+      [EventStatus.VOTING_ENDED]: [],
+      [EventStatus.CONFIRMED]: [],
+      [EventStatus.COMPLETED]: [],
     };
 
     // Categorize events by status
     events.forEach((event) => {
       switch (event.status) {
         case EventStatus.VOTING:
-          filtered.voting.push(event);
+          filtered[EventStatus.VOTING].push(event);
           break;
         case EventStatus.VOTING_ENDED:
-          filtered.votingEnded.push(event);
+          filtered[EventStatus.VOTING_ENDED].push(event);
           break;
         case EventStatus.CONFIRMED:
-          filtered.confirmed.push(event);
+          filtered[EventStatus.CONFIRMED].push(event);
           break;
         case EventStatus.COMPLETED:
-          filtered.completed.push(event);
+          filtered[EventStatus.COMPLETED].push(event);
           break;
       }
     });
 
     // Sort each category
     return {
-      voting: sortEvents(filtered.voting, "voting"),
-      votingEnded: sortEvents(filtered.votingEnded, "votingEnded"),
-      confirmed: sortEvents(filtered.confirmed, "confirmed"),
-      completed: sortEvents(filtered.completed, "completed"),
+      [EventStatus.VOTING]: sortEvents(
+        filtered[EventStatus.VOTING],
+        EventStatus.VOTING,
+      ),
+      [EventStatus.VOTING_ENDED]: sortEvents(
+        filtered[EventStatus.VOTING_ENDED],
+        EventStatus.VOTING_ENDED,
+      ),
+      [EventStatus.CONFIRMED]: sortEvents(
+        filtered[EventStatus.CONFIRMED],
+        EventStatus.CONFIRMED,
+      ),
+      [EventStatus.COMPLETED]: sortEvents(
+        filtered[EventStatus.COMPLETED],
+        EventStatus.COMPLETED,
+      ),
     };
   }, [events]);
 }

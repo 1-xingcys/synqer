@@ -30,8 +30,7 @@ export function useHostedEvents() {
       const data = (await response.json()) as ExtendedHostedEvent[];
       setEvents(data);
       setError(null);
-    } catch (err) {
-      console.error("Error fetching hosted events:", err);
+    } catch {
       setError("Failed to load hosted events");
     } finally {
       setLoading(false);

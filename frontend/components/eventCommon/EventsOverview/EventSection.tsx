@@ -2,21 +2,20 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import EventRow, {
-  EventRowData,
-  HostedEventRowData,
-  EventCategory,
-} from "./EventRow";
+import EventRow from "./EventRow";
+import { EventRowData, HostedEventRowData } from "./types";
 import { ChevronRight } from "lucide-react";
+import { EventStatus } from "@/types/event";
+import { EventRowMode } from "./types";
 
 interface EventSectionProps {
   title: string;
   events: (EventRowData | HostedEventRowData)[];
-  category: EventCategory;
+  category: EventStatus;
   showViewMore?: boolean;
   viewMoreHref?: string;
   limit?: number;
-  mode?: "joined" | "hosted";
+  mode?: EventRowMode;
   translationNamespace?: string;
 }
 
@@ -27,7 +26,7 @@ export default function EventSection({
   showViewMore = false,
   viewMoreHref,
   limit,
-  mode = "joined",
+  mode = EventRowMode.JOINED,
   translationNamespace = "joinedEvents",
 }: EventSectionProps) {
   const t = useTranslations(translationNamespace);
@@ -39,11 +38,11 @@ export default function EventSection({
     return null;
   }
 
-  const categoryTitles: Record<EventCategory, string> = {
-    voting: t("tabs.voting"),
-    votingEnded: t("tabs.votingEnded"),
-    confirmed: t("tabs.confirmed"),
-    completed: t("tabs.completed"),
+  const categoryTitles: Record<EventStatus, string> = {
+    [EventStatus.VOTING]: t("tabs.voting"),
+    [EventStatus.VOTING_ENDED]: t("tabs.votingEnded"),
+    [EventStatus.CONFIRMED]: t("tabs.confirmed"),
+    [EventStatus.COMPLETED]: t("tabs.completed"),
   };
 
   return (

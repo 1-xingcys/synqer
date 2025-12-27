@@ -50,7 +50,6 @@ export function useLineGroups() {
       setGroups(data);
       setError(null);
     } catch (err) {
-      console.error("Error fetching LINE groups:", err);
       setError(err instanceof Error ? err.message : "Failed to load groups");
     } finally {
       setLoading(false);
@@ -107,7 +106,6 @@ export function useLineGroupMembers(groupId: string | null) {
         }
       } catch (err) {
         if (!cancelled) {
-          console.error("Error fetching group members:", err);
           setError(
             err instanceof Error ? err.message : "Failed to load members",
           );

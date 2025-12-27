@@ -10,5 +10,5 @@ export type {
   EventRowData,
   HostedEventRowData,
   EventRowHost,
-  EventCategory,
-} from "./EventRow";
+  EventRowMode,
+} from "./types";

@@ -111,7 +111,6 @@ export function useAuth() {
       }
     } catch (error) {
       log("Error", { error: String(error) });
-      console.error("Error fetching user:", error);
       setUser(null);
       setLoading(false);
     }
@@ -134,8 +133,8 @@ export function useAuth() {
       });
       setUser(null);
       window.location.reload();
-    } catch (error) {
-      console.error("Error logging out:", error);
+    } catch {
+      // ignore error
     }
   };
 

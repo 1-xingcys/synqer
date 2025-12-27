@@ -96,7 +96,6 @@ export function useHostedEventDetail(eventId: string) {
       setData(eventData);
       setError(null);
     } catch (err) {
-      console.error("Error loading hosted event:", err);
       setError(err instanceof Error ? err.message : "Failed to load event");
     } finally {
       setLoading(false);
