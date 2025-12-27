@@ -16,7 +16,10 @@ import { TimeGranularity, TimeSlot, Vote, Participant } from "../types";
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];
-  votes: Vote[];
+  /** 已過濾的投票（從 ResultsView 傳入） */
+  filteredVotes: Vote[];
+  /** 根據 slotId 分組的投票（從 ResultsView 傳入） */
+  votesBySlot: Record<string, Vote[]>;
   participants: Participant[];
   selectedParticipants: Set<string>;
   maxVotes: number;
@@ -43,7 +46,8 @@ interface SelectionRange {
 
 export function ResultsHeatmapGrid({
   slots,
-  votes,
+  filteredVotes: _filteredVotes,
+  votesBySlot,
   participants,
   selectedParticipants,
   maxVotes,
@@ -90,24 +94,6 @@ export function ResultsHeatmapGrid({
     dates,
     datesPerPage,
   });
-
-  // Filter votes based on selected participants
-  const filteredVotes = useMemo(() => {
-    if (selectedParticipants.size === 0) return [];
-    return votes.filter((vote) => selectedParticipants.has(vote.userId));
-  }, [votes, selectedParticipants]);
-
-  // Group filtered votes by slot
-  const votesBySlot = useMemo(() => {
-    return filteredVotes.reduce(
-      (acc, vote) => {
-        if (!acc[vote.slotId]) acc[vote.slotId] = [];
-        acc[vote.slotId].push(vote);
-        return acc;
-      },
-      {} as Record<string, Vote[]>,
-    );
-  }, [filteredVotes]);
 
   // Get vote count for merged row (intersection - voters available for ALL slots in the merged row)
   const getVoteCountForMergedRow = useCallback(

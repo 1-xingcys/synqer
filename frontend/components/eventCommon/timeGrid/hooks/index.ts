@@ -7,3 +7,4 @@ export { useMergedRowDragSelection } from "./useMergedRowDragSelection";
 export { useMergedRows } from "./useMergedRows";
 export { useResponsiveGrid } from "./useResponsiveGrid";
 export { usePaginatedDates } from "./usePaginatedDates";
+export { useFilteredVotes } from "./useFilteredVotes";

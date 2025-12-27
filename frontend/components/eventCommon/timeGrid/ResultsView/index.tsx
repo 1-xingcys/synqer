@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { ResultsViewProps, SlotRangeInfo } from "./types";
 import { ParticipantFilter } from "./ParticipantFilter";
 import { HeatMapLegend } from "./HeatMapLegend";
 import { ResultsHeatmapGrid } from "./ResultsHeatmapGrid";
+import { useFilteredVotes } from "../hooks";
 
 export type { ResultsViewProps, SlotRangeInfo };
 
@@ -25,31 +26,11 @@ export default function ResultsView({
     () => new Set(participants.map((p) => p.userId)),
   );
 
-  // Filter votes based on selected participants
-  const filteredVotes = useMemo(() => {
-    if (selectedParticipants.size === 0) return [];
-    return votes.filter((vote) => selectedParticipants.has(vote.userId));
-  }, [votes, selectedParticipants]);
-
-  // Calculate max votes for heatmap scaling
-  const maxVotes = useMemo(() => {
-    if (filteredVotes.length === 0) return 0;
-
-    // Group votes by slot
-    const votesBySlot: Record<string, Set<string>> = {};
-    filteredVotes.forEach((vote) => {
-      if (!votesBySlot[vote.slotId]) {
-        votesBySlot[vote.slotId] = new Set();
-      }
-      votesBySlot[vote.slotId].add(vote.userId);
-    });
-
-    // Find max unique voters per slot
-    return Math.max(
-      ...Object.values(votesBySlot).map((voters) => voters.size),
-      1,
-    );
-  }, [filteredVotes]);
+  // Use hook for filtered votes calculation
+  const { filteredVotes, votesBySlot, maxVotes } = useFilteredVotes({
+    votes,
+    selectedParticipants,
+  });
 
   // Show empty state if no participants selected
   const showEmptyState = selectedParticipants.size === 0;
@@ -115,7 +96,8 @@ export default function ResultsView({
         ) : (
           <ResultsHeatmapGrid
             slots={slots}
-            votes={votes}
+            filteredVotes={filteredVotes}
+            votesBySlot={votesBySlot}
             participants={participants}
             selectedParticipants={selectedParticipants}
             maxVotes={maxVotes}
