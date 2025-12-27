@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
 import { EventStatus } from "@/types/event";
-import VotingGrid from "@/components/eventCommon/VotingGrid";
+import VotingGrid from "@/components/eventCommon/timeGrid";
 import { VotingEndedView } from "./VotingEndedView";
 import { ConfirmedView } from "./ConfirmedView";
 import { CompletedView } from "./CompletedView";

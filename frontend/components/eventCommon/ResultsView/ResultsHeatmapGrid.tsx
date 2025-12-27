@@ -5,12 +5,12 @@ import { useTranslations, useLocale } from "next-intl";
 import { TimeSlot, Vote, Participant, SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
-import { DatePagination } from "@/components/eventCommon/VotingGrid/ui/DatePagination";
+import { DatePagination } from "@/components/eventCommon/timeGrid/ui/DatePagination";
 import {
   formatTime,
   formatDateHeader,
   groupSlotsByDate,
-} from "@/components/eventCommon/VotingGrid/utils";
+} from "@/components/eventCommon/timeGrid/utils";
 import {
   useResponsiveGrid,
   usePaginatedDates,
