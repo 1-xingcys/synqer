@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Participant } from "./types";
+import { Participant } from "../types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface ParticipantFilterProps {

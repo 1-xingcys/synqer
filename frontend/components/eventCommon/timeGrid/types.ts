@@ -21,11 +21,13 @@ export interface Vote {
   slotId: string;
   userId: string;
   userDisplayName: string;
+  pictureUrl?: string;
 }
 
 export interface Participant {
   userId: string;
   displayName: string;
+  pictureUrl?: string;
 }
 
 export interface CalendarEvent {

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { TimeSlot, Vote, Participant, SlotRangeInfo } from "./types";
+import { SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
 import { DatePagination } from "@/components/eventCommon/timeGrid/ui/DatePagination";
@@ -12,7 +12,7 @@ import {
   groupSlotsByDate,
 } from "@/components/eventCommon/timeGrid/utils";
 import { useResponsiveGrid, usePaginatedDates, useMergedRows } from "../hooks";
-import { TimeGranularity } from "../types";
+import { TimeGranularity, TimeSlot, Vote, Participant } from "../types";
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];

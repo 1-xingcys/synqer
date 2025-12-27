@@ -2,8 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
-import { Vote, Participant } from "./types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Vote, Participant } from "../types";
 
 export interface SlotRangeInfo {
   startDate: string;
