@@ -5,4 +5,4 @@ export {
   useMergedRows,
   type TimeGranularity,
   type MergedTimeRow,
-} from "./useMergedRows";
+} from "../timeGrid/hooks/useMergedRows";

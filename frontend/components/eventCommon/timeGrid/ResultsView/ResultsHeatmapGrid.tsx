@@ -14,9 +14,9 @@ import {
 import {
   useResponsiveGrid,
   usePaginatedDates,
-  useMergedRows,
   type TimeGranularity,
 } from "@/components/eventCommon/hooks";
+import { useMergedRows } from "../hooks";
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];

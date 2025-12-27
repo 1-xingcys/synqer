@@ -6,8 +6,8 @@ import { VotingGridProps, Vote, CalendarEvent } from "./types";
 import {
   useVotingSelection,
   useCalendarIntegration,
-  useTimeGranularity,
   useMergedRowDragSelection,
+  useMergedRows,
 } from "./hooks";
 import { groupVotesBySlot, formatTime } from "./utils";
 import {
@@ -24,7 +24,7 @@ import {
 import {
   useResponsiveGrid,
   usePaginatedDates,
-  type TimeGranularity,
+  TimeGranularity,
 } from "@/components/eventCommon/hooks";
 
 export type { VotingGridProps };
@@ -59,7 +59,7 @@ export default function VotingGrid({
   } = useVotingSelection({ slots, initialSelectedIds });
 
   // Use time granularity hook
-  const { mergedRows } = useTimeGranularity({
+  const { mergedRows } = useMergedRows({
     timeSlots,
     granularity,
   });
