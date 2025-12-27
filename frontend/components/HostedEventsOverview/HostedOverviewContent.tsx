@@ -8,6 +8,7 @@ import {
   EmptyState,
 } from "@/components/eventCommon/EventsOverview";
 import { EventStatus } from "@/types/event";
+import { EventRowMode } from "@/components/eventCommon/EventsOverview/types";
 
 const TOP_N = 5;
 const TRANSLATION_NS = "hostedEvents";
@@ -57,7 +58,7 @@ export default function HostedOverviewContent() {
           showViewMore={filteredEvents[EventStatus.VOTING].length > TOP_N}
           viewMoreHref="/hosted/voting"
           limit={undefined} // Show all voting events
-          mode="hosted"
+          mode={EventRowMode.HOSTED}
           translationNamespace={TRANSLATION_NS}
         />
       )}
@@ -71,7 +72,7 @@ export default function HostedOverviewContent() {
           showViewMore={true}
           viewMoreHref="/hosted/voting-ended"
           limit={TOP_N}
-          mode="hosted"
+          mode={EventRowMode.HOSTED}
           translationNamespace={TRANSLATION_NS}
         />
       )}
@@ -85,7 +86,7 @@ export default function HostedOverviewContent() {
           showViewMore={true}
           viewMoreHref="/hosted/confirmed"
           limit={TOP_N}
-          mode="hosted"
+          mode={EventRowMode.HOSTED}
           translationNamespace={TRANSLATION_NS}
         />
       )}
@@ -99,7 +100,7 @@ export default function HostedOverviewContent() {
           showViewMore={true}
           viewMoreHref="/hosted/completed"
           limit={TOP_N}
-          mode="hosted"
+          mode={EventRowMode.HOSTED}
           translationNamespace={TRANSLATION_NS}
         />
       )}

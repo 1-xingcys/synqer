@@ -6,6 +6,7 @@ import EventRow from "./EventRow";
 import { EventRowData, HostedEventRowData } from "./types";
 import { ChevronRight } from "lucide-react";
 import { EventStatus } from "@/types/event";
+import { EventRowMode } from "./types";
 
 interface EventSectionProps {
   title: string;
@@ -14,7 +15,7 @@ interface EventSectionProps {
   showViewMore?: boolean;
   viewMoreHref?: string;
   limit?: number;
-  mode?: "joined" | "hosted";
+  mode?: EventRowMode;
   translationNamespace?: string;
 }
 
@@ -25,7 +26,7 @@ export default function EventSection({
   showViewMore = false,
   viewMoreHref,
   limit,
-  mode = "joined",
+  mode = EventRowMode.JOINED,
   translationNamespace = "joinedEvents",
 }: EventSectionProps) {
   const t = useTranslations(translationNamespace);

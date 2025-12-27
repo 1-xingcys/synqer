@@ -5,6 +5,7 @@ import { useAttendedEvents } from "@/hooks/useAttendedEvents";
 import { useFilteredAttendedEvents } from "@/hooks/useFilteredAttendedEvents";
 import { EventListWithPagination } from "@/components/eventCommon/EventsOverview";
 import { EventStatus } from "@/types/event";
+import { EventRowMode } from "@/components/eventCommon/EventsOverview/types";
 
 interface CategoryPageContentProps {
   category: EventStatus;
@@ -43,7 +44,7 @@ export default function CategoryPageContent({
       events={categoryEvents}
       category={category}
       pageSize={10}
-      mode="joined"
+      mode={EventRowMode.JOINED}
       translationNamespace="joinedEvents"
     />
   );

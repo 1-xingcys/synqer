@@ -8,6 +8,7 @@ import {
   EmptyState,
 } from "@/components/eventCommon/EventsOverview";
 import { EventStatus } from "@/types/event";
+import { EventRowMode } from "@/components/eventCommon/EventsOverview/types";
 
 const TOP_N = 5;
 
@@ -56,7 +57,7 @@ export default function OverviewContent() {
           showViewMore={filteredEvents[EventStatus.VOTING].length > TOP_N}
           viewMoreHref="/joined/voting"
           limit={undefined} // Show all voting events
-          mode="joined"
+          mode={EventRowMode.JOINED}
           translationNamespace="joinedEvents"
         />
       )}
@@ -70,7 +71,7 @@ export default function OverviewContent() {
           showViewMore={true}
           viewMoreHref="/joined/voting-ended"
           limit={TOP_N}
-          mode="joined"
+          mode={EventRowMode.JOINED}
           translationNamespace="joinedEvents"
         />
       )}
@@ -84,7 +85,7 @@ export default function OverviewContent() {
           showViewMore={true}
           viewMoreHref="/joined/confirmed"
           limit={TOP_N}
-          mode="joined"
+          mode={EventRowMode.JOINED}
           translationNamespace="joinedEvents"
         />
       )}
@@ -98,7 +99,7 @@ export default function OverviewContent() {
           showViewMore={true}
           viewMoreHref="/joined/completed"
           limit={TOP_N}
-          mode="joined"
+          mode={EventRowMode.JOINED}
           translationNamespace="joinedEvents"
         />
       )}

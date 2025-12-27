@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { BarChart3, Vote, Clock, CheckCircle, CircleCheck } from "lucide-react";
+import { EventRowMode } from "./types";
 
 interface EventsLayoutProps {
   children: ReactNode;
-  mode: "joined" | "hosted";
+  mode: EventRowMode;
   translationNamespace?: string;
 }
 
@@ -20,7 +21,7 @@ export default function EventsLayout({
   const pathname = usePathname();
   const t = useTranslations(translationNamespace);
 
-  const basePath = mode === "joined" ? "/joined" : "/hosted";
+  const basePath = mode === EventRowMode.JOINED ? "/joined" : "/hosted";
 
   // Determine active tab based on pathname
   const getActiveTab = () => {

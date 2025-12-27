@@ -23,25 +23,25 @@ import {
 } from "lucide-react";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { format } from "date-fns";
-import { EventRowData, HostedEventRowData } from "./types";
+import { EventRowData, HostedEventRowData, EventRowMode } from "./types";
 
 interface EventRowProps {
   event: EventRowData | HostedEventRowData;
   variant: EventStatus;
-  mode?: "joined" | "hosted";
+  mode?: EventRowMode;
   translationNamespace?: string;
 }
 
 export default function EventRow({
   event,
   variant,
-  mode = "joined",
+  mode = EventRowMode.JOINED,
   translationNamespace = "joinedEvents",
 }: EventRowProps) {
   const t = useTranslations(translationNamespace);
   const [copied, setCopied] = useState(false);
 
-  const isJoined = mode === "joined";
+  const isJoined = mode === EventRowMode.JOINED;
   const linkHref = isJoined ? `/joined/${event.id}` : `/hosted/${event.id}`;
 
   // Check if hasVoted exists (for joined events)

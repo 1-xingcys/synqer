@@ -16,12 +16,13 @@ import {
 import { paginateEvents } from "@/hooks/useFilteredAttendedEvents";
 import EmptyState from "./EmptyState";
 import { EventStatus } from "@/types/event";
+import { EventRowMode } from "./types";
 
 interface EventListWithPaginationProps {
   events: (EventRowData | HostedEventRowData)[];
   category: EventStatus;
   pageSize?: number;
-  mode?: "joined" | "hosted";
+  mode?: EventRowMode;
   translationNamespace?: string;
 }
 
@@ -29,7 +30,7 @@ export default function EventListWithPagination({
   events,
   category,
   pageSize = 10,
-  mode = "joined",
+  mode = EventRowMode.JOINED,
   translationNamespace = "joinedEvents",
 }: EventListWithPaginationProps) {
   const t = useTranslations(translationNamespace);

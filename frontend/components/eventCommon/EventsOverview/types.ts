@@ -23,3 +23,8 @@ export interface HostedEventRowData extends EventListItem {
   expectedParticipantCount?: number;
   votedCount?: number;
 }
+
+export enum EventRowMode {
+  JOINED = "joined",
+  HOSTED = "hosted",
+}
