@@ -7,6 +7,8 @@ import {
   EventSection,
   EmptyState,
 } from "@/components/eventCommon/EventsOverview";
+import { EventStatus } from "@/types/event";
+import { EventRowMode } from "@/components/eventCommon/EventsOverview/types";
 
 const TOP_N = 5;
 
@@ -35,10 +37,10 @@ export default function OverviewContent() {
   }
 
   const hasAnyEvents =
-    filteredEvents.voting.length > 0 ||
-    filteredEvents.votingEnded.length > 0 ||
-    filteredEvents.confirmed.length > 0 ||
-    filteredEvents.completed.length > 0;
+    filteredEvents[EventStatus.VOTING].length > 0 ||
+    filteredEvents[EventStatus.VOTING_ENDED].length > 0 ||
+    filteredEvents[EventStatus.CONFIRMED].length > 0 ||
+    filteredEvents[EventStatus.COMPLETED].length > 0;
 
   if (!hasAnyEvents) {
     return <EmptyState category="all" translationNamespace="joinedEvents" />;
@@ -47,57 +49,57 @@ export default function OverviewContent() {
   return (
     <div className="space-y-6">
       {/* Voting Section - Show all */}
-      {filteredEvents.voting.length > 0 && (
+      {filteredEvents[EventStatus.VOTING].length > 0 && (
         <EventSection
           title={t("sections.voting")}
-          events={filteredEvents.voting}
-          category="voting"
-          showViewMore={filteredEvents.voting.length > TOP_N}
+          events={filteredEvents[EventStatus.VOTING]}
+          category={EventStatus.VOTING}
+          showViewMore={filteredEvents[EventStatus.VOTING].length > TOP_N}
           viewMoreHref="/joined/voting"
           limit={undefined} // Show all voting events
-          mode="joined"
+          mode={EventRowMode.JOINED}
           translationNamespace="joinedEvents"
         />
       )}
 
       {/* Voting Ended Section - Top 5 */}
-      {filteredEvents.votingEnded.length > 0 && (
+      {filteredEvents[EventStatus.VOTING_ENDED].length > 0 && (
         <EventSection
           title={t("sections.votingEnded")}
-          events={filteredEvents.votingEnded}
-          category="votingEnded"
+          events={filteredEvents[EventStatus.VOTING_ENDED]}
+          category={EventStatus.VOTING_ENDED}
           showViewMore={true}
           viewMoreHref="/joined/voting-ended"
           limit={TOP_N}
-          mode="joined"
+          mode={EventRowMode.JOINED}
           translationNamespace="joinedEvents"
         />
       )}
 
       {/* Confirmed Section - Top 5 */}
-      {filteredEvents.confirmed.length > 0 && (
+      {filteredEvents[EventStatus.CONFIRMED].length > 0 && (
         <EventSection
           title={t("sections.confirmed")}
-          events={filteredEvents.confirmed}
-          category="confirmed"
+          events={filteredEvents[EventStatus.CONFIRMED]}
+          category={EventStatus.CONFIRMED}
           showViewMore={true}
           viewMoreHref="/joined/confirmed"
           limit={TOP_N}
-          mode="joined"
+          mode={EventRowMode.JOINED}
           translationNamespace="joinedEvents"
         />
       )}
 
       {/* Completed Section - Top 5 */}
-      {filteredEvents.completed.length > 0 && (
+      {filteredEvents[EventStatus.COMPLETED].length > 0 && (
         <EventSection
           title={t("sections.completed")}
-          events={filteredEvents.completed}
-          category="completed"
+          events={filteredEvents[EventStatus.COMPLETED]}
+          category={EventStatus.COMPLETED}
           showViewMore={true}
           viewMoreHref="/joined/completed"
           limit={TOP_N}
-          mode="joined"
+          mode={EventRowMode.JOINED}
           translationNamespace="joinedEvents"
         />
       )}

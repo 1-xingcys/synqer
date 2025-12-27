@@ -1,4 +1,4 @@
-import JoinedEventPage from "@/components/JoinedEventPage";
+import JoinedEventPage from "@/components/joinedEvent/JoinedEventPage";
 
 export default function Page() {
   return <JoinedEventPage />;

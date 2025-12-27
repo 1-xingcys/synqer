@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import EventRow, {
-  EventRowData,
-  HostedEventRowData,
-  EventCategory,
-} from "./EventRow";
+import EventRow from "./EventRow";
+import { EventRowData, HostedEventRowData } from "./types";
 import {
   Pagination,
   PaginationContent,
@@ -18,12 +15,14 @@ import {
 } from "@/components/ui/pagination";
 import { paginateEvents } from "@/hooks/useFilteredAttendedEvents";
 import EmptyState from "./EmptyState";
+import { EventStatus } from "@/types/event";
+import { EventRowMode } from "./types";
 
 interface EventListWithPaginationProps {
   events: (EventRowData | HostedEventRowData)[];
-  category: EventCategory;
+  category: EventStatus;
   pageSize?: number;
-  mode?: "joined" | "hosted";
+  mode?: EventRowMode;
   translationNamespace?: string;
 }
 
@@ -31,7 +30,7 @@ export default function EventListWithPagination({
   events,
   category,
   pageSize = 10,
-  mode = "joined",
+  mode = EventRowMode.JOINED,
   translationNamespace = "joinedEvents",
 }: EventListWithPaginationProps) {
   const t = useTranslations(translationNamespace);

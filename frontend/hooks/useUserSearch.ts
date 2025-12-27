@@ -38,7 +38,6 @@ export function useUserSearch() {
       setResults(data);
       setError(null);
     } catch (err) {
-      console.error("Error searching users:", err);
       setError(err instanceof Error ? err.message : "Failed to search users");
       setResults([]);
     } finally {

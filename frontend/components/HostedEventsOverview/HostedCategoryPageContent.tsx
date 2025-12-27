@@ -3,15 +3,14 @@
 import { useTranslations } from "next-intl";
 import { useHostedEvents } from "@/hooks/useHostedEvents";
 import { useFilteredHostedEvents } from "@/hooks/useFilteredHostedEvents";
-import {
-  EventListWithPagination,
-  EventCategory,
-} from "@/components/eventCommon/EventsOverview";
+import { EventListWithPagination } from "@/components/eventCommon/EventsOverview";
+import { EventStatus } from "@/types/event";
+import { EventRowMode } from "@/components/eventCommon/EventsOverview/types";
 
 const TRANSLATION_NS = "hostedEvents";
 
 interface HostedCategoryPageContentProps {
-  category: EventCategory;
+  category: EventStatus;
 }
 
 export default function HostedCategoryPageContent({
@@ -47,7 +46,7 @@ export default function HostedCategoryPageContent({
       events={categoryEvents}
       category={category}
       pageSize={10}
-      mode="hosted"
+      mode={EventRowMode.HOSTED}
       translationNamespace={TRANSLATION_NS}
     />
   );

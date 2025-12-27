@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { SlotRangeInfo } from "@/components/eventCommon/ResultsView";
+import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
 import { SelectedTimeRange } from "../EventTimeSelector";
 import { ConfirmedTimeRange } from "@/types/event";
 

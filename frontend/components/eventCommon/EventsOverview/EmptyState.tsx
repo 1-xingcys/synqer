@@ -2,9 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { Vote, Clock, CheckCircle, CircleCheck, Calendar } from "lucide-react";
-import { EventCategory } from "./EventRow";
+import { EventStatus } from "@/types/event";
 
-type EmptyStateCategory = EventCategory | "all";
+type EmptyStateCategory = EventStatus | "all";
 
 interface EmptyStateProps {
   category?: EmptyStateCategory;
@@ -19,15 +19,15 @@ export default function EmptyState({
 
   const getIcon = () => {
     switch (category) {
-      case "voting":
+      case EventStatus.VOTING:
         return <Vote className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />;
-      case "votingEnded":
+      case EventStatus.VOTING_ENDED:
         return <Clock className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />;
-      case "confirmed":
+      case EventStatus.CONFIRMED:
         return (
           <CheckCircle className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
         );
-      case "completed":
+      case EventStatus.COMPLETED:
         return (
           <CircleCheck className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
         );
@@ -40,22 +40,22 @@ export default function EmptyState({
 
   const getMessage = () => {
     switch (category) {
-      case "voting":
+      case EventStatus.VOTING:
         return {
           title: t("empty.voting"),
           description: t("empty.votingDescription"),
         };
-      case "votingEnded":
+      case EventStatus.VOTING_ENDED:
         return {
           title: t("empty.votingEnded"),
           description: t("empty.votingEndedDescription"),
         };
-      case "confirmed":
+      case EventStatus.CONFIRMED:
         return {
           title: t("empty.confirmed"),
           description: t("empty.confirmedDescription"),
         };
-      case "completed":
+      case EventStatus.COMPLETED:
         return {
           title: t("empty.completed"),
           description: t("empty.completedDescription"),

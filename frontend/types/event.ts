@@ -13,6 +13,12 @@ export enum ParticipantStatus {
   NOT_REGISTERED = "NOT_REGISTERED", // 還沒註冊（只有 LINE 使用者）
 }
 
+// 投票模式
+export enum VoteMode {
+  AVAILABLE = "available", // 可參加
+  UNAVAILABLE = "unavailable", // 不可參加
+}
+
 // 合併後的時間範圍（連續時段合併成一個範圍）
 export interface ConfirmedTimeRange {
   startTime: string; // ISO 8601 格式

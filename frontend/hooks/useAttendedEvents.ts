@@ -30,8 +30,7 @@ export function useAttendedEvents() {
       const data = (await response.json()) as ExtendedAttendedEvent[];
       setEvents(data);
       setError(null);
-    } catch (err) {
-      console.error("Error fetching attended events:", err);
+    } catch {
       setError("Failed to load attended events");
     } finally {
       setLoading(false);
