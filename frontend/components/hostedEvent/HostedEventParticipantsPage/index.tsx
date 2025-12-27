@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useParticipantsState } from "./useParticipantsState";
-import { LineGroupLayout, SearchLayout, ReadOnlyLayout } from "./layouts";
+import { LineGroupView, SearchView, ReadOnlyView } from "./view";
 import { useEffect } from "react";
 import { EventStatus } from "@/types/event";
 
@@ -78,7 +78,7 @@ export default function HostedEventParticipantsPage() {
         </div>
 
         {/* Read-only participant list */}
-        <ReadOnlyLayout
+        <ReadOnlyView
           selectedParticipants={selectedParticipants}
           isHost={isHost}
         />
@@ -101,7 +101,7 @@ export default function HostedEventParticipantsPage() {
       </div>
 
       {eventMode === "lineGroup" ? (
-        <LineGroupLayout
+        <LineGroupView
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           filteredLineGroupList={filteredLineGroupList}
@@ -117,7 +117,7 @@ export default function HostedEventParticipantsPage() {
           hasUnsavedChanges={hasUnsavedChanges}
         />
       ) : (
-        <SearchLayout
+        <SearchView
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           searchResults={searchResults}

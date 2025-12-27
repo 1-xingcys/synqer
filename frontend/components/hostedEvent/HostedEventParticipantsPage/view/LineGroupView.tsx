@@ -11,7 +11,7 @@ import {
 import { SelectedParticipant, ParticipantListItem } from "../types";
 import { LineGroupMember } from "@/hooks/useLineGroups";
 
-interface LineGroupLayoutProps {
+interface LineGroupViewProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   filteredLineGroupList: ParticipantListItem[];
@@ -27,7 +27,7 @@ interface LineGroupLayoutProps {
   hasUnsavedChanges: boolean;
 }
 
-export function LineGroupLayout({
+export function LineGroupView({
   searchQuery,
   onSearchChange,
   filteredLineGroupList,
@@ -41,7 +41,7 @@ export function LineGroupLayout({
   onSave,
   isHost,
   hasUnsavedChanges,
-}: LineGroupLayoutProps) {
+}: LineGroupViewProps) {
   const t = useTranslations();
 
   // Show selected first, then unselected

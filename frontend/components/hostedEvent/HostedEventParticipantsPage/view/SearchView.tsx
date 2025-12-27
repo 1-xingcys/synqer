@@ -11,7 +11,7 @@ import {
 import { SelectedParticipant } from "../types";
 import { SearchedUser } from "@/hooks/useUserSearch";
 
-interface SearchLayoutProps {
+interface SearchViewProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   searchResults: SearchedUser[];
@@ -27,7 +27,7 @@ interface SearchLayoutProps {
   hasUnsavedChanges: boolean;
 }
 
-export function SearchLayout({
+export function SearchView({
   searchQuery,
   onSearchChange,
   searchResults,
@@ -41,7 +41,7 @@ export function SearchLayout({
   onSave,
   isHost,
   hasUnsavedChanges,
-}: SearchLayoutProps) {
+}: SearchViewProps) {
   const t = useTranslations();
 
   const isSearching = searchQuery.length >= 2;
