@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { VotingGridProps, Vote, CalendarEvent, TimeGranularity } from "./types";
 import {
@@ -37,7 +37,6 @@ export default function VotingGrid({
   const t = useTranslations("event");
   const [saving, setSaving] = useState(false);
   const [granularity, setGranularity] = useState<TimeGranularity>(15);
-  const gridRef = useRef<HTMLDivElement>(null);
   const { datesPerPage, slotHeight } = useResponsiveGrid();
 
   // Use voting selection hook (for utilities and base state)
@@ -266,7 +265,6 @@ export default function VotingGrid({
 
       {/* Grid */}
       <div
-        ref={gridRef}
         className="select-none transition-opacity duration-200 touch-none"
         onMouseUp={handleMergedMouseUp}
         onMouseLeave={() => setHoveredCell(null)}
@@ -282,7 +280,7 @@ export default function VotingGrid({
           {/* Time slots grid with time points at boundaries */}
           <div className="flex">
             {/* Time column */}
-            <TimeColumn mergedRows={mergedRows} />
+            <TimeColumn mergedRows={mergedRows} slotHeight={slotHeight} />
 
             {/* Slots grid */}
             <SlotMatrix

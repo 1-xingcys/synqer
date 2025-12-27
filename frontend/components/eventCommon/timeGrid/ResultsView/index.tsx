@@ -27,7 +27,7 @@ export default function ResultsView({
   );
 
   // Use hook for filtered votes calculation
-  const { filteredVotes, votesBySlot, maxVotes } = useFilteredVotes({
+  const { votesBySlot, maxVotes } = useFilteredVotes({
     votes,
     selectedParticipants,
   });
@@ -96,7 +96,6 @@ export default function ResultsView({
         ) : (
           <ResultsHeatmapGrid
             slots={slots}
-            filteredVotes={filteredVotes}
             votesBySlot={votesBySlot}
             participants={participants}
             selectedParticipants={selectedParticipants}

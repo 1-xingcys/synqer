@@ -137,12 +137,13 @@ export function TimeSlotCell({
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       className={`
-        flex-1 min-w-0 h-10 sm:h-11 relative
+        flex-1 min-w-0 relative
         cursor-pointer transition-colors duration-75
         ${borderClasses}
         ${getBackgroundClass()}
         ${!isDragging && isHovered && !isSelected && !isPartiallySelected ? "bg-gray-50 dark:bg-zinc-800" : ""}
       `}
+      style={{ height: "var(--slot-height, 2.5rem)" }}
     >
       {/* Partial selection indicator - diagonal stripes */}
       {isPartiallySelected && (

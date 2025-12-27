@@ -19,8 +19,6 @@ import { TimeGranularity, TimeSlot, Vote, Participant } from "../types";
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];
-  /** 已過濾的投票（從 ResultsView 傳入） */
-  filteredVotes: Vote[];
   /** 根據 slotId 分組的投票（從 ResultsView 傳入） */
   votesBySlot: Record<string, Vote[]>;
   participants: Participant[];
@@ -49,7 +47,6 @@ interface SelectionRange {
 
 export function ResultsHeatmapGrid({
   slots,
-  filteredVotes: _filteredVotes,
   votesBySlot,
   participants,
   selectedParticipants,

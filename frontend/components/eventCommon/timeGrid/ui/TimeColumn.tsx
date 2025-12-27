@@ -6,15 +6,24 @@ import { MergedTimeRow } from "../types";
 
 interface TimeColumnProps {
   mergedRows: MergedTimeRow[];
+  slotHeight: string;
 }
 
 export const TimeColumn = memo(function TimeColumn({
   mergedRows,
+  slotHeight,
 }: TimeColumnProps) {
   return (
-    <div className="w-9 sm:w-14 shrink-0 relative border-r border-gray-200 dark:border-zinc-700 rounded-l-lg">
+    <div
+      className="w-9 sm:w-14 shrink-0 relative border-r border-gray-200 dark:border-zinc-700 rounded-l-lg"
+      style={{ "--slot-height": slotHeight } as React.CSSProperties}
+    >
       {mergedRows.map((row, rowIndex) => (
-        <div key={rowIndex} className="h-10 sm:h-11 relative">
+        <div
+          key={rowIndex}
+          className="relative"
+          style={{ height: "var(--slot-height)" }}
+        >
           {/* Time label at top boundary */}
           <span className="absolute -top-2 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
             {formatTime(row.startMinute)}
