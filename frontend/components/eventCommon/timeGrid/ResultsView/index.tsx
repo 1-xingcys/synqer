@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { ResultsViewProps, SlotRangeInfo } from "./types";
 import { ParticipantFilter } from "./ParticipantFilter";
 import { HeatMapLegend } from "./HeatMapLegend";
@@ -9,6 +10,9 @@ import { ResultsHeatmapGrid } from "./ResultsHeatmapGrid";
 import { useFilteredVotes } from "../hooks";
 
 export type { ResultsViewProps, SlotRangeInfo };
+
+const SELECTED_PARAM = "selected";
+const SELECTED_ALL = "all";
 
 export default function ResultsView({
   slots,
@@ -20,11 +24,89 @@ export default function ResultsView({
   selectedSlotIds,
 }: ResultsViewProps) {
   const t = useTranslations("joined");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
-  // Initialize with all participants selected
+  // Parse URL param to get initial selection
+  const getInitialSelection = useCallback((): Set<string> => {
+    const selectedParam = searchParams.get(SELECTED_PARAM);
+    if (selectedParam !== null) {
+      // URL has selection param
+      if (selectedParam === SELECTED_ALL) {
+        return new Set(participants.map((p) => p.userId)); // All selected
+      }
+      if (selectedParam === "") {
+        return new Set(); // Empty selection
+      }
+      const selectedIds = selectedParam.split(",").filter(Boolean);
+      // Only include IDs that exist in participants
+      const validIds = new Set(participants.map((p) => p.userId));
+      return new Set(selectedIds.filter((id) => validIds.has(id)));
+    }
+    // No param = select all (default), but we'll add ?selected=all to URL
+    return new Set(participants.map((p) => p.userId));
+  }, [searchParams, participants]);
+
+  // Initialize with URL param or all selected
   const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(
     () => new Set(participants.map((p) => p.userId)),
   );
+
+  // Sync state from URL on mount and when searchParams change
+  useEffect(() => {
+    setSelectedParticipants(getInitialSelection());
+  }, [getInitialSelection]);
+
+  // Add ?selected=all to URL if not present (on initial load)
+  useEffect(() => {
+    if (hasInitialized) return;
+    const selectedParam = searchParams.get(SELECTED_PARAM);
+    if (selectedParam === null && participants.length > 0) {
+      // No param present, add ?selected=all
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(SELECTED_PARAM, SELECTED_ALL);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+    setHasInitialized(true);
+  }, [searchParams, pathname, router, participants.length, hasInitialized]);
+
+  // Update URL when selection changes
+  const handleSelectionChange = useCallback(
+    (newSelection: Set<string>) => {
+      setSelectedParticipants(newSelection);
+
+      const params = new URLSearchParams(searchParams.toString());
+      const allSelected = newSelection.size === participants.length;
+
+      if (allSelected) {
+        // All selected = use "all" keyword
+        params.set(SELECTED_PARAM, SELECTED_ALL);
+      } else if (newSelection.size === 0) {
+        // None selected = empty string
+        params.set(SELECTED_PARAM, "");
+      } else {
+        // Partial selection = store individual IDs
+        params.set(SELECTED_PARAM, Array.from(newSelection).join(","));
+      }
+
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, participants.length, pathname, router],
+  );
+
+  // Copy shareable link
+  const copyShareableLink = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy link:", err);
+    }
+  }, []);
 
   // Use hook for filtered votes calculation
   const { votesBySlot, maxVotes } = useFilteredVotes({
@@ -45,8 +127,63 @@ export default function ResultsView({
             <ParticipantFilter
               participants={participants}
               selectedParticipants={selectedParticipants}
-              onSelectionChange={setSelectedParticipants}
+              onSelectionChange={handleSelectionChange}
             />
+
+            {/* Copy Link Button */}
+            <button
+              onClick={copyShareableLink}
+              className={`
+                flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg
+                border transition-all
+                ${
+                  linkCopied
+                    ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300"
+                    : "bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-700 hover:text-zinc-800 dark:hover:text-zinc-200"
+                }
+              `}
+              title={t("results.copyLinkTitle")}
+            >
+              {linkCopied ? (
+                <>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">
+                    {t("results.linkCopied")}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">
+                    {t("results.copyLink")}
+                  </span>
+                </>
+              )}
+            </button>
           </div>
 
           {/* Quick info */}

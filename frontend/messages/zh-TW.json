@@ -162,7 +162,10 @@
       "unavailableParticipants": "沒空",
       "noOneAvailable": "沒有人有空",
       "close": "關閉",
-      "rangeHint": "顯示所有選取時段都有空的人"
+      "rangeHint": "顯示所有選取時段都有空的人",
+      "copyLink": "分享",
+      "copyLinkTitle": "複製目前篩選結果的連結",
+      "linkCopied": "已複製！"
     },
     "viewResultsDescription": "查看時段分析",
     "notParticipant": {
