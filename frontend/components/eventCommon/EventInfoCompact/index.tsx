@@ -1,12 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { EventStatus, ConfirmedTimeRange } from "@/types/event";
 import { EventStatusBadge } from "@/components/eventCommon/EventStatusBadge";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { format, isPast, differenceInHours } from "date-fns";
 import { Link } from "@/i18n/routing";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ChevronDown, Copy, CheckCheck } from "lucide-react";
 
 interface EventInfoCompactProps {
   title?: string | null;
@@ -40,11 +41,27 @@ export function EventInfoCompact({
   eventId,
 }: EventInfoCompactProps) {
   const t = useTranslations();
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const formatTime = (minuteOfDay: number) => {
     const hours = Math.floor(minuteOfDay / 60);
     const minutes = minuteOfDay % 60;
     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  };
+
+  const handleCopyLink = () => {
+    if (!eventId) return;
+    const shareUrl = `${window.location.origin}/events/${eventId}`;
+    navigator.clipboard.writeText(shareUrl).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      },
+      (err) => {
+        console.error("Failed to copy:", err);
+      },
+    );
   };
 
   const isVotingPhase =
@@ -60,16 +77,30 @@ export function EventInfoCompact({
   const isDeadlinePast = deadlineDate && isPast(deadlineDate);
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-5">
+    <div className={`bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 ${isDetailsOpen ? "" : "pb-1"}`}>
       {/* Header Row: Title + Status | Voted Badge */}
-      <div className="flex items-start justify-between gap-3 mb-3">
-        {/* Title + Status */}
+      <div className="flex items-start justify-between gap-2">
+        {/* Title + Status + Copy Link */}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-lg sm:text-xl font-semibold text-zinc-900 dark:text-zinc-100 truncate">
               {title || t("event.untitled")}
             </h1>
             <EventStatusBadge status={status} size="sm" />
+            {/* Copy Link Button - only show for hosted mode */}
+            {isHosted && eventId && (
+              <button
+                onClick={handleCopyLink}
+                className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                title={t("event.copyLink")}
+              >
+                {copied ? (
+                  <CheckCheck className="w-4 h-4 text-emerald-500" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
+              </button>
+            )}
           </div>
           {description && (
             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
@@ -129,93 +160,116 @@ export function EventInfoCompact({
         )}
       </div>
 
-      {/* Info Grid */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-        {/* Date Range */}
-        <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
-          <svg
-            className="w-4 h-4 shrink-0 text-zinc-400 dark:text-zinc-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
-          {isVotingPhase ? (
-            <span>
-              {format(new Date(startDate), "M/d")} -{" "}
-              {format(new Date(endDate), "M/d")}
-            </span>
-          ) : hasConfirmedTime ? (
-            <ConfirmedTimeDisplay
-              timeRanges={confirmedTimeRanges}
-              preview
-              className="truncate"
-            />
-          ) : (
-            <span>
-              {format(new Date(startDate), "M/d")} -{" "}
-              {format(new Date(endDate), "M/d")}
-            </span>
-          )}
-        </div>
-
-        {/* Time Range - only show for voting phase */}
-        {isVotingPhase && (
-          <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
-            <svg
-              className="w-4 h-4 shrink-0 text-zinc-400 dark:text-zinc-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span className="font-mono text-xs">
-              {formatTime(startMinuteOfDay)} - {formatTime(endMinuteOfDay)}
-            </span>
-          </div>
-        )}
-
-        {/* Voting Deadline - more prominent */}
-        {isVotingPhase && deadlineDate && (
-          <div
-            className={`flex items-center gap-2 px-2 py-0.5 rounded-md ${
-              isDeadlinePast
-                ? "text-zinc-500 dark:text-zinc-400"
-                : isDeadlineUrgent
-                  ? "text-red-600 dark:text-red-400"
-                  : "text-zinc-600 dark:text-zinc-400"
+      {/* Details Toggle - Centered */}
+      <div className="flex justify-center">
+        <button
+          onClick={() => setIsDetailsOpen(!isDetailsOpen)}
+          className="p-1 rounded-md text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          aria-label={isDetailsOpen ? t("common.hideDetails") : t("common.showDetails")}
+        >
+          <ChevronDown
+            className={`w-5 h-5 transition-transform duration-300 ease-out ${
+              isDetailsOpen ? "rotate-180" : ""
             }`}
-          >
-            <svg
-              className="w-4 h-4 shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
-            <span className="text-xs font-medium">
-              {t("eventInfo.deadline")}: {format(deadlineDate, "M/d HH:mm")}
-            </span>
+          />
+        </button>
+      </div>
+
+      {/* Info Grid - Collapsible */}
+      <div
+        className={`grid transition-all duration-300 ease-out ${
+          isDetailsOpen ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0 mt-0"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+            {/* Date Range */}
+            <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
+              <svg
+                className="w-4 h-4 shrink-0 text-zinc-400 dark:text-zinc-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              {isVotingPhase ? (
+                <span>
+                  {format(new Date(startDate), "M/d")} -{" "}
+                  {format(new Date(endDate), "M/d")}
+                </span>
+              ) : hasConfirmedTime ? (
+                <ConfirmedTimeDisplay
+                  timeRanges={confirmedTimeRanges}
+                  preview
+                  className="truncate"
+                />
+              ) : (
+                <span>
+                  {format(new Date(startDate), "M/d")} -{" "}
+                  {format(new Date(endDate), "M/d")}
+                </span>
+              )}
+            </div>
+
+            {/* Time Range - only show for voting phase */}
+            {isVotingPhase && (
+              <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
+                <svg
+                  className="w-4 h-4 shrink-0 text-zinc-400 dark:text-zinc-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span className="font-mono text-xs">
+                  {formatTime(startMinuteOfDay)} - {formatTime(endMinuteOfDay)}
+                </span>
+              </div>
+            )}
+
+            {/* Voting Deadline - more prominent */}
+            {isVotingPhase && deadlineDate && (
+              <div
+                className={`flex items-center gap-2 px-2 py-0.5 rounded-md ${
+                  isDeadlinePast
+                    ? "text-zinc-500 dark:text-zinc-400"
+                    : isDeadlineUrgent
+                      ? "text-red-600 dark:text-red-400"
+                      : "text-zinc-600 dark:text-zinc-400"
+                }`}
+              >
+                <svg
+                  className="w-4 h-4 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                <span className="text-xs font-medium">
+                  {t("eventInfo.deadline")}: {format(deadlineDate, "M/d HH:mm")}
+                </span>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

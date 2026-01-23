@@ -9,7 +9,9 @@
     "cancel": "取消",
     "edit": "編輯",
     "delete": "刪除",
-    "back": "返回"
+    "back": "返回",
+    "showDetails": "顯示詳情",
+    "hideDetails": "隱藏詳情"
   },
   "landing": {
     "gotoDashboard": "前往控制台",
@@ -98,6 +100,24 @@
   "joined": {
     "title": "加入的活動",
     "description": "您正在參與的活動",
+    "pageHint": {
+      "voting": {
+        "title": "投票選擇時間",
+        "description": "選擇你有空的時段，讓主辦者找到最適合大家的時間"
+      },
+      "votingEnded": {
+        "title": "等待確認中",
+        "description": "投票已結束，請等待主辦者確認活動時間"
+      },
+      "confirmed": {
+        "title": "活動時間已確定",
+        "description": "活動時間已確認，別忘了加入你的行事曆！"
+      },
+      "completed": {
+        "title": "活動已結束",
+        "description": "此活動已結束，感謝你的參與！"
+      }
+    },
     "noEvents": "您尚未加入任何活動",
     "noEventsDescription": "當有人邀請您參加活動時，它會出現在這裡",
     "viewEvent": "投票",
@@ -226,6 +246,10 @@
   "hosted": {
     "title": "主辦的活動",
     "description": "管理您主辦的活動",
+    "pageHint": {
+      "title": "活動管理",
+      "description": "查看投票結果、管理參與者、確認活動時間"
+    },
     "noEvents": "您尚未主辦任何活動",
     "noEventsDescription": "建立您的第一個活動來開始",
     "manageEvent": "管理",
