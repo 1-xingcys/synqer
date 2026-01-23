@@ -125,6 +125,9 @@ model Event {
   lineGroupId String?
   lineGroup   LineGroup? @relation(fields: [lineGroupId], references: [id], onDelete: SetNull)
 
+  // 軟刪除：標記活動是否已被刪除
+  isDeleted Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
