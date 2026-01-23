@@ -123,6 +123,8 @@
     "viewEvent": "投票",
     "backToJoined": "返回加入的活動",
     "backToEvent": "返回活動",
+    "eventDeleted": "此活動已被刪除",
+    "eventDeletedDescription": "此活動已被主辦人刪除，無法再存取。",
     "tabs": {
       "overview": "總覽",
       "vote": "投票",
@@ -264,6 +266,8 @@
     "overview": "總覽",
     "backToHosted": "返回主辦活動",
     "eventNotFound": "找不到活動",
+    "eventDeleted": "此活動已被刪除",
+    "eventDeletedDescription": "此活動已被主辦人刪除，無法再存取。",
     "totalExpected": "預期參與者",
     "totalVoted": "已投票",
     "votingProgress": "投票進度",
@@ -402,7 +406,9 @@
     "alreadyParticipantDescription": "您已經加入了這個活動。",
     "goToVote": "前往投票",
     "goToEvent": "查看活動",
-    "eventNotFoundDescription": "您尋找的活動不存在或已被刪除。"
+    "eventNotFoundDescription": "您尋找的活動不存在或已被刪除。",
+    "eventDeleted": "此活動已被刪除",
+    "eventDeletedDescription": "此活動已被主辦人刪除，無法再存取。"
   },
   "event": {
     "loading": "載入中...",
