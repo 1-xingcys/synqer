@@ -77,7 +77,9 @@ export function EventInfoCompact({
   const isDeadlinePast = deadlineDate && isPast(deadlineDate);
 
   return (
-    <div className={`bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 ${isDetailsOpen ? "" : "pb-1"}`}>
+    <div
+      className={`bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 ${isDetailsOpen ? "" : "pb-1"}`}
+    >
       {/* Header Row: Title + Status | Voted Badge */}
       <div className="flex items-start justify-between gap-2">
         {/* Title + Status + Copy Link */}
@@ -165,7 +167,9 @@ export function EventInfoCompact({
         <button
           onClick={() => setIsDetailsOpen(!isDetailsOpen)}
           className="p-1 rounded-md text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-          aria-label={isDetailsOpen ? t("common.hideDetails") : t("common.showDetails")}
+          aria-label={
+            isDetailsOpen ? t("common.hideDetails") : t("common.showDetails")
+          }
         >
           <ChevronDown
             className={`w-5 h-5 transition-transform duration-300 ease-out ${
@@ -178,7 +182,9 @@ export function EventInfoCompact({
       {/* Info Grid - Collapsible */}
       <div
         className={`grid transition-all duration-300 ease-out ${
-          isDetailsOpen ? "grid-rows-[1fr] opacity-100 mt-3" : "grid-rows-[0fr] opacity-0 mt-0"
+          isDetailsOpen
+            ? "grid-rows-[1fr] opacity-100 mt-3"
+            : "grid-rows-[0fr] opacity-0 mt-0"
         }`}
       >
         <div className="overflow-hidden">
