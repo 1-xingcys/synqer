@@ -61,6 +61,7 @@ interface Event {
 }
 
 export interface EventDetailData {
+  isDeleted: boolean;
   event: Event;
   slots: TimeSlot[];
   votes: Vote[];
@@ -89,8 +90,9 @@ export function useEventDetail(eventId: string) {
         throw new Error("Failed to fetch event data");
       }
 
-      const eventData = (await response.json()) as EventDetailData;
-      setData(eventData);
+      const responseData = (await response.json()) as EventDetailData;
+      setData(responseData);
+      setError(null);
     } catch {
       setError("載入活動失敗");
     } finally {

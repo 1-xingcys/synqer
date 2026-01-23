@@ -5,6 +5,7 @@ import { useRouter } from "@/i18n/routing";
 import { EventStatus, ConfirmedTimeRange } from "@/types/event";
 
 export interface EventPublicInfo {
+  isDeleted: boolean;
   id: string;
   title: string | null;
   description: string | null;
@@ -56,8 +57,14 @@ export function useEventJoin(eventId: string): UseEventJoinResult {
           }
           throw new Error("Failed to load event");
         }
-        const eventData = (await eventResponse.json()) as EventPublicInfo;
-        setEventInfo(eventData);
+        const responseData = (await eventResponse.json()) as EventPublicInfo;
+        setEventInfo(responseData);
+
+        // 檢查活動是否已被刪除，若已刪除則不需要取得參與狀態
+        if (responseData.isDeleted) {
+          setLoading(false);
+          return;
+        }
 
         // 取得使用者參與狀態
         const participationResponse = await fetch(
