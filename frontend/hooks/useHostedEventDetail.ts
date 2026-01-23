@@ -55,6 +55,7 @@ interface Event {
 }
 
 export interface HostedEventDetailData {
+  isDeleted: boolean;
   event: Event;
   slots: TimeSlot[];
   votes: Vote[];
@@ -92,8 +93,8 @@ export function useHostedEventDetail(eventId: string) {
         throw new Error("Failed to fetch event data");
       }
 
-      const eventData = (await response.json()) as HostedEventDetailData;
-      setData(eventData);
+      const responseData = (await response.json()) as HostedEventDetailData;
+      setData(responseData);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load event");

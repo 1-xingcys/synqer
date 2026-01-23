@@ -123,6 +123,8 @@
     "viewEvent": "Vote",
     "backToJoined": "Back to Joined Events",
     "backToEvent": "Back to Event",
+    "eventDeleted": "This event has been deleted",
+    "eventDeletedDescription": "This event has been deleted by the host and can no longer be accessed.",
     "tabs": {
       "overview": "Overview",
       "vote": "Vote",
@@ -264,6 +266,8 @@
     "overview": "Overview",
     "backToHosted": "Back to Hosted Events",
     "eventNotFound": "Event not found",
+    "eventDeleted": "This event has been deleted",
+    "eventDeletedDescription": "This event has been deleted by the host and can no longer be accessed.",
     "totalExpected": "Expected Participants",
     "totalVoted": "Voted",
     "votingProgress": "Voting Progress",
@@ -402,7 +406,9 @@
     "alreadyParticipantDescription": "You have already joined this event.",
     "goToVote": "Go to Vote",
     "goToEvent": "View Event",
-    "eventNotFoundDescription": "The event you're looking for doesn't exist or has been deleted."
+    "eventNotFoundDescription": "The event you're looking for doesn't exist or has been deleted.",
+    "eventDeleted": "This event has been deleted",
+    "eventDeletedDescription": "This event has been deleted by the host and can no longer be accessed."
   },
   "event": {
     "loading": "Loading...",

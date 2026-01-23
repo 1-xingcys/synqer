@@ -260,6 +260,7 @@ export class LineBotService implements OnModuleInit {
     const events = await this.prisma.event.findMany({
       where: {
         lineGroupId: lineGroupDbId,
+        isDeleted: false,
       },
       include: {
         expectedParticipants: {
@@ -477,9 +478,10 @@ export class LineBotService implements OnModuleInit {
 
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
+      select: { id: true, title: true, isDeleted: true },
     });
 
-    if (!event) {
+    if (!event || event.isDeleted) {
       throw new Error('Event not found');
     }
 

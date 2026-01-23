@@ -196,8 +196,9 @@ export class EventsService {
   async remove(eventId: string, userId: string) {
     await this.eventAuthorizationService.verifyOwner(eventId, userId);
 
-    await this.prisma.event.delete({
+    await this.prisma.event.update({
       where: { id: eventId },
+      data: { isDeleted: true },
     });
 
     return { success: true };
