@@ -12,15 +12,15 @@ interface DeletedEventViewProps {
   backLabel: string;
   /** 翻譯 key 的前綴，用於取得 eventDeleted 和 eventDeletedDescription */
   translationPrefix: string;
-  /** 是否顯示返回首頁按鈕 */
-  showHomeButton?: boolean;
+  /** 是否顯示返回 Dashboard 按鈕（使用 backHref 作為目標路徑） */
+  showDashboardButton?: boolean;
 }
 
 export function DeletedEventView({
   backHref,
   backLabel,
   translationPrefix,
-  showHomeButton = false,
+  showDashboardButton = false,
 }: DeletedEventViewProps) {
   const t = useTranslations();
 
@@ -38,9 +38,9 @@ export function DeletedEventView({
           <p className="text-zinc-500 dark:text-zinc-400">
             {t(`${translationPrefix}.eventDeletedDescription`)}
           </p>
-          {showHomeButton && (
+          {showDashboardButton && (
             <Link
-              href="/joined"
+              href={backHref}
               className="inline-flex items-center gap-2 px-4 py-2 mt-6 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
             >
               {t("event.backToDashboard")}

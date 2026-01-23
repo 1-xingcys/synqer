@@ -34,7 +34,7 @@ export default function EventJoinPage({ eventId }: EventJoinPageProps) {
         backHref="/joined"
         backLabel={t("joined.backToJoined")}
         translationPrefix="eventJoin"
-        showHomeButton
+        showDashboardButton
       />
     );
   }
