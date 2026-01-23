@@ -9,7 +9,9 @@
     "cancel": "Cancel",
     "edit": "Edit",
     "delete": "Delete",
-    "back": "Back"
+    "back": "Back",
+    "showDetails": "Show details",
+    "hideDetails": "Hide details"
   },
   "landing": {
     "gotoDashboard": "Go to Dashboard",
@@ -98,6 +100,24 @@
   "joined": {
     "title": "Joined Events",
     "description": "Events you're participating in",
+    "pageHint": {
+      "voting": {
+        "title": "Vote Your Availability",
+        "description": "Select the times you're available so the host can find the best time for everyone"
+      },
+      "votingEnded": {
+        "title": "Waiting for Confirmation",
+        "description": "Voting has ended. Please wait for the host to confirm the event time"
+      },
+      "confirmed": {
+        "title": "Event Scheduled",
+        "description": "The event time has been confirmed. Don't forget to add it to your calendar!"
+      },
+      "completed": {
+        "title": "Event Completed",
+        "description": "This event has ended. Thank you for participating!"
+      }
+    },
     "noEvents": "You haven't joined any events yet",
     "noEventsDescription": "When someone invites you to an event, it will appear here",
     "viewEvent": "Vote",
@@ -226,6 +246,10 @@
   "hosted": {
     "title": "Hosted Events",
     "description": "Manage events that you host",
+    "pageHint": {
+      "title": "Event Management",
+      "description": "View voting results, manage participants, and confirm the event time"
+    },
     "noEvents": "You haven't hosted any events yet",
     "noEventsDescription": "Create your first event to get started",
     "manageEvent": "Manage",
