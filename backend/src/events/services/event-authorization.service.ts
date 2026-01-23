@@ -62,7 +62,7 @@ export class EventAuthorizationService {
   ): Promise<T> {
     const event = (await this.prisma.event.findUnique({
       where: { id: eventId },
-      ...(select && { select: { ...select, isDeleted: true } }),
+      ...(select && { select: { ...select, isDeleted: true, ownerId: true } }),
     })) as T | null;
 
     if (!event || event.isDeleted) {
