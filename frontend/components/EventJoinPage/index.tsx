@@ -1,16 +1,19 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEventJoin } from "./useEventJoin";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorView } from "./ErrorView";
 import { AlreadyParticipantView } from "./AlreadyParticipantView";
 import { JoinConfirmView } from "./JoinConfirmView";
+import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
 
 interface EventJoinPageProps {
   eventId: string;
 }
 
 export default function EventJoinPage({ eventId }: EventJoinPageProps) {
+  const t = useTranslations();
   const {
     eventInfo,
     participationStatus,
@@ -22,6 +25,18 @@ export default function EventJoinPage({ eventId }: EventJoinPageProps) {
 
   if (loading) {
     return <LoadingSpinner />;
+  }
+
+  // 已刪除活動的 UI 提示
+  if (eventInfo?.isDeleted) {
+    return (
+      <DeletedEventView
+        backHref="/joined"
+        backLabel={t("joined.backToJoined")}
+        translationPrefix="eventJoin"
+        showHomeButton
+      />
+    );
   }
 
   if (error || !eventInfo) {
