@@ -162,7 +162,10 @@
       "unavailableParticipants": "Not Available",
       "noOneAvailable": "No one is available",
       "close": "Close",
-      "rangeHint": "Showing people available for ALL selected time slots"
+      "rangeHint": "Showing people available for ALL selected time slots",
+      "copyLink": "Share",
+      "copyLinkTitle": "Copy shareable link with current filter",
+      "linkCopied": "Copied!"
     },
     "viewResultsDescription": "View availability analysis",
     "notParticipant": {
