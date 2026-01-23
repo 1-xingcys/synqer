@@ -51,7 +51,6 @@ describe('EventsService', () => {
       findMany: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
-      delete: jest.fn(),
     },
     eventTimeSlot: {
       createMany: jest.fn(),
@@ -516,12 +515,15 @@ describe('EventsService', () => {
   });
 
   describe('remove', () => {
-    it('should delete event successfully', async () => {
+    it('should soft delete event successfully', async () => {
       const eventId = 'event-1';
       const userId = 'user-1';
 
       eventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
-      mockPrismaService.event.delete.mockResolvedValue({} as any);
+      mockPrismaService.event.update.mockResolvedValue({
+        id: eventId,
+        isDeleted: true,
+      } as any);
 
       const result = await service.remove(eventId, userId);
 
@@ -529,8 +531,9 @@ describe('EventsService', () => {
         eventId,
         userId,
       );
-      expect(prismaService.event.delete).toHaveBeenCalledWith({
+      expect(prismaService.event.update).toHaveBeenCalledWith({
         where: { id: eventId },
+        data: { isDeleted: true },
       });
       expect(result.success).toBe(true);
     });

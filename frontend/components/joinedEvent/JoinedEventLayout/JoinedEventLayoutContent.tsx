@@ -8,6 +8,7 @@ import {
   NavIcons,
 } from "@/components/eventCommon/EventDetailNav";
 import { EventInfoCompact } from "@/components/eventCommon/EventInfoCompact";
+import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
 import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -38,6 +39,17 @@ export function JoinedEventLayoutContent({
           </div>
         </div>
       </div>
+    );
+  }
+
+  // 已刪除活動的 UI 提示
+  if (data?.isDeleted) {
+    return (
+      <DeletedEventView
+        backHref="/joined"
+        backLabel={t("joined.backToJoined")}
+        translationPrefix="joined"
+      />
     );
   }
 

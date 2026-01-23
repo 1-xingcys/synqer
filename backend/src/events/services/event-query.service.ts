@@ -23,6 +23,7 @@ export class EventQueryService {
     const events = await this.prisma.event.findMany({
       where: {
         ownerId: userId,
+        isDeleted: false,
       },
       include: {
         expectedParticipants: {
@@ -99,6 +100,7 @@ export class EventQueryService {
             isRemoved: false,
           },
         },
+        isDeleted: false,
       },
       include: {
         expectedParticipants: {
@@ -239,6 +241,19 @@ export class EventQueryService {
       return null;
     }
 
+    // 檢查活動是否已被軟刪除
+    if (event.isDeleted) {
+      return {
+        isDeleted: true,
+        event: this.eventMapper.mapEventToDetail(event),
+        lineGroup: event.lineGroup,
+        slots: [],
+        votes: [],
+        participants: [],
+        expectedParticipants: [],
+      };
+    }
+
     // 取得未被移除的預期參與者的 userId 集合
     const activeParticipantUserIds = new Set<string>(
       event.expectedParticipants
@@ -270,6 +285,7 @@ export class EventQueryService {
       );
 
     return {
+      isDeleted: false,
       event: this.eventMapper.mapEventToDetail(event),
       lineGroup: event.lineGroup,
       slots: event.slots,
@@ -334,6 +350,23 @@ export class EventQueryService {
       return null; // 權限檢查由調用者處理
     }
 
+    // 檢查活動是否已被軟刪除
+    if (event.isDeleted) {
+      return {
+        isDeleted: true,
+        event: this.eventMapper.mapEventToDetail(event),
+        slots: [],
+        votes: [],
+        participants: [],
+        expectedParticipants: [],
+        votingStats: {
+          totalExpected: 0,
+          totalVoted: 0,
+          votingPercentage: 0,
+        },
+      };
+    }
+
     // 取得未被移除的預期參與者的 userId 集合
     const activeParticipantUserIds = new Set<string>(
       event.expectedParticipants
@@ -373,6 +406,7 @@ export class EventQueryService {
     );
 
     return {
+      isDeleted: false,
       event: this.eventMapper.mapEventToDetail(event),
       slots: event.slots,
       votes,
@@ -412,6 +446,19 @@ export class EventQueryService {
       return null;
     }
 
+    // 檢查活動是否已被軟刪除
+    if (event.isDeleted) {
+      return {
+        isDeleted: true,
+        ...this.eventMapper.mapEventToList(event, false),
+        participantCount: 0,
+        status: this.eventStatusService.computeEventStatus({
+          votingDeadline: event.votingDeadline,
+          confirmedTimeSlots: [],
+        }),
+      };
+    }
+
     const confirmedTimeSlots = event.confirmedTimeSlots.map((cts) => ({
       slotId: cts.slotId,
       date: cts.slot.date,
@@ -420,6 +467,7 @@ export class EventQueryService {
     }));
 
     return {
+      isDeleted: false,
       ...this.eventMapper.mapEventToList(event, false),
       participantCount: event.expectedParticipants.length,
       status: this.eventStatusService.computeEventStatus({

@@ -17,16 +17,6 @@ export function JoinedEventGuard({ children }: JoinedEventGuardProps) {
 
   const isLoading = loading || authLoading;
 
-  // Check if user is an expected participant
-  const isParticipant =
-    data && user
-      ? data.expectedParticipants.some(
-          (p) =>
-            p.userId === user.id.toString() ||
-            p.user?.id === user.id.toString(),
-        )
-      : false;
-
   // Show loading while checking
   if (isLoading) {
     return (
@@ -42,6 +32,21 @@ export function JoinedEventGuard({ children }: JoinedEventGuardProps) {
       </div>
     );
   }
+
+  // 已刪除活動直接放行，讓 JoinedEventLayoutContent 處理顯示
+  if (data?.isDeleted) {
+    return <>{children}</>;
+  }
+
+  // Check if user is an expected participant
+  const isParticipant =
+    data && user
+      ? data.expectedParticipants.some(
+          (p) =>
+            p.userId === user.id.toString() ||
+            p.user?.id === user.id.toString(),
+        )
+      : false;
 
   // If not a participant, show not participant view
   if (data && user && !isParticipant) {
