@@ -22,16 +22,17 @@ export class EventVoteService {
     // 使用 transaction 保證一致性
     const result = await this.prisma.$transaction(
       async (prisma: Prisma.TransactionClient) => {
-        // 0. 檢查活動是否存在及投票是否已截止
+        // 0. 檢查活動是否存在、是否已刪除、投票是否已截止
         const event = await prisma.event.findUnique({
           where: { id: eventId },
           select: {
             votingDeadline: true,
             lineGroupId: true,
+            isDeleted: true,
           },
         });
 
-        if (!event) {
+        if (!event || event.isDeleted) {
           throw new BadRequestException('活動不存在');
         }
 

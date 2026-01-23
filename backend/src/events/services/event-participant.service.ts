@@ -38,7 +38,7 @@ export class EventParticipantService {
       },
     });
 
-    if (!event) {
+    if (!event || event.isDeleted) {
       throw new NotFoundException(`Event ${eventId} not found`);
     }
 
@@ -235,9 +235,10 @@ export class EventParticipantService {
   async checkParticipantStatus(eventId: string, userId: string) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
+      select: { id: true, isDeleted: true },
     });
 
-    if (!event) {
+    if (!event || event.isDeleted) {
       throw new NotFoundException(`Event ${eventId} not found`);
     }
 
@@ -271,9 +272,10 @@ export class EventParticipantService {
   async joinEvent(eventId: string, userId: string) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
+      select: { id: true, isDeleted: true },
     });
 
-    if (!event) {
+    if (!event || event.isDeleted) {
       throw new NotFoundException(`Event ${eventId} not found`);
     }
 

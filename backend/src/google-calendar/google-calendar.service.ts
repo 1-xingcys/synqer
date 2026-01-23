@@ -359,7 +359,7 @@ export class GoogleCalendarService {
       },
     });
 
-    if (!event) {
+    if (!event || event.isDeleted) {
       throw new BadRequestException('Event not found');
     }
 
