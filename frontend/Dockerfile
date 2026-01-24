@@ -5,9 +5,11 @@ WORKDIR /app
 
 # 接收构建参数（NEXT_PUBLIC_* 环境变量需要在构建时存在）
 ARG NEXT_PUBLIC_API
+ARG NEXT_PUBLIC_LINE_LIFF_ID
 
 # 将构建参数转换为环境变量（Next.js 构建时需要）
 ENV NEXT_PUBLIC_API=${NEXT_PUBLIC_API}
+ENV NEXT_PUBLIC_LINE_LIFF_ID=${NEXT_PUBLIC_LINE_LIFF_ID}
 
 # 复制 package 文件
 COPY package*.json ./
