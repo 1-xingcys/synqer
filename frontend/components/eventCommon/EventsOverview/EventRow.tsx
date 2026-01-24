@@ -21,7 +21,6 @@ import {
   Users,
   Vote,
 } from "lucide-react";
-import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { format } from "date-fns";
 import { EventRowData, HostedEventRowData, EventRowMode } from "./types";
 
@@ -222,19 +221,7 @@ export default function EventRow({
 
         {/* Time Range */}
         <div className="text-sm text-zinc-500 dark:text-zinc-400 shrink-0 min-w-[160px]">
-          {variant === EventStatus.CONFIRMED ||
-          variant === EventStatus.COMPLETED ? (
-            event.confirmedTimeRanges?.length > 0 ? (
-              <ConfirmedTimeDisplay
-                timeRanges={event.confirmedTimeRanges}
-                preview
-              />
-            ) : (
-              formatDateRange()
-            )
-          ) : (
-            formatDateRange()
-          )}
+          {formatDateRange()}
         </div>
 
         {/* Vote Count */}
@@ -305,21 +292,7 @@ export default function EventRow({
               )}
 
               {/* Date */}
-              <span>
-                {variant === EventStatus.CONFIRMED ||
-                variant === EventStatus.COMPLETED ? (
-                  event.confirmedTimeRanges?.length > 0 ? (
-                    <ConfirmedTimeDisplay
-                      timeRanges={event.confirmedTimeRanges}
-                      preview
-                    />
-                  ) : (
-                    formatDateRange()
-                  )
-                ) : (
-                  formatDateRange()
-                )}
-              </span>
+              <span>{formatDateRange()}</span>
 
               {/* Vote Count */}
               <div className="flex items-center gap-1">

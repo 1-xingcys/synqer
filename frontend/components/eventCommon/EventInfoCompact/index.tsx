@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { EventStatus, ConfirmedTimeRange } from "@/types/event";
+import { EventStatus } from "@/types/event";
 import { EventStatusBadge } from "@/components/eventCommon/EventStatusBadge";
-import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { format, isPast, differenceInHours } from "date-fns";
 import { Link } from "@/i18n/routing";
 import { ExternalLink, ChevronDown, Copy, CheckCheck } from "lucide-react";
@@ -18,7 +17,6 @@ interface EventInfoCompactProps {
   endMinuteOfDay: number;
   status: EventStatus;
   hasVoted?: boolean;
-  confirmedTimeRanges?: ConfirmedTimeRange[];
   votingDeadline?: string | null;
   /** 是否為 hosted 頁面（不顯示 Status Description，顯示前往按鈕） */
   isHosted?: boolean;
@@ -35,7 +33,6 @@ export function EventInfoCompact({
   endMinuteOfDay,
   status,
   hasVoted,
-  confirmedTimeRanges = [],
   votingDeadline,
   isHosted = false,
   eventId,
@@ -66,7 +63,6 @@ export function EventInfoCompact({
 
   const isVotingPhase =
     status === EventStatus.VOTING || status === EventStatus.VOTING_ENDED;
-  const hasConfirmedTime = confirmedTimeRanges.length > 0;
 
   // Check if deadline is urgent (within 24 hours)
   const deadlineDate = votingDeadline ? new Date(votingDeadline) : null;
@@ -204,46 +200,31 @@ export function EventInfoCompact({
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              {isVotingPhase ? (
-                <span>
-                  {format(new Date(startDate), "M/d")} -{" "}
-                  {format(new Date(endDate), "M/d")}
-                </span>
-              ) : hasConfirmedTime ? (
-                <ConfirmedTimeDisplay
-                  timeRanges={confirmedTimeRanges}
-                  preview
-                  className="truncate"
-                />
-              ) : (
-                <span>
-                  {format(new Date(startDate), "M/d")} -{" "}
-                  {format(new Date(endDate), "M/d")}
-                </span>
-              )}
+              <span>
+                {format(new Date(startDate), "M/d")} -{" "}
+                {format(new Date(endDate), "M/d")}
+              </span>
             </div>
 
-            {/* Time Range - only show for voting phase */}
-            {isVotingPhase && (
-              <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
-                <svg
-                  className="w-4 h-4 shrink-0 text-zinc-400 dark:text-zinc-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span className="font-mono text-xs">
-                  {formatTime(startMinuteOfDay)} - {formatTime(endMinuteOfDay)}
-                </span>
-              </div>
-            )}
+            {/* Time Range */}
+            <div className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
+              <svg
+                className="w-4 h-4 shrink-0 text-zinc-400 dark:text-zinc-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span className="font-mono text-xs">
+                {formatTime(startMinuteOfDay)} - {formatTime(endMinuteOfDay)}
+              </span>
+            </div>
 
             {/* Voting Deadline - more prominent */}
             {isVotingPhase && deadlineDate && (
