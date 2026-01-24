@@ -2,8 +2,7 @@ name: Deploy to GCP
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
     types: [closed]
 
 env:
@@ -11,10 +10,10 @@ env:
   REGION: asia-east1
   BACKEND_SERVICE: backend
   FRONTEND_SERVICE: frontend
+  AR_REPO: no-invite
 
 jobs:
   deploy:
-    # 只在 PR merge 到 main 時執行
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
@@ -23,39 +22,57 @@ jobs:
       id-token: write
 
     steps:
-      - name: Test gcloud auth
-        run: |
-          gcloud auth list
-          gcloud config list
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Authenticate to Google Cloud
+      - name: Authenticate to Google Cloud (WIF)
         uses: google-github-actions/auth@v2
         with:
           project_id: ${{ env.PROJECT_ID }}
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
+      # 讓 runner 有 gcloud + docker credential helper
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Build and Push Backend Image
+      # 讓 docker 可以 push 到 Artifact Registry
+      - name: Configure Docker for Artifact Registry
         run: |
-          cd backend
-          gcloud builds submit --config=cloudbuild.yaml \
-            --substitutions=_TAG=${{ github.sha }}
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-      - name: Build and Push Frontend Image
-        run: |
-          cd frontend
-          gcloud builds submit --config=cloudbuild.yaml \
-            --substitutions=_TAG=${{ github.sha }}
+      # buildx（可以快取、跨平台）
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Build & Push Backend
+      - name: Build & Push Backend (local buildx)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/backend:${{ github.sha }}
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Build & Push Frontend
+      - name: Build & Push Frontend (local buildx)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/frontend:${{ github.sha }}
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Deploy Backend to Cloud Run
         run: |
           gcloud run deploy ${{ env.BACKEND_SERVICE }} \
-            --image=asia-east1-docker.pkg.dev/${{ env.PROJECT_ID }}/no-invite/backend:${{ github.sha }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/backend:${{ github.sha }} \
             --region=${{ env.REGION }} \
             --platform=managed \
             --allow-unauthenticated
@@ -63,7 +80,7 @@ jobs:
       - name: Deploy Frontend to Cloud Run
         run: |
           gcloud run deploy ${{ env.FRONTEND_SERVICE }} \
-            --image=asia-east1-docker.pkg.dev/${{ env.PROJECT_ID }}/no-invite/frontend:${{ github.sha }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/frontend:${{ github.sha }} \
             --region=${{ env.REGION }} \
             --platform=managed \
             --allow-unauthenticated
