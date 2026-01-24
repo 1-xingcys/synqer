@@ -260,7 +260,6 @@ export function JoinedEventLayoutContent({
         endMinuteOfDay={event.endMinuteOfDay}
         status={event.status}
         hasVoted={hasVoted}
-        confirmedTimeRanges={event.confirmedTimeRanges}
         votingDeadline={event.votingDeadline}
       />
 

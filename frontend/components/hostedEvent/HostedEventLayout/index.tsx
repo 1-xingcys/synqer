@@ -142,7 +142,6 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
         startMinuteOfDay={event.startMinuteOfDay}
         endMinuteOfDay={event.endMinuteOfDay}
         status={event.status}
-        confirmedTimeRanges={event.confirmedTimeRanges}
         votingDeadline={event.votingDeadline}
         isHosted={true}
         eventId={eventId}
