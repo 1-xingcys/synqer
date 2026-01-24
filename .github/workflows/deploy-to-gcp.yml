@@ -66,6 +66,9 @@ jobs:
           tags: |
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/frontend:${{ github.sha }}
             ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPO }}/frontend:latest
+          build-args: |
+            NEXT_PUBLIC_API=${{ secrets.NEXT_PUBLIC_API }}
+            NEXT_PUBLIC_LINE_LIFF_ID=${{ secrets.NEXT_PUBLIC_LINE_LIFF_ID }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
