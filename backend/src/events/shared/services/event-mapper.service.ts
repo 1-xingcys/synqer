@@ -3,7 +3,6 @@ import { EventStatusService } from './event-status.service';
 import {
   ConfirmedTimeService,
   ConfirmedTimeSlotData,
-  ConfirmedTimeRange,
 } from '../../../confirmed-time';
 
 // 確認時段的資料結構（重新導出以保持向後兼容）
@@ -120,18 +119,6 @@ export class EventMapperService {
   }
 
   /**
-   * 將確認時段轉換為時間範圍
-   */
-  mapConfirmedTimeRanges(
-    confirmedTimeSlots?: ConfirmedTimeSlot[],
-  ): ConfirmedTimeRange[] {
-    if (!confirmedTimeSlots || confirmedTimeSlots.length === 0) {
-      return [];
-    }
-    return this.confirmedTimeService.mergeToTimeRanges(confirmedTimeSlots);
-  }
-
-  /**
    * 映射事件為列表項格式
    */
   mapEventToList(
@@ -150,8 +137,8 @@ export class EventMapperService {
   ) {
     const confirmedSlotIds =
       event.confirmedTimeSlots?.map((cts) => cts.slotId) || [];
-    const confirmedTimeRanges = this.mapConfirmedTimeRanges(
-      event.confirmedTimeSlots,
+    const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
+      event.confirmedTimeSlots || [],
     );
 
     const base = {
@@ -202,8 +189,8 @@ export class EventMapperService {
   }) {
     const confirmedSlotIds =
       event.confirmedTimeSlots?.map((cts) => cts.slotId) || [];
-    const confirmedTimeRanges = this.mapConfirmedTimeRanges(
-      event.confirmedTimeSlots,
+    const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
+      event.confirmedTimeSlots || [],
     );
 
     return {
