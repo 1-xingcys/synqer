@@ -198,6 +198,10 @@ function DesktopTimePicker({
   const handleInputFocus = () => {
     setIsEditing(true);
     setEditValue(value);
+    // Open popover on focus (slight delay to avoid race condition with Radix)
+    requestAnimationFrame(() => {
+      setOpen(true);
+    });
   };
 
   // Handle input blur - validate and apply
@@ -258,10 +262,7 @@ function DesktopTimePicker({
               onChange={handleInputChange}
               onBlur={handleInputBlur}
               onKeyDown={handleKeyDown}
-              onFocus={() => {
-                handleInputFocus();
-                setOpen(true);
-              }}
+              onFocus={handleInputFocus}
               disabled={disabled}
               placeholder="HH:MM"
               className={cn(
@@ -280,8 +281,15 @@ function DesktopTimePicker({
           className="w-(--radix-popover-trigger-width) p-0"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(e) => e.preventDefault()}
         >
-          <div className="max-h-60 overflow-y-auto">
+          <div
+            className="max-h-60 overflow-y-auto"
+            onMouseDown={(e) => {
+              // Prevent input blur when clicking inside popover
+              e.preventDefault();
+            }}
+          >
             {timeOptions.map((time) => (
               <button
                 key={time}
@@ -291,6 +299,7 @@ function DesktopTimePicker({
                   time === value &&
                     "bg-accent text-accent-foreground font-medium",
                 )}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleOptionSelect(time)}
               >
                 {time}
