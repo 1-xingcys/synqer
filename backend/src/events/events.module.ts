@@ -1,32 +1,19 @@
 import { Module } from '@nestjs/common';
-import { EventsService } from './events.service';
-import { EventsController } from './events.controller';
-import { PrismaModule } from '../prisma/prisma.module';
-import { LineBotModule } from '../line-bot/line-bot.module';
-import { ConfirmedTimeModule } from '../confirmed-time';
-import {
-  TimeSlotService,
-  EventParticipantService,
-  EventVoteService,
-  EventAuthorizationService,
-  EventMapperService,
-  EventQueryService,
-  EventCreationService,
-} from './services';
+
+// Sub-modules
+import { EventSharedModule } from './shared/event-shared.module';
+import { EventCoreModule } from './core/event-core.module';
+import { ParticipationModule } from './participation/participation.module';
+import { VotingModule } from './voting/voting.module';
+import { ConfirmationModule } from './confirmation/confirmation.module';
 
 @Module({
-  imports: [PrismaModule, LineBotModule, ConfirmedTimeModule],
-  controllers: [EventsController],
-  providers: [
-    EventsService,
-    TimeSlotService,
-    EventParticipantService,
-    EventVoteService,
-    EventAuthorizationService,
-    EventMapperService,
-    EventQueryService,
-    EventCreationService,
+  imports: [
+    EventSharedModule,
+    EventCoreModule,
+    ParticipationModule,
+    VotingModule,
+    ConfirmationModule,
   ],
-  exports: [EventsService],
 })
 export class EventsModule {}

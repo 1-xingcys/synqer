@@ -120,7 +120,7 @@ export function useDefaultParticipantsState(eventId: string) {
     try {
       setSaving(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}/participants`,
+        `${process.env.NEXT_PUBLIC_API}/events/${eventId}/participation/members`,
         {
           method: "PUT",
           headers: {

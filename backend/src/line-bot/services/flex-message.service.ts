@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventStatus } from '../../events/services/event-status.service';
+import { EventStatus } from '../../events/shared/services/event-status.service';
 
 /**
  * LINE Flex Message 類型定義

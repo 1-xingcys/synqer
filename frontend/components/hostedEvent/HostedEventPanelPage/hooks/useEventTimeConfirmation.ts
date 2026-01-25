@@ -58,7 +58,7 @@ export function useEventTimeConfirmation({
       const slotIds = getAllSelectedSlotIds();
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirm-time`,
+        `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation`,
         {
           method: "POST",
           headers: {
@@ -108,7 +108,7 @@ export function useEventTimeConfirmation({
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirm-time`,
+        `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation`,
         {
           method: "DELETE",
           credentials: "include",
