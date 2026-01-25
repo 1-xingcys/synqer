@@ -132,7 +132,7 @@ export default function ResultsView({
 
             {/* Copy Link Button */}
             <button
-              onClick={copyShareableLink}
+              onClick={() => void copyShareableLink()}
               className={`
                 flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg
                 border transition-all
