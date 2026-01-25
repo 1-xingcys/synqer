@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { CreateEventFormData, initialFormData } from "../types";
+import { CreateEventFormData, getInitialFormData } from "../types";
 
 export function useFormState() {
-  const [formData, setFormData] =
-    useState<CreateEventFormData>(initialFormData);
+  const [formData, setFormData] = useState<CreateEventFormData>(() =>
+    getInitialFormData(),
+  );
   const [loading, setLoading] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 

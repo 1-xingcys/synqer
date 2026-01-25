@@ -8,6 +8,9 @@ export const SLOT_DURATION_MIN = 15;
 // Feature flags
 export const RESTRICT_START_DATE_TO_TODAY = false; // Set to true to restrict start date to today or later
 
+// Minimum hours before event start time (to ensure enough voting time)
+export const MIN_HOURS_BEFORE_EVENT = 1;
+
 export interface CreateEventFormData {
   title: string;
   description: string;
@@ -103,6 +106,26 @@ export function getToday(): Date {
   return today;
 }
 
+// Get a reasonable default start time (current time + 2 hours, rounded to 15 min)
+// Returns "00:00" if that would push into the next day
+export function getDefaultStartTime(): string {
+  const now = new Date();
+  const targetMinutes = now.getHours() * 60 + now.getMinutes() + 120; // +2 hours
+
+  // If it exceeds today, return 00:00 (user will need to pick tomorrow)
+  if (targetMinutes >= 24 * 60) {
+    return "00:00";
+  }
+
+  // Round up to next 15-minute interval
+  const roundedMinutes = Math.ceil(targetMinutes / 15) * 15;
+
+  // Make sure we don't exceed 23:45
+  const finalMinutes = Math.min(roundedMinutes, 23 * 60 + 45);
+
+  return formatMinutesToTime(finalMinutes);
+}
+
 // Combine date and time into a single Date object
 export function combineDateAndTime(date: Date, time: string): Date {
   const [hours, minutes] = time.split(":").map(Number);
@@ -111,18 +134,22 @@ export function combineDateAndTime(date: Date, time: string): Date {
   return result;
 }
 
-// Initial form data with defaults
-export const initialFormData: CreateEventFormData = {
-  title: "",
-  description: "",
-  startDate: getToday(),
-  endDate: getToday(),
-  startTime: "00:00",
-  endTime: "24:00",
-  timeZone: "Asia/Taipei",
-  votingDeadline: getToday(),
-  votingDeadlineTime: "00:00",
-  votingDeadlineManuallySet: false,
-  lineGroupId: null,
-  selectedLineUserIds: [],
-};
+// Get initial form data with sensible defaults
+export function getInitialFormData(): CreateEventFormData {
+  const defaultStartTime = getDefaultStartTime();
+
+  return {
+    title: "",
+    description: "",
+    startDate: getToday(),
+    endDate: getToday(),
+    startTime: defaultStartTime,
+    endTime: "24:00",
+    timeZone: "Asia/Taipei",
+    votingDeadline: getToday(),
+    votingDeadlineTime: defaultStartTime,
+    votingDeadlineManuallySet: false,
+    lineGroupId: null,
+    selectedLineUserIds: [],
+  };
+}

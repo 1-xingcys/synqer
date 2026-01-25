@@ -12,6 +12,7 @@ interface ConfigurationSectionProps {
   startTime: string;
   endTime: string;
   hasTimeError?: boolean;
+  hasStartTimeTooSoonError?: boolean;
   onStartDateChange: (date: Date | null) => void;
   onEndDateChange: (date: Date | null) => void;
   onStartTimeChange: (value: string) => void;
@@ -24,6 +25,7 @@ export function ConfigurationSection({
   startTime,
   endTime,
   hasTimeError = false,
+  hasStartTimeTooSoonError = false,
   onStartDateChange,
   onEndDateChange,
   onStartTimeChange,
@@ -31,7 +33,7 @@ export function ConfigurationSection({
 }: ConfigurationSectionProps) {
   const t = useTranslations();
 
-  // Min date for date picker (currently unused but kept for future use)
+  // Min date for date picker - start date must be at least today
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -51,6 +53,9 @@ export function ConfigurationSection({
             <h2 className="text-base font-semibold text-foreground mb-1">
               {t("createEvent.configuration.title")}
             </h2>
+            <p className="text-xs text-muted-foreground">
+              {t("createEvent.configuration.description")}
+            </p>
           </div>
 
           {/* Start Date & End Date */}
@@ -61,8 +66,7 @@ export function ConfigurationSection({
                 value={startDate}
                 onChange={onStartDateChange}
                 placeholder={t("createEvent.configuration.selectDate")}
-                // minDate={minDate}
-                // maxDate={endDate || undefined}
+                minDate={today}
               />
             </div>
 
@@ -72,7 +76,7 @@ export function ConfigurationSection({
                 value={endDate}
                 onChange={onEndDateChange}
                 placeholder={t("createEvent.configuration.selectDate")}
-                // minDate={startDate || minDate}
+                minDate={startDate || today}
               />
             </div>
           </div>
@@ -106,6 +110,16 @@ export function ConfigurationSection({
               <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
               <p className="text-sm text-destructive">
                 {t("createEvent.configuration.timeError")}
+              </p>
+            </div>
+          )}
+
+          {/* Start Time Too Soon Error */}
+          {hasStartTimeTooSoonError && (
+            <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+              <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive">
+                {t("createEvent.configuration.startTimeTooSoonError")}
               </p>
             </div>
           )}

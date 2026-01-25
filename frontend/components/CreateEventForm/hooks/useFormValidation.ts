@@ -5,7 +5,8 @@ import {
   CreateEventFormData,
   parseTimeToMinutes,
   combineDateAndTime,
-  getToday,
+  getInitialFormData,
+  MIN_HOURS_BEFORE_EVENT,
 } from "../types";
 
 export interface ValidationErrors {
@@ -33,6 +34,25 @@ export function useFormValidation(formData: CreateEventFormData) {
     if (startMinutes >= endMinutes) {
       errors.startTime = "startTimeNotBeforeEndTime";
       errors.endTime = "startTimeNotBeforeEndTime";
+    }
+
+    // Event start time validation: must be at least MIN_HOURS_BEFORE_EVENT from now
+    if (formData.startDate) {
+      const eventStartDateTime = combineDateAndTime(
+        formData.startDate,
+        formData.startTime,
+      );
+      const minStartTime = new Date();
+      minStartTime.setHours(
+        minStartTime.getHours() + MIN_HOURS_BEFORE_EVENT,
+        minStartTime.getMinutes(),
+        0,
+        0,
+      );
+
+      if (eventStartDateTime < minStartTime) {
+        errors.startDate = "startTimeTooSoon";
+      }
     }
 
     // Voting deadline validation
@@ -65,7 +85,7 @@ export function useFormValidation(formData: CreateEventFormData) {
   }, [formData.title, validationErrors]);
 
   const hasUnsavedChanges = useMemo(() => {
-    const today = getToday();
+    const initialData = getInitialFormData();
     const isSameDay = (d1: Date | null, d2: Date | null) => {
       if (!d1 || !d2) return d1 === d2;
       return d1.toDateString() === d2.toDateString();
@@ -74,9 +94,8 @@ export function useFormValidation(formData: CreateEventFormData) {
     return (
       formData.title.trim() !== "" ||
       formData.description.trim() !== "" ||
-      !isSameDay(formData.startDate, today) ||
-      !isSameDay(formData.endDate, today) ||
-      formData.startTime !== "00:00" ||
+      !isSameDay(formData.startDate, initialData.startDate) ||
+      !isSameDay(formData.endDate, initialData.endDate) ||
       formData.endTime !== "24:00" ||
       formData.votingDeadlineManuallySet ||
       formData.lineGroupId !== null ||

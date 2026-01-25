@@ -79,6 +79,7 @@ export default function CreateEventForm() {
             startTime={formData.startTime}
             endTime={formData.endTime}
             hasTimeError={!!validationErrors.startTime}
+            hasStartTimeTooSoonError={!!validationErrors.startDate}
             onStartDateChange={handleStartDateChange}
             onEndDateChange={handleEndDateChange}
             onStartTimeChange={handleStartTimeChange}
