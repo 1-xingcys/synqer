@@ -112,7 +112,7 @@ export function useEventDetail(eventId: string) {
       throw new Error("NEXT_PUBLIC_API is not set");
     }
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API}/events/${eventId}/votes`,
+      `${process.env.NEXT_PUBLIC_API}/events/${eventId}/voting`,
       {
         method: "POST",
         headers: {
