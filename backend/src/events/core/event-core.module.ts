@@ -17,13 +17,10 @@ import { EventRepository } from './repositories/event.repository';
   imports: [PrismaModule, EventSharedModule],
   controllers: [EventCoreController],
   providers: [
-    // Services
     EventCreationService,
     EventQueryService,
     EventUpdateService,
-    // Repositories
     EventRepository,
   ],
-  exports: [EventCreationService, EventQueryService, EventUpdateService],
 })
 export class EventCoreModule {}

@@ -14,12 +14,6 @@ import { ConfirmationRepository } from './repositories/confirmation.repository';
 @Module({
   imports: [PrismaModule, EventSharedModule],
   controllers: [ConfirmationController],
-  providers: [
-    // Services
-    ConfirmationService,
-    // Repositories
-    ConfirmationRepository,
-  ],
-  exports: [ConfirmationService],
+  providers: [ConfirmationService, ConfirmationRepository],
 })
 export class ConfirmationModule {}
