@@ -3,7 +3,7 @@ import { ConfirmedTimeService } from './confirmed-time.service';
 import {
   ConfirmedTimeSlotData,
   ConfirmedTimeRange,
-} from './confirmed-time.interface';
+} from '../interfaces/confirmed-time.interface';
 
 describe('ConfirmedTimeService', () => {
   let service: ConfirmedTimeService;

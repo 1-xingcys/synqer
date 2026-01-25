@@ -1,24 +1,25 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../prisma/prisma.module';
-import { ConfirmedTimeModule } from '../../confirmed-time';
 
 // Services
 import { TimeSlotService } from './services/time-slot.service';
 import { EventStatusService } from './services/event-status.service';
 import { EventAuthorizationService } from './services/event-authorization.service';
 import { EventMapperService } from './services/event-mapper.service';
+import { ConfirmedTimeService } from './services/confirmed-time.service';
 
 // Repositories
 import { EventBaseRepository } from './repositories/event.repository';
 import { TimeSlotRepository } from './repositories/time-slot.repository';
 
 @Module({
-  imports: [PrismaModule, ConfirmedTimeModule],
+  imports: [PrismaModule],
   providers: [
     TimeSlotService,
     EventStatusService,
     EventAuthorizationService,
     EventMapperService,
+    ConfirmedTimeService,
     EventBaseRepository,
     TimeSlotRepository,
   ],
@@ -27,6 +28,7 @@ import { TimeSlotRepository } from './repositories/time-slot.repository';
     EventStatusService,
     EventAuthorizationService,
     EventMapperService,
+    ConfirmedTimeService,
     EventBaseRepository,
     TimeSlotRepository,
   ],

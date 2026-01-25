@@ -11,7 +11,7 @@ import {
   EventStatusService,
   EventStatus,
 } from '../events/shared/services/event-status.service';
-import { ConfirmedTimeService } from '../confirmed-time';
+import { ConfirmedTimeService } from '../events/shared/services/confirmed-time.service';
 import {
   WebhookEvent,
   MessageEvent,

@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EventStatusService } from './event-status.service';
-import {
-  ConfirmedTimeService,
-  ConfirmedTimeSlotData,
-} from '../../../confirmed-time';
+import { ConfirmedTimeService } from './confirmed-time.service';
+import { ConfirmedTimeSlotData } from '../interfaces/confirmed-time.interface';
 
 // 確認時段的資料結構（重新導出以保持向後兼容）
 export type ConfirmedTimeSlot = ConfirmedTimeSlotData;

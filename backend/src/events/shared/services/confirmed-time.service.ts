@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   ConfirmedTimeSlotData,
   ConfirmedTimeRange,
-} from './confirmed-time.interface';
+} from '../interfaces/confirmed-time.interface';
 
 /**
  * 確認時間處理服務
@@ -71,19 +71,6 @@ export class ConfirmedTimeService {
   }
 
   /**
-   * 建立完整的 DateTime
-   * 使用 setUTCHours 確保在任何伺服器時區都能正確處理時間
-   * （資料庫中的 date 欄位是 UTC 時間）
-   */
-  private createDateTime(date: Date, minuteOfDay: number): Date {
-    const result = new Date(date);
-    const hours = Math.floor(minuteOfDay / 60);
-    const minutes = minuteOfDay % 60;
-    result.setUTCHours(hours, minutes, 0, 0);
-    return result;
-  }
-
-  /**
    * 格式化時間範圍為可讀字串（用於 LINE Bot 等）
    */
   formatTimeRange(range: ConfirmedTimeRange): string {
@@ -127,6 +114,19 @@ export class ConfirmedTimeService {
     }
 
     return ranges.map((r) => this.formatTimeRange(r)).join('\n');
+  }
+
+  /**
+   * 建立完整的 DateTime
+   * 使用 setUTCHours 確保在任何伺服器時區都能正確處理時間
+   * （資料庫中的 date 欄位是 UTC 時間）
+   */
+  private createDateTime(date: Date, minuteOfDay: number): Date {
+    const result = new Date(date);
+    const hours = Math.floor(minuteOfDay / 60);
+    const minutes = minuteOfDay % 60;
+    result.setUTCHours(hours, minutes, 0, 0);
+    return result;
   }
 
   private formatDate(date: Date): string {

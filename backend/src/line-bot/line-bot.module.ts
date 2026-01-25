@@ -9,11 +9,10 @@ import {
 } from './services';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UsersModule } from '../users/users.module';
-import { ConfirmedTimeModule } from '../confirmed-time';
 import { EventSharedModule } from '../events/shared/event-shared.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, ConfirmedTimeModule, EventSharedModule],
+  imports: [PrismaModule, UsersModule, EventSharedModule],
   controllers: [LineBotController],
   providers: [
     LineBotService,
