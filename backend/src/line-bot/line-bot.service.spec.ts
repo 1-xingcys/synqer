@@ -103,6 +103,19 @@ describe('LineBotService', () => {
   });
 
   describe('onModuleInit', () => {
+    const originalEnv = process.env;
+
+    beforeEach(() => {
+      // 確保每個測試前都有乾淨的 mock 狀態
+      mockLineApiService.getBotInfo.mockReset();
+      // 設定環境變數以確保 onModuleInit 會執行
+      process.env = { ...originalEnv, LINE_CHANNEL_ACCESS_TOKEN: 'test-token' };
+    });
+
+    afterEach(() => {
+      process.env = originalEnv;
+    });
+
     it('should get bot info and store userId', async () => {
       mockLineApiService.getBotInfo.mockResolvedValue({
         userId: 'bot-user-id',
@@ -119,6 +132,14 @@ describe('LineBotService', () => {
 
       // Should not throw
       await expect(service.onModuleInit()).resolves.not.toThrow();
+    });
+
+    it('should skip initialization when LINE_CHANNEL_ACCESS_TOKEN is not set', async () => {
+      delete process.env.LINE_CHANNEL_ACCESS_TOKEN;
+
+      await service.onModuleInit();
+
+      expect(mockLineApiService.getBotInfo).not.toHaveBeenCalled();
     });
   });
 
