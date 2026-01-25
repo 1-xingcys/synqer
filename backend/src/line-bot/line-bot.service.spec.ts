@@ -12,6 +12,7 @@ import {
   EventStatusService,
   EventStatus,
 } from '../events/shared/services/event-status.service';
+import { ConfirmedTimeService } from '../events/shared/services/confirmed-time.service';
 import { MessageEvent } from './dto/webhook-event.dto';
 
 describe('LineBotService', () => {
@@ -73,6 +74,12 @@ describe('LineBotService', () => {
     computeParticipantStatus: jest.fn(),
   };
 
+  const mockConfirmedTimeService = {
+    mergeToTimeRanges: jest.fn().mockReturnValue([]),
+    formatTimeRange: jest.fn(),
+    formatTimeRangesSummary: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -82,6 +89,7 @@ describe('LineBotService', () => {
         { provide: LineGroupService, useValue: mockLineGroupService },
         { provide: FlexMessageService, useValue: mockFlexMessageService },
         { provide: EventStatusService, useValue: mockEventStatusService },
+        { provide: ConfirmedTimeService, useValue: mockConfirmedTimeService },
       ],
     }).compile();
 
@@ -337,9 +345,8 @@ describe('LineBotService', () => {
           description: 'Description',
           ownerId: 'owner-1',
           votingDeadline: new Date('2025-12-31'),
-          confirmedStartTime: null,
-          confirmedEndTime: null,
-          expectedParticipants: [{ id: 'ep-1', hasVoted: false }],
+          confirmedTimeSlots: [],
+          expectedParticipants: [{ id: 'ep-1', hasVoted: false, userId: null }],
           votes: [],
         },
       ];
@@ -381,7 +388,7 @@ describe('LineBotService', () => {
 
       expect(mockPrismaService.event.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { lineGroupId: 'db-group-id' },
+          where: expect.objectContaining({ lineGroupId: 'db-group-id' }),
         }),
       );
       expect(mockFlexMessageService.buildEventFlexMessage).toHaveBeenCalled();
@@ -462,8 +469,17 @@ describe('LineBotService', () => {
           description: null,
           ownerId: 'owner-1',
           votingDeadline: null,
-          confirmedStartTime: new Date('2025-01-01T10:00:00Z'),
-          confirmedEndTime: new Date('2025-01-01T12:00:00Z'),
+          confirmedTimeSlots: [
+            {
+              slotId: 'slot-1',
+              slot: {
+                id: 'slot-1',
+                date: new Date('2025-01-01'),
+                startMinute: 600,
+                endMinute: 720,
+              },
+            },
+          ],
           expectedParticipants: [],
           votes: [],
         },
@@ -505,11 +521,10 @@ describe('LineBotService', () => {
           description: null,
           ownerId: 'owner-1',
           votingDeadline: new Date('2025-12-31'),
-          confirmedStartTime: null,
-          confirmedEndTime: null,
+          confirmedTimeSlots: [],
           expectedParticipants: [
-            { id: 'ep-1', hasVoted: true },
-            { id: 'ep-2', hasVoted: false },
+            { id: 'ep-1', hasVoted: true, userId: 'user-voted' },
+            { id: 'ep-2', hasVoted: false, userId: 'user-unvoted' },
           ],
           votes: [{ userId: 'user-voted' }],
         },
@@ -578,9 +593,8 @@ describe('LineBotService', () => {
           description: null,
           ownerId: 'owner-1',
           votingDeadline: new Date('2025-12-31'),
-          confirmedStartTime: null,
-          confirmedEndTime: null,
-          expectedParticipants: [{ id: 'ep-1', hasVoted: true }],
+          confirmedTimeSlots: [],
+          expectedParticipants: [{ id: 'ep-1', hasVoted: true, userId: 'user-voted' }],
           votes: [{ userId: 'user-voted' }],
         },
       ];
