@@ -7,7 +7,10 @@ import {
   FlexMessageService,
   EventInfo,
 } from './services';
-import { EventStatusService, EventStatus } from '../events/services';
+import {
+  EventStatusService,
+  EventStatus,
+} from '../events/shared/services/event-status.service';
 import { ConfirmedTimeService } from '../confirmed-time';
 import {
   WebhookEvent,

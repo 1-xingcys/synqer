@@ -9,11 +9,11 @@ import {
 } from './services';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UsersModule } from '../users/users.module';
-import { EventStatusService } from '../events/services/event-status.service';
 import { ConfirmedTimeModule } from '../confirmed-time';
+import { EventSharedModule } from '../events/shared/event-shared.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, ConfirmedTimeModule],
+  imports: [PrismaModule, UsersModule, ConfirmedTimeModule, EventSharedModule],
   controllers: [LineBotController],
   providers: [
     LineBotService,
@@ -21,7 +21,6 @@ import { ConfirmedTimeModule } from '../confirmed-time';
     LineGroupService,
     FlexMessageService,
     RichMenuService,
-    EventStatusService,
   ],
   exports: [
     LineBotService,
@@ -29,7 +28,6 @@ import { ConfirmedTimeModule } from '../confirmed-time';
     LineGroupService,
     FlexMessageService,
     RichMenuService,
-    EventStatusService,
   ],
 })
 export class LineBotModule {}

@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
 import { FlexMessageService, EventInfo } from './flex-message.service';
-import { EventStatus } from '../../events/services/event-status.service';
+import { EventStatus } from '../../events/shared/services/event-status.service';
 
 describe('FlexMessageService', () => {
   let service: FlexMessageService;
@@ -40,8 +40,8 @@ describe('FlexMessageService', () => {
       description: 'Test Description',
       status: EventStatus.VOTING,
       votingDeadline: new Date('2025-12-31T23:59:59Z'),
-      confirmedStartTime: null,
-      confirmedEndTime: null,
+      confirmedTimeSlots: [],
+      confirmedTimeRanges: [],
       host: {
         displayName: 'Test Host',
         pictureUrl: 'https://example.com/avatar.jpg',
@@ -134,8 +134,21 @@ describe('FlexMessageService', () => {
       const confirmedEvent: EventInfo = {
         ...baseEvent,
         status: EventStatus.CONFIRMED,
-        confirmedStartTime: new Date('2025-12-25T10:00:00Z'),
-        confirmedEndTime: new Date('2025-12-25T12:00:00Z'),
+        confirmedTimeSlots: [
+          {
+            slotId: 'slot-1',
+            date: new Date('2025-12-25'),
+            startMinute: 600, // 10:00
+            endMinute: 720, // 12:00
+          },
+        ],
+        confirmedTimeRanges: [
+          {
+            startTime: new Date('2025-12-25T10:00:00Z'),
+            endTime: new Date('2025-12-25T12:00:00Z'),
+            slotIds: ['slot-1'],
+          },
+        ],
         votingStats: undefined,
       };
 
@@ -276,8 +289,8 @@ describe('FlexMessageService', () => {
         description: null,
         status: EventStatus.VOTING,
         votingDeadline: null,
-        confirmedStartTime: null,
-        confirmedEndTime: null,
+        confirmedTimeSlots: [],
+        confirmedTimeRanges: [],
         host: { displayName: 'Host' },
         votingStats: { totalExpected: 0, totalVoted: 0, votingPercentage: 0 },
       };
@@ -293,8 +306,8 @@ describe('FlexMessageService', () => {
         description: null,
         status: EventStatus.VOTING,
         votingDeadline: new Date(),
-        confirmedStartTime: null,
-        confirmedEndTime: null,
+        confirmedTimeSlots: [],
+        confirmedTimeRanges: [],
         host: { displayName: 'Host' },
         votingStats: { totalExpected: 5, totalVoted: 2, votingPercentage: 40 },
       };
@@ -320,8 +333,8 @@ describe('FlexMessageService', () => {
           description: null,
           status: EventStatus.VOTING,
           votingDeadline: new Date(),
-          confirmedStartTime: null,
-          confirmedEndTime: null,
+          confirmedTimeSlots: [],
+          confirmedTimeRanges: [],
           host: { displayName: 'Host' },
         };
 

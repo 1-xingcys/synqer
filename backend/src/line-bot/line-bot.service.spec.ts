@@ -11,7 +11,7 @@ import {
 import {
   EventStatusService,
   EventStatus,
-} from '../events/services/event-status.service';
+} from '../events/shared/services/event-status.service';
 import { MessageEvent } from './dto/webhook-event.dto';
 
 describe('LineBotService', () => {
