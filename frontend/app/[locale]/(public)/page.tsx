@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -233,12 +233,14 @@ export default function LandingPage() {
   const commonT = useTranslations("common");
   const router = useRouter();
   const { user, loading } = useAuthContext();
-  const [mounted, setMounted] = useState(false);
 
-  // Set mounted state on client-side only
-  if (typeof window !== "undefined" && !mounted) {
-    void Promise.resolve().then(() => setMounted(true));
-  }
+  // Track client-side mounting for animations
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    // Use a minimal delay to trigger animations after hydration
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleGetStarted = useCallback(() => {
     if (user) {
