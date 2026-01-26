@@ -31,7 +31,15 @@ export function getToday(): Date {
 
 /**
  * Get default start date and time (current time + 2 hours, rounded to 15 min)
- * Handles cross-day scenario correctly
+ * Handles cross-day scenario correctly.
+ *
+ * Edge case handling:
+ * - If current time is near midnight (e.g., 23:30), adding 2 hours results in
+ *   targetMinutes > 24*60 (1440). In this case, we calculate the overflow and
+ *   return tomorrow's date with the appropriate time.
+ * - Example: At 23:30, targetMinutes = 23*60 + 30 + 120 = 1530 (25.5 hours)
+ *   -> overflow = 1530 - 1440 = 90 minutes -> rounded = 90 -> time = "01:30"
+ *   -> date = tomorrow
  */
 export function getDefaultStartDateTime(): { date: Date; time: string } {
   const now = new Date();

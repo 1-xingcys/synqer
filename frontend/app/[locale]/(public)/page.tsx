@@ -237,9 +237,9 @@ export default function LandingPage() {
   // Track client-side mounting for animations
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    // Use a minimal delay to trigger animations after hydration
-    const timer = setTimeout(() => setMounted(true), 0);
-    return () => clearTimeout(timer);
+    // Use requestAnimationFrame to defer state update and avoid cascading render warning
+    const frame = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(frame);
   }, []);
 
   const handleGetStarted = useCallback(() => {

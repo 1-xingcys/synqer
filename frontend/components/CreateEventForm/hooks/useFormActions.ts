@@ -33,6 +33,12 @@ export function useFormActions({
       setLoading(true);
 
       try {
+        // Defensive null check for required fields
+        if (!formData.startDate || !formData.endDate) {
+          console.error("Missing required date fields");
+          return;
+        }
+
         let votingDeadlineISO: string | undefined;
         if (formData.votingDeadline) {
           const deadlineDateTime = combineDateAndTime(
@@ -45,8 +51,8 @@ export function useFormActions({
         const payload = {
           title: formData.title,
           description: formData.description || undefined,
-          startDate: formatDate(formData.startDate!),
-          endDate: formatDate(formData.endDate!),
+          startDate: formatDate(formData.startDate),
+          endDate: formatDate(formData.endDate),
           startTime: formData.startTime,
           endTime: formData.endTime,
           slotDurationMin: 15,
@@ -67,11 +73,18 @@ export function useFormActions({
         });
 
         if (!response.ok) {
-          throw new Error("Failed to create event");
+          const errorData = (await response.json().catch(() => ({}))) as {
+            message?: string;
+          };
+          throw new Error(errorData.message || "Failed to create event");
         }
 
         const result = (await response.json()) as { eventId: string };
         router.push(`/hosted/${result.eventId}`);
+      } catch (error) {
+        alert(
+          error instanceof Error ? error.message : "Failed to create event",
+        );
       } finally {
         setLoading(false);
       }
