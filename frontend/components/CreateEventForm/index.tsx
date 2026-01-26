@@ -1,37 +1,29 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useCreateEventForm } from "./useCreateEventForm";
+import {
+  CreateEventFormProvider,
+  useFormStateContext,
+} from "./CreateEventFormContext";
 import { GeneralSection } from "./GeneralSection";
 import { ConfigurationSection } from "./ConfigurationSection";
 import { VotingDeadlineSection } from "./VotingDeadlineSection";
 import { FormActions } from "./FormActions";
+import { useFormValidation } from "./hooks/useFormValidation";
+import { useFormActions } from "./hooks/useFormActions";
 
-export default function CreateEventForm() {
+function CreateEventFormContent() {
   const t = useTranslations();
-  const {
+
+  const { formData, setLoading, setShowCancelConfirm } = useFormStateContext();
+
+  const { hasUnsavedChanges } = useFormValidation(formData);
+  const { handleSubmit } = useFormActions({
     formData,
-    loading,
-    validationErrors,
-    updateTitle,
-    updateDescription,
-    handleStartDateChange,
-    handleEndDateChange,
-    handleStartTimeChange,
-    handleEndTimeChange,
-    handleVotingDeadlineDateChange,
-    handleVotingDeadlineTimeChange,
-    handleLineGroupChange,
-    handleSelectedMembersChange,
-    handleSubmit,
-    handleCancel,
-    confirmCancel,
-    cancelConfirmCancel,
-    isFormValid,
-    titleCharCount,
-    descriptionCharCount,
-    showCancelConfirm,
-  } = useCreateEventForm();
+    hasUnsavedChanges,
+    setLoading,
+    setShowCancelConfirm,
+  });
 
   return (
     <div className="max-w-4xl mx-auto py-8 pr-4">
@@ -57,58 +49,21 @@ export default function CreateEventForm() {
               zIndex: 1,
             }}
           />
-
-          {/* Section 1: General (includes LINE Group Selection) */}
-          <GeneralSection
-            title={formData.title}
-            description={formData.description}
-            titleCharCount={titleCharCount}
-            descriptionCharCount={descriptionCharCount}
-            onTitleChange={updateTitle}
-            onDescriptionChange={updateDescription}
-            selectedLineGroupId={formData.lineGroupId}
-            selectedLineUserIds={formData.selectedLineUserIds}
-            onLineGroupChange={handleLineGroupChange}
-            onLineMembersChange={handleSelectedMembersChange}
-          />
-
-          {/* Section 2: Configuration */}
-          <ConfigurationSection
-            startDate={formData.startDate}
-            endDate={formData.endDate}
-            startTime={formData.startTime}
-            endTime={formData.endTime}
-            hasTimeError={!!validationErrors.startTime}
-            hasStartTimeTooSoonError={!!validationErrors.startDate}
-            onStartDateChange={handleStartDateChange}
-            onEndDateChange={handleEndDateChange}
-            onStartTimeChange={handleStartTimeChange}
-            onEndTimeChange={handleEndTimeChange}
-          />
-
-          {/* Section 3: Voting Deadline */}
-          <VotingDeadlineSection
-            votingDeadline={formData.votingDeadline}
-            votingDeadlineTime={formData.votingDeadlineTime}
-            startDate={formData.startDate}
-            startTime={formData.startTime}
-            isManuallySet={formData.votingDeadlineManuallySet}
-            hasError={!!validationErrors.votingDeadline}
-            onDeadlineDateChange={handleVotingDeadlineDateChange}
-            onDeadlineTimeChange={handleVotingDeadlineTimeChange}
-          />
+          <GeneralSection />
+          <ConfigurationSection />
+          <VotingDeadlineSection />
         </div>
 
-        {/* Submit Button */}
-        <FormActions
-          loading={loading}
-          isFormValid={isFormValid}
-          showCancelConfirm={showCancelConfirm}
-          onCancel={handleCancel}
-          onConfirmCancel={confirmCancel}
-          onCancelConfirmCancel={cancelConfirmCancel}
-        />
+        <FormActions />
       </form>
     </div>
+  );
+}
+
+export default function CreateEventForm() {
+  return (
+    <CreateEventFormProvider>
+      <CreateEventFormContent />
+    </CreateEventFormProvider>
   );
 }

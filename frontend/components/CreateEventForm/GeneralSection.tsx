@@ -10,36 +10,26 @@ import { Label } from "@/components/ui/label";
 import { TITLE_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from "./types";
 import { cn } from "@/lib/utils";
 import { LineGroupSection } from "./LineGroupSection";
+import { useFormStateContext } from "./CreateEventFormContext";
+import { useTextFields } from "./hooks/useTextFields";
+import { useLineGroupFields } from "./hooks/useLineGroupFields";
 
-interface GeneralSectionProps {
-  title: string;
-  description: string;
-  titleCharCount: number;
-  descriptionCharCount: number;
-  onTitleChange: (value: string) => void;
-  onDescriptionChange: (value: string) => void;
-  // LINE Group props
-  selectedLineGroupId: string | null;
-  selectedLineUserIds: string[];
-  onLineGroupChange: (groupId: string | null) => void;
-  onLineMembersChange: (memberIds: string[]) => void;
-}
-
-export function GeneralSection({
-  title,
-  description,
-  titleCharCount,
-  descriptionCharCount,
-  onTitleChange,
-  onDescriptionChange,
-  selectedLineGroupId,
-  selectedLineUserIds,
-  onLineGroupChange,
-  onLineMembersChange,
-}: GeneralSectionProps) {
+export function GeneralSection() {
   const t = useTranslations();
   const { user } = useAuthContext();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { formData, setFormData } = useFormStateContext();
+
+  const {
+    titleCharCount,
+    descriptionCharCount,
+    updateTitle,
+    updateDescription,
+  } = useTextFields(formData, setFormData);
+
+  const { handleLineGroupChange, handleSelectedMembersChange } =
+    useLineGroupFields(setFormData);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -48,7 +38,7 @@ export function GeneralSection({
       textarea.style.height = "auto";
       textarea.style.height = `${Math.max(80, textarea.scrollHeight)}px`;
     }
-  }, [description]);
+  }, [formData.description]);
 
   const isOverTitleLimit = titleCharCount >= TITLE_MAX_LENGTH;
   const isOverDescriptionLimit = descriptionCharCount >= DESCRIPTION_MAX_LENGTH;
@@ -108,8 +98,8 @@ export function GeneralSection({
               </Label>
               <Input
                 id="title"
-                value={title}
-                onChange={(e) => onTitleChange(e.target.value)}
+                value={formData.title}
+                onChange={(e) => updateTitle(e.target.value)}
                 placeholder={t("createEvent.general.eventNamePlaceholder")}
                 className={cn(
                   isOverTitleLimit &&
@@ -143,8 +133,8 @@ export function GeneralSection({
             <Textarea
               ref={textareaRef}
               id="description"
-              value={description}
-              onChange={(e) => onDescriptionChange(e.target.value)}
+              value={formData.description}
+              onChange={(e) => updateDescription(e.target.value)}
               placeholder={t("createEvent.general.descriptionPlaceholder")}
               className={cn(
                 "resize-none overflow-hidden",
@@ -173,10 +163,10 @@ export function GeneralSection({
 
           {/* LINE Group Selection (only for LINE users) */}
           <LineGroupSection
-            selectedGroupId={selectedLineGroupId}
-            selectedMemberIds={selectedLineUserIds}
-            onGroupChange={onLineGroupChange}
-            onMembersChange={onLineMembersChange}
+            selectedGroupId={formData.lineGroupId}
+            selectedMemberIds={formData.selectedLineUserIds}
+            onGroupChange={handleLineGroupChange}
+            onMembersChange={handleSelectedMembersChange}
           />
         </div>
       </div>

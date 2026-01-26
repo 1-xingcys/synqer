@@ -5,37 +5,30 @@ import { AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
+import { useFormStateContext } from "./CreateEventFormContext";
+import { useDateTimeFields } from "./hooks/useDateTimeFields";
+import { useFormValidation } from "./hooks/useFormValidation";
 
-interface ConfigurationSectionProps {
-  startDate: Date | null;
-  endDate: Date | null;
-  startTime: string;
-  endTime: string;
-  hasTimeError?: boolean;
-  hasStartTimeTooSoonError?: boolean;
-  onStartDateChange: (date: Date | null) => void;
-  onEndDateChange: (date: Date | null) => void;
-  onStartTimeChange: (value: string) => void;
-  onEndTimeChange: (value: string) => void;
-}
-
-export function ConfigurationSection({
-  startDate,
-  endDate,
-  startTime,
-  endTime,
-  hasTimeError = false,
-  hasStartTimeTooSoonError = false,
-  onStartDateChange,
-  onEndDateChange,
-  onStartTimeChange,
-  onEndTimeChange,
-}: ConfigurationSectionProps) {
+export function ConfigurationSection() {
   const t = useTranslations();
+
+  const { formData, setFormData } = useFormStateContext();
+
+  const {
+    handleStartDateChange,
+    handleEndDateChange,
+    handleStartTimeChange,
+    handleEndTimeChange,
+  } = useDateTimeFields(setFormData);
+
+  const { validationErrors } = useFormValidation(formData);
 
   // Min date for date picker - start date must be at least today
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  const hasTimeError = !!validationErrors.startTime;
+  const hasStartTimeTooSoonError = !!validationErrors.startDate;
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">
@@ -63,8 +56,8 @@ export function ConfigurationSection({
             <div className="space-y-1.5">
               <Label>{t("createEvent.configuration.startDate")}</Label>
               <DatePicker
-                value={startDate}
-                onChange={onStartDateChange}
+                value={formData.startDate}
+                onChange={handleStartDateChange}
                 placeholder={t("createEvent.configuration.selectDate")}
                 minDate={today}
               />
@@ -73,10 +66,10 @@ export function ConfigurationSection({
             <div className="space-y-1.5">
               <Label>{t("createEvent.configuration.endDate")}</Label>
               <DatePicker
-                value={endDate}
-                onChange={onEndDateChange}
+                value={formData.endDate}
+                onChange={handleEndDateChange}
                 placeholder={t("createEvent.configuration.selectDate")}
-                minDate={startDate || today}
+                minDate={formData.startDate || today}
               />
             </div>
           </div>
@@ -86,8 +79,8 @@ export function ConfigurationSection({
             <div className="space-y-1.5">
               <Label>{t("createEvent.configuration.startTime")}</Label>
               <TimePicker
-                value={startTime}
-                onChange={onStartTimeChange}
+                value={formData.startTime}
+                onChange={handleStartTimeChange}
                 type="start"
                 hasError={hasTimeError}
               />
@@ -96,8 +89,8 @@ export function ConfigurationSection({
             <div className="space-y-1.5">
               <Label>{t("createEvent.configuration.endTime")}</Label>
               <TimePicker
-                value={endTime}
-                onChange={onEndTimeChange}
+                value={formData.endTime}
+                onChange={handleEndTimeChange}
                 type="end"
                 hasError={hasTimeError}
               />

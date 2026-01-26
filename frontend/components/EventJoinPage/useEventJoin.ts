@@ -94,10 +94,13 @@ export function useEventJoin(eventId: string): UseEventJoinResult {
       setJoining(true);
       const apiBase = process.env.NEXT_PUBLIC_API;
 
-      const response = await fetch(`${apiBase}/events/${eventId}/participation/join`, {
-        method: "POST",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${apiBase}/events/${eventId}/participation/join`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
 
       if (!response.ok) {
         throw new Error("Failed to join event");

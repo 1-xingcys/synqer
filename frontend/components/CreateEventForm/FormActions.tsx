@@ -2,25 +2,31 @@
 
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { useFormStateContext } from "./CreateEventFormContext";
+import { useFormValidation } from "./hooks/useFormValidation";
+import { useFormActions } from "./hooks/useFormActions";
 
-interface FormActionsProps {
-  loading: boolean;
-  isFormValid: boolean;
-  showCancelConfirm: boolean;
-  onCancel: () => void;
-  onConfirmCancel: () => void;
-  onCancelConfirmCancel: () => void;
-}
-
-export function FormActions({
-  loading,
-  isFormValid,
-  showCancelConfirm,
-  onCancel,
-  onConfirmCancel,
-  onCancelConfirmCancel,
-}: FormActionsProps) {
+export function FormActions() {
   const t = useTranslations();
+
+  // 從 Context 取得核心 state
+  const {
+    formData,
+    loading,
+    setLoading,
+    showCancelConfirm,
+    setShowCancelConfirm,
+  } = useFormStateContext();
+
+  // 組合需要的 hooks
+  const { isFormValid, hasUnsavedChanges } = useFormValidation(formData);
+
+  const { handleCancel, confirmCancel, cancelConfirmCancel } = useFormActions({
+    formData,
+    hasUnsavedChanges,
+    setLoading,
+    setShowCancelConfirm,
+  });
 
   return (
     <>
@@ -30,7 +36,7 @@ export function FormActions({
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50"
-            onClick={onCancelConfirmCancel}
+            onClick={cancelConfirmCancel}
           />
 
           {/* Modal */}
@@ -47,10 +53,10 @@ export function FormActions({
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
-              <Button variant="outline" onClick={onCancelConfirmCancel}>
+              <Button variant="outline" onClick={cancelConfirmCancel}>
                 {t("createEvent.cancelConfirm.keepEditing")}
               </Button>
-              <Button variant="destructive" onClick={onConfirmCancel}>
+              <Button variant="destructive" onClick={confirmCancel}>
                 {t("createEvent.cancelConfirm.discard")}
               </Button>
             </div>
@@ -60,7 +66,7 @@ export function FormActions({
 
       {/* Form Actions */}
       <div className="flex justify-end gap-3 pt-4 border-t border-border">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={handleCancel}>
           {t("createEvent.cancel")}
         </Button>
         <Button type="submit" disabled={loading || !isFormValid}>
