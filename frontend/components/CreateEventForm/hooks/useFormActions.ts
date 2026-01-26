@@ -2,7 +2,8 @@
 
 import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
-import { CreateEventFormData, combineDateAndTime } from "../types";
+import { CreateEventFormData } from "../types";
+import { combineDateAndTime } from "./utils";
 
 interface UseFormActionsProps {
   formData: CreateEventFormData;
@@ -32,17 +33,12 @@ export function useFormActions({
       setLoading(true);
 
       try {
+        // Defensive null check for required fields
         if (!formData.startDate || !formData.endDate) {
-          alert("請選擇開始和結束日期");
-          setLoading(false);
+          console.error("Missing required date fields");
           return;
         }
 
-        if (!process.env.NEXT_PUBLIC_API) {
-          throw new Error("NEXT_PUBLIC_API is not set");
-        }
-
-        // Build voting deadline ISO string if set
         let votingDeadlineISO: string | undefined;
         if (formData.votingDeadline) {
           const deadlineDateTime = combineDateAndTime(
@@ -59,7 +55,7 @@ export function useFormActions({
           endDate: formatDate(formData.endDate),
           startTime: formData.startTime,
           endTime: formData.endTime,
-          slotDurationMin: 15, // Fixed at 15 minutes
+          slotDurationMin: 15,
           timeZone: formData.timeZone,
           votingDeadline: votingDeadlineISO,
           lineGroupId: formData.lineGroupId || undefined,
@@ -71,9 +67,7 @@ export function useFormActions({
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API}/events`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify(payload),
         });
@@ -88,8 +82,9 @@ export function useFormActions({
         const result = (await response.json()) as { eventId: string };
         router.push(`/hosted/${result.eventId}`);
       } catch (error) {
-        console.error("建立活動失敗:", error);
-        alert("建立活動失敗，請重試");
+        alert(
+          error instanceof Error ? error.message : "Failed to create event",
+        );
       } finally {
         setLoading(false);
       }

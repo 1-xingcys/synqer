@@ -738,6 +738,7 @@
     },
     "configuration": {
       "title": "Configuration",
+      "description": "Set the candidate dates and time range for the event",
       "startDate": "Start date",
       "endDate": "End date",
       "selectDate": "Select date",
@@ -746,7 +747,8 @@
       "slotDuration": "Time slot duration",
       "minutes": "minutes",
       "slotDurationDescription": "Duration of each time slot",
-      "timeError": "Start time must be earlier than end time"
+      "timeError": "Start time must be earlier than end time",
+      "startTimeTooSoonError": "Event start time must be at least 1 hour from now to allow enough voting time"
     },
     "votingDeadline": {
       "title": "Voting Deadline",
@@ -754,7 +756,8 @@
       "date": "Deadline date",
       "time": "Deadline time",
       "autoSync": "Auto-synced with event start time",
-      "error": "Voting deadline must be before or at the event start time"
+      "errorInPast": "Voting deadline cannot be in the past",
+      "errorAfterStart": "Voting deadline must be before or at the event start time"
     },
     "cancel": "Cancel",
     "create": "Create event",

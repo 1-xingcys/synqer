@@ -5,9 +5,19 @@ import {
   CreateEventFormData,
   TITLE_MAX_LENGTH,
   DESCRIPTION_MAX_LENGTH,
-  countCharacters,
-  truncateToMaxChars,
 } from "../types";
+
+function countCharacters(str: string): number {
+  return [...str].length;
+}
+
+function truncateToMaxChars(str: string, maxChars: number): string {
+  const chars = [...str];
+  if (chars.length <= maxChars) {
+    return str;
+  }
+  return chars.slice(0, maxChars).join("");
+}
 
 export function useTextFields(
   formData: CreateEventFormData,

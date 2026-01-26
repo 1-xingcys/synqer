@@ -5,35 +5,29 @@ import { AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
+import { useFormStateContext } from "./CreateEventFormContext";
+import { useDateTimeFields } from "./hooks/useDateTimeFields";
+import { useFormValidation, ValidationError } from "./hooks/useFormValidation";
+import { getToday } from "./hooks/utils";
 
-interface ConfigurationSectionProps {
-  startDate: Date | null;
-  endDate: Date | null;
-  startTime: string;
-  endTime: string;
-  hasTimeError?: boolean;
-  onStartDateChange: (date: Date | null) => void;
-  onEndDateChange: (date: Date | null) => void;
-  onStartTimeChange: (value: string) => void;
-  onEndTimeChange: (value: string) => void;
-}
-
-export function ConfigurationSection({
-  startDate,
-  endDate,
-  startTime,
-  endTime,
-  hasTimeError = false,
-  onStartDateChange,
-  onEndDateChange,
-  onStartTimeChange,
-  onEndTimeChange,
-}: ConfigurationSectionProps) {
+export function ConfigurationSection() {
   const t = useTranslations();
 
-  // Min date for date picker (currently unused but kept for future use)
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const { formData, setFormData } = useFormStateContext();
+
+  const {
+    handleStartDateChange,
+    handleEndDateChange,
+    handleStartTimeChange,
+    handleEndTimeChange,
+  } = useDateTimeFields(setFormData);
+
+  const { errors } = useFormValidation(formData);
+
+  const today = getToday();
+
+  const hasTimeError = errors.has(ValidationError.StartTimeAfterEndTime);
+  const hasStartTimeTooSoonError = errors.has(ValidationError.StartTimeTooSoon);
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">
@@ -51,6 +45,9 @@ export function ConfigurationSection({
             <h2 className="text-base font-semibold text-foreground mb-1">
               {t("createEvent.configuration.title")}
             </h2>
+            <p className="text-xs text-muted-foreground">
+              {t("createEvent.configuration.description")}
+            </p>
           </div>
 
           {/* Start Date & End Date */}
@@ -58,21 +55,20 @@ export function ConfigurationSection({
             <div className="space-y-1.5">
               <Label>{t("createEvent.configuration.startDate")}</Label>
               <DatePicker
-                value={startDate}
-                onChange={onStartDateChange}
+                value={formData.startDate}
+                onChange={handleStartDateChange}
                 placeholder={t("createEvent.configuration.selectDate")}
-                // minDate={minDate}
-                // maxDate={endDate || undefined}
+                minDate={today}
               />
             </div>
 
             <div className="space-y-1.5">
               <Label>{t("createEvent.configuration.endDate")}</Label>
               <DatePicker
-                value={endDate}
-                onChange={onEndDateChange}
+                value={formData.endDate}
+                onChange={handleEndDateChange}
                 placeholder={t("createEvent.configuration.selectDate")}
-                // minDate={startDate || minDate}
+                minDate={formData.startDate || today}
               />
             </div>
           </div>
@@ -82,8 +78,8 @@ export function ConfigurationSection({
             <div className="space-y-1.5">
               <Label>{t("createEvent.configuration.startTime")}</Label>
               <TimePicker
-                value={startTime}
-                onChange={onStartTimeChange}
+                value={formData.startTime}
+                onChange={handleStartTimeChange}
                 type="start"
                 hasError={hasTimeError}
               />
@@ -92,8 +88,8 @@ export function ConfigurationSection({
             <div className="space-y-1.5">
               <Label>{t("createEvent.configuration.endTime")}</Label>
               <TimePicker
-                value={endTime}
-                onChange={onEndTimeChange}
+                value={formData.endTime}
+                onChange={handleEndTimeChange}
                 type="end"
                 hasError={hasTimeError}
               />
@@ -106,6 +102,16 @@ export function ConfigurationSection({
               <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
               <p className="text-sm text-destructive">
                 {t("createEvent.configuration.timeError")}
+              </p>
+            </div>
+          )}
+
+          {/* Start Time Too Soon Error */}
+          {hasStartTimeTooSoonError && (
+            <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+              <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive">
+                {t("createEvent.configuration.startTimeTooSoonError")}
               </p>
             </div>
           )}

@@ -1,71 +1,81 @@
 "use client";
 
 import { useMemo } from "react";
+import { CreateEventFormData, MIN_HOURS_BEFORE_EVENT } from "../types";
 import {
-  CreateEventFormData,
   parseTimeToMinutes,
   combineDateAndTime,
-  getToday,
-} from "../types";
+  getDefaultStartDateTime,
+} from "./utils";
 
-export interface ValidationErrors {
-  title?: string;
-  description?: string;
-  startDate?: string;
-  endDate?: string;
-  startTime?: string;
-  endTime?: string;
-  votingDeadline?: string;
+export enum ValidationError {
+  TitleRequired = "TitleRequired",
+  StartTimeAfterEndTime = "StartTimeAfterEndTime",
+  StartTimeTooSoon = "StartTimeTooSoon",
+  DeadlineAfterStart = "DeadlineAfterStart",
+  DeadlineInPast = "DeadlineInPast",
 }
 
 export function useFormValidation(formData: CreateEventFormData) {
-  const validationErrors = useMemo((): ValidationErrors => {
-    const errors: ValidationErrors = {};
+  const errors = useMemo(() => {
+    const errorSet = new Set<ValidationError>();
 
-    // Title is required
     if (!formData.title.trim()) {
-      errors.title = "required";
+      errorSet.add(ValidationError.TitleRequired);
     }
 
-    // Time validation: startTime must be < endTime
     const startMinutes = parseTimeToMinutes(formData.startTime);
     const endMinutes = parseTimeToMinutes(formData.endTime);
     if (startMinutes >= endMinutes) {
-      errors.startTime = "startTimeNotBeforeEndTime";
-      errors.endTime = "startTimeNotBeforeEndTime";
+      errorSet.add(ValidationError.StartTimeAfterEndTime);
     }
 
-    // Voting deadline validation
-    if (
-      formData.startDate &&
-      formData.votingDeadline &&
-      formData.votingDeadlineManuallySet
-    ) {
-      const startDateTime = combineDateAndTime(
+    if (formData.startDate) {
+      const eventStartDateTime = combineDateAndTime(
         formData.startDate,
         formData.startTime,
       );
+      const minStartTime = new Date();
+      minStartTime.setHours(
+        minStartTime.getHours() + MIN_HOURS_BEFORE_EVENT,
+        minStartTime.getMinutes(),
+        0,
+        0,
+      );
+
+      if (eventStartDateTime < minStartTime) {
+        errorSet.add(ValidationError.StartTimeTooSoon);
+      }
+    }
+
+    if (formData.votingDeadline) {
       const deadlineDateTime = combineDateAndTime(
         formData.votingDeadline,
         formData.votingDeadlineTime,
       );
 
-      if (deadlineDateTime > startDateTime) {
-        errors.votingDeadline = "deadlineAfterStart";
+      if (deadlineDateTime < new Date()) {
+        errorSet.add(ValidationError.DeadlineInPast);
+      }
+
+      if (formData.startDate) {
+        const startDateTime = combineDateAndTime(
+          formData.startDate,
+          formData.startTime,
+        );
+
+        if (deadlineDateTime > startDateTime) {
+          errorSet.add(ValidationError.DeadlineAfterStart);
+        }
       }
     }
 
-    return errors;
+    return errorSet;
   }, [formData]);
 
-  const isFormValid = useMemo(() => {
-    return (
-      formData.title.trim() !== "" && Object.keys(validationErrors).length === 0
-    );
-  }, [formData.title, validationErrors]);
-
   const hasUnsavedChanges = useMemo(() => {
-    const today = getToday();
+    const { date: defaultDate, time: defaultTime } = getDefaultStartDateTime();
+
     const isSameDay = (d1: Date | null, d2: Date | null) => {
       if (!d1 || !d2) return d1 === d2;
       return d1.toDateString() === d2.toDateString();
@@ -74,9 +84,9 @@ export function useFormValidation(formData: CreateEventFormData) {
     return (
       formData.title.trim() !== "" ||
       formData.description.trim() !== "" ||
-      !isSameDay(formData.startDate, today) ||
-      !isSameDay(formData.endDate, today) ||
-      formData.startTime !== "00:00" ||
+      !isSameDay(formData.startDate, defaultDate) ||
+      !isSameDay(formData.endDate, defaultDate) ||
+      formData.startTime !== defaultTime ||
       formData.endTime !== "24:00" ||
       formData.votingDeadlineManuallySet ||
       formData.lineGroupId !== null ||
@@ -85,8 +95,7 @@ export function useFormValidation(formData: CreateEventFormData) {
   }, [formData]);
 
   return {
-    validationErrors,
-    isFormValid,
+    errors,
     hasUnsavedChanges,
   };
 }

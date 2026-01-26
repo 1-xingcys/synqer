@@ -1,48 +1,31 @@
 "use client";
 
-import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
-import { combineDateAndTime } from "./types";
+import { useFormStateContext } from "./CreateEventFormContext";
+import { useDateTimeFields } from "./hooks/useDateTimeFields";
+import { useFormValidation, ValidationError } from "./hooks/useFormValidation";
+import { getToday } from "./hooks/utils";
 
-interface VotingDeadlineSectionProps {
-  votingDeadline: Date | null;
-  votingDeadlineTime: string;
-  startDate: Date | null;
-  startTime: string;
-  isManuallySet: boolean;
-  hasError: boolean;
-  onDeadlineDateChange: (date: Date | null) => void;
-  onDeadlineTimeChange: (time: string) => void;
-}
-
-export function VotingDeadlineSection({
-  votingDeadline,
-  votingDeadlineTime,
-  startDate,
-  startTime,
-  isManuallySet,
-  hasError: _hasError,
-  onDeadlineDateChange,
-  onDeadlineTimeChange,
-}: VotingDeadlineSectionProps) {
+export function VotingDeadlineSection() {
   const t = useTranslations();
 
-  // Calculate if deadline is after event start
-  const isDeadlineInvalid = useMemo(() => {
-    if (!votingDeadline || !startDate) return false;
+  const { formData, setFormData } = useFormStateContext();
 
-    const deadlineDateTime = combineDateAndTime(
-      votingDeadline,
-      votingDeadlineTime,
-    );
-    const startDateTime = combineDateAndTime(startDate, startTime);
+  const { handleVotingDeadlineDateChange, handleVotingDeadlineTimeChange } =
+    useDateTimeFields(setFormData);
 
-    return deadlineDateTime > startDateTime;
-  }, [votingDeadline, votingDeadlineTime, startDate, startTime]);
+  const { errors } = useFormValidation(formData);
+
+  const hasDeadlineAfterStartError = errors.has(
+    ValidationError.DeadlineAfterStart,
+  );
+  const hasDeadlineInPastError = errors.has(ValidationError.DeadlineInPast);
+
+  const today = getToday();
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">
@@ -70,37 +53,46 @@ export function VotingDeadlineSection({
             <div className="space-y-1.5">
               <Label>{t("createEvent.votingDeadline.date")}</Label>
               <DatePicker
-                value={votingDeadline}
-                onChange={onDeadlineDateChange}
+                value={formData.votingDeadline}
+                onChange={handleVotingDeadlineDateChange}
                 placeholder={t("createEvent.configuration.selectDate")}
-                maxDate={startDate || undefined}
+                minDate={today}
+                maxDate={formData.startDate || undefined}
               />
             </div>
 
             <div className="space-y-1.5">
               <Label>{t("createEvent.votingDeadline.time")}</Label>
               <TimePicker
-                value={votingDeadlineTime}
-                onChange={onDeadlineTimeChange}
+                value={formData.votingDeadlineTime}
+                onChange={handleVotingDeadlineTimeChange}
                 type="start"
               />
             </div>
           </div>
 
           {/* Auto-sync indicator */}
-          {!isManuallySet && (
+          {!formData.votingDeadlineManuallySet && (
             <p className="text-xs text-primary flex items-center gap-1.5">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
               {t("createEvent.votingDeadline.autoSync")}
             </p>
           )}
 
-          {/* Error message */}
-          {isDeadlineInvalid && (
+          {/* Error messages */}
+          {hasDeadlineInPastError && (
             <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
               <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
               <p className="text-sm text-destructive">
-                {t("createEvent.votingDeadline.error")}
+                {t("createEvent.votingDeadline.errorInPast")}
+              </p>
+            </div>
+          )}
+          {hasDeadlineAfterStartError && (
+            <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+              <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive">
+                {t("createEvent.votingDeadline.errorAfterStart")}
               </p>
             </div>
           )}
