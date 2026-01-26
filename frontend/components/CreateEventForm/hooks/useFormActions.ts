@@ -2,7 +2,8 @@
 
 import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
-import { CreateEventFormData, combineDateAndTime } from "../types";
+import { CreateEventFormData } from "../types";
+import { combineDateAndTime } from "./utils";
 
 interface UseFormActionsProps {
   formData: CreateEventFormData;

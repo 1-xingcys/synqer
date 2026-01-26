@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
+import { CreateEventFormData, MIN_HOURS_BEFORE_EVENT } from "../types";
 import {
-  CreateEventFormData,
   parseTimeToMinutes,
   combineDateAndTime,
-  getInitialFormData,
-  MIN_HOURS_BEFORE_EVENT,
-} from "../types";
+  getToday,
+  getDefaultStartTime,
+} from "./utils";
 
 export interface ValidationErrors {
   title?: string;
@@ -85,7 +85,9 @@ export function useFormValidation(formData: CreateEventFormData) {
   }, [formData.title, validationErrors]);
 
   const hasUnsavedChanges = useMemo(() => {
-    const initialData = getInitialFormData();
+    const today = getToday();
+    const defaultStartTime = getDefaultStartTime();
+
     const isSameDay = (d1: Date | null, d2: Date | null) => {
       if (!d1 || !d2) return d1 === d2;
       return d1.toDateString() === d2.toDateString();
@@ -94,8 +96,9 @@ export function useFormValidation(formData: CreateEventFormData) {
     return (
       formData.title.trim() !== "" ||
       formData.description.trim() !== "" ||
-      !isSameDay(formData.startDate, initialData.startDate) ||
-      !isSameDay(formData.endDate, initialData.endDate) ||
+      !isSameDay(formData.startDate, today) ||
+      !isSameDay(formData.endDate, today) ||
+      formData.startTime !== defaultStartTime ||
       formData.endTime !== "24:00" ||
       formData.votingDeadlineManuallySet ||
       formData.lineGroupId !== null ||
