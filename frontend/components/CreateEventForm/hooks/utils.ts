@@ -21,6 +21,15 @@ export function parseTimeToMinutes(time: string): number {
 }
 
 /**
+ * Get today's date at midnight (local time)
+ */
+export function getToday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
+/**
  * Get default start date and time (current time + 2 hours, rounded to 15 min)
  * Handles cross-day scenario correctly
  */
@@ -64,13 +73,4 @@ function formatMinutesToTime(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
   return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-}
-
-/**
- * Get today's date at midnight (local time)
- */
-function getToday(): Date {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return today;
 }

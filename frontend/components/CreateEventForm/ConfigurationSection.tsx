@@ -8,6 +8,7 @@ import { TimePicker } from "@/components/eventCommon/TimePicker";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
 import { useFormValidation, ValidationError } from "./hooks/useFormValidation";
+import { getToday } from "./hooks/utils";
 
 export function ConfigurationSection() {
   const t = useTranslations();
@@ -23,9 +24,7 @@ export function ConfigurationSection() {
 
   const { errors } = useFormValidation(formData);
 
-  // Min date for date picker - start date must be at least today
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getToday();
 
   const hasTimeError = errors.has(ValidationError.StartTimeAfterEndTime);
   const hasStartTimeTooSoonError = errors.has(ValidationError.StartTimeTooSoon);

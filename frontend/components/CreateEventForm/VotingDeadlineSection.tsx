@@ -8,6 +8,7 @@ import { TimePicker } from "@/components/eventCommon/TimePicker";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
 import { useFormValidation, ValidationError } from "./hooks/useFormValidation";
+import { getToday } from "./hooks/utils";
 
 export function VotingDeadlineSection() {
   const t = useTranslations();
@@ -19,7 +20,12 @@ export function VotingDeadlineSection() {
 
   const { errors } = useFormValidation(formData);
 
-  const hasDeadlineError = errors.has(ValidationError.DeadlineAfterStart);
+  const hasDeadlineAfterStartError = errors.has(
+    ValidationError.DeadlineAfterStart,
+  );
+  const hasDeadlineInPastError = errors.has(ValidationError.DeadlineInPast);
+
+  const today = getToday();
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">
@@ -50,6 +56,7 @@ export function VotingDeadlineSection() {
                 value={formData.votingDeadline}
                 onChange={handleVotingDeadlineDateChange}
                 placeholder={t("createEvent.configuration.selectDate")}
+                minDate={today}
                 maxDate={formData.startDate || undefined}
               />
             </div>
@@ -72,12 +79,20 @@ export function VotingDeadlineSection() {
             </p>
           )}
 
-          {/* Error message */}
-          {hasDeadlineError && (
+          {/* Error messages */}
+          {hasDeadlineInPastError && (
             <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
               <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
               <p className="text-sm text-destructive">
-                {t("createEvent.votingDeadline.error")}
+                {t("createEvent.votingDeadline.errorInPast")}
+              </p>
+            </div>
+          )}
+          {hasDeadlineAfterStartError && (
+            <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+              <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+              <p className="text-sm text-destructive">
+                {t("createEvent.votingDeadline.errorAfterStart")}
               </p>
             </div>
           )}

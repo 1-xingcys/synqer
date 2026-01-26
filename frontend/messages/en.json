@@ -756,7 +756,8 @@
       "date": "Deadline date",
       "time": "Deadline time",
       "autoSync": "Auto-synced with event start time",
-      "error": "Voting deadline must be before or at the event start time"
+      "errorInPast": "Voting deadline cannot be in the past",
+      "errorAfterStart": "Voting deadline must be before or at the event start time"
     },
     "cancel": "Cancel",
     "create": "Create event",

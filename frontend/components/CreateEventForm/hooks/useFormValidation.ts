@@ -13,6 +13,7 @@ export enum ValidationError {
   StartTimeAfterEndTime = "StartTimeAfterEndTime",
   StartTimeTooSoon = "StartTimeTooSoon",
   DeadlineAfterStart = "DeadlineAfterStart",
+  DeadlineInPast = "DeadlineInPast",
 }
 
 export function useFormValidation(formData: CreateEventFormData) {
@@ -47,18 +48,25 @@ export function useFormValidation(formData: CreateEventFormData) {
       }
     }
 
-    if (formData.startDate && formData.votingDeadline) {
-      const startDateTime = combineDateAndTime(
-        formData.startDate,
-        formData.startTime,
-      );
+    if (formData.votingDeadline) {
       const deadlineDateTime = combineDateAndTime(
         formData.votingDeadline,
         formData.votingDeadlineTime,
       );
 
-      if (deadlineDateTime > startDateTime) {
-        errorSet.add(ValidationError.DeadlineAfterStart);
+      if (deadlineDateTime < new Date()) {
+        errorSet.add(ValidationError.DeadlineInPast);
+      }
+
+      if (formData.startDate) {
+        const startDateTime = combineDateAndTime(
+          formData.startDate,
+          formData.startTime,
+        );
+
+        if (deadlineDateTime > startDateTime) {
+          errorSet.add(ValidationError.DeadlineAfterStart);
+        }
       }
     }
 
