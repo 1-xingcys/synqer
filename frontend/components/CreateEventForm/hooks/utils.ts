@@ -21,30 +21,36 @@ export function parseTimeToMinutes(time: string): number {
 }
 
 /**
- * Get today's date at midnight (local time)
+ * Get default start date and time (current time + 2 hours, rounded to 15 min)
+ * Handles cross-day scenario correctly
  */
-export function getToday(): Date {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return today;
-}
-
-/**
- * Get a reasonable default start time (current time + 2 hours, rounded to 15 min)
- * Returns "00:00" if that would push into the next day
- */
-export function getDefaultStartTime(): string {
+export function getDefaultStartDateTime(): { date: Date; time: string } {
   const now = new Date();
   const targetMinutes = now.getHours() * 60 + now.getMinutes() + 120; // +2 hours
 
+  const today = getToday();
+
   if (targetMinutes >= 24 * 60) {
-    return "00:00";
+    // Cross-day: use tomorrow
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const overflowMinutes = targetMinutes - 24 * 60;
+    const roundedMinutes = Math.ceil(overflowMinutes / 15) * 15;
+
+    return {
+      date: tomorrow,
+      time: formatMinutesToTime(roundedMinutes),
+    };
   }
 
   const roundedMinutes = Math.ceil(targetMinutes / 15) * 15;
   const finalMinutes = Math.min(roundedMinutes, 23 * 60 + 45);
 
-  return formatMinutesToTime(finalMinutes);
+  return {
+    date: today,
+    time: formatMinutesToTime(finalMinutes),
+  };
 }
 
 // =============================================================================
@@ -58,4 +64,13 @@ function formatMinutesToTime(minutes: number): string {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
   return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+}
+
+/**
+ * Get today's date at midnight (local time)
+ */
+function getToday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
 }

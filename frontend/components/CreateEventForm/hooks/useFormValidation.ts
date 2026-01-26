@@ -5,8 +5,7 @@ import { CreateEventFormData, MIN_HOURS_BEFORE_EVENT } from "../types";
 import {
   parseTimeToMinutes,
   combineDateAndTime,
-  getToday,
-  getDefaultStartTime,
+  getDefaultStartDateTime,
 } from "./utils";
 
 export enum ValidationError {
@@ -67,8 +66,7 @@ export function useFormValidation(formData: CreateEventFormData) {
   }, [formData]);
 
   const hasUnsavedChanges = useMemo(() => {
-    const today = getToday();
-    const defaultStartTime = getDefaultStartTime();
+    const { date: defaultDate, time: defaultTime } = getDefaultStartDateTime();
 
     const isSameDay = (d1: Date | null, d2: Date | null) => {
       if (!d1 || !d2) return d1 === d2;
@@ -78,9 +76,9 @@ export function useFormValidation(formData: CreateEventFormData) {
     return (
       formData.title.trim() !== "" ||
       formData.description.trim() !== "" ||
-      !isSameDay(formData.startDate, today) ||
-      !isSameDay(formData.endDate, today) ||
-      formData.startTime !== defaultStartTime ||
+      !isSameDay(formData.startDate, defaultDate) ||
+      !isSameDay(formData.endDate, defaultDate) ||
+      formData.startTime !== defaultTime ||
       formData.endTime !== "24:00" ||
       formData.votingDeadlineManuallySet ||
       formData.lineGroupId !== null ||

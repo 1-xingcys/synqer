@@ -2,21 +2,21 @@
 
 import { useState } from "react";
 import { CreateEventFormData } from "../types";
-import { getToday, getDefaultStartTime } from "./utils";
+import { getDefaultStartDateTime } from "./utils";
 
 function getInitialFormData(): CreateEventFormData {
-  const defaultStartTime = getDefaultStartTime();
+  const { date: defaultDate, time: defaultTime } = getDefaultStartDateTime();
 
   return {
     title: "",
     description: "",
-    startDate: getToday(),
-    endDate: getToday(),
-    startTime: defaultStartTime,
+    startDate: defaultDate,
+    endDate: defaultDate,
+    startTime: defaultTime,
     endTime: "24:00",
     timeZone: "Asia/Taipei",
-    votingDeadline: getToday(),
-    votingDeadlineTime: defaultStartTime,
+    votingDeadline: defaultDate,
+    votingDeadlineTime: defaultTime,
     votingDeadlineManuallySet: false,
     lineGroupId: null,
     selectedLineUserIds: [],
