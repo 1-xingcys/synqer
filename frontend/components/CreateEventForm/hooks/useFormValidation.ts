@@ -9,34 +9,27 @@ import {
   getDefaultStartTime,
 } from "./utils";
 
-export interface ValidationErrors {
-  title?: string;
-  description?: string;
-  startDate?: string;
-  endDate?: string;
-  startTime?: string;
-  endTime?: string;
-  votingDeadline?: string;
+export enum ValidationError {
+  TitleRequired = "TitleRequired",
+  StartTimeAfterEndTime = "StartTimeAfterEndTime",
+  StartTimeTooSoon = "StartTimeTooSoon",
+  DeadlineAfterStart = "DeadlineAfterStart",
 }
 
 export function useFormValidation(formData: CreateEventFormData) {
-  const validationErrors = useMemo((): ValidationErrors => {
-    const errors: ValidationErrors = {};
+  const errors = useMemo(() => {
+    const errorSet = new Set<ValidationError>();
 
-    // Title is required
     if (!formData.title.trim()) {
-      errors.title = "required";
+      errorSet.add(ValidationError.TitleRequired);
     }
 
-    // Time validation: startTime must be < endTime
     const startMinutes = parseTimeToMinutes(formData.startTime);
     const endMinutes = parseTimeToMinutes(formData.endTime);
     if (startMinutes >= endMinutes) {
-      errors.startTime = "startTimeNotBeforeEndTime";
-      errors.endTime = "startTimeNotBeforeEndTime";
+      errorSet.add(ValidationError.StartTimeAfterEndTime);
     }
 
-    // Event start time validation: must be at least MIN_HOURS_BEFORE_EVENT from now
     if (formData.startDate) {
       const eventStartDateTime = combineDateAndTime(
         formData.startDate,
@@ -51,11 +44,10 @@ export function useFormValidation(formData: CreateEventFormData) {
       );
 
       if (eventStartDateTime < minStartTime) {
-        errors.startDate = "startTimeTooSoon";
+        errorSet.add(ValidationError.StartTimeTooSoon);
       }
     }
 
-    // Voting deadline validation: deadline must be before or equal to event start
     if (formData.startDate && formData.votingDeadline) {
       const startDateTime = combineDateAndTime(
         formData.startDate,
@@ -67,18 +59,12 @@ export function useFormValidation(formData: CreateEventFormData) {
       );
 
       if (deadlineDateTime > startDateTime) {
-        errors.votingDeadline = "deadlineAfterStart";
+        errorSet.add(ValidationError.DeadlineAfterStart);
       }
     }
 
-    return errors;
+    return errorSet;
   }, [formData]);
-
-  const isFormValid = useMemo(() => {
-    return (
-      formData.title.trim() !== "" && Object.keys(validationErrors).length === 0
-    );
-  }, [formData.title, validationErrors]);
 
   const hasUnsavedChanges = useMemo(() => {
     const today = getToday();
@@ -103,8 +89,7 @@ export function useFormValidation(formData: CreateEventFormData) {
   }, [formData]);
 
   return {
-    validationErrors,
-    isFormValid,
+    errors,
     hasUnsavedChanges,
   };
 }

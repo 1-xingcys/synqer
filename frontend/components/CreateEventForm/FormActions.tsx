@@ -9,7 +9,6 @@ import { useFormActions } from "./hooks/useFormActions";
 export function FormActions() {
   const t = useTranslations();
 
-  // 從 Context 取得核心 state
   const {
     formData,
     loading,
@@ -18,8 +17,7 @@ export function FormActions() {
     setShowCancelConfirm,
   } = useFormStateContext();
 
-  // 組合需要的 hooks
-  const { isFormValid, hasUnsavedChanges } = useFormValidation(formData);
+  const { errors, hasUnsavedChanges } = useFormValidation(formData);
 
   const { handleCancel, confirmCancel, cancelConfirmCancel } = useFormActions({
     formData,
@@ -69,7 +67,7 @@ export function FormActions() {
         <Button type="button" variant="outline" onClick={handleCancel}>
           {t("createEvent.cancel")}
         </Button>
-        <Button type="submit" disabled={loading || !isFormValid}>
+        <Button type="submit" disabled={loading || errors.size > 0}>
           {loading ? t("createEvent.creating") : t("createEvent.create")}
         </Button>
       </div>

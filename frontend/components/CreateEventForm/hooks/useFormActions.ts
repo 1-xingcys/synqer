@@ -33,17 +33,6 @@ export function useFormActions({
       setLoading(true);
 
       try {
-        if (!formData.startDate || !formData.endDate) {
-          alert("請選擇開始和結束日期");
-          setLoading(false);
-          return;
-        }
-
-        if (!process.env.NEXT_PUBLIC_API) {
-          throw new Error("NEXT_PUBLIC_API is not set");
-        }
-
-        // Build voting deadline ISO string if set
         let votingDeadlineISO: string | undefined;
         if (formData.votingDeadline) {
           const deadlineDateTime = combineDateAndTime(
@@ -56,11 +45,11 @@ export function useFormActions({
         const payload = {
           title: formData.title,
           description: formData.description || undefined,
-          startDate: formatDate(formData.startDate),
-          endDate: formatDate(formData.endDate),
+          startDate: formatDate(formData.startDate!),
+          endDate: formatDate(formData.endDate!),
           startTime: formData.startTime,
           endTime: formData.endTime,
-          slotDurationMin: 15, // Fixed at 15 minutes
+          slotDurationMin: 15,
           timeZone: formData.timeZone,
           votingDeadline: votingDeadlineISO,
           lineGroupId: formData.lineGroupId || undefined,
@@ -72,25 +61,17 @@ export function useFormActions({
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API}/events`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify(payload),
         });
 
         if (!response.ok) {
-          const errorData = (await response.json().catch(() => ({}))) as {
-            message?: string;
-          };
-          throw new Error(errorData.message || "Failed to create event");
+          throw new Error("Failed to create event");
         }
 
         const result = (await response.json()) as { eventId: string };
         router.push(`/hosted/${result.eventId}`);
-      } catch (error) {
-        console.error("建立活動失敗:", error);
-        alert("建立活動失敗，請重試");
       } finally {
         setLoading(false);
       }

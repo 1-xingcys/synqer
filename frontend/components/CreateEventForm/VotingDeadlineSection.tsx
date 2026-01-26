@@ -7,7 +7,7 @@ import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
-import { useFormValidation } from "./hooks/useFormValidation";
+import { useFormValidation, ValidationError } from "./hooks/useFormValidation";
 
 export function VotingDeadlineSection() {
   const t = useTranslations();
@@ -17,9 +17,9 @@ export function VotingDeadlineSection() {
   const { handleVotingDeadlineDateChange, handleVotingDeadlineTimeChange } =
     useDateTimeFields(setFormData);
 
-  const { validationErrors } = useFormValidation(formData);
+  const { errors } = useFormValidation(formData);
 
-  const hasDeadlineError = !!validationErrors.votingDeadline;
+  const hasDeadlineError = errors.has(ValidationError.DeadlineAfterStart);
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">

@@ -7,7 +7,7 @@ import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
-import { useFormValidation } from "./hooks/useFormValidation";
+import { useFormValidation, ValidationError } from "./hooks/useFormValidation";
 
 export function ConfigurationSection() {
   const t = useTranslations();
@@ -21,14 +21,14 @@ export function ConfigurationSection() {
     handleEndTimeChange,
   } = useDateTimeFields(setFormData);
 
-  const { validationErrors } = useFormValidation(formData);
+  const { errors } = useFormValidation(formData);
 
   // Min date for date picker - start date must be at least today
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const hasTimeError = !!validationErrors.startTime;
-  const hasStartTimeTooSoonError = !!validationErrors.startDate;
+  const hasTimeError = errors.has(ValidationError.StartTimeAfterEndTime);
+  const hasStartTimeTooSoonError = errors.has(ValidationError.StartTimeTooSoon);
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">
