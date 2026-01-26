@@ -1,14 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { AlertCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
-import { combineDateAndTime } from "./hooks/utils";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
+import { useFormValidation } from "./hooks/useFormValidation";
 
 export function VotingDeadlineSection() {
   const t = useTranslations();
@@ -18,26 +17,9 @@ export function VotingDeadlineSection() {
   const { handleVotingDeadlineDateChange, handleVotingDeadlineTimeChange } =
     useDateTimeFields(setFormData);
 
-  // Calculate if deadline is after event start
-  const isDeadlineInvalid = useMemo(() => {
-    if (!formData.votingDeadline || !formData.startDate) return false;
+  const { validationErrors } = useFormValidation(formData);
 
-    const deadlineDateTime = combineDateAndTime(
-      formData.votingDeadline,
-      formData.votingDeadlineTime,
-    );
-    const startDateTime = combineDateAndTime(
-      formData.startDate,
-      formData.startTime,
-    );
-
-    return deadlineDateTime > startDateTime;
-  }, [
-    formData.votingDeadline,
-    formData.votingDeadlineTime,
-    formData.startDate,
-    formData.startTime,
-  ]);
+  const hasDeadlineError = !!validationErrors.votingDeadline;
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">
@@ -91,7 +73,7 @@ export function VotingDeadlineSection() {
           )}
 
           {/* Error message */}
-          {isDeadlineInvalid && (
+          {hasDeadlineError && (
             <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
               <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
               <p className="text-sm text-destructive">

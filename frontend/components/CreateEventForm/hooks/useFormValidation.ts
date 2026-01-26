@@ -55,12 +55,8 @@ export function useFormValidation(formData: CreateEventFormData) {
       }
     }
 
-    // Voting deadline validation
-    if (
-      formData.startDate &&
-      formData.votingDeadline &&
-      formData.votingDeadlineManuallySet
-    ) {
+    // Voting deadline validation: deadline must be before or equal to event start
+    if (formData.startDate && formData.votingDeadline) {
       const startDateTime = combineDateAndTime(
         formData.startDate,
         formData.startTime,
