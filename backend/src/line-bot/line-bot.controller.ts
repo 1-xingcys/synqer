@@ -17,7 +17,7 @@ import type { Request } from 'express';
 import { LineBotService } from './line-bot.service';
 import { RichMenuService } from './services';
 import type { WebhookRequestBody } from './dto/webhook-event.dto';
-import { SessionAuthGuard } from '../auth/guards';
+import { SessionAuthGuard, CurrentUser } from '../auth';
 
 @Controller('line-bot')
 export class LineBotController {
@@ -117,6 +117,31 @@ export class LineBotController {
     await this.lineBotService.sendVoteReminder(eventId, groupId, lineUserIds);
 
     return { success: true, reminded: lineUserIds.length };
+  }
+
+  /**
+   * POST /line-bot/events/:eventId/notify-group
+   * 發送活動通知到綁定的 LINE 群組
+   */
+  @Post('events/:eventId/notify-group')
+  @UseGuards(SessionAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async notifyGroup(
+    @Param('eventId') eventId: string,
+    @CurrentUser() userId: string,
+  ) {
+    const result = await this.lineBotService.sendEventNotificationToGroup(
+      eventId,
+      userId,
+    );
+
+    if (!result.success) {
+      throw new BadRequestException(
+        result.error || 'Failed to send notification',
+      );
+    }
+
+    return { success: true };
   }
 
   // ============ Rich Menu 管理端點 ============
