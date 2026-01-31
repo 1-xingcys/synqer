@@ -49,18 +49,6 @@ export default function HostedEventSettingsPage() {
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
-      {/* Page Header */}
-      <div className="pb-4 border-b border-zinc-200 dark:border-zinc-700">
-        <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-          {t("hosted.settingsPage.title")}
-        </h1>
-        {eventData?.event?.title && (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            {eventData.event.title}
-          </p>
-        )}
-      </div>
-
       {/* Voting Deadline Section */}
       <div
         className={`border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden ${isVotingDisabled ? "opacity-60" : ""}`}

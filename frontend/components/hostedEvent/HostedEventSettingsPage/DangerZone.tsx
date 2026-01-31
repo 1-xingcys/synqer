@@ -31,17 +31,16 @@ export function DangerZone({
 
       {/* Content */}
       <div className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex-1 min-w-0 pr-4">
-            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-              {t("hosted.settingsPage.deleteEvent")}
-            </p>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-              {t("hosted.settingsPage.deleteWarning")}
-            </p>
-          </div>
-
-          {!showDeleteConfirm ? (
+        {!showDeleteConfirm ? (
+          <div className="flex items-center justify-between">
+            <div className="flex-1 min-w-0 pr-4">
+              <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                {t("hosted.settingsPage.deleteEvent")}
+              </p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+                {t("hosted.settingsPage.deleteWarning")}
+              </p>
+            </div>
             <Button
               variant="outline"
               onClick={onDeleteClick}
@@ -49,24 +48,41 @@ export function DangerZone({
             >
               {t("hosted.settingsPage.deleteEvent")}
             </Button>
-          ) : (
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-sm text-red-600 dark:text-red-400 mr-2">
-                {t("hosted.settingsPage.confirmDelete")}
-              </span>
-              <Button
-                variant="destructive"
-                onClick={onConfirmDelete}
-                disabled={deleting}
-              >
-                {deleting ? t("common.loading") : t("common.delete")}
-              </Button>
-              <Button variant="outline" onClick={onCancelDelete}>
-                {t("common.cancel")}
-              </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                {t("hosted.settingsPage.deleteEvent")}
+              </p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+                {t("hosted.settingsPage.deleteWarning")}
+              </p>
             </div>
-          )}
-        </div>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 pt-2 border-t border-red-100 dark:border-red-900/30">
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">
+                {t("hosted.settingsPage.confirmDelete")}
+              </p>
+              <div className="flex gap-2 sm:ml-auto">
+                <Button
+                  variant="destructive"
+                  onClick={onConfirmDelete}
+                  disabled={deleting}
+                  className="flex-1 sm:flex-none"
+                >
+                  {deleting ? t("common.loading") : t("common.delete")}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={onCancelDelete}
+                  className="flex-1 sm:flex-none"
+                >
+                  {t("common.cancel")}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
