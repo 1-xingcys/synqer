@@ -7,6 +7,7 @@ import { VotingProgress } from "@/components/ui/VotingProgress";
 import { EventStatus } from "@/types/event";
 import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
 import { DeadlineCountdown } from "./DeadlineCountdown";
+import { VotingStatusBar } from "./VotingStatusBar";
 import { EventTimeSelector } from "./EventTimeSelector";
 import { ConfirmTimeDialog } from "./ConfirmTimeDialog";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
@@ -73,17 +74,27 @@ export default function HostedEventPanelPage() {
     <div className="space-y-6">
       {/* Voting Phase Content */}
       {isVotingPhase && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Deadline Countdown */}
-          <DeadlineCountdown votingDeadline={event.votingDeadline} />
+        <>
+          {/* Mobile: Compact Status Bar */}
+          <div className="sm:hidden">
+            <VotingStatusBar
+              votingDeadline={event.votingDeadline}
+              votingPercentage={votingStats.votingPercentage}
+              totalVoted={votingStats.totalVoted}
+              totalExpected={votingStats.totalExpected}
+            />
+          </div>
 
-          {/* Voting Progress */}
-          <VotingProgress
-            votingPercentage={votingStats.votingPercentage}
-            totalVoted={votingStats.totalVoted}
-            totalExpected={votingStats.totalExpected}
-          />
-        </div>
+          {/* Desktop: Two separate cards */}
+          <div className="hidden sm:grid grid-cols-1 md:grid-cols-2 gap-4">
+            <DeadlineCountdown votingDeadline={event.votingDeadline} />
+            <VotingProgress
+              votingPercentage={votingStats.votingPercentage}
+              totalVoted={votingStats.totalVoted}
+              totalExpected={votingStats.totalExpected}
+            />
+          </div>
+        </>
       )}
 
       {/* Voting Ended Phase - Just show voting stats */}
