@@ -128,6 +128,7 @@ export default function HostedEventPanelPage() {
             slots={slots}
             votes={votesWithAvatars}
             participants={participantsWithAvatars}
+            eventId={eventId}
             canAddToEventTime={true}
             isVotingPhase={isVotingPhase}
             onAddToEventTime={selection.addTimeRange}

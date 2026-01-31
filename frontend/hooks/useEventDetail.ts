@@ -58,6 +58,7 @@ interface Event {
   confirmedSlotIds: string[];
   confirmedTimeRanges: ConfirmedTimeRange[];
   votingDeadline?: string;
+  lineGroupId?: string;
 }
 
 export interface EventDetailData {

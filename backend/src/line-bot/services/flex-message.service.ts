@@ -578,6 +578,209 @@ export class FlexMessageService {
   }
 
   /**
+   * 活動分享資訊（用於建構分享用 Flex Message）
+   */
+  buildEventShareFlexMessage(shareInfo: {
+    eventId: string;
+    title: string | null;
+    hostName: string;
+    hostAvatarUrl?: string | null;
+    startDate: Date;
+    endDate: Date;
+    startTime: string; // HH:mm
+    endTime: string; // HH:mm
+    votingDeadline?: Date | null;
+  }): FlexMessage {
+    const bubble = this.buildEventShareBubble(shareInfo);
+    return {
+      type: 'flex',
+      altText: `邀請你參加「${shareInfo.title || '未命名活動'}」的時間投票！`,
+      contents: bubble,
+    };
+  }
+
+  /**
+   * 建構活動分享 Bubble
+   */
+  private buildEventShareBubble(shareInfo: {
+    eventId: string;
+    title: string | null;
+    hostName: string;
+    hostAvatarUrl?: string | null;
+    startDate: Date;
+    endDate: Date;
+    startTime: string;
+    endTime: string;
+    votingDeadline?: Date | null;
+  }): FlexBubble {
+    const bodyContents: FlexComponent[] = [
+      // 標題
+      {
+        type: 'text',
+        text: shareInfo.title || '未命名活動',
+        weight: 'bold',
+        size: 'xl',
+        wrap: true,
+        maxLines: 2,
+      } as FlexText,
+      // 分隔線
+      {
+        type: 'separator',
+        margin: 'lg',
+      } as FlexSeparator,
+      // 發起人資訊
+      {
+        type: 'box',
+        layout: 'horizontal',
+        margin: 'lg',
+        spacing: 'sm',
+        contents: [
+          ...(shareInfo.hostAvatarUrl
+            ? [
+                {
+                  type: 'box',
+                  layout: 'vertical',
+                  width: '36px',
+                  height: '36px',
+                  contents: [
+                    {
+                      type: 'image',
+                      url: shareInfo.hostAvatarUrl,
+                      size: 'full',
+                      aspectRatio: '1:1',
+                      aspectMode: 'cover',
+                    } as FlexImage,
+                  ],
+                  cornerRadius: '18px',
+                } as FlexBox,
+              ]
+            : []),
+          {
+            type: 'box',
+            layout: 'vertical',
+            flex: 1,
+            contents: [
+              {
+                type: 'text',
+                text: '發起人',
+                size: 'xs',
+                color: '#999999',
+              } as FlexText,
+              {
+                type: 'text',
+                text: shareInfo.hostName,
+                size: 'sm',
+                weight: 'bold',
+                color: '#333333',
+              } as FlexText,
+            ],
+          } as FlexBox,
+        ],
+      } as FlexBox,
+      // 投票時間範圍
+      {
+        type: 'box',
+        layout: 'vertical',
+        margin: 'lg',
+        contents: [
+          {
+            type: 'text',
+            text: '投票時間範圍',
+            size: 'xs',
+            color: '#999999',
+          } as FlexText,
+          {
+            type: 'text',
+            text: this.formatVotingDateRange(shareInfo),
+            size: 'sm',
+            color: '#333333',
+            margin: 'xs',
+          } as FlexText,
+        ],
+      } as FlexBox,
+    ];
+
+    // 截止時間（如果有）
+    if (shareInfo.votingDeadline) {
+      bodyContents.push({
+        type: 'box',
+        layout: 'vertical',
+        margin: 'lg',
+        contents: [
+          {
+            type: 'text',
+            text: '投票截止',
+            size: 'xs',
+            color: '#999999',
+          } as FlexText,
+          {
+            type: 'text',
+            text: this.formatDateTime(shareInfo.votingDeadline),
+            size: 'sm',
+            color: '#333333',
+            margin: 'xs',
+          } as FlexText,
+        ],
+      } as FlexBox);
+    }
+
+    return {
+      type: 'bubble',
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        contents: bodyContents,
+        paddingAll: '20px',
+      },
+      footer: {
+        type: 'box',
+        layout: 'vertical',
+        contents: [
+          {
+            type: 'button',
+            style: 'primary',
+            height: 'sm',
+            action: {
+              type: 'uri',
+              label: '前往投票',
+              uri: `${this.liffUrl}/events/${shareInfo.eventId}`,
+            },
+            color: '#06C755',
+          } as FlexButton,
+        ],
+        paddingAll: '12px',
+      },
+      styles: {
+        footer: {
+          separator: true,
+        },
+      },
+    };
+  }
+
+  /**
+   * 格式化投票時間範圍
+   */
+  private formatVotingDateRange(info: {
+    startDate: Date;
+    endDate: Date;
+    startTime: string;
+    endTime: string;
+  }): string {
+    const start = new Date(info.startDate);
+    const end = new Date(info.endDate);
+    const startMonth = start.getUTCMonth() + 1;
+    const startDay = start.getUTCDate();
+    const endMonth = end.getUTCMonth() + 1;
+    const endDay = end.getUTCDate();
+
+    if (start.toISOString().slice(0, 10) === end.toISOString().slice(0, 10)) {
+      return `${startMonth}/${startDay} ${info.startTime} ~ ${info.endTime}`;
+    }
+    return `${startMonth}/${startDay} ~ ${endMonth}/${endDay} ${info.startTime} ~ ${info.endTime}`;
+  }
+
+  /**
    * 建構投票提醒訊息（使用 textV2 格式真正提及未投票使用者）
    * @see https://developers.line.biz/en/reference/messaging-api/#text-message
    */

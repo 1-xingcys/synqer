@@ -80,7 +80,7 @@ export function useFormActions({
         }
 
         const result = (await response.json()) as { eventId: string };
-        router.push(`/hosted/${result.eventId}`);
+        router.push(`/new/success/${result.eventId}`);
       } catch (error) {
         alert(
           error instanceof Error ? error.message : "Failed to create event",

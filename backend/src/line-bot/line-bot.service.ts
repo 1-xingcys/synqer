@@ -202,6 +202,9 @@ export class LineBotService implements OnModuleInit {
   ): Promise<void> {
     // 查詢這個群組中尚未結束的活動
     const activeEvents = await this.getActiveGroupEvents(lineGroupDbId);
+    this.logger.debug(
+      `Active events: ${JSON.stringify(activeEvents, null, 2)}`,
+    );
 
     if (activeEvents.length === 0) {
       // 沒有活動，發送提示訊息
@@ -260,6 +263,8 @@ export class LineBotService implements OnModuleInit {
   private async getActiveGroupEvents(
     lineGroupDbId: string,
   ): Promise<EventInfo[]> {
+    this.logger.debug(`Querying events for lineGroupDbId: "${lineGroupDbId}"`);
+
     const events = await this.prisma.event.findMany({
       where: {
         lineGroupId: lineGroupDbId,
@@ -296,6 +301,8 @@ export class LineBotService implements OnModuleInit {
         createdAt: 'desc',
       },
     });
+
+    this.logger.debug(`Events: ${JSON.stringify(events, null, 2)}`);
 
     const result: EventInfo[] = [];
 
@@ -512,5 +519,143 @@ export class LineBotService implements OnModuleInit {
 
   async linkUserToGroupMembers(userId: string, lineUserId: string) {
     return this.lineGroup.linkUserToMembers(userId, lineUserId);
+  }
+
+  // ============ 發送活動通知到群組 ============
+
+  /**
+   * 發送單一活動的 Flex Message 到綁定的 LINE 群組
+   * @param eventId - 活動 ID
+   * @param userId - 發送者的使用者 ID（用於驗證權限）
+   */
+  async sendEventNotificationToGroup(
+    eventId: string,
+    userId: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    // 取得活動資訊
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        lineGroup: true,
+        expectedParticipants: {
+          where: { isRemoved: false },
+          select: {
+            id: true,
+            userId: true,
+            hasVoted: true,
+          },
+        },
+        votes: {
+          select: {
+            userId: true,
+          },
+        },
+        confirmedTimeSlots: {
+          include: {
+            slot: {
+              select: {
+                id: true,
+                date: true,
+                startMinute: true,
+                endMinute: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!event) {
+      return { success: false, error: 'Event not found' };
+    }
+
+    if (event.isDeleted) {
+      return { success: false, error: 'Event has been deleted' };
+    }
+
+    // 驗證發送者是活動擁有者
+    if (event.ownerId !== userId) {
+      return { success: false, error: 'Not authorized to send notification' };
+    }
+
+    // 檢查是否有綁定 LINE 群組
+    if (!event.lineGroup) {
+      return { success: false, error: 'Event is not linked to a LINE group' };
+    }
+
+    // 檢查群組是否仍活躍（Bot 還在群組中）
+    if (!event.lineGroup.isActive) {
+      this.logger.warn(
+        `LINE group ${event.lineGroup.lineGroupId} is not active (Bot may have left)`,
+      );
+      return {
+        success: false,
+        error: 'Bot is no longer in the LINE group',
+      };
+    }
+
+    this.logger.debug(
+      `LINE Group info: id=${event.lineGroup.id}, lineGroupId=${event.lineGroup.lineGroupId}, isActive=${event.lineGroup.isActive}`,
+    );
+
+    // 取得 Host 資訊
+    const host = await this.getEventHostInfo(event.ownerId);
+
+    // 將分鐘轉換為時間字串
+    const formatTime = (minutes: number): string => {
+      const hours = Math.floor(minutes / 60)
+        .toString()
+        .padStart(2, '0');
+      const mins = (minutes % 60).toString().padStart(2, '0');
+      return `${hours}:${mins}`;
+    };
+
+    // 檢查 LIFF URL 是否已設定
+    if (!process.env.LINE_LIFF_URL) {
+      this.logger.warn(
+        'LINE_LIFF_URL is not configured, Flex Message buttons may not work correctly',
+      );
+    }
+
+    // 建構分享用 Flex Message
+    const flexMsg = this.flexMessage.buildEventShareFlexMessage({
+      eventId: event.id,
+      title: event.title,
+      hostName: host.displayName,
+      hostAvatarUrl: host.pictureUrl,
+      startDate: event.startDate,
+      endDate: event.endDate,
+      startTime: formatTime(event.startMinuteOfDay),
+      endTime: formatTime(event.endMinuteOfDay),
+      votingDeadline: event.votingDeadline,
+    });
+
+    this.logger.debug(`Sending to LINE group: ${event.lineGroup.lineGroupId}`);
+
+    try {
+      await this.lineApi.pushMessages(event.lineGroup.lineGroupId, [flexMsg]);
+      this.logger.log(
+        `Sent event notification for ${eventId} to group ${event.lineGroup.lineGroupId}`,
+      );
+      return { success: true };
+    } catch (error) {
+      // 記錄詳細錯誤資訊
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as {
+          response?: { status?: number; data?: unknown };
+        };
+        this.logger.error(
+          `Failed to send event notification: ${JSON.stringify({
+            status: axiosError.response?.status,
+            data: axiosError.response?.data,
+          })}`,
+        );
+      } else {
+        this.logger.error(
+          `Failed to send event notification: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+      return { success: false, error: 'Failed to send message to LINE group' };
+    }
   }
 }

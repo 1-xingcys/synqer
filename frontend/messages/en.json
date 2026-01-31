@@ -767,6 +767,27 @@
       "description": "Your entered data will be lost. This action cannot be undone.",
       "keepEditing": "Keep editing",
       "discard": "Discard"
+    },
+    "success": {
+      "title": "Event created successfully!",
+      "description": "You can now invite participants to vote.",
+      "eventName": "Event name",
+      "unnamedEvent": "Unnamed event",
+      "nextSteps": "Next steps",
+      "goToManage": "Go to management page",
+      "goToManageDescription": "View event details, manage participants",
+      "goToVote": "Go to voting page",
+      "goToVoteDescription": "Fill in your available times",
+      "copyLink": "Copy voting link",
+      "copyLinkDescription": "Share the link with friends to vote",
+      "linkCopied": "Link copied!",
+      "shareToLine": "Share to LINE",
+      "shareToLineDescription": "Choose friends or groups to share",
+      "sendToLineGroup": "Send to LINE group",
+      "sendToLineGroupDescription": "Send event info to the linked LINE group",
+      "sending": "Sending...",
+      "sentSuccess": "Sent successfully!",
+      "sentFailed": "Failed to send, please try again"
     }
   }
 }

@@ -12,6 +12,8 @@ export interface ResultsViewProps {
   slots: TimeSlot[];
   votes: Vote[];
   participants: Participant[];
+  // Event ID for share link
+  eventId: string;
   // Host-only props for adding time ranges to event time
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;

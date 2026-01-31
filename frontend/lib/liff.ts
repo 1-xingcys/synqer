@@ -29,11 +29,37 @@ export interface LiffProfile {
 }
 
 /**
+ * LIFF Context 類型
+ */
+export const LiffContextType = {
+  Utou: "utou",
+  Room: "room",
+  Group: "group",
+  None: "none",
+  External: "external",
+  SquareChat: "square_chat",
+} as const;
+export type LiffContextType =
+  (typeof LiffContextType)[keyof typeof LiffContextType];
+
+/**
+ * LIFF View 類型
+ */
+export const LiffViewType = {
+  Full: "full",
+  Tall: "tall",
+  Compact: "compact",
+  Frame: "frame",
+  FullFlex: "full-flex",
+} as const;
+export type LiffViewType = (typeof LiffViewType)[keyof typeof LiffViewType];
+
+/**
  * LIFF Context 資訊
  */
 export interface LiffContext {
-  type: "utou" | "room" | "group" | "none" | "external" | "square_chat";
-  viewType?: "full" | "tall" | "compact" | "frame" | "full-flex";
+  type: LiffContextType;
+  viewType?: LiffViewType;
   userId?: string;
   utouId?: string;
   roomId?: string;
@@ -279,12 +305,12 @@ export async function getLiffContext(): Promise<LiffContext | null> {
   try {
     const context = liff.getContext();
     if (!context) {
-      return { type: "external" };
+      return { type: LiffContextType.External };
     }
 
     return {
-      type: context.type,
-      viewType: context.viewType,
+      type: context.type as LiffContextType,
+      viewType: context.viewType as LiffViewType | undefined,
       userId: context.userId,
       utouId: context.utouId,
       roomId: context.roomId,

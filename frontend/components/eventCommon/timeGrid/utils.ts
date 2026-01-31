@@ -1,12 +1,5 @@
 import { TimeSlot, Vote, CalendarEvent } from "./types";
 
-// Format time from minutes to HH:MM string
-export const formatTime = (minutes: number): string => {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-};
-
 // Map app locale to date-fns locale string
 const getDateLocale = (locale: string): string => {
   const localeMap: Record<string, string> = {

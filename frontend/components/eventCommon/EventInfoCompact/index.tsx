@@ -7,6 +7,8 @@ import { EventStatusBadge } from "@/components/eventCommon/EventStatusBadge";
 import { format, isPast, differenceInHours } from "date-fns";
 import { Link } from "@/i18n/routing";
 import { ExternalLink, ChevronDown, Copy, CheckCheck } from "lucide-react";
+import { useEventShareLink } from "@/hooks/useEventShareLink";
+import { formatMinutesToTime } from "@/lib/utils";
 
 interface EventInfoCompactProps {
   title?: string | null;
@@ -39,27 +41,7 @@ export function EventInfoCompact({
 }: EventInfoCompactProps) {
   const t = useTranslations();
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  const formatTime = (minuteOfDay: number) => {
-    const hours = Math.floor(minuteOfDay / 60);
-    const minutes = minuteOfDay % 60;
-    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-  };
-
-  const handleCopyLink = () => {
-    if (!eventId) return;
-    const shareUrl = `${window.location.origin}/events/${eventId}`;
-    navigator.clipboard.writeText(shareUrl).then(
-      () => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      },
-      (err) => {
-        console.error("Failed to copy:", err);
-      },
-    );
-  };
+  const { copied, copyLink: handleCopyLink } = useEventShareLink(eventId || "");
 
   const isVotingPhase =
     status === EventStatus.VOTING || status === EventStatus.VOTING_ENDED;
@@ -88,7 +70,7 @@ export function EventInfoCompact({
             {/* Copy Link Button - only show for hosted mode */}
             {isHosted && eventId && (
               <button
-                onClick={handleCopyLink}
+                onClick={() => void handleCopyLink()}
                 className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                 title={t("event.copyLink")}
               >
@@ -222,7 +204,8 @@ export function EventInfoCompact({
                 />
               </svg>
               <span className="font-mono text-xs">
-                {formatTime(startMinuteOfDay)} - {formatTime(endMinuteOfDay)}
+                {formatMinutesToTime(startMinuteOfDay)} -{" "}
+                {formatMinutesToTime(endMinuteOfDay)}
               </span>
             </div>
 
