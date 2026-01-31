@@ -39,6 +39,8 @@ export function EventInfoCompact({
   const t = useTranslations();
   const { copied, copyLink: handleCopyLink } = useEventShareLink(eventId || "");
 
+  const showActions = isHosted && eventId;
+
   return (
     <div className="flex flex-col gap-2 sm:gap-4">
       {/* 1. Header Section: Title & Status Badge */}
@@ -66,10 +68,16 @@ export function EventInfoCompact({
         </div>
       </div>
 
-      {/* 2. Info Cards: Date & Time */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* 2. Info Cards & Actions Grid */}
+      <div
+        className={`grid gap-2 sm:gap-3 ${
+          showActions
+            ? "grid-cols-2 md:grid-cols-[1fr_1fr_minmax(140px,140px)_minmax(140px,140px)]"
+            : "grid-cols-2"
+        }`}
+      >
         {/* Date Card */}
-        <div className="flex flex-col p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
+        <div className="flex flex-col justify-center p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800 h-full">
           <div className="flex items-center gap-1.5 mb-0.5 text-zinc-500 dark:text-zinc-400">
             <Calendar className="w-3.5 h-3.5" />
             <span className="text-xs font-medium uppercase tracking-wide">
@@ -83,7 +91,7 @@ export function EventInfoCompact({
         </div>
 
         {/* Time Card */}
-        <div className="flex flex-col p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800">
+        <div className="flex flex-col justify-center p-2 sm:p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-800 h-full">
           <div className="flex items-center gap-1.5 mb-0.5 text-zinc-500 dark:text-zinc-400">
             <Clock className="w-3.5 h-3.5" />
             <span className="text-xs font-medium uppercase tracking-wide">
@@ -95,32 +103,32 @@ export function EventInfoCompact({
             {formatMinutesToTime(endMinuteOfDay)}
           </span>
         </div>
+
+        {/* Action Buttons (Only for Hosted Mode) */}
+        {showActions && (
+          <>
+            <button
+              onClick={() => void handleCopyLink()}
+              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium text-sm transition-all active:scale-[0.98] h-full col-span-1"
+            >
+              {copied ? (
+                <CheckCheck className="w-4 h-4 text-emerald-500" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
+              {t("eventInfo.copyVoteLink")}
+            </button>
+
+            <Link
+              href={`/joined/${eventId}`}
+              className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium text-sm transition-all active:scale-[0.98] shadow-sm shadow-blue-500/20 h-full col-span-1"
+            >
+              <ExternalLink className="w-4 h-4" />
+              {t("eventInfo.goToVotePage")}
+            </Link>
+          </>
+        )}
       </div>
-
-      {/* 3. Action Buttons (Only for Hosted Mode) */}
-      {isHosted && eventId && (
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-1">
-          <button
-            onClick={() => void handleCopyLink()}
-            className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium text-sm transition-all active:scale-[0.98]"
-          >
-            {copied ? (
-              <CheckCheck className="w-4 h-4 text-emerald-500" />
-            ) : (
-              <Copy className="w-4 h-4" />
-            )}
-            {t("eventInfo.copyVoteLink")}
-          </button>
-
-          <Link
-            href={`/joined/${eventId}`}
-            className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium text-sm transition-all active:scale-[0.98] shadow-sm shadow-blue-500/20"
-          >
-            <ExternalLink className="w-4 h-4" />
-            {t("eventInfo.goToVotePage")}
-          </Link>
-        </div>
-      )}
     </div>
   );
 }
