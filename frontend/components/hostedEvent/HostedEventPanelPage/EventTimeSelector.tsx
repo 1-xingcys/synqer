@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
+import { formatMinutesToTime } from "@/lib/utils";
 
 export interface SelectedTimeRange {
   id: string;
@@ -43,12 +44,6 @@ export function EventTimeSelector({
 }: EventTimeSelectorProps) {
   const t = useTranslations("hosted");
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-
-  const formatTime = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-  };
 
   const formatDateRange = (startDate: string, endDate: string) => {
     const start = new Date(startDate);
@@ -207,7 +202,8 @@ export function EventTimeSelector({
                   </span>
                   <span className="text-zinc-400">•</span>
                   <span className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
-                    {formatTime(range.startTime)} - {formatTime(range.endTime)}
+                    {formatMinutesToTime(range.startTime)} -{" "}
+                    {formatMinutesToTime(range.endTime)}
                   </span>
 
                   {/* Available count for non-confirmed */}

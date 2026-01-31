@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { formatTime } from "../utils";
+import { formatMinutesToTime } from "@/lib/utils";
 import { MergedTimeRow } from "../types";
 
 interface TimeColumnProps {
@@ -26,14 +26,14 @@ export const TimeColumn = memo(function TimeColumn({
         >
           {/* Time label at top boundary */}
           <span className="absolute -top-2 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
-            {formatTime(row.startMinute)}
+            {formatMinutesToTime(row.startMinute)}
           </span>
         </div>
       ))}
       {/* Last time label */}
       {mergedRows.length > 0 && (
         <span className="absolute bottom-0.5 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
-          {formatTime(mergedRows[mergedRows.length - 1].endMinute)}
+          {formatMinutesToTime(mergedRows[mergedRows.length - 1].endMinute)}
         </span>
       )}
     </div>

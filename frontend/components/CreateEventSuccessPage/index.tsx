@@ -22,6 +22,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { ActionButton, ActionButtonVariant } from "./ActionButton";
+import { formatMinutesToTime } from "@/lib/utils";
 
 const SendStatus = {
   Idle: "idle",
@@ -83,23 +84,16 @@ export default function CreateEventSuccessPage() {
     void fetchEventData();
   }, [fetchEventData]);
 
-  // 將分鐘數轉換為時間字串 (HH:MM)
-  const minutesToTime = (minutes: number): string => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
-  };
-
   // 從 eventData 取得資料
   const eventTitle = eventData?.title;
   const lineGroupId = eventData?.lineGroupId;
   const startDate = eventData?.startDate?.split("T")[0];
   const endDate = eventData?.endDate?.split("T")[0];
   const startTime = eventData
-    ? minutesToTime(eventData.startMinuteOfDay)
+    ? formatMinutesToTime(eventData.startMinuteOfDay)
     : undefined;
   const endTime = eventData
-    ? minutesToTime(eventData.endMinuteOfDay)
+    ? formatMinutesToTime(eventData.endMinuteOfDay)
     : undefined;
   const votingDeadline = eventData?.votingDeadline;
 

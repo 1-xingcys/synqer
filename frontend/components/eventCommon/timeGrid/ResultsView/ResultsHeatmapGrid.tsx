@@ -10,10 +10,10 @@ import {
   GranularitySelector,
 } from "@/components/eventCommon/timeGrid/ui";
 import {
-  formatTime,
   formatDateHeader,
   groupSlotsByDate,
 } from "@/components/eventCommon/timeGrid/utils";
+import { formatMinutesToTime } from "@/lib/utils";
 import { useResponsiveGrid, usePaginatedDates, useMergedRows } from "../hooks";
 import { TimeGranularity, TimeSlot, Vote, Participant } from "../types";
 
@@ -377,7 +377,7 @@ export function ResultsHeatmapGrid({
       }
 
       // Format time label
-      const timeLabel = `${formatTime(range.startTime)} - ${formatTime(range.endTime)}`;
+      const timeLabel = `${formatMinutesToTime(range.startTime)} - ${formatMinutesToTime(range.endTime)}`;
 
       setModalData({
         dateLabel,
@@ -592,13 +592,15 @@ export function ResultsHeatmapGrid({
               {mergedRows.map((row, rowIndex) => (
                 <div key={rowIndex} className="h-10 sm:h-11 relative">
                   <span className="absolute -top-2 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
-                    {formatTime(row.startMinute)}
+                    {formatMinutesToTime(row.startMinute)}
                   </span>
                 </div>
               ))}
               {mergedRows.length > 0 && (
                 <span className="absolute bottom-0.5 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
-                  {formatTime(mergedRows[mergedRows.length - 1].endMinute)}
+                  {formatMinutesToTime(
+                    mergedRows[mergedRows.length - 1].endMinute,
+                  )}
                 </span>
               )}
             </div>

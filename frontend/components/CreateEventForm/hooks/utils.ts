@@ -2,6 +2,8 @@
 // Date/Time Utilities (shared across hooks and components)
 // =============================================================================
 
+import { formatMinutesToTime } from "@/lib/utils";
+
 /**
  * Combine date and time into a single Date object
  */
@@ -68,17 +70,4 @@ export function getDefaultStartDateTime(): { date: Date; time: string } {
     date: today,
     time: formatMinutesToTime(finalMinutes),
   };
-}
-
-// =============================================================================
-// Internal Utilities
-// =============================================================================
-
-/**
- * Format minutes to time string (HH:MM)
- */
-function formatMinutesToTime(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
 }
