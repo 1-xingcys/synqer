@@ -72,8 +72,8 @@ export default function HostedEventPanelPage() {
 
   return (
     <div className="space-y-3 sm:space-y-6">
-      {/* Voting Phase Content */}
-      {isVotingPhase && (
+      {/* Voting Phase & Voting Ended - Show deadline countdown and voting progress */}
+      {(isVotingPhase || isVotingEnded) && (
         <>
           {/* Mobile: Compact Status Bar */}
           <div className="sm:hidden">
@@ -95,15 +95,6 @@ export default function HostedEventPanelPage() {
             />
           </div>
         </>
-      )}
-
-      {/* Voting Ended Phase - Just show voting stats */}
-      {isVotingEnded && (
-        <VotingProgress
-          votingPercentage={votingStats.votingPercentage}
-          totalVoted={votingStats.totalVoted}
-          totalExpected={votingStats.totalExpected}
-        />
       )}
 
       {/* Error messages */}

@@ -69,28 +69,24 @@ export function VotingStatusBar({
           {t("hosted.deadline.notSet")}
         </span>
       );
-    if (isExpired)
-      return (
-        <span className="text-zinc-500 font-medium text-sm">
-          {t("hosted.deadline.expired")}
-        </span>
-      );
 
     return (
       <div className={`flex items-baseline gap-1 ${getTimeColor()}`}>
-        {days > 0 && (
-          <>
-            <span className="text-xl font-bold tabular-nums">{days}</span>
-            <span className="text-xs font-medium mr-1">
-              {t("hosted.deadline.days")}
-            </span>
-          </>
-        )}
-        <span className="text-xl font-bold tabular-nums">{hours}</span>
+        <span className="text-xl font-bold tabular-nums">
+          {isExpired ? "00" : days.toString().padStart(2, "0")}
+        </span>
+        <span className="text-xs font-medium mr-1">
+          {t("hosted.deadline.days")}
+        </span>
+        <span className="text-xl font-bold tabular-nums">
+          {isExpired ? "00" : hours.toString().padStart(2, "0")}
+        </span>
         <span className="text-xs font-medium mr-1">
           {t("hosted.deadline.hours")}
         </span>
-        <span className="text-xl font-bold tabular-nums">{minutes}</span>
+        <span className="text-xl font-bold tabular-nums">
+          {isExpired ? "00" : minutes.toString().padStart(2, "0")}
+        </span>
         <span className="text-xs font-medium">
           {t("hosted.deadline.minutes")}
         </span>

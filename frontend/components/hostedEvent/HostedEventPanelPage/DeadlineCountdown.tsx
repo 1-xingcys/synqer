@@ -105,53 +105,51 @@ export function DeadlineCountdown({ votingDeadline }: DeadlineCountdownProps) {
         </span>
       </div>
 
-      {isExpired ? (
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400 dark:text-zinc-500" />
-          <span className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 font-medium">
-            {t("deadline.expired")}
-          </span>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between">
-          {/* Countdown units */}
-          <div className="flex items-baseline gap-3 sm:gap-4">
-            {days > 0 && (
-              <div className="text-center">
-                <span
-                  className={`text-2xl sm:text-3xl font-bold tabular-nums ${getStatusColor()}`}
-                >
-                  {days}
-                </span>
-                <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-0.5 sm:ml-1">
-                  {t("deadline.days")}
-                </span>
-              </div>
-            )}
-            <div className="text-center">
-              <span
-                className={`text-2xl sm:text-3xl font-bold tabular-nums ${getStatusColor()}`}
-              >
-                {hours}
-              </span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-0.5 sm:ml-1">
-                {t("deadline.hours")}
-              </span>
-            </div>
-            <div className="text-center">
-              <span
-                className={`text-2xl sm:text-3xl font-bold tabular-nums ${getStatusColor()}`}
-              >
-                {minutes}
-              </span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-0.5 sm:ml-1">
-                {t("deadline.minutes")}
-              </span>
-            </div>
+      <div className="flex items-center justify-between">
+        {/* Countdown units */}
+        <div className="flex items-baseline gap-3 sm:gap-4">
+          <div className="text-center">
+            <span
+              className={`text-2xl sm:text-3xl font-bold tabular-nums ${getStatusColor()}`}
+            >
+              {isExpired ? "00" : days.toString().padStart(2, "0")}
+            </span>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-0.5 sm:ml-1">
+              {t("deadline.days")}
+            </span>
           </div>
+          <div className="text-center">
+            <span
+              className={`text-2xl sm:text-3xl font-bold tabular-nums ${getStatusColor()}`}
+            >
+              {isExpired ? "00" : hours.toString().padStart(2, "0")}
+            </span>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-0.5 sm:ml-1">
+              {t("deadline.hours")}
+            </span>
+          </div>
+          <div className="text-center">
+            <span
+              className={`text-2xl sm:text-3xl font-bold tabular-nums ${getStatusColor()}`}
+            >
+              {isExpired ? "00" : minutes.toString().padStart(2, "0")}
+            </span>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-0.5 sm:ml-1">
+              {t("deadline.minutes")}
+            </span>
+          </div>
+        </div>
 
-          {/* Desktop: Urgency indicator on the right */}
-          {(isUrgent || isVeryCritical) && (
+        {/* Desktop: Urgency indicator or expired badge on the right */}
+        {isExpired ? (
+          <div className="hidden sm:block">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400">
+              <Clock className="w-3.5 h-3.5" />
+              {t("deadline.expired")}
+            </span>
+          </div>
+        ) : (
+          (isUrgent || isVeryCritical) && (
             <div className="hidden sm:block">
               <span
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -166,9 +164,9 @@ export function DeadlineCountdown({ votingDeadline }: DeadlineCountdownProps) {
                   : t("deadline.endingSoon")}
               </span>
             </div>
-          )}
-        </div>
-      )}
+          )
+        )}
+      </div>
     </div>
   );
 }
