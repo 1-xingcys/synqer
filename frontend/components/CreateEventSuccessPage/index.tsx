@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useLiff } from "@/hooks/useLiff";
+import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
   shareEventFlexMessage,
@@ -50,10 +51,14 @@ export default function CreateEventSuccessPage() {
   const router = useRouter();
   const { user } = useAuthContext();
   const { isInClient: isInLiff, isInitialized: liffInitialized } = useLiff();
+  const {
+    shareUrl,
+    copied: linkCopied,
+    copyLink: handleCopyLink,
+  } = useEventShareLink(eventId);
 
   const [eventData, setEventData] = useState<EventData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [linkCopied, setLinkCopied] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendStatus, setSendStatus] = useState<SendStatus>(SendStatus.Idle);
 
@@ -97,26 +102,6 @@ export default function CreateEventSuccessPage() {
     : undefined;
   const votingDeadline = eventData?.votingDeadline;
 
-  // 投票頁面連結（使用 LIFF URL）
-  const liffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
-  const voteUrl =
-    typeof window !== "undefined"
-      ? `https://liff.line.me/${liffId}/events/${eventId}`
-      : "";
-
-  // 複製連結
-  const handleCopyLink = async () => {
-    if (!voteUrl) return;
-
-    try {
-      await navigator.clipboard.writeText(voteUrl);
-      setLinkCopied(true);
-      setTimeout(() => setLinkCopied(false), 2000);
-    } catch (error) {
-      console.error("Failed to copy link:", error);
-    }
-  };
-
   // 分享到 LINE（使用 shareTargetPicker）
   const handleShareToLine = async () => {
     if (!eventId || !startDate || !endDate || !startTime || !endTime || sending)
@@ -138,7 +123,7 @@ export default function CreateEventSuccessPage() {
         votingDeadline: votingDeadline || undefined,
       };
 
-      const result = await shareEventFlexMessage(shareInfo, voteUrl);
+      const result = await shareEventFlexMessage(shareInfo, shareUrl);
       if (result === ShareResult.Success) {
         setSendStatus(SendStatus.Success);
       } else if (result === ShareResult.Cancelled) {

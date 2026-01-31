@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -23,6 +22,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { EventRowData, HostedEventRowData, EventRowMode } from "./types";
+import { useEventShareLink } from "@/hooks/useEventShareLink";
 
 interface EventRowProps {
   event: EventRowData | HostedEventRowData;
@@ -38,29 +38,13 @@ export default function EventRow({
   translationNamespace = "joinedEvents",
 }: EventRowProps) {
   const t = useTranslations(translationNamespace);
-  const [copied, setCopied] = useState(false);
+  const { copied, copyLink: handleCopyLink } = useEventShareLink(event.id);
 
   const isJoined = mode === EventRowMode.JOINED;
   const linkHref = isJoined ? `/joined/${event.id}` : `/hosted/${event.id}`;
 
   // Check if hasVoted exists (for joined events)
   const hasVoted = "hasVoted" in event ? event.hasVoted : false;
-
-  const handleCopyLink = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const shareUrl = `${window.location.origin}/events/${event.id}`;
-    navigator.clipboard.writeText(shareUrl).then(
-      () => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      },
-      (err) => {
-        console.error("Failed to copy:", err);
-      },
-    );
-  };
 
   // Format time range based on variant
   const getTimeRange = () => {
@@ -182,7 +166,7 @@ export default function EventRow({
                 variant="ghost"
                 size="icon-sm"
                 className="opacity-70"
-                onClick={handleCopyLink}
+                onClick={(e) => void handleCopyLink(e)}
               >
                 {copied ? (
                   <CheckCheck className="w-4 h-4 text-emerald-500" />
@@ -252,7 +236,7 @@ export default function EventRow({
                     variant="ghost"
                     size="icon-sm"
                     className="h-6 w-6"
-                    onClick={handleCopyLink}
+                    onClick={(e) => void handleCopyLink(e)}
                   >
                     {copied ? (
                       <CheckCheck className="w-3 h-3 text-emerald-500" />

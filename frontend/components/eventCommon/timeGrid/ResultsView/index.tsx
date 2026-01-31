@@ -8,6 +8,7 @@ import { ParticipantFilter } from "./ParticipantFilter";
 import { HeatMapLegend } from "./HeatMapLegend";
 import { ResultsHeatmapGrid } from "./ResultsHeatmapGrid";
 import { useFilteredVotes } from "../hooks";
+import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 
 export type { ResultsViewProps, SlotRangeInfo };
 
@@ -27,7 +28,7 @@ export default function ResultsView({
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [linkCopied, setLinkCopied] = useState(false);
+  const { copied: linkCopied, copy } = useCopyToClipboard();
   const [hasInitialized, setHasInitialized] = useState(false);
 
   // Parse URL param to get initial selection
@@ -98,15 +99,9 @@ export default function ResultsView({
   );
 
   // Copy shareable link
-  const copyShareableLink = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setLinkCopied(true);
-      setTimeout(() => setLinkCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy link:", err);
-    }
-  }, []);
+  const copyShareableLink = useCallback(() => {
+    return copy(window.location.href);
+  }, [copy]);
 
   // Use hook for filtered votes calculation
   const { votesBySlot, maxVotes } = useFilteredVotes({
