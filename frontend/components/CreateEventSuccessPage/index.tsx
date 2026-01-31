@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useLiff } from "@/hooks/useLiff";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
+import { useEventDetail } from "@/hooks/useEventDetail";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
   shareEventFlexMessage,
@@ -32,18 +33,6 @@ const SendStatus = {
 } as const;
 type SendStatus = (typeof SendStatus)[keyof typeof SendStatus];
 
-interface EventData {
-  id: string;
-  title?: string;
-  startDate: string;
-  endDate: string;
-  startMinuteOfDay: number;
-  endMinuteOfDay: number;
-  timeZone: string;
-  votingDeadline?: string;
-  lineGroupId?: string;
-}
-
 export default function CreateEventSuccessPage() {
   const params = useParams<{ eventId: string }>();
   const eventId = params.eventId;
@@ -56,40 +45,18 @@ export default function CreateEventSuccessPage() {
     copied: linkCopied,
     copyLink: handleCopyLink,
   } = useEventShareLink(eventId);
+  const { data, loading, error } = useEventDetail(eventId);
 
-  const [eventData, setEventData] = useState<EventData | null>(null);
-  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [sendStatus, setSendStatus] = useState<SendStatus>(SendStatus.Idle);
 
-  // 抓取活動資料
-  const fetchEventData = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}`,
-        {
-          credentials: "include",
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch event data");
-      }
-
-      const data = (await response.json()) as { event: EventData };
-      setEventData(data.event);
-    } catch {
-      router.replace("/joined");
-    } finally {
-      setLoading(false);
-    }
-  }, [eventId, router]);
-
   useEffect(() => {
-    void fetchEventData();
-  }, [fetchEventData]);
+    if (error) {
+      router.replace("/joined");
+    }
+  }, [error, router]);
 
-  // 從 eventData 取得資料
+  const eventData = data?.event;
   const eventTitle = eventData?.title;
   const lineGroupId = eventData?.lineGroupId;
   const startDate = eventData?.startDate?.split("T")[0];
