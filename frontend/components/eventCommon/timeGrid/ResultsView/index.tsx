@@ -9,6 +9,7 @@ import { HeatMapLegend } from "./HeatMapLegend";
 import { ResultsHeatmapGrid } from "./ResultsHeatmapGrid";
 import { useFilteredVotes } from "../hooks";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { useLiff } from "@/hooks/useLiff";
 
 export type { ResultsViewProps, SlotRangeInfo };
 
@@ -19,6 +20,7 @@ export default function ResultsView({
   slots,
   votes,
   participants,
+  eventId,
   canAddToEventTime = false,
   isVotingPhase = false,
   onAddToEventTime,
@@ -28,7 +30,6 @@ export default function ResultsView({
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const { copied: linkCopied, copy } = useCopyToClipboard();
   const [hasInitialized, setHasInitialized] = useState(false);
 
   // Parse URL param to get initial selection
@@ -98,10 +99,31 @@ export default function ResultsView({
     [searchParams, participants.length, pathname, router],
   );
 
-  // Copy shareable link
+  // Share link with filter state (for results page)
+  const { isInClient } = useLiff();
+  const { copied: linkCopied, copy } = useCopyToClipboard();
+
+  // Build shareable link: joined/[eventId]/results?selected=...
   const copyShareableLink = useCallback(() => {
-    return copy(window.location.href);
-  }, [copy]);
+    const liffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
+    const resultsPath = `/joined/${eventId}/results`;
+
+    // Build base URL based on environment
+    let baseUrl: string;
+    if (isInClient && liffId) {
+      baseUrl = `https://liff.line.me/${liffId}${resultsPath}`;
+    } else {
+      baseUrl = `${window.location.origin}${resultsPath}`;
+    }
+
+    const url = new URL(baseUrl);
+    // Preserve current filter params
+    const selectedParam = searchParams.get(SELECTED_PARAM);
+    if (selectedParam !== null) {
+      url.searchParams.set(SELECTED_PARAM, selectedParam);
+    }
+    return copy(url.toString());
+  }, [eventId, isInClient, searchParams, copy]);
 
   // Use hook for filtered votes calculation
   const { votesBySlot, maxVotes } = useFilteredVotes({

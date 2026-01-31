@@ -17,8 +17,8 @@ export function useCopyToClipboard(resetDelay = 2000): {
         await navigator.clipboard.writeText(text);
         setCopied(true);
         setTimeout(() => setCopied(false), resetDelay);
-      } catch (error) {
-        console.error("Failed to copy to clipboard:", error);
+      } catch {
+        // Ignore error
       }
     },
     [resetDelay],

@@ -30,6 +30,7 @@ export default function JoinedEventResultsPage({
         slots={data.slots}
         votes={votesWithAvatars}
         participants={participantsWithAvatars}
+        eventId={eventId}
       />
     </div>
   );
