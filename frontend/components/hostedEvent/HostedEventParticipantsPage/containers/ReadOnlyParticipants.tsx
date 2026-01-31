@@ -20,13 +20,10 @@ export function ReadOnlyParticipants() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="max-w-xl mx-auto">
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-          {t("hosted.participantsPage.title")}
-        </h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+        <p className="text-sm text-center text-zinc-500 dark:text-zinc-400 mt-1">
           {t("hosted.participantsPage.votingEndedDescription")}
         </p>
       </div>
