@@ -28,6 +28,7 @@ import { formatMinutesToTime } from "@/lib/utils";
 
 const SendStatus = {
   Idle: "idle",
+  Sending: "sending",
   Success: "success",
   Error: "error",
 } as const;
@@ -47,7 +48,6 @@ export default function CreateEventSuccessPage() {
   } = useEventShareLink(eventId);
   const { data, loading, error } = useEventDetail(eventId);
 
-  const [sending, setSending] = useState(false);
   const [sendStatus, setSendStatus] = useState<SendStatus>(SendStatus.Idle);
 
   useEffect(() => {
@@ -71,11 +71,17 @@ export default function CreateEventSuccessPage() {
 
   // 分享到 LINE（使用 shareTargetPicker）
   const handleShareToLine = async () => {
-    if (!eventId || !startDate || !endDate || !startTime || !endTime || sending)
+    if (
+      !eventId ||
+      !startDate ||
+      !endDate ||
+      !startTime ||
+      !endTime ||
+      sendStatus === SendStatus.Sending
+    )
       return;
 
-    setSending(true);
-    setSendStatus(SendStatus.Idle);
+    setSendStatus(SendStatus.Sending);
 
     try {
       const shareInfo: EventShareInfo = {
@@ -99,20 +105,16 @@ export default function CreateEventSuccessPage() {
       } else {
         setSendStatus(SendStatus.Error);
       }
-    } catch (error) {
-      console.error("Failed to share to LINE:", error);
+    } catch {
       setSendStatus(SendStatus.Error);
-    } finally {
-      setSending(false);
     }
   };
 
   // 發送到綁定的 LINE 群組（使用 Messaging API）
   const handleSendToLineGroup = async () => {
-    if (!eventId || !lineGroupId || sending) return;
+    if (!eventId || !lineGroupId || sendStatus === SendStatus.Sending) return;
 
-    setSending(true);
-    setSendStatus(SendStatus.Idle);
+    setSendStatus(SendStatus.Sending);
 
     try {
       const response = await fetch(
@@ -131,25 +133,17 @@ export default function CreateEventSuccessPage() {
       } else {
         setSendStatus(SendStatus.Error);
       }
-    } catch (error) {
-      console.error("Failed to send to LINE group:", error);
+    } catch {
       setSendStatus(SendStatus.Error);
-    } finally {
-      setSending(false);
     }
   };
 
-  // 判斷顯示哪種按鈕
-  // 在 LIFF 環境中才顯示分享按鈕
   const showLineShareButton = isInLiff && liffInitialized;
-  // 有綁定群組時用 Messaging API 發送
   const hasLinkedGroup = !!lineGroupId;
 
-  // 預先計算 LINE 分享按鈕的 props
   const getLineShareButtonProps = () => {
-    // 計算 icon
     let icon: React.ReactNode;
-    if (sending) {
+    if (sendStatus === SendStatus.Sending) {
       icon = <Loader2 className="w-5 h-5 animate-spin" />;
     } else if (sendStatus === SendStatus.Success) {
       icon = <Check className="w-5 h-5" />;
@@ -159,9 +153,8 @@ export default function CreateEventSuccessPage() {
       icon = <Share2 className="w-5 h-5" />;
     }
 
-    // 計算 title
     let title: string;
-    if (sending) {
+    if (sendStatus === SendStatus.Sending) {
       title = t("sending");
     } else if (sendStatus === SendStatus.Success) {
       title = t("sentSuccess");
@@ -173,12 +166,10 @@ export default function CreateEventSuccessPage() {
       title = t("shareToLine");
     }
 
-    // 計算 description
     const description = hasLinkedGroup
       ? t("sendToLineGroupDescription")
       : t("shareToLineDescription");
 
-    // 計算 variant
     let variant: ActionButtonVariant;
     if (sendStatus === SendStatus.Success) {
       variant = ActionButtonVariant.Success;
@@ -187,17 +178,12 @@ export default function CreateEventSuccessPage() {
     } else {
       variant = ActionButtonVariant.Highlight;
     }
-
-    // 計算 disabled
-    const disabled = sending || sendStatus === SendStatus.Success;
-
-    // 計算 onClick
+    const disabled = sendStatus === SendStatus.Success;
     const onClick = hasLinkedGroup ? handleSendToLineGroup : handleShareToLine;
 
     return { icon, title, description, variant, disabled, onClick };
   };
 
-  // 預先計算複製連結按鈕的 props
   const getCopyLinkButtonProps = () => {
     const icon = linkCopied ? (
       <Check className="w-5 h-5" />
@@ -216,7 +202,6 @@ export default function CreateEventSuccessPage() {
   const lineShareButtonProps = getLineShareButtonProps();
   const copyLinkButtonProps = getCopyLinkButtonProps();
 
-  // Loading 狀態
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
