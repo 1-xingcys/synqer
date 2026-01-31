@@ -71,7 +71,7 @@ export default function HostedEventPanelPage() {
     !isResetMode && event.confirmedSlotIds && event.confirmedSlotIds.length > 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       {/* Voting Phase Content */}
       {isVotingPhase && (
         <>
@@ -119,18 +119,25 @@ export default function HostedEventPanelPage() {
       {showResultsView && (
         <>
           {/* Event Time Selector - Combined header and time list */}
-          <EventTimeSelector
-            selectedRanges={selection.allTimeRanges}
-            onRemove={selection.removeTimeRange}
-            onConfirm={handleConfirmClick}
-            onReset={() => void handleResetEventTime()}
-            isVotingPhase={isVotingPhase}
-            isVotingEnded={isVotingEnded}
-            isConfirming={isConfirming}
-            isResetting={isResetting}
-            hasUserSelection={selection.hasUserSelection}
-            hasConfirmedTime={!!hasConfirmedTime}
-          />
+          {/* Hide when voting is in progress and no selection */}
+          {!(isVotingPhase && selection.allTimeRanges.length === 0) && (
+            <EventTimeSelector
+              selectedRanges={selection.allTimeRanges}
+              onRemove={selection.removeTimeRange}
+              onConfirm={handleConfirmClick}
+              onReset={() => void handleResetEventTime()}
+              isVotingPhase={isVotingPhase}
+              isVotingEnded={isVotingEnded}
+              isConfirming={isConfirming}
+              isResetting={isResetting}
+              hasUserSelection={selection.hasUserSelection}
+              hasConfirmedTime={!!hasConfirmedTime}
+            />
+          )}
+
+          <p className="text-sm text-zinc-400 dark:text-zinc-500 text-center py-2">
+            {t("hosted.eventTimeSelector.emptyHint")}
+          </p>
 
           {/* Results View with HeatMap */}
           <ResultsView
