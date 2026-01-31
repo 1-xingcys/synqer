@@ -11,7 +11,8 @@
     "delete": "Delete",
     "back": "Back",
     "showDetails": "Show details",
-    "hideDetails": "Hide details"
+    "hideDetails": "Hide details",
+    "votingProgress": "Voting Progress"
   },
   "landing": {
     "gotoDashboard": "Go to Dashboard",

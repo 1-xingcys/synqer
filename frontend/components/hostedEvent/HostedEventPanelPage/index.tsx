@@ -79,7 +79,6 @@ export default function HostedEventPanelPage() {
 
           {/* Voting Progress */}
           <VotingProgress
-            title={t("hosted.votingProgress")}
             votingPercentage={votingStats.votingPercentage}
             totalVoted={votingStats.totalVoted}
             totalExpected={votingStats.totalExpected}
@@ -90,7 +89,6 @@ export default function HostedEventPanelPage() {
       {/* Voting Ended Phase - Just show voting stats */}
       {isVotingEnded && (
         <VotingProgress
-          title={t("hosted.votingProgress")}
           votingPercentage={votingStats.votingPercentage}
           totalVoted={votingStats.totalVoted}
           totalExpected={votingStats.totalExpected}

@@ -129,7 +129,6 @@ export default function JoinedEventParticipantsPage() {
     <div className="py-4 space-y-6">
       {/* Voting Progress */}
       <VotingProgress
-        title={t("joined.votingProgress")}
         votingPercentage={votingPercentage}
         totalVoted={votedCount}
         totalExpected={totalParticipants}
