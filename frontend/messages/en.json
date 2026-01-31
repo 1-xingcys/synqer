@@ -534,7 +534,9 @@
       "completed": "This event has ended"
     },
     "hostedEventHint": "You are the host of this event",
-    "goToEvent": "Go To Vote Page"
+    "goToEvent": "Go To Vote Page",
+    "copyVoteLink": "Vote Link",
+    "goToVotePage": "Vote Page"
   },
   "participantStatus": {
     "voted": "Voted",

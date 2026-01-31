@@ -534,7 +534,9 @@
       "completed": "此活動已結束"
     },
     "hostedEventHint": "你是這個活動的主辦者",
-    "goToEvent": "投票頁面"
+    "goToEvent": "投票頁面",
+    "copyVoteLink": "投票連結",
+    "goToVotePage": "投票頁面"
   },
   "participantStatus": {
     "voted": "已投票",

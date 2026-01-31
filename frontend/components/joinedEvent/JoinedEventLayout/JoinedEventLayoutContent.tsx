@@ -253,14 +253,11 @@ export function JoinedEventLayoutContent({
       {/* Event Info Compact */}
       <EventInfoCompact
         title={event.title}
-        description={event.description}
         startDate={event.startDate}
         endDate={event.endDate}
         startMinuteOfDay={event.startMinuteOfDay}
         endMinuteOfDay={event.endMinuteOfDay}
-        status={event.status}
         hasVoted={hasVoted}
-        votingDeadline={event.votingDeadline}
       />
 
       {/* Navigation Tabs */}
