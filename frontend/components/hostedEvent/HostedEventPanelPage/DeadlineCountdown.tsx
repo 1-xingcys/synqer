@@ -9,6 +9,7 @@ import {
   isPast,
   format,
 } from "date-fns";
+import { Clock, AlertTriangle } from "lucide-react";
 
 interface DeadlineCountdownProps {
   votingDeadline?: string | null;
@@ -28,9 +29,9 @@ export function DeadlineCountdown({ votingDeadline }: DeadlineCountdownProps) {
 
   if (!votingDeadline) {
     return (
-      <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+      <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-2 sm:mb-3">
+          <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             {t("deadline.title")}
           </h2>
         </div>
@@ -77,12 +78,28 @@ export function DeadlineCountdown({ votingDeadline }: DeadlineCountdownProps) {
 
   return (
     <div
-      className={`rounded-xl border p-6 ${getBgColor()} ${getBorderColor()}`}
+      className={`rounded-xl border p-4 sm:p-6 ${getBgColor()} ${getBorderColor()}`}
     >
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-          {t("deadline.title")}
-        </h2>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <div className="flex items-center gap-2">
+          <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            {t("deadline.title")}
+          </h2>
+          {/* Mobile: Show urgency badge inline with title */}
+          {(isUrgent || isVeryCritical) && !isExpired && (
+            <span
+              className={`sm:hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                isVeryCritical
+                  ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                  : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
+              }`}
+            >
+              <AlertTriangle className="w-3 h-3" />
+              {isVeryCritical ? t("deadline.urgent") : t("deadline.endingSoon")}
+            </span>
+          )}
+        </div>
         <span className="text-xs text-zinc-500 dark:text-zinc-400">
           {format(deadlineDate, "M/d HH:mm")}
         </span>
@@ -90,64 +107,52 @@ export function DeadlineCountdown({ votingDeadline }: DeadlineCountdownProps) {
 
       {isExpired ? (
         <div className="flex items-center gap-2">
-          <svg
-            className="w-5 h-5 text-zinc-400 dark:text-zinc-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span className="text-zinc-500 dark:text-zinc-400 font-medium">
+          <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400 dark:text-zinc-500" />
+          <span className="text-sm sm:text-base text-zinc-500 dark:text-zinc-400 font-medium">
             {t("deadline.expired")}
           </span>
         </div>
       ) : (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between">
           {/* Countdown units */}
-          <div className="flex items-baseline gap-4">
+          <div className="flex items-baseline gap-3 sm:gap-4">
             {days > 0 && (
               <div className="text-center">
                 <span
-                  className={`text-3xl font-bold tabular-nums ${getStatusColor()}`}
+                  className={`text-2xl sm:text-3xl font-bold tabular-nums ${getStatusColor()}`}
                 >
                   {days}
                 </span>
-                <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-1">
+                <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-0.5 sm:ml-1">
                   {t("deadline.days")}
                 </span>
               </div>
             )}
             <div className="text-center">
               <span
-                className={`text-3xl font-bold tabular-nums ${getStatusColor()}`}
+                className={`text-2xl sm:text-3xl font-bold tabular-nums ${getStatusColor()}`}
               >
                 {hours}
               </span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-1">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-0.5 sm:ml-1">
                 {t("deadline.hours")}
               </span>
             </div>
             <div className="text-center">
               <span
-                className={`text-3xl font-bold tabular-nums ${getStatusColor()}`}
+                className={`text-2xl sm:text-3xl font-bold tabular-nums ${getStatusColor()}`}
               >
                 {minutes}
               </span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-1">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-0.5 sm:ml-1">
                 {t("deadline.minutes")}
               </span>
             </div>
           </div>
 
-          {/* Urgency indicator */}
+          {/* Desktop: Urgency indicator on the right */}
           {(isUrgent || isVeryCritical) && (
-            <div className="ml-auto">
+            <div className="hidden sm:block">
               <span
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                   isVeryCritical
@@ -155,19 +160,7 @@ export function DeadlineCountdown({ votingDeadline }: DeadlineCountdownProps) {
                     : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"
                 }`}
               >
-                <svg
-                  className="w-3.5 h-3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
+                <AlertTriangle className="w-3.5 h-3.5" />
                 {isVeryCritical
                   ? t("deadline.urgent")
                   : t("deadline.endingSoon")}
