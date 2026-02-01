@@ -529,7 +529,7 @@
     "voting": "投票中",
     "votingEnded": "投票結束",
     "confirmed": "時間已定",
-    "completed": "活動結束"
+    "completed": "已結束"
   },
   "eventInfo": {
     "deadline": "截止時間",

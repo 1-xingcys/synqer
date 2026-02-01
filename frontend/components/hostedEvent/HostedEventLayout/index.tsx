@@ -112,6 +112,7 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
       {/* Event Info Compact */}
       <div className="mt-5">
         <EventInfoCompact
+          eventStatus={event.status}
           title={event.title}
           startDate={event.startDate}
           endDate={event.endDate}

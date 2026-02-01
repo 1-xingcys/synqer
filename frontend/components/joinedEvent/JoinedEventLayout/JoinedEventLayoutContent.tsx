@@ -252,6 +252,7 @@ export function JoinedEventLayoutContent({
 
       {/* Event Info Compact */}
       <EventInfoCompact
+        eventStatus={event.status}
         title={event.title}
         startDate={event.startDate}
         endDate={event.endDate}

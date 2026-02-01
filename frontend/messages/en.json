@@ -299,7 +299,7 @@
     },
     "confirmError": "Failed to confirm time. Please try again.",
     "deadline": {
-      "title": "Time Until Deadline",
+      "title": "Time left",
       "notSet": "No deadline set",
       "expired": "Voting has ended",
       "days": "days",
