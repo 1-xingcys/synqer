@@ -15,9 +15,9 @@ import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatus } from "@/types/event";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
-import { VotingStatusBar } from "@/components/hostedEvent/HostedEventPanelPage/VotingStatusBar";
-import { DeadlineCountdown } from "@/components/hostedEvent/HostedEventPanelPage/DeadlineCountdown";
-import { VotingProgress } from "@/components/ui/VotingProgress";
+import { VotingStatusBar } from "./VotingStatusBar";
+import { DeadlineCountdown } from "./DeadlineCountdown";
+import { VotingProgress } from "./VotingProgress";
 
 interface VotingStatusProps {
   votingDeadline?: string | null;
