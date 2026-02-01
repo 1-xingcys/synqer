@@ -6,7 +6,6 @@ import { Link } from "@/i18n/routing";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useMemo, useState } from "react";
-import { VotingProgress } from "@/components/ui/VotingProgress";
 import { FilterTabs } from "./FilterTabs";
 import { SearchInput } from "./SearchInput";
 import { ParticipantCard } from "./ParticipantCard";
@@ -19,7 +18,7 @@ export default function JoinedEventParticipantsPage() {
   const t = useTranslations();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  const { data: eventDetailData, loading, error } = useEventDetail(eventId);
+  const { data: eventDetailData, isLoading, error } = useEventDetail(eventId);
 
   const [filter, setFilter] = useState<FilterType>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,7 +68,7 @@ export default function JoinedEventParticipantsPage() {
     return result;
   }, [participants, filter, searchQuery]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -115,11 +114,6 @@ export default function JoinedEventParticipantsPage() {
     );
   }
 
-  const totalParticipants = participants.length;
-  const votedCount = counts.voted;
-  const votingPercentage =
-    totalParticipants > 0 ? (votedCount / totalParticipants) * 100 : 0;
-
   const statusLabels = {
     voted: t("joined.voted"),
     notVoted: t("joined.notVoted"),
@@ -127,14 +121,6 @@ export default function JoinedEventParticipantsPage() {
 
   return (
     <div className="py-4 space-y-6">
-      {/* Voting Progress */}
-      <VotingProgress
-        title={t("joined.votingProgress")}
-        votingPercentage={votingPercentage}
-        totalVoted={votedCount}
-        totalExpected={totalParticipants}
-      />
-
       {/* Filter, Search, and Participants */}
       <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
         {/* Filter and Search */}

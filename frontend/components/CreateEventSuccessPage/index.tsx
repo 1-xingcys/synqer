@@ -46,7 +46,7 @@ export default function CreateEventSuccessPage() {
     copied: linkCopied,
     copyLink: handleCopyLink,
   } = useEventShareLink(eventId);
-  const { data, loading, error } = useEventDetail(eventId);
+  const { data, isLoading, error } = useEventDetail(eventId);
 
   const [sendStatus, setSendStatus] = useState<SendStatus>(SendStatus.Idle);
 
@@ -202,7 +202,7 @@ export default function CreateEventSuccessPage() {
   const lineShareButtonProps = getLineShareButtonProps();
   const copyLinkButtonProps = getCopyLinkButtonProps();
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="w-8 h-8 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />

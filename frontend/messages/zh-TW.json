@@ -11,7 +11,8 @@
     "delete": "刪除",
     "back": "返回",
     "showDetails": "顯示詳情",
-    "hideDetails": "隱藏詳情"
+    "hideDetails": "隱藏詳情",
+    "votingProgress": "投票進度"
   },
   "landing": {
     "gotoDashboard": "前往控制台",
@@ -121,7 +122,7 @@
     "noEvents": "您尚未加入任何活動",
     "noEventsDescription": "當有人邀請您參加活動時，它會出現在這裡",
     "viewEvent": "投票",
-    "backToJoined": "返回加入的活動",
+    "backToJoined": "我加入的活動",
     "backToEvent": "返回活動",
     "eventDeleted": "此活動已被刪除",
     "eventDeletedDescription": "此活動已被主辦人刪除，無法再存取。",
@@ -264,7 +265,7 @@
     "participants": "參與者",
     "settings": "設定",
     "overview": "總覽",
-    "backToHosted": "返回主辦活動",
+    "backToHosted": "我主辦的活動",
     "eventNotFound": "找不到活動",
     "eventDeleted": "此活動已被刪除",
     "eventDeletedDescription": "此活動已被主辦人刪除，無法再存取。",
@@ -314,23 +315,28 @@
     },
     "eventTimeSelector": {
       "confirmedTitle": "已確認的活動時間",
-      "selectingTitle": "選擇活動時間",
       "emptyTitle": "活動時間",
-      "emptyHint": "從下方投票結果中點選或拖曳選擇時段",
-      "votingEndedWarning": "投票已結束，請盡快選擇並確認活動時間",
-      "votingNotEnded": "投票尚未結束，確認後將提前決定活動時間",
+      "emptyHint": "從下方投票結果中點選或拖曳選擇活動時段",
+      "noConfirmedTime": "尚未確認活動時間",
       "reset": "重新選擇",
       "remove": "移除",
-      "confirm": "確認活動時間",
-      "confirming": "確認中...",
       "cancel": "取消",
-      "resetConfirmTitle": "重新選擇活動時間？",
-      "resetConfirmDesc": "這將清除已確認的時間，活動狀態會退回「投票結束」",
-      "resetConfirm": "確定重選"
+      "resetConfirmTitle": "清除所有活動時間？",
+      "resetConfirmDesc": "這將清除所有已確認的時間，活動狀態會退回「投票結束」",
+      "resetConfirm": "確定清除",
+      "removeConfirmTitle": "移除此活動時間？",
+      "removeConfirmDesc": "確定要移除這個已確認的活動時間嗎？",
+      "removeConfirm": "確定移除"
     },
     "addToEventTime": {
       "button": "加入活動時間",
-      "votingHint": "投票仍在進行中"
+      "adding": "加入中...",
+      "votingHint": "投票仍在進行中",
+      "votingConfirmHint": "確認後投票將立即結束",
+      "confirmTitle": "確定要加入活動時間？",
+      "confirmDesc": "確認活動時間後，投票將立即結束，參與者將無法再進行投票。",
+      "cancel": "取消",
+      "confirm": "確認加入"
     },
     "confirmDialog": {
       "title": "確認活動時間",
@@ -418,7 +424,7 @@
     "untitled": "未命名活動",
     "copyLink": "複製活動連結",
     "copied": "已複製！",
-    "eventDate": "活動日期",
+    "eventDate": "候選日期",
     "timeRange": "時間範圍",
     "participantCount": "參與人數",
     "participantUnit": "位",
@@ -431,7 +437,7 @@
     "saving": "儲存中...",
     "saveSuccess": "儲存成功！",
     "saveError": "儲存失敗，請重試",
-    "time": "時間",
+    "time": "候選時段",
     "heatmapTitle": "時段熱力圖",
     "heatmapDescription": "顏色越深表示越多人有空（點擊格子查看詳情）",
     "slotDetails": "時段詳情",
@@ -523,7 +529,7 @@
     "voting": "投票中",
     "votingEnded": "投票結束",
     "confirmed": "時間已定",
-    "completed": "活動結束"
+    "completed": "已結束"
   },
   "eventInfo": {
     "deadline": "截止時間",
@@ -534,7 +540,9 @@
       "completed": "此活動已結束"
     },
     "hostedEventHint": "你是這個活動的主辦者",
-    "goToEvent": "投票頁面"
+    "goToEvent": "投票頁面",
+    "copyVoteLink": "投票連結",
+    "goToVotePage": "投票頁面"
   },
   "participantStatus": {
     "voted": "已投票",

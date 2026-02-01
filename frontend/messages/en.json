@@ -11,7 +11,8 @@
     "delete": "Delete",
     "back": "Back",
     "showDetails": "Show details",
-    "hideDetails": "Hide details"
+    "hideDetails": "Hide details",
+    "votingProgress": "Progress"
   },
   "landing": {
     "gotoDashboard": "Go to Dashboard",
@@ -298,7 +299,7 @@
     },
     "confirmError": "Failed to confirm time. Please try again.",
     "deadline": {
-      "title": "Time Until Deadline",
+      "title": "Time left",
       "notSet": "No deadline set",
       "expired": "Voting has ended",
       "days": "days",
@@ -314,23 +315,28 @@
     },
     "eventTimeSelector": {
       "confirmedTitle": "Confirmed Event Time",
-      "selectingTitle": "Select Event Time",
       "emptyTitle": "Event Time",
-      "emptyHint": "Click or drag to select time slots from the results below",
-      "votingEndedWarning": "Voting has ended. Please select and confirm the event time",
-      "votingNotEnded": "Voting hasn't ended. Confirming now will finalize the time early",
+      "emptyHint": "Click or drag to select time slots from the results below to confirm the event time",
+      "noConfirmedTime": "No confirmed event time yet",
       "reset": "Reset",
       "remove": "Remove",
-      "confirm": "Confirm Event Time",
-      "confirming": "Confirming...",
       "cancel": "Cancel",
-      "resetConfirmTitle": "Reset Event Time?",
-      "resetConfirmDesc": "This will clear the confirmed time and revert to 'Voting Ended' status",
-      "resetConfirm": "Reset"
+      "resetConfirmTitle": "Clear All Event Times?",
+      "resetConfirmDesc": "This will clear all confirmed times and revert to 'Voting Ended' status",
+      "resetConfirm": "Clear",
+      "removeConfirmTitle": "Remove This Event Time?",
+      "removeConfirmDesc": "Are you sure you want to remove this confirmed event time?",
+      "removeConfirm": "Remove"
     },
     "addToEventTime": {
       "button": "Add to Event Time",
-      "votingHint": "Voting is still in progress"
+      "adding": "Adding...",
+      "votingHint": "Voting is still in progress",
+      "votingConfirmHint": "Voting will end immediately after confirmation",
+      "confirmTitle": "Confirm adding to event time?",
+      "confirmDesc": "Once confirmed, voting will end immediately and participants will no longer be able to vote.",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
     },
     "confirmDialog": {
       "title": "Confirm Event Time",
@@ -418,7 +424,7 @@
     "untitled": "Untitled Event",
     "copyLink": "Copy Event Link",
     "copied": "Copied!",
-    "eventDate": "Event Date",
+    "eventDate": "Date Range",
     "timeRange": "Time Range",
     "participantCount": "Participants",
     "participantUnit": "",
@@ -431,7 +437,7 @@
     "saving": "Saving...",
     "saveSuccess": "Saved successfully!",
     "saveError": "Failed to save, please try again",
-    "time": "Time",
+    "time": "Time Range",
     "heatmapTitle": "Time Slot Heatmap",
     "heatmapDescription": "Darker colors indicate more people available (Click to view details)",
     "slotDetails": "Slot Details",
@@ -534,7 +540,9 @@
       "completed": "This event has ended"
     },
     "hostedEventHint": "You are the host of this event",
-    "goToEvent": "Go To Vote Page"
+    "goToEvent": "Go To Vote Page",
+    "copyVoteLink": "Vote Link",
+    "goToVotePage": "Vote Page"
   },
   "participantStatus": {
     "voted": "Voted",

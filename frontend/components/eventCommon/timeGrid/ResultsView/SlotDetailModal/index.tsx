@@ -1,9 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Vote, Participant } from "../types";
+import { Check, X, Info } from "lucide-react";
+import { Vote, Participant } from "../../types";
+import {
+  VotingConfirmView,
+  AddButtonView,
+  CloseButtonView,
+} from "./footerViews";
 
 export interface SlotRangeInfo {
   startDate: string;
@@ -25,7 +31,7 @@ interface SlotDetailModalProps {
   // Host-only props for adding to event time
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;
-  onAddToEventTime?: (info: SlotRangeInfo) => void;
+  onAddToEventTime?: (info: SlotRangeInfo) => Promise<boolean>;
   rangeInfo?: SlotRangeInfo;
 }
 
@@ -47,19 +53,27 @@ export function SlotDetailModal({
   const tHosted = useTranslations("hosted");
   const modalRef = useRef<HTMLDivElement>(null);
 
+  // Voting phase confirmation dialog state
+  const [showVotingConfirmDialog, setShowVotingConfirmDialog] = useState(false);
+
   // Detect if it's a range based on dateLabel containing "~"
   const showRangeHint = isRange || dateLabel.includes("~");
 
-  // Close on escape key
+  const handleClose = useCallback(() => {
+    setShowVotingConfirmDialog(false);
+    onClose();
+  }, [onClose]);
+
+  // Close on escape key (but not when showing confirm dialog)
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape" && !showVotingConfirmDialog) handleClose();
     };
     if (isOpen) {
       document.addEventListener("keydown", handleEscape);
       return () => document.removeEventListener("keydown", handleEscape);
     }
-  }, [isOpen, onClose]);
+  }, [isOpen, showVotingConfirmDialog, handleClose]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -71,11 +85,27 @@ export function SlotDetailModal({
     }
   }, [isOpen]);
 
-  const handleAddToEventTime = () => {
-    if (onAddToEventTime && rangeInfo) {
-      onAddToEventTime(rangeInfo);
-      onClose();
+  const handleAddButtonClick = () => {
+    if (isVotingPhase) {
+      // Show confirmation dialog for voting phase
+      setShowVotingConfirmDialog(true);
+    } else {
+      // Direct add for non-voting phase
+      void handleConfirmAdd();
     }
+  };
+
+  const handleConfirmAdd = async () => {
+    if (onAddToEventTime && rangeInfo) {
+      const success = await onAddToEventTime(rangeInfo);
+      if (success) {
+        handleClose();
+      }
+    }
+  };
+
+  const handleCancelConfirm = () => {
+    setShowVotingConfirmDialog(false);
   };
 
   if (!isOpen) return null;
@@ -85,7 +115,7 @@ export function SlotDetailModal({
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-in fade-in duration-200"
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       {/* Modal */}
@@ -105,22 +135,10 @@ export function SlotDetailModal({
               </p>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
             >
-              <svg
-                className="w-5 h-5 text-gray-500 dark:text-zinc-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <X className="w-5 h-5 text-gray-500 dark:text-zinc-400" />
             </button>
           </div>
 
@@ -131,17 +149,7 @@ export function SlotDetailModal({
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                    <svg
-                      className="w-4 h-4 text-emerald-600 dark:text-emerald-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
                     <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
@@ -159,19 +167,7 @@ export function SlotDetailModal({
               {/* Range hint */}
               {showRangeHint && (
                 <p className="mt-2 text-xs text-gray-400 dark:text-zinc-500 flex items-center gap-1">
-                  <svg
-                    className="w-3 h-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                  <Info className="w-3 h-3" />
                   {t("results.rangeHint")}
                 </p>
               )}
@@ -180,17 +176,7 @@ export function SlotDetailModal({
             {/* Available List */}
             <div className="mb-5">
               <h4 className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-3">
-                <svg
-                  className="w-4 h-4"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <Check className="w-4 h-4" />
                 {t("results.availableParticipants")} ({voters.length})
               </h4>
               {voters.length === 0 ? (
@@ -226,17 +212,7 @@ export function SlotDetailModal({
             {nonVoters.length > 0 && (
               <div>
                 <h4 className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-zinc-400 mb-3">
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <X className="w-4 h-4" />
                   {t("results.unavailableParticipants")} ({nonVoters.length})
                 </h4>
                 <div className="space-y-2">
@@ -268,51 +244,22 @@ export function SlotDetailModal({
           <div className="px-5 py-3 border-t border-gray-100 dark:border-zinc-800">
             {canAddToEventTime && onAddToEventTime && rangeInfo ? (
               <div className="space-y-2">
-                <button
-                  onClick={handleAddToEventTime}
-                  className="w-full py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center justify-center gap-2"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  {tHosted("addToEventTime.button")}
-                </button>
-                {isVotingPhase && (
-                  <p className="text-xs text-amber-600 dark:text-amber-400 text-center flex items-center justify-center gap-1">
-                    <svg
-                      className="w-3 h-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    {tHosted("addToEventTime.votingHint")}
-                  </p>
+                {showVotingConfirmDialog ? (
+                  <VotingConfirmView
+                    onCancel={handleCancelConfirm}
+                    onConfirm={() => void handleConfirmAdd()}
+                    tHosted={tHosted}
+                  />
+                ) : (
+                  <AddButtonView
+                    isVotingPhase={isVotingPhase}
+                    onAdd={handleAddButtonClick}
+                    tHosted={tHosted}
+                  />
                 )}
               </div>
             ) : (
-              <button
-                onClick={onClose}
-                className="sm:hidden w-full py-2.5 text-sm font-medium text-gray-700 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors"
-              >
-                {t("results.close")}
-              </button>
+              <CloseButtonView onClose={handleClose} t={t} />
             )}
           </div>
         </div>

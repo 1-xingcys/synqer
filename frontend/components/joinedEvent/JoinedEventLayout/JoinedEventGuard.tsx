@@ -12,10 +12,10 @@ interface JoinedEventGuardProps {
 
 export function JoinedEventGuard({ children }: JoinedEventGuardProps) {
   const t = useTranslations();
-  const { data, loading } = useJoinedEventContext();
+  const { data, isLoading: eventLoading } = useJoinedEventContext();
   const { user, loading: authLoading } = useAuthContext();
 
-  const isLoading = loading || authLoading;
+  const isLoading = eventLoading || authLoading;
 
   // Show loading while checking
   if (isLoading) {

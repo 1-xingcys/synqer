@@ -18,7 +18,7 @@ export interface VoteWithAvatar {
 
 export interface UseJoinedEventResultsResult {
   data: EventDetailData | null;
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
   participantsWithAvatars: ParticipantWithAvatar[];
   votesWithAvatars: VoteWithAvatar[];
@@ -27,7 +27,7 @@ export interface UseJoinedEventResultsResult {
 export function useJoinedEventResults(
   eventId: string,
 ): UseJoinedEventResultsResult {
-  const { data: eventDetailData, loading, error } = useEventDetail(eventId);
+  const { data: eventDetailData, isLoading, error } = useEventDetail(eventId);
 
   // Transform participants to include avatar info
   const participantsWithAvatars = useMemo(() => {
@@ -64,7 +64,7 @@ export function useJoinedEventResults(
 
   return {
     data: eventDetailData,
-    loading,
+    isLoading,
     error,
     participantsWithAvatars,
     votesWithAvatars,

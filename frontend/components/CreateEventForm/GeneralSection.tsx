@@ -1,13 +1,11 @@
 "use client";
 
-import { useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { TITLE_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from "./types";
+import { TITLE_MAX_LENGTH } from "./types";
 import { cn } from "@/lib/utils";
 import { LineGroupSection } from "./LineGroupSection";
 import { useFormStateContext } from "./CreateEventFormContext";
@@ -17,31 +15,15 @@ import { useLineGroupFields } from "./hooks/useLineGroupFields";
 export function GeneralSection() {
   const t = useTranslations();
   const { user } = useAuthContext();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { formData, setFormData } = useFormStateContext();
 
-  const {
-    titleCharCount,
-    descriptionCharCount,
-    updateTitle,
-    updateDescription,
-  } = useTextFields(formData, setFormData);
+  const { titleCharCount, updateTitle } = useTextFields(formData, setFormData);
 
   const { handleLineGroupChange, handleSelectedMembersChange } =
     useLineGroupFields(setFormData);
 
-  // Auto-resize textarea
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${Math.max(80, textarea.scrollHeight)}px`;
-    }
-  }, [formData.description]);
-
   const isOverTitleLimit = titleCharCount >= TITLE_MAX_LENGTH;
-  const isOverDescriptionLimit = descriptionCharCount >= DESCRIPTION_MAX_LENGTH;
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">
@@ -123,42 +105,6 @@ export function GeneralSection() {
                 )}
               </p>
             </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-1.5">
-            <Label htmlFor="description">
-              {t("createEvent.general.description")}
-            </Label>
-            <Textarea
-              ref={textareaRef}
-              id="description"
-              value={formData.description}
-              onChange={(e) => updateDescription(e.target.value)}
-              placeholder={t("createEvent.general.descriptionPlaceholder")}
-              className={cn(
-                "resize-none overflow-hidden",
-                isOverDescriptionLimit &&
-                  "border-destructive focus-visible:ring-destructive/20",
-              )}
-              style={{ minHeight: "80px" }}
-            />
-            <p
-              className={cn(
-                "text-xs",
-                isOverDescriptionLimit
-                  ? "text-destructive"
-                  : "text-muted-foreground",
-              )}
-            >
-              {descriptionCharCount} / {DESCRIPTION_MAX_LENGTH}{" "}
-              {t("createEvent.general.characters")}
-              {isOverDescriptionLimit && (
-                <span className="ml-1">
-                  {t("createEvent.general.charLimitReached")}
-                </span>
-              )}
-            </p>
           </div>
 
           {/* LINE Group Selection (only for LINE users) */}

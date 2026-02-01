@@ -1,12 +1,13 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, ReactNode, useCallback } from "react";
 import { useEventDetail, EventDetailData } from "@/hooks/useEventDetail";
 import { VoteMode } from "@/types/event";
 
 interface JoinedEventContextType {
   data: EventDetailData | null;
-  loading: boolean;
+  isLoading: boolean;
+  isFetching: boolean;
   error: string | null;
   saveVotes: (selectedSlotIds: string[], voteMode?: VoteMode) => Promise<void>;
   refetch: () => Promise<void>;
@@ -23,11 +24,24 @@ export function JoinedEventProvider({
   eventId,
   children,
 }: JoinedEventProviderProps) {
-  const { data, loading, error, saveVotes, refetch } = useEventDetail(eventId);
+  const { data, isLoading, isFetching, error, saveVotes, refetch } =
+    useEventDetail(eventId);
+
+  // Wrap refetch to return Promise<void>
+  const handleRefetch = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   return (
     <JoinedEventContext.Provider
-      value={{ data, loading, error, saveVotes, refetch }}
+      value={{
+        data,
+        isLoading,
+        isFetching,
+        error,
+        saveVotes,
+        refetch: handleRefetch,
+      }}
     >
       {children}
     </JoinedEventContext.Provider>

@@ -2,148 +2,242 @@
 
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { EventStatus } from "@/types/event";
+import {
+  hostedEventKeys,
+  HostedEventDetailData,
+} from "@/hooks/useHostedEventDetail";
 
 interface UseEventTimeConfirmationOptions {
   eventId: string;
   eventStatus: EventStatus;
-  getAllSelectedSlotIds: () => string[];
-  clearSelections: () => void;
-  refetch: () => Promise<void>;
+  confirmedSlotIds?: string[];
 }
 
 interface UseEventTimeConfirmationReturn {
-  // Confirmation state
-  isConfirming: boolean;
+  // Add/Remove confirmation
   confirmError: string | null;
-  showConfirmDialog: boolean;
-  setShowConfirmDialog: (show: boolean) => void;
-  handleConfirmClick: () => void;
-  handleConfirmEventTime: () => Promise<void>;
+  addConfirmedTime: (slotIds: string[]) => Promise<boolean>;
+  removeConfirmedTime: (slotIdsToRemove: string[]) => Promise<boolean>;
 
-  // Reset state
+  // Reset
   isResetMode: boolean;
-  isResetting: boolean;
   resetError: string | null;
   handleResetEventTime: () => Promise<void>;
 }
 
+// API functions
+async function confirmTimeApi(
+  eventId: string,
+  slotIds: string[],
+): Promise<void> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ slotIds }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to update confirmed time");
+  }
+}
+
+async function deleteConfirmationApi(eventId: string): Promise<void> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to reset event time");
+  }
+}
+
 export function useEventTimeConfirmation({
   eventId,
-  eventStatus,
-  getAllSelectedSlotIds,
-  clearSelections,
-  refetch,
+  confirmedSlotIds = [],
 }: UseEventTimeConfirmationOptions): UseEventTimeConfirmationReturn {
   const t = useTranslations();
-  const router = useRouter();
+  const queryClient = useQueryClient();
+  const queryKey = hostedEventKeys.detail(eventId);
 
-  // Confirmation state
-  const [isConfirming, setIsConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState<string | null>(null);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-
-  // Reset state
-  const [isResetMode, setIsResetMode] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
   const [resetError, setResetError] = useState<string | null>(null);
 
-  // Handle actual confirmation to backend
-  const handleConfirmEventTime = useCallback(async () => {
-    setIsConfirming(true);
-    setConfirmError(null);
+  const [isResetMode, setIsResetMode] = useState(false);
 
-    try {
-      const slotIds = getAllSelectedSlotIds();
+  const addMutation = useMutation({
+    mutationFn: async (newSlotIds: string[]) => {
+      const allSlotIds = [...new Set([...confirmedSlotIds, ...newSlotIds])];
+      await confirmTimeApi(eventId, allSlotIds);
+      return allSlotIds;
+    },
+    onMutate: async (newSlotIds) => {
+      setConfirmError(null);
+      await queryClient.cancelQueries({ queryKey });
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      const previousData =
+        queryClient.getQueryData<HostedEventDetailData>(queryKey);
+
+      // 樂觀更新：只更新 confirmedSlotIds
+      if (previousData) {
+        const allSlotIds = [...new Set([...confirmedSlotIds, ...newSlotIds])];
+        queryClient.setQueryData<HostedEventDetailData>(queryKey, {
+          ...previousData,
+          event: {
+            ...previousData.event,
+            confirmedSlotIds: allSlotIds,
           },
-          credentials: "include",
-          body: JSON.stringify({ slotIds }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to confirm time");
+        });
       }
 
-      // Success - refetch data and clear selection
-      await refetch();
-      clearSelections();
-      setIsResetMode(false);
-      setShowConfirmDialog(false);
-
-      // Optionally redirect to the event page
-      router.push(`/hosted/${eventId}`);
-    } catch {
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
       setConfirmError(t("hosted.confirmError"));
-    } finally {
-      setIsConfirming(false);
-    }
-  }, [eventId, getAllSelectedSlotIds, refetch, clearSelections, router, t]);
+    },
+    onSuccess: () => {
+      setIsResetMode(false);
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey });
+    },
+  });
 
-  // Handle confirm button click
-  const handleConfirmClick = useCallback(() => {
-    const isVotingPhase = eventStatus === EventStatus.VOTING;
-
-    if (isVotingPhase) {
-      // Show confirmation dialog for voting phase
-      setShowConfirmDialog(true);
-    } else {
-      // Direct confirm for voting-ended phase
-      void handleConfirmEventTime();
-    }
-  }, [eventStatus, handleConfirmEventTime]);
-
-  // Handle reset event time (clear all selections and call API)
-  const handleResetEventTime = useCallback(async () => {
-    setIsResetting(true);
-    setResetError(null);
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
+  const removeMutation = useMutation({
+    mutationFn: async (slotIdsToRemove: string[]) => {
+      const remainingSlotIds = confirmedSlotIds.filter(
+        (id) => !slotIdsToRemove.includes(id),
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to reset event time");
+      if (remainingSlotIds.length === 0) {
+        await deleteConfirmationApi(eventId);
+      } else {
+        await confirmTimeApi(eventId, remainingSlotIds);
       }
 
-      // Success - clear local selections and enter reset mode
-      clearSelections();
-      setIsResetMode(true);
+      return remainingSlotIds;
+    },
+    onMutate: async (slotIdsToRemove) => {
+      setConfirmError(null);
+      await queryClient.cancelQueries({ queryKey });
 
-      // Refetch to get updated event status
-      await refetch();
-    } catch {
+      const previousData =
+        queryClient.getQueryData<HostedEventDetailData>(queryKey);
+
+      if (previousData) {
+        const slotIdsToRemoveSet = new Set(slotIdsToRemove);
+        const remainingSlotIds = confirmedSlotIds.filter(
+          (id) => !slotIdsToRemoveSet.has(id),
+        );
+        const remainingTimeRanges = (
+          previousData.event.confirmedTimeRanges ?? []
+        ).filter(
+          (range) => !range.slotIds.some((id) => slotIdsToRemoveSet.has(id)),
+        );
+        queryClient.setQueryData<HostedEventDetailData>(queryKey, {
+          ...previousData,
+          event: {
+            ...previousData.event,
+            confirmedSlotIds: remainingSlotIds,
+            confirmedTimeRanges: remainingTimeRanges,
+          },
+        });
+      }
+
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
+      setConfirmError(t("hosted.confirmError"));
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: async () => {
+      await deleteConfirmationApi(eventId);
+    },
+    onMutate: async () => {
+      setResetError(null);
+      await queryClient.cancelQueries({ queryKey });
+
+      const previousData =
+        queryClient.getQueryData<HostedEventDetailData>(queryKey);
+
+      if (previousData) {
+        queryClient.setQueryData<HostedEventDetailData>(queryKey, {
+          ...previousData,
+          event: {
+            ...previousData.event,
+            confirmedSlotIds: [],
+            confirmedTimeRanges: [],
+          },
+        });
+      }
+
+      setIsResetMode(true);
+      return { previousData };
+    },
+    onError: (_err, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
+      setIsResetMode(false);
       setResetError(t("hosted.resetError"));
-    } finally {
-      setIsResetting(false);
-    }
-  }, [eventId, clearSelections, refetch, t]);
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  // Wrapper functions - trigger mutation and return immediately for optimistic UX
+  const addConfirmedTime = useCallback(
+    (slotIds: string[]): Promise<boolean> => {
+      addMutation.mutate(slotIds);
+      return Promise.resolve(true);
+    },
+    [addMutation],
+  );
+
+  const removeConfirmedTime = useCallback(
+    (slotIdsToRemove: string[]): Promise<boolean> => {
+      removeMutation.mutate(slotIdsToRemove);
+      return Promise.resolve(true);
+    },
+    [removeMutation],
+  );
+
+  const handleResetEventTime = useCallback(() => {
+    resetMutation.mutate();
+    return Promise.resolve();
+  }, [resetMutation]);
 
   return {
-    // Confirmation
-    isConfirming,
+    // Add/Remove
     confirmError,
-    showConfirmDialog,
-    setShowConfirmDialog,
-    handleConfirmClick,
-    handleConfirmEventTime,
+    addConfirmedTime,
+    removeConfirmedTime,
 
     // Reset
     isResetMode,
-    isResetting,
     resetError,
     handleResetEventTime,
   };

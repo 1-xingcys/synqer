@@ -5,7 +5,7 @@ import { useHostedEventContext } from "@/contexts/HostedEventContext";
 import { SelectedParticipant } from "../types";
 
 export function useReadOnlyParticipantsState() {
-  const { data: eventData, loading: eventLoading } = useHostedEventContext();
+  const { data: eventData, isLoading: eventLoading } = useHostedEventContext();
 
   // Derive selected participants from event data (no useState needed for read-only)
   const selectedParticipants = useMemo<SelectedParticipant[]>(() => {

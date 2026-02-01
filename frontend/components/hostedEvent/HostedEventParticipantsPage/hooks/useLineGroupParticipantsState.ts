@@ -11,7 +11,7 @@ import { SelectedParticipant, ParticipantListItem } from "../types";
 export function useLineGroupParticipantsState(eventId: string) {
   const {
     data: eventData,
-    loading: eventLoading,
+    isLoading: eventLoading,
     refetch,
   } = useHostedEventContext();
 

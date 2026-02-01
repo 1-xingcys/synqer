@@ -9,7 +9,7 @@ export interface VotingDeadlineFormData {
 
 export function useEventSettings(eventId: string) {
   const router = useRouter();
-  const { data: eventData, loading, refetch } = useHostedEventContext();
+  const { data: eventData, isLoading, refetch } = useHostedEventContext();
 
   const [formData, setFormData] = useState<VotingDeadlineFormData>({
     deadlineDate: null,
@@ -167,7 +167,7 @@ export function useEventSettings(eventId: string) {
     isDeadlineValid,
     updateDeadlineDate,
     updateDeadlineTime,
-    loading,
+    isLoading,
     saving,
     saveSuccess,
     deleting,
