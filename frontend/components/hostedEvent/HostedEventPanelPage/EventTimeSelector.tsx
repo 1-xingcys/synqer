@@ -4,15 +4,8 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { formatMinutesToTime } from "@/lib/utils";
-import { ResetButton } from "./ResetButton";
-import {
-  AlertTriangle,
-  Calendar,
-  Check,
-  X,
-  RotateCcw,
-  Loader2,
-} from "lucide-react";
+import { Calendar, X, RotateCcw, Loader2, Trash2 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export interface SelectedTimeRange {
   id: string;
@@ -29,30 +22,85 @@ export interface SelectedTimeRange {
 interface EventTimeSelectorProps {
   selectedRanges: SelectedTimeRange[];
   onRemove: (id: string) => void;
-  onConfirm: () => void;
   onReset: () => void | Promise<void>;
-  isVotingPhase: boolean;
-  isVotingEnded: boolean;
-  isConfirming: boolean;
+  isRemoving: boolean;
   isResetting: boolean;
-  hasUserSelection: boolean;
   hasConfirmedTime: boolean;
+}
+
+// Confirmation Dialog Component
+interface ConfirmDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  isLoading: boolean;
+  icon: LucideIcon;
+  title: string;
+  cancelText: string;
+  confirmText: string;
+}
+
+function ConfirmDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  isLoading,
+  icon: Icon,
+  title,
+  cancelText,
+  confirmText,
+}: ConfirmDialogProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 w-80 mx-4 shadow-xl">
+        <div className="text-center">
+          <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+            <Icon className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+            {title}
+          </h3>
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={onClose}
+            disabled={isLoading}
+            className="flex-1 px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:opacity-50 rounded-lg transition-colors whitespace-nowrap"
+          >
+            {cancelText}
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={isLoading}
+            className="flex-1 px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+          >
+            {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function EventTimeSelector({
   selectedRanges,
   onRemove,
-  onConfirm,
   onReset,
-  isVotingPhase,
-  isVotingEnded,
-  isConfirming,
+  isRemoving,
   isResetting,
-  hasUserSelection,
   hasConfirmedTime,
 }: EventTimeSelectorProps) {
   const t = useTranslations("hosted");
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(
+    null,
+  );
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const formatDateRange = (startDate: string, endDate: string) => {
     const start = new Date(startDate);
@@ -73,15 +121,24 @@ export function EventTimeSelector({
     setShowResetConfirm(false);
   };
 
+  const handleRemoveClick = (id: string) => {
+    setShowRemoveConfirm(id);
+  };
+
+  const handleConfirmRemove = () => {
+    if (showRemoveConfirm) {
+      setRemovingId(showRemoveConfirm);
+      onRemove(showRemoveConfirm);
+      setShowRemoveConfirm(null);
+    }
+  };
+
   const isEmpty = selectedRanges.length === 0;
 
   // Determine title based on state
   const getTitle = () => {
-    if (hasConfirmedTime && !hasUserSelection) {
+    if (hasConfirmedTime) {
       return t("eventTimeSelector.confirmedTitle");
-    }
-    if (hasUserSelection) {
-      return t("eventTimeSelector.selectingTitle");
     }
     return t("eventTimeSelector.emptyTitle");
   };
@@ -101,142 +158,93 @@ export function EventTimeSelector({
           </div>
 
           {hasConfirmedTime && (
-            <ResetButton onClick={handleResetClick} isResetting={isResetting} />
+            <button
+              onClick={handleResetClick}
+              disabled={isResetting}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+            >
+              {isResetting ? (
+                <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <RotateCcw className="w-3 h-3" />
+              )}
+              {t("eventTimeSelector.reset")}
+            </button>
           )}
         </div>
       </div>
 
       {/* Content */}
       <div className="p-4">
-        {isVotingEnded && !hasConfirmedTime && isEmpty && (
-          <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-            <p className="text-sm text-amber-700 dark:text-amber-300 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              {t("eventTimeSelector.votingEndedWarning")}
-            </p>
-          </div>
-        )}
-
         {/* Time ranges list */}
-        {!isEmpty && (
+        {!isEmpty ? (
           <div className="space-y-2">
-            {selectedRanges.map((range) => (
-              <div
-                key={range.id}
-                className={`flex items-center justify-between rounded-lg px-3 py-2.5 ${
-                  range.isConfirmed
-                    ? "bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"
-                    : "bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700"
-                }`}
-              >
-                <div className="flex items-center gap-2 text-sm flex-wrap min-w-0">
-                  {/* Status indicator */}
-                  {range.isConfirmed ? (
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500 text-white shrink-0">
-                      <Check className="w-3 h-3" />
+            {selectedRanges.map((range) => {
+              const isThisRemoving = removingId === range.id && isRemoving;
+              return (
+                <div
+                  key={range.id}
+                  className="flex items-center justify-between rounded-lg px-3 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"
+                >
+                  <div className="flex items-center gap-2 text-sm flex-wrap min-w-0">
+                    {/* Date and time */}
+                    <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                      {formatDateRange(range.startDate, range.endDate)}
                     </span>
-                  ) : (
-                    <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-500 text-white text-xs font-medium shrink-0">
-                      {range.availableCount}
+                    <span className="text-zinc-400">•</span>
+                    <span className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
+                      {formatMinutesToTime(range.startTime)} -{" "}
+                      {formatMinutesToTime(range.endTime)}
                     </span>
-                  )}
+                  </div>
 
-                  {/* Date and time */}
-                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {formatDateRange(range.startDate, range.endDate)}
-                  </span>
-                  <span className="text-zinc-400">•</span>
-                  <span className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
-                    {formatMinutesToTime(range.startTime)} -{" "}
-                    {formatMinutesToTime(range.endTime)}
-                  </span>
-                </div>
-
-                {/* Remove button for non-confirmed */}
-                {!range.isConfirmed && (
+                  {/* Remove button */}
                   <button
-                    onClick={() => onRemove(range.id)}
-                    className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0"
+                    onClick={() => handleRemoveClick(range.id)}
+                    disabled={isRemoving}
+                    className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 transition-colors shrink-0"
                     title={t("eventTimeSelector.remove")}
                   >
-                    <X className="w-4 h-4" />
+                    {isThisRemoving ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <X className="w-4 h-4" />
+                    )}
                   </button>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
+        ) : (
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-2">
+            {t("eventTimeSelector.noConfirmedTime")}
+          </p>
         )}
       </div>
 
-      {/* Footer - Confirm button */}
-      {hasUserSelection && (
-        <div className="px-4 py-3 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50">
-          {isVotingPhase && (
-            <p className="text-xs text-amber-600 dark:text-amber-400 mb-3 flex items-center gap-1.5">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              {t("eventTimeSelector.votingNotEnded")}
-            </p>
-          )}
-          <button
-            onClick={onConfirm}
-            disabled={isConfirming}
-            className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2"
-          >
-            {isConfirming ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                {t("eventTimeSelector.confirming")}
-              </>
-            ) : (
-              <>
-                <Check className="w-4 h-4" />
-                {t("eventTimeSelector.confirm")}
-              </>
-            )}
-          </button>
-        </div>
-      )}
-
       {/* Reset Confirmation Dialog */}
-      {showResetConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setShowResetConfirm(false)}
-          />
-          <div className="relative bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 max-w-sm mx-4 shadow-xl">
-            <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                <RotateCcw className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
-                {t("eventTimeSelector.resetConfirmTitle")}
-              </h3>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                {t("eventTimeSelector.resetConfirmDesc")}
-              </p>
-            </div>
+      <ConfirmDialog
+        isOpen={showResetConfirm}
+        onClose={() => setShowResetConfirm(false)}
+        onConfirm={() => void handleConfirmReset()}
+        isLoading={isResetting}
+        icon={RotateCcw}
+        title={t("eventTimeSelector.resetConfirmTitle")}
+        cancelText={t("eventTimeSelector.cancel")}
+        confirmText={t("eventTimeSelector.resetConfirm")}
+      />
 
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setShowResetConfirm(false)}
-                disabled={isResetting}
-                className="flex-1 px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:opacity-50 rounded-lg transition-colors"
-              >
-                {t("eventTimeSelector.cancel")}
-              </button>
-              <button
-                onClick={() => void handleConfirmReset()}
-                disabled={isResetting}
-                className="flex-1 px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 rounded-lg transition-colors flex items-center justify-center gap-2"
-              >
-                {isResetting && <Loader2 className="w-4 h-4 animate-spin" />}
-                {t("eventTimeSelector.resetConfirm")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Remove Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showRemoveConfirm !== null}
+        onClose={() => setShowRemoveConfirm(null)}
+        onConfirm={handleConfirmRemove}
+        isLoading={isRemoving}
+        icon={Trash2}
+        title={t("eventTimeSelector.removeConfirmTitle")}
+        cancelText={t("eventTimeSelector.cancel")}
+        confirmText={t("eventTimeSelector.removeConfirm")}
+      />
     </div>
   );
 }

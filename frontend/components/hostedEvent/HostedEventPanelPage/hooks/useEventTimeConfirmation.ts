@@ -2,25 +2,22 @@
 
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
 import { EventStatus } from "@/types/event";
 
 interface UseEventTimeConfirmationOptions {
   eventId: string;
   eventStatus: EventStatus;
-  getAllSelectedSlotIds: () => string[];
-  clearSelections: () => void;
+  confirmedSlotIds?: string[];
   refetch: () => Promise<void>;
 }
 
 interface UseEventTimeConfirmationReturn {
-  // Confirmation state
-  isConfirming: boolean;
+  // Add/Remove confirmation state
+  isAdding: boolean;
+  isRemoving: boolean;
   confirmError: string | null;
-  showConfirmDialog: boolean;
-  setShowConfirmDialog: (show: boolean) => void;
-  handleConfirmClick: () => void;
-  handleConfirmEventTime: () => Promise<void>;
+  addConfirmedTime: (slotIds: string[]) => Promise<boolean>;
+  removeConfirmedTime: (slotIdsToRemove: string[]) => Promise<boolean>;
 
   // Reset state
   isResetMode: boolean;
@@ -31,32 +28,24 @@ interface UseEventTimeConfirmationReturn {
 
 export function useEventTimeConfirmation({
   eventId,
-  eventStatus,
-  getAllSelectedSlotIds,
-  clearSelections,
+  confirmedSlotIds = [],
   refetch,
 }: UseEventTimeConfirmationOptions): UseEventTimeConfirmationReturn {
   const t = useTranslations();
-  const router = useRouter();
 
-  // Confirmation state
-  const [isConfirming, setIsConfirming] = useState(false);
+  // Add/Remove state
+  const [isAdding, setIsAdding] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
   const [confirmError, setConfirmError] = useState<string | null>(null);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Reset state
   const [isResetMode, setIsResetMode] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [resetError, setResetError] = useState<string | null>(null);
 
-  // Handle actual confirmation to backend
-  const handleConfirmEventTime = useCallback(async () => {
-    setIsConfirming(true);
-    setConfirmError(null);
-
-    try {
-      const slotIds = getAllSelectedSlotIds();
-
+  // Helper function to call confirmation API
+  const callConfirmationApi = useCallback(
+    async (slotIds: string[]) => {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation`,
         {
@@ -70,38 +59,85 @@ export function useEventTimeConfirmation({
       );
 
       if (!response.ok) {
-        throw new Error("Failed to confirm time");
+        throw new Error("Failed to update confirmed time");
       }
 
-      // Success - refetch data and clear selection
-      await refetch();
-      clearSelections();
-      setIsResetMode(false);
-      setShowConfirmDialog(false);
+      return response;
+    },
+    [eventId],
+  );
 
-      // Optionally redirect to the event page
-      router.push(`/hosted/${eventId}`);
-    } catch {
-      setConfirmError(t("hosted.confirmError"));
-    } finally {
-      setIsConfirming(false);
-    }
-  }, [eventId, getAllSelectedSlotIds, refetch, clearSelections, router, t]);
+  // Add new time slots to confirmed (merge with existing)
+  const addConfirmedTime = useCallback(
+    async (newSlotIds: string[]): Promise<boolean> => {
+      setIsAdding(true);
+      setConfirmError(null);
 
-  // Handle confirm button click
-  const handleConfirmClick = useCallback(() => {
-    const isVotingPhase = eventStatus === EventStatus.VOTING;
+      try {
+        // Merge existing and new slot IDs (remove duplicates)
+        const allSlotIds = [...new Set([...confirmedSlotIds, ...newSlotIds])];
 
-    if (isVotingPhase) {
-      // Show confirmation dialog for voting phase
-      setShowConfirmDialog(true);
-    } else {
-      // Direct confirm for voting-ended phase
-      void handleConfirmEventTime();
-    }
-  }, [eventStatus, handleConfirmEventTime]);
+        await callConfirmationApi(allSlotIds);
 
-  // Handle reset event time (clear all selections and call API)
+        // Success - refetch data and exit reset mode
+        await refetch();
+        setIsResetMode(false);
+
+        return true;
+      } catch {
+        setConfirmError(t("hosted.confirmError"));
+        return false;
+      } finally {
+        setIsAdding(false);
+      }
+    },
+    [confirmedSlotIds, callConfirmationApi, refetch, t],
+  );
+
+  // Remove time slots from confirmed
+  const removeConfirmedTime = useCallback(
+    async (slotIdsToRemove: string[]): Promise<boolean> => {
+      setIsRemoving(true);
+      setConfirmError(null);
+
+      try {
+        // Remove specified slot IDs from existing
+        const remainingSlotIds = confirmedSlotIds.filter(
+          (id) => !slotIdsToRemove.includes(id),
+        );
+
+        if (remainingSlotIds.length === 0) {
+          // If no slots remaining, call DELETE API instead
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation`,
+            {
+              method: "DELETE",
+              credentials: "include",
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to reset event time");
+          }
+        } else {
+          await callConfirmationApi(remainingSlotIds);
+        }
+
+        // Success - refetch data
+        await refetch();
+
+        return true;
+      } catch {
+        setConfirmError(t("hosted.confirmError"));
+        return false;
+      } finally {
+        setIsRemoving(false);
+      }
+    },
+    [confirmedSlotIds, eventId, callConfirmationApi, refetch, t],
+  );
+
+  // Handle reset event time (clear all confirmations)
   const handleResetEventTime = useCallback(async () => {
     setIsResetting(true);
     setResetError(null);
@@ -119,8 +155,7 @@ export function useEventTimeConfirmation({
         throw new Error("Failed to reset event time");
       }
 
-      // Success - clear local selections and enter reset mode
-      clearSelections();
+      // Success - enter reset mode
       setIsResetMode(true);
 
       // Refetch to get updated event status
@@ -130,16 +165,15 @@ export function useEventTimeConfirmation({
     } finally {
       setIsResetting(false);
     }
-  }, [eventId, clearSelections, refetch, t]);
+  }, [eventId, refetch, t]);
 
   return {
-    // Confirmation
-    isConfirming,
+    // Add/Remove
+    isAdding,
+    isRemoving,
     confirmError,
-    showConfirmDialog,
-    setShowConfirmDialog,
-    handleConfirmClick,
-    handleConfirmEventTime,
+    addConfirmedTime,
+    removeConfirmedTime,
 
     // Reset
     isResetMode,

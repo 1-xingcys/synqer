@@ -23,6 +23,7 @@ export default function ResultsView({
   eventId,
   canAddToEventTime = false,
   isVotingPhase = false,
+  isAdding = false,
   onAddToEventTime,
   selectedSlotIds,
 }: ResultsViewProps) {
@@ -256,6 +257,7 @@ export default function ResultsView({
             maxVotes={maxVotes}
             canAddToEventTime={canAddToEventTime}
             isVotingPhase={isVotingPhase}
+            isAdding={isAdding}
             onAddToEventTime={onAddToEventTime}
             selectedSlotIds={selectedSlotIds}
           />

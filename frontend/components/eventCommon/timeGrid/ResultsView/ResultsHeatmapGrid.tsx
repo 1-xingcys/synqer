@@ -27,7 +27,8 @@ interface ResultsHeatmapGridProps {
   // Host-only props for adding time ranges to event time
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;
-  onAddToEventTime?: (info: SlotRangeInfo, availableCount: number) => void;
+  isAdding?: boolean;
+  onAddToEventTime?: (info: SlotRangeInfo) => Promise<boolean>;
   // Selected slot IDs to display with border highlight
   selectedSlotIds?: Set<string>;
 }
@@ -53,6 +54,7 @@ export function ResultsHeatmapGrid({
   maxVotes,
   canAddToEventTime = false,
   isVotingPhase = false,
+  isAdding = false,
   onAddToEventTime,
   selectedSlotIds,
 }: ResultsHeatmapGridProps) {
@@ -745,12 +747,9 @@ export function ResultsHeatmapGrid({
           totalFiltered={selectedParticipants.size}
           canAddToEventTime={canAddToEventTime}
           isVotingPhase={isVotingPhase}
+          isAdding={isAdding}
           rangeInfo={modalData.rangeInfo}
-          onAddToEventTime={
-            onAddToEventTime
-              ? (info) => onAddToEventTime(info, modalData.voters.length)
-              : undefined
-          }
+          onAddToEventTime={onAddToEventTime}
         />
       )}
     </div>

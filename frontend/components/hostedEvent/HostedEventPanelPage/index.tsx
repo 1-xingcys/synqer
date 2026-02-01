@@ -2,14 +2,15 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useCallback } from "react";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
 import { VotingProgress } from "@/components/ui/VotingProgress";
 import { EventStatus } from "@/types/event";
 import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
+import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
 import { DeadlineCountdown } from "./DeadlineCountdown";
 import { VotingStatusBar } from "./VotingStatusBar";
 import { EventTimeSelector } from "./EventTimeSelector";
-import { ConfirmTimeDialog } from "./ConfirmTimeDialog";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import {
   useEventTimeSelection,
@@ -29,12 +30,11 @@ export default function HostedEventPanelPage() {
 
   // Event time confirmation/reset logic
   const {
-    isConfirming,
+    isAdding,
+    isRemoving,
     confirmError,
-    showConfirmDialog,
-    setShowConfirmDialog,
-    handleConfirmClick,
-    handleConfirmEventTime,
+    addConfirmedTime,
+    removeConfirmedTime,
     isResetMode,
     isResetting,
     resetError,
@@ -42,18 +42,38 @@ export default function HostedEventPanelPage() {
   } = useEventTimeConfirmation({
     eventId,
     eventStatus: data?.event.status ?? EventStatus.VOTING,
-    getAllSelectedSlotIds: () => selection.getAllSelectedSlotIds(),
-    clearSelections: () => selection.clearSelections(),
+    confirmedSlotIds: data?.event.confirmedSlotIds,
     refetch,
   });
 
-  // Event time selection logic
-  const selection = useEventTimeSelection({
-    totalParticipants,
-    confirmedSlotIds: data?.event.confirmedSlotIds,
-    confirmedTimeRanges: data?.event.confirmedTimeRanges,
-    isResetMode,
-  });
+  // Event time selection logic (now only for display)
+  const { confirmedTimeRangesDisplay, selectedSlotIdsSet } =
+    useEventTimeSelection({
+      totalParticipants,
+      confirmedSlotIds: data?.event.confirmedSlotIds,
+      confirmedTimeRanges: data?.event.confirmedTimeRanges,
+      isResetMode,
+    });
+
+  // Handle adding time range (called from SlotDetailModal)
+  const handleAddToEventTime = useCallback(
+    async (info: SlotRangeInfo): Promise<boolean> => {
+      return await addConfirmedTime(info.slotIds);
+    },
+    [addConfirmedTime],
+  );
+
+  // Handle removing a confirmed time range
+  const handleRemoveConfirmedTime = useCallback(
+    async (rangeId: string) => {
+      // Find the range by ID to get its slotIds
+      const range = confirmedTimeRangesDisplay.find((r) => r.id === rangeId);
+      if (range) {
+        await removeConfirmedTime(range.slotIds);
+      }
+    },
+    [confirmedTimeRangesDisplay, removeConfirmedTime],
+  );
 
   // Loading and error states are handled by the layout
   if (!data) {
@@ -67,8 +87,7 @@ export default function HostedEventPanelPage() {
   const isCompleted = event.status === EventStatus.COMPLETED;
   const showResultsView = isVotingPhase || isVotingEnded || isConfirmed;
   // hasConfirmedTime should be false when in reset mode
-  const hasConfirmedTime =
-    !isResetMode && event.confirmedSlotIds && event.confirmedSlotIds.length > 0;
+  const hasConfirmedTime = selectedSlotIdsSet.size > 0;
 
   return (
     <div className="space-y-3 sm:space-y-6">
@@ -109,20 +128,16 @@ export default function HostedEventPanelPage() {
       {/* Event Time Selector & Results Section */}
       {showResultsView && (
         <>
-          {/* Event Time Selector - Combined header and time list */}
-          {/* Hide when voting is in progress and no selection */}
-          {!(isVotingPhase && selection.allTimeRanges.length === 0) && (
+          {/* Event Time Selector - Show confirmed times */}
+          {/* Hide when voting is in progress and no confirmed time */}
+          {!(isVotingPhase && !hasConfirmedTime) && (
             <EventTimeSelector
-              selectedRanges={selection.allTimeRanges}
-              onRemove={selection.removeTimeRange}
-              onConfirm={handleConfirmClick}
+              selectedRanges={confirmedTimeRangesDisplay}
+              onRemove={(id) => void handleRemoveConfirmedTime(id)}
               onReset={() => void handleResetEventTime()}
-              isVotingPhase={isVotingPhase}
-              isVotingEnded={isVotingEnded}
-              isConfirming={isConfirming}
+              isRemoving={isRemoving}
               isResetting={isResetting}
-              hasUserSelection={selection.hasUserSelection}
-              hasConfirmedTime={!!hasConfirmedTime}
+              hasConfirmedTime={hasConfirmedTime}
             />
           )}
 
@@ -138,8 +153,9 @@ export default function HostedEventPanelPage() {
             eventId={eventId}
             canAddToEventTime={true}
             isVotingPhase={isVotingPhase}
-            onAddToEventTime={selection.addTimeRange}
-            selectedSlotIds={selection.selectedSlotIdsSet}
+            isAdding={isAdding}
+            onAddToEventTime={handleAddToEventTime}
+            selectedSlotIds={selectedSlotIdsSet}
           />
         </>
       )}
@@ -198,16 +214,6 @@ export default function HostedEventPanelPage() {
           </div>
         </div>
       )}
-
-      {/* Confirm Time Dialog */}
-      <ConfirmTimeDialog
-        isOpen={showConfirmDialog}
-        onClose={() => setShowConfirmDialog(false)}
-        onConfirm={() => void handleConfirmEventTime()}
-        isVotingPhase={isVotingPhase}
-        slotsCount={selection.getAllSelectedSlotIds().length}
-        isConfirming={isConfirming}
-      />
     </div>
   );
 }
