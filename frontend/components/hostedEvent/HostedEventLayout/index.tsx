@@ -14,6 +14,7 @@ import {
   HostedEventProvider,
   useHostedEventContext,
 } from "@/contexts/HostedEventContext";
+import { EventStatus } from "@/types/event";
 
 interface HostedEventLayoutProps {
   children: ReactNode;
@@ -102,7 +103,10 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
     );
   }
 
-  const { event } = data;
+  const { event, votingStats } = data;
+  const isConfirmedOrCompleted =
+    event.status === EventStatus.CONFIRMED ||
+    event.status === EventStatus.COMPLETED;
 
   return (
     <div className="py-4 sm:py-8 flex flex-col">
@@ -120,6 +124,13 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
           endMinuteOfDay={event.endMinuteOfDay}
           isHosted={true}
           eventId={eventId}
+          votingStatus={{
+            votingDeadline: event.votingDeadline,
+            votingPercentage: votingStats.votingPercentage,
+            totalVoted: votingStats.totalVoted,
+            totalExpected: votingStats.totalExpected,
+            isInactive: isConfirmedOrCompleted,
+          }}
         />
       </div>
 

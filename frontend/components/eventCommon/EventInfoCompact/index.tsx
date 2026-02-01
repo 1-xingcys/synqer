@@ -15,6 +15,18 @@ import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatus } from "@/types/event";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
+import { VotingStatusBar } from "@/components/hostedEvent/HostedEventPanelPage/VotingStatusBar";
+import { DeadlineCountdown } from "@/components/hostedEvent/HostedEventPanelPage/DeadlineCountdown";
+import { VotingProgress } from "@/components/ui/VotingProgress";
+
+interface VotingStatusProps {
+  votingDeadline?: string | null;
+  votingPercentage: number;
+  totalVoted: number;
+  totalExpected: number;
+  /** 是否為非投票階段（confirmed/completed），倒數會顯示灰色 */
+  isInactive?: boolean;
+}
 
 interface EventInfoCompactProps {
   title?: string | null;
@@ -27,6 +39,7 @@ interface EventInfoCompactProps {
   isHosted?: boolean;
   eventId?: string;
   eventStatus?: EventStatus;
+  votingStatus?: VotingStatusProps;
 }
 
 export function EventInfoCompact({
@@ -39,6 +52,7 @@ export function EventInfoCompact({
   isHosted = false,
   eventId,
   eventStatus,
+  votingStatus,
 }: EventInfoCompactProps) {
   const t = useTranslations();
   const { copied, copyLink: handleCopyLink } = useEventShareLink(eventId || "");
@@ -105,33 +119,96 @@ export function EventInfoCompact({
         </div>
       </div>
 
-      {/* Actions (Only for Hosted Mode) */}
+      {/* Actions & Voting Status */}
       {showActions && (
-        <div className="flex flex-row gap-3 w-full sm:w-auto">
-          <button
-            onClick={() => void handleCopyLink()}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium text-sm sm:text-base transition-all active:scale-[0.98]"
-          >
-            {copied ? (
-              <CheckCheck className="w-4 h-4 text-emerald-500" />
-            ) : (
-              <Copy className="w-4 h-4" />
-            )}
-            <span className="whitespace-nowrap">
-              {t("eventInfo.copyVoteLink")}
-            </span>
-          </button>
+        <>
+          {/* Mobile: Buttons stacked, then VotingStatusBar below */}
+          <div className="flex flex-col gap-4 sm:hidden">
+            <div className="flex flex-row gap-3 w-full">
+              <button
+                onClick={() => void handleCopyLink()}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium text-sm transition-all active:scale-[0.98]"
+              >
+                {copied ? (
+                  <CheckCheck className="w-4 h-4 text-emerald-500" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
+                <span className="whitespace-nowrap">
+                  {t("eventInfo.copyVoteLink")}
+                </span>
+              </button>
 
-          <Link
-            href={`/joined/${eventId}`}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium text-sm sm:text-base transition-all active:scale-[0.98] shadow-sm shadow-blue-500/20"
-          >
-            <ExternalLink className="w-4 h-4" />
-            <span className="whitespace-nowrap">
-              {t("eventInfo.goToVotePage")}
-            </span>
-          </Link>
-        </div>
+              <Link
+                href={`/joined/${eventId}`}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium text-sm transition-all active:scale-[0.98] shadow-sm shadow-blue-500/20"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span className="whitespace-nowrap">
+                  {t("eventInfo.goToVotePage")}
+                </span>
+              </Link>
+            </div>
+
+            {votingStatus && (
+              <VotingStatusBar
+                votingDeadline={votingStatus.votingDeadline}
+                votingPercentage={votingStatus.votingPercentage}
+                totalVoted={votingStatus.totalVoted}
+                totalExpected={votingStatus.totalExpected}
+                isInactive={votingStatus.isInactive}
+              />
+            )}
+          </div>
+
+          {/* Desktop: Deadline + Progress + Buttons in a unified row */}
+          <div className="hidden sm:flex sm:flex-row sm:items-stretch sm:gap-4">
+            {votingStatus && (
+              <div className="flex-1 min-w-[200px]">
+                <DeadlineCountdown
+                  votingDeadline={votingStatus.votingDeadline}
+                  isInactive={votingStatus.isInactive}
+                />
+              </div>
+            )}
+
+            {votingStatus && (
+              <div className="flex-1 min-w-[200px]">
+                <VotingProgress
+                  votingPercentage={votingStatus.votingPercentage}
+                  totalVoted={votingStatus.totalVoted}
+                  totalExpected={votingStatus.totalExpected}
+                  isInactive={votingStatus.isInactive}
+                />
+              </div>
+            )}
+
+            <div className="flex flex-col justify-center gap-2 shrink-0 ml-auto min-w-[140px]">
+              <Link
+                href={`/joined/${eventId}`}
+                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium text-sm transition-all active:scale-[0.98] shadow-sm shadow-blue-500/20 w-full"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span className="whitespace-nowrap">
+                  {t("eventInfo.goToVotePage")}
+                </span>
+              </Link>
+              <button
+                onClick={() => void handleCopyLink()}
+                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium text-sm transition-all active:scale-[0.98] w-full"
+              >
+                {copied ? (
+                  <CheckCheck className="w-4 h-4 text-emerald-500" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
+                <span className="whitespace-nowrap">
+                  {t("eventInfo.copyVoteLink")}
+                </span>
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

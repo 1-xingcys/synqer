@@ -4,12 +4,9 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
-import { VotingProgress } from "@/components/ui/VotingProgress";
 import { EventStatus } from "@/types/event";
 import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
 import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
-import { DeadlineCountdown } from "./DeadlineCountdown";
-import { VotingStatusBar } from "./VotingStatusBar";
 import { EventTimeSelector } from "./EventTimeSelector";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import {
@@ -76,7 +73,7 @@ export default function HostedEventPanelPage() {
     return null;
   }
 
-  const { event, slots, votingStats } = data;
+  const { event, slots } = data;
   const isVotingPhase = event.status === EventStatus.VOTING;
   const isVotingEnded = event.status === EventStatus.VOTING_ENDED;
   const isConfirmed = event.status === EventStatus.CONFIRMED;
@@ -87,31 +84,6 @@ export default function HostedEventPanelPage() {
 
   return (
     <div className="space-y-3 sm:space-y-6">
-      {/* Voting Phase & Voting Ended - Show deadline countdown and voting progress */}
-      {(isVotingPhase || isVotingEnded) && (
-        <>
-          {/* Mobile: Compact Status Bar */}
-          <div className="sm:hidden">
-            <VotingStatusBar
-              votingDeadline={event.votingDeadline}
-              votingPercentage={votingStats.votingPercentage}
-              totalVoted={votingStats.totalVoted}
-              totalExpected={votingStats.totalExpected}
-            />
-          </div>
-
-          {/* Desktop: Two separate cards */}
-          <div className="hidden sm:grid grid-cols-1 md:grid-cols-2 gap-4">
-            <DeadlineCountdown votingDeadline={event.votingDeadline} />
-            <VotingProgress
-              votingPercentage={votingStats.votingPercentage}
-              totalVoted={votingStats.totalVoted}
-              totalExpected={votingStats.totalExpected}
-            />
-          </div>
-        </>
-      )}
-
       {/* Error messages */}
       {(confirmError || resetError) && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">

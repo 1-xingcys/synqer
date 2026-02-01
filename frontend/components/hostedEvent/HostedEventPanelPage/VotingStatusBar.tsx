@@ -15,6 +15,8 @@ interface VotingStatusBarProps {
   votingPercentage: number;
   totalVoted: number;
   totalExpected: number;
+  /** 是否為非投票階段（confirmed/completed），倒數會顯示灰色 */
+  isInactive?: boolean;
 }
 
 /**
@@ -25,6 +27,7 @@ export function VotingStatusBar({
   votingPercentage,
   totalVoted,
   totalExpected,
+  isInactive = false,
 }: VotingStatusBarProps) {
   const t = useTranslations();
 
@@ -39,19 +42,23 @@ export function VotingStatusBar({
     ? differenceInMinutes(deadlineDate, now) % 60
     : 0;
 
-  // Determine urgency level
+  // Determine urgency level (only when active and not expired)
   const totalHours = deadlineDate ? differenceInHours(deadlineDate, now) : 0;
-  const isUrgent = totalHours <= 24 && totalHours > 0;
-  const isVeryCritical = totalHours <= 6 && totalHours > 0;
+  const isUrgent = !isInactive && totalHours <= 24 && totalHours > 0;
+  const isVeryCritical = !isInactive && totalHours <= 6 && totalHours > 0;
 
   const getTimeColor = () => {
-    if (isExpired || !deadlineDate) return "text-zinc-500 dark:text-zinc-400";
+    if (isInactive || isExpired || !deadlineDate)
+      return "text-zinc-500 dark:text-zinc-400";
     if (isVeryCritical) return "text-red-600 dark:text-red-400";
     if (isUrgent) return "text-amber-600 dark:text-amber-400";
     return "text-blue-600 dark:text-blue-400";
   };
 
   const getUrgencyIcon = () => {
+    if (isInactive) {
+      return <Clock className="w-3.5 h-3.5 text-zinc-400" />;
+    }
     if ((isUrgent || isVeryCritical) && !isExpired) {
       return (
         <AlertTriangle
@@ -148,7 +155,11 @@ export function VotingStatusBar({
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
-                className="text-blue-500 transition-all duration-1000 ease-out"
+                className={`transition-all duration-1000 ease-out ${
+                  isInactive
+                    ? "text-zinc-400 dark:text-zinc-500"
+                    : "text-blue-500"
+                }`}
               />
             </svg>
             {/* Percentage Text */}
