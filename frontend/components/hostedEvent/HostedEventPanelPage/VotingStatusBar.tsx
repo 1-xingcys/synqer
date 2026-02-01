@@ -6,6 +6,7 @@ import {
   differenceInHours,
   differenceInMinutes,
   isPast,
+  format,
 } from "date-fns";
 import { Clock, AlertTriangle, Users } from "lucide-react";
 
@@ -110,6 +111,11 @@ export function VotingStatusBar({
             <span className="text-xs font-medium tracking-wide uppercase">
               {t("hosted.deadline.title")}
             </span>
+            {deadlineDate && (
+              <span className="text-[10px] text-zinc-400 dark:text-zinc-500 ml-1">
+                ({format(deadlineDate, "M/d HH:mm")})
+              </span>
+            )}
           </div>
           <div>{getCountdownContent()}</div>
         </div>
