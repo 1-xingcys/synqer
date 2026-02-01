@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { formatMinutesToTime } from "@/lib/utils";
-import { Calendar, X, RotateCcw, Loader2, Trash2 } from "lucide-react";
+import { Calendar, X, RotateCcw, Trash2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface SelectedTimeRange {
@@ -23,8 +23,6 @@ interface EventTimeSelectorProps {
   selectedRanges: SelectedTimeRange[];
   onRemove: (id: string) => void;
   onReset: () => void | Promise<void>;
-  isRemoving: boolean;
-  isResetting: boolean;
   hasConfirmedTime: boolean;
 }
 
@@ -33,7 +31,6 @@ interface ConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  isLoading: boolean;
   icon: LucideIcon;
   title: string;
   cancelText: string;
@@ -44,7 +41,6 @@ function ConfirmDialog({
   isOpen,
   onClose,
   onConfirm,
-  isLoading,
   icon: Icon,
   title,
   cancelText,
@@ -68,17 +64,14 @@ function ConfirmDialog({
         <div className="flex gap-3 mt-6">
           <button
             onClick={onClose}
-            disabled={isLoading}
-            className="flex-1 px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 disabled:opacity-50 rounded-lg transition-colors whitespace-nowrap"
+            className="flex-1 px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors whitespace-nowrap"
           >
             {cancelText}
           </button>
           <button
             onClick={onConfirm}
-            disabled={isLoading}
-            className="flex-1 px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 rounded-lg transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+            className="flex-1 px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors whitespace-nowrap"
           >
-            {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
             {confirmText}
           </button>
         </div>
@@ -91,8 +84,6 @@ export function EventTimeSelector({
   selectedRanges,
   onRemove,
   onReset,
-  isRemoving,
-  isResetting,
   hasConfirmedTime,
 }: EventTimeSelectorProps) {
   const t = useTranslations("hosted");
@@ -100,7 +91,6 @@ export function EventTimeSelector({
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(
     null,
   );
-  const [removingId, setRemovingId] = useState<string | null>(null);
 
   const formatDateRange = (startDate: string, endDate: string) => {
     const start = new Date(startDate);
@@ -127,7 +117,6 @@ export function EventTimeSelector({
 
   const handleConfirmRemove = () => {
     if (showRemoveConfirm) {
-      setRemovingId(showRemoveConfirm);
       onRemove(showRemoveConfirm);
       setShowRemoveConfirm(null);
     }
@@ -160,14 +149,9 @@ export function EventTimeSelector({
           {hasConfirmedTime && (
             <button
               onClick={handleResetClick}
-              disabled={isResetting}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
             >
-              {isResetting ? (
-                <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <RotateCcw className="w-3 h-3" />
-              )}
+              <RotateCcw className="w-3 h-3" />
               {t("eventTimeSelector.reset")}
             </button>
           )}
@@ -179,41 +163,33 @@ export function EventTimeSelector({
         {/* Time ranges list */}
         {!isEmpty ? (
           <div className="space-y-2">
-            {selectedRanges.map((range) => {
-              const isThisRemoving = removingId === range.id && isRemoving;
-              return (
-                <div
-                  key={range.id}
-                  className="flex items-center justify-between rounded-lg px-3 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"
-                >
-                  <div className="flex items-center gap-2 text-sm flex-wrap min-w-0">
-                    {/* Date and time */}
-                    <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                      {formatDateRange(range.startDate, range.endDate)}
-                    </span>
-                    <span className="text-zinc-400">•</span>
-                    <span className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
-                      {formatMinutesToTime(range.startTime)} -{" "}
-                      {formatMinutesToTime(range.endTime)}
-                    </span>
-                  </div>
-
-                  {/* Remove button */}
-                  <button
-                    onClick={() => handleRemoveClick(range.id)}
-                    disabled={isRemoving}
-                    className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 transition-colors shrink-0"
-                    title={t("eventTimeSelector.remove")}
-                  >
-                    {isThisRemoving ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <X className="w-4 h-4" />
-                    )}
-                  </button>
+            {selectedRanges.map((range) => (
+              <div
+                key={range.id}
+                className="flex items-center justify-between rounded-lg px-3 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"
+              >
+                <div className="flex items-center gap-2 text-sm flex-wrap min-w-0">
+                  {/* Date and time */}
+                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                    {formatDateRange(range.startDate, range.endDate)}
+                  </span>
+                  <span className="text-zinc-400">•</span>
+                  <span className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
+                    {formatMinutesToTime(range.startTime)} -{" "}
+                    {formatMinutesToTime(range.endTime)}
+                  </span>
                 </div>
-              );
-            })}
+
+                {/* Remove button */}
+                <button
+                  onClick={() => handleRemoveClick(range.id)}
+                  className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0"
+                  title={t("eventTimeSelector.remove")}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
           </div>
         ) : (
           <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-2">
@@ -227,7 +203,6 @@ export function EventTimeSelector({
         isOpen={showResetConfirm}
         onClose={() => setShowResetConfirm(false)}
         onConfirm={() => void handleConfirmReset()}
-        isLoading={isResetting}
         icon={RotateCcw}
         title={t("eventTimeSelector.resetConfirmTitle")}
         cancelText={t("eventTimeSelector.cancel")}
@@ -239,7 +214,6 @@ export function EventTimeSelector({
         isOpen={showRemoveConfirm !== null}
         onClose={() => setShowRemoveConfirm(null)}
         onConfirm={handleConfirmRemove}
-        isLoading={isRemoving}
         icon={Trash2}
         title={t("eventTimeSelector.removeConfirmTitle")}
         cancelText={t("eventTimeSelector.cancel")}

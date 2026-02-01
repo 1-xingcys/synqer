@@ -12,10 +12,10 @@ interface JoinedEventResultsPageProps {
 export default function JoinedEventResultsPage({
   eventId,
 }: JoinedEventResultsPageProps) {
-  const { data, loading, error, participantsWithAvatars, votesWithAvatars } =
+  const { data, isLoading, error, participantsWithAvatars, votesWithAvatars } =
     useJoinedEventResults(eventId);
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 

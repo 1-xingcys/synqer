@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 import {
   EventStatus,
   ConfirmedTimeRange,
@@ -70,77 +71,106 @@ export interface EventDetailData {
   expectedParticipants: ExpectedParticipant[];
 }
 
-export function useEventDetail(eventId: string) {
-  const [data, setData] = useState<EventDetailData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+// Query key factory for event detail
+export const eventDetailKeys = {
+  all: ["eventDetail"] as const,
+  detail: (eventId: string) => [...eventDetailKeys.all, eventId] as const,
+};
 
-  const fetchEventData = useCallback(async () => {
-    try {
-      if (!process.env.NEXT_PUBLIC_API) {
-        throw new Error("NEXT_PUBLIC_API is not set");
-      }
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}`,
-        {
-          credentials: "include",
-        },
-      );
+// Fetch function
+async function fetchEventDetail(eventId: string): Promise<EventDetailData> {
+  if (!process.env.NEXT_PUBLIC_API) {
+    throw new Error("NEXT_PUBLIC_API is not set");
+  }
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch event data");
-      }
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API}/events/${eventId}`,
+    {
+      credentials: "include",
+    },
+  );
 
-      const responseData = (await response.json()) as EventDetailData;
-      setData(responseData);
-      setError(null);
-    } catch {
-      setError("載入活動失敗");
-    } finally {
-      setLoading(false);
-    }
-  }, [eventId]);
+  if (!response.ok) {
+    throw new Error("Failed to fetch event data");
+  }
 
-  useEffect(() => {
-    void fetchEventData();
-  }, [fetchEventData]);
+  return response.json() as Promise<EventDetailData>;
+}
 
-  const saveVotes = async (
-    selectedSlotIds: string[],
-    voteMode: VoteMode = VoteMode.AVAILABLE,
-  ) => {
-    if (!process.env.NEXT_PUBLIC_API) {
-      throw new Error("NEXT_PUBLIC_API is not set");
-    }
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API}/events/${eventId}/voting`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ selectedSlotIds, voteMode }),
+// Save votes function
+async function saveVotesApi(
+  eventId: string,
+  selectedSlotIds: string[],
+  voteMode: VoteMode,
+): Promise<void> {
+  if (!process.env.NEXT_PUBLIC_API) {
+    throw new Error("NEXT_PUBLIC_API is not set");
+  }
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/voting`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      credentials: "include",
+      body: JSON.stringify({ selectedSlotIds, voteMode }),
+    },
+  );
 
-    if (!response.ok) {
-      const errorData = (await response.json().catch(() => ({}))) as {
-        message?: string;
-      };
-      const errorMessage = errorData.message || "Failed to save votes";
-      alert(errorMessage);
-    }
+  if (!response.ok) {
+    const errorData = (await response.json().catch(() => ({}))) as {
+      message?: string;
+    };
+    throw new Error(errorData.message || "Failed to save votes");
+  }
+}
 
-    // 重新載入資料以更新 heatmap
-    void fetchEventData();
-  };
+export function useEventDetail(eventId: string) {
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: eventDetailKeys.detail(eventId),
+    queryFn: () => fetchEventDetail(eventId),
+    enabled: !!eventId,
+  });
+
+  const voteMutation = useMutation({
+    mutationFn: ({
+      selectedSlotIds,
+      voteMode,
+    }: {
+      selectedSlotIds: string[];
+      voteMode: VoteMode;
+    }) => saveVotesApi(eventId, selectedSlotIds, voteMode),
+    onSuccess: () => {
+      // Invalidate and refetch
+      void queryClient.invalidateQueries({
+        queryKey: eventDetailKeys.detail(eventId),
+      });
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
+  });
+
+  const saveVotes = useCallback(
+    async (
+      selectedSlotIds: string[],
+      voteMode: VoteMode = VoteMode.AVAILABLE,
+    ) => {
+      await voteMutation.mutateAsync({ selectedSlotIds, voteMode });
+    },
+    [voteMutation],
+  );
 
   return {
-    data,
-    loading,
-    error,
+    data: query.data ?? null,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    error: query.error?.message ?? null,
     saveVotes,
-    refetch: fetchEventData,
+    refetch: query.refetch,
   };
 }

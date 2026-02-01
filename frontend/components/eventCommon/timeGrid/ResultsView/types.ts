@@ -17,7 +17,6 @@ export interface ResultsViewProps {
   // Host-only props for adding time ranges to event time
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;
-  isAdding?: boolean;
   onAddToEventTime?: (info: SlotRangeInfo) => Promise<boolean>;
   // Selected slot IDs to display with border highlight
   selectedSlotIds?: Set<string>;

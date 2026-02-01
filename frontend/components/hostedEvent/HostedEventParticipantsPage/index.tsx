@@ -11,7 +11,7 @@ import {
 
 export default function HostedEventParticipantsPage() {
   const t = useTranslations();
-  const { data: eventData, loading: eventLoading } = useHostedEventContext();
+  const { data: eventData, isLoading: eventLoading } = useHostedEventContext();
 
   if (eventLoading) {
     return (

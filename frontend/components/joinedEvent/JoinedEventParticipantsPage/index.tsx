@@ -19,7 +19,7 @@ export default function JoinedEventParticipantsPage() {
   const t = useTranslations();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  const { data: eventDetailData, loading, error } = useEventDetail(eventId);
+  const { data: eventDetailData, isLoading, error } = useEventDetail(eventId);
 
   const [filter, setFilter] = useState<FilterType>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,7 +69,7 @@ export default function JoinedEventParticipantsPage() {
     return result;
   }, [participants, filter, searchQuery]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4">

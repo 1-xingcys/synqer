@@ -31,7 +31,6 @@ interface SlotDetailModalProps {
   // Host-only props for adding to event time
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;
-  isAdding?: boolean;
   onAddToEventTime?: (info: SlotRangeInfo) => Promise<boolean>;
   rangeInfo?: SlotRangeInfo;
 }
@@ -47,7 +46,6 @@ export function SlotDetailModal({
   isRange = false,
   canAddToEventTime = false,
   isVotingPhase = false,
-  isAdding = false,
   onAddToEventTime,
   rangeInfo,
 }: SlotDetailModalProps) {
@@ -66,17 +64,16 @@ export function SlotDetailModal({
     onClose();
   }, [onClose]);
 
-  // Close on escape key (but not when adding or showing confirm dialog)
+  // Close on escape key (but not when showing confirm dialog)
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !isAdding && !showVotingConfirmDialog)
-        handleClose();
+      if (e.key === "Escape" && !showVotingConfirmDialog) handleClose();
     };
     if (isOpen) {
       document.addEventListener("keydown", handleEscape);
       return () => document.removeEventListener("keydown", handleEscape);
     }
-  }, [isOpen, isAdding, showVotingConfirmDialog, handleClose]);
+  }, [isOpen, showVotingConfirmDialog, handleClose]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -249,14 +246,12 @@ export function SlotDetailModal({
               <div className="space-y-2">
                 {showVotingConfirmDialog ? (
                   <VotingConfirmView
-                    isAdding={isAdding}
                     onCancel={handleCancelConfirm}
                     onConfirm={() => void handleConfirmAdd()}
                     tHosted={tHosted}
                   />
                 ) : (
                   <AddButtonView
-                    isAdding={isAdding}
                     isVotingPhase={isVotingPhase}
                     onAdd={handleAddButtonClick}
                     tHosted={tHosted}

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext, ReactNode, useCallback } from "react";
 import {
   useHostedEventDetail,
   HostedEventDetailData,
@@ -8,7 +8,8 @@ import {
 
 interface HostedEventContextType {
   data: HostedEventDetailData | null;
-  loading: boolean;
+  isLoading: boolean;
+  isFetching: boolean;
   error: string | null;
   refetch: () => Promise<void>;
 }
@@ -24,10 +25,18 @@ export function HostedEventProvider({
   eventId,
   children,
 }: HostedEventProviderProps) {
-  const { data, loading, error, refetch } = useHostedEventDetail(eventId);
+  const { data, isLoading, isFetching, error, refetch } =
+    useHostedEventDetail(eventId);
+
+  // Wrap refetch to return Promise<void>
+  const handleRefetch = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   return (
-    <HostedEventContext.Provider value={{ data, loading, error, refetch }}>
+    <HostedEventContext.Provider
+      value={{ data, isLoading, isFetching, error, refetch: handleRefetch }}
+    >
       {children}
     </HostedEventContext.Provider>
   );

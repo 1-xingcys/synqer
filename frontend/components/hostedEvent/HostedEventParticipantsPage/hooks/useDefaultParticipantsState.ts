@@ -8,7 +8,7 @@ import { SelectedParticipant } from "../types";
 export function useDefaultParticipantsState(eventId: string) {
   const {
     data: eventData,
-    loading: eventLoading,
+    isLoading: eventLoading,
     refetch,
   } = useHostedEventContext();
 

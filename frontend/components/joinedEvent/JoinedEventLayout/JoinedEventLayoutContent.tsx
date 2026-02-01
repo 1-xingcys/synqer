@@ -24,10 +24,10 @@ export function JoinedEventLayoutContent({
   const params = useParams();
   const t = useTranslations();
   const eventId = params.eventId as string;
-  const { data, loading, error } = useJoinedEventContext();
+  const { data, isLoading, error } = useJoinedEventContext();
   const { user } = useAuthContext();
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="py-8">
         <div className="flex items-center justify-center min-h-[40vh]">

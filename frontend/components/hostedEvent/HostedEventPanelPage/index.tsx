@@ -22,28 +22,24 @@ export default function HostedEventPanelPage() {
   const params = useParams();
   const eventId = params.eventId as string;
   const t = useTranslations();
-  const { data, refetch } = useHostedEventContext();
+  const { data } = useHostedEventContext();
 
   // Participants and votes data
   const { participantsWithAvatars, votesWithAvatars, totalParticipants } =
     useParticipantsData(data);
 
-  // Event time confirmation/reset logic
+  // Event time confirmation/reset logic (with optimistic updates)
   const {
-    isAdding,
-    isRemoving,
     confirmError,
     addConfirmedTime,
     removeConfirmedTime,
     isResetMode,
-    isResetting,
     resetError,
     handleResetEventTime,
   } = useEventTimeConfirmation({
     eventId,
     eventStatus: data?.event.status ?? EventStatus.VOTING,
     confirmedSlotIds: data?.event.confirmedSlotIds,
-    refetch,
   });
 
   // Event time selection logic (now only for display)
@@ -135,8 +131,6 @@ export default function HostedEventPanelPage() {
               selectedRanges={confirmedTimeRangesDisplay}
               onRemove={(id) => void handleRemoveConfirmedTime(id)}
               onReset={() => void handleResetEventTime()}
-              isRemoving={isRemoving}
-              isResetting={isResetting}
               hasConfirmedTime={hasConfirmedTime}
             />
           )}
@@ -153,7 +147,6 @@ export default function HostedEventPanelPage() {
             eventId={eventId}
             canAddToEventTime={true}
             isVotingPhase={isVotingPhase}
-            isAdding={isAdding}
             onAddToEventTime={handleAddToEventTime}
             selectedSlotIds={selectedSlotIdsSet}
           />

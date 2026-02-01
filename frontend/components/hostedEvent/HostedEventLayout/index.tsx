@@ -24,7 +24,7 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
   const t = useTranslations("hosted");
   const tCommon = useTranslations("common");
   const eventId = params.eventId as string;
-  const { data, loading, error } = useHostedEventContext();
+  const { data, isLoading, error } = useHostedEventContext();
 
   const tabs = [
     {
@@ -47,7 +47,7 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
     },
   ];
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="py-8">
         <div className="flex items-center justify-center min-h-[40vh]">

@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LiffProvider } from "@/contexts/LiffContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { QueryProvider } from "@/components/QueryProvider";
 import { DebugWrapper } from "@/components/DebugConsole/DebugWrapper";
 import { LiffPathHandler } from "@/components/LiffPathHandler";
 import type { Metadata } from "next";
@@ -52,15 +53,17 @@ export default async function LocaleLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider>
-          <NextIntlClientProvider messages={messages}>
-            <LiffProvider>
-              <LiffPathHandler>
-                <AuthProvider>
-                  <DebugWrapper>{children}</DebugWrapper>
-                </AuthProvider>
-              </LiffPathHandler>
-            </LiffProvider>
-          </NextIntlClientProvider>
+          <QueryProvider>
+            <NextIntlClientProvider messages={messages}>
+              <LiffProvider>
+                <LiffPathHandler>
+                  <AuthProvider>
+                    <DebugWrapper>{children}</DebugWrapper>
+                  </AuthProvider>
+                </LiffPathHandler>
+              </LiffProvider>
+            </NextIntlClientProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>
