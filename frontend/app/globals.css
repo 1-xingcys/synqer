@@ -174,3 +174,75 @@ body {
 .dark .react-datepicker__triangle::before {
   border-bottom-color: rgb(63 63 70) !important;
 }
+
+/* View Transitions - Slide Effect */
+@keyframes slide-out-to-left {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-20%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(20%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-to-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(20%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-from-left {
+  from {
+    transform: translateX(-20%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Forward navigation: old page slides left, new page slides in from right */
+html.slide-forward::view-transition-old(root) {
+  animation: slide-out-to-left 0.25s ease-out;
+}
+
+html.slide-forward::view-transition-new(root) {
+  animation: slide-in-from-right 0.25s ease-out;
+}
+
+/* Back navigation: old page slides right, new page slides in from left */
+html.slide-back::view-transition-old(root) {
+  animation: slide-out-to-right 0.25s ease-out;
+}
+
+html.slide-back::view-transition-new(root) {
+  animation: slide-in-from-left 0.25s ease-out;
+}
+
+/* Default transition (fallback) */
+::view-transition-old(root) {
+  animation: slide-out-to-left 0.25s ease-out;
+}
+
+::view-transition-new(root) {
+  animation: slide-in-from-right 0.25s ease-out;
+}
