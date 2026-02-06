@@ -134,6 +134,7 @@ export function JoinedEventLayoutContent({
           startMinuteOfDay={event.startMinuteOfDay}
           endMinuteOfDay={event.endMinuteOfDay}
           hasVoted={hasVoted}
+          eventId={eventId}
         />
       </div>
 

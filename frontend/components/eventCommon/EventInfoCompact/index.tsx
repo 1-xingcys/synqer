@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { Link } from "@/i18n/routing";
+import { TransitionLink } from "@/components/ui/TransitionLink";
 import {
   ExternalLink,
   Copy,
@@ -10,6 +11,7 @@ import {
   AlertCircle,
   Calendar,
   Clock,
+  ChevronRight,
 } from "lucide-react";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { formatMinutesToTime } from "@/lib/utils";
@@ -37,7 +39,7 @@ interface EventInfoCompactProps {
   hasVoted?: boolean;
   /** 是否為 hosted 頁面（不顯示 Status Description，顯示前往按鈕） */
   isHosted?: boolean;
-  eventId?: string;
+  eventId: string;
   eventStatus?: EventStatus;
   votingStatus?: VotingStatusProps;
 }
@@ -88,7 +90,10 @@ export function EventInfoCompact({
         </div>
 
         {/* Meta Row: Event Status • Date • Time */}
-        <div className="flex flex-wrap items-center gap-x-1 sm:gap-x-2 gap-y-1 text-xs sm:text-base text-zinc-500 dark:text-zinc-400">
+        <TransitionLink
+          href={`/event/info/${eventId}`}
+          className="group flex flex-wrap items-center gap-x-1 sm:gap-x-2 gap-y-1 text-xs sm:text-base text-zinc-500 dark:text-zinc-400 decoration-zinc-400 dark:decoration-zinc-500 underline-offset-2 transition-all"
+        >
           {/* Event Status */}
           {eventStatus && (
             <>
@@ -116,7 +121,10 @@ export function EventInfoCompact({
               {formatMinutesToTime(endMinuteOfDay)}
             </span>
           </div>
-        </div>
+
+          {/* Chevron */}
+          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors ml-0.5" />
+        </TransitionLink>
       </div>
 
       {/* Actions & Voting Status */}
