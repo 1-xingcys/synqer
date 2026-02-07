@@ -106,12 +106,6 @@ export function JoinedEventLayoutContent({
       icon: NavIcons.overview,
     },
     {
-      id: "participants",
-      label: t("joined.tabs.participants"),
-      href: `/joined/${eventId}/participants`,
-      icon: NavIcons.participants,
-    },
-    {
       id: "results",
       label: t("joined.tabs.results"),
       href: `/joined/${eventId}/results`,
