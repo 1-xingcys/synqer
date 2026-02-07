@@ -8,7 +8,6 @@ import {
   ExternalLink,
   Copy,
   CheckCheck,
-  AlertCircle,
   Calendar,
   Clock,
   ChevronRight,
@@ -17,6 +16,7 @@ import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatus } from "@/types/event";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
+import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
 import { VotingStatusBar } from "./VotingStatusBar";
 import { DeadlineCountdown } from "./DeadlineCountdown";
 import { VotingProgress } from "./VotingProgress";
@@ -61,20 +61,7 @@ export function EventInfoCompact({
 
   const showActions = isHosted && eventId;
 
-  const votedBadge = (
-    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-      <CheckCheck className="w-3 h-3" />
-      {t("joined.voted")}
-    </span>
-  );
-
-  const notVotedBadge = (
-    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-      <AlertCircle className="w-3 h-3" />
-      {t("joined.notVoted")}
-    </span>
-  );
-
+  // ========== Pre-render: Meta Row Content ==========
   const metaRowContent = (
     <>
       {eventStatus && (
@@ -199,7 +186,7 @@ export function EventInfoCompact({
           </h1>
           {hasVoted !== undefined && (
             <div className="shrink-0 pt-1">
-              {hasVoted ? votedBadge : notVotedBadge}
+              <VoteStatusText hasVoted={hasVoted} />
             </div>
           )}
         </div>

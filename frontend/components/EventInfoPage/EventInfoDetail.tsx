@@ -2,16 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
-import {
-  CheckCheck,
-  AlertCircle,
-  Calendar,
-  Clock,
-  Timer,
-  Info,
-} from "lucide-react";
+import { Calendar, Clock, Timer, Info } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
+import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
 import { EventStatus } from "@/types/event";
 
 interface EventInfoDetailProps {
@@ -54,17 +48,7 @@ export function EventInfoDetail({
           <span className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
             {t("eventInfo.myVotingStatus")}
           </span>
-          {currentUserHasVoted ? (
-            <span className="inline-flex items-center gap-1.5 text-xs sm:text-base text-emerald-600 dark:text-emerald-400 font-medium">
-              <CheckCheck className="w-4 h-4" />
-              {t("joined.voted")}
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-xs sm:text-base text-amber-600 dark:text-amber-400 font-medium">
-              <AlertCircle className="w-4 h-4" />
-              {t("joined.notVoted")}
-            </span>
-          )}
+          <VoteStatusText hasVoted={currentUserHasVoted} />
         </div>
       </div>
 
