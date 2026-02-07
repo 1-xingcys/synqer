@@ -76,7 +76,7 @@ export function EventInfoPage() {
   const { event, host, expectedParticipants, currentUserHasVoted } = data;
 
   return (
-    <div className="max-w-5xl mx-auto py-4 sm:py-8">
+    <div className="mx-auto py-4 sm:py-8">
       <EventInfoHeader
         eventId={eventId}
         title={event.title}

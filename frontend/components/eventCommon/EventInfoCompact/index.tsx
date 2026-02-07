@@ -92,7 +92,7 @@ export function EventInfoCompact({
         {/* Meta Row: Event Status • Date • Time */}
         <TransitionLink
           href={`/joined/info/${eventId}/`}
-          className="group flex flex-wrap items-center gap-x-1 sm:gap-x-2 gap-y-1 text-xs sm:text-base text-zinc-500 dark:text-zinc-400 decoration-zinc-400 dark:decoration-zinc-500 underline-offset-2 transition-all"
+          className="group flex flex-wrap items-center gap-x-1 sm:gap-x-2 gap-y-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 decoration-zinc-400 dark:decoration-zinc-500 underline-offset-2 transition-all"
         >
           {/* Event Status */}
           {eventStatus && (
@@ -105,7 +105,7 @@ export function EventInfoCompact({
           {/* Date */}
           <div className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400" />
-            <span>
+            <span className="font-mono">
               {format(new Date(startDate), "M/d")} ~{" "}
               {format(new Date(endDate), "M/d")}
             </span>

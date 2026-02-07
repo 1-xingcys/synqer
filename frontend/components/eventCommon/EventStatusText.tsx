@@ -13,7 +13,7 @@ export function EventStatusText({ status, size = "md" }: EventStatusTextProps) {
 
   const sizeClasses = {
     sm: "text-xs",
-    md: "text-xs sm:text-base",
+    md: "text-xs sm:text-sm",
   };
 
   const statusConfig: Record<
