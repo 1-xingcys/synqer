@@ -91,7 +91,7 @@ export function EventInfoCompact({
 
         {/* Meta Row: Event Status • Date • Time */}
         <TransitionLink
-          href={`/event/info/${eventId}`}
+          href={`/joined/info/${eventId}/`}
           className="group flex flex-wrap items-center gap-x-1 sm:gap-x-2 gap-y-1 text-xs sm:text-base text-zinc-500 dark:text-zinc-400 decoration-zinc-400 dark:decoration-zinc-500 underline-offset-2 transition-all"
         >
           {/* Event Status */}
