@@ -88,6 +88,23 @@ export class EventCoreController {
   }
 
   /**
+   * GET /events/:eventId/info
+   * 取得活動詳細資訊頁面（參與者視角，包含主辦人、參與者列表）
+   */
+  @Get(':eventId/info')
+  @UseGuards(SessionAuthGuard)
+  async getEventInfo(
+    @Param('eventId') eventId: string,
+    @CurrentUser() userId: string,
+  ) {
+    const result = await this.eventQueryService.getEventInfo(eventId, userId);
+    if (!result) {
+      throw new NotFoundException(`Event ${eventId} not found`);
+    }
+    return result;
+  }
+
+  /**
    * GET /events/:eventId/hosted
    * 取得 Host 端的活動詳細資料（包含投票狀態）
    */

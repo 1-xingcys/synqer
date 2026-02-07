@@ -35,11 +35,11 @@ export function DeadlineCountdown({
     return (
       <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-3">
         <div className="flex items-center justify-between mb-1">
-          <h2 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs">
+          <h2 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
             {t("deadline.title")}
           </h2>
         </div>
-        <p className="text-zinc-500 dark:text-zinc-400 text-xs">
+        <p className="text-zinc-500 dark:text-zinc-400 text-sm">
           {t("deadline.notSet")}
         </p>
       </div>
@@ -86,10 +86,10 @@ export function DeadlineCountdown({
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
-        <h2 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs">
+        <h2 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
           {t("deadline.title")}
         </h2>
-        <span className="text-zinc-500 dark:text-zinc-400 text-[10px]">
+        <span className="text-zinc-500 dark:text-zinc-400 text-xs">
           {format(deadlineDate, "M/d HH:mm")}
         </span>
       </div>
@@ -102,7 +102,7 @@ export function DeadlineCountdown({
           >
             {isExpired ? "00" : days.toString().padStart(2, "0")}
           </span>
-          <span className="text-zinc-500 dark:text-zinc-400 text-[9px] ml-0.5">
+          <span className="text-zinc-500 dark:text-zinc-400 text-[10px] ml-0.5">
             {t("deadline.days")}
           </span>
         </div>
@@ -112,7 +112,7 @@ export function DeadlineCountdown({
           >
             {isExpired ? "00" : hours.toString().padStart(2, "0")}
           </span>
-          <span className="text-zinc-500 dark:text-zinc-400 text-[9px] ml-0.5">
+          <span className="text-zinc-500 dark:text-zinc-400 text-[10px] ml-0.5">
             {t("deadline.hours")}
           </span>
         </div>
@@ -122,7 +122,7 @@ export function DeadlineCountdown({
           >
             {isExpired ? "00" : minutes.toString().padStart(2, "0")}
           </span>
-          <span className="text-zinc-500 dark:text-zinc-400 text-[9px] ml-0.5">
+          <span className="text-zinc-500 dark:text-zinc-400 text-[10px] ml-0.5">
             {t("deadline.minutes")}
           </span>
         </div>

@@ -197,6 +197,13 @@ export class EventRepository {
             groupName: true,
           },
         },
+        owner: {
+          select: {
+            id: true,
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
         expectedParticipants: {
           where: { isRemoved: false },
           include: {

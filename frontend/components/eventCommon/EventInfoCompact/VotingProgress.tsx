@@ -21,10 +21,10 @@ export function VotingProgress({
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-3">
       <div className="flex items-center justify-between mb-1.5">
-        <h2 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs">
+        <h2 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
           {t("common.votingProgress")}
         </h2>
-        <span className="font-medium text-zinc-600 dark:text-zinc-400 text-[10px]">
+        <span className="font-medium text-zinc-600 dark:text-zinc-400 text-xs">
           {totalVoted} / {totalExpected}
         </span>
       </div>
@@ -36,7 +36,7 @@ export function VotingProgress({
           />
         </div>
         <div className="mt-1 text-right">
-          <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400">
+          <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
             {Math.round(votingPercentage)}%
           </span>
         </div>

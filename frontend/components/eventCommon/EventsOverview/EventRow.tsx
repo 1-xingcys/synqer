@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { TransitionLink } from "@/components/ui/TransitionLink";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -145,9 +145,10 @@ export default function EventRow({
   };
 
   return (
-    <Link
+    <TransitionLink
       href={linkHref}
       className="group block border-b border-zinc-200 dark:border-zinc-800 last:border-b-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+      direction="forward"
     >
       {/* Desktop Layout - Single Row */}
       <div className="hidden md:flex items-center gap-4 px-4 py-3">
@@ -289,6 +290,6 @@ export default function EventRow({
           </div>
         </div>
       </div>
-    </Link>
+    </TransitionLink>
   );
 }
