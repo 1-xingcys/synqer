@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useCallback, useState } from "react";
-import { VotingGridProps, Vote, CalendarEvent, TimeGranularity } from "./types";
+import { VotingGridProps, Vote, TimeGranularity } from "./types";
 import {
   useVotingSelection,
   useCalendarIntegration,
@@ -10,6 +10,7 @@ import {
   useResponsiveGrid,
   usePaginatedDates,
   useOptimisticVoting,
+  useCalendarOverlayProjection,
 } from "./hooks";
 import { groupVotesBySlot } from "./utils";
 import {
@@ -115,6 +116,13 @@ export default function VotingGrid({
     disconnectCalendar,
   } = useCalendarIntegration({ eventId, slots, slotsByDate });
 
+  const { getCalendarProjectionForCell } = useCalendarOverlayProjection({
+    mergedRows,
+    paginatedDates,
+    slotsByDate,
+    calendarEventsForSlot,
+  });
+
   // Group votes by slot
   const votesBySlot = useMemo(() => groupVotesBySlot(votes), [votes]);
 
@@ -154,62 +162,6 @@ export default function VotingGrid({
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
-
-  // Check if event starts in this merged row (for a specific date)
-  const isEventStartInMergedRow = useCallback(
-    (rowIndex: number, dateKey: string, event: CalendarEvent): boolean => {
-      const row = mergedRows[rowIndex];
-      if (!row) return false;
-
-      // Check if any slot in this merged row contains the event
-      const hasEventInRow = row.slotIndices.some((idx) => {
-        const slot = slotsByDate[dateKey]?.[idx];
-        if (!slot) return false;
-        const eventsInSlot = calendarEventsForSlot.get(slot.id) || [];
-        return eventsInSlot.some((e) => e.id === event.id);
-      });
-
-      if (!hasEventInRow) return false;
-
-      // Check if any previous merged row also contains this event
-      for (let i = 0; i < rowIndex; i++) {
-        const prevRow = mergedRows[i];
-        const prevHasEvent = prevRow.slotIndices.some((idx) => {
-          const slot = slotsByDate[dateKey]?.[idx];
-          if (!slot) return false;
-          const eventsInSlot = calendarEventsForSlot.get(slot.id) || [];
-          return eventsInSlot.some((e) => e.id === event.id);
-        });
-        if (prevHasEvent) return false; // Event started in an earlier row
-      }
-
-      return true;
-    },
-    [mergedRows, slotsByDate, calendarEventsForSlot],
-  );
-
-  // Get how many merged rows an event spans from a given row index
-  const getEventSpanInMergedRows = useCallback(
-    (rowIndex: number, dateKey: string, event: CalendarEvent): number => {
-      let span = 0;
-      for (let i = rowIndex; i < mergedRows.length; i++) {
-        const row = mergedRows[i];
-        const hasEventInRow = row.slotIndices.some((idx) => {
-          const slot = slotsByDate[dateKey]?.[idx];
-          if (!slot) return false;
-          const eventsInSlot = calendarEventsForSlot.get(slot.id) || [];
-          return eventsInSlot.some((e) => e.id === event.id);
-        });
-        if (hasEventInRow) {
-          span++;
-        } else {
-          break;
-        }
-      }
-      return span;
-    },
-    [mergedRows, slotsByDate, calendarEventsForSlot],
-  );
 
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -289,11 +241,9 @@ export default function VotingGrid({
               mergedRectBounds={mergedRectBounds}
               slotHeight={slotHeight}
               showCalendarOnGrid={showCalendarOnGrid}
-              calendarEventsForSlot={calendarEventsForSlot}
+              getCalendarProjectionForCell={getCalendarProjectionForCell}
               isInDragRectangle={isInDragRectangle}
               getVotersForMergedRow={getVotersForMergedRow}
-              isEventStartInMergedRow={isEventStartInMergedRow}
-              getEventSpanInMergedRows={getEventSpanInMergedRows}
               onMouseDown={handleMergedMouseDown}
               onMouseEnter={handleMergedMouseEnter}
               onTouchStart={handleMergedTouchStart}

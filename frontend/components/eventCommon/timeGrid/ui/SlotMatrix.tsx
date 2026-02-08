@@ -29,20 +29,16 @@ interface SlotMatrixProps {
   mergedRectBounds: MergedRectBounds | null;
   slotHeight: string;
   showCalendarOnGrid: boolean;
-  calendarEventsForSlot: Map<string, CalendarEvent[]>;
+  getCalendarProjectionForCell: (
+    rowIndex: number,
+    dateKey: string,
+  ) => {
+    events: CalendarEvent[];
+    eventSpanById: Map<string, number>;
+  };
   // Callbacks
   isInDragRectangle: (rowIndex: number, dateIndex: number) => boolean;
   getVotersForMergedRow: (slotIndices: number[], dateKey: string) => string[];
-  isEventStartInMergedRow: (
-    rowIndex: number,
-    dateKey: string,
-    event: CalendarEvent,
-  ) => boolean;
-  getEventSpanInMergedRows: (
-    rowIndex: number,
-    dateKey: string,
-    event: CalendarEvent,
-  ) => number;
   onMouseDown: (
     rowIndex: number,
     dateIndex: number,
@@ -71,11 +67,9 @@ export const SlotMatrix = memo(function SlotMatrix({
   mergedRectBounds,
   slotHeight,
   showCalendarOnGrid,
-  calendarEventsForSlot,
+  getCalendarProjectionForCell,
   isInDragRectangle,
   getVotersForMergedRow,
-  isEventStartInMergedRow,
-  getEventSpanInMergedRows,
   onMouseDown,
   onMouseEnter,
   onTouchStart,
@@ -141,15 +135,9 @@ export const SlotMatrix = memo(function SlotMatrix({
             // Check if this merged cell is in the drag rectangle
             const inRectangle = isInDragRectangle(rowIndex, dateIndex);
 
-            // Get calendar events for all slots in this merged row
-            const mergedCalendarEvents = row.slotIndices.flatMap((idx) => {
-              const slot = slotsByDate[dateKey]?.[idx];
-              return slot ? calendarEventsForSlot.get(slot.id) || [] : [];
-            });
-            // Deduplicate events by id
-            const uniqueCalendarEvents = mergedCalendarEvents.filter(
-              (event, index, self) =>
-                self.findIndex((e) => e.id === event.id) === index,
+            const calendarProjection = getCalendarProjectionForCell(
+              rowIndex,
+              dateKey,
             );
 
             return (
@@ -167,14 +155,9 @@ export const SlotMatrix = memo(function SlotMatrix({
                 mergedRectBounds={mergedRectBounds}
                 voteMode={voteMode}
                 voters={voters}
-                slotCalendarEvents={uniqueCalendarEvents}
+                slotCalendarEvents={calendarProjection.events}
+                eventSpanById={calendarProjection.eventSpanById}
                 showCalendarOnGrid={showCalendarOnGrid}
-                isEventStartInMergedRow={(event) =>
-                  isEventStartInMergedRow(rowIndex, dateKey, event)
-                }
-                getEventSpanInMergedRows={(event) =>
-                  getEventSpanInMergedRows(rowIndex, dateKey, event)
-                }
                 mergedSlotIds={slotIds}
                 onMouseDown={(e) => onMouseDown(rowIndex, dateIndex, e)}
                 onMouseEnter={() => onMouseEnter(rowIndex, dateIndex)}

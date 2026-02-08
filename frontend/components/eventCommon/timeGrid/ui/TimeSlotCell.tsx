@@ -26,11 +26,8 @@ interface TimeSlotCellProps {
   voteMode: VoteMode;
   voters: string[];
   slotCalendarEvents: CalendarEvent[];
+  eventSpanById?: Map<string, number>;
   showCalendarOnGrid: boolean;
-  // For merged rows: check if event starts in this merged row
-  isEventStartInMergedRow?: (event: CalendarEvent) => boolean;
-  // For merged rows: get span in merged rows (not 15-min slots)
-  getEventSpanInMergedRows?: (event: CalendarEvent) => number;
   mergedSlotIds?: string[]; // IDs of all slots in this merged cell
   onMouseDown: (e: React.MouseEvent) => void;
   onMouseEnter: () => void;
@@ -54,9 +51,8 @@ export function TimeSlotCell({
   voteMode,
   voters,
   slotCalendarEvents,
+  eventSpanById,
   showCalendarOnGrid,
-  isEventStartInMergedRow,
-  getEventSpanInMergedRows,
   mergedSlotIds,
   onMouseDown,
   onMouseEnter,
@@ -162,17 +158,8 @@ export function TimeSlotCell({
       {showCalendarOnGrid && slotCalendarEvents.length > 0 && (
         <div className="absolute inset-0 pointer-events-none overflow-visible">
           {slotCalendarEvents.slice(0, 2).map((event, idx) => {
-            // Use merged row functions if available, otherwise skip
-            const isStart = isEventStartInMergedRow
-              ? isEventStartInMergedRow(event)
-              : false;
-            const span =
-              isStart && getEventSpanInMergedRows
-                ? getEventSpanInMergedRows(event)
-                : 0;
-
-            // Only render on the start row
-            if (!isStart || span === 0) return null;
+            const span = eventSpanById?.get(event.id) ?? 0;
+            if (span === 0) return null;
 
             const borderColors = [
               "border-orange-500 dark:border-orange-400",
