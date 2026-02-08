@@ -11,6 +11,7 @@ import {
   usePaginatedDates,
   useOptimisticVoting,
   useCalendarOverlayProjection,
+  useSlotMatrixViewModel,
 } from "./hooks";
 import { groupVotesBySlot } from "./utils";
 import {
@@ -150,6 +151,18 @@ export default function VotingGrid({
     [slotsByDate, getVotersForSlot],
   );
 
+  const slotMatrixRows = useSlotMatrixViewModel({
+    mergedRows,
+    paginatedDates,
+    slotsByDate,
+    displaySelection,
+    hoveredCell,
+    longPressCell,
+    isInDragRectangle,
+    getVotersForMergedRow,
+    getCalendarProjectionForCell,
+  });
+
   // Get rectangle bounds for visual overlay
   const mergedRectBounds = getMergedRectangleBounds();
 
@@ -230,20 +243,12 @@ export default function VotingGrid({
 
             {/* Slots grid */}
             <SlotMatrix
-              mergedRows={mergedRows}
-              paginatedDates={paginatedDates}
-              slotsByDate={slotsByDate}
-              displaySelection={displaySelection}
+              rows={slotMatrixRows}
               voteMode={voteMode}
               isDragging={isDragging}
-              hoveredCell={hoveredCell}
-              longPressCell={longPressCell}
               mergedRectBounds={mergedRectBounds}
               slotHeight={slotHeight}
               showCalendarOnGrid={showCalendarOnGrid}
-              getCalendarProjectionForCell={getCalendarProjectionForCell}
-              isInDragRectangle={isInDragRectangle}
-              getVotersForMergedRow={getVotersForMergedRow}
               onMouseDown={handleMergedMouseDown}
               onMouseEnter={handleMergedMouseEnter}
               onTouchStart={handleMergedTouchStart}
