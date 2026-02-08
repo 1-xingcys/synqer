@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Patch,
   Param,
   Body,
   HttpCode,
@@ -8,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { VoteService } from './services/vote.service';
-import { VoteEventDto } from './dto/vote-event.dto';
+import { VoteEventDto, UpdateVoteDto } from './dto/vote-event.dto';
 import { SessionAuthGuard, CurrentUser } from '../../auth';
 
 @Controller('events/:eventId/voting')
@@ -28,5 +29,20 @@ export class VotingController {
     @CurrentUser() userId: string,
   ) {
     return this.voteService.vote(eventId, userId, voteDto);
+  }
+
+  /**
+   * PATCH /events/:eventId/voting
+   * 更新投票（新增/移除特定 slots）
+   */
+  @Patch()
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionAuthGuard)
+  async updateVotes(
+    @Param('eventId') eventId: string,
+    @Body() updateVoteDto: UpdateVoteDto,
+    @CurrentUser() userId: string,
+  ) {
+    return this.voteService.updateVotes(eventId, userId, updateVoteDto);
   }
 }

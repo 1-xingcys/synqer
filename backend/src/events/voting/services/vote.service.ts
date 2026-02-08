@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { VoteRepository } from '../repositories/vote.repository';
-import { VoteEventDto, VoteMode } from '../dto/vote-event.dto';
+import { VoteEventDto, VoteMode, UpdateVoteDto } from '../dto/vote-event.dto';
 import { TimeSlotRepository } from '../../shared/repositories/time-slot.repository';
 
 /**
@@ -69,6 +69,58 @@ export class VoteService {
       success: true,
       votedSlots: result.availableSlotIds.length,
       voteMode,
+    };
+  }
+
+  /**
+   * 增量更新使用者的投票
+   * 新增 addSlotIds 的投票紀錄、移除 removeSlotIds 的投票紀錄
+   */
+  async updateVotes(
+    eventId: string,
+    userId: string,
+    updateVoteDto: UpdateVoteDto,
+  ) {
+    const { addSlotIds = [], removeSlotIds = [] } = updateVoteDto;
+    if (addSlotIds.length === 0 && removeSlotIds.length === 0) {
+      return { success: true, added: 0, removed: 0 };
+    }
+
+    const event = await this.voteRepository.findEventVotingInfo(eventId);
+
+    if (!event || event.isDeleted) {
+      throw new BadRequestException('活動不存在');
+    }
+
+    if (event.votingDeadline && new Date() > event.votingDeadline) {
+      throw new BadRequestException('投票已截止');
+    }
+
+    const allSlotIds = await this.timeSlotRepository.findIdsByEventId(eventId);
+    const allSlotIdSet = new Set(allSlotIds);
+    const uniqueAddSlotIds = [...new Set(addSlotIds)];
+    const uniqueRemoveSlotIds = [...new Set(removeSlotIds)];
+
+    const allRequestedIds = [...uniqueAddSlotIds, ...uniqueRemoveSlotIds];
+    const invalidSlotIds = allRequestedIds.filter(
+      (id) => !allSlotIdSet.has(id),
+    );
+    if (invalidSlotIds.length > 0) {
+      throw new BadRequestException('部分時段不屬於此活動');
+    }
+
+    // 使用 transaction 執行增量更新
+    const result = await this.voteRepository.updateVotesInTransaction(
+      eventId,
+      userId,
+      uniqueAddSlotIds,
+      uniqueRemoveSlotIds,
+    );
+
+    return {
+      success: true,
+      added: result.addSlotIds.length,
+      removed: result.removeSlotIds.length,
     };
   }
 }
