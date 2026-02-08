@@ -1,0 +1,268 @@
+"use client";
+
+import { useState, useMemo, useCallback } from "react";
+import { Vote, TimeGranularity, VotingGridProps } from "../types";
+import { useVotingSelection } from "./useVotingSelection";
+import { useCalendarIntegration } from "./useCalendarIntegration";
+import { useMergedRowDragSelection } from "./useMergedRowDragSelection";
+import { useMergedRows } from "./useMergedRows";
+import { useResponsiveGrid } from "./useResponsiveGrid";
+import { usePaginatedDates } from "./usePaginatedDates";
+import { useOptimisticVoting } from "./useOptimisticVoting";
+import { useCalendarOverlayProjection } from "./useCalendarOverlayProjection";
+import { useSlotMatrixViewModel } from "./useSlotMatrixViewModel";
+import { groupVotesBySlot } from "../utils";
+import { VoteMode } from "@/types/event";
+
+interface UseVotingGridControllerProps {
+  slots: VotingGridProps["slots"];
+  votes: VotingGridProps["votes"];
+  eventId: VotingGridProps["eventId"];
+  currentUserId: VotingGridProps["currentUserId"];
+  currentUserDisplayName: VotingGridProps["currentUserDisplayName"];
+}
+
+interface UseVotingGridControllerResult {
+  // top-level controls
+  granularity: TimeGranularity;
+  setGranularity: (granularity: TimeGranularity) => void;
+  voteMode: VoteMode;
+  setVoteMode: (mode: VoteMode) => void;
+  selectedCount: number;
+  clearSelection: () => void;
+  selectAll: () => void;
+
+  // pagination / grid structure
+  dates: string[];
+  paginatedDates: string[];
+  currentPage: number;
+  datesPerPage: number;
+  handlePageChange: (newPage: number) => void;
+  slotHeight: string;
+  mergedRows: ReturnType<typeof useMergedRows>["mergedRows"];
+  slotMatrixRows: ReturnType<typeof useSlotMatrixViewModel>;
+  mergedRectBounds: ReturnType<
+    typeof useMergedRowDragSelection
+  >["getRectangleBounds"] extends (...args: never[]) => infer R
+    ? R
+    : never;
+
+  // day/grid actions
+  isDayFullySelected: (dateKey: string) => boolean;
+  selectEntireDay: (dateKey: string) => void;
+  handleGridMouseUp: () => void;
+  handleGridMouseLeave: () => void;
+
+  // drag/cell interactions
+  isDragging: boolean;
+  handleMergedMouseDown: (
+    rowIndex: number,
+    dateIndex: number,
+    e: React.MouseEvent,
+  ) => void;
+  handleMergedMouseEnter: (rowIndex: number, dateIndex: number) => void;
+  handleMergedTouchStart: (
+    rowIndex: number,
+    dateIndex: number,
+    e: React.TouchEvent,
+  ) => void;
+  handleMergedTouchMove: (e: React.TouchEvent) => void;
+  handleMergedTouchEnd: () => void;
+  handleMergedClick: (rowIndex: number, dateIndex: number) => void;
+
+  // calendar panel / legend
+  calendarStatus: { connected: boolean; googleEmail?: string } | null;
+  calendarLoading: boolean;
+  calendarEvents: ReturnType<typeof useCalendarIntegration>["calendarEvents"];
+  conflictingSlotIds: string[];
+  loadingCalendar: boolean;
+  showCalendarOnGrid: boolean;
+  setShowCalendarOnGrid: (show: boolean) => void;
+  connectCalendar: () => void;
+  disconnectCalendar: () => Promise<void>;
+  markConflictsAsUnavailable: () => void;
+}
+
+export function useVotingGridController({
+  slots,
+  votes,
+  eventId,
+  currentUserId,
+  currentUserDisplayName,
+}: UseVotingGridControllerProps): UseVotingGridControllerResult {
+  const [granularity, setGranularity] = useState<TimeGranularity>(15);
+  const { datesPerPage, slotHeight } = useResponsiveGrid();
+
+  const { selectedSlots, toggleSlots, replaceAllSlots } = useOptimisticVoting({
+    eventId,
+    currentUserId,
+    currentUserDisplayName,
+    votes,
+  });
+
+  const {
+    voteMode,
+    slotsByDate,
+    dates,
+    timeSlots,
+    displaySelection: modeDisplaySelection,
+    setVoteMode,
+    commitDisplaySelectionChange,
+    selectEntireDay,
+    clearSelection,
+    selectAll,
+    isDayFullySelected,
+    applyConflicts,
+  } = useVotingSelection({
+    slots,
+    selectedSlots,
+    onSelectionCommit: toggleSlots,
+    onReplaceAll: replaceAllSlots,
+  });
+
+  const { mergedRows } = useMergedRows({
+    timeSlots,
+    granularity,
+  });
+
+  const { paginatedDates, currentPage, setCurrentPage } = usePaginatedDates({
+    dates,
+    datesPerPage,
+  });
+
+  const {
+    isDragging,
+    hoveredCell,
+    longPressCell,
+    displaySelection,
+    handleMouseDown: handleMergedMouseDown,
+    handleMouseEnter: handleMergedMouseEnter,
+    handleMouseUp: handleMergedMouseUp,
+    handleTouchStart: handleMergedTouchStart,
+    handleTouchMove: handleMergedTouchMove,
+    handleTouchEnd: handleMergedTouchEnd,
+    handleClick: handleMergedClick,
+    setHoveredCell,
+    isInDragRectangle,
+    getRectangleBounds: getMergedRectangleBounds,
+  } = useMergedRowDragSelection({
+    selectedSlots: modeDisplaySelection,
+    mergedRows,
+    slotsByDate,
+    paginatedDates,
+    onSelectionCommit: commitDisplaySelectionChange,
+  });
+
+  const {
+    calendarStatus,
+    calendarLoading,
+    calendarEvents,
+    conflictingSlotIds,
+    loadingCalendar,
+    showCalendarOnGrid,
+    calendarEventsForSlot,
+    setShowCalendarOnGrid,
+    connectCalendar,
+    disconnectCalendar,
+  } = useCalendarIntegration({ eventId, slots, slotsByDate });
+
+  const { getCalendarProjectionForCell } = useCalendarOverlayProjection({
+    mergedRows,
+    paginatedDates,
+    slotsByDate,
+    calendarEventsForSlot,
+  });
+
+  const votesBySlot = useMemo(() => groupVotesBySlot(votes), [votes]);
+
+  const getVotersForSlot = useCallback(
+    (slotId: string): string[] => {
+      return (votesBySlot[slotId] || []).map((v: Vote) => v.userDisplayName);
+    },
+    [votesBySlot],
+  );
+
+  const getVotersForMergedRow = useCallback(
+    (slotIndices: number[], dateKey: string): string[] => {
+      const allVoters = new Set<string>();
+      slotIndices.forEach((idx) => {
+        const slot = slotsByDate[dateKey]?.[idx];
+        if (!slot) return;
+
+        const voters = getVotersForSlot(slot.id);
+        voters.forEach((v) => allVoters.add(v));
+      });
+      return Array.from(allVoters);
+    },
+    [slotsByDate, getVotersForSlot],
+  );
+
+  const slotMatrixRows = useSlotMatrixViewModel({
+    mergedRows,
+    paginatedDates,
+    slotsByDate,
+    displaySelection,
+    hoveredCell,
+    longPressCell,
+    isInDragRectangle,
+    getVotersForMergedRow,
+    getCalendarProjectionForCell,
+  });
+
+  const mergedRectBounds = getMergedRectangleBounds();
+
+  const markConflictsAsUnavailable = useCallback(() => {
+    applyConflicts(conflictingSlotIds);
+  }, [applyConflicts, conflictingSlotIds]);
+
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      setCurrentPage(newPage);
+    },
+    [setCurrentPage],
+  );
+
+  const handleGridMouseLeave = useCallback(() => {
+    setHoveredCell(null);
+  }, [setHoveredCell]);
+
+  return {
+    granularity,
+    setGranularity,
+    voteMode,
+    setVoteMode,
+    selectedCount: displaySelection.size,
+    clearSelection,
+    selectAll,
+    dates,
+    paginatedDates,
+    currentPage,
+    datesPerPage,
+    handlePageChange,
+    slotHeight,
+    mergedRows,
+    slotMatrixRows,
+    mergedRectBounds,
+    isDayFullySelected,
+    selectEntireDay,
+    handleGridMouseUp: handleMergedMouseUp,
+    handleGridMouseLeave,
+    isDragging,
+    handleMergedMouseDown,
+    handleMergedMouseEnter,
+    handleMergedTouchStart,
+    handleMergedTouchMove,
+    handleMergedTouchEnd,
+    handleMergedClick,
+    calendarStatus,
+    calendarLoading,
+    calendarEvents,
+    conflictingSlotIds,
+    loadingCalendar,
+    showCalendarOnGrid,
+    setShowCalendarOnGrid,
+    connectCalendar,
+    disconnectCalendar,
+    markConflictsAsUnavailable,
+  };
+}

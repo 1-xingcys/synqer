@@ -11,3 +11,4 @@ export { useFilteredVotes } from "./useFilteredVotes";
 export { useOptimisticVoting } from "./useOptimisticVoting";
 export { useCalendarOverlayProjection } from "./useCalendarOverlayProjection";
 export { useSlotMatrixViewModel } from "./useSlotMatrixViewModel";
+export { useVotingGridController } from "./useVotingGridController";
