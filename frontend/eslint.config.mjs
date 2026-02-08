@@ -73,4 +73,13 @@ export default tseslint.config(
       '@next/next/no-html-link-for-pages': 'off', // 使用 next-intl 的 Link
     },
   },
+  {
+    files: ['**/*.test.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+        ...globals.node,
+      },
+    },
+  },
 );
