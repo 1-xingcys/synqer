@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback } from "react";
 import { TimeSlot } from "../types";
 import { VoteMode } from "@/types/event";
 import { useSlotGrid } from "./useSlotGrid";
@@ -19,6 +18,7 @@ interface UseVotingSelectionProps {
 interface UseVotingSelectionReturn {
   // State
   selectedSlots: Set<string>;
+  displaySelection: Set<string>;
   voteMode: VoteMode;
 
   // Computed
@@ -28,6 +28,10 @@ interface UseVotingSelectionReturn {
 
   // Actions
   setVoteMode: (mode: VoteMode) => void;
+  commitDisplaySelectionChange: (
+    addDisplaySlotIds: string[],
+    removeDisplaySlotIds: string[],
+  ) => void;
   selectEntireDay: (dateKey: string) => void;
   clearSelection: () => void;
   selectAll: () => void;
@@ -48,11 +52,13 @@ export function useVotingSelection({
   const {
     voteMode,
     setVoteMode,
+    displaySelection,
+    commitDisplaySelectionChange,
     selectEntireDay,
     clearSelection,
     selectAll,
     applyConflicts,
-    isDayFullySelected: isDayFullySelectedInternal,
+    isDayFullySelected,
   } = useSlotSelection({
     slots,
     slotsByDate,
@@ -61,17 +67,10 @@ export function useVotingSelection({
     onReplaceAll,
   });
 
-  // Wrap isDayFullySelected to use current selectedSlots
-  const isDayFullySelected = useCallback(
-    (dateKey: string) => {
-      return isDayFullySelectedInternal(dateKey, selectedSlots);
-    },
-    [selectedSlots, isDayFullySelectedInternal],
-  );
-
   return {
     // State
     selectedSlots,
+    displaySelection,
     voteMode,
 
     // Computed
@@ -81,6 +80,7 @@ export function useVotingSelection({
 
     // Actions
     setVoteMode,
+    commitDisplaySelectionChange,
     selectEntireDay,
     clearSelection,
     selectAll,

@@ -2,7 +2,6 @@
 
 import { useMemo, useCallback, useState } from "react";
 import { VotingGridProps, Vote, CalendarEvent, TimeGranularity } from "./types";
-import { VoteMode } from "@/types/event";
 import {
   useVotingSelection,
   useCalendarIntegration,
@@ -51,7 +50,9 @@ export default function VotingGrid({
     slotsByDate,
     dates,
     timeSlots,
+    displaySelection: modeDisplaySelection,
     setVoteMode,
+    commitDisplaySelectionChange,
     selectEntireDay,
     clearSelection,
     selectAll,
@@ -76,35 +77,6 @@ export default function VotingGrid({
     datesPerPage,
   });
 
-  // Wrap onSelectionCommit to handle VoteMode
-  const handleSelectionCommit = useCallback(
-    (addSlotIds: string[], removeSlotIds: string[]) => {
-      if (voteMode === "available") {
-        // Available mode: add = mark available (add vote), remove = mark unavailable (remove vote)
-        toggleSlots(addSlotIds, removeSlotIds);
-      } else {
-        // Unavailable mode: add = mark unavailable (remove vote), remove = mark available (add vote)
-        toggleSlots(removeSlotIds, addSlotIds);
-      }
-    },
-    [voteMode, toggleSlots],
-  );
-
-  // Selection displayed on grid depends on mode:
-  // - available: selected = voted slots
-  // - unavailable: selected = complement of voted slots
-  const modeSelection = useMemo(() => {
-    if (voteMode === VoteMode.AVAILABLE) return selectedSlots;
-
-    const unavailableSelection = new Set<string>();
-    slots.forEach((slot) => {
-      if (!selectedSlots.has(slot.id)) {
-        unavailableSelection.add(slot.id);
-      }
-    });
-    return unavailableSelection;
-  }, [voteMode, selectedSlots, slots]);
-
   // Use merged row drag selection hook
   const {
     isDragging,
@@ -122,11 +94,11 @@ export default function VotingGrid({
     isInDragRectangle,
     getRectangleBounds: getMergedRectangleBounds,
   } = useMergedRowDragSelection({
-    selectedSlots: modeSelection,
+    selectedSlots: modeDisplaySelection,
     mergedRows,
     slotsByDate,
     paginatedDates,
-    onSelectionCommit: handleSelectionCommit,
+    onSelectionCommit: commitDisplaySelectionChange,
   });
 
   // Use calendar integration hook

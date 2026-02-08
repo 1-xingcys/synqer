@@ -1,8 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { TimeSlot } from "../types";
 import { VoteMode } from "@/types/event";
+import {
+  projectSelectionForMode,
+  mapDisplayDiffToAvailableDiff,
+  getClearSelectionAvailableSlotIds,
+  getSelectAllAvailableSlotIds,
+  getMarkUnavailableDiff,
+} from "../domain/selection";
 
 interface UseSlotSelectionProps {
   slots: TimeSlot[];
@@ -18,15 +25,20 @@ interface UseSlotSelectionProps {
 interface UseSlotSelectionReturn {
   // State
   selectedSlots: Set<string>;
+  displaySelection: Set<string>;
   voteMode: VoteMode;
 
   // Actions
   setVoteMode: (mode: VoteMode) => void;
+  commitDisplaySelectionChange: (
+    addDisplaySlotIds: string[],
+    removeDisplaySlotIds: string[],
+  ) => void;
   selectEntireDay: (dateKey: string) => void;
   clearSelection: () => void;
   selectAll: () => void;
   applyConflicts: (conflictingSlotIds: string[]) => void;
-  isDayFullySelected: (dateKey: string, checkSet?: Set<string>) => boolean;
+  isDayFullySelected: (dateKey: string) => boolean;
 }
 
 export function useSlotSelection({
@@ -37,36 +49,58 @@ export function useSlotSelection({
   onReplaceAll,
 }: UseSlotSelectionProps): UseSlotSelectionReturn {
   const [voteMode, setVoteModeState] = useState<VoteMode>(VoteMode.AVAILABLE);
+  const allSlotIds = useMemo(() => slots.map((s) => s.id), [slots]);
+
+  // UI-level selection projected by current vote mode.
+  const displaySelection = useMemo(
+    () => projectSelectionForMode(selectedSlots, allSlotIds, voteMode),
+    [selectedSlots, allSlotIds, voteMode],
+  );
+
+  const commitDisplaySelectionChange = useCallback(
+    (addDisplaySlotIds: string[], removeDisplaySlotIds: string[]) => {
+      const { addSlotIds, removeSlotIds } = mapDisplayDiffToAvailableDiff(
+        voteMode,
+        addDisplaySlotIds,
+        removeDisplaySlotIds,
+      );
+
+      onSelectionCommit(addSlotIds, removeSlotIds);
+    },
+    [voteMode, onSelectionCommit],
+  );
 
   // Check if a day is fully selected
   const isDayFullySelected = useCallback(
-    (dateKey: string, checkSet?: Set<string>) => {
+    (dateKey: string) => {
       const daySlots = slotsByDate[dateKey] || [];
-      const setToCheck = checkSet ?? selectedSlots;
       return (
-        daySlots.length > 0 && daySlots.every((slot) => setToCheck.has(slot.id))
+        daySlots.length > 0 &&
+        daySlots.every((slot) => displaySelection.has(slot.id))
       );
     },
-    [slotsByDate, selectedSlots],
+    [slotsByDate, displaySelection],
   );
 
-  // Select entire day — 增量更新
+  // Select entire day in current display mode — 增量更新
   const selectEntireDay = useCallback(
     (dateKey: string) => {
       const daySlots = slotsByDate[dateKey] || [];
-      const allSelected = daySlots.every((slot) => selectedSlots.has(slot.id));
+      const allSelected = daySlots.every((slot) =>
+        displaySelection.has(slot.id),
+      );
       const daySlotIds = daySlots.map((slot) => slot.id);
 
       if (allSelected) {
-        // 取消選擇整天
-        onSelectionCommit([], daySlotIds);
+        // Toggle day off in display selection.
+        commitDisplaySelectionChange([], daySlotIds);
       } else {
-        // 選擇整天（只新增尚未選擇的）
-        const toAdd = daySlotIds.filter((id) => !selectedSlots.has(id));
-        onSelectionCommit(toAdd, []);
+        // Toggle day on in display selection.
+        const toAdd = daySlotIds.filter((id) => !displaySelection.has(id));
+        commitDisplaySelectionChange(toAdd, []);
       }
     },
-    [slotsByDate, selectedSlots, onSelectionCommit],
+    [slotsByDate, displaySelection, commitDisplaySelectionChange],
   );
 
   // Vote mode change handler
@@ -74,45 +108,37 @@ export function useSlotSelection({
     setVoteModeState(newMode);
   }, []);
 
-  // Clear selection — 全量替換為空
+  // Clear selection in current display mode.
   const clearSelection = useCallback(() => {
-    onReplaceAll([]);
-  }, [onReplaceAll]);
+    onReplaceAll(getClearSelectionAvailableSlotIds(voteMode, allSlotIds));
+  }, [onReplaceAll, voteMode, allSlotIds]);
 
-  // Select all — 全量替換為全部
+  // Select all in current display mode.
   const selectAll = useCallback(() => {
-    const allSlotIds = slots.map((s) => s.id);
-    onReplaceAll(allSlotIds);
-  }, [slots, onReplaceAll]);
+    onReplaceAll(getSelectAllAvailableSlotIds(voteMode, allSlotIds));
+  }, [onReplaceAll, voteMode, allSlotIds]);
 
-  // Apply conflicts from calendar — 增量更新
+  // Apply conflicts from calendar (mark as unavailable in canonical model).
   const applyConflicts = useCallback(
     (conflictingSlotIds: string[]) => {
-      if (voteMode === VoteMode.UNAVAILABLE) {
-        // 不可用模式：將衝突時段標記為選取（不可用）
-        // 在資料庫中，這代表移除投票（因為投票 = 有空）
-        const toRemove = conflictingSlotIds.filter((id) =>
-          selectedSlots.has(id),
-        );
-        onSelectionCommit([], toRemove);
-      } else {
-        // 可用模式：將衝突時段從選取中移除
-        const toRemove = conflictingSlotIds.filter((id) =>
-          selectedSlots.has(id),
-        );
-        onSelectionCommit([], toRemove);
-      }
+      const { addSlotIds, removeSlotIds } = getMarkUnavailableDiff(
+        selectedSlots,
+        conflictingSlotIds,
+      );
+      onSelectionCommit(addSlotIds, removeSlotIds);
     },
-    [voteMode, selectedSlots, onSelectionCommit],
+    [selectedSlots, onSelectionCommit],
   );
 
   return {
     // State
     selectedSlots,
+    displaySelection,
     voteMode,
 
     // Actions
     setVoteMode,
+    commitDisplaySelectionChange,
     selectEntireDay,
     clearSelection,
     selectAll,
