@@ -125,6 +125,34 @@ export async function patchVotesApi(
   }
 }
 
+// Replace votes function (full update)
+export async function replaceVotesApi(
+  eventId: string,
+  selectedSlotIds: string[],
+  voteMode: "available" | "unavailable" = "available",
+): Promise<void> {
+  if (!process.env.NEXT_PUBLIC_API) {
+    throw new Error("NEXT_PUBLIC_API is not set");
+  }
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/voting`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ selectedSlotIds, voteMode }),
+    },
+  );
+
+  if (!response.ok) {
+    const errorData = (await response.json().catch(() => ({}))) as {
+      message?: string;
+    };
+    throw new Error(errorData.message || "Failed to save votes");
+  }
+}
+
 export function useEventDetail(eventId: string) {
   const query = useQuery({
     queryKey: eventDetailKeys.detail(eventId),

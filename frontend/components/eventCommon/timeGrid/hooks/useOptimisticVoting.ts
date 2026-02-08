@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   patchVotesApi,
+  replaceVotesApi,
   eventDetailKeys,
   EventDetailData,
 } from "@/hooks/useEventDetail";
@@ -122,29 +123,8 @@ export function useOptimisticVoting({
 
   // 全量替換 mutation（用於 selectAll / clearSelection）
   const replaceMutation = useMutation({
-    mutationFn: async ({ slotIds }: { slotIds: string[] }) => {
-      if (!process.env.NEXT_PUBLIC_API) {
-        throw new Error("NEXT_PUBLIC_API is not set");
-      }
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}/voting`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({
-            selectedSlotIds: slotIds,
-            voteMode: "available",
-          }),
-        },
-      );
-      if (!response.ok) {
-        const errorData = (await response.json().catch(() => ({}))) as {
-          message?: string;
-        };
-        throw new Error(errorData.message || "Failed to save votes");
-      }
-    },
+    mutationFn: async ({ slotIds }: { slotIds: string[] }) =>
+      replaceVotesApi(eventId, slotIds, "available"),
     onMutate: async ({ slotIds }) => {
       await queryClient.cancelQueries({
         queryKey: eventDetailKeys.detail(eventId),
