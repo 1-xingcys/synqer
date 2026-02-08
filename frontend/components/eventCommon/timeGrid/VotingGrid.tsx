@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useMemo, useCallback, useState } from "react";
 import { VotingGridProps, Vote, CalendarEvent, TimeGranularity } from "./types";
+import { VoteMode } from "@/types/event";
 import {
   useVotingSelection,
   useCalendarIntegration,
@@ -10,10 +10,10 @@ import {
   useMergedRows,
   useResponsiveGrid,
   usePaginatedDates,
+  useOptimisticVoting,
 } from "./hooks";
 import { groupVotesBySlot } from "./utils";
 import {
-  VotingHeader,
   VoteModeToggle,
   SelectionInfoBar,
   GridLegend,
@@ -30,30 +30,39 @@ export type { VotingGridProps };
 export default function VotingGrid({
   slots,
   votes,
-  onSave,
-  initialSelectedIds = [],
   eventId,
+  currentUserId,
+  currentUserDisplayName,
 }: VotingGridProps) {
-  const t = useTranslations("event");
-  const [saving, setSaving] = useState(false);
   const [granularity, setGranularity] = useState<TimeGranularity>(15);
   const { datesPerPage, slotHeight } = useResponsiveGrid();
 
-  // Use voting selection hook (for utilities and base state)
+  // Optimistic voting hook — 從 cache 派生 selectedSlots + 提供 mutation
+  const { selectedSlots, toggleSlots, replaceAllSlots } = useOptimisticVoting({
+    eventId,
+    currentUserId,
+    currentUserDisplayName,
+    votes,
+  });
+
+  // Use voting selection hook (grid data + voteMode + actions)
   const {
-    selectedSlots,
     voteMode,
     slotsByDate,
     dates,
     timeSlots,
-    setSelectedSlots,
     setVoteMode,
     selectEntireDay,
     clearSelection,
     selectAll,
     isDayFullySelected,
     applyConflicts,
-  } = useVotingSelection({ slots, initialSelectedIds });
+  } = useVotingSelection({
+    slots,
+    selectedSlots,
+    onSelectionCommit: toggleSlots,
+    onReplaceAll: replaceAllSlots,
+  });
 
   // Use time granularity hook
   const { mergedRows } = useMergedRows({
@@ -66,6 +75,35 @@ export default function VotingGrid({
     dates,
     datesPerPage,
   });
+
+  // Wrap onSelectionCommit to handle VoteMode
+  const handleSelectionCommit = useCallback(
+    (addSlotIds: string[], removeSlotIds: string[]) => {
+      if (voteMode === "available") {
+        // Available mode: add = mark available (add vote), remove = mark unavailable (remove vote)
+        toggleSlots(addSlotIds, removeSlotIds);
+      } else {
+        // Unavailable mode: add = mark unavailable (remove vote), remove = mark available (add vote)
+        toggleSlots(removeSlotIds, addSlotIds);
+      }
+    },
+    [voteMode, toggleSlots],
+  );
+
+  // Selection displayed on grid depends on mode:
+  // - available: selected = voted slots
+  // - unavailable: selected = complement of voted slots
+  const modeSelection = useMemo(() => {
+    if (voteMode === VoteMode.AVAILABLE) return selectedSlots;
+
+    const unavailableSelection = new Set<string>();
+    slots.forEach((slot) => {
+      if (!selectedSlots.has(slot.id)) {
+        unavailableSelection.add(slot.id);
+      }
+    });
+    return unavailableSelection;
+  }, [voteMode, selectedSlots, slots]);
 
   // Use merged row drag selection hook
   const {
@@ -84,11 +122,11 @@ export default function VotingGrid({
     isInDragRectangle,
     getRectangleBounds: getMergedRectangleBounds,
   } = useMergedRowDragSelection({
-    selectedSlots,
-    setSelectedSlots,
+    selectedSlots: modeSelection,
     mergedRows,
     slotsByDate,
     paginatedDates,
+    onSelectionCommit: handleSelectionCommit,
   });
 
   // Use calendar integration hook
@@ -134,19 +172,6 @@ export default function VotingGrid({
 
   // Get rectangle bounds for visual overlay
   const mergedRectBounds = getMergedRectangleBounds();
-
-  // Save handler
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await onSave(Array.from(selectedSlots), voteMode);
-    } catch (error) {
-      console.error("Save error:", error);
-      alert(t("saveError"));
-    } finally {
-      setSaving(false);
-    }
-  };
 
   // Mark conflicts as unavailable
   const markConflictsAsUnavailable = useCallback(() => {
@@ -230,13 +255,10 @@ export default function VotingGrid({
         markConflictsAsUnavailable={markConflictsAsUnavailable}
       />
 
-      {/* Top Bar: Mode Toggle + Save */}
+      {/* Top Bar: Mode Toggle */}
       <div className="flex items-start sm:items-center justify-between gap-2 sm:gap-3">
         {/* Vote Mode Toggle */}
         <VoteModeToggle voteMode={voteMode} onModeChange={setVoteMode} />
-
-        {/* Save Button */}
-        <VotingHeader saving={saving} onSave={() => void handleSave()} />
       </div>
 
       {/* Selection info bar */}

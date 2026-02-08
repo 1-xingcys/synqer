@@ -7,7 +7,12 @@ import { VoteMode } from "@/types/event";
 interface UseSlotSelectionProps {
   slots: TimeSlot[];
   slotsByDate: Record<string, TimeSlot[]>;
-  initialSelectedIds: string[];
+  /** 從 React Query cache 派生的當前使用者已選 slot IDs */
+  selectedSlots: Set<string>;
+  /** 增量更新 callback */
+  onSelectionCommit: (addSlotIds: string[], removeSlotIds: string[]) => void;
+  /** 全量替換 callback（用於 selectAll / clearSelection） */
+  onReplaceAll: (slotIds: string[]) => void;
 }
 
 interface UseSlotSelectionReturn {
@@ -16,8 +21,7 @@ interface UseSlotSelectionReturn {
   voteMode: VoteMode;
 
   // Actions
-  setSelectedSlots: React.Dispatch<React.SetStateAction<Set<string>>>;
-  setVoteMode: (mode: VoteMode, onModeChange?: () => void) => void;
+  setVoteMode: (mode: VoteMode) => void;
   selectEntireDay: (dateKey: string) => void;
   clearSelection: () => void;
   selectAll: () => void;
@@ -28,11 +32,10 @@ interface UseSlotSelectionReturn {
 export function useSlotSelection({
   slots,
   slotsByDate,
-  initialSelectedIds,
+  selectedSlots,
+  onSelectionCommit,
+  onReplaceAll,
 }: UseSlotSelectionProps): UseSlotSelectionReturn {
-  const [selectedSlots, setSelectedSlots] = useState<Set<string>>(
-    new Set(initialSelectedIds),
-  );
   const [voteMode, setVoteModeState] = useState<VoteMode>(VoteMode.AVAILABLE);
 
   // Check if a day is fully selected
@@ -47,70 +50,60 @@ export function useSlotSelection({
     [slotsByDate, selectedSlots],
   );
 
-  // Select entire day
+  // Select entire day — 增量更新
   const selectEntireDay = useCallback(
     (dateKey: string) => {
       const daySlots = slotsByDate[dateKey] || [];
       const allSelected = daySlots.every((slot) => selectedSlots.has(slot.id));
+      const daySlotIds = daySlots.map((slot) => slot.id);
 
-      setSelectedSlots((prev) => {
-        const newSelected = new Set(prev);
-        daySlots.forEach((slot) => {
-          if (allSelected) {
-            newSelected.delete(slot.id);
-          } else {
-            newSelected.add(slot.id);
-          }
-        });
-        return newSelected;
-      });
+      if (allSelected) {
+        // 取消選擇整天
+        onSelectionCommit([], daySlotIds);
+      } else {
+        // 選擇整天（只新增尚未選擇的）
+        const toAdd = daySlotIds.filter((id) => !selectedSlots.has(id));
+        onSelectionCommit(toAdd, []);
+      }
     },
-    [slotsByDate, selectedSlots],
+    [slotsByDate, selectedSlots, onSelectionCommit],
   );
 
   // Vote mode change handler
-  const setVoteMode = useCallback(
-    (newMode: VoteMode, onModeChange?: () => void) => {
-      setVoteModeState((prevMode) => {
-        if (newMode !== prevMode) {
-          setSelectedSlots(new Set());
-          onModeChange?.();
-        }
-        return newMode;
-      });
-    },
-    [],
-  );
-
-  // Clear selection
-  const clearSelection = useCallback(() => {
-    setSelectedSlots(new Set());
+  const setVoteMode = useCallback((newMode: VoteMode) => {
+    setVoteModeState(newMode);
   }, []);
 
-  // Select all
-  const selectAll = useCallback(() => {
-    const allSlots = new Set(slots.map((s) => s.id));
-    setSelectedSlots(allSlots);
-  }, [slots]);
+  // Clear selection — 全量替換為空
+  const clearSelection = useCallback(() => {
+    onReplaceAll([]);
+  }, [onReplaceAll]);
 
-  // Apply conflicts from calendar
+  // Select all — 全量替換為全部
+  const selectAll = useCallback(() => {
+    const allSlotIds = slots.map((s) => s.id);
+    onReplaceAll(allSlotIds);
+  }, [slots, onReplaceAll]);
+
+  // Apply conflicts from calendar — 增量更新
   const applyConflicts = useCallback(
     (conflictingSlotIds: string[]) => {
       if (voteMode === VoteMode.UNAVAILABLE) {
-        setSelectedSlots((prev) => {
-          const newSelection = new Set(prev);
-          conflictingSlotIds.forEach((id) => newSelection.add(id));
-          return newSelection;
-        });
+        // 不可用模式：將衝突時段標記為選取（不可用）
+        // 在資料庫中，這代表移除投票（因為投票 = 有空）
+        const toRemove = conflictingSlotIds.filter((id) =>
+          selectedSlots.has(id),
+        );
+        onSelectionCommit([], toRemove);
       } else {
-        setSelectedSlots((prev) => {
-          const newSelection = new Set(prev);
-          conflictingSlotIds.forEach((id) => newSelection.delete(id));
-          return newSelection;
-        });
+        // 可用模式：將衝突時段從選取中移除
+        const toRemove = conflictingSlotIds.filter((id) =>
+          selectedSlots.has(id),
+        );
+        onSelectionCommit([], toRemove);
       }
     },
-    [voteMode],
+    [voteMode, selectedSlots, onSelectionCommit],
   );
 
   return {
@@ -119,7 +112,6 @@ export function useSlotSelection({
     voteMode,
 
     // Actions
-    setSelectedSlots,
     setVoteMode,
     selectEntireDay,
     clearSelection,

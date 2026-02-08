@@ -16,7 +16,7 @@ export default function JoinedEventPage() {
   const eventId = params.eventId as string;
   const tJoined = useTranslations("joined");
   const { user } = useAuthContext();
-  const { data: eventDetailData, saveVotes } = useJoinedEventContext();
+  const { data: eventDetailData } = useJoinedEventContext();
 
   // Loading and error states are handled by the layout
   if (!eventDetailData) {
@@ -26,13 +26,7 @@ export default function JoinedEventPage() {
   const { event } = eventDetailData;
   const isVoting = event.status === EventStatus.VOTING;
 
-  const currentUserVotes: string[] = user
-    ? eventDetailData.votes
-        .filter((vote) => vote.userId === user.id.toString())
-        .map((vote) => vote.slotId)
-    : [];
-
-  if (isVoting) {
+  if (isVoting && user) {
     return (
       <div className="space-y-4 sm:space-y-6">
         <VotingInstruction />
@@ -41,9 +35,8 @@ export default function JoinedEventPage() {
             slots={eventDetailData.slots}
             votes={eventDetailData.votes}
             participants={eventDetailData.participants}
-            onSave={saveVotes}
-            initialSelectedIds={currentUserVotes}
-            currentUserId={user?.id?.toString()}
+            currentUserId={user.id.toString()}
+            currentUserDisplayName={user.displayName || ""}
             eventId={eventId}
           />
         </div>

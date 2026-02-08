@@ -1,182 +1,90 @@
 "use client";
 
 import { useCallback } from "react";
-import { TimeSlot, GridPosition } from "../types";
+import { TimeSlot } from "../types";
 import { VoteMode } from "@/types/event";
 import { useSlotGrid } from "./useSlotGrid";
 import { useSlotSelection } from "./useSlotSelection";
-import { useDragSelection } from "./useDragSelection";
 
 interface UseVotingSelectionProps {
   slots: TimeSlot[];
-  initialSelectedIds: string[];
+  /** 從 React Query cache 派生的當前使用者已選 slot IDs */
+  selectedSlots: Set<string>;
+  /** 增量更新 callback */
+  onSelectionCommit: (addSlotIds: string[], removeSlotIds: string[]) => void;
+  /** 全量替換 callback */
+  onReplaceAll: (slotIds: string[]) => void;
 }
 
 interface UseVotingSelectionReturn {
   // State
   selectedSlots: Set<string>;
-  isDragging: boolean;
-  dragStart: GridPosition | null;
-  dragEnd: GridPosition | null;
-  baseSelection: Set<string>;
-  hoveredSlot: string | null;
-  longPressSlot: string | null;
   voteMode: VoteMode;
 
   // Computed
-  previewSelection: Set<string>;
-  displaySelection: Set<string>;
   slotsByDate: Record<string, TimeSlot[]>;
   dates: string[];
   timeSlots: TimeSlot[];
-  slotGrid: string[][];
 
   // Actions
-  setSelectedSlots: React.Dispatch<React.SetStateAction<Set<string>>>;
-  setHoveredSlot: React.Dispatch<React.SetStateAction<string | null>>;
   setVoteMode: (mode: VoteMode) => void;
-  handleMouseDown: (slotId: string, e: React.MouseEvent) => void;
-  handleMouseEnter: (slotId: string) => void;
-  handleMouseUp: () => void;
-  handleTouchStart: (slotId: string, e: React.TouchEvent) => void;
-  handleTouchMove: (e: React.TouchEvent) => void;
-  handleTouchEnd: () => void;
-  handleClick: (slotId: string) => void;
   selectEntireDay: (dateKey: string) => void;
   clearSelection: () => void;
   selectAll: () => void;
-  isSlotInRectangle: (slotId: string) => boolean;
-  getRectangleBounds: () => {
-    minDate: number;
-    maxDate: number;
-    minTime: number;
-    maxTime: number;
-  } | null;
   isDayFullySelected: (dateKey: string) => boolean;
-  getSlotPosition: (slotId: string) => GridPosition | null;
   applyConflicts: (conflictingSlotIds: string[]) => void;
 }
 
 export function useVotingSelection({
   slots,
-  initialSelectedIds,
+  selectedSlots,
+  onSelectionCommit,
+  onReplaceAll,
 }: UseVotingSelectionProps): UseVotingSelectionReturn {
   // Grid data processing
-  const {
-    slotsByDate,
-    dates,
-    timeSlots,
-    slotGrid,
-    getSlotPosition,
-    getSlotsInRectangle,
-  } = useSlotGrid({ slots });
+  const { slotsByDate, dates, timeSlots } = useSlotGrid({ slots });
 
-  // Selection state management
+  // Selection state management (voteMode + actions)
   const {
-    selectedSlots,
     voteMode,
-    setSelectedSlots,
-    setVoteMode: setVoteModeInternal,
+    setVoteMode,
     selectEntireDay,
-    clearSelection: clearSelectionInternal,
-    selectAll: selectAllInternal,
+    clearSelection,
+    selectAll,
     applyConflicts,
     isDayFullySelected: isDayFullySelectedInternal,
-  } = useSlotSelection({ slots, slotsByDate, initialSelectedIds });
-
-  // Drag selection logic
-  const {
-    isDragging,
-    dragStart,
-    dragEnd,
-    baseSelection,
-    hoveredSlot,
-    longPressSlot,
-    previewSelection,
-    displaySelection,
-    setHoveredSlot,
-    handleMouseDown,
-    handleMouseEnter,
-    handleMouseUp,
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd,
-    handleClick,
-    isSlotInRectangle,
-    getRectangleBounds,
-    resetBaseSelection,
-  } = useDragSelection({
+  } = useSlotSelection({
+    slots,
+    slotsByDate,
     selectedSlots,
-    setSelectedSlots,
-    getSlotPosition,
-    getSlotsInRectangle,
+    onSelectionCommit,
+    onReplaceAll,
   });
 
-  // Wrap setVoteMode to also reset base selection
-  const setVoteMode = useCallback(
-    (mode: VoteMode) => {
-      setVoteModeInternal(mode, resetBaseSelection);
-    },
-    [setVoteModeInternal, resetBaseSelection],
-  );
-
-  // Wrap clearSelection to also reset base selection
-  const clearSelection = useCallback(() => {
-    clearSelectionInternal();
-    resetBaseSelection();
-  }, [clearSelectionInternal, resetBaseSelection]);
-
-  // Wrap selectAll to also update base selection
-  const selectAll = useCallback(() => {
-    selectAllInternal();
-  }, [selectAllInternal]);
-
-  // Wrap isDayFullySelected to use display selection when dragging
+  // Wrap isDayFullySelected to use current selectedSlots
   const isDayFullySelected = useCallback(
     (dateKey: string) => {
-      const checkSet = isDragging ? previewSelection : selectedSlots;
-      return isDayFullySelectedInternal(dateKey, checkSet);
+      return isDayFullySelectedInternal(dateKey, selectedSlots);
     },
-    [isDragging, previewSelection, selectedSlots, isDayFullySelectedInternal],
+    [selectedSlots, isDayFullySelectedInternal],
   );
 
   return {
     // State
     selectedSlots,
-    isDragging,
-    dragStart,
-    dragEnd,
-    baseSelection,
-    hoveredSlot,
-    longPressSlot,
     voteMode,
 
     // Computed
-    previewSelection,
-    displaySelection,
     slotsByDate,
     dates,
     timeSlots,
-    slotGrid,
 
     // Actions
-    setSelectedSlots,
-    setHoveredSlot,
     setVoteMode,
-    handleMouseDown,
-    handleMouseEnter,
-    handleMouseUp,
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd,
-    handleClick,
     selectEntireDay,
     clearSelection,
     selectAll,
-    isSlotInRectangle,
-    getRectangleBounds,
     isDayFullySelected,
-    getSlotPosition,
     applyConflicts,
   };
 }

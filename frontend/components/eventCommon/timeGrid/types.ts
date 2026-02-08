@@ -1,5 +1,3 @@
-import { VoteMode } from "@/types/event";
-
 export type TimeGranularity = 15 | 30 | 60;
 
 export interface MergedTimeRow {
@@ -48,10 +46,9 @@ export interface VotingGridProps {
   slots: TimeSlot[];
   votes: Vote[];
   participants: Participant[];
-  onSave: (selectedSlotIds: string[], voteMode: VoteMode) => Promise<void>;
-  initialSelectedIds?: string[];
-  currentUserId?: string;
-  eventId?: string;
+  currentUserId: string;
+  currentUserDisplayName: string;
+  eventId: string;
 }
 
 export interface RectangleBounds {

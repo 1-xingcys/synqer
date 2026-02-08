@@ -10,10 +10,11 @@ interface MergedRowPosition {
 
 interface UseMergedRowDragSelectionProps {
   selectedSlots: Set<string>;
-  setSelectedSlots: React.Dispatch<React.SetStateAction<Set<string>>>;
   mergedRows: MergedTimeRow[];
   slotsByDate: Record<string, { id: string }[]>;
   paginatedDates: string[];
+  /** 拖曳/點擊結束時的 callback，傳入新增與移除的 slot IDs */
+  onSelectionCommit: (addSlotIds: string[], removeSlotIds: string[]) => void;
 }
 
 interface UseMergedRowDragSelectionReturn {
@@ -50,12 +51,32 @@ interface UseMergedRowDragSelectionReturn {
   } | null;
 }
 
+/**
+ * 計算兩個 Set 的差異
+ */
+function computeDiff(
+  base: Set<string>,
+  next: Set<string>,
+): { addSlotIds: string[]; removeSlotIds: string[] } {
+  const addSlotIds: string[] = [];
+  const removeSlotIds: string[] = [];
+
+  for (const id of next) {
+    if (!base.has(id)) addSlotIds.push(id);
+  }
+  for (const id of base) {
+    if (!next.has(id)) removeSlotIds.push(id);
+  }
+
+  return { addSlotIds, removeSlotIds };
+}
+
 export function useMergedRowDragSelection({
   selectedSlots,
-  setSelectedSlots,
   mergedRows,
   slotsByDate,
   paginatedDates,
+  onSelectionCommit,
 }: UseMergedRowDragSelectionProps): UseMergedRowDragSelectionReturn {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<MergedRowPosition | null>(null);
@@ -183,6 +204,17 @@ export function useMergedRowDragSelection({
     };
   }, [dragStart, dragEnd]);
 
+  // Commit the selection diff and reset drag state
+  const commitAndReset = useCallback(
+    (preview: Set<string>, base: Set<string>) => {
+      const { addSlotIds, removeSlotIds } = computeDiff(base, preview);
+      if (addSlotIds.length > 0 || removeSlotIds.length > 0) {
+        onSelectionCommit(addSlotIds, removeSlotIds);
+      }
+    },
+    [onSelectionCommit],
+  );
+
   // Mouse handlers
   const handleMouseDown = useCallback(
     (rowIndex: number, dateIndex: number, e: React.MouseEvent) => {
@@ -214,35 +246,41 @@ export function useMergedRowDragSelection({
       dragStart.dateIndex === dragEnd.dateIndex;
 
     if (isDragging && dragStart && dragEnd && !isSameCell) {
-      setSelectedSlots(previewSelection);
-      setBaseSelection(previewSelection);
+      commitAndReset(previewSelection, baseSelection);
     }
     setIsDragging(false);
     setDragStart(null);
     setDragEnd(null);
-  }, [isDragging, dragStart, dragEnd, previewSelection, setSelectedSlots]);
+  }, [
+    isDragging,
+    dragStart,
+    dragEnd,
+    previewSelection,
+    baseSelection,
+    commitAndReset,
+  ]);
 
   // Click handler for single cell toggle
   const handleClick = useCallback(
     (rowIndex: number, dateIndex: number) => {
       const slotIds = getSlotIdsForCell(rowIndex, dateIndex);
+      if (slotIds.length === 0) return;
+
       const isFullySelected = isCellFullySelected(
         rowIndex,
         dateIndex,
         selectedSlots,
       );
 
-      setSelectedSlots((prev) => {
-        const newSet = new Set(prev);
-        if (isFullySelected) {
-          slotIds.forEach((id) => newSet.delete(id));
-        } else {
-          slotIds.forEach((id) => newSet.add(id));
-        }
-        return newSet;
-      });
+      if (isFullySelected) {
+        // Remove these slots
+        onSelectionCommit([], slotIds);
+      } else {
+        // Add these slots
+        onSelectionCommit(slotIds, []);
+      }
     },
-    [getSlotIdsForCell, isCellFullySelected, selectedSlots, setSelectedSlots],
+    [getSlotIdsForCell, isCellFullySelected, selectedSlots, onSelectionCommit],
   );
 
   // Touch handlers
@@ -303,22 +341,27 @@ export function useMergedRowDragSelection({
       dragStart.dateIndex === dragEnd.dateIndex;
 
     if (isDragging && dragStart && dragEnd && !isSameCell) {
-      setSelectedSlots(previewSelection);
-      setBaseSelection(previewSelection);
+      commitAndReset(previewSelection, baseSelection);
     }
 
     setIsDragging(false);
     setDragStart(null);
     setDragEnd(null);
     setTimeout(() => setLongPressCell(null), 100);
-  }, [isDragging, dragStart, dragEnd, previewSelection, setSelectedSlots]);
+  }, [
+    isDragging,
+    dragStart,
+    dragEnd,
+    previewSelection,
+    baseSelection,
+    commitAndReset,
+  ]);
 
   // Global mouse up handler
   useEffect(() => {
     const handleGlobalMouseUp = () => {
       if (isDragging && dragStart && dragEnd) {
-        setSelectedSlots(previewSelection);
-        setBaseSelection(previewSelection);
+        commitAndReset(previewSelection, baseSelection);
       }
       setIsDragging(false);
       setDragStart(null);
@@ -327,7 +370,14 @@ export function useMergedRowDragSelection({
 
     document.addEventListener("mouseup", handleGlobalMouseUp);
     return () => document.removeEventListener("mouseup", handleGlobalMouseUp);
-  }, [isDragging, dragStart, dragEnd, previewSelection, setSelectedSlots]);
+  }, [
+    isDragging,
+    dragStart,
+    dragEnd,
+    previewSelection,
+    baseSelection,
+    commitAndReset,
+  ]);
 
   return {
     isDragging,

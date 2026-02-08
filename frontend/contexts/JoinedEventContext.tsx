@@ -2,14 +2,12 @@
 
 import { createContext, useContext, ReactNode, useCallback } from "react";
 import { useEventDetail, EventDetailData } from "@/hooks/useEventDetail";
-import { VoteMode } from "@/types/event";
 
 interface JoinedEventContextType {
   data: EventDetailData | null;
   isLoading: boolean;
   isFetching: boolean;
   error: string | null;
-  saveVotes: (selectedSlotIds: string[], voteMode?: VoteMode) => Promise<void>;
   refetch: () => Promise<void>;
 }
 
@@ -24,7 +22,7 @@ export function JoinedEventProvider({
   eventId,
   children,
 }: JoinedEventProviderProps) {
-  const { data, isLoading, isFetching, error, saveVotes, refetch } =
+  const { data, isLoading, isFetching, error, refetch } =
     useEventDetail(eventId);
 
   // Wrap refetch to return Promise<void>
@@ -39,7 +37,6 @@ export function JoinedEventProvider({
         isLoading,
         isFetching,
         error,
-        saveVotes,
         refetch: handleRefetch,
       }}
     >

@@ -1,4 +1,3 @@
-export { VotingHeader } from "./VotingHeader";
 export { VoteModeToggle } from "./VoteModeToggle";
 export { SelectionInfoBar } from "./SelectionInfoBar";
 export { GridLegend } from "./GridLegend";

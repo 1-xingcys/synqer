@@ -8,3 +8,4 @@ export { useMergedRows } from "./useMergedRows";
 export { useResponsiveGrid } from "./useResponsiveGrid";
 export { usePaginatedDates } from "./usePaginatedDates";
 export { useFilteredVotes } from "./useFilteredVotes";
+export { useOptimisticVoting } from "./useOptimisticVoting";
