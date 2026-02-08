@@ -1,32 +1,17 @@
 "use client";
 
 import { useMemo } from "react";
-import { CalendarEvent, MergedTimeRow, TimeSlot } from "../types";
+import {
+  CalendarEvent,
+  MergedTimeRow,
+  TimeSlot,
+  SlotMatrixCellViewModel,
+  SlotMatrixRowViewModel,
+} from "../types";
 
 interface CellPosition {
   rowIndex: number;
   dateIndex: number;
-}
-
-export interface SlotMatrixCellViewModel {
-  key: string;
-  slot: TimeSlot;
-  rowIndex: number;
-  dateIndex: number;
-  mergedSlotIds: string[];
-  isSelected: boolean;
-  isPartiallySelected: boolean;
-  isHovered: boolean;
-  isLongPressed: boolean;
-  inRectangle: boolean;
-  voters: string[];
-  slotCalendarEvents: CalendarEvent[];
-  eventSpanById: Map<string, number>;
-}
-
-export interface SlotMatrixRowViewModel {
-  rowIndex: number;
-  cells: SlotMatrixCellViewModel[];
 }
 
 interface UseSlotMatrixViewModelProps {

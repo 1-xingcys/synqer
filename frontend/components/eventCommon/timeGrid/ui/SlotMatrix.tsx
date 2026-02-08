@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 import { TimeSlotCell } from "./TimeSlotCell";
-import { SlotMatrixRowViewModel } from "../hooks/useSlotMatrixViewModel";
+import { SlotMatrixRowViewModel } from "../types";
 import { VoteMode } from "@/types/event";
 
 interface MergedRectBounds {

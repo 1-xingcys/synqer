@@ -34,7 +34,6 @@ export default function JoinedEventPage() {
           <VotingGrid
             slots={eventDetailData.slots}
             votes={eventDetailData.votes}
-            participants={eventDetailData.participants}
             currentUserId={user.id.toString()}
             currentUserDisplayName={user.displayName || ""}
             eventId={eventId}

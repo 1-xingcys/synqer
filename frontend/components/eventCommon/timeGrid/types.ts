@@ -45,7 +45,6 @@ export interface GridPosition {
 export interface VotingGridProps {
   slots: TimeSlot[];
   votes: Vote[];
-  participants: Participant[];
   currentUserId: string;
   currentUserDisplayName: string;
   eventId: string;
@@ -56,4 +55,25 @@ export interface RectangleBounds {
   maxDate: number;
   minTime: number;
   maxTime: number;
+}
+
+export interface SlotMatrixCellViewModel {
+  key: string;
+  slot: TimeSlot;
+  rowIndex: number;
+  dateIndex: number;
+  mergedSlotIds: string[];
+  isSelected: boolean;
+  isPartiallySelected: boolean;
+  isHovered: boolean;
+  isLongPressed: boolean;
+  inRectangle: boolean;
+  voters: string[];
+  slotCalendarEvents: CalendarEvent[];
+  eventSpanById: Map<string, number>;
+}
+
+export interface SlotMatrixRowViewModel {
+  rowIndex: number;
+  cells: SlotMatrixCellViewModel[];
 }
