@@ -90,6 +90,8 @@ export function useMergedRowDragSelection({
   );
 
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  // Guard against duplicate commits from local + global mouseup handlers.
+  const hasCommittedRef = useRef(false);
 
   // Get all slot IDs for a merged cell
   const getSlotIdsForCell = useCallback(
@@ -215,10 +217,36 @@ export function useMergedRowDragSelection({
     [onSelectionCommit],
   );
 
+  const commitDragPreview = useCallback(() => {
+    if (!isDragging || !dragStart || !dragEnd || hasCommittedRef.current) {
+      return;
+    }
+
+    // Single click on same cell is handled by onClick.
+    const isSameCell =
+      dragStart.rowIndex === dragEnd.rowIndex &&
+      dragStart.dateIndex === dragEnd.dateIndex;
+
+    if (isSameCell) {
+      return;
+    }
+
+    commitAndReset(previewSelection, baseSelection);
+    hasCommittedRef.current = true;
+  }, [
+    isDragging,
+    dragStart,
+    dragEnd,
+    previewSelection,
+    baseSelection,
+    commitAndReset,
+  ]);
+
   // Mouse handlers
   const handleMouseDown = useCallback(
     (rowIndex: number, dateIndex: number, e: React.MouseEvent) => {
       e.preventDefault();
+      hasCommittedRef.current = false;
       setIsDragging(true);
       setDragStart({ rowIndex, dateIndex });
       setDragEnd({ rowIndex, dateIndex });
@@ -238,27 +266,11 @@ export function useMergedRowDragSelection({
   );
 
   const handleMouseUp = useCallback(() => {
-    // Single click on same cell is handled by onClick
-    const isSameCell =
-      dragStart &&
-      dragEnd &&
-      dragStart.rowIndex === dragEnd.rowIndex &&
-      dragStart.dateIndex === dragEnd.dateIndex;
-
-    if (isDragging && dragStart && dragEnd && !isSameCell) {
-      commitAndReset(previewSelection, baseSelection);
-    }
+    commitDragPreview();
     setIsDragging(false);
     setDragStart(null);
     setDragEnd(null);
-  }, [
-    isDragging,
-    dragStart,
-    dragEnd,
-    previewSelection,
-    baseSelection,
-    commitAndReset,
-  ]);
+  }, [commitDragPreview]);
 
   // Click handler for single cell toggle
   const handleClick = useCallback(
@@ -287,6 +299,7 @@ export function useMergedRowDragSelection({
   const handleTouchStart = useCallback(
     (rowIndex: number, dateIndex: number, e: React.TouchEvent) => {
       e.preventDefault();
+      hasCommittedRef.current = false;
 
       longPressTimer.current = setTimeout(() => {
         setLongPressCell({ rowIndex, dateIndex });
@@ -333,36 +346,18 @@ export function useMergedRowDragSelection({
       longPressTimer.current = null;
     }
 
-    // Single tap on same cell is handled by onClick
-    const isSameCell =
-      dragStart &&
-      dragEnd &&
-      dragStart.rowIndex === dragEnd.rowIndex &&
-      dragStart.dateIndex === dragEnd.dateIndex;
-
-    if (isDragging && dragStart && dragEnd && !isSameCell) {
-      commitAndReset(previewSelection, baseSelection);
-    }
+    commitDragPreview();
 
     setIsDragging(false);
     setDragStart(null);
     setDragEnd(null);
     setTimeout(() => setLongPressCell(null), 100);
-  }, [
-    isDragging,
-    dragStart,
-    dragEnd,
-    previewSelection,
-    baseSelection,
-    commitAndReset,
-  ]);
+  }, [commitDragPreview]);
 
   // Global mouse up handler
   useEffect(() => {
     const handleGlobalMouseUp = () => {
-      if (isDragging && dragStart && dragEnd) {
-        commitAndReset(previewSelection, baseSelection);
-      }
+      commitDragPreview();
       setIsDragging(false);
       setDragStart(null);
       setDragEnd(null);
@@ -370,14 +365,7 @@ export function useMergedRowDragSelection({
 
     document.addEventListener("mouseup", handleGlobalMouseUp);
     return () => document.removeEventListener("mouseup", handleGlobalMouseUp);
-  }, [
-    isDragging,
-    dragStart,
-    dragEnd,
-    previewSelection,
-    baseSelection,
-    commitAndReset,
-  ]);
+  }, [commitDragPreview]);
 
   return {
     isDragging,
