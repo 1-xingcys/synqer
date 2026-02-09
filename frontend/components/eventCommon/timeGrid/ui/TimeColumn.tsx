@@ -5,12 +5,12 @@ import { formatMinutesToTime } from "@/lib/utils";
 import { MergedTimeRow } from "../types";
 
 interface TimeColumnProps {
-  mergedRows: MergedTimeRow[];
+  mergedTimeRows: MergedTimeRow[];
   slotHeight: string;
 }
 
 export const TimeColumn = memo(function TimeColumn({
-  mergedRows,
+  mergedTimeRows,
   slotHeight,
 }: TimeColumnProps) {
   return (
@@ -18,7 +18,7 @@ export const TimeColumn = memo(function TimeColumn({
       className="w-9 sm:w-14 shrink-0 relative border-r border-gray-200 dark:border-zinc-700 rounded-l-lg"
       style={{ "--slot-height": slotHeight } as React.CSSProperties}
     >
-      {mergedRows.map((row, rowIndex) => (
+      {mergedTimeRows.map((row, rowIndex) => (
         <div
           key={rowIndex}
           className="relative"
@@ -31,9 +31,11 @@ export const TimeColumn = memo(function TimeColumn({
         </div>
       ))}
       {/* Last time label */}
-      {mergedRows.length > 0 && (
+      {mergedTimeRows.length > 0 && (
         <span className="absolute bottom-0.5 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
-          {formatMinutesToTime(mergedRows[mergedRows.length - 1].endMinute)}
+          {formatMinutesToTime(
+            mergedTimeRows[mergedTimeRows.length - 1].endMinute,
+          )}
         </span>
       )}
     </div>

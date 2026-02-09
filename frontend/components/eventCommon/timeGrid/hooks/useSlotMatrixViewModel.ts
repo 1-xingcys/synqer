@@ -15,7 +15,7 @@ interface CellPosition {
 }
 
 interface UseSlotMatrixViewModelProps {
-  mergedRows: MergedTimeRow[];
+  mergedTimeRows: MergedTimeRow[];
   paginatedDates: string[];
   slotsByDate: Record<string, TimeSlot[]>;
   displaySelection: Set<string>;
@@ -32,8 +32,12 @@ interface UseSlotMatrixViewModelProps {
   };
 }
 
+/**
+ * 組裝 Slot Matrix 渲染所需的 view model：
+ * 把 selection/hover/drag、投票者與日曆 overlay 合併成逐列逐格資料。
+ */
 export function useSlotMatrixViewModel({
-  mergedRows,
+  mergedTimeRows,
   paginatedDates,
   slotsByDate,
   displaySelection,
@@ -46,8 +50,8 @@ export function useSlotMatrixViewModel({
   return useMemo(() => {
     const rows: SlotMatrixRowViewModel[] = [];
 
-    for (let rowIndex = 0; rowIndex < mergedRows.length; rowIndex++) {
-      const row = mergedRows[rowIndex];
+    for (let rowIndex = 0; rowIndex < mergedTimeRows.length; rowIndex++) {
+      const row = mergedTimeRows[rowIndex];
       const cells: SlotMatrixCellViewModel[] = [];
 
       for (let dateIndex = 0; dateIndex < paginatedDates.length; dateIndex++) {
@@ -101,7 +105,7 @@ export function useSlotMatrixViewModel({
 
     return rows;
   }, [
-    mergedRows,
+    mergedTimeRows,
     paginatedDates,
     slotsByDate,
     displaySelection,

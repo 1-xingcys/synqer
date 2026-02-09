@@ -14,11 +14,14 @@ interface UseMergedTimeRowsModelProps {
 }
 
 interface UseMergedTimeRowsModelReturn {
-  mergedRows: MergedTimeRow[];
+  mergedTimeRows: MergedTimeRow[];
   getSlotIndicesForRow: (rowIndex: number) => number[];
 }
 
 /**
+ * 依時間粒度把 15 分鐘 slots 合併成可渲染列資料，
+ * 並保留每列對應的原始 slot 索引，供選取與渲染共用。
+ *
  * Hook to calculate merged time rows based on granularity
  *
  * This is the single source of truth for merging 15-min slots into
@@ -41,7 +44,7 @@ export function useMergedTimeRowsModel({
   timeSlots,
   granularity,
 }: UseMergedTimeRowsModelProps): UseMergedTimeRowsModelReturn {
-  const mergedRows = useMemo(() => {
+  const mergedTimeRows = useMemo(() => {
     if (timeSlots.length === 0) return [];
 
     // No merging needed - each slot is its own row
@@ -142,11 +145,11 @@ export function useMergedTimeRowsModel({
   }, [timeSlots, granularity]);
 
   const getSlotIndicesForRow = (rowIndex: number): number[] => {
-    return mergedRows[rowIndex]?.slotIndices || [];
+    return mergedTimeRows[rowIndex]?.slotIndices || [];
   };
 
   return {
-    mergedRows,
+    mergedTimeRows,
     getSlotIndicesForRow,
   };
 }

@@ -14,7 +14,7 @@ function event(id: string): CalendarEvent {
 
 describe("buildCalendarOverlayProjection", () => {
   it("deduplicates events and computes start-row spans", () => {
-    const mergedRows: MergedTimeRow[] = [
+    const mergedTimeRows: MergedTimeRow[] = [
       { startMinute: 540, endMinute: 555, slotIndices: [0], height: 1 },
       { startMinute: 555, endMinute: 570, slotIndices: [1], height: 1 },
     ];
@@ -44,7 +44,7 @@ describe("buildCalendarOverlayProjection", () => {
     ]);
 
     const projection = buildCalendarOverlayProjection({
-      mergedRows,
+      mergedTimeRows,
       paginatedDates: ["2026-01-01"],
       slotsByDate,
       calendarEventsForSlot,
@@ -66,7 +66,7 @@ describe("buildCalendarOverlayProjection", () => {
   });
 
   it("splits spans when rows are not contiguous", () => {
-    const mergedRows: MergedTimeRow[] = [
+    const mergedTimeRows: MergedTimeRow[] = [
       { startMinute: 540, endMinute: 555, slotIndices: [0], height: 1 },
       { startMinute: 555, endMinute: 570, slotIndices: [1], height: 1 },
       { startMinute: 570, endMinute: 585, slotIndices: [2], height: 1 },
@@ -105,7 +105,7 @@ describe("buildCalendarOverlayProjection", () => {
     ]);
 
     const projection = buildCalendarOverlayProjection({
-      mergedRows,
+      mergedTimeRows,
       paginatedDates: ["2026-01-02"],
       slotsByDate,
       calendarEventsForSlot,

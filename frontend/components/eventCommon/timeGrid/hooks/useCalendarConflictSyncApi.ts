@@ -8,7 +8,6 @@ import { mapCalendarEventsToSlots } from "../utils";
 interface UseCalendarConflictSyncApiProps {
   eventId?: string;
   slots: TimeSlot[];
-  slotsByDate: Record<string, TimeSlot[]>;
 }
 
 interface UseCalendarConflictSyncApiReturn {
@@ -27,15 +26,15 @@ interface UseCalendarConflictSyncApiReturn {
   setShowCalendarOnGrid: React.Dispatch<React.SetStateAction<boolean>>;
   connectCalendar: () => void;
   disconnectCalendar: () => Promise<void>;
-  loadCalendarConflicts: () => Promise<void>;
-  isEventStartInSlot: (slotId: string, event: CalendarEvent) => boolean;
-  getEventSpanFromSlot: (slotId: string, event: CalendarEvent) => number;
 }
 
+/**
+ * 統一管理 Google Calendar 衝突同步：
+ * 負責連線狀態、衝突資料抓取，並提供格子層需要的事件映射資料。
+ */
 export function useCalendarConflictSyncApi({
   eventId,
   slots,
-  slotsByDate,
 }: UseCalendarConflictSyncApiProps): UseCalendarConflictSyncApiReturn {
   const {
     status: calendarStatus,
@@ -81,51 +80,6 @@ export function useCalendarConflictSyncApi({
     }
   }, [calendarStatus?.connected, eventId, loadCalendarConflicts]);
 
-  // Check if this slot is the first occurrence of an event in its row
-  const isEventStartInSlot = useCallback(
-    (slotId: string, event: CalendarEvent): boolean => {
-      const slot = slots.find((s) => s.id === slotId);
-      if (!slot) return false;
-
-      const dateKey = slot.date.split("T")[0];
-      const daySlots = slotsByDate[dateKey] || [];
-
-      for (const daySlot of daySlots) {
-        const eventsInSlot = calendarEventsForSlot.get(daySlot.id) || [];
-        if (eventsInSlot.some((e) => e.id === event.id)) {
-          return daySlot.id === slotId;
-        }
-      }
-      return false;
-    },
-    [slots, slotsByDate, calendarEventsForSlot],
-  );
-
-  // Calculate how many consecutive slots an event spans from this slot
-  const getEventSpanFromSlot = useCallback(
-    (slotId: string, event: CalendarEvent): number => {
-      const slot = slots.find((s) => s.id === slotId);
-      if (!slot) return 1;
-
-      const dateKey = slot.date.split("T")[0];
-      const daySlots = slotsByDate[dateKey] || [];
-      const slotIndex = daySlots.findIndex((s) => s.id === slotId);
-      if (slotIndex === -1) return 1;
-
-      let span = 0;
-      for (let i = slotIndex; i < daySlots.length; i++) {
-        const eventsInSlot = calendarEventsForSlot.get(daySlots[i].id) || [];
-        if (eventsInSlot.some((e) => e.id === event.id)) {
-          span++;
-        } else {
-          break;
-        }
-      }
-      return span;
-    },
-    [slots, slotsByDate, calendarEventsForSlot],
-  );
-
   return {
     // State
     calendarStatus,
@@ -142,8 +96,5 @@ export function useCalendarConflictSyncApi({
     setShowCalendarOnGrid,
     connectCalendar,
     disconnectCalendar,
-    loadCalendarConflicts,
-    isEventStartInSlot,
-    getEventSpanFromSlot,
   };
 }

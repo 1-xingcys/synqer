@@ -17,6 +17,10 @@ interface UseFilteredVotesResult {
   maxVotes: number;
 }
 
+/**
+ * 對投票資料做顯示層預處理：
+ * 依參與者過濾、按 slot 分組，並計算熱力圖所需的最大票數。
+ */
 export function useFilteredVotes({
   votes,
   selectedParticipants,

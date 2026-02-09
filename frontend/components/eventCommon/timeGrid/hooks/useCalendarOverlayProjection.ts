@@ -4,7 +4,7 @@ import { useMemo, useCallback } from "react";
 import { CalendarEvent, MergedTimeRow, TimeSlot } from "../types";
 
 interface CalendarOverlayProjectionParams {
-  mergedRows: MergedTimeRow[];
+  mergedTimeRows: MergedTimeRow[];
   paginatedDates: string[];
   slotsByDate: Record<string, TimeSlot[]>;
   calendarEventsForSlot: Map<string, CalendarEvent[]>;
@@ -35,20 +35,20 @@ function getCellKey(rowIndex: number, dateKey: string): string {
 
 function computeProjectionForDate({
   dateKey,
-  mergedRows,
+  mergedTimeRows,
   slotsByDate,
   calendarEventsForSlot,
 }: {
   dateKey: string;
-  mergedRows: MergedTimeRow[];
+  mergedTimeRows: MergedTimeRow[];
   slotsByDate: Record<string, TimeSlot[]>;
   calendarEventsForSlot: Map<string, CalendarEvent[]>;
 }): Map<string, CalendarCellProjection> {
   const eventRowsById = new Map<string, number[]>();
   const rowEventsMap = new Map<number, CalendarEvent[]>();
 
-  for (let rowIndex = 0; rowIndex < mergedRows.length; rowIndex++) {
-    const row = mergedRows[rowIndex];
+  for (let rowIndex = 0; rowIndex < mergedTimeRows.length; rowIndex++) {
+    const row = mergedTimeRows[rowIndex];
     const uniqueEventMap = new Map<string, CalendarEvent>();
 
     for (const slotIdx of row.slotIndices) {
@@ -100,7 +100,7 @@ function computeProjectionForDate({
   }
 
   const result = new Map<string, CalendarCellProjection>();
-  for (let rowIndex = 0; rowIndex < mergedRows.length; rowIndex++) {
+  for (let rowIndex = 0; rowIndex < mergedTimeRows.length; rowIndex++) {
     result.set(getCellKey(rowIndex, dateKey), {
       events: rowEventsMap.get(rowIndex) || EMPTY_EVENTS,
       eventSpanById: startSpanMapByRow.get(rowIndex) || EMPTY_SPAN_MAP,
@@ -113,14 +113,14 @@ function computeProjectionForDate({
 export function buildCalendarOverlayProjection(
   params: CalendarOverlayProjectionParams,
 ) {
-  const { mergedRows, paginatedDates, slotsByDate, calendarEventsForSlot } =
+  const { mergedTimeRows, paginatedDates, slotsByDate, calendarEventsForSlot } =
     params;
   const result = new Map<string, CalendarCellProjection>();
 
   for (const dateKey of paginatedDates) {
     const dateProjection = computeProjectionForDate({
       dateKey,
-      mergedRows,
+      mergedTimeRows,
       slotsByDate,
       calendarEventsForSlot,
     });
@@ -133,8 +133,12 @@ export function buildCalendarOverlayProjection(
   return result;
 }
 
+/**
+ * 將日曆事件投影到合併後的格子座標，
+ * 輸出每個 cell 的事件列表與可用於跨列渲染的 span 資訊。
+ */
 export function useCalendarOverlayProjection({
-  mergedRows,
+  mergedTimeRows,
   paginatedDates,
   slotsByDate,
   calendarEventsForSlot,
@@ -142,12 +146,12 @@ export function useCalendarOverlayProjection({
   const projectionByCell = useMemo(
     () =>
       buildCalendarOverlayProjection({
-        mergedRows,
+        mergedTimeRows,
         paginatedDates,
         slotsByDate,
         calendarEventsForSlot,
       }),
-    [mergedRows, paginatedDates, slotsByDate, calendarEventsForSlot],
+    [mergedTimeRows, paginatedDates, slotsByDate, calendarEventsForSlot],
   );
 
   const getCalendarProjectionForCell = useCallback(

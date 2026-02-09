@@ -40,7 +40,7 @@ interface UseVotingGridControllerResult {
   datesPerPage: number;
   handlePageChange: (newPage: number) => void;
   slotHeight: string;
-  mergedRows: ReturnType<typeof useMergedTimeRowsModel>["mergedRows"];
+  mergedTimeRows: ReturnType<typeof useMergedTimeRowsModel>["mergedTimeRows"];
   slotMatrixRows: ReturnType<typeof useSlotMatrixViewModel>;
   mergedRectBounds: ReturnType<
     typeof useMergedTimeGridSelectionInteraction
@@ -86,6 +86,10 @@ interface UseVotingGridControllerResult {
   markConflictsAsUnavailable: () => void;
 }
 
+/**
+ * TimeGrid 的編排層 controller：
+ * 串接各子 hooks，對外提供畫面需要的狀態、衍生資料與互動 handler。
+ */
 export function useVotingGridController({
   slots,
   votes,
@@ -123,7 +127,7 @@ export function useVotingGridController({
     onReplaceAll: replaceAllSlots,
   });
 
-  const { mergedRows } = useMergedTimeRowsModel({
+  const { mergedTimeRows } = useMergedTimeRowsModel({
     timeSlots,
     granularity,
   });
@@ -150,7 +154,7 @@ export function useVotingGridController({
     getRectangleBounds: getMergedRectangleBounds,
   } = useMergedTimeGridSelectionInteraction({
     selectedSlots: modeDisplaySelection,
-    mergedTimeRows: mergedRows,
+    mergedTimeRows,
     slotsByDate,
     paginatedDates,
     onSelectionCommit: commitDisplaySelectionChange,
@@ -167,10 +171,10 @@ export function useVotingGridController({
     setShowCalendarOnGrid,
     connectCalendar,
     disconnectCalendar,
-  } = useCalendarConflictSyncApi({ eventId, slots, slotsByDate });
+  } = useCalendarConflictSyncApi({ eventId, slots });
 
   const { getCalendarProjectionForCell } = useCalendarOverlayProjection({
-    mergedRows,
+    mergedTimeRows,
     paginatedDates,
     slotsByDate,
     calendarEventsForSlot,
@@ -201,7 +205,7 @@ export function useVotingGridController({
   );
 
   const slotMatrixRows = useSlotMatrixViewModel({
-    mergedRows,
+    mergedTimeRows,
     paginatedDates,
     slotsByDate,
     displaySelection,
@@ -243,7 +247,7 @@ export function useVotingGridController({
     datesPerPage,
     handlePageChange,
     slotHeight,
-    mergedRows,
+    mergedTimeRows,
     slotMatrixRows,
     mergedRectBounds,
     isDayFullySelected,

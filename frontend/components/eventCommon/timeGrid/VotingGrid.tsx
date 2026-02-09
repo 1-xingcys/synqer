@@ -37,7 +37,7 @@ export default function VotingGrid({
     datesPerPage,
     handlePageChange,
     slotHeight,
-    mergedRows,
+    mergedTimeRows,
     slotMatrixRows,
     mergedRectBounds,
     isDayFullySelected,
@@ -122,7 +122,10 @@ export default function VotingGrid({
           />
 
           <div className="flex">
-            <TimeColumn mergedRows={mergedRows} slotHeight={slotHeight} />
+            <TimeColumn
+              mergedTimeRows={mergedTimeRows}
+              slotHeight={slotHeight}
+            />
 
             <SlotMatrix
               rows={slotMatrixRows}

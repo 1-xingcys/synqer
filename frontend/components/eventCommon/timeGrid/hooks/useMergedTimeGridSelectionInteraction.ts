@@ -19,11 +19,8 @@ interface UseMergedTimeGridSelectionInteractionProps {
 
 interface UseMergedTimeGridSelectionInteractionReturn {
   isDragging: boolean;
-  dragStart: MergedTimeGridPosition | null;
-  dragEnd: MergedTimeGridPosition | null;
   hoveredCell: MergedTimeGridPosition | null;
   longPressCell: MergedTimeGridPosition | null;
-  previewSelection: Set<string>;
   displaySelection: Set<string>;
 
   handleMouseDown: (
@@ -71,6 +68,10 @@ function computeDiff(
   return { addSlotIds, removeSlotIds };
 }
 
+/**
+ * 管理合併時間列的互動狀態：
+ * 處理滑鼠/觸控拖曳、單格點擊、預覽選取與 commit diff 的整套流程。
+ */
 export function useMergedTimeGridSelectionInteraction({
   selectedSlots,
   mergedTimeRows,
@@ -373,11 +374,8 @@ export function useMergedTimeGridSelectionInteraction({
 
   return {
     isDragging,
-    dragStart,
-    dragEnd,
     hoveredCell,
     longPressCell,
-    previewSelection,
     displaySelection,
     handleMouseDown,
     handleMouseEnter,

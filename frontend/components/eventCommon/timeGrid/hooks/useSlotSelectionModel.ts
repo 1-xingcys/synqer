@@ -24,7 +24,6 @@ interface UseSlotSelectionModelProps {
 
 interface UseSlotSelectionModelReturn {
   // State
-  selectedSlots: Set<string>;
   displaySelection: Set<string>;
   voteMode: VoteMode;
 
@@ -41,6 +40,10 @@ interface UseSlotSelectionModelReturn {
   isDayFullySelected: (dateKey: string) => boolean;
 }
 
+/**
+ * 封裝投票選取規則：
+ * 依據 voteMode 在顯示層與 canonical available 狀態間轉換，並輸出增量/全量更新操作。
+ */
 export function useSlotSelectionModel({
   slots,
   slotsByDate,
@@ -132,7 +135,6 @@ export function useSlotSelectionModel({
 
   return {
     // State
-    selectedSlots,
     displaySelection,
     voteMode,
 

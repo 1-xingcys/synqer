@@ -28,6 +28,10 @@ interface UseOptimisticVotingReturn {
   isPending: boolean;
 }
 
+/**
+ * 封裝投票的樂觀更新流程：
+ * 從 query cache 派生當前使用者選取，並提供增量/全量 mutation 與回滾機制。
+ */
 export function useOptimisticVoting({
   eventId,
   currentUserId,
