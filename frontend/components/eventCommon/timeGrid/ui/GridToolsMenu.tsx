@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Check, X } from "lucide-react";
 import { VoteMode } from "@/types/event";
 import { TimeGranularity } from "../types";
 
@@ -56,6 +57,113 @@ export function GridToolsMenu({
     }
   }, [open]);
 
+  const modeButtons = (
+    <>
+      <button
+        onClick={() => {
+          onModeChange(VoteMode.AVAILABLE);
+          setOpen(false);
+        }}
+        className={`w-full px-3 py-2 text-xs sm:text-sm flex items-center justify-between ${
+          voteMode === VoteMode.AVAILABLE
+            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+            : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
+        }`}
+      >
+        <span>{tJoined("voteModeAvailable")}</span>
+        {voteMode === VoteMode.AVAILABLE && <Check className="w-4 h-4" />}
+      </button>
+      <button
+        onClick={() => {
+          onModeChange(VoteMode.UNAVAILABLE);
+          setOpen(false);
+        }}
+        className={`w-full px-3 py-2 text-xs sm:text-sm flex items-center justify-between ${
+          voteMode === VoteMode.UNAVAILABLE
+            ? "bg-[#fff1f2] text-[#be123c] dark:bg-[#881337]/30 dark:text-[#fda4af]"
+            : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
+        }`}
+      >
+        <span>{tJoined("voteModeUnavailable")}</span>
+        {voteMode === VoteMode.UNAVAILABLE && <X className="w-4 h-4" />}
+      </button>
+    </>
+  );
+
+  const granularityButtons = GRANULARITY_ITEMS.map((item) => (
+    <button
+      key={item.value}
+      onClick={() => {
+        onGranularityChange(item.value);
+        setOpen(false);
+      }}
+      className={`w-full px-3 py-2 text-xs sm:text-sm flex items-center justify-between ${
+        granularity === item.value
+          ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+          : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
+      }`}
+    >
+      <span>{tJoined(`mobileTools.${item.label}`)}</span>
+      {granularity === item.value && <Check className="w-4 h-4" />}
+    </button>
+  ));
+
+  const quickActionButtons = (
+    <>
+      <button
+        onClick={() => {
+          onSelectAll();
+          setOpen(false);
+        }}
+        className={`w-full px-3 py-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40 text-left`}
+      >
+        {tJoined("selectAll")}
+      </button>
+      <button
+        onClick={() => {
+          onClearSelection();
+          setOpen(false);
+        }}
+        className={`w-full px-3 py-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40 text-left`}
+      >
+        {tJoined("clearSelection")}
+      </button>
+    </>
+  );
+
+  const integrationButtons = !isCalendarConnected ? (
+    <button
+      onClick={() => {
+        onOpenCalendarPanel();
+        setOpen(false);
+      }}
+      className={`w-full px-3 py-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40 text-left`}
+    >
+      {tJoined("googleCalendar.connect")}
+    </button>
+  ) : (
+    <>
+      <button
+        onClick={() => {
+          onOpenCalendarPanel();
+          setOpen(false);
+        }}
+        className={`w-full px-3 py-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40 text-left`}
+      >
+        {tJoined("googleCalendar.settings")}
+      </button>
+      <button
+        onClick={() => {
+          void onDisconnectCalendar();
+          setOpen(false);
+        }}
+        className="w-full px-3 py-2 text-left text-xs sm:text-sm text-rose-600 dark:text-rose-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
+      >
+        {tJoined("googleCalendar.disconnect")}
+      </button>
+    </>
+  );
+
   return (
     <div ref={containerRef} className="relative">
       <button
@@ -90,161 +198,28 @@ export function GridToolsMenu({
           <div className="px-3 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
             {tJoined("mobileTools.mode")}
           </div>
-          <button
-            onClick={() => {
-              onModeChange(VoteMode.AVAILABLE);
-              setOpen(false);
-            }}
-            className={`w-full px-3 py-2 text-xs sm:text-sm flex items-center justify-between ${
-              voteMode === VoteMode.AVAILABLE
-                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
-                : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
-            }`}
-          >
-            <span>{tJoined("voteModeAvailable")}</span>
-            {voteMode === VoteMode.AVAILABLE && (
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            )}
-          </button>
-          <button
-            onClick={() => {
-              onModeChange(VoteMode.UNAVAILABLE);
-              setOpen(false);
-            }}
-            className={`w-full px-3 py-2 text-xs sm:text-sm flex items-center justify-between ${
-              voteMode === VoteMode.UNAVAILABLE
-                ? "bg-[#fff1f2] text-[#be123c] dark:bg-[#881337]/30 dark:text-[#fda4af]"
-                : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
-            }`}
-          >
-            <span>{tJoined("voteModeUnavailable")}</span>
-            {voteMode === VoteMode.UNAVAILABLE && (
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            )}
-          </button>
+          {modeButtons}
 
           <div className="my-1 border-t border-zinc-200 dark:border-zinc-700" />
 
           <div className="px-3 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
             {tJoined("mobileTools.view")}
           </div>
-          {GRANULARITY_ITEMS.map((item) => (
-            <button
-              key={item.value}
-              onClick={() => {
-                onGranularityChange(item.value);
-                setOpen(false);
-              }}
-              className={`w-full px-3 py-2 text-xs sm:text-sm flex items-center justify-between ${
-                granularity === item.value
-                  ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                  : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
-              }`}
-            >
-              <span>{tJoined(`mobileTools.${item.label}`)}</span>
-              {granularity === item.value && (
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              )}
-            </button>
-          ))}
+          {granularityButtons}
 
           <div className="my-1 border-t border-zinc-200 dark:border-zinc-700" />
 
           <div className="px-3 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
             {tJoined("mobileTools.quickActions")}
           </div>
-          <button
-            onClick={() => {
-              onSelectAll();
-              setOpen(false);
-            }}
-            className="w-full px-3 py-2 text-left text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
-          >
-            {tJoined("selectAll")}
-          </button>
-          <button
-            onClick={() => {
-              onClearSelection();
-              setOpen(false);
-            }}
-            className="w-full px-3 py-2 text-left text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
-          >
-            {tJoined("clearSelection")}
-          </button>
+          {quickActionButtons}
 
           <div className="my-1 border-t border-zinc-200 dark:border-zinc-700" />
 
           <div className="px-3 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
             {tJoined("mobileTools.integration")}
           </div>
-          {!isCalendarConnected ? (
-            <button
-              onClick={() => {
-                onOpenCalendarPanel();
-                setOpen(false);
-              }}
-              className="w-full px-3 py-2 text-left text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
-            >
-              {tJoined("googleCalendar.connect")}
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={() => {
-                  onOpenCalendarPanel();
-                  setOpen(false);
-                }}
-                className="w-full px-3 py-2 text-left text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
-              >
-                {tJoined("googleCalendar.settings")}
-              </button>
-              <button
-                onClick={() => {
-                  void onDisconnectCalendar();
-                  setOpen(false);
-                }}
-                className="w-full px-3 py-2 text-left text-xs sm:text-sm text-rose-600 dark:text-rose-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
-              >
-                {tJoined("googleCalendar.disconnect")}
-              </button>
-            </>
-          )}
+          {integrationButtons}
         </div>
       )}
     </div>
