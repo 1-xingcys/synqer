@@ -23,34 +23,46 @@ export default function VotingGrid({
   currentUserId,
   currentUserDisplayName,
 }: VotingGridProps) {
+  const { selection, pagination, matrix, calendar } = useVotingGridController({
+    slots,
+    votes,
+    eventId,
+    currentUserId,
+    currentUserDisplayName,
+  });
+
   const {
-    granularity,
-    setGranularity,
     voteMode,
     setVoteMode,
     selectedCount,
     clearSelection,
     selectAll,
-    dates,
-    paginatedDates,
-    currentPage,
-    datesPerPage,
-    handlePageChange,
+    isDayFullySelected,
+    selectEntireDay,
+  } = selection;
+
+  const { dates, paginatedDates, currentPage, datesPerPage, handlePageChange } =
+    pagination;
+
+  const {
+    granularity,
+    setGranularity,
     slotHeight,
     mergedTimeRows,
     slotMatrixRows,
     mergedRectBounds,
-    isDayFullySelected,
-    selectEntireDay,
+    isDragging,
     handleGridMouseUp,
     handleGridMouseLeave,
-    isDragging,
     handleMergedMouseDown,
     handleMergedMouseEnter,
     handleMergedTouchStart,
     handleMergedTouchMove,
     handleMergedTouchEnd,
     handleMergedClick,
+  } = matrix;
+
+  const {
     calendarStatus,
     calendarLoading,
     calendarEvents,
@@ -61,13 +73,7 @@ export default function VotingGrid({
     connectCalendar,
     disconnectCalendar,
     markConflictsAsUnavailable,
-  } = useVotingGridController({
-    slots,
-    votes,
-    eventId,
-    currentUserId,
-    currentUserDisplayName,
-  });
+  } = calendar;
 
   return (
     <div className="space-y-3 sm:space-y-4">

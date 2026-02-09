@@ -24,66 +24,65 @@ interface UseVotingGridControllerProps {
 }
 
 interface UseVotingGridControllerResult {
-  // top-level controls
-  granularity: TimeGranularity;
-  setGranularity: (granularity: TimeGranularity) => void;
-  voteMode: VoteMode;
-  setVoteMode: (mode: VoteMode) => void;
-  selectedCount: number;
-  clearSelection: () => void;
-  selectAll: () => void;
-
-  // pagination / grid structure
-  dates: string[];
-  paginatedDates: string[];
-  currentPage: number;
-  datesPerPage: number;
-  handlePageChange: (newPage: number) => void;
-  slotHeight: string;
-  mergedTimeRows: ReturnType<typeof useMergedTimeRowsModel>["mergedTimeRows"];
-  slotMatrixRows: ReturnType<typeof useSlotMatrixViewModel>;
-  mergedRectBounds: ReturnType<
-    typeof useMergedTimeGridSelectionInteraction
-  >["getRectangleBounds"] extends (...args: never[]) => infer R
-    ? R
-    : never;
-
-  // day/grid actions
-  isDayFullySelected: (dateKey: string) => boolean;
-  selectEntireDay: (dateKey: string) => void;
-  handleGridMouseUp: () => void;
-  handleGridMouseLeave: () => void;
-
-  // drag/cell interactions
-  isDragging: boolean;
-  handleMergedMouseDown: (
-    rowIndex: number,
-    dateIndex: number,
-    e: React.MouseEvent,
-  ) => void;
-  handleMergedMouseEnter: (rowIndex: number, dateIndex: number) => void;
-  handleMergedTouchStart: (
-    rowIndex: number,
-    dateIndex: number,
-    e: React.TouchEvent,
-  ) => void;
-  handleMergedTouchMove: (e: React.TouchEvent) => void;
-  handleMergedTouchEnd: () => void;
-  handleMergedClick: (rowIndex: number, dateIndex: number) => void;
-
-  // calendar panel / legend
-  calendarStatus: { connected: boolean; googleEmail?: string } | null;
-  calendarLoading: boolean;
-  calendarEvents: ReturnType<
-    typeof useCalendarConflictSyncApi
-  >["calendarEvents"];
-  conflictingSlotIds: string[];
-  loadingCalendar: boolean;
-  showCalendarOnGrid: boolean;
-  setShowCalendarOnGrid: (show: boolean) => void;
-  connectCalendar: () => void;
-  disconnectCalendar: () => Promise<void>;
-  markConflictsAsUnavailable: () => void;
+  selection: {
+    voteMode: VoteMode;
+    setVoteMode: (mode: VoteMode) => void;
+    selectedCount: number;
+    clearSelection: () => void;
+    selectAll: () => void;
+    isDayFullySelected: (dateKey: string) => boolean;
+    selectEntireDay: (dateKey: string) => void;
+  };
+  pagination: {
+    dates: string[];
+    paginatedDates: string[];
+    currentPage: number;
+    datesPerPage: number;
+    handlePageChange: (newPage: number) => void;
+  };
+  matrix: {
+    granularity: TimeGranularity;
+    setGranularity: (granularity: TimeGranularity) => void;
+    slotHeight: string;
+    mergedTimeRows: ReturnType<typeof useMergedTimeRowsModel>["mergedTimeRows"];
+    slotMatrixRows: ReturnType<typeof useSlotMatrixViewModel>;
+    mergedRectBounds: ReturnType<
+      typeof useMergedTimeGridSelectionInteraction
+    >["getRectangleBounds"] extends (...args: never[]) => infer R
+      ? R
+      : never;
+    isDragging: boolean;
+    handleGridMouseUp: () => void;
+    handleGridMouseLeave: () => void;
+    handleMergedMouseDown: (
+      rowIndex: number,
+      dateIndex: number,
+      e: React.MouseEvent,
+    ) => void;
+    handleMergedMouseEnter: (rowIndex: number, dateIndex: number) => void;
+    handleMergedTouchStart: (
+      rowIndex: number,
+      dateIndex: number,
+      e: React.TouchEvent,
+    ) => void;
+    handleMergedTouchMove: (e: React.TouchEvent) => void;
+    handleMergedTouchEnd: () => void;
+    handleMergedClick: (rowIndex: number, dateIndex: number) => void;
+  };
+  calendar: {
+    calendarStatus: { connected: boolean; googleEmail?: string } | null;
+    calendarLoading: boolean;
+    calendarEvents: ReturnType<
+      typeof useCalendarConflictSyncApi
+    >["calendarEvents"];
+    conflictingSlotIds: string[];
+    loadingCalendar: boolean;
+    showCalendarOnGrid: boolean;
+    setShowCalendarOnGrid: (show: boolean) => void;
+    connectCalendar: () => void;
+    disconnectCalendar: () => Promise<void>;
+    markConflictsAsUnavailable: () => void;
+  };
 }
 
 /**
@@ -234,42 +233,50 @@ export function useVotingGridController({
   }, [setHoveredCell]);
 
   return {
-    granularity,
-    setGranularity,
-    voteMode,
-    setVoteMode,
-    selectedCount: displaySelection.size,
-    clearSelection,
-    selectAll,
-    dates,
-    paginatedDates,
-    currentPage,
-    datesPerPage,
-    handlePageChange,
-    slotHeight,
-    mergedTimeRows,
-    slotMatrixRows,
-    mergedRectBounds,
-    isDayFullySelected,
-    selectEntireDay,
-    handleGridMouseUp: handleMergedMouseUp,
-    handleGridMouseLeave,
-    isDragging,
-    handleMergedMouseDown,
-    handleMergedMouseEnter,
-    handleMergedTouchStart,
-    handleMergedTouchMove,
-    handleMergedTouchEnd,
-    handleMergedClick,
-    calendarStatus,
-    calendarLoading,
-    calendarEvents,
-    conflictingSlotIds,
-    loadingCalendar,
-    showCalendarOnGrid,
-    setShowCalendarOnGrid,
-    connectCalendar,
-    disconnectCalendar,
-    markConflictsAsUnavailable,
+    selection: {
+      voteMode,
+      setVoteMode,
+      selectedCount: displaySelection.size,
+      clearSelection,
+      selectAll,
+      isDayFullySelected,
+      selectEntireDay,
+    },
+    pagination: {
+      dates,
+      paginatedDates,
+      currentPage,
+      datesPerPage,
+      handlePageChange,
+    },
+    matrix: {
+      granularity,
+      setGranularity,
+      slotHeight,
+      mergedTimeRows,
+      slotMatrixRows,
+      mergedRectBounds,
+      isDragging,
+      handleGridMouseUp: handleMergedMouseUp,
+      handleGridMouseLeave,
+      handleMergedMouseDown,
+      handleMergedMouseEnter,
+      handleMergedTouchStart,
+      handleMergedTouchMove,
+      handleMergedTouchEnd,
+      handleMergedClick,
+    },
+    calendar: {
+      calendarStatus,
+      calendarLoading,
+      calendarEvents,
+      conflictingSlotIds,
+      loadingCalendar,
+      showCalendarOnGrid,
+      setShowCalendarOnGrid,
+      connectCalendar,
+      disconnectCalendar,
+      markConflictsAsUnavailable,
+    },
   };
 }
