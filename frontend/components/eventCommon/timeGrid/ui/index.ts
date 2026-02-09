@@ -8,3 +8,4 @@ export { SlotMatrix } from "./SlotMatrix";
 export { GoogleCalendarPanel } from "./GoogleCalendarPanel";
 export { DatePagination } from "./DatePagination";
 export { GranularitySelector } from "./GranularitySelector";
+export { MobileGridToolsMenu } from "./MobileGridToolsMenu";

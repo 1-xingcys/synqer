@@ -1,10 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { VotingGridProps } from "./types";
 import { useVotingGridController } from "./hooks";
 import {
   VoteModeToggle,
-  SelectionInfoBar,
   GridLegend,
   DateHeader,
   TimeColumn,
@@ -12,6 +12,7 @@ import {
   GoogleCalendarPanel,
   DatePagination,
   GranularitySelector,
+  MobileGridToolsMenu,
 } from "./ui";
 
 export type { VotingGridProps };
@@ -23,6 +24,7 @@ export default function VotingGrid({
   currentUserId,
   currentUserDisplayName,
 }: VotingGridProps) {
+  const tJoined = useTranslations("joined");
   const { selection, pagination, matrix, calendar } = useVotingGridController({
     slots,
     votes,
@@ -34,7 +36,6 @@ export default function VotingGrid({
   const {
     voteMode,
     setVoteMode,
-    selectedCount,
     clearSelection,
     selectAll,
     isDayFullySelected,
@@ -90,30 +91,65 @@ export default function VotingGrid({
         markConflictsAsUnavailable={markConflictsAsUnavailable}
       />
 
-      <div className="flex items-start sm:items-center justify-between gap-2 sm:gap-3">
-        <VoteModeToggle voteMode={voteMode} onModeChange={setVoteMode} />
+      <div className="hidden sm:flex w-full items-center justify-between gap-3 p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40">
+        <div className="flex items-center gap-3">
+          <VoteModeToggle voteMode={voteMode} onModeChange={setVoteMode} />
+          <span className="h-6 w-px bg-zinc-200 dark:bg-zinc-700" />
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500 dark:text-zinc-400">
+              {tJoined("mobileTools.view")}
+            </span>
+            <GranularitySelector
+              granularity={granularity}
+              onChange={setGranularity}
+            />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={selectAll}
+            className="px-2.5 py-1.5 text-xs font-medium rounded-md border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/50"
+          >
+            {tJoined("selectAll")}
+          </button>
+          <button
+            onClick={clearSelection}
+            className="px-2.5 py-1.5 text-xs font-medium rounded-md border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/50"
+          >
+            {tJoined("clearSelection")}
+          </button>
+        </div>
       </div>
 
-      <SelectionInfoBar
-        selectedCount={selectedCount}
-        onClear={clearSelection}
-        onSelectAll={selectAll}
-      />
+      <div className="sm:hidden flex items-center">
+        <div className="w-9 shrink-0 flex justify-center">
+          <MobileGridToolsMenu
+            voteMode={voteMode}
+            onModeChange={setVoteMode}
+            granularity={granularity}
+            onGranularityChange={setGranularity}
+            onSelectAll={selectAll}
+            onClearSelection={clearSelection}
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <DatePagination
+            dates={dates}
+            currentPage={currentPage}
+            datesPerPage={datesPerPage}
+            onPageChange={handlePageChange}
+          />
+        </div>
+      </div>
 
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 dark:text-zinc-400">View</span>
-        <GranularitySelector
-          granularity={granularity}
-          onChange={setGranularity}
+      <div className="hidden sm:block">
+        <DatePagination
+          dates={dates}
+          currentPage={currentPage}
+          datesPerPage={datesPerPage}
+          onPageChange={handlePageChange}
         />
       </div>
-
-      <DatePagination
-        dates={dates}
-        currentPage={currentPage}
-        datesPerPage={datesPerPage}
-        onPageChange={handlePageChange}
-      />
 
       <div
         className="select-none transition-opacity duration-200 touch-pan-y"

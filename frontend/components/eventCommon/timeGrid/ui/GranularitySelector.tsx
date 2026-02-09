@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { TimeGranularity } from "../types";
 
 interface GranularitySelectorProps {
@@ -7,19 +8,21 @@ interface GranularitySelectorProps {
   onChange: (granularity: TimeGranularity) => void;
 }
 
-const GRANULARITY_OPTIONS: { value: TimeGranularity; label: string }[] = [
-  { value: 15, label: "15m" },
-  { value: 30, label: "30m" },
-  { value: 60, label: "1h" },
+const GRANULARITY_OPTIONS: { value: TimeGranularity; labelKey: string }[] = [
+  { value: 15, labelKey: "view15min" },
+  { value: 30, labelKey: "view30min" },
+  { value: 60, labelKey: "view1hr" },
 ];
 
 export function GranularitySelector({
   granularity,
   onChange,
 }: GranularitySelectorProps) {
+  const tJoined = useTranslations("joined");
+
   return (
     <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5">
-      {GRANULARITY_OPTIONS.map(({ value, label }) => (
+      {GRANULARITY_OPTIONS.map(({ value, labelKey }) => (
         <button
           key={value}
           onClick={() => onChange(value)}
@@ -29,7 +32,7 @@ export function GranularitySelector({
               : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
           }`}
         >
-          {label}
+          {tJoined(`mobileTools.${labelKey}`)}
         </button>
       ))}
     </div>

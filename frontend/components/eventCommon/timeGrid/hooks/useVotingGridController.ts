@@ -27,7 +27,6 @@ interface UseVotingGridControllerResult {
   selection: {
     voteMode: VoteMode;
     setVoteMode: (mode: VoteMode) => void;
-    selectedCount: number;
     clearSelection: () => void;
     selectAll: () => void;
     isDayFullySelected: (dateKey: string) => boolean;
@@ -236,7 +235,6 @@ export function useVotingGridController({
     selection: {
       voteMode,
       setVoteMode,
-      selectedCount: displaySelection.size,
       clearSelection,
       selectAll,
       isDayFullySelected,

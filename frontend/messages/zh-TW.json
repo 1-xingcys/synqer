@@ -198,6 +198,15 @@
     "voteModeAvailableDesc": "選擇你有空的時段",
     "voteModeUnavailable": "投「不行」的時間",
     "voteModeUnavailableDesc": "選擇你不行的時段",
+    "mobileTools": {
+      "open": "開啟工具",
+      "mode": "Mode",
+      "view": "View",
+      "quickActions": "Quick Actions",
+      "view15min": "15min",
+      "view30min": "30min",
+      "view1hr": "1hr"
+    },
     "selectAvailableMode": "選擇你可以的時間",
     "selectUnavailableMode": "選擇你不行的時間",
     "dragToSelectAvailable": "拖曳選取你「可以」的時段，或點擊日期選取整天",

@@ -198,6 +198,15 @@
     "voteModeAvailableDesc": "Mark when you're free",
     "voteModeUnavailable": "Select unavailable times",
     "voteModeUnavailableDesc": "Mark when you're busy",
+    "mobileTools": {
+      "open": "Open tools",
+      "mode": "Mode",
+      "view": "View",
+      "quickActions": "Quick Actions",
+      "view15min": "15min",
+      "view30min": "30min",
+      "view1hr": "1hr"
+    },
     "selectAvailableMode": "Select your available times",
     "selectUnavailableMode": "Select your unavailable times",
     "dragToSelectAvailable": "Drag to select times you're available, or click dates to select entire days",
