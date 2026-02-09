@@ -200,6 +200,7 @@
     "voteModeUnavailableDesc": "選擇你不行的時段",
     "mobileTools": {
       "open": "開啟工具",
+      "tools": "Tools",
       "mode": "Mode",
       "view": "View",
       "quickActions": "Quick Actions",

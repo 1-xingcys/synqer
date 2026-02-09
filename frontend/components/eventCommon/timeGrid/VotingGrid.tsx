@@ -5,15 +5,13 @@ import { useTranslations } from "next-intl";
 import { VotingGridProps } from "./types";
 import { useVotingGridController } from "./hooks";
 import {
-  VoteModeToggle,
   GridLegend,
   DateHeader,
   TimeColumn,
   SlotMatrix,
   GoogleCalendarPanel,
   DatePagination,
-  GranularitySelector,
-  MobileGridToolsMenu,
+  GridToolsMenu,
 } from "./ui";
 
 export type { VotingGridProps };
@@ -99,79 +97,25 @@ export default function VotingGrid({
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      <div className="hidden sm:flex w-full items-center justify-between gap-3 p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40">
-        <div className="flex items-center gap-3">
-          <VoteModeToggle voteMode={voteMode} onModeChange={setVoteMode} />
-          <span className="h-6 w-px bg-zinc-200 dark:bg-zinc-700" />
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500 dark:text-zinc-400">
-              {tJoined("mobileTools.view")}
-            </span>
-            <GranularitySelector
-              granularity={granularity}
-              onChange={setGranularity}
-              variant="toolbar"
-            />
-          </div>
-        </div>
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-zinc-100 dark:bg-zinc-800">
-          <button
-            onClick={() => setIsCalendarModalOpen(true)}
-            className={`h-8 px-3 text-xs font-medium rounded-md transition-colors ${
-              calendarStatus?.connected
-                ? "bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/45"
-                : "bg-white text-zinc-600 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
-            }`}
-          >
-            {calendarStatus?.connected
-              ? tJoined("googleCalendar.settings")
-              : tJoined("googleCalendar.connect")}
-          </button>
-          <button
-            onClick={selectAll}
-            className="px-2.5 py-1.5 text-xs font-medium rounded-md text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/50"
-          >
-            {tJoined("selectAll")}
-          </button>
-          <button
-            onClick={clearSelection}
-            className="px-2.5 py-1.5 text-xs font-medium rounded-md text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700/50"
-          >
-            {tJoined("clearSelection")}
-          </button>
-        </div>
-      </div>
-
-      <div className="sm:hidden flex items-center gap-2">
-        <div className="flex-1 min-w-0 flex items-center gap-2">
-          <div className="flex-1 min-w-0">
-            <DatePagination
-              dates={dates}
-              currentPage={currentPage}
-              datesPerPage={datesPerPage}
-              onPageChange={handlePageChange}
-            />
-          </div>
-          <MobileGridToolsMenu
-            voteMode={voteMode}
-            onModeChange={setVoteMode}
-            granularity={granularity}
-            onGranularityChange={setGranularity}
-            onSelectAll={selectAll}
-            onClearSelection={clearSelection}
-            calendarStatus={calendarStatus}
-            onOpenCalendarPanel={() => setIsCalendarModalOpen(true)}
-            onDisconnectCalendar={disconnectCalendar}
+      <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-0">
+          <DatePagination
+            dates={dates}
+            currentPage={currentPage}
+            datesPerPage={datesPerPage}
+            onPageChange={handlePageChange}
           />
         </div>
-      </div>
-
-      <div className="hidden sm:block">
-        <DatePagination
-          dates={dates}
-          currentPage={currentPage}
-          datesPerPage={datesPerPage}
-          onPageChange={handlePageChange}
+        <GridToolsMenu
+          voteMode={voteMode}
+          onModeChange={setVoteMode}
+          granularity={granularity}
+          onGranularityChange={setGranularity}
+          onSelectAll={selectAll}
+          onClearSelection={clearSelection}
+          calendarStatus={calendarStatus}
+          onOpenCalendarPanel={() => setIsCalendarModalOpen(true)}
+          onDisconnectCalendar={disconnectCalendar}
         />
       </div>
 
