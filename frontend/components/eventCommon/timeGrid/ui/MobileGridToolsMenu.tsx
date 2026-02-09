@@ -12,6 +12,9 @@ interface MobileGridToolsMenuProps {
   onGranularityChange: (granularity: TimeGranularity) => void;
   onSelectAll: () => void;
   onClearSelection: () => void;
+  calendarStatus: { connected: boolean; googleEmail?: string } | null;
+  onOpenCalendarPanel: () => void;
+  onDisconnectCalendar: () => Promise<void>;
 }
 
 const GRANULARITY_ITEMS: { value: TimeGranularity; label: string }[] = [
@@ -27,10 +30,14 @@ export function MobileGridToolsMenu({
   onGranularityChange,
   onSelectAll,
   onClearSelection,
+  calendarStatus,
+  onOpenCalendarPanel,
+  onDisconnectCalendar,
 }: MobileGridToolsMenuProps) {
   const tJoined = useTranslations("joined");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isCalendarConnected = Boolean(calendarStatus?.connected);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -53,7 +60,7 @@ export function MobileGridToolsMenu({
     <div ref={containerRef} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className={`w-8 h-8 rounded-lg border transition-colors flex items-center justify-center ${
+        className={`w-10 h-8 rounded-lg border transition-colors flex items-center justify-center ${
           open
             ? "bg-blue-100 border-blue-300 text-blue-600 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-400"
             : "bg-zinc-100 border-zinc-200 text-zinc-600 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-300"
@@ -76,7 +83,7 @@ export function MobileGridToolsMenu({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-1 z-50 w-56 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 py-1">
+        <div className="absolute right-0 top-full mt-1 z-50 w-56 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 py-1">
           <div className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
             {tJoined("mobileTools.mode")}
           </div>
@@ -115,7 +122,7 @@ export function MobileGridToolsMenu({
             }}
             className={`w-full px-3 py-2 text-sm flex items-center justify-between ${
               voteMode === VoteMode.UNAVAILABLE
-                ? "bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
+                ? "bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300"
                 : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
             }`}
           >
@@ -197,6 +204,44 @@ export function MobileGridToolsMenu({
           >
             {tJoined("clearSelection")}
           </button>
+
+          <div className="my-1 border-t border-zinc-200 dark:border-zinc-700" />
+
+          <div className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+            {tJoined("mobileTools.integration")}
+          </div>
+          {!isCalendarConnected ? (
+            <button
+              onClick={() => {
+                onOpenCalendarPanel();
+                setOpen(false);
+              }}
+              className="w-full px-3 py-2 text-left text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
+            >
+              {tJoined("googleCalendar.connect")}
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => {
+                  onOpenCalendarPanel();
+                  setOpen(false);
+                }}
+                className="w-full px-3 py-2 text-left text-sm text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
+              >
+                {tJoined("googleCalendar.settings")}
+              </button>
+              <button
+                onClick={() => {
+                  void onDisconnectCalendar();
+                  setOpen(false);
+                }}
+                className="w-full px-3 py-2 text-left text-sm text-rose-600 dark:text-rose-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
+              >
+                {tJoined("googleCalendar.disconnect")}
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

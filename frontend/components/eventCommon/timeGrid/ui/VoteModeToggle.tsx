@@ -17,17 +17,17 @@ export function VoteModeToggle({
   return (
     <div className="relative mb-5 sm:mb-0">
       {/* Toggle buttons */}
-      <div className="inline-flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1">
+      <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-zinc-100 dark:bg-zinc-800">
         <button
           onClick={() => onModeChange(VoteMode.AVAILABLE)}
-          className={`w-12 h-8 sm:w-auto sm:h-auto flex items-center justify-center gap-1.5 sm:gap-2 sm:px-3 sm:py-1.5 rounded-md text-sm font-medium transition-all ${
+          className={`h-8 px-3 flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors ${
             voteMode === VoteMode.AVAILABLE
-              ? "bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
-              : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+              : "text-zinc-500 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-900/70"
           }`}
         >
           <svg
-            className="w-4 h-4 shrink-0"
+            className="w-3.5 h-3.5 shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -45,14 +45,14 @@ export function VoteModeToggle({
         </button>
         <button
           onClick={() => onModeChange(VoteMode.UNAVAILABLE)}
-          className={`w-12 h-8 sm:w-auto sm:h-auto flex items-center justify-center gap-1.5 sm:gap-2 sm:px-3 sm:py-1.5 rounded-md text-sm font-medium transition-all ${
+          className={`h-8 px-3 flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors ${
             voteMode === VoteMode.UNAVAILABLE
-              ? "bg-white dark:bg-zinc-900 text-rose-600 dark:text-rose-400 shadow-sm"
-              : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+              ? "bg-[#fff1f2] text-[#be123c] dark:bg-[#881337]/30 dark:text-[#fda4af]"
+              : "text-zinc-500 dark:text-zinc-400 hover:bg-white dark:hover:bg-zinc-900/70"
           }`}
         >
           <svg
-            className="w-4 h-4 shrink-0"
+            className="w-3.5 h-3.5 shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

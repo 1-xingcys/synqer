@@ -203,6 +203,7 @@
       "mode": "Mode",
       "view": "View",
       "quickActions": "Quick Actions",
+      "integration": "Integration",
       "view15min": "15min",
       "view30min": "30min",
       "view1hr": "1hr"
@@ -220,6 +221,7 @@
       "notConnected": "未連結",
       "connectedAs": "已連結帳號：{email}",
       "connect": "連結 Google 日曆",
+      "settings": "設定 Google 日曆",
       "disconnect": "斷開連結",
       "import": "重新載入",
       "importing": "匯入中...",

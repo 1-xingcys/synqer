@@ -1,5 +1,4 @@
 export { VoteModeToggle } from "./VoteModeToggle";
-export { SelectionInfoBar } from "./SelectionInfoBar";
 export { GridLegend } from "./GridLegend";
 export { DateHeader } from "./DateHeader";
 export { TimeSlotCell } from "./TimeSlotCell";
