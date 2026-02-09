@@ -15,8 +15,13 @@ export const TimeColumn = memo(function TimeColumn({
 }: TimeColumnProps) {
   return (
     <div
-      className="w-9 sm:w-14 shrink-0 relative border-r border-gray-200 dark:border-zinc-700 rounded-l-lg"
-      style={{ "--slot-height": slotHeight } as React.CSSProperties}
+      className="w-9 sm:w-14 shrink-0 relative border-r border-gray-200 dark:border-zinc-700 rounded-l-lg touch-pan-y"
+      style={
+        {
+          "--slot-height": slotHeight,
+          touchAction: "pan-y",
+        } as React.CSSProperties
+      }
     >
       {mergedTimeRows.map((row, rowIndex) => (
         <div

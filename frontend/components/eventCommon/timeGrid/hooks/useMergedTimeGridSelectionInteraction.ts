@@ -326,6 +326,7 @@ export function useMergedTimeGridSelectionInteraction({
       }
 
       if (!isDragging) return;
+      e.preventDefault();
 
       const touch = e.touches[0];
       const element = document.elementFromPoint(touch.clientX, touch.clientY);

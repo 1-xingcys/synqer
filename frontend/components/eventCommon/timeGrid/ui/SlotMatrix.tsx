@@ -52,7 +52,12 @@ export const SlotMatrix = memo(function SlotMatrix({
   return (
     <div
       className="flex-1 border border-gray-200 dark:border-zinc-700 rounded-r-lg overflow-hidden"
-      style={{ "--slot-height": slotHeight } as React.CSSProperties}
+      style={
+        {
+          "--slot-height": slotHeight,
+          touchAction: "none",
+        } as React.CSSProperties
+      }
     >
       {rows.map((row) => (
         <div key={row.rowIndex} className="flex">

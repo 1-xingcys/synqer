@@ -116,7 +116,7 @@ export default function VotingGrid({
       />
 
       <div
-        className="select-none transition-opacity duration-200 touch-none"
+        className="select-none transition-opacity duration-200 touch-pan-y"
         onMouseUp={handleGridMouseUp}
         onMouseLeave={handleGridMouseLeave}
       >
