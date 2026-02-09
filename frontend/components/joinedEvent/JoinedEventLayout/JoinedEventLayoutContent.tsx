@@ -132,8 +132,8 @@ export function JoinedEventLayoutContent({
         />
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="mt-5">
+      {/* Navigation Tabs (sticky header for joined/[eventId] pages) */}
+      <div className="sticky top-0 z-40 mt-5 bg-white/95 dark:bg-zinc-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-zinc-900/80">
         <EventDetailNav tabs={tabs} />
       </div>
 
