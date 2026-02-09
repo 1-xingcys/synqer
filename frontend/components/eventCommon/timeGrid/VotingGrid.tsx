@@ -96,70 +96,72 @@ export default function VotingGrid({
   }, [isCalendarModalOpen]);
 
   return (
-    <div className="space-y-3 sm:space-y-4">
-      <div className="flex items-center gap-2">
-        <div className="flex-1 min-w-0">
-          <DatePagination
-            dates={dates}
-            currentPage={currentPage}
-            datesPerPage={datesPerPage}
-            onPageChange={handlePageChange}
-          />
-        </div>
-        <GridToolsMenu
-          voteMode={voteMode}
-          onModeChange={setVoteMode}
-          granularity={granularity}
-          onGranularityChange={setGranularity}
-          onSelectAll={selectAll}
-          onClearSelection={clearSelection}
-          calendarStatus={calendarStatus}
-          onOpenCalendarPanel={() => setIsCalendarModalOpen(true)}
-          onDisconnectCalendar={disconnectCalendar}
-        />
-      </div>
-
-      <div
-        className="select-none transition-opacity duration-200 touch-pan-y"
-        onMouseUp={handleGridMouseUp}
-        onMouseLeave={handleGridMouseLeave}
-      >
-        <div className="relative">
-          <DateHeader
-            dates={paginatedDates}
-            isDayFullySelected={isDayFullySelected}
-            onSelectDay={selectEntireDay}
-          />
-
-          <div className="flex">
-            <TimeColumn
-              mergedTimeRows={mergedTimeRows}
-              slotHeight={slotHeight}
-            />
-
-            <SlotMatrix
-              rows={slotMatrixRows}
-              voteMode={voteMode}
-              isDragging={isDragging}
-              mergedRectBounds={mergedRectBounds}
-              slotHeight={slotHeight}
-              showCalendarOnGrid={showCalendarOnGrid}
-              onMouseDown={handleMergedMouseDown}
-              onMouseEnter={handleMergedMouseEnter}
-              onTouchStart={handleMergedTouchStart}
-              onTouchMove={handleMergedTouchMove}
-              onTouchEnd={handleMergedTouchEnd}
-              onClick={handleMergedClick}
+    <div className="bg-white dark:bg-zinc-900 shadow rounded-lg overflow-visible border border-gray-200 dark:border-zinc-800 p-2 sm:p-6">
+      <div className="space-y-2 sm:space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <DatePagination
+              dates={dates}
+              currentPage={currentPage}
+              datesPerPage={datesPerPage}
+              onPageChange={handlePageChange}
             />
           </div>
+          <GridToolsMenu
+            voteMode={voteMode}
+            onModeChange={setVoteMode}
+            granularity={granularity}
+            onGranularityChange={setGranularity}
+            onSelectAll={selectAll}
+            onClearSelection={clearSelection}
+            calendarStatus={calendarStatus}
+            onOpenCalendarPanel={() => setIsCalendarModalOpen(true)}
+            onDisconnectCalendar={disconnectCalendar}
+          />
         </div>
-      </div>
 
-      <GridLegend
-        voteMode={voteMode}
-        showCalendarOnGrid={showCalendarOnGrid}
-        calendarEvents={calendarEvents}
-      />
+        <div
+          className="select-none transition-opacity duration-200 touch-pan-y"
+          onMouseUp={handleGridMouseUp}
+          onMouseLeave={handleGridMouseLeave}
+        >
+          <div className="relative">
+            <DateHeader
+              dates={paginatedDates}
+              isDayFullySelected={isDayFullySelected}
+              onSelectDay={selectEntireDay}
+            />
+
+            <div className="flex">
+              <TimeColumn
+                mergedTimeRows={mergedTimeRows}
+                slotHeight={slotHeight}
+              />
+
+              <SlotMatrix
+                rows={slotMatrixRows}
+                voteMode={voteMode}
+                isDragging={isDragging}
+                mergedRectBounds={mergedRectBounds}
+                slotHeight={slotHeight}
+                showCalendarOnGrid={showCalendarOnGrid}
+                onMouseDown={handleMergedMouseDown}
+                onMouseEnter={handleMergedMouseEnter}
+                onTouchStart={handleMergedTouchStart}
+                onTouchMove={handleMergedTouchMove}
+                onTouchEnd={handleMergedTouchEnd}
+                onClick={handleMergedClick}
+              />
+            </div>
+          </div>
+        </div>
+
+        <GridLegend
+          voteMode={voteMode}
+          showCalendarOnGrid={showCalendarOnGrid}
+          calendarEvents={calendarEvents}
+        />
+      </div>
 
       {isCalendarModalOpen && (
         <>
