@@ -1,6 +1,8 @@
 // @ts-check
 import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import reactPlugin from 'eslint-plugin-react';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import nextVitals from 'eslint-config-next/core-web-vitals';
@@ -17,6 +19,7 @@ export default tseslint.config(
       'next-env.d.ts',
       'node_modules/**',
       'eslint.config.mjs',
+      'jest.config.cjs',
       'postcss.config.mjs',
       'tailwind.config.ts',
     ],
@@ -44,6 +47,10 @@ export default tseslint.config(
         // 設定 tsconfig 的根目錄
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+    plugins: {
+      react: reactPlugin,
+      'react-hooks': reactHooksPlugin,
     },
     rules: {
       // TypeScript 相關規則

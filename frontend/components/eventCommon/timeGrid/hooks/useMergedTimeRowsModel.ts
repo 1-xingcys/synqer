@@ -8,12 +8,12 @@ interface TimeSlotForMerge {
   endMinute: number;
 }
 
-interface UseMergedRowsProps {
+interface UseMergedTimeRowsModelProps {
   timeSlots: TimeSlotForMerge[];
   granularity: TimeGranularity;
 }
 
-interface UseMergedRowsReturn {
+interface UseMergedTimeRowsModelReturn {
   mergedRows: MergedTimeRow[];
   getSlotIndicesForRow: (rowIndex: number) => number[];
 }
@@ -37,10 +37,10 @@ interface UseMergedRowsReturn {
  * - 10:00~11:00 (60min, height=4)
  * - 11:00~11:15 (15min remainder at end, height=1)
  */
-export function useMergedRows({
+export function useMergedTimeRowsModel({
   timeSlots,
   granularity,
-}: UseMergedRowsProps): UseMergedRowsReturn {
+}: UseMergedTimeRowsModelProps): UseMergedTimeRowsModelReturn {
   const mergedRows = useMemo(() => {
     if (timeSlots.length === 0) return [];
 

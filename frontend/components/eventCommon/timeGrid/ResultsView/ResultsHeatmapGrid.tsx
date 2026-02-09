@@ -14,7 +14,11 @@ import {
   groupSlotsByDate,
 } from "@/components/eventCommon/timeGrid/utils";
 import { formatMinutesToTime } from "@/lib/utils";
-import { useResponsiveGrid, usePaginatedDates, useMergedRows } from "../hooks";
+import {
+  useResponsiveGrid,
+  usePaginatedDates,
+  useMergedTimeRowsModel,
+} from "../hooks";
 import { TimeGranularity, TimeSlot, Vote, Participant } from "../types";
 
 interface ResultsHeatmapGridProps {
@@ -87,7 +91,7 @@ export function ResultsHeatmapGrid({
   );
 
   // Merged rows for granularity (using shared hook)
-  const { mergedRows } = useMergedRows({ timeSlots, granularity });
+  const { mergedRows } = useMergedTimeRowsModel({ timeSlots, granularity });
 
   // Use paginated dates hook (handles page clamping automatically)
   const { paginatedDates, currentPage, setCurrentPage } = usePaginatedDates({

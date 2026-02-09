@@ -3,26 +3,26 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { MergedTimeRow } from "../types";
 
-interface MergedRowPosition {
+interface MergedTimeGridPosition {
   rowIndex: number;
   dateIndex: number;
 }
 
-interface UseMergedRowDragSelectionProps {
+interface UseMergedTimeGridSelectionInteractionProps {
   selectedSlots: Set<string>;
-  mergedRows: MergedTimeRow[];
+  mergedTimeRows: MergedTimeRow[];
   slotsByDate: Record<string, { id: string }[]>;
   paginatedDates: string[];
   /** 拖曳/點擊結束時的 callback，傳入新增與移除的 slot IDs */
   onSelectionCommit: (addSlotIds: string[], removeSlotIds: string[]) => void;
 }
 
-interface UseMergedRowDragSelectionReturn {
+interface UseMergedTimeGridSelectionInteractionReturn {
   isDragging: boolean;
-  dragStart: MergedRowPosition | null;
-  dragEnd: MergedRowPosition | null;
-  hoveredCell: MergedRowPosition | null;
-  longPressCell: MergedRowPosition | null;
+  dragStart: MergedTimeGridPosition | null;
+  dragEnd: MergedTimeGridPosition | null;
+  hoveredCell: MergedTimeGridPosition | null;
+  longPressCell: MergedTimeGridPosition | null;
   previewSelection: Set<string>;
   displaySelection: Set<string>;
 
@@ -41,7 +41,7 @@ interface UseMergedRowDragSelectionReturn {
   handleTouchMove: (e: React.TouchEvent) => void;
   handleTouchEnd: () => void;
   handleClick: (rowIndex: number, dateIndex: number) => void;
-  setHoveredCell: (cell: MergedRowPosition | null) => void;
+  setHoveredCell: (cell: MergedTimeGridPosition | null) => void;
   isInDragRectangle: (rowIndex: number, dateIndex: number) => boolean;
   getRectangleBounds: () => {
     minRow: number;
@@ -71,23 +71,24 @@ function computeDiff(
   return { addSlotIds, removeSlotIds };
 }
 
-export function useMergedRowDragSelection({
+export function useMergedTimeGridSelectionInteraction({
   selectedSlots,
-  mergedRows,
+  mergedTimeRows,
   slotsByDate,
   paginatedDates,
   onSelectionCommit,
-}: UseMergedRowDragSelectionProps): UseMergedRowDragSelectionReturn {
+}: UseMergedTimeGridSelectionInteractionProps): UseMergedTimeGridSelectionInteractionReturn {
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<MergedRowPosition | null>(null);
-  const [dragEnd, setDragEnd] = useState<MergedRowPosition | null>(null);
+  const [dragStart, setDragStart] = useState<MergedTimeGridPosition | null>(
+    null,
+  );
+  const [dragEnd, setDragEnd] = useState<MergedTimeGridPosition | null>(null);
   const [baseSelection, setBaseSelection] = useState<Set<string>>(new Set());
-  const [hoveredCell, setHoveredCell] = useState<MergedRowPosition | null>(
+  const [hoveredCell, setHoveredCell] = useState<MergedTimeGridPosition | null>(
     null,
   );
-  const [longPressCell, setLongPressCell] = useState<MergedRowPosition | null>(
-    null,
-  );
+  const [longPressCell, setLongPressCell] =
+    useState<MergedTimeGridPosition | null>(null);
 
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   // Guard against duplicate commits from local + global mouseup handlers.
@@ -96,7 +97,7 @@ export function useMergedRowDragSelection({
   // Get all slot IDs for a merged cell
   const getSlotIdsForCell = useCallback(
     (rowIndex: number, dateIndex: number): string[] => {
-      const row = mergedRows[rowIndex];
+      const row = mergedTimeRows[rowIndex];
       const dateKey = paginatedDates[dateIndex];
       if (!row || !dateKey) return [];
 
@@ -104,7 +105,7 @@ export function useMergedRowDragSelection({
         .map((idx) => slotsByDate[dateKey]?.[idx]?.id)
         .filter(Boolean);
     },
-    [mergedRows, paginatedDates, slotsByDate],
+    [mergedTimeRows, paginatedDates, slotsByDate],
   );
 
   // Check if a merged cell is fully selected in a given selection set
@@ -118,13 +119,16 @@ export function useMergedRowDragSelection({
 
   // Get cells in rectangle
   const getCellsInRectangle = useCallback(
-    (start: MergedRowPosition, end: MergedRowPosition): MergedRowPosition[] => {
+    (
+      start: MergedTimeGridPosition,
+      end: MergedTimeGridPosition,
+    ): MergedTimeGridPosition[] => {
       const minRow = Math.min(start.rowIndex, end.rowIndex);
       const maxRow = Math.max(start.rowIndex, end.rowIndex);
       const minDate = Math.min(start.dateIndex, end.dateIndex);
       const maxDate = Math.max(start.dateIndex, end.dateIndex);
 
-      const cells: MergedRowPosition[] = [];
+      const cells: MergedTimeGridPosition[] = [];
       for (let row = minRow; row <= maxRow; row++) {
         for (let date = minDate; date <= maxDate; date++) {
           cells.push({ rowIndex: row, dateIndex: date });

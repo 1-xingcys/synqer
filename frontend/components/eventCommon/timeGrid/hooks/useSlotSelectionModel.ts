@@ -11,7 +11,7 @@ import {
   getMarkUnavailableDiff,
 } from "../domain/selection";
 
-interface UseSlotSelectionProps {
+interface UseSlotSelectionModelProps {
   slots: TimeSlot[];
   slotsByDate: Record<string, TimeSlot[]>;
   /** 從 React Query cache 派生的當前使用者已選 slot IDs */
@@ -22,7 +22,7 @@ interface UseSlotSelectionProps {
   onReplaceAll: (slotIds: string[]) => void;
 }
 
-interface UseSlotSelectionReturn {
+interface UseSlotSelectionModelReturn {
   // State
   selectedSlots: Set<string>;
   displaySelection: Set<string>;
@@ -41,13 +41,13 @@ interface UseSlotSelectionReturn {
   isDayFullySelected: (dateKey: string) => boolean;
 }
 
-export function useSlotSelection({
+export function useSlotSelectionModel({
   slots,
   slotsByDate,
   selectedSlots,
   onSelectionCommit,
   onReplaceAll,
-}: UseSlotSelectionProps): UseSlotSelectionReturn {
+}: UseSlotSelectionModelProps): UseSlotSelectionModelReturn {
   const [voteMode, setVoteModeState] = useState<VoteMode>(VoteMode.AVAILABLE);
   const allSlotIds = useMemo(() => slots.map((s) => s.id), [slots]);
 

@@ -4,11 +4,11 @@ import { useMemo, useCallback } from "react";
 import { GridPosition, TimeSlot } from "../types";
 import { groupSlotsByDate, createSlotGrid } from "../utils";
 
-interface UseSlotGridProps {
+interface UseSlotGridModelProps {
   slots: TimeSlot[];
 }
 
-interface UseSlotGridReturn {
+interface UseSlotGridModelReturn {
   slotsByDate: Record<string, TimeSlot[]>;
   dates: string[];
   timeSlots: TimeSlot[];
@@ -17,7 +17,9 @@ interface UseSlotGridReturn {
   getSlotsInRectangle: (start: GridPosition, end: GridPosition) => Set<string>;
 }
 
-export function useSlotGrid({ slots }: UseSlotGridProps): UseSlotGridReturn {
+export function useSlotGridModel({
+  slots,
+}: UseSlotGridModelProps): UseSlotGridModelReturn {
   // Group slots by date
   const slotsByDate = useMemo(() => groupSlotsByDate(slots), [slots]);
 

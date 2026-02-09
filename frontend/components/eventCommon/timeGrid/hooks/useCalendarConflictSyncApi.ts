@@ -5,13 +5,13 @@ import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 import { CalendarEvent, TimeSlot } from "../types";
 import { mapCalendarEventsToSlots } from "../utils";
 
-interface UseCalendarIntegrationProps {
+interface UseCalendarConflictSyncApiProps {
   eventId?: string;
   slots: TimeSlot[];
   slotsByDate: Record<string, TimeSlot[]>;
 }
 
-interface UseCalendarIntegrationReturn {
+interface UseCalendarConflictSyncApiReturn {
   // State
   calendarStatus: { connected: boolean; googleEmail?: string } | null;
   calendarLoading: boolean;
@@ -32,11 +32,11 @@ interface UseCalendarIntegrationReturn {
   getEventSpanFromSlot: (slotId: string, event: CalendarEvent) => number;
 }
 
-export function useCalendarIntegration({
+export function useCalendarConflictSyncApi({
   eventId,
   slots,
   slotsByDate,
-}: UseCalendarIntegrationProps): UseCalendarIntegrationReturn {
+}: UseCalendarConflictSyncApiProps): UseCalendarConflictSyncApiReturn {
   const {
     status: calendarStatus,
     loading: calendarLoading,

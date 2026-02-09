@@ -2,15 +2,16 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { Vote, TimeGranularity, VotingGridProps } from "../types";
-import { useVotingSelection } from "./useVotingSelection";
-import { useCalendarIntegration } from "./useCalendarIntegration";
-import { useMergedRowDragSelection } from "./useMergedRowDragSelection";
-import { useMergedRows } from "./useMergedRows";
+import { useCalendarConflictSyncApi } from "./useCalendarConflictSyncApi";
+import { useMergedTimeGridSelectionInteraction } from "./useMergedTimeGridSelectionInteraction";
+import { useMergedTimeRowsModel } from "./useMergedTimeRowsModel";
 import { useResponsiveGrid } from "./useResponsiveGrid";
 import { usePaginatedDates } from "./usePaginatedDates";
 import { useOptimisticVoting } from "./useOptimisticVoting";
 import { useCalendarOverlayProjection } from "./useCalendarOverlayProjection";
 import { useSlotMatrixViewModel } from "./useSlotMatrixViewModel";
+import { useSlotGridModel } from "./useSlotGridModel";
+import { useSlotSelectionModel } from "./useSlotSelectionModel";
 import { groupVotesBySlot } from "../utils";
 import { VoteMode } from "@/types/event";
 
@@ -39,10 +40,10 @@ interface UseVotingGridControllerResult {
   datesPerPage: number;
   handlePageChange: (newPage: number) => void;
   slotHeight: string;
-  mergedRows: ReturnType<typeof useMergedRows>["mergedRows"];
+  mergedRows: ReturnType<typeof useMergedTimeRowsModel>["mergedRows"];
   slotMatrixRows: ReturnType<typeof useSlotMatrixViewModel>;
   mergedRectBounds: ReturnType<
-    typeof useMergedRowDragSelection
+    typeof useMergedTimeGridSelectionInteraction
   >["getRectangleBounds"] extends (...args: never[]) => infer R
     ? R
     : never;
@@ -73,7 +74,9 @@ interface UseVotingGridControllerResult {
   // calendar panel / legend
   calendarStatus: { connected: boolean; googleEmail?: string } | null;
   calendarLoading: boolean;
-  calendarEvents: ReturnType<typeof useCalendarIntegration>["calendarEvents"];
+  calendarEvents: ReturnType<
+    typeof useCalendarConflictSyncApi
+  >["calendarEvents"];
   conflictingSlotIds: string[];
   loadingCalendar: boolean;
   showCalendarOnGrid: boolean;
@@ -100,27 +103,27 @@ export function useVotingGridController({
     votes,
   });
 
+  const { slotsByDate, dates, timeSlots } = useSlotGridModel({ slots });
+
   const {
     voteMode,
-    slotsByDate,
-    dates,
-    timeSlots,
-    displaySelection: modeDisplaySelection,
     setVoteMode,
+    displaySelection: modeDisplaySelection,
     commitDisplaySelectionChange,
     selectEntireDay,
     clearSelection,
     selectAll,
-    isDayFullySelected,
     applyConflicts,
-  } = useVotingSelection({
+    isDayFullySelected,
+  } = useSlotSelectionModel({
     slots,
+    slotsByDate,
     selectedSlots,
     onSelectionCommit: toggleSlots,
     onReplaceAll: replaceAllSlots,
   });
 
-  const { mergedRows } = useMergedRows({
+  const { mergedRows } = useMergedTimeRowsModel({
     timeSlots,
     granularity,
   });
@@ -145,9 +148,9 @@ export function useVotingGridController({
     setHoveredCell,
     isInDragRectangle,
     getRectangleBounds: getMergedRectangleBounds,
-  } = useMergedRowDragSelection({
+  } = useMergedTimeGridSelectionInteraction({
     selectedSlots: modeDisplaySelection,
-    mergedRows,
+    mergedTimeRows: mergedRows,
     slotsByDate,
     paginatedDates,
     onSelectionCommit: commitDisplaySelectionChange,
@@ -164,7 +167,7 @@ export function useVotingGridController({
     setShowCalendarOnGrid,
     connectCalendar,
     disconnectCalendar,
-  } = useCalendarIntegration({ eventId, slots, slotsByDate });
+  } = useCalendarConflictSyncApi({ eventId, slots, slotsByDate });
 
   const { getCalendarProjectionForCell } = useCalendarOverlayProjection({
     mergedRows,

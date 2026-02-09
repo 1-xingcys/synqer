@@ -1,9 +1,8 @@
-export { useVotingSelection } from "./useVotingSelection";
-export { useCalendarIntegration } from "./useCalendarIntegration";
-export { useSlotGrid } from "./useSlotGrid";
-export { useSlotSelection } from "./useSlotSelection";
-export { useMergedRowDragSelection } from "./useMergedRowDragSelection";
-export { useMergedRows } from "./useMergedRows";
+export { useCalendarConflictSyncApi } from "./useCalendarConflictSyncApi";
+export { useSlotGridModel } from "./useSlotGridModel";
+export { useSlotSelectionModel } from "./useSlotSelectionModel";
+export { useMergedTimeGridSelectionInteraction } from "./useMergedTimeGridSelectionInteraction";
+export { useMergedTimeRowsModel } from "./useMergedTimeRowsModel";
 export { useResponsiveGrid } from "./useResponsiveGrid";
 export { usePaginatedDates } from "./usePaginatedDates";
 export { useFilteredVotes } from "./useFilteredVotes";
