@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { VotingGridProps } from "./types";
 import { useVotingGridController } from "./hooks";
+import { formatMinutesToTime } from "@/lib/utils";
+import { useTimeGridStickyHeaderSignal } from "./stickyHeaderSignalContext";
 import {
   GridLegend,
   DateHeader,
@@ -25,6 +27,9 @@ export default function VotingGrid({
 }: VotingGridProps) {
   const tJoined = useTranslations("joined");
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [isStickyActive, setIsStickyActive] = useState(false);
+  const stickySentinelRef = useRef<HTMLDivElement>(null);
+  const { setStickyActive } = useTimeGridStickyHeaderSignal();
   const { selection, pagination, matrix, calendar } = useVotingGridController({
     slots,
     votes,
@@ -75,6 +80,10 @@ export default function VotingGrid({
     disconnectCalendar,
     markConflictsAsUnavailable,
   } = calendar;
+  const firstTimeLabel =
+    mergedTimeRows.length > 0
+      ? formatMinutesToTime(mergedTimeRows[0].startMinute)
+      : undefined;
 
   useEffect(() => {
     if (!isCalendarModalOpen) return;
@@ -95,28 +104,64 @@ export default function VotingGrid({
     };
   }, [isCalendarModalOpen]);
 
+  useEffect(() => {
+    const sentinel = stickySentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const active = !entry.isIntersecting;
+        setIsStickyActive(active);
+        setStickyActive(active);
+      },
+      { threshold: [1] },
+    );
+
+    observer.observe(sentinel);
+    return () => {
+      observer.disconnect();
+      setIsStickyActive(false);
+      setStickyActive(false);
+    };
+  }, [setStickyActive]);
+
   return (
-    <div className="bg-white dark:bg-zinc-900 shadow rounded-lg overflow-visible border border-gray-200 dark:border-zinc-800 p-2 sm:p-6">
-      <div className="space-y-2 sm:space-y-4">
-        <div className="flex items-center gap-2">
-          <div className="flex-1 min-w-0">
-            <DatePagination
-              dates={dates}
-              currentPage={currentPage}
-              datesPerPage={datesPerPage}
-              onPageChange={handlePageChange}
+    <div className="relative z-50 bg-white dark:bg-zinc-900 shadow rounded-lg overflow-visible border border-gray-200 dark:border-zinc-800 px-2 pb-2 sm:px-6 sm:pb-6">
+      <div>
+        <div ref={stickySentinelRef} className="h-px" aria-hidden />
+
+        <div
+          className={`sticky top-0 z-50 bg-white dark:bg-zinc-900 backdrop-blur supports-[backdrop-filter]:bg-white/100 dark:supports-[backdrop-filter]:bg-zinc-900/100 space-y-2 sm:space-y-4`}
+        >
+          <div className="h-[8px]"></div>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <DatePagination
+                dates={dates}
+                currentPage={currentPage}
+                datesPerPage={datesPerPage}
+                onPageChange={handlePageChange}
+              />
+            </div>
+            <GridToolsMenu
+              voteMode={voteMode}
+              onModeChange={setVoteMode}
+              granularity={granularity}
+              onGranularityChange={setGranularity}
+              onSelectAll={selectAll}
+              onClearSelection={clearSelection}
+              calendarStatus={calendarStatus}
+              onOpenCalendarPanel={() => setIsCalendarModalOpen(true)}
+              onDisconnectCalendar={disconnectCalendar}
             />
           </div>
-          <GridToolsMenu
-            voteMode={voteMode}
-            onModeChange={setVoteMode}
-            granularity={granularity}
-            onGranularityChange={setGranularity}
-            onSelectAll={selectAll}
-            onClearSelection={clearSelection}
-            calendarStatus={calendarStatus}
-            onOpenCalendarPanel={() => setIsCalendarModalOpen(true)}
-            onDisconnectCalendar={disconnectCalendar}
+
+          <DateHeader
+            dates={paginatedDates}
+            isDayFullySelected={isDayFullySelected}
+            onSelectDay={selectEntireDay}
+            firstTimeLabel={firstTimeLabel}
+            isStickyActive={isStickyActive}
           />
         </div>
 
@@ -126,16 +171,11 @@ export default function VotingGrid({
           onMouseLeave={handleGridMouseLeave}
         >
           <div className="relative">
-            <DateHeader
-              dates={paginatedDates}
-              isDayFullySelected={isDayFullySelected}
-              onSelectDay={selectEntireDay}
-            />
-
             <div className="flex">
               <TimeColumn
                 mergedTimeRows={mergedTimeRows}
                 slotHeight={slotHeight}
+                showFirstBoundaryLabel={false}
               />
 
               <SlotMatrix
@@ -156,11 +196,13 @@ export default function VotingGrid({
           </div>
         </div>
 
-        <GridLegend
-          voteMode={voteMode}
-          showCalendarOnGrid={showCalendarOnGrid}
-          calendarEvents={calendarEvents}
-        />
+        <div className="mt-2 sm:mt-4">
+          <GridLegend
+            voteMode={voteMode}
+            showCalendarOnGrid={showCalendarOnGrid}
+            calendarEvents={calendarEvents}
+          />
+        </div>
       </div>
 
       {isCalendarModalOpen && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -12,6 +12,7 @@ import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
 import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { TimeGridStickyHeaderSignalProvider } from "@/components/eventCommon/timeGrid/stickyHeaderSignalContext";
 import { EventStatus } from "@/types/event";
 
 interface JoinedEventLayoutContentProps {
@@ -26,6 +27,7 @@ export function JoinedEventLayoutContent({
   const eventId = params.eventId as string;
   const { data, isLoading, error } = useJoinedEventContext();
   const { user } = useAuthContext();
+  const [isGridStickyActive, setIsGridStickyActive] = useState(false);
 
   if (isLoading) {
     return (
@@ -133,12 +135,24 @@ export function JoinedEventLayoutContent({
       </div>
 
       {/* Navigation Tabs (sticky header for joined/[eventId] pages) */}
-      <div className="sticky top-0 z-40 mt-5 bg-white/95 dark:bg-zinc-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-zinc-900/80">
+      <div
+        className={`sticky top-0 z-40 mt-5 bg-white/100 dark:bg-zinc-900/100 backdrop-blur supports-[backdrop-filter]:bg-white/100 dark:supports-[backdrop-filter]:bg-zinc-900/100 transition-transform duration-200 ${
+          isGridStickyActive
+            ? "-translate-y-full pointer-events-none"
+            : "translate-y-0"
+        }`}
+      >
         <EventDetailNav tabs={tabs} />
       </div>
 
       {/* Page Content */}
-      <div className="mt-5">{children}</div>
+      <div className="mt-5">
+        <TimeGridStickyHeaderSignalProvider
+          setStickyActive={setIsGridStickyActive}
+        >
+          {children}
+        </TimeGridStickyHeaderSignalProvider>
+      </div>
     </div>
   );
 }

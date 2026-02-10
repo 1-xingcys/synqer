@@ -89,7 +89,7 @@ export default function Sidebar({
       {/* Overlay - 手機版點擊關閉 */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-[70] lg:hidden"
           onClick={onClose}
         />
       )}
@@ -101,7 +101,7 @@ export default function Sidebar({
           w-64 ${widthClass} bg-white dark:bg-zinc-900 
           border-r border-zinc-200 dark:border-zinc-800
           transition-[transform,opacity,width] duration-300 ease-in-out
-          z-50 lg:z-0
+          z-[80] lg:z-0
           ${visibilityClass}
         `}
         aria-hidden={!isOpen}

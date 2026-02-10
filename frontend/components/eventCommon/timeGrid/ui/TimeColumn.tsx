@@ -7,11 +7,13 @@ import { MergedTimeRow } from "../types";
 interface TimeColumnProps {
   mergedTimeRows: MergedTimeRow[];
   slotHeight: string;
+  showFirstBoundaryLabel?: boolean;
 }
 
 export const TimeColumn = memo(function TimeColumn({
   mergedTimeRows,
   slotHeight,
+  showFirstBoundaryLabel = true,
 }: TimeColumnProps) {
   return (
     <div
@@ -30,9 +32,11 @@ export const TimeColumn = memo(function TimeColumn({
           style={{ height: "var(--slot-height)" }}
         >
           {/* Time label at top boundary */}
-          <span className="absolute -top-2 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
-            {formatMinutesToTime(row.startMinute)}
-          </span>
+          {(showFirstBoundaryLabel || rowIndex !== 0) && (
+            <span className="absolute -top-2 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
+              {formatMinutesToTime(row.startMinute)}
+            </span>
+          )}
         </div>
       ))}
       {/* Last time label */}
