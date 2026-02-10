@@ -13,6 +13,7 @@ describe('VoteService', () => {
   const mockVoteRepository = {
     findEventVotingInfo: jest.fn(),
     submitVoteInTransaction: jest.fn(),
+    updateVotesInTransaction: jest.fn(),
   };
 
   const mockTimeSlotRepository = {
@@ -273,6 +274,133 @@ describe('VoteService', () => {
         ['slot-1', 'slot-2'], // all slots available
       );
       expect(result.votedSlots).toBe(2);
+    });
+  });
+
+  describe('updateVotes', () => {
+    const eventId = 'event-123';
+    const userId = 'user-123';
+
+    it('should return early when no add/remove slot ids', async () => {
+      const result = await service.updateVotes(eventId, userId, {
+        addSlotIds: [],
+        removeSlotIds: [],
+      });
+
+      expect(result).toEqual({ success: true, added: 0, removed: 0 });
+      expect(voteRepository.findEventVotingInfo).not.toHaveBeenCalled();
+      expect(timeSlotRepository.findIdsByEventId).not.toHaveBeenCalled();
+      expect(voteRepository.updateVotesInTransaction).not.toHaveBeenCalled();
+    });
+
+    it('should update votes successfully', async () => {
+      mockVoteRepository.findEventVotingInfo.mockResolvedValue({
+        votingDeadline: null,
+        isDeleted: false,
+      });
+      mockTimeSlotRepository.findIdsByEventId.mockResolvedValue([
+        'slot-1',
+        'slot-2',
+        'slot-3',
+      ]);
+      mockVoteRepository.updateVotesInTransaction.mockResolvedValue({
+        addSlotIds: ['slot-1'],
+        removeSlotIds: ['slot-2'],
+      });
+
+      const result = await service.updateVotes(eventId, userId, {
+        addSlotIds: ['slot-1'],
+        removeSlotIds: ['slot-2'],
+      });
+
+      expect(voteRepository.findEventVotingInfo).toHaveBeenCalledWith(eventId);
+      expect(timeSlotRepository.findIdsByEventId).toHaveBeenCalledWith(eventId);
+      expect(voteRepository.updateVotesInTransaction).toHaveBeenCalledWith(
+        eventId,
+        userId,
+        ['slot-1'],
+        ['slot-2'],
+      );
+      expect(result).toEqual({ success: true, added: 1, removed: 1 });
+    });
+
+    it('should deduplicate add/remove slot ids before updating', async () => {
+      mockVoteRepository.findEventVotingInfo.mockResolvedValue({
+        votingDeadline: null,
+        isDeleted: false,
+      });
+      mockTimeSlotRepository.findIdsByEventId.mockResolvedValue([
+        'slot-1',
+        'slot-2',
+        'slot-3',
+      ]);
+      mockVoteRepository.updateVotesInTransaction.mockResolvedValue({
+        addSlotIds: ['slot-1'],
+        removeSlotIds: ['slot-2'],
+      });
+
+      await service.updateVotes(eventId, userId, {
+        addSlotIds: ['slot-1', 'slot-1'],
+        removeSlotIds: ['slot-2', 'slot-2'],
+      });
+
+      expect(voteRepository.updateVotesInTransaction).toHaveBeenCalledWith(
+        eventId,
+        userId,
+        ['slot-1'],
+        ['slot-2'],
+      );
+    });
+
+    it('should throw BadRequestException when event not found', async () => {
+      mockVoteRepository.findEventVotingInfo.mockResolvedValue(null);
+
+      await expect(
+        service.updateVotes(eventId, userId, { addSlotIds: ['slot-1'] }),
+      ).rejects.toThrow(new BadRequestException('活動不存在'));
+    });
+
+    it('should throw BadRequestException when event is deleted', async () => {
+      mockVoteRepository.findEventVotingInfo.mockResolvedValue({
+        votingDeadline: null,
+        isDeleted: true,
+      });
+
+      await expect(
+        service.updateVotes(eventId, userId, { addSlotIds: ['slot-1'] }),
+      ).rejects.toThrow(new BadRequestException('活動不存在'));
+    });
+
+    it('should throw BadRequestException when voting deadline has passed', async () => {
+      const pastDeadline = new Date();
+      pastDeadline.setDate(pastDeadline.getDate() - 1);
+
+      mockVoteRepository.findEventVotingInfo.mockResolvedValue({
+        votingDeadline: pastDeadline,
+        isDeleted: false,
+      });
+
+      await expect(
+        service.updateVotes(eventId, userId, { addSlotIds: ['slot-1'] }),
+      ).rejects.toThrow(new BadRequestException('投票已截止'));
+    });
+
+    it('should throw BadRequestException for invalid slot IDs', async () => {
+      mockVoteRepository.findEventVotingInfo.mockResolvedValue({
+        votingDeadline: null,
+        isDeleted: false,
+      });
+      mockTimeSlotRepository.findIdsByEventId.mockResolvedValue([
+        'slot-1',
+        'slot-2',
+      ]);
+
+      await expect(
+        service.updateVotes(eventId, userId, {
+          addSlotIds: ['slot-1'],
+          removeSlotIds: ['invalid-slot'],
+        }),
+      ).rejects.toThrow(new BadRequestException('部分時段不屬於此活動'));
     });
   });
 });

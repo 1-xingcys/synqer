@@ -20,6 +20,8 @@ interface UsePaginatedDatesReturn {
 }
 
 /**
+ * 將日期陣列切分為分頁資料，並在每頁容量變化時自動夾住頁碼範圍。
+ *
  * Hook for paginating dates with automatic page clamping
  * when datesPerPage changes (e.g., on resize)
  */

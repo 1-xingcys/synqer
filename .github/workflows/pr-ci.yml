@@ -25,6 +25,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Unit test
+        run: npm test
+
   ci-backend:
     runs-on: ubuntu-latest
     defaults:

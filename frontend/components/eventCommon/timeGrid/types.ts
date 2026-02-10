@@ -1,5 +1,3 @@
-import { VoteMode } from "@/types/event";
-
 export type TimeGranularity = 15 | 30 | 60;
 
 export interface MergedTimeRow {
@@ -47,11 +45,9 @@ export interface GridPosition {
 export interface VotingGridProps {
   slots: TimeSlot[];
   votes: Vote[];
-  participants: Participant[];
-  onSave: (selectedSlotIds: string[], voteMode: VoteMode) => Promise<void>;
-  initialSelectedIds?: string[];
-  currentUserId?: string;
-  eventId?: string;
+  currentUserId: string;
+  currentUserDisplayName: string;
+  eventId: string;
 }
 
 export interface RectangleBounds {
@@ -59,4 +55,25 @@ export interface RectangleBounds {
   maxDate: number;
   minTime: number;
   maxTime: number;
+}
+
+export interface SlotMatrixCellViewModel {
+  key: string;
+  slot: TimeSlot;
+  rowIndex: number;
+  dateIndex: number;
+  mergedSlotIds: string[];
+  isSelected: boolean;
+  isPartiallySelected: boolean;
+  isHovered: boolean;
+  isLongPressed: boolean;
+  inRectangle: boolean;
+  voters: string[];
+  slotCalendarEvents: CalendarEvent[];
+  eventSpanById: Map<string, number>;
+}
+
+export interface SlotMatrixRowViewModel {
+  rowIndex: number;
+  cells: SlotMatrixCellViewModel[];
 }

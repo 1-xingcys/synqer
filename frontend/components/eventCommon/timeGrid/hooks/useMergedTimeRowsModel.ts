@@ -8,17 +8,20 @@ interface TimeSlotForMerge {
   endMinute: number;
 }
 
-interface UseMergedRowsProps {
+interface UseMergedTimeRowsModelProps {
   timeSlots: TimeSlotForMerge[];
   granularity: TimeGranularity;
 }
 
-interface UseMergedRowsReturn {
-  mergedRows: MergedTimeRow[];
+interface UseMergedTimeRowsModelReturn {
+  mergedTimeRows: MergedTimeRow[];
   getSlotIndicesForRow: (rowIndex: number) => number[];
 }
 
 /**
+ * 依時間粒度把 15 分鐘 slots 合併成可渲染列資料，
+ * 並保留每列對應的原始 slot 索引，供選取與渲染共用。
+ *
  * Hook to calculate merged time rows based on granularity
  *
  * This is the single source of truth for merging 15-min slots into
@@ -37,11 +40,11 @@ interface UseMergedRowsReturn {
  * - 10:00~11:00 (60min, height=4)
  * - 11:00~11:15 (15min remainder at end, height=1)
  */
-export function useMergedRows({
+export function useMergedTimeRowsModel({
   timeSlots,
   granularity,
-}: UseMergedRowsProps): UseMergedRowsReturn {
-  const mergedRows = useMemo(() => {
+}: UseMergedTimeRowsModelProps): UseMergedTimeRowsModelReturn {
+  const mergedTimeRows = useMemo(() => {
     if (timeSlots.length === 0) return [];
 
     // No merging needed - each slot is its own row
@@ -142,11 +145,11 @@ export function useMergedRows({
   }, [timeSlots, granularity]);
 
   const getSlotIndicesForRow = (rowIndex: number): number[] => {
-    return mergedRows[rowIndex]?.slotIndices || [];
+    return mergedTimeRows[rowIndex]?.slotIndices || [];
   };
 
   return {
-    mergedRows,
+    mergedTimeRows,
     getSlotIndicesForRow,
   };
 }

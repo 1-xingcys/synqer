@@ -41,6 +41,20 @@ export default function Header({
   const { user } = useAuthContext();
   const pathname = usePathname();
 
+  // 判斷是否在 joined/[eventId] 的活動詳情頁面
+  const pathSegments = (pathname || "").split("/").filter(Boolean);
+  const joinedStaticSegments = new Set([
+    "info",
+    "completed",
+    "confirmed",
+    "voting-ended",
+    "voting",
+  ]);
+  const isJoinedEventDetailPage =
+    pathSegments[0] === "joined" &&
+    pathSegments.length >= 2 &&
+    !joinedStaticSegments.has(pathSegments[1]);
+
   // 判斷是否為受保護頁面
   const isProtectedPage =
     pathname?.startsWith("/events") ||
@@ -54,7 +68,12 @@ export default function Header({
 
   if (shouldUseProtected) {
     return (
-      <ProtectedHeader onMenuClick={onMenuClick}>{children}</ProtectedHeader>
+      <ProtectedHeader
+        onMenuClick={onMenuClick}
+        sticky={!isJoinedEventDetailPage}
+      >
+        {children}
+      </ProtectedHeader>
     );
   }
 

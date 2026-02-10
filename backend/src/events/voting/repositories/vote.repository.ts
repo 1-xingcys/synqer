@@ -104,4 +104,79 @@ export class VoteRepository {
       },
     );
   }
+
+  /**
+   * 增量新增投票
+   */
+  async upsertVotes(
+    eventId: string,
+    userId: string,
+    slotIds: string[],
+    prismaClient?: Prisma.TransactionClient,
+  ) {
+    const client = prismaClient || this.prisma;
+    if (slotIds.length === 0) return;
+    return client.eventVote.createMany({
+      data: slotIds.map((slotId) => ({
+        eventId,
+        slotId,
+        userId,
+      })),
+      skipDuplicates: true,
+    });
+  }
+
+  /**
+   * 刪除指定 slots 的投票
+   */
+  async deleteSpecificVotes(
+    eventId: string,
+    userId: string,
+    slotIds: string[],
+    prismaClient?: Prisma.TransactionClient,
+  ) {
+    const client = prismaClient || this.prisma;
+    if (slotIds.length === 0) return;
+    return client.eventVote.deleteMany({
+      where: {
+        eventId,
+        userId,
+        slotId: { in: slotIds },
+      },
+    });
+  }
+
+  /**
+   * 使用交易執行增量投票更新
+   */
+  async updateVotesInTransaction(
+    eventId: string,
+    userId: string,
+    addSlotIds: string[],
+    removeSlotIds: string[],
+  ) {
+    return this.prisma.$transaction(
+      async (prisma: Prisma.TransactionClient) => {
+        // 1. 新增投票
+        if (addSlotIds.length > 0) {
+          await this.upsertVotes(eventId, userId, addSlotIds, prisma);
+        }
+
+        // 2. 刪除投票
+        if (removeSlotIds.length > 0) {
+          await this.deleteSpecificVotes(
+            eventId,
+            userId,
+            removeSlotIds,
+            prisma,
+          );
+        }
+
+        // 3. 更新 EventExpectedParticipant 的 hasVoted 狀態
+        await this.updateParticipantVoteStatus(eventId, userId, true, prisma);
+
+        return { addSlotIds, removeSlotIds };
+      },
+    );
+  }
 }

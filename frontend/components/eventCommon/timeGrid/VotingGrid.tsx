@@ -1,28 +1,19 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { VotingGridProps, Vote, CalendarEvent, TimeGranularity } from "./types";
+import { VotingGridProps } from "./types";
+import { useVotingGridController } from "./hooks";
+import { formatMinutesToTime } from "@/lib/utils";
+import { useTimeGridStickyHeaderSignal } from "./stickyHeaderSignalContext";
 import {
-  useVotingSelection,
-  useCalendarIntegration,
-  useMergedRowDragSelection,
-  useMergedRows,
-  useResponsiveGrid,
-  usePaginatedDates,
-} from "./hooks";
-import { groupVotesBySlot } from "./utils";
-import {
-  VotingHeader,
-  VoteModeToggle,
-  SelectionInfoBar,
   GridLegend,
   DateHeader,
   TimeColumn,
   SlotMatrix,
   GoogleCalendarPanel,
   DatePagination,
-  GranularitySelector,
+  GridToolsMenu,
 } from "./ui";
 
 export type { VotingGridProps };
@@ -30,68 +21,53 @@ export type { VotingGridProps };
 export default function VotingGrid({
   slots,
   votes,
-  onSave,
-  initialSelectedIds = [],
   eventId,
+  currentUserId,
+  currentUserDisplayName,
 }: VotingGridProps) {
-  const t = useTranslations("event");
-  const [saving, setSaving] = useState(false);
-  const [granularity, setGranularity] = useState<TimeGranularity>(15);
-  const { datesPerPage, slotHeight } = useResponsiveGrid();
+  const tJoined = useTranslations("joined");
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [isStickyActive, setIsStickyActive] = useState(false);
+  const stickySentinelRef = useRef<HTMLDivElement>(null);
+  const { setStickyActive } = useTimeGridStickyHeaderSignal();
+  const { selection, pagination, matrix, calendar } = useVotingGridController({
+    slots,
+    votes,
+    eventId,
+    currentUserId,
+    currentUserDisplayName,
+  });
 
-  // Use voting selection hook (for utilities and base state)
   const {
-    selectedSlots,
     voteMode,
-    slotsByDate,
-    dates,
-    timeSlots,
-    setSelectedSlots,
     setVoteMode,
-    selectEntireDay,
     clearSelection,
     selectAll,
     isDayFullySelected,
-    applyConflicts,
-  } = useVotingSelection({ slots, initialSelectedIds });
+    selectEntireDay,
+  } = selection;
 
-  // Use time granularity hook
-  const { mergedRows } = useMergedRows({
-    timeSlots,
-    granularity,
-  });
+  const { dates, paginatedDates, currentPage, datesPerPage, handlePageChange } =
+    pagination;
 
-  // Use paginated dates hook
-  const { paginatedDates, currentPage, setCurrentPage } = usePaginatedDates({
-    dates,
-    datesPerPage,
-  });
-
-  // Use merged row drag selection hook
   const {
+    granularity,
+    setGranularity,
+    slotHeight,
+    mergedTimeRows,
+    slotMatrixRows,
+    mergedRectBounds,
     isDragging,
-    hoveredCell,
-    longPressCell,
-    displaySelection,
-    handleMouseDown: handleMergedMouseDown,
-    handleMouseEnter: handleMergedMouseEnter,
-    handleMouseUp: handleMergedMouseUp,
-    handleTouchStart: handleMergedTouchStart,
-    handleTouchMove: handleMergedTouchMove,
-    handleTouchEnd: handleMergedTouchEnd,
-    handleClick: handleMergedClick,
-    setHoveredCell,
-    isInDragRectangle,
-    getRectangleBounds: getMergedRectangleBounds,
-  } = useMergedRowDragSelection({
-    selectedSlots,
-    setSelectedSlots,
-    mergedRows,
-    slotsByDate,
-    paginatedDates,
-  });
+    handleGridMouseUp,
+    handleGridMouseLeave,
+    handleMergedMouseDown,
+    handleMergedMouseEnter,
+    handleMergedTouchStart,
+    handleMergedTouchMove,
+    handleMergedTouchEnd,
+    handleMergedClick,
+  } = matrix;
 
-  // Use calendar integration hook
   const {
     calendarStatus,
     calendarLoading,
@@ -99,224 +75,178 @@ export default function VotingGrid({
     conflictingSlotIds,
     loadingCalendar,
     showCalendarOnGrid,
-    calendarEventsForSlot,
     setShowCalendarOnGrid,
     connectCalendar,
     disconnectCalendar,
-  } = useCalendarIntegration({ eventId, slots, slotsByDate });
+    markConflictsAsUnavailable,
+  } = calendar;
+  const firstTimeLabel =
+    mergedTimeRows.length > 0
+      ? formatMinutesToTime(mergedTimeRows[0].startMinute)
+      : undefined;
 
-  // Group votes by slot
-  const votesBySlot = useMemo(() => groupVotesBySlot(votes), [votes]);
+  useEffect(() => {
+    if (!isCalendarModalOpen) return;
 
-  // Get voters for a slot
-  const getVotersForSlot = useCallback(
-    (slotId: string): string[] => {
-      return (votesBySlot[slotId] || []).map((v: Vote) => v.userDisplayName);
-    },
-    [votesBySlot],
-  );
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
-  // Get voters for merged row (all slots combined)
-  const getVotersForMergedRow = useCallback(
-    (slotIndices: number[], dateKey: string): string[] => {
-      const allVoters = new Set<string>();
-      slotIndices.forEach((idx) => {
-        const slot = slotsByDate[dateKey]?.[idx];
-        if (slot) {
-          const voters = getVotersForSlot(slot.id);
-          voters.forEach((v) => allVoters.add(v));
-        }
-      });
-      return Array.from(allVoters);
-    },
-    [slotsByDate, getVotersForSlot],
-  );
-
-  // Get rectangle bounds for visual overlay
-  const mergedRectBounds = getMergedRectangleBounds();
-
-  // Save handler
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      await onSave(Array.from(selectedSlots), voteMode);
-    } catch (error) {
-      console.error("Save error:", error);
-      alert(t("saveError"));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Mark conflicts as unavailable
-  const markConflictsAsUnavailable = useCallback(() => {
-    applyConflicts(conflictingSlotIds);
-  }, [applyConflicts, conflictingSlotIds]);
-
-  // Handle page change with smooth transition
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-
-  // Check if event starts in this merged row (for a specific date)
-  const isEventStartInMergedRow = useCallback(
-    (rowIndex: number, dateKey: string, event: CalendarEvent): boolean => {
-      const row = mergedRows[rowIndex];
-      if (!row) return false;
-
-      // Check if any slot in this merged row contains the event
-      const hasEventInRow = row.slotIndices.some((idx) => {
-        const slot = slotsByDate[dateKey]?.[idx];
-        if (!slot) return false;
-        const eventsInSlot = calendarEventsForSlot.get(slot.id) || [];
-        return eventsInSlot.some((e) => e.id === event.id);
-      });
-
-      if (!hasEventInRow) return false;
-
-      // Check if any previous merged row also contains this event
-      for (let i = 0; i < rowIndex; i++) {
-        const prevRow = mergedRows[i];
-        const prevHasEvent = prevRow.slotIndices.some((idx) => {
-          const slot = slotsByDate[dateKey]?.[idx];
-          if (!slot) return false;
-          const eventsInSlot = calendarEventsForSlot.get(slot.id) || [];
-          return eventsInSlot.some((e) => e.id === event.id);
-        });
-        if (prevHasEvent) return false; // Event started in an earlier row
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsCalendarModalOpen(false);
       }
+    };
 
-      return true;
-    },
-    [mergedRows, slotsByDate, calendarEventsForSlot],
-  );
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isCalendarModalOpen]);
 
-  // Get how many merged rows an event spans from a given row index
-  const getEventSpanInMergedRows = useCallback(
-    (rowIndex: number, dateKey: string, event: CalendarEvent): number => {
-      let span = 0;
-      for (let i = rowIndex; i < mergedRows.length; i++) {
-        const row = mergedRows[i];
-        const hasEventInRow = row.slotIndices.some((idx) => {
-          const slot = slotsByDate[dateKey]?.[idx];
-          if (!slot) return false;
-          const eventsInSlot = calendarEventsForSlot.get(slot.id) || [];
-          return eventsInSlot.some((e) => e.id === event.id);
-        });
-        if (hasEventInRow) {
-          span++;
-        } else {
-          break;
-        }
-      }
-      return span;
-    },
-    [mergedRows, slotsByDate, calendarEventsForSlot],
-  );
+  useEffect(() => {
+    const sentinel = stickySentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const active = !entry.isIntersecting;
+        setIsStickyActive(active);
+        setStickyActive(active);
+      },
+      { threshold: [1] },
+    );
+
+    observer.observe(sentinel);
+    return () => {
+      observer.disconnect();
+      setIsStickyActive(false);
+      setStickyActive(false);
+    };
+  }, [setStickyActive]);
 
   return (
-    <div className="space-y-3 sm:space-y-4">
-      {/* Google Calendar Integration */}
-      <GoogleCalendarPanel
-        eventId={eventId}
-        calendarStatus={calendarStatus}
-        calendarLoading={calendarLoading}
-        conflictingSlotIds={conflictingSlotIds}
-        loadingCalendar={loadingCalendar}
-        showCalendarOnGrid={showCalendarOnGrid}
-        setShowCalendarOnGrid={setShowCalendarOnGrid}
-        connectCalendar={connectCalendar}
-        disconnectCalendar={disconnectCalendar}
-        markConflictsAsUnavailable={markConflictsAsUnavailable}
-      />
+    <div className="relative z-50 bg-white dark:bg-zinc-900 shadow rounded-lg overflow-visible border border-gray-200 dark:border-zinc-800 px-2 pb-2 sm:px-6 sm:pb-6">
+      <div>
+        <div ref={stickySentinelRef} className="h-px" aria-hidden />
 
-      {/* Top Bar: Mode Toggle + Save */}
-      <div className="flex items-start sm:items-center justify-between gap-2 sm:gap-3">
-        {/* Vote Mode Toggle */}
-        <VoteModeToggle voteMode={voteMode} onModeChange={setVoteMode} />
+        <div
+          className={`sticky top-0 z-50 bg-white dark:bg-zinc-900 backdrop-blur supports-[backdrop-filter]:bg-white/100 dark:supports-[backdrop-filter]:bg-zinc-900/100 space-y-2 sm:space-y-4`}
+        >
+          <div className="h-[8px]"></div>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <DatePagination
+                dates={dates}
+                currentPage={currentPage}
+                datesPerPage={datesPerPage}
+                onPageChange={handlePageChange}
+              />
+            </div>
+            <GridToolsMenu
+              voteMode={voteMode}
+              onModeChange={setVoteMode}
+              granularity={granularity}
+              onGranularityChange={setGranularity}
+              onSelectAll={selectAll}
+              onClearSelection={clearSelection}
+              calendarStatus={calendarStatus}
+              onOpenCalendarPanel={() => setIsCalendarModalOpen(true)}
+              onDisconnectCalendar={disconnectCalendar}
+            />
+          </div>
 
-        {/* Save Button */}
-        <VotingHeader saving={saving} onSave={() => void handleSave()} />
-      </div>
-
-      {/* Selection info bar */}
-      <SelectionInfoBar
-        selectedCount={displaySelection.size}
-        onClear={clearSelection}
-        onSelectAll={selectAll}
-      />
-
-      {/* Granularity Selector */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 dark:text-zinc-400">View</span>
-        <GranularitySelector
-          granularity={granularity}
-          onChange={setGranularity}
-        />
-      </div>
-
-      {/* Date Pagination */}
-      <DatePagination
-        dates={dates}
-        currentPage={currentPage}
-        datesPerPage={datesPerPage}
-        onPageChange={handlePageChange}
-      />
-
-      {/* Grid */}
-      <div
-        className="select-none transition-opacity duration-200 touch-none"
-        onMouseUp={handleMergedMouseUp}
-        onMouseLeave={() => setHoveredCell(null)}
-      >
-        <div className="relative">
-          {/* Date headers */}
           <DateHeader
             dates={paginatedDates}
             isDayFullySelected={isDayFullySelected}
             onSelectDay={selectEntireDay}
+            firstTimeLabel={firstTimeLabel}
+            isStickyActive={isStickyActive}
           />
+        </div>
 
-          {/* Time slots grid with time points at boundaries */}
-          <div className="flex">
-            {/* Time column */}
-            <TimeColumn mergedRows={mergedRows} slotHeight={slotHeight} />
+        <div
+          className="select-none transition-opacity duration-200 touch-pan-y"
+          onMouseUp={handleGridMouseUp}
+          onMouseLeave={handleGridMouseLeave}
+        >
+          <div className="relative">
+            <div className="flex">
+              <TimeColumn
+                mergedTimeRows={mergedTimeRows}
+                slotHeight={slotHeight}
+                showFirstBoundaryLabel={false}
+              />
 
-            {/* Slots grid */}
-            <SlotMatrix
-              mergedRows={mergedRows}
-              paginatedDates={paginatedDates}
-              slotsByDate={slotsByDate}
-              displaySelection={displaySelection}
-              voteMode={voteMode}
-              isDragging={isDragging}
-              hoveredCell={hoveredCell}
-              longPressCell={longPressCell}
-              mergedRectBounds={mergedRectBounds}
-              slotHeight={slotHeight}
-              showCalendarOnGrid={showCalendarOnGrid}
-              calendarEventsForSlot={calendarEventsForSlot}
-              isInDragRectangle={isInDragRectangle}
-              getVotersForMergedRow={getVotersForMergedRow}
-              isEventStartInMergedRow={isEventStartInMergedRow}
-              getEventSpanInMergedRows={getEventSpanInMergedRows}
-              onMouseDown={handleMergedMouseDown}
-              onMouseEnter={handleMergedMouseEnter}
-              onTouchStart={handleMergedTouchStart}
-              onTouchMove={handleMergedTouchMove}
-              onTouchEnd={handleMergedTouchEnd}
-              onClick={handleMergedClick}
-            />
+              <SlotMatrix
+                rows={slotMatrixRows}
+                voteMode={voteMode}
+                isDragging={isDragging}
+                mergedRectBounds={mergedRectBounds}
+                slotHeight={slotHeight}
+                showCalendarOnGrid={showCalendarOnGrid}
+                onMouseDown={handleMergedMouseDown}
+                onMouseEnter={handleMergedMouseEnter}
+                onTouchStart={handleMergedTouchStart}
+                onTouchMove={handleMergedTouchMove}
+                onTouchEnd={handleMergedTouchEnd}
+                onClick={handleMergedClick}
+              />
+            </div>
           </div>
+        </div>
+
+        <div className="mt-2 sm:mt-4">
+          <GridLegend
+            voteMode={voteMode}
+            showCalendarOnGrid={showCalendarOnGrid}
+            calendarEvents={calendarEvents}
+          />
         </div>
       </div>
 
-      {/* Legend */}
-      <GridLegend
-        voteMode={voteMode}
-        showCalendarOnGrid={showCalendarOnGrid}
-        calendarEvents={calendarEvents}
-      />
+      {isCalendarModalOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-[90] bg-black/55 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => setIsCalendarModalOpen(false)}
+          />
+          <div className="fixed inset-0 z-[100] p-3 sm:p-6 flex items-end sm:items-center justify-center pointer-events-none">
+            <div className="w-full max-w-2xl pointer-events-auto animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300">
+              <div className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/95 dark:bg-zinc-900/95 shadow-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50/80 dark:bg-zinc-800/60">
+                  <div>
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                      {tJoined("googleCalendar.settings")}
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setIsCalendarModalOpen(false)}
+                    className="w-8 h-8 rounded-lg bg-white/90 dark:bg-zinc-800/90 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
+                    aria-label="Close calendar panel"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="p-3 sm:p-4 max-h-[80vh] overflow-y-auto">
+                  <GoogleCalendarPanel
+                    eventId={eventId}
+                    calendarStatus={calendarStatus}
+                    calendarLoading={calendarLoading}
+                    conflictingSlotIds={conflictingSlotIds}
+                    loadingCalendar={loadingCalendar}
+                    showCalendarOnGrid={showCalendarOnGrid}
+                    setShowCalendarOnGrid={setShowCalendarOnGrid}
+                    connectCalendar={connectCalendar}
+                    disconnectCalendar={disconnectCalendar}
+                    markConflictsAsUnavailable={markConflictsAsUnavailable}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

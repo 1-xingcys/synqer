@@ -1,10 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   EventStatus,
   ConfirmedTimeRange,
   ParticipantStatus,
-  VoteMode,
 } from "@/types/event";
 
 interface TimeSlot {
@@ -97,11 +95,41 @@ async function fetchEventDetail(eventId: string): Promise<EventDetailData> {
   return response.json() as Promise<EventDetailData>;
 }
 
-// Save votes function
-async function saveVotesApi(
+// Patch votes function (incremental update)
+export async function patchVotesApi(
+  eventId: string,
+  addSlotIds: string[],
+  removeSlotIds: string[],
+): Promise<void> {
+  if (!process.env.NEXT_PUBLIC_API) {
+    throw new Error("NEXT_PUBLIC_API is not set");
+  }
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/voting`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ addSlotIds, removeSlotIds }),
+    },
+  );
+
+  if (!response.ok) {
+    const errorData = (await response.json().catch(() => ({}))) as {
+      message?: string;
+    };
+    throw new Error(errorData.message || "Failed to update votes");
+  }
+}
+
+// Replace votes function (full update)
+export async function replaceVotesApi(
   eventId: string,
   selectedSlotIds: string[],
-  voteMode: VoteMode,
+  voteMode: "available" | "unavailable" = "available",
 ): Promise<void> {
   if (!process.env.NEXT_PUBLIC_API) {
     throw new Error("NEXT_PUBLIC_API is not set");
@@ -111,9 +139,7 @@ async function saveVotesApi(
     `${process.env.NEXT_PUBLIC_API}/events/${eventId}/voting`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ selectedSlotIds, voteMode }),
     },
@@ -128,49 +154,17 @@ async function saveVotesApi(
 }
 
 export function useEventDetail(eventId: string) {
-  const queryClient = useQueryClient();
-
   const query = useQuery({
     queryKey: eventDetailKeys.detail(eventId),
     queryFn: () => fetchEventDetail(eventId),
     enabled: !!eventId,
   });
 
-  const voteMutation = useMutation({
-    mutationFn: ({
-      selectedSlotIds,
-      voteMode,
-    }: {
-      selectedSlotIds: string[];
-      voteMode: VoteMode;
-    }) => saveVotesApi(eventId, selectedSlotIds, voteMode),
-    onSuccess: () => {
-      // Invalidate and refetch
-      void queryClient.invalidateQueries({
-        queryKey: eventDetailKeys.detail(eventId),
-      });
-    },
-    onError: (error) => {
-      alert(error.message);
-    },
-  });
-
-  const saveVotes = useCallback(
-    async (
-      selectedSlotIds: string[],
-      voteMode: VoteMode = VoteMode.AVAILABLE,
-    ) => {
-      await voteMutation.mutateAsync({ selectedSlotIds, voteMode });
-    },
-    [voteMutation],
-  );
-
   return {
     data: query.data ?? null,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     error: query.error?.message ?? null,
-    saveVotes,
     refetch: query.refetch,
   };
 }

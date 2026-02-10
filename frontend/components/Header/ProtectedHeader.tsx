@@ -7,6 +7,7 @@ import Logo from "@/components/Logo";
 interface ProtectedHeaderProps {
   children?: ReactNode;
   onMenuClick?: () => void;
+  sticky?: boolean;
 }
 
 /**
@@ -22,9 +23,14 @@ interface ProtectedHeaderProps {
 export default function ProtectedHeader({
   children,
   onMenuClick,
+  sticky = true,
 }: ProtectedHeaderProps) {
+  const headerPositionClass = sticky ? "sticky top-0 z-30" : "relative z-30";
+
   return (
-    <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-30">
+    <header
+      className={`bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 ${headerPositionClass}`}
+    >
       <div className="w-full pl-3 pr-4 py-2">
         <div className="flex items-center justify-between">
           {/* 左側：漢堡按鈕 + Logo */}

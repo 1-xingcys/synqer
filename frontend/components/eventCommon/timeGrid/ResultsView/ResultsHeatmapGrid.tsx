@@ -5,16 +5,17 @@ import { useTranslations, useLocale } from "next-intl";
 import { SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
-import {
-  DatePagination,
-  GranularitySelector,
-} from "@/components/eventCommon/timeGrid/ui";
+import { DatePagination } from "@/components/eventCommon/timeGrid/ui";
 import {
   formatDateHeader,
   groupSlotsByDate,
 } from "@/components/eventCommon/timeGrid/utils";
 import { formatMinutesToTime } from "@/lib/utils";
-import { useResponsiveGrid, usePaginatedDates, useMergedRows } from "../hooks";
+import {
+  useResponsiveGrid,
+  usePaginatedDates,
+  useMergedTimeRowsModel,
+} from "../hooks";
 import { TimeGranularity, TimeSlot, Vote, Participant } from "../types";
 
 interface ResultsHeatmapGridProps {
@@ -44,6 +45,12 @@ interface SelectionRange {
   startTime: number;
   endTime: number;
 }
+
+const GRANULARITY_OPTIONS: { value: TimeGranularity; labelKey: string }[] = [
+  { value: 15, labelKey: "view15min" },
+  { value: 30, labelKey: "view30min" },
+  { value: 60, labelKey: "view1hr" },
+];
 
 export function ResultsHeatmapGrid({
   slots,
@@ -87,7 +94,7 @@ export function ResultsHeatmapGrid({
   );
 
   // Merged rows for granularity (using shared hook)
-  const { mergedRows } = useMergedRows({ timeSlots, granularity });
+  const { mergedTimeRows } = useMergedTimeRowsModel({ timeSlots, granularity });
 
   // Use paginated dates hook (handles page clamping automatically)
   const { paginatedDates, currentPage, setCurrentPage } = usePaginatedDates({
@@ -220,7 +227,7 @@ export function ResultsHeatmapGrid({
       // Check adjacent cells
       const checkAdjacentSelected = (rIdx: number, dIdx: number): boolean => {
         const adjDateKey = paginatedDates[dIdx];
-        const adjRow = mergedRows[rIdx];
+        const adjRow = mergedTimeRows[rIdx];
         if (!adjDateKey || !adjRow) return false;
         return isMergedCellSelected(adjRow.slotIndices, adjDateKey);
       };
@@ -228,7 +235,7 @@ export function ResultsHeatmapGrid({
       const isTop =
         rowIndex === 0 || !checkAdjacentSelected(rowIndex - 1, dateIndex);
       const isBottom =
-        rowIndex === mergedRows.length - 1 ||
+        rowIndex === mergedTimeRows.length - 1 ||
         !checkAdjacentSelected(rowIndex + 1, dateIndex);
       const isLeft =
         dateIndex === 0 || !checkAdjacentSelected(rowIndex, dateIndex - 1);
@@ -238,7 +245,7 @@ export function ResultsHeatmapGrid({
 
       return { isTop, isBottom, isLeft, isRight };
     },
-    [selectedSlotIds, isMergedCellSelected, paginatedDates, mergedRows],
+    [selectedSlotIds, isMergedCellSelected, paginatedDates, mergedTimeRows],
   );
 
   // Calculate rectangle bounds from drag start/end
@@ -322,7 +329,7 @@ export function ResultsHeatmapGrid({
       dateKeys.push(dateKey);
 
       for (let rowIdx = bounds.minRow; rowIdx <= bounds.maxRow; rowIdx++) {
-        const row = mergedRows[rowIdx];
+        const row = mergedTimeRows[rowIdx];
         if (!row) continue;
         cells.push({
           dateKey,
@@ -334,8 +341,8 @@ export function ResultsHeatmapGrid({
 
     if (cells.length === 0) return null;
 
-    const startRow = mergedRows[bounds.minRow];
-    const endRow = mergedRows[bounds.maxRow];
+    const startRow = mergedTimeRows[bounds.minRow];
+    const endRow = mergedTimeRows[bounds.maxRow];
 
     return {
       cells,
@@ -344,7 +351,7 @@ export function ResultsHeatmapGrid({
       startTime: startRow?.startMinute ?? 0,
       endTime: endRow?.endMinute ?? 0,
     };
-  }, [getRectangleBounds, paginatedDates, mergedRows]);
+  }, [getRectangleBounds, paginatedDates, mergedTimeRows]);
 
   // Get all slot IDs from selection range cells
   const getSlotIdsFromCells = useCallback(
@@ -410,7 +417,7 @@ export function ResultsHeatmapGrid({
         return;
       }
 
-      const row = mergedRows[rowIndex];
+      const row = mergedTimeRows[rowIndex];
       if (!row) return;
 
       const range: SelectionRange = {
@@ -423,7 +430,7 @@ export function ResultsHeatmapGrid({
 
       showModalForSelection(range);
     },
-    [mergedRows, showModalForSelection],
+    [mergedTimeRows, showModalForSelection],
   );
 
   // Touch handlers
@@ -537,10 +544,21 @@ export function ResultsHeatmapGrid({
         <span className="text-xs text-gray-500 dark:text-zinc-400">
           {t("results.granularity")}
         </span>
-        <GranularitySelector
-          granularity={granularity}
-          onChange={setGranularity}
-        />
+        <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5">
+          {GRANULARITY_OPTIONS.map(({ value, labelKey }) => (
+            <button
+              key={value}
+              onClick={() => setGranularity(value)}
+              className={`px-2 py-1 text-xs font-medium rounded-md transition-all ${
+                granularity === value
+                  ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                  : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+              }`}
+            >
+              {t(`mobileTools.${labelKey}`)}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Date Pagination */}
@@ -589,17 +607,17 @@ export function ResultsHeatmapGrid({
           <div className="flex">
             {/* Time column */}
             <div className="w-9 sm:w-14 shrink-0 relative border-r border-gray-200 dark:border-zinc-700 rounded-l-lg">
-              {mergedRows.map((row, rowIndex) => (
+              {mergedTimeRows.map((row, rowIndex) => (
                 <div key={rowIndex} className="h-10 sm:h-11 relative">
                   <span className="absolute -top-2 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
                     {formatMinutesToTime(row.startMinute)}
                   </span>
                 </div>
               ))}
-              {mergedRows.length > 0 && (
+              {mergedTimeRows.length > 0 && (
                 <span className="absolute bottom-0.5 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
                   {formatMinutesToTime(
-                    mergedRows[mergedRows.length - 1].endMinute,
+                    mergedTimeRows[mergedTimeRows.length - 1].endMinute,
                   )}
                 </span>
               )}
@@ -610,7 +628,7 @@ export function ResultsHeatmapGrid({
               data-grid="slots"
               className="flex-1 border border-gray-200 dark:border-zinc-700 rounded-r-lg overflow-hidden"
             >
-              {mergedRows.map((row, rowIndex) => (
+              {mergedTimeRows.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex">
                   {paginatedDates.map((dateKey, dateIndex) => {
                     const voteCount = getVoteCountForMergedRow(

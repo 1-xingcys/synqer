@@ -9,6 +9,9 @@ interface ResponsiveGridConfig {
 }
 
 /**
+ * 依視窗寬度計算 time grid 的響應式配置，
+ * 提供每頁日期數、格高與是否 mobile 的單一來源。
+ *
  * Responsive breakpoints configuration:
  * - < 400px: 5 dates, mobile height
  * - < 640px (sm): 5 dates, mobile height

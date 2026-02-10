@@ -1,6 +1,8 @@
 // @ts-check
 import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import reactPlugin from 'eslint-plugin-react';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import nextVitals from 'eslint-config-next/core-web-vitals';
@@ -17,6 +19,7 @@ export default tseslint.config(
       'next-env.d.ts',
       'node_modules/**',
       'eslint.config.mjs',
+      'jest.config.cjs',
       'postcss.config.mjs',
       'tailwind.config.ts',
     ],
@@ -45,6 +48,10 @@ export default tseslint.config(
         tsconfigRootDir: import.meta.dirname,
       },
     },
+    plugins: {
+      react: reactPlugin,
+      'react-hooks': reactHooksPlugin,
+    },
     rules: {
       // TypeScript 相關規則
       '@typescript-eslint/no-explicit-any': 'warn', // 警告使用 any 型別
@@ -71,6 +78,15 @@ export default tseslint.config(
 
       // Tailwind CSS 相關規則
       '@next/next/no-html-link-for-pages': 'off', // 使用 next-intl 的 Link
+    },
+  },
+  {
+    files: ['**/*.test.ts'],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+        ...globals.node,
+      },
     },
   },
 );

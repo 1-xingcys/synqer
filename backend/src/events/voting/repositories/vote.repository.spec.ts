@@ -286,4 +286,147 @@ describe('VoteRepository', () => {
       expect(callOrder).toEqual(['delete', 'create', 'update']);
     });
   });
+
+  describe('upsertVotes', () => {
+    it('should upsert votes with skipDuplicates', async () => {
+      const eventId = 'event-123';
+      const userId = 'user-123';
+      const slotIds = ['slot-1', 'slot-2'];
+
+      mockPrismaService.eventVote.createMany.mockResolvedValue({ count: 2 });
+
+      const result = await repository.upsertVotes(eventId, userId, slotIds);
+
+      expect(prismaService.eventVote.createMany).toHaveBeenCalledWith({
+        data: [
+          { eventId, slotId: 'slot-1', userId },
+          { eventId, slotId: 'slot-2', userId },
+        ],
+        skipDuplicates: true,
+      });
+      expect(result).toEqual({ count: 2 });
+    });
+
+    it('should return early for empty slot ids', async () => {
+      const result = await repository.upsertVotes('event-123', 'user-123', []);
+
+      expect(result).toBeUndefined();
+      expect(prismaService.eventVote.createMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteSpecificVotes', () => {
+    it('should delete only specified slot votes', async () => {
+      const eventId = 'event-123';
+      const userId = 'user-123';
+      const slotIds = ['slot-1', 'slot-3'];
+
+      mockPrismaService.eventVote.deleteMany.mockResolvedValue({ count: 2 });
+
+      const result = await repository.deleteSpecificVotes(
+        eventId,
+        userId,
+        slotIds,
+      );
+
+      expect(prismaService.eventVote.deleteMany).toHaveBeenCalledWith({
+        where: {
+          eventId,
+          userId,
+          slotId: { in: slotIds },
+        },
+      });
+      expect(result).toEqual({ count: 2 });
+    });
+
+    it('should return early for empty slot ids', async () => {
+      const result = await repository.deleteSpecificVotes(
+        'event-123',
+        'user-123',
+        [],
+      );
+
+      expect(result).toBeUndefined();
+      expect(prismaService.eventVote.deleteMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateVotesInTransaction', () => {
+    it('should execute upsert then delete then participant update in transaction', async () => {
+      const callOrder: string[] = [];
+      const eventId = 'event-123';
+      const userId = 'user-123';
+      const addSlotIds = ['slot-1'];
+      const removeSlotIds = ['slot-2'];
+
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        const mockPrisma = {
+          eventVote: {
+            createMany: jest.fn().mockImplementation(() => {
+              callOrder.push('upsert');
+              return Promise.resolve({ count: 1 });
+            }),
+            deleteMany: jest.fn().mockImplementation(() => {
+              callOrder.push('delete');
+              return Promise.resolve({ count: 1 });
+            }),
+          },
+          eventExpectedParticipant: {
+            updateMany: jest.fn().mockImplementation(() => {
+              callOrder.push('update');
+              return Promise.resolve({ count: 1 });
+            }),
+          },
+        };
+        return callback(mockPrisma as any);
+      });
+
+      const result = await repository.updateVotesInTransaction(
+        eventId,
+        userId,
+        addSlotIds,
+        removeSlotIds,
+      );
+
+      expect(prismaService.$transaction).toHaveBeenCalled();
+      expect(callOrder).toEqual(['upsert', 'delete', 'update']);
+      expect(result).toEqual({ addSlotIds, removeSlotIds });
+    });
+
+    it('should only update participant status when add/remove are empty', async () => {
+      const callOrder: string[] = [];
+
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        const mockPrisma = {
+          eventVote: {
+            createMany: jest.fn().mockImplementation(() => {
+              callOrder.push('upsert');
+              return Promise.resolve({ count: 0 });
+            }),
+            deleteMany: jest.fn().mockImplementation(() => {
+              callOrder.push('delete');
+              return Promise.resolve({ count: 0 });
+            }),
+          },
+          eventExpectedParticipant: {
+            updateMany: jest.fn().mockImplementation(() => {
+              callOrder.push('update');
+              return Promise.resolve({ count: 1 });
+            }),
+          },
+        };
+        return callback(mockPrisma as any);
+      });
+
+      const result = await repository.updateVotesInTransaction(
+        'event-123',
+        'user-123',
+        [],
+        [],
+      );
+
+      expect(callOrder).toEqual(['update']);
+      expect(result).toEqual({ addSlotIds: [], removeSlotIds: [] });
+    });
+  });
 });

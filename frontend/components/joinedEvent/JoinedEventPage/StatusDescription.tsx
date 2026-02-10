@@ -1,29 +1,22 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { EventStatus } from "@/types/event";
 
-interface StatusDescriptionProps {
-  status: EventStatus;
+interface VotingInstructionProps {
   className?: string;
 }
 
-export function StatusDescription({
-  status,
-  className = "",
-}: StatusDescriptionProps) {
+/**
+ * 投票階段說明文字
+ */
+export function VotingInstruction({ className = "" }: VotingInstructionProps) {
   const t = useTranslations();
 
-  const statusDescriptions: Record<EventStatus, string> = {
-    [EventStatus.VOTING]: t("eventInfo.statusDesc.voting"),
-    [EventStatus.VOTING_ENDED]: t("eventInfo.statusDesc.votingEnded"),
-    [EventStatus.CONFIRMED]: t("eventInfo.statusDesc.confirmed"),
-    [EventStatus.COMPLETED]: t("eventInfo.statusDesc.completed"),
-  };
-
   return (
-    <p className={`text-xs text-zinc-500 dark:text-zinc-500 ${className}`}>
-      {statusDescriptions[status]}
+    <p
+      className={`text-center text-xs sm:text-sm text-zinc-500 dark:text-zinc-500 ${className}`}
+    >
+      {t("eventInfo.statusDesc.voting")}
     </p>
   );
 }
