@@ -470,7 +470,7 @@ export function ResultsHeatmapGrid({
                         {hasVotes && !inSelection && (
                           <div
                             className={`
-                              absolute inset-0 flex items-center justify-center
+                              absolute inset-0 flex items-center justify-center pointer-events-none
                               text-xs sm:text-sm font-semibold
                               ${isSelectedEventTime ? "text-orange-700 dark:text-orange-300" : colors.text}
                             `}
@@ -479,7 +479,7 @@ export function ResultsHeatmapGrid({
                           </div>
                         )}
                         {inSelection && (
-                          <div className="absolute inset-0 flex items-center justify-center text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300">
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300">
                             {voteCount}
                           </div>
                         )}
