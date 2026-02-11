@@ -141,7 +141,7 @@ export function ParticipantFilter({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 z-50 w-72 sm:w-80 bg-white dark:bg-zinc-800 rounded-xl shadow-xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
+        <div className="absolute top-full right-0 mt-2 z-50 w-72 sm:w-80 bg-white dark:bg-zinc-800 rounded-xl shadow-xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
           {/* Search */}
           <div className="p-3 border-b border-gray-100 dark:border-zinc-700">
             <div className="relative">

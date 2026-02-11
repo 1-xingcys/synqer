@@ -5,7 +5,6 @@ import { useMemo } from "react";
 
 interface HeatMapLegendProps {
   maxVotes: number;
-  selectedParticipantsCount: number;
 }
 
 // Utility to get heatmap color based on vote count
@@ -104,10 +103,7 @@ export function getHeatmapClasses(
   }
 }
 
-export function HeatMapLegend({
-  maxVotes,
-  selectedParticipantsCount,
-}: HeatMapLegendProps) {
+export function HeatMapLegend({ maxVotes }: HeatMapLegendProps) {
   const t = useTranslations("joined");
 
   // Generate legend steps dynamically based on max votes
@@ -148,21 +144,21 @@ export function HeatMapLegend({
   }, [maxVotes]);
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 text-xs">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs">
       {/* Label */}
       <span className="text-gray-500 dark:text-zinc-400 font-medium shrink-0">
         {t("results.legendLabel")}
       </span>
 
       {/* Color Scale */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0">
         {legendSteps.map((step, index) => {
           const colors = getHeatmapClasses(step.value, maxVotes);
           const isFirst = index === 0;
           const isLast = index === legendSteps.length - 1;
 
           return (
-            <div key={step.value} className="flex items-center gap-1">
+            <div key={step.value} className="flex items-center">
               {/* Color box */}
               <div
                 className={`
@@ -181,11 +177,6 @@ export function HeatMapLegend({
           );
         })}
       </div>
-
-      {/* Description */}
-      <span className="text-gray-400 dark:text-zinc-500 hidden sm:inline">
-        {t("results.legendDescription", { count: selectedParticipantsCount })}
-      </span>
     </div>
   );
 }

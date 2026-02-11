@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { useLocale } from "next-intl";
 import { SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
+import { ResultsGridToolsMenu } from "./ResultsGridToolsMenu";
 import {
   DateHeader,
   DatePagination,
@@ -36,13 +37,9 @@ interface ResultsHeatmapGridProps {
   onAddToEventTime?: (info: SlotRangeInfo) => Promise<boolean>;
   // Selected slot IDs to display with border highlight
   selectedSlotIds?: Set<string>;
+  onCopyShareLink: () => void;
+  linkCopied: boolean;
 }
-
-const GRANULARITY_OPTIONS: { value: TimeGranularity; labelKey: string }[] = [
-  { value: 15, labelKey: "view15min" },
-  { value: 30, labelKey: "view30min" },
-  { value: 60, labelKey: "view1hr" },
-];
 
 export function ResultsHeatmapGrid({
   slots,
@@ -54,8 +51,9 @@ export function ResultsHeatmapGrid({
   isVotingPhase = false,
   onAddToEventTime,
   selectedSlotIds,
+  onCopyShareLink,
+  linkCopied,
 }: ResultsHeatmapGridProps) {
-  const t = useTranslations("joined");
   const locale = useLocale();
   const gridRef = useRef<HTMLDivElement>(null);
   const [granularity, setGranularity] = useState<TimeGranularity>(15);
@@ -316,35 +314,22 @@ export function ResultsHeatmapGrid({
 
   return (
     <div className="space-y-4">
-      {/* Granularity Selector */}
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 dark:text-zinc-400">
-          {t("results.granularity")}
-        </span>
-        <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5">
-          {GRANULARITY_OPTIONS.map(({ value, labelKey }) => (
-            <button
-              key={value}
-              onClick={() => setGranularity(value)}
-              className={`px-2 py-1 text-xs font-medium rounded-md transition-all ${
-                granularity === value
-                  ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm"
-                  : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-              }`}
-            >
-              {t(`mobileTools.${labelKey}`)}
-            </button>
-          ))}
+        <div className="flex-1 min-w-0">
+          <DatePagination
+            dates={dates}
+            currentPage={currentPage}
+            datesPerPage={datesPerPage}
+            onPageChange={setCurrentPage}
+          />
         </div>
+        <ResultsGridToolsMenu
+          granularity={granularity}
+          onGranularityChange={setGranularity}
+          onCopyShareLink={onCopyShareLink}
+          linkCopied={linkCopied}
+        />
       </div>
-
-      {/* Date Pagination */}
-      <DatePagination
-        dates={dates}
-        currentPage={currentPage}
-        datesPerPage={datesPerPage}
-        onPageChange={setCurrentPage}
-      />
 
       {/* Grid */}
       <div

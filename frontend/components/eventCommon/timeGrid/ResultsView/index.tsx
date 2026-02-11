@@ -135,94 +135,27 @@ export default function ResultsView({
   const showEmptyState = selectedParticipants.size === 0;
 
   return (
-    <div className="space-y-5">
-      {/* Filter & Legend Section */}
-      <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 p-4 space-y-4">
-        {/* Filter Row */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
-          <div className="flex items-center gap-3">
-            <ParticipantFilter
-              participants={participants}
-              selectedParticipants={selectedParticipants}
-              onSelectionChange={handleSelectionChange}
-            />
-
-            {/* Copy Link Button */}
-            <button
-              onClick={() => void copyShareableLink()}
-              className={`
-                flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg
-                border transition-all
-                ${
-                  linkCopied
-                    ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300"
-                    : "bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-700 hover:text-zinc-800 dark:hover:text-zinc-200"
-                }
-              `}
-              title={t("results.copyLinkTitle")}
-            >
-              {linkCopied ? (
-                <>
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  <span className="hidden sm:inline">
-                    {t("results.linkCopied")}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                    />
-                  </svg>
-                  <span className="hidden sm:inline">
-                    {t("results.copyLink")}
-                  </span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {/* Quick info */}
-          <div className="text-xs text-gray-500 dark:text-zinc-400">
-            {t("results.showingAvailability", {
-              count: selectedParticipants.size,
-              total: participants.length,
-            })}
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="pt-3 border-t border-gray-100 dark:border-zinc-800">
-          <HeatMapLegend
-            maxVotes={maxVotes}
-            selectedParticipantsCount={selectedParticipants.size}
+    <div className="space-y-4 sm:space-y-6">
+      {/* Tip */}
+      {!canAddToEventTime && (
+        <p className="text-xs text-gray-500 dark:text-zinc-400 text-center">
+          {t("results.clickToSeeWho")}
+        </p>
+      )}
+      <div className="flex flex-col bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 p-3 sm:p-5 mt-3 sm:mt-4">
+        {/* Filter & Legend Section */}
+        <div className="flex items-center justify-between gap-3 flex-wrap mt-1">
+          <HeatMapLegend maxVotes={maxVotes} />
+          <ParticipantFilter
+            participants={participants}
+            selectedParticipants={selectedParticipants}
+            onSelectionChange={handleSelectionChange}
           />
         </div>
-      </div>
 
-      {/* Heatmap Grid */}
-      <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 p-3 sm:p-5">
+        <div className="my-3 border-t border-zinc-200 dark:border-zinc-700" />
+
+        {/* Heatmap Grid */}
         {showEmptyState ? (
           <div className="py-12 text-center">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center">
@@ -258,14 +191,13 @@ export default function ResultsView({
             isVotingPhase={isVotingPhase}
             onAddToEventTime={onAddToEventTime}
             selectedSlotIds={selectedSlotIds}
+            onCopyShareLink={() => {
+              void copyShareableLink();
+            }}
+            linkCopied={linkCopied}
           />
         )}
       </div>
-
-      {/* Tip */}
-      <p className="text-xs text-gray-500 dark:text-zinc-400 text-center">
-        {t("results.clickToSeeWho")}
-      </p>
     </div>
   );
 }
