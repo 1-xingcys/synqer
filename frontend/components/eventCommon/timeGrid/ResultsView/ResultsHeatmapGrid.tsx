@@ -2,10 +2,11 @@
 
 import { useState, useCallback, useRef } from "react";
 import { useLocale } from "next-intl";
-import { SlotRangeInfo } from "./types";
+import { ResultsAvailabilityMode, SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
 import { ResultsGridToolsMenu } from "./ResultsGridToolsMenu";
+import { useResultsAvailabilityMetrics } from "./hooks/useResultsAvailabilityMetrics";
 import {
   DateHeader,
   DatePagination,
@@ -31,6 +32,8 @@ interface ResultsHeatmapGridProps {
   participants: Participant[];
   selectedParticipants: Set<string>;
   maxVotes: number;
+  mode: ResultsAvailabilityMode;
+  onModeChange: (mode: ResultsAvailabilityMode) => void;
   // Host-only props for adding time ranges to event time
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;
@@ -47,6 +50,8 @@ export function ResultsHeatmapGrid({
   participants,
   selectedParticipants,
   maxVotes,
+  mode,
+  onModeChange,
   canAddToEventTime = false,
   isVotingPhase = false,
   onAddToEventTime,
@@ -79,93 +84,19 @@ export function ResultsHeatmapGrid({
     datesPerPage,
   });
 
-  // Get vote count for merged row (intersection - voters available for ALL slots in the merged row)
-  const getVoteCountForMergedRow = useCallback(
-    (slotIndices: number[], dateKey: string): number => {
-      if (slotIndices.length === 0) return 0;
-
-      // Get all slot IDs for this merged row
-      const slotIds: string[] = [];
-      slotIndices.forEach((idx) => {
-        const slot = slotsByDate[dateKey]?.[idx];
-        if (slot) slotIds.push(slot.id);
-      });
-
-      if (slotIds.length === 0) return 0;
-
-      // Count how many times each voter appears across all slots
-      const voterCounts = new Map<string, number>();
-      slotIds.forEach((slotId) => {
-        const slotVotes = votesBySlot[slotId] || [];
-        slotVotes.forEach((vote) => {
-          voterCounts.set(vote.userId, (voterCounts.get(vote.userId) || 0) + 1);
-        });
-      });
-
-      // Only count voters who are available for ALL slots in the merged row
-      const totalSlots = slotIds.length;
-      let count = 0;
-      voterCounts.forEach((voteCount) => {
-        if (voteCount === totalSlots) {
-          count++;
-        }
-      });
-
-      return count;
-    },
-    [slotsByDate, votesBySlot],
-  );
-
-  // Get voters for a selection range (intersection - available for ALL selected slots)
-  const getVotersForRange = useCallback(
-    (cells: SelectionRange["cells"]): Vote[] => {
-      if (cells.length === 0) return [];
-
-      // Get all slot IDs in the range
-      const allSlotIds: string[] = [];
-      cells.forEach(({ dateKey, slotIndices }) => {
-        slotIndices.forEach((idx) => {
-          const slot = slotsByDate[dateKey]?.[idx];
-          if (slot) allSlotIds.push(slot.id);
-        });
-      });
-
-      if (allSlotIds.length === 0) return [];
-
-      // Find voters who voted for ALL slots in the range
-      const voterCounts = new Map<string, { vote: Vote; count: number }>();
-      allSlotIds.forEach((slotId) => {
-        const slotVotes = votesBySlot[slotId] || [];
-        slotVotes.forEach((vote) => {
-          const existing = voterCounts.get(vote.userId);
-          if (existing) {
-            existing.count++;
-          } else {
-            voterCounts.set(vote.userId, { vote, count: 1 });
-          }
-        });
-      });
-
-      // Return only voters who are available for ALL slots
-      const totalSlots = allSlotIds.length;
-      return Array.from(voterCounts.values())
-        .filter(({ count }) => count === totalSlots)
-        .map(({ vote }) => vote);
-    },
-    [slotsByDate, votesBySlot],
-  );
-
-  // Get non-voters for a selection range
-  const getNonVotersForRange = useCallback(
-    (cells: SelectionRange["cells"]): Participant[] => {
-      const voters = getVotersForRange(cells);
-      const voterIds = new Set(voters.map((v) => v.userId));
-      return participants.filter(
-        (p) => selectedParticipants.has(p.userId) && !voterIds.has(p.userId),
-      );
-    },
-    [getVotersForRange, participants, selectedParticipants],
-  );
+  const {
+    getCellCount,
+    getAvailableVotesForRange,
+    getUnavailableParticipantsForRange,
+    getSlotIdsFromRange,
+  } = useResultsAvailabilityMetrics({
+    slotsByDate,
+    dates,
+    mergedTimeRows,
+    votesBySlot,
+    participants,
+    selectedParticipants,
+  });
 
   // Check if a merged row cell contains any selected slots
   const isMergedCellSelected = useCallback(
@@ -239,27 +170,12 @@ export function ResultsHeatmapGrid({
     [locale],
   );
 
-  // Get all slot IDs from selection range cells
-  const getSlotIdsFromCells = useCallback(
-    (cells: SelectionRange["cells"]): string[] => {
-      const slotIds: string[] = [];
-      cells.forEach(({ dateKey, slotIndices }) => {
-        slotIndices.forEach((idx) => {
-          const slot = slotsByDate[dateKey]?.[idx];
-          if (slot) slotIds.push(slot.id);
-        });
-      });
-      return slotIds;
-    },
-    [slotsByDate],
-  );
-
   // Show modal with selection data
   const showModalForSelection = useCallback(
     (range: SelectionRange) => {
-      const voters = getVotersForRange(range.cells);
-      const nonVoters = getNonVotersForRange(range.cells);
-      const slotIds = getSlotIdsFromCells(range.cells);
+      const voters = getAvailableVotesForRange(range.cells);
+      const nonVoters = getUnavailableParticipantsForRange(range.cells);
+      const slotIds = getSlotIdsFromRange(range.cells);
 
       // Format date label
       let dateLabel: string;
@@ -287,9 +203,9 @@ export function ResultsHeatmapGrid({
       });
     },
     [
-      getVotersForRange,
-      getNonVotersForRange,
-      getSlotIdsFromCells,
+      getAvailableVotesForRange,
+      getUnavailableParticipantsForRange,
+      getSlotIdsFromRange,
       formatDateForModal,
     ],
   );
@@ -311,6 +227,8 @@ export function ResultsHeatmapGrid({
     paginatedDates,
     onRangeSelect: showModalForSelection,
   });
+  const maxHeatmapCount =
+    mode === "available" ? maxVotes : selectedParticipants.size;
 
   return (
     <div className="space-y-4">
@@ -324,6 +242,8 @@ export function ResultsHeatmapGrid({
           />
         </div>
         <ResultsGridToolsMenu
+          mode={mode}
+          onModeChange={onModeChange}
           granularity={granularity}
           onGranularityChange={setGranularity}
           onCopyShareLink={onCopyShareLink}
@@ -358,12 +278,13 @@ export function ResultsHeatmapGrid({
               {mergedTimeRows.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex">
                   {paginatedDates.map((dateKey, dateIndex) => {
-                    const voteCount = getVoteCountForMergedRow(
-                      row.slotIndices,
-                      dateKey,
+                    const cellCount = getCellCount(rowIndex, dateKey, mode);
+                    const colors = getHeatmapClasses(
+                      cellCount,
+                      maxHeatmapCount,
+                      mode,
                     );
-                    const colors = getHeatmapClasses(voteCount, maxVotes);
-                    const hasVotes = voteCount > 0;
+                    const hasVotes = cellCount > 0;
                     const inSelection =
                       isDragging && isInDragRectangle(rowIndex, dateIndex);
 
@@ -460,12 +381,12 @@ export function ResultsHeatmapGrid({
                               ${isSelectedEventTime ? "text-orange-700 dark:text-orange-300" : colors.text}
                             `}
                           >
-                            {voteCount}
+                            {cellCount}
                           </div>
                         )}
                         {inSelection && (
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300">
-                            {voteCount}
+                            {cellCount}
                           </div>
                         )}
                       </div>
@@ -488,6 +409,7 @@ export function ResultsHeatmapGrid({
           voters={modalData.voters}
           nonVoters={modalData.nonVoters}
           totalFiltered={selectedParticipants.size}
+          mode={mode}
           canAddToEventTime={canAddToEventTime}
           isVotingPhase={isVotingPhase}
           rangeInfo={modalData.rangeInfo}

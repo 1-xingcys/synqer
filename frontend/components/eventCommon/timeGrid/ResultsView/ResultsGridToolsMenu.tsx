@@ -2,10 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Link2 } from "lucide-react";
+import { Check, Link2, X } from "lucide-react";
 import { TimeGranularity } from "../types";
+import { ResultsAvailabilityMode } from "./types";
 
 interface ResultsGridToolsMenuProps {
+  mode: ResultsAvailabilityMode;
+  onModeChange: (mode: ResultsAvailabilityMode) => void;
   granularity: TimeGranularity;
   onGranularityChange: (granularity: TimeGranularity) => void;
   onCopyShareLink: () => void;
@@ -19,6 +22,8 @@ const GRANULARITY_ITEMS: { value: TimeGranularity; labelKey: string }[] = [
 ];
 
 export function ResultsGridToolsMenu({
+  mode,
+  onModeChange,
   granularity,
   onGranularityChange,
   onCopyShareLink,
@@ -76,6 +81,40 @@ export function ResultsGridToolsMenu({
 
       {open && (
         <div className="absolute right-0 top-full mt-1 z-50 w-64 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 py-1">
+          <div className="px-3 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+            {tJoined("mobileTools.mode")}
+          </div>
+          <button
+            onClick={() => {
+              onModeChange("available");
+              setOpen(false);
+            }}
+            className={`w-full px-3 py-2 text-xs sm:text-sm flex items-center justify-between ${
+              mode === "available"
+                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
+            }`}
+          >
+            <span>{tJoined("results.availableParticipants")}</span>
+            {mode === "available" && <Check className="w-4 h-4" />}
+          </button>
+          <button
+            onClick={() => {
+              onModeChange("unavailable");
+              setOpen(false);
+            }}
+            className={`w-full px-3 py-2 text-xs sm:text-sm flex items-center justify-between ${
+              mode === "unavailable"
+                ? "bg-[#fff1f2] text-[#be123c] dark:bg-[#8813374D] dark:text-[#fda4af]"
+                : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
+            }`}
+          >
+            <span>{tJoined("results.unavailableParticipants")}</span>
+            {mode === "unavailable" && <X className="w-4 h-4" />}
+          </button>
+
+          <div className="my-1 border-t border-zinc-200 dark:border-zinc-700" />
+
           <div className="px-3 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
             {tJoined("mobileTools.view")}
           </div>

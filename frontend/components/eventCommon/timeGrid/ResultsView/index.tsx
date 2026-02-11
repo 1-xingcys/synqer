@@ -3,7 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { ResultsViewProps, SlotRangeInfo } from "./types";
+import {
+  ResultsAvailabilityMode,
+  ResultsViewProps,
+  SlotRangeInfo,
+} from "./types";
 import { ParticipantFilter } from "./ParticipantFilter";
 import { HeatMapLegend } from "./HeatMapLegend";
 import { ResultsHeatmapGrid } from "./ResultsHeatmapGrid";
@@ -31,6 +35,8 @@ export default function ResultsView({
   const router = useRouter();
   const pathname = usePathname();
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [availabilityMode, setAvailabilityMode] =
+    useState<ResultsAvailabilityMode>("available");
 
   // Parse URL param to get initial selection
   const getInitialSelection = useCallback((): Set<string> => {
@@ -130,6 +136,8 @@ export default function ResultsView({
     votes,
     selectedParticipants,
   });
+  const legendMaxVotes =
+    availabilityMode === "available" ? maxVotes : selectedParticipants.size;
 
   // Show empty state if no participants selected
   const showEmptyState = selectedParticipants.size === 0;
@@ -145,7 +153,7 @@ export default function ResultsView({
       <div className="flex flex-col bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 p-3 sm:p-5 mt-3 sm:mt-4">
         {/* Filter & Legend Section */}
         <div className="flex items-center justify-between gap-3 flex-wrap mt-1">
-          <HeatMapLegend maxVotes={maxVotes} />
+          <HeatMapLegend maxVotes={legendMaxVotes} mode={availabilityMode} />
           <ParticipantFilter
             participants={participants}
             selectedParticipants={selectedParticipants}
@@ -153,7 +161,7 @@ export default function ResultsView({
           />
         </div>
 
-        <div className="my-3 border-t border-zinc-200 dark:border-zinc-700" />
+        <div className="my-3 sm:my-6 border-t border-zinc-200 dark:border-zinc-700" />
 
         {/* Heatmap Grid */}
         {showEmptyState ? (
@@ -191,6 +199,8 @@ export default function ResultsView({
             isVotingPhase={isVotingPhase}
             onAddToEventTime={onAddToEventTime}
             selectedSlotIds={selectedSlotIds}
+            mode={availabilityMode}
+            onModeChange={setAvailabilityMode}
             onCopyShareLink={() => {
               void copyShareableLink();
             }}
