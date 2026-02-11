@@ -349,7 +349,7 @@ export function ResultsHeatmapGrid({
       {/* Grid */}
       <div
         ref={gridRef}
-        className="select-none touch-none"
+        className="select-none touch-pan-y"
         style={{ "--slot-height": slotHeight } as React.CSSProperties}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -359,7 +359,7 @@ export function ResultsHeatmapGrid({
           <DateHeader dates={paginatedDates} selectable={false} />
 
           {/* Time slots grid */}
-          <div className="flex">
+          <div className="flex touch-pan-y">
             <TimeColumn
               mergedTimeRows={mergedTimeRows}
               slotHeight={slotHeight}
@@ -368,7 +368,7 @@ export function ResultsHeatmapGrid({
             {/* Slots grid */}
             <div
               data-grid="slots"
-              className="flex-1 border border-gray-200 dark:border-zinc-700 rounded-r-lg overflow-hidden"
+              className="flex-1 touch-none border border-gray-200 dark:border-zinc-700 overflow-hidden"
             >
               {mergedTimeRows.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex">
