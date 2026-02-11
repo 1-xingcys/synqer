@@ -5,10 +5,11 @@ import { formatDateHeader } from "../utils";
 
 interface DateHeaderProps {
   dates: string[];
-  isDayFullySelected: (dateKey: string) => boolean;
-  onSelectDay: (dateKey: string) => void;
+  isDayFullySelected?: (dateKey: string) => boolean;
+  onSelectDay?: (dateKey: string) => void;
   firstTimeLabel?: string;
-  isStickyActive: boolean;
+  isStickyActive?: boolean;
+  selectable?: boolean;
 }
 
 export function DateHeader({
@@ -17,6 +18,7 @@ export function DateHeader({
   onSelectDay,
   firstTimeLabel,
   isStickyActive = false,
+  selectable = true,
 }: DateHeaderProps) {
   const locale = useLocale();
   const showBottomGridLine = isStickyActive;
@@ -34,17 +36,10 @@ export function DateHeader({
       {/* Date columns */}
       {dates.map((dateKey) => {
         const { weekday, day, month } = formatDateHeader(dateKey, locale);
-        const isFullySelected = isDayFullySelected(dateKey);
-        return (
-          <button
-            key={dateKey}
-            onClick={() => onSelectDay(dateKey)}
-            className={`flex-1 min-w-0 p-1 sm:p-2 text-center cursor-pointer transition-all rounded-t-lg mx-px sm:mx-0.5 ${
-              isFullySelected
-                ? "bg-blue-100 dark:bg-blue-900/30"
-                : "hover:bg-gray-100 dark:hover:bg-zinc-800"
-            }`}
-          >
+        const isFullySelected = isDayFullySelected?.(dateKey) ?? false;
+
+        const content = (
+          <>
             <div className="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400 font-medium">
               {weekday}
             </div>
@@ -60,6 +55,31 @@ export function DateHeader({
             <div className="text-[10px] sm:text-xs text-gray-400 dark:text-zinc-500">
               {month}
             </div>
+          </>
+        );
+
+        if (!selectable) {
+          return (
+            <div
+              key={dateKey}
+              className="flex-1 min-w-0 p-1 sm:p-2 text-center rounded-t-lg mx-px sm:mx-0.5"
+            >
+              {content}
+            </div>
+          );
+        }
+
+        return (
+          <button
+            key={dateKey}
+            onClick={() => onSelectDay?.(dateKey)}
+            className={`flex-1 min-w-0 p-1 sm:p-2 text-center cursor-pointer transition-all rounded-t-lg mx-px sm:mx-0.5 ${
+              isFullySelected
+                ? "bg-blue-100 dark:bg-blue-900/30"
+                : "hover:bg-gray-100 dark:hover:bg-zinc-800"
+            }`}
+          >
+            {content}
           </button>
         );
       })}

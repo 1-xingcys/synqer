@@ -1,20 +1,21 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
-import { DatePagination } from "@/components/eventCommon/timeGrid/ui";
 import {
-  formatDateHeader,
-  groupSlotsByDate,
-} from "@/components/eventCommon/timeGrid/utils";
+  DateHeader,
+  DatePagination,
+  TimeColumn,
+} from "@/components/eventCommon/timeGrid/ui";
 import { formatMinutesToTime } from "@/lib/utils";
 import {
   useResponsiveGrid,
   usePaginatedDates,
   useMergedTimeRowsModel,
+  useSlotGridModel,
 } from "../hooks";
 import { TimeGranularity, TimeSlot, Vote, Participant } from "../types";
 
@@ -85,13 +86,7 @@ export function ResultsHeatmapGrid({
     rangeInfo: SlotRangeInfo;
   } | null>(null);
 
-  // Group slots by date
-  const slotsByDate = useMemo(() => groupSlotsByDate(slots), [slots]);
-  const dates = useMemo(() => Object.keys(slotsByDate).sort(), [slotsByDate]);
-  const timeSlots = useMemo(
-    () => (dates.length > 0 ? slotsByDate[dates[0]] : []),
-    [dates, slotsByDate],
-  );
+  const { slotsByDate, dates, timeSlots } = useSlotGridModel({ slots });
 
   // Merged rows for granularity (using shared hook)
   const { mergedTimeRows } = useMergedTimeRowsModel({ timeSlots, granularity });
@@ -579,49 +574,14 @@ export function ResultsHeatmapGrid({
         onMouseLeave={handleMouseUp}
       >
         <div className="relative">
-          {/* Date headers */}
-          <div className="flex">
-            <div className="w-9 sm:w-14 shrink-0" />
-            {paginatedDates.map((dateKey) => {
-              const { weekday, day, month } = formatDateHeader(dateKey, locale);
-              return (
-                <div
-                  key={dateKey}
-                  className="flex-1 min-w-0 p-1 sm:p-2 text-center mx-px sm:mx-0.5"
-                >
-                  <div className="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400 font-medium">
-                    {weekday}
-                  </div>
-                  <div className="text-sm sm:text-lg font-bold text-gray-900 dark:text-zinc-100">
-                    {day}
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-gray-400 dark:text-zinc-500">
-                    {month}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <DateHeader dates={paginatedDates} selectable={false} />
 
           {/* Time slots grid */}
           <div className="flex">
-            {/* Time column */}
-            <div className="w-9 sm:w-14 shrink-0 relative border-r border-gray-200 dark:border-zinc-700 rounded-l-lg">
-              {mergedTimeRows.map((row, rowIndex) => (
-                <div key={rowIndex} className="h-10 sm:h-11 relative">
-                  <span className="absolute -top-2 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
-                    {formatMinutesToTime(row.startMinute)}
-                  </span>
-                </div>
-              ))}
-              {mergedTimeRows.length > 0 && (
-                <span className="absolute bottom-0.5 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
-                  {formatMinutesToTime(
-                    mergedTimeRows[mergedTimeRows.length - 1].endMinute,
-                  )}
-                </span>
-              )}
-            </div>
+            <TimeColumn
+              mergedTimeRows={mergedTimeRows}
+              slotHeight={slotHeight}
+            />
 
             {/* Slots grid */}
             <div
