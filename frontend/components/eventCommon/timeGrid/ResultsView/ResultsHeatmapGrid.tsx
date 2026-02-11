@@ -18,6 +18,10 @@ import {
   useSlotGridModel,
 } from "../hooks";
 import { TimeGranularity, TimeSlot, Vote, Participant } from "../types";
+import {
+  SelectionRange,
+  useResultsRangeSelection,
+} from "./hooks/useResultsRangeSelection";
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];
@@ -32,19 +36,6 @@ interface ResultsHeatmapGridProps {
   onAddToEventTime?: (info: SlotRangeInfo) => Promise<boolean>;
   // Selected slot IDs to display with border highlight
   selectedSlotIds?: Set<string>;
-}
-
-interface CellPosition {
-  rowIndex: number;
-  dateIndex: number;
-}
-
-interface SelectionRange {
-  cells: Array<{ dateKey: string; rowIndex: number; slotIndices: number[] }>;
-  startDate: string;
-  endDate: string;
-  startTime: number;
-  endTime: number;
 }
 
 const GRANULARITY_OPTIONS: { value: TimeGranularity; labelKey: string }[] = [
@@ -69,13 +60,6 @@ export function ResultsHeatmapGrid({
   const gridRef = useRef<HTMLDivElement>(null);
   const [granularity, setGranularity] = useState<TimeGranularity>(15);
   const { datesPerPage, slotHeight } = useResponsiveGrid();
-
-  // Drag selection state
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<CellPosition | null>(null);
-  const [dragEnd, setDragEnd] = useState<CellPosition | null>(null);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-  const hasDraggedRef = useRef(false);
 
   // Modal state
   const [modalData, setModalData] = useState<{
@@ -243,59 +227,6 @@ export function ResultsHeatmapGrid({
     [selectedSlotIds, isMergedCellSelected, paginatedDates, mergedTimeRows],
   );
 
-  // Calculate rectangle bounds from drag start/end
-  const getRectangleBounds = useCallback(() => {
-    if (!dragStart || !dragEnd) return null;
-    return {
-      minRow: Math.min(dragStart.rowIndex, dragEnd.rowIndex),
-      maxRow: Math.max(dragStart.rowIndex, dragEnd.rowIndex),
-      minDate: Math.min(dragStart.dateIndex, dragEnd.dateIndex),
-      maxDate: Math.max(dragStart.dateIndex, dragEnd.dateIndex),
-    };
-  }, [dragStart, dragEnd]);
-
-  // Check if a cell is in the drag rectangle
-  const isInDragRectangle = useCallback(
-    (rowIndex: number, dateIndex: number): boolean => {
-      const bounds = getRectangleBounds();
-      if (!bounds) return false;
-      return (
-        rowIndex >= bounds.minRow &&
-        rowIndex <= bounds.maxRow &&
-        dateIndex >= bounds.minDate &&
-        dateIndex <= bounds.maxDate
-      );
-    },
-    [getRectangleBounds],
-  );
-
-  // Get cell position from touch/mouse coordinates
-  const getCellFromPoint = useCallback(
-    (clientX: number, clientY: number): CellPosition | null => {
-      if (!gridRef.current) return null;
-
-      const gridElement = gridRef.current.querySelector('[data-grid="slots"]');
-      if (!gridElement) return null;
-
-      const cells = gridElement.querySelectorAll("[data-cell]");
-      for (const cell of cells) {
-        const rect = cell.getBoundingClientRect();
-        if (
-          clientX >= rect.left &&
-          clientX <= rect.right &&
-          clientY >= rect.top &&
-          clientY <= rect.bottom
-        ) {
-          const rowIndex = parseInt(cell.getAttribute("data-row") || "0", 10);
-          const dateIndex = parseInt(cell.getAttribute("data-date") || "0", 10);
-          return { rowIndex, dateIndex };
-        }
-      }
-      return null;
-    },
-    [],
-  );
-
   // Format date for modal
   const formatDateForModal = useCallback(
     (dateStr: string) => {
@@ -309,44 +240,6 @@ export function ResultsHeatmapGrid({
     },
     [locale],
   );
-
-  // Get selection range data
-  const getSelectionRange = useCallback((): SelectionRange | null => {
-    const bounds = getRectangleBounds();
-    if (!bounds) return null;
-
-    const cells: SelectionRange["cells"] = [];
-    const dateKeys: string[] = [];
-
-    for (let dateIdx = bounds.minDate; dateIdx <= bounds.maxDate; dateIdx++) {
-      const dateKey = paginatedDates[dateIdx];
-      if (!dateKey) continue;
-      dateKeys.push(dateKey);
-
-      for (let rowIdx = bounds.minRow; rowIdx <= bounds.maxRow; rowIdx++) {
-        const row = mergedTimeRows[rowIdx];
-        if (!row) continue;
-        cells.push({
-          dateKey,
-          rowIndex: rowIdx,
-          slotIndices: row.slotIndices,
-        });
-      }
-    }
-
-    if (cells.length === 0) return null;
-
-    const startRow = mergedTimeRows[bounds.minRow];
-    const endRow = mergedTimeRows[bounds.maxRow];
-
-    return {
-      cells,
-      startDate: dateKeys[0],
-      endDate: dateKeys[dateKeys.length - 1],
-      startTime: startRow?.startMinute ?? 0,
-      endTime: endRow?.endMinute ?? 0,
-    };
-  }, [getRectangleBounds, paginatedDates, mergedTimeRows]);
 
   // Get all slot IDs from selection range cells
   const getSlotIdsFromCells = useCallback(
@@ -403,134 +296,23 @@ export function ResultsHeatmapGrid({
     ],
   );
 
-  // Handle single cell click
-  const handleCellClick = useCallback(
-    (dateKey: string, rowIndex: number, slotIndices: number[]) => {
-      // Don't trigger click if we just finished dragging
-      if (hasDraggedRef.current) {
-        hasDraggedRef.current = false;
-        return;
-      }
-
-      const row = mergedTimeRows[rowIndex];
-      if (!row) return;
-
-      const range: SelectionRange = {
-        cells: [{ dateKey, rowIndex, slotIndices }],
-        startDate: dateKey,
-        endDate: dateKey,
-        startTime: row.startMinute,
-        endTime: row.endMinute,
-      };
-
-      showModalForSelection(range);
-    },
-    [mergedTimeRows, showModalForSelection],
-  );
-
-  // Touch handlers
-  const handleTouchStart = useCallback(
-    (rowIndex: number, dateIndex: number, e: React.TouchEvent) => {
-      const touch = e.touches[0];
-      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-      hasDraggedRef.current = false;
-      setDragStart({ rowIndex, dateIndex });
-      setDragEnd({ rowIndex, dateIndex });
-    },
-    [],
-  );
-
-  const handleTouchMove = useCallback(
-    (e: React.TouchEvent) => {
-      if (!dragStart || !touchStartRef.current) return;
-
-      const touch = e.touches[0];
-      const dx = Math.abs(touch.clientX - touchStartRef.current.x);
-      const dy = Math.abs(touch.clientY - touchStartRef.current.y);
-
-      // Start dragging if moved more than threshold
-      if (dx > 10 || dy > 10) {
-        if (!isDragging) {
-          setIsDragging(true);
-          hasDraggedRef.current = true;
-        }
-
-        const cell = getCellFromPoint(touch.clientX, touch.clientY);
-        if (cell) {
-          setDragEnd(cell);
-        }
-      }
-    },
-    [dragStart, isDragging, getCellFromPoint],
-  );
-
-  const handleTouchEnd = useCallback(() => {
-    if (isDragging) {
-      const range = getSelectionRange();
-      if (range) {
-        showModalForSelection(range);
-      }
-    }
-
-    setIsDragging(false);
-    setDragStart(null);
-    setDragEnd(null);
-    touchStartRef.current = null;
-  }, [isDragging, getSelectionRange, showModalForSelection]);
-
-  // Mouse handlers for desktop drag
-  const handleMouseDown = useCallback(
-    (rowIndex: number, dateIndex: number, e: React.MouseEvent) => {
-      // Only left click
-      if (e.button !== 0) return;
-      e.preventDefault();
-
-      touchStartRef.current = { x: e.clientX, y: e.clientY };
-      hasDraggedRef.current = false;
-      setDragStart({ rowIndex, dateIndex });
-      setDragEnd({ rowIndex, dateIndex });
-    },
-    [],
-  );
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!dragStart || !touchStartRef.current) return;
-
-      const dx = Math.abs(e.clientX - touchStartRef.current.x);
-      const dy = Math.abs(e.clientY - touchStartRef.current.y);
-
-      if (dx > 5 || dy > 5) {
-        if (!isDragging) {
-          setIsDragging(true);
-          hasDraggedRef.current = true;
-        }
-
-        const cell = getCellFromPoint(e.clientX, e.clientY);
-        if (cell) {
-          setDragEnd(cell);
-        }
-      }
-    },
-    [dragStart, isDragging, getCellFromPoint],
-  );
-
-  const handleMouseUp = useCallback(() => {
-    if (isDragging) {
-      const range = getSelectionRange();
-      if (range) {
-        showModalForSelection(range);
-      }
-    }
-
-    setIsDragging(false);
-    setDragStart(null);
-    setDragEnd(null);
-    touchStartRef.current = null;
-  }, [isDragging, getSelectionRange, showModalForSelection]);
-
-  // Get rectangle bounds for visual styling
-  const rectBounds = getRectangleBounds();
+  const {
+    isDragging,
+    rectBounds,
+    isInDragRectangle,
+    handleCellClick,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+  } = useResultsRangeSelection({
+    gridRef,
+    mergedTimeRows,
+    paginatedDates,
+    onRangeSelect: showModalForSelection,
+  });
 
   return (
     <div className="space-y-4">
