@@ -15,6 +15,7 @@ import { useFilteredVotes } from "../hooks";
 import { TimeGranularity } from "../types";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useLiff } from "@/hooks/useLiff";
+import { Z_INDEX } from "@/lib/zIndex";
 
 export type { ResultsViewProps, SlotRangeInfo };
 
@@ -195,7 +196,9 @@ export default function ResultsView({
           {t("results.clickToSeeWho")}
         </p>
       )}
-      <div className="flex flex-col bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 p-3 sm:p-5 mt-3 sm:mt-4">
+      <div
+        className={`relative flex flex-col ${Z_INDEX.GRID_BASE} bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 p-3 sm:p-5 mt-3 sm:mt-4`}
+      >
         {/* Filter & Legend Section */}
         <div className="flex items-center justify-between gap-3 flex-wrap mt-1">
           <HeatMapLegend maxVotes={legendMaxVotes} mode={availabilityMode} />
@@ -206,7 +209,7 @@ export default function ResultsView({
           />
         </div>
 
-        <div className="my-3 sm:my-6 border-t border-zinc-200 dark:border-zinc-700" />
+        <div className="mt-3 border-t border-zinc-200 dark:border-zinc-700" />
 
         {/* Heatmap Grid */}
         {showEmptyState ? (

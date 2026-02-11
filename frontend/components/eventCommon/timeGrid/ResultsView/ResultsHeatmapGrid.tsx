@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocale } from "next-intl";
 import { ResultsAvailabilityMode, SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
@@ -12,7 +12,9 @@ import {
   DatePagination,
   TimeColumn,
 } from "@/components/eventCommon/timeGrid/ui";
+import { useTimeGridStickyHeaderSignal } from "../stickyHeaderSignalContext";
 import { formatMinutesToTime } from "@/lib/utils";
+import { Z_INDEX } from "@/lib/zIndex";
 import {
   useResponsiveGrid,
   usePaginatedDates,
@@ -67,6 +69,9 @@ export function ResultsHeatmapGrid({
 }: ResultsHeatmapGridProps) {
   const locale = useLocale();
   const gridRef = useRef<HTMLDivElement>(null);
+  const stickySentinelRef = useRef<HTMLDivElement>(null);
+  const [isStickyActive, setIsStickyActive] = useState(false);
+  const { setStickyActive } = useTimeGridStickyHeaderSignal();
   const { datesPerPage, slotHeight } = useResponsiveGrid();
 
   // Modal state
@@ -234,26 +239,65 @@ export function ResultsHeatmapGrid({
   });
   const maxHeatmapCount =
     mode === "available" ? maxVotes : selectedParticipants.size;
+  const firstTimeLabel =
+    mergedTimeRows.length > 0
+      ? formatMinutesToTime(mergedTimeRows[0].startMinute)
+      : undefined;
+
+  useEffect(() => {
+    const sentinel = stickySentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const active = !entry.isIntersecting;
+        setIsStickyActive(active);
+        setStickyActive(active);
+      },
+      { threshold: [1] },
+    );
+
+    observer.observe(sentinel);
+    return () => {
+      observer.disconnect();
+      setIsStickyActive(false);
+      setStickyActive(false);
+    };
+  }, [setStickyActive]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <div className="flex-1 min-w-0">
-          <DatePagination
-            dates={dates}
-            currentPage={currentPage}
-            datesPerPage={datesPerPage}
-            onPageChange={setCurrentPage}
+    <div className="space-y-0">
+      <div ref={stickySentinelRef} className="h-px" aria-hidden />
+
+      <div
+        className={`sticky top-0 ${Z_INDEX.GRID_BASE} bg-white/100 dark:bg-zinc-900/100 backdrop-blur supports-[backdrop-filter]:bg-white/100 dark:supports-[backdrop-filter]:bg-zinc-900/100 space-y-2 sm:space-y-3`}
+      >
+        <div className="h-3" />
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <DatePagination
+              dates={dates}
+              currentPage={currentPage}
+              datesPerPage={datesPerPage}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+          <ResultsGridToolsMenu
+            mode={mode}
+            onModeChange={onModeChange}
+            granularity={granularity}
+            onGranularityChange={onGranularityChange}
+            getShareableLink={getShareableLink}
+            onCopyShareLink={onCopyShareLink}
+            linkCopied={linkCopied}
           />
         </div>
-        <ResultsGridToolsMenu
-          mode={mode}
-          onModeChange={onModeChange}
-          granularity={granularity}
-          onGranularityChange={onGranularityChange}
-          getShareableLink={getShareableLink}
-          onCopyShareLink={onCopyShareLink}
-          linkCopied={linkCopied}
+
+        <DateHeader
+          dates={paginatedDates}
+          selectable={false}
+          firstTimeLabel={firstTimeLabel}
+          isStickyActive={isStickyActive}
         />
       </div>
 
@@ -267,13 +311,12 @@ export function ResultsHeatmapGrid({
         onMouseLeave={handleMouseUp}
       >
         <div className="relative">
-          <DateHeader dates={paginatedDates} selectable={false} />
-
           {/* Time slots grid */}
           <div className="flex touch-pan-y">
             <TimeColumn
               mergedTimeRows={mergedTimeRows}
               slotHeight={slotHeight}
+              showFirstBoundaryLabel={false}
             />
 
             {/* Slots grid */}

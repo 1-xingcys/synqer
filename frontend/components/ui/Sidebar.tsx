@@ -12,6 +12,7 @@ import { useRouter, usePathname, Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { Z_INDEX } from "@/lib/zIndex";
 
 /**
  * Sidebar 通用元件
@@ -89,7 +90,7 @@ export default function Sidebar({
       {/* Overlay - 手機版點擊關閉 */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-[70] lg:hidden"
+          className={`fixed inset-0 bg-black/50 ${Z_INDEX.SIDEBAR_BACKDROP} lg:hidden`}
           onClick={onClose}
         />
       )}
@@ -101,7 +102,7 @@ export default function Sidebar({
           w-64 ${widthClass} bg-white dark:bg-zinc-900 
           border-r border-zinc-200 dark:border-zinc-800
           transition-[transform,opacity,width] duration-300 ease-in-out
-          z-[80] lg:z-0
+          ${Z_INDEX.SIDEBAR_PANEL} lg:z-0
           ${visibilityClass}
         `}
         aria-hidden={!isOpen}

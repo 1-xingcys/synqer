@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Participant } from "../types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Z_INDEX } from "@/lib/zIndex";
 
 interface ParticipantFilterProps {
   participants: Participant[];
@@ -141,7 +142,9 @@ export function ParticipantFilter({
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 z-50 w-72 sm:w-80 bg-white dark:bg-zinc-800 rounded-xl shadow-xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
+        <div
+          className={`absolute top-full right-0 mt-2 ${Z_INDEX.DROPDOWN_OVER_GRID} w-72 sm:w-80 bg-white dark:bg-zinc-800 rounded-xl shadow-xl border border-gray-200 dark:border-zinc-700 overflow-hidden`}
+        >
           {/* Search */}
           <div className="p-3 border-b border-gray-100 dark:border-zinc-700">
             <div className="relative">
