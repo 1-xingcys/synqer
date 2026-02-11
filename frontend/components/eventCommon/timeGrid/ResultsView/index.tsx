@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
@@ -12,6 +12,7 @@ import { ParticipantFilter } from "./ParticipantFilter";
 import { HeatMapLegend } from "./HeatMapLegend";
 import { ResultsHeatmapGrid } from "./ResultsHeatmapGrid";
 import { useFilteredVotes } from "../hooks";
+import { TimeGranularity } from "../types";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useLiff } from "@/hooks/useLiff";
 
@@ -19,6 +20,20 @@ export type { ResultsViewProps, SlotRangeInfo };
 
 const SELECTED_PARAM = "selected";
 const SELECTED_ALL = "all";
+const MODE_PARAM = "mode";
+const GRANULARITY_PARAM = "granularity";
+const DEFAULT_MODE: ResultsAvailabilityMode = "available";
+const DEFAULT_GRANULARITY: TimeGranularity = 15;
+
+function normalizeMode(value: string | null): ResultsAvailabilityMode {
+  return value === "unavailable" ? "unavailable" : "available";
+}
+
+function normalizeGranularity(value: string | null): TimeGranularity {
+  if (value === "30") return 30;
+  if (value === "60") return 60;
+  return 15;
+}
 
 export default function ResultsView({
   slots,
@@ -34,75 +49,93 @@ export default function ResultsView({
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [hasInitialized, setHasInitialized] = useState(false);
-  const [availabilityMode, setAvailabilityMode] =
-    useState<ResultsAvailabilityMode>("available");
 
-  // Parse URL param to get initial selection
-  const getInitialSelection = useCallback((): Set<string> => {
+  const selectedParticipants = useMemo((): Set<string> => {
     const selectedParam = searchParams.get(SELECTED_PARAM);
-    if (selectedParam !== null) {
-      // URL has selection param
-      if (selectedParam === SELECTED_ALL) {
-        return new Set(participants.map((p) => p.userId)); // All selected
-      }
-      if (selectedParam === "") {
-        return new Set(); // Empty selection
-      }
-      const selectedIds = selectedParam.split(",").filter(Boolean);
-      // Only include IDs that exist in participants
-      const validIds = new Set(participants.map((p) => p.userId));
-      return new Set(selectedIds.filter((id) => validIds.has(id)));
+    const allIds = participants.map((p) => p.userId);
+    const validIds = new Set(allIds);
+
+    if (selectedParam === null || selectedParam === SELECTED_ALL) {
+      return new Set(allIds);
     }
-    // No param = select all (default), but we'll add ?selected=all to URL
-    return new Set(participants.map((p) => p.userId));
+    if (selectedParam === "") {
+      return new Set();
+    }
+
+    const selectedIds = selectedParam.split(",").filter(Boolean);
+    return new Set(selectedIds.filter((id) => validIds.has(id)));
   }, [searchParams, participants]);
 
-  // Initialize with URL param or all selected
-  const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(
-    () => new Set(participants.map((p) => p.userId)),
+  const availabilityMode = useMemo(
+    () => normalizeMode(searchParams.get(MODE_PARAM)),
+    [searchParams],
   );
 
-  // Sync state from URL on mount and when searchParams change
-  useEffect(() => {
-    setSelectedParticipants(getInitialSelection());
-  }, [getInitialSelection]);
+  const granularity = useMemo(
+    () => normalizeGranularity(searchParams.get(GRANULARITY_PARAM)),
+    [searchParams],
+  );
 
-  // Add ?selected=all to URL if not present (on initial load)
+  const serializeSelectionParam = useCallback(
+    (selection: Set<string>): string => {
+      const allSelected = selection.size === participants.length;
+      if (allSelected) return SELECTED_ALL;
+      if (selection.size === 0) return "";
+      return Array.from(selection).sort().join(",");
+    },
+    [participants.length],
+  );
+
+  // Add default URL params if not present
   useEffect(() => {
-    if (hasInitialized) return;
-    const selectedParam = searchParams.get(SELECTED_PARAM);
-    if (selectedParam === null && participants.length > 0) {
-      // No param present, add ?selected=all
-      const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams.toString());
+    let changed = false;
+
+    if (searchParams.get(SELECTED_PARAM) === null && participants.length > 0) {
       params.set(SELECTED_PARAM, SELECTED_ALL);
+      changed = true;
+    }
+    if (searchParams.get(MODE_PARAM) === null) {
+      params.set(MODE_PARAM, DEFAULT_MODE);
+      changed = true;
+    }
+    if (searchParams.get(GRANULARITY_PARAM) === null) {
+      params.set(GRANULARITY_PARAM, String(DEFAULT_GRANULARITY));
+      changed = true;
+    }
+
+    if (changed) {
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     }
-    setHasInitialized(true);
-  }, [searchParams, pathname, router, participants.length, hasInitialized]);
+  }, [searchParams, pathname, router, participants.length]);
 
   // Update URL when selection changes
   const handleSelectionChange = useCallback(
     (newSelection: Set<string>) => {
-      setSelectedParticipants(newSelection);
-
       const params = new URLSearchParams(searchParams.toString());
-      const allSelected = newSelection.size === participants.length;
-
-      if (allSelected) {
-        // All selected = use "all" keyword
-        params.set(SELECTED_PARAM, SELECTED_ALL);
-      } else if (newSelection.size === 0) {
-        // None selected = empty string
-        params.set(SELECTED_PARAM, "");
-      } else {
-        // Partial selection = store individual IDs
-        params.set(SELECTED_PARAM, Array.from(newSelection).join(","));
-      }
+      params.set(SELECTED_PARAM, serializeSelectionParam(newSelection));
 
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     },
-    [searchParams, participants.length, pathname, router],
+    [searchParams, serializeSelectionParam, pathname, router],
+  );
+
+  const handleModeChange = useCallback(
+    (nextMode: ResultsAvailabilityMode) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(MODE_PARAM, nextMode);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
+  );
+
+  const handleGranularityChange = useCallback(
+    (nextGranularity: TimeGranularity) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(GRANULARITY_PARAM, String(nextGranularity));
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
   );
 
   // Share link with filter state (for results page)
@@ -123,13 +156,21 @@ export default function ResultsView({
     }
 
     const url = new URL(baseUrl);
-    // Preserve current filter params
-    const selectedParam = searchParams.get(SELECTED_PARAM);
-    if (selectedParam !== null) {
-      url.searchParams.set(SELECTED_PARAM, selectedParam);
-    }
+    url.searchParams.set(
+      SELECTED_PARAM,
+      serializeSelectionParam(selectedParticipants),
+    );
+    url.searchParams.set(MODE_PARAM, availabilityMode);
+    url.searchParams.set(GRANULARITY_PARAM, String(granularity));
     return url.toString();
-  }, [eventId, isInClient, searchParams]);
+  }, [
+    eventId,
+    isInClient,
+    serializeSelectionParam,
+    selectedParticipants,
+    availabilityMode,
+    granularity,
+  ]);
 
   const copyShareableLink = useCallback(() => {
     return copy(getShareableLink());
@@ -204,7 +245,9 @@ export default function ResultsView({
             onAddToEventTime={onAddToEventTime}
             selectedSlotIds={selectedSlotIds}
             mode={availabilityMode}
-            onModeChange={setAvailabilityMode}
+            onModeChange={handleModeChange}
+            granularity={granularity}
+            onGranularityChange={handleGranularityChange}
             getShareableLink={getShareableLink}
             onCopyShareLink={() => {
               void copyShareableLink();

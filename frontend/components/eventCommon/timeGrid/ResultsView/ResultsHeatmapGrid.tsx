@@ -34,6 +34,8 @@ interface ResultsHeatmapGridProps {
   maxVotes: number;
   mode: ResultsAvailabilityMode;
   onModeChange: (mode: ResultsAvailabilityMode) => void;
+  granularity: TimeGranularity;
+  onGranularityChange: (granularity: TimeGranularity) => void;
   // Host-only props for adding time ranges to event time
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;
@@ -53,6 +55,8 @@ export function ResultsHeatmapGrid({
   maxVotes,
   mode,
   onModeChange,
+  granularity,
+  onGranularityChange,
   canAddToEventTime = false,
   isVotingPhase = false,
   onAddToEventTime,
@@ -63,7 +67,6 @@ export function ResultsHeatmapGrid({
 }: ResultsHeatmapGridProps) {
   const locale = useLocale();
   const gridRef = useRef<HTMLDivElement>(null);
-  const [granularity, setGranularity] = useState<TimeGranularity>(15);
   const { datesPerPage, slotHeight } = useResponsiveGrid();
 
   // Modal state
@@ -247,7 +250,7 @@ export function ResultsHeatmapGrid({
           mode={mode}
           onModeChange={onModeChange}
           granularity={granularity}
-          onGranularityChange={setGranularity}
+          onGranularityChange={onGranularityChange}
           getShareableLink={getShareableLink}
           onCopyShareLink={onCopyShareLink}
           linkCopied={linkCopied}
