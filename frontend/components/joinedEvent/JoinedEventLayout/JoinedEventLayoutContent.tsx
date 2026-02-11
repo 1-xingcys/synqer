@@ -14,6 +14,7 @@ import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { TimeGridStickyHeaderSignalProvider } from "@/components/eventCommon/timeGrid/stickyHeaderSignalContext";
 import { EventStatus } from "@/types/event";
+import { Z_INDEX } from "@/lib/zIndex";
 
 interface JoinedEventLayoutContentProps {
   children: ReactNode;
@@ -136,7 +137,7 @@ export function JoinedEventLayoutContent({
 
       {/* Navigation Tabs (sticky header for joined/[eventId] pages) */}
       <div
-        className={`sticky top-0 z-40 mt-5 bg-white/100 dark:bg-zinc-900/100 backdrop-blur supports-[backdrop-filter]:bg-white/100 dark:supports-[backdrop-filter]:bg-zinc-900/100 transition-transform duration-200 ${
+        className={`sticky top-0 ${Z_INDEX.NAV_STICKY} mt-5 bg-white/100 dark:bg-zinc-900/100 backdrop-blur supports-[backdrop-filter]:bg-white/100 dark:supports-[backdrop-filter]:bg-zinc-900/100 transition-transform duration-200 ${
           isGridStickyActive
             ? "-translate-y-full pointer-events-none"
             : "translate-y-0"

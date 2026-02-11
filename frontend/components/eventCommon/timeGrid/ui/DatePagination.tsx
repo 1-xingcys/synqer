@@ -61,7 +61,7 @@ export function DatePagination({
     }
   }, [isDropdownOpen]);
 
-  if (totalPages <= 1) return null;
+  if (totalPages <= 0) return null;
 
   // Format: YYYY/MM/DD
   const formatPageDate = (dateStr: string) => {

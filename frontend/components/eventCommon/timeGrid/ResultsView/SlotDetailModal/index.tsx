@@ -5,6 +5,8 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Check, X, Info } from "lucide-react";
 import { Vote, Participant } from "../../types";
+import { ResultsAvailabilityMode } from "../types";
+import { Z_INDEX } from "@/lib/zIndex";
 import {
   VotingConfirmView,
   AddButtonView,
@@ -27,6 +29,7 @@ interface SlotDetailModalProps {
   voters: Vote[];
   nonVoters: Participant[];
   totalFiltered: number;
+  mode?: ResultsAvailabilityMode;
   isRange?: boolean;
   // Host-only props for adding to event time
   canAddToEventTime?: boolean;
@@ -43,6 +46,7 @@ export function SlotDetailModal({
   voters,
   nonVoters,
   totalFiltered,
+  mode = "available",
   isRange = false,
   canAddToEventTime = false,
   isVotingPhase = false,
@@ -58,6 +62,8 @@ export function SlotDetailModal({
 
   // Detect if it's a range based on dateLabel containing "~"
   const showRangeHint = isRange || dateLabel.includes("~");
+  const isUnavailableMode = mode === "unavailable";
+  const primaryCount = isUnavailableMode ? nonVoters.length : voters.length;
 
   const handleClose = useCallback(() => {
     setShowVotingConfirmDialog(false);
@@ -114,14 +120,14 @@ export function SlotDetailModal({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-in fade-in duration-200"
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm ${Z_INDEX.MODAL_BACKDROP} animate-in fade-in duration-200`}
         onClick={handleClose}
       />
 
       {/* Modal */}
       <div
         ref={modalRef}
-        className="fixed z-50 inset-x-4 bottom-4 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:max-w-md sm:w-full animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300"
+        className={`fixed ${Z_INDEX.MODAL_CONTENT} inset-x-4 bottom-4 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:max-w-md sm:w-full animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300`}
       >
         <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
           {/* Header */}
@@ -148,12 +154,28 @@ export function SlotDetailModal({
             <div className="mb-4 pb-4 border-b border-gray-100 dark:border-zinc-800">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                    <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      isUnavailableMode
+                        ? "bg-[#ffe4e6] dark:bg-[#8813374D]"
+                        : "bg-emerald-100 dark:bg-emerald-900/30"
+                    }`}
+                  >
+                    {isUnavailableMode ? (
+                      <X className="w-4 h-4 text-[#be123c] dark:text-[#fda4af]" />
+                    ) : (
+                      <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    )}
                   </div>
                   <div>
-                    <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                      {voters.length}
+                    <span
+                      className={`text-lg font-bold ${
+                        isUnavailableMode
+                          ? "text-[#be123c] dark:text-[#fda4af]"
+                          : "text-emerald-600 dark:text-emerald-400"
+                      }`}
+                    >
+                      {primaryCount}
                     </span>
                     <span className="text-sm text-gray-500 dark:text-zinc-400 ml-1">
                       / {totalFiltered}
@@ -161,7 +183,9 @@ export function SlotDetailModal({
                   </div>
                 </div>
                 <span className="text-sm text-gray-500 dark:text-zinc-400">
-                  {t("results.available")}
+                  {isUnavailableMode
+                    ? t("results.unavailableParticipants")
+                    : t("results.availableParticipants")}
                 </span>
               </div>
               {/* Range hint */}
@@ -173,70 +197,141 @@ export function SlotDetailModal({
               )}
             </div>
 
-            {/* Available List */}
-            <div className="mb-5">
-              <h4 className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-3">
-                <Check className="w-4 h-4" />
-                {t("results.availableParticipants")} ({voters.length})
-              </h4>
-              {voters.length === 0 ? (
-                <p className="text-sm text-gray-500 dark:text-zinc-400 py-2">
-                  {t("results.noOneAvailable")}
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {voters.map((voter) => (
-                    <div
-                      key={voter.userId}
-                      className="flex items-center gap-3 p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20"
-                    >
-                      <Avatar className="w-8 h-8 shadow-sm">
-                        <AvatarImage
-                          src={voter.pictureUrl}
-                          alt={voter.userDisplayName}
-                        />
-                        <AvatarFallback className="bg-linear-to-br from-emerald-400 to-emerald-600 text-white text-sm font-semibold">
-                          {voter.userDisplayName[0]?.toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                        {voter.userDisplayName}
-                      </span>
+            {isUnavailableMode ? (
+              <>
+                <div className="mb-5">
+                  <h4 className="flex items-center gap-2 text-sm font-medium text-[#be123c] dark:text-[#fda4af] mb-3">
+                    <X className="w-4 h-4" />
+                    {t("results.unavailableParticipants")} ({nonVoters.length})
+                  </h4>
+                  {nonVoters.length === 0 ? (
+                    <p className="text-sm text-gray-500 dark:text-zinc-400 py-2">
+                      {t("everyoneAvailable")}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {nonVoters.map((participant) => (
+                        <div
+                          key={participant.userId}
+                          className="flex items-center gap-3 p-2 rounded-lg bg-[#fff1f2] dark:bg-[#88133740]"
+                        >
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage
+                              src={participant.pictureUrl}
+                              alt={participant.displayName}
+                            />
+                            <AvatarFallback className="bg-linear-to-br from-[#fb7185] to-[#e11d48] text-white text-sm font-semibold">
+                              {participant.displayName[0]?.toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm text-[#9f1239] dark:text-[#fecdd3]">
+                            {participant.displayName}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Unavailable List */}
-            {nonVoters.length > 0 && (
-              <div>
-                <h4 className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-zinc-400 mb-3">
-                  <X className="w-4 h-4" />
-                  {t("results.unavailableParticipants")} ({nonVoters.length})
-                </h4>
-                <div className="space-y-2">
-                  {nonVoters.map((participant) => (
-                    <div
-                      key={participant.userId}
-                      className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-zinc-800/50"
-                    >
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage
-                          src={participant.pictureUrl}
-                          alt={participant.displayName}
-                        />
-                        <AvatarFallback className="bg-linear-to-br from-gray-300 to-gray-400 dark:from-zinc-600 dark:to-zinc-700 text-white text-sm font-semibold">
-                          {participant.displayName[0]?.toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm text-gray-600 dark:text-zinc-400">
-                        {participant.displayName}
-                      </span>
+                {voters.length > 0 && (
+                  <div>
+                    <h4 className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-zinc-400 mb-3">
+                      <Check className="w-4 h-4" />
+                      {t("results.availableParticipants")} ({voters.length})
+                    </h4>
+                    <div className="space-y-2">
+                      {voters.map((voter) => (
+                        <div
+                          key={voter.userId}
+                          className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-zinc-800/50"
+                        >
+                          <Avatar className="w-8 h-8 shadow-sm">
+                            <AvatarImage
+                              src={voter.pictureUrl}
+                              alt={voter.userDisplayName}
+                            />
+                            <AvatarFallback className="bg-linear-to-br from-gray-300 to-gray-400 dark:from-zinc-600 dark:to-zinc-700 text-white text-sm font-semibold">
+                              {voter.userDisplayName[0]?.toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm text-gray-600 dark:text-zinc-400">
+                            {voter.userDisplayName}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Available List */}
+                <div className="mb-5">
+                  <h4 className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400 mb-3">
+                    <Check className="w-4 h-4" />
+                    {t("results.availableParticipants")} ({voters.length})
+                  </h4>
+                  {voters.length === 0 ? (
+                    <p className="text-sm text-gray-500 dark:text-zinc-400 py-2">
+                      {t("results.noOneAvailable")}
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {voters.map((voter) => (
+                        <div
+                          key={voter.userId}
+                          className="flex items-center gap-3 p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20"
+                        >
+                          <Avatar className="w-8 h-8 shadow-sm">
+                            <AvatarImage
+                              src={voter.pictureUrl}
+                              alt={voter.userDisplayName}
+                            />
+                            <AvatarFallback className="bg-linear-to-br from-emerald-400 to-emerald-600 text-white text-sm font-semibold">
+                              {voter.userDisplayName[0]?.toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                            {voter.userDisplayName}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
+
+                {/* Unavailable List */}
+                {nonVoters.length > 0 && (
+                  <div>
+                    <h4 className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-zinc-400 mb-3">
+                      <X className="w-4 h-4" />
+                      {t("results.unavailableParticipants")} ({nonVoters.length}
+                      )
+                    </h4>
+                    <div className="space-y-2">
+                      {nonVoters.map((participant) => (
+                        <div
+                          key={participant.userId}
+                          className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-zinc-800/50"
+                        >
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage
+                              src={participant.pictureUrl}
+                              alt={participant.displayName}
+                            />
+                            <AvatarFallback className="bg-linear-to-br from-gray-300 to-gray-400 dark:from-zinc-600 dark:to-zinc-700 text-white text-sm font-semibold">
+                              {participant.displayName[0]?.toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm text-gray-600 dark:text-zinc-400">
+                            {participant.displayName}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

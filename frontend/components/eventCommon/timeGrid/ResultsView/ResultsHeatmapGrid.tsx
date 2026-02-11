@@ -1,22 +1,31 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react";
-import { useTranslations, useLocale } from "next-intl";
-import { SlotRangeInfo } from "./types";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useLocale } from "next-intl";
+import { ResultsAvailabilityMode, SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
 import { SlotDetailModal } from "./SlotDetailModal";
-import { DatePagination } from "@/components/eventCommon/timeGrid/ui";
+import { ResultsGridToolsMenu } from "./ResultsGridToolsMenu";
+import { useResultsAvailabilityMetrics } from "./hooks/useResultsAvailabilityMetrics";
 import {
-  formatDateHeader,
-  groupSlotsByDate,
-} from "@/components/eventCommon/timeGrid/utils";
+  DateHeader,
+  DatePagination,
+  TimeColumn,
+} from "@/components/eventCommon/timeGrid/ui";
+import { useTimeGridStickyHeaderSignal } from "../stickyHeaderSignalContext";
 import { formatMinutesToTime } from "@/lib/utils";
+import { Z_INDEX } from "@/lib/zIndex";
 import {
   useResponsiveGrid,
   usePaginatedDates,
   useMergedTimeRowsModel,
+  useSlotGridModel,
 } from "../hooks";
 import { TimeGranularity, TimeSlot, Vote, Participant } from "../types";
+import {
+  SelectionRange,
+  useResultsRangeSelection,
+} from "./hooks/useResultsRangeSelection";
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];
@@ -25,32 +34,20 @@ interface ResultsHeatmapGridProps {
   participants: Participant[];
   selectedParticipants: Set<string>;
   maxVotes: number;
+  mode: ResultsAvailabilityMode;
+  onModeChange: (mode: ResultsAvailabilityMode) => void;
+  granularity: TimeGranularity;
+  onGranularityChange: (granularity: TimeGranularity) => void;
   // Host-only props for adding time ranges to event time
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;
   onAddToEventTime?: (info: SlotRangeInfo) => Promise<boolean>;
   // Selected slot IDs to display with border highlight
   selectedSlotIds?: Set<string>;
+  getShareableLink: () => string;
+  onCopyShareLink: () => void;
+  linkCopied: boolean;
 }
-
-interface CellPosition {
-  rowIndex: number;
-  dateIndex: number;
-}
-
-interface SelectionRange {
-  cells: Array<{ dateKey: string; rowIndex: number; slotIndices: number[] }>;
-  startDate: string;
-  endDate: string;
-  startTime: number;
-  endTime: number;
-}
-
-const GRANULARITY_OPTIONS: { value: TimeGranularity; labelKey: string }[] = [
-  { value: 15, labelKey: "view15min" },
-  { value: 30, labelKey: "view30min" },
-  { value: 60, labelKey: "view1hr" },
-];
 
 export function ResultsHeatmapGrid({
   slots,
@@ -58,23 +55,24 @@ export function ResultsHeatmapGrid({
   participants,
   selectedParticipants,
   maxVotes,
+  mode,
+  onModeChange,
+  granularity,
+  onGranularityChange,
   canAddToEventTime = false,
   isVotingPhase = false,
   onAddToEventTime,
   selectedSlotIds,
+  getShareableLink,
+  onCopyShareLink,
+  linkCopied,
 }: ResultsHeatmapGridProps) {
-  const t = useTranslations("joined");
   const locale = useLocale();
   const gridRef = useRef<HTMLDivElement>(null);
-  const [granularity, setGranularity] = useState<TimeGranularity>(15);
+  const stickySentinelRef = useRef<HTMLDivElement>(null);
+  const [isStickyActive, setIsStickyActive] = useState(false);
+  const { setStickyActive } = useTimeGridStickyHeaderSignal();
   const { datesPerPage, slotHeight } = useResponsiveGrid();
-
-  // Drag selection state
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<CellPosition | null>(null);
-  const [dragEnd, setDragEnd] = useState<CellPosition | null>(null);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-  const hasDraggedRef = useRef(false);
 
   // Modal state
   const [modalData, setModalData] = useState<{
@@ -85,13 +83,7 @@ export function ResultsHeatmapGrid({
     rangeInfo: SlotRangeInfo;
   } | null>(null);
 
-  // Group slots by date
-  const slotsByDate = useMemo(() => groupSlotsByDate(slots), [slots]);
-  const dates = useMemo(() => Object.keys(slotsByDate).sort(), [slotsByDate]);
-  const timeSlots = useMemo(
-    () => (dates.length > 0 ? slotsByDate[dates[0]] : []),
-    [dates, slotsByDate],
-  );
+  const { slotsByDate, dates, timeSlots } = useSlotGridModel({ slots });
 
   // Merged rows for granularity (using shared hook)
   const { mergedTimeRows } = useMergedTimeRowsModel({ timeSlots, granularity });
@@ -102,93 +94,19 @@ export function ResultsHeatmapGrid({
     datesPerPage,
   });
 
-  // Get vote count for merged row (intersection - voters available for ALL slots in the merged row)
-  const getVoteCountForMergedRow = useCallback(
-    (slotIndices: number[], dateKey: string): number => {
-      if (slotIndices.length === 0) return 0;
-
-      // Get all slot IDs for this merged row
-      const slotIds: string[] = [];
-      slotIndices.forEach((idx) => {
-        const slot = slotsByDate[dateKey]?.[idx];
-        if (slot) slotIds.push(slot.id);
-      });
-
-      if (slotIds.length === 0) return 0;
-
-      // Count how many times each voter appears across all slots
-      const voterCounts = new Map<string, number>();
-      slotIds.forEach((slotId) => {
-        const slotVotes = votesBySlot[slotId] || [];
-        slotVotes.forEach((vote) => {
-          voterCounts.set(vote.userId, (voterCounts.get(vote.userId) || 0) + 1);
-        });
-      });
-
-      // Only count voters who are available for ALL slots in the merged row
-      const totalSlots = slotIds.length;
-      let count = 0;
-      voterCounts.forEach((voteCount) => {
-        if (voteCount === totalSlots) {
-          count++;
-        }
-      });
-
-      return count;
-    },
-    [slotsByDate, votesBySlot],
-  );
-
-  // Get voters for a selection range (intersection - available for ALL selected slots)
-  const getVotersForRange = useCallback(
-    (cells: SelectionRange["cells"]): Vote[] => {
-      if (cells.length === 0) return [];
-
-      // Get all slot IDs in the range
-      const allSlotIds: string[] = [];
-      cells.forEach(({ dateKey, slotIndices }) => {
-        slotIndices.forEach((idx) => {
-          const slot = slotsByDate[dateKey]?.[idx];
-          if (slot) allSlotIds.push(slot.id);
-        });
-      });
-
-      if (allSlotIds.length === 0) return [];
-
-      // Find voters who voted for ALL slots in the range
-      const voterCounts = new Map<string, { vote: Vote; count: number }>();
-      allSlotIds.forEach((slotId) => {
-        const slotVotes = votesBySlot[slotId] || [];
-        slotVotes.forEach((vote) => {
-          const existing = voterCounts.get(vote.userId);
-          if (existing) {
-            existing.count++;
-          } else {
-            voterCounts.set(vote.userId, { vote, count: 1 });
-          }
-        });
-      });
-
-      // Return only voters who are available for ALL slots
-      const totalSlots = allSlotIds.length;
-      return Array.from(voterCounts.values())
-        .filter(({ count }) => count === totalSlots)
-        .map(({ vote }) => vote);
-    },
-    [slotsByDate, votesBySlot],
-  );
-
-  // Get non-voters for a selection range
-  const getNonVotersForRange = useCallback(
-    (cells: SelectionRange["cells"]): Participant[] => {
-      const voters = getVotersForRange(cells);
-      const voterIds = new Set(voters.map((v) => v.userId));
-      return participants.filter(
-        (p) => selectedParticipants.has(p.userId) && !voterIds.has(p.userId),
-      );
-    },
-    [getVotersForRange, participants, selectedParticipants],
-  );
+  const {
+    getCellCount,
+    getAvailableVotesForRange,
+    getUnavailableParticipantsForRange,
+    getSlotIdsFromRange,
+  } = useResultsAvailabilityMetrics({
+    slotsByDate,
+    dates,
+    mergedTimeRows,
+    votesBySlot,
+    participants,
+    selectedParticipants,
+  });
 
   // Check if a merged row cell contains any selected slots
   const isMergedCellSelected = useCallback(
@@ -248,59 +166,6 @@ export function ResultsHeatmapGrid({
     [selectedSlotIds, isMergedCellSelected, paginatedDates, mergedTimeRows],
   );
 
-  // Calculate rectangle bounds from drag start/end
-  const getRectangleBounds = useCallback(() => {
-    if (!dragStart || !dragEnd) return null;
-    return {
-      minRow: Math.min(dragStart.rowIndex, dragEnd.rowIndex),
-      maxRow: Math.max(dragStart.rowIndex, dragEnd.rowIndex),
-      minDate: Math.min(dragStart.dateIndex, dragEnd.dateIndex),
-      maxDate: Math.max(dragStart.dateIndex, dragEnd.dateIndex),
-    };
-  }, [dragStart, dragEnd]);
-
-  // Check if a cell is in the drag rectangle
-  const isInDragRectangle = useCallback(
-    (rowIndex: number, dateIndex: number): boolean => {
-      const bounds = getRectangleBounds();
-      if (!bounds) return false;
-      return (
-        rowIndex >= bounds.minRow &&
-        rowIndex <= bounds.maxRow &&
-        dateIndex >= bounds.minDate &&
-        dateIndex <= bounds.maxDate
-      );
-    },
-    [getRectangleBounds],
-  );
-
-  // Get cell position from touch/mouse coordinates
-  const getCellFromPoint = useCallback(
-    (clientX: number, clientY: number): CellPosition | null => {
-      if (!gridRef.current) return null;
-
-      const gridElement = gridRef.current.querySelector('[data-grid="slots"]');
-      if (!gridElement) return null;
-
-      const cells = gridElement.querySelectorAll("[data-cell]");
-      for (const cell of cells) {
-        const rect = cell.getBoundingClientRect();
-        if (
-          clientX >= rect.left &&
-          clientX <= rect.right &&
-          clientY >= rect.top &&
-          clientY <= rect.bottom
-        ) {
-          const rowIndex = parseInt(cell.getAttribute("data-row") || "0", 10);
-          const dateIndex = parseInt(cell.getAttribute("data-date") || "0", 10);
-          return { rowIndex, dateIndex };
-        }
-      }
-      return null;
-    },
-    [],
-  );
-
   // Format date for modal
   const formatDateForModal = useCallback(
     (dateStr: string) => {
@@ -315,65 +180,12 @@ export function ResultsHeatmapGrid({
     [locale],
   );
 
-  // Get selection range data
-  const getSelectionRange = useCallback((): SelectionRange | null => {
-    const bounds = getRectangleBounds();
-    if (!bounds) return null;
-
-    const cells: SelectionRange["cells"] = [];
-    const dateKeys: string[] = [];
-
-    for (let dateIdx = bounds.minDate; dateIdx <= bounds.maxDate; dateIdx++) {
-      const dateKey = paginatedDates[dateIdx];
-      if (!dateKey) continue;
-      dateKeys.push(dateKey);
-
-      for (let rowIdx = bounds.minRow; rowIdx <= bounds.maxRow; rowIdx++) {
-        const row = mergedTimeRows[rowIdx];
-        if (!row) continue;
-        cells.push({
-          dateKey,
-          rowIndex: rowIdx,
-          slotIndices: row.slotIndices,
-        });
-      }
-    }
-
-    if (cells.length === 0) return null;
-
-    const startRow = mergedTimeRows[bounds.minRow];
-    const endRow = mergedTimeRows[bounds.maxRow];
-
-    return {
-      cells,
-      startDate: dateKeys[0],
-      endDate: dateKeys[dateKeys.length - 1],
-      startTime: startRow?.startMinute ?? 0,
-      endTime: endRow?.endMinute ?? 0,
-    };
-  }, [getRectangleBounds, paginatedDates, mergedTimeRows]);
-
-  // Get all slot IDs from selection range cells
-  const getSlotIdsFromCells = useCallback(
-    (cells: SelectionRange["cells"]): string[] => {
-      const slotIds: string[] = [];
-      cells.forEach(({ dateKey, slotIndices }) => {
-        slotIndices.forEach((idx) => {
-          const slot = slotsByDate[dateKey]?.[idx];
-          if (slot) slotIds.push(slot.id);
-        });
-      });
-      return slotIds;
-    },
-    [slotsByDate],
-  );
-
   // Show modal with selection data
   const showModalForSelection = useCallback(
     (range: SelectionRange) => {
-      const voters = getVotersForRange(range.cells);
-      const nonVoters = getNonVotersForRange(range.cells);
-      const slotIds = getSlotIdsFromCells(range.cells);
+      const voters = getAvailableVotesForRange(range.cells);
+      const nonVoters = getUnavailableParticipantsForRange(range.cells);
+      const slotIds = getSlotIdsFromRange(range.cells);
 
       // Format date label
       let dateLabel: string;
@@ -401,242 +213,127 @@ export function ResultsHeatmapGrid({
       });
     },
     [
-      getVotersForRange,
-      getNonVotersForRange,
-      getSlotIdsFromCells,
+      getAvailableVotesForRange,
+      getUnavailableParticipantsForRange,
+      getSlotIdsFromRange,
       formatDateForModal,
     ],
   );
 
-  // Handle single cell click
-  const handleCellClick = useCallback(
-    (dateKey: string, rowIndex: number, slotIndices: number[]) => {
-      // Don't trigger click if we just finished dragging
-      if (hasDraggedRef.current) {
-        hasDraggedRef.current = false;
-        return;
-      }
+  const {
+    isDragging,
+    rectBounds,
+    isInDragRectangle,
+    handleCellClick,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+  } = useResultsRangeSelection({
+    gridRef,
+    mergedTimeRows,
+    paginatedDates,
+    onRangeSelect: showModalForSelection,
+  });
+  const maxHeatmapCount =
+    mode === "available" ? maxVotes : selectedParticipants.size;
+  const firstTimeLabel =
+    mergedTimeRows.length > 0
+      ? formatMinutesToTime(mergedTimeRows[0].startMinute)
+      : undefined;
 
-      const row = mergedTimeRows[rowIndex];
-      if (!row) return;
+  useEffect(() => {
+    const sentinel = stickySentinelRef.current;
+    if (!sentinel) return;
 
-      const range: SelectionRange = {
-        cells: [{ dateKey, rowIndex, slotIndices }],
-        startDate: dateKey,
-        endDate: dateKey,
-        startTime: row.startMinute,
-        endTime: row.endMinute,
-      };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const active = !entry.isIntersecting;
+        setIsStickyActive(active);
+        setStickyActive(active);
+      },
+      { threshold: [1] },
+    );
 
-      showModalForSelection(range);
-    },
-    [mergedTimeRows, showModalForSelection],
-  );
-
-  // Touch handlers
-  const handleTouchStart = useCallback(
-    (rowIndex: number, dateIndex: number, e: React.TouchEvent) => {
-      const touch = e.touches[0];
-      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-      hasDraggedRef.current = false;
-      setDragStart({ rowIndex, dateIndex });
-      setDragEnd({ rowIndex, dateIndex });
-    },
-    [],
-  );
-
-  const handleTouchMove = useCallback(
-    (e: React.TouchEvent) => {
-      if (!dragStart || !touchStartRef.current) return;
-
-      const touch = e.touches[0];
-      const dx = Math.abs(touch.clientX - touchStartRef.current.x);
-      const dy = Math.abs(touch.clientY - touchStartRef.current.y);
-
-      // Start dragging if moved more than threshold
-      if (dx > 10 || dy > 10) {
-        if (!isDragging) {
-          setIsDragging(true);
-          hasDraggedRef.current = true;
-        }
-
-        const cell = getCellFromPoint(touch.clientX, touch.clientY);
-        if (cell) {
-          setDragEnd(cell);
-        }
-      }
-    },
-    [dragStart, isDragging, getCellFromPoint],
-  );
-
-  const handleTouchEnd = useCallback(() => {
-    if (isDragging) {
-      const range = getSelectionRange();
-      if (range) {
-        showModalForSelection(range);
-      }
-    }
-
-    setIsDragging(false);
-    setDragStart(null);
-    setDragEnd(null);
-    touchStartRef.current = null;
-  }, [isDragging, getSelectionRange, showModalForSelection]);
-
-  // Mouse handlers for desktop drag
-  const handleMouseDown = useCallback(
-    (rowIndex: number, dateIndex: number, e: React.MouseEvent) => {
-      // Only left click
-      if (e.button !== 0) return;
-      e.preventDefault();
-
-      touchStartRef.current = { x: e.clientX, y: e.clientY };
-      hasDraggedRef.current = false;
-      setDragStart({ rowIndex, dateIndex });
-      setDragEnd({ rowIndex, dateIndex });
-    },
-    [],
-  );
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!dragStart || !touchStartRef.current) return;
-
-      const dx = Math.abs(e.clientX - touchStartRef.current.x);
-      const dy = Math.abs(e.clientY - touchStartRef.current.y);
-
-      if (dx > 5 || dy > 5) {
-        if (!isDragging) {
-          setIsDragging(true);
-          hasDraggedRef.current = true;
-        }
-
-        const cell = getCellFromPoint(e.clientX, e.clientY);
-        if (cell) {
-          setDragEnd(cell);
-        }
-      }
-    },
-    [dragStart, isDragging, getCellFromPoint],
-  );
-
-  const handleMouseUp = useCallback(() => {
-    if (isDragging) {
-      const range = getSelectionRange();
-      if (range) {
-        showModalForSelection(range);
-      }
-    }
-
-    setIsDragging(false);
-    setDragStart(null);
-    setDragEnd(null);
-    touchStartRef.current = null;
-  }, [isDragging, getSelectionRange, showModalForSelection]);
-
-  // Get rectangle bounds for visual styling
-  const rectBounds = getRectangleBounds();
+    observer.observe(sentinel);
+    return () => {
+      observer.disconnect();
+      setIsStickyActive(false);
+      setStickyActive(false);
+    };
+  }, [setStickyActive]);
 
   return (
-    <div className="space-y-4">
-      {/* Granularity Selector */}
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 dark:text-zinc-400">
-          {t("results.granularity")}
-        </span>
-        <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5">
-          {GRANULARITY_OPTIONS.map(({ value, labelKey }) => (
-            <button
-              key={value}
-              onClick={() => setGranularity(value)}
-              className={`px-2 py-1 text-xs font-medium rounded-md transition-all ${
-                granularity === value
-                  ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm"
-                  : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-              }`}
-            >
-              {t(`mobileTools.${labelKey}`)}
-            </button>
-          ))}
-        </div>
-      </div>
+    <div className="space-y-0">
+      <div ref={stickySentinelRef} className="h-px" aria-hidden />
 
-      {/* Date Pagination */}
-      <DatePagination
-        dates={dates}
-        currentPage={currentPage}
-        datesPerPage={datesPerPage}
-        onPageChange={setCurrentPage}
-      />
+      <div
+        className={`sticky top-0 ${Z_INDEX.GRID_BASE} bg-white/100 dark:bg-zinc-900/100 backdrop-blur supports-[backdrop-filter]:bg-white/100 dark:supports-[backdrop-filter]:bg-zinc-900/100 space-y-2 sm:space-y-3`}
+      >
+        <div className="h-3" />
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <DatePagination
+              dates={dates}
+              currentPage={currentPage}
+              datesPerPage={datesPerPage}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+          <ResultsGridToolsMenu
+            mode={mode}
+            onModeChange={onModeChange}
+            granularity={granularity}
+            onGranularityChange={onGranularityChange}
+            getShareableLink={getShareableLink}
+            onCopyShareLink={onCopyShareLink}
+            linkCopied={linkCopied}
+          />
+        </div>
+
+        <DateHeader
+          dates={paginatedDates}
+          selectable={false}
+          firstTimeLabel={firstTimeLabel}
+          isStickyActive={isStickyActive}
+        />
+      </div>
 
       {/* Grid */}
       <div
         ref={gridRef}
-        className="select-none touch-none"
+        className="select-none touch-pan-y"
         style={{ "--slot-height": slotHeight } as React.CSSProperties}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
         <div className="relative">
-          {/* Date headers */}
-          <div className="flex">
-            <div className="w-9 sm:w-14 shrink-0" />
-            {paginatedDates.map((dateKey) => {
-              const { weekday, day, month } = formatDateHeader(dateKey, locale);
-              return (
-                <div
-                  key={dateKey}
-                  className="flex-1 min-w-0 p-1 sm:p-2 text-center mx-px sm:mx-0.5"
-                >
-                  <div className="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400 font-medium">
-                    {weekday}
-                  </div>
-                  <div className="text-sm sm:text-lg font-bold text-gray-900 dark:text-zinc-100">
-                    {day}
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-gray-400 dark:text-zinc-500">
-                    {month}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
           {/* Time slots grid */}
-          <div className="flex">
-            {/* Time column */}
-            <div className="w-9 sm:w-14 shrink-0 relative border-r border-gray-200 dark:border-zinc-700 rounded-l-lg">
-              {mergedTimeRows.map((row, rowIndex) => (
-                <div key={rowIndex} className="h-10 sm:h-11 relative">
-                  <span className="absolute -top-2 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
-                    {formatMinutesToTime(row.startMinute)}
-                  </span>
-                </div>
-              ))}
-              {mergedTimeRows.length > 0 && (
-                <span className="absolute bottom-0.5 left-0 right-1 text-[10px] sm:text-xs font-medium text-gray-500 dark:text-zinc-400 text-right leading-none">
-                  {formatMinutesToTime(
-                    mergedTimeRows[mergedTimeRows.length - 1].endMinute,
-                  )}
-                </span>
-              )}
-            </div>
+          <div className="flex touch-pan-y">
+            <TimeColumn
+              mergedTimeRows={mergedTimeRows}
+              slotHeight={slotHeight}
+              showFirstBoundaryLabel={false}
+            />
 
             {/* Slots grid */}
             <div
               data-grid="slots"
-              className="flex-1 border border-gray-200 dark:border-zinc-700 rounded-r-lg overflow-hidden"
+              className="flex-1 touch-none border border-gray-200 dark:border-zinc-700 overflow-hidden"
             >
               {mergedTimeRows.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex">
                   {paginatedDates.map((dateKey, dateIndex) => {
-                    const voteCount = getVoteCountForMergedRow(
-                      row.slotIndices,
-                      dateKey,
+                    const cellCount = getCellCount(rowIndex, dateKey, mode);
+                    const colors = getHeatmapClasses(
+                      cellCount,
+                      maxHeatmapCount,
+                      mode,
                     );
-                    const colors = getHeatmapClasses(voteCount, maxVotes);
-                    const hasVotes = voteCount > 0;
+                    const hasVotes = cellCount > 0;
                     const inSelection =
                       isDragging && isInDragRectangle(rowIndex, dateIndex);
 
@@ -728,17 +425,17 @@ export function ResultsHeatmapGrid({
                         {hasVotes && !inSelection && (
                           <div
                             className={`
-                              absolute inset-0 flex items-center justify-center
+                              absolute inset-0 flex items-center justify-center pointer-events-none
                               text-xs sm:text-sm font-semibold
                               ${isSelectedEventTime ? "text-orange-700 dark:text-orange-300" : colors.text}
                             `}
                           >
-                            {voteCount}
+                            {cellCount}
                           </div>
                         )}
                         {inSelection && (
-                          <div className="absolute inset-0 flex items-center justify-center text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300">
-                            {voteCount}
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300">
+                            {cellCount}
                           </div>
                         )}
                       </div>
@@ -761,6 +458,7 @@ export function ResultsHeatmapGrid({
           voters={modalData.voters}
           nonVoters={modalData.nonVoters}
           totalFiltered={selectedParticipants.size}
+          mode={mode}
           canAddToEventTime={canAddToEventTime}
           isVotingPhase={isVotingPhase}
           rangeInfo={modalData.rangeInfo}

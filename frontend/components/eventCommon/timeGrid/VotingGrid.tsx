@@ -6,6 +6,7 @@ import { VotingGridProps } from "./types";
 import { useVotingGridController } from "./hooks";
 import { formatMinutesToTime } from "@/lib/utils";
 import { useTimeGridStickyHeaderSignal } from "./stickyHeaderSignalContext";
+import { Z_INDEX } from "@/lib/zIndex";
 import {
   GridLegend,
   DateHeader,
@@ -126,14 +127,16 @@ export default function VotingGrid({
   }, [setStickyActive]);
 
   return (
-    <div className="relative z-50 bg-white dark:bg-zinc-900 shadow rounded-lg overflow-visible border border-gray-200 dark:border-zinc-800 px-2 pb-2 sm:px-6 sm:pb-6">
+    <div
+      className={`relative ${Z_INDEX.GRID_BASE} bg-white dark:bg-zinc-900 shadow rounded-lg overflow-visible border border-gray-200 dark:border-zinc-800 px-2 pb-2 sm:px-6 sm:pb-6`}
+    >
       <div>
         <div ref={stickySentinelRef} className="h-px" aria-hidden />
 
         <div
-          className={`sticky top-0 z-50 bg-white dark:bg-zinc-900 backdrop-blur supports-[backdrop-filter]:bg-white/100 dark:supports-[backdrop-filter]:bg-zinc-900/100 space-y-2 sm:space-y-4`}
+          className={`sticky top-0 ${Z_INDEX.GRID_BASE} bg-white dark:bg-zinc-900 backdrop-blur supports-[backdrop-filter]:bg-white/100 dark:supports-[backdrop-filter]:bg-zinc-900/100 space-y-2 sm:space-y-4`}
         >
-          <div className="h-[8px]"></div>
+          <div className="h-[8px]" />
           <div className="flex items-center gap-2">
             <div className="flex-1 min-w-0">
               <DatePagination
@@ -208,10 +211,12 @@ export default function VotingGrid({
       {isCalendarModalOpen && (
         <>
           <div
-            className="fixed inset-0 z-[90] bg-black/55 backdrop-blur-sm animate-in fade-in duration-200"
+            className={`fixed inset-0 ${Z_INDEX.MODAL_BACKDROP} bg-black/55 backdrop-blur-sm animate-in fade-in duration-200`}
             onClick={() => setIsCalendarModalOpen(false)}
           />
-          <div className="fixed inset-0 z-[100] p-3 sm:p-6 flex items-end sm:items-center justify-center pointer-events-none">
+          <div
+            className={`fixed inset-0 ${Z_INDEX.MODAL_CONTENT} p-3 sm:p-6 flex items-end sm:items-center justify-center pointer-events-none`}
+          >
             <div className="w-full max-w-2xl pointer-events-auto animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300">
               <div className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/95 dark:bg-zinc-900/95 shadow-2xl overflow-hidden">
                 <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50/80 dark:bg-zinc-800/60">

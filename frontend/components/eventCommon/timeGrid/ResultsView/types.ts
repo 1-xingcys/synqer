@@ -1,5 +1,7 @@
 import { TimeSlot, Vote, Participant } from "../types";
 
+export type ResultsAvailabilityMode = "available" | "unavailable";
+
 export interface SlotRangeInfo {
   startDate: string;
   endDate: string;

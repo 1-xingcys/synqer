@@ -166,9 +166,12 @@
       "noOneAvailable": "No one is available",
       "close": "Close",
       "rangeHint": "Showing people available for ALL selected time slots",
-      "copyLink": "Share",
+      "copyLink": "Copy Link",
       "copyLinkTitle": "Copy shareable link with current filter",
-      "linkCopied": "Copied!"
+      "linkCopied": "Copied!",
+      "shareModalTitle": "Share current filtered results",
+      "shareModalHint": "Share this link so others can open the same filtered view.",
+      "shareViaSystem": "Share"
     },
     "viewResultsDescription": "View availability analysis",
     "notParticipant": {

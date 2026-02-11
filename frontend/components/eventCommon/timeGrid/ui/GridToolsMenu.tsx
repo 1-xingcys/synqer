@@ -80,7 +80,7 @@ export function GridToolsMenu({
         }}
         className={`w-full px-3 py-2 text-xs sm:text-sm flex items-center justify-between ${
           voteMode === VoteMode.UNAVAILABLE
-            ? "bg-[#fff1f2] text-[#be123c] dark:bg-[#881337]/30 dark:text-[#fda4af]"
+            ? "bg-[#fff1f2] text-[#be123c] dark:bg-[#8813374D] dark:text-[#fda4af]"
             : "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
         }`}
       >
@@ -157,7 +157,7 @@ export function GridToolsMenu({
           void onDisconnectCalendar();
           setOpen(false);
         }}
-        className="w-full px-3 py-2 text-left text-xs sm:text-sm text-rose-600 dark:text-rose-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
+        className="w-full px-3 py-2 text-left text-xs sm:text-sm text-[#be123c] dark:text-[#fda4af] hover:bg-zinc-50 dark:hover:bg-zinc-700/40"
       >
         {tJoined("googleCalendar.disconnect")}
       </button>

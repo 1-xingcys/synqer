@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { formatMinutesToTime } from "@/lib/utils";
 import { Calendar, X, RotateCcw, Trash2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Z_INDEX } from "@/lib/zIndex";
 
 export interface SelectedTimeRange {
   id: string;
@@ -49,7 +50,9 @@ function ConfirmDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div
+      className={`fixed inset-0 ${Z_INDEX.MODAL_CONTENT} flex items-center justify-center`}
+    >
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 w-80 mx-4 shadow-xl">
         <div className="text-center">
