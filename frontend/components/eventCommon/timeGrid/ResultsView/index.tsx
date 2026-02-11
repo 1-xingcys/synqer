@@ -110,7 +110,7 @@ export default function ResultsView({
   const { copied: linkCopied, copy } = useCopyToClipboard();
 
   // Build shareable link: joined/[eventId]/results?selected=...
-  const copyShareableLink = useCallback(() => {
+  const getShareableLink = useCallback((): string => {
     const liffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
     const resultsPath = `/joined/${eventId}/results`;
 
@@ -128,8 +128,12 @@ export default function ResultsView({
     if (selectedParam !== null) {
       url.searchParams.set(SELECTED_PARAM, selectedParam);
     }
-    return copy(url.toString());
-  }, [eventId, isInClient, searchParams, copy]);
+    return url.toString();
+  }, [eventId, isInClient, searchParams]);
+
+  const copyShareableLink = useCallback(() => {
+    return copy(getShareableLink());
+  }, [copy, getShareableLink]);
 
   // Use hook for filtered votes calculation
   const { votesBySlot, maxVotes } = useFilteredVotes({
@@ -201,6 +205,7 @@ export default function ResultsView({
             selectedSlotIds={selectedSlotIds}
             mode={availabilityMode}
             onModeChange={setAvailabilityMode}
+            getShareableLink={getShareableLink}
             onCopyShareLink={() => {
               void copyShareableLink();
             }}

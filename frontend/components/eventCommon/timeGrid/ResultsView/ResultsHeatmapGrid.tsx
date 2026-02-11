@@ -40,6 +40,7 @@ interface ResultsHeatmapGridProps {
   onAddToEventTime?: (info: SlotRangeInfo) => Promise<boolean>;
   // Selected slot IDs to display with border highlight
   selectedSlotIds?: Set<string>;
+  getShareableLink: () => string;
   onCopyShareLink: () => void;
   linkCopied: boolean;
 }
@@ -56,6 +57,7 @@ export function ResultsHeatmapGrid({
   isVotingPhase = false,
   onAddToEventTime,
   selectedSlotIds,
+  getShareableLink,
   onCopyShareLink,
   linkCopied,
 }: ResultsHeatmapGridProps) {
@@ -246,6 +248,7 @@ export function ResultsHeatmapGrid({
           onModeChange={onModeChange}
           granularity={granularity}
           onGranularityChange={setGranularity}
+          getShareableLink={getShareableLink}
           onCopyShareLink={onCopyShareLink}
           linkCopied={linkCopied}
         />
