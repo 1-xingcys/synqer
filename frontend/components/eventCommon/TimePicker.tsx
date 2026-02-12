@@ -198,14 +198,14 @@ function DesktopTimePicker({
   const handleInputFocus = () => {
     setIsEditing(true);
     setEditValue(value);
-    // Open popover on focus (slight delay to avoid race condition with Radix)
-    requestAnimationFrame(() => {
-      setOpen(true);
-    });
   };
 
   // Handle input blur - validate and apply
   const handleInputBlur = () => {
+    // If we're not editing anymore (e.g. just selected from dropdown),
+    // skip blur commit to avoid overwriting the latest selection.
+    if (!isEditing) return;
+
     // Normalize input (add leading zero if needed)
     let normalizedValue = editValue.trim();
 
@@ -232,9 +232,9 @@ function DesktopTimePicker({
   // Handle option select from dropdown
   const handleOptionSelect = (time: string) => {
     onChange(time);
+    setEditValue(time);
     setIsEditing(false);
     setInputError(null);
-    setIsEditing(false);
     setOpen(false);
   };
 
@@ -244,9 +244,9 @@ function DesktopTimePicker({
       handleInputBlur();
       setOpen(false);
     } else if (e.key === "Escape") {
+      setEditValue(value);
       setIsEditing(false);
       setInputError(null);
-      setIsEditing(false);
       setOpen(false);
     }
   };
