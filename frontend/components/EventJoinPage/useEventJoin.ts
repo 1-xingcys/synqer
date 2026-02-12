@@ -4,18 +4,28 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
 import { EventStatus, ConfirmedTimeRange } from "@/types/event";
 
+interface EventHost {
+  id: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+}
+
 export interface EventPublicInfo {
   isDeleted: boolean;
   id: string;
   title: string | null;
   description: string | null;
+  createdAt?: string;
   startDate: string;
   endDate: string;
+  startMinuteOfDay?: number;
+  endMinuteOfDay?: number;
   votingDeadline: string | null;
   confirmedSlotIds: string[];
   confirmedTimeRanges: ConfirmedTimeRange[];
   status: EventStatus;
   participantCount: number;
+  host?: EventHost | null;
 }
 
 export interface ParticipationStatus {
