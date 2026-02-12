@@ -316,9 +316,28 @@ export class EventQueryService {
       endMinute: cts.slot.endMinute,
     }));
 
+    const host = event.owner
+      ? {
+          id: event.owner.id,
+          displayName: event.owner.displayName,
+          avatarUrl: event.owner.avatarUrl,
+        }
+      : null;
+
+    const votingTimeRange =
+      typeof event.startMinuteOfDay === 'number' &&
+      typeof event.endMinuteOfDay === 'number'
+        ? {
+            startMinuteOfDay: event.startMinuteOfDay,
+            endMinuteOfDay: event.endMinuteOfDay,
+          }
+        : {};
+
     return {
       isDeleted: false,
       ...this.eventMapper.mapEventToList(event, false),
+      ...votingTimeRange,
+      host,
       participantCount: event.expectedParticipants.length,
       status: this.eventStatusService.computeEventStatus({
         votingDeadline: event.votingDeadline,

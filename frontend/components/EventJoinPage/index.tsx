@@ -46,11 +46,7 @@ export default function EventJoinPage({ eventId }: EventJoinPageProps) {
   // 如果使用者已經是參與者
   if (participationStatus?.isParticipant) {
     return (
-      <AlreadyParticipantView
-        eventId={eventId}
-        eventTitle={eventInfo.title}
-        hasVoted={participationStatus.hasVoted}
-      />
+      <AlreadyParticipantView eventId={eventId} eventTitle={eventInfo.title} />
     );
   }
 
