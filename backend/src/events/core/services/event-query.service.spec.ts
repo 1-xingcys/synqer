@@ -421,6 +421,7 @@ describe('EventQueryService', () => {
       expect(result).toEqual({
         isDeleted: false,
         id: eventId,
+        host: null,
         participantCount: 1,
         status: 'VOTING',
       });

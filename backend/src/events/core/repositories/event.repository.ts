@@ -239,6 +239,13 @@ export class EventRepository {
     return this.prisma.event.findUnique({
       where: { id: eventId },
       include: {
+        owner: {
+          select: {
+            id: true,
+            displayName: true,
+            avatarUrl: true,
+          },
+        },
         expectedParticipants: {
           where: { isRemoved: false },
           select: { id: true },
