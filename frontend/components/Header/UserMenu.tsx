@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -15,11 +16,14 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { LogOutIcon } from "lucide-react";
 import { useLiff } from "@/hooks/useLiff";
+import { cn } from "@/lib/utils";
 
 export default function UserMenu() {
   const t = useTranslations();
   const { user, logout } = useAuthContext();
   const { isInClient: isInLiff } = useLiff();
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   if (!user) return null;
 
@@ -29,11 +33,19 @@ export default function UserMenu() {
     return name.charAt(0).toUpperCase();
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+  };
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
       <DropdownMenuTrigger asChild>
         <button
-          className="rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          ref={triggerRef}
+          className={cn(
+            "rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+            open && "ring-2 ring-blue-500 ring-offset-2",
+          )}
           aria-label="使用者選單"
         >
           <Avatar className="size-9 cursor-pointer hover:opacity-80 transition-opacity">
@@ -49,7 +61,11 @@ export default function UserMenu() {
           </Avatar>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent
+        align="end"
+        className="w-56"
+        onCloseAutoFocus={(e: Event) => e.preventDefault()}
+      >
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
