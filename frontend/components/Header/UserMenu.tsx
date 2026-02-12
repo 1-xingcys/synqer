@@ -43,12 +43,12 @@ export default function UserMenu() {
         <button
           ref={triggerRef}
           className={cn(
-            "rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
-            open && "ring-2 ring-blue-500 ring-offset-2",
+            "rounded-full hover:ring-3 hover:ring-zinc-300 hover:dark:ring-zinc-600",
+            open && "ring-2 sm:ring-3 ring-zinc-300 dark:ring-zinc-600",
           )}
           aria-label="使用者選單"
         >
-          <Avatar className="size-9 cursor-pointer hover:opacity-80 transition-opacity">
+          <Avatar className="size-9 cursor-pointer transition-opacity">
             {user.avatarUrl ? (
               <AvatarImage
                 src={user.avatarUrl}
