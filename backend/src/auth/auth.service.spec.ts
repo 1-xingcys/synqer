@@ -1,14 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import axios from 'axios';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { PrismaService } from '../prisma/prisma.service';
-import axios from 'axios';
-import * as jwt from 'jsonwebtoken';
-
-jest.mock('jsonwebtoken', () => ({
-  decode: jest.fn(),
-  verify: jest.fn(),
-}));
+import {
+  OAuthTokenPayload,
+  TokenVerificationService,
+} from './services/token-verification.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -28,6 +26,11 @@ describe('AuthService', () => {
     },
   };
 
+  const mockTokenVerificationService = {
+    verifyIdToken: jest.fn(),
+    verifyLineIdToken: jest.fn(),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
     process.env = {
@@ -42,6 +45,10 @@ describe('AuthService', () => {
         AuthService,
         { provide: UsersService, useValue: mockUsersService },
         { provide: PrismaService, useValue: mockPrismaService },
+        {
+          provide: TokenVerificationService,
+          useValue: mockTokenVerificationService,
+        },
       ],
     }).compile();
 
@@ -56,7 +63,7 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 
-  it('refreshes JWKS once on kid cache miss and verifies token with refreshed key', async () => {
+  it('delegates Google token verification to TokenVerificationService', async () => {
     const state = 'test-state';
     jest.spyOn(service, 'getPKCE').mockReturnValue({
       codeVerifier: 'test-code-verifier',
@@ -67,32 +74,7 @@ describe('AuthService', () => {
       data: { id_token: 'test-id-token' },
     } as never);
 
-    jest
-      .spyOn(axios, 'get')
-      .mockResolvedValueOnce({
-        data: {
-          keys: [{ kty: 'RSA', kid: 'old-kid', n: 'old-n', e: 'AQAB' }],
-        },
-        headers: { 'cache-control': 'public, max-age=3600' },
-      } as never)
-      .mockResolvedValueOnce({
-        data: {
-          keys: [{ kty: 'RSA', kid: 'new-kid', n: 'new-n', e: 'AQAB' }],
-        },
-        headers: { 'cache-control': 'public, max-age=3600' },
-      } as never);
-
-    (jwt.decode as jest.Mock).mockReturnValue({
-      header: { alg: 'RS256', kid: 'new-kid' },
-      payload: {},
-    } as never);
-
-    jest
-      .spyOn(service as any, 'jwkToPem')
-      .mockReturnValueOnce('old-public-key')
-      .mockReturnValueOnce('new-public-key');
-
-    (jwt.verify as jest.Mock).mockReturnValue({
+    const verifiedPayload: OAuthTokenPayload = {
       sub: 'google-sub-id',
       aud: 'google-client-id',
       iss: 'https://accounts.google.com',
@@ -100,7 +82,8 @@ describe('AuthService', () => {
       email: 'user@example.com',
       name: 'Test User',
       picture: 'https://example.com/avatar.png',
-    } as never);
+    };
+    mockTokenVerificationService.verifyIdToken.mockResolvedValue(verifiedPayload);
 
     mockUsersService.upsertUserFromIdentity.mockResolvedValue({
       id: 'user-id-1',
@@ -108,15 +91,12 @@ describe('AuthService', () => {
 
     const result = await service.handleGoogleCallback('auth-code', state);
 
-    expect(axios.get).toHaveBeenCalledTimes(2);
-    expect(jwt.verify).toHaveBeenCalledWith(
-      'test-id-token',
-      'new-public-key',
-      expect.objectContaining({
-        algorithms: ['RS256'],
-        audience: 'google-client-id',
-      }),
-    );
+    expect(mockTokenVerificationService.verifyIdToken).toHaveBeenCalledWith({
+      token: 'test-id-token',
+      audience: 'google-client-id',
+      issuers: ['https://accounts.google.com', 'accounts.google.com'],
+      jwksUrl: 'https://www.googleapis.com/oauth2/v3/certs',
+    });
     expect(mockUsersService.upsertUserFromIdentity).toHaveBeenCalledWith(
       'google',
       'google-sub-id',
