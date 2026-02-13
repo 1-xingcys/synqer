@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { UnauthorizedException } from '@nestjs/common';
 import axios from 'axios';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
@@ -38,6 +39,9 @@ describe('AuthService', () => {
       GOOGLE_CLIENT_ID: 'google-client-id',
       GOOGLE_CLIENT_SECRET: 'google-client-secret',
       GOOGLE_REDIRECT_URI: 'http://localhost:8080/auth/google/callback',
+      LINE_LOGIN_CHANNEL_ID: 'line-channel-id',
+      LINE_LOGIN_CHANNEL_SECRET: 'line-channel-secret',
+      LINE_LOGIN_REDIRECT_URI: 'http://localhost:8080/auth/line/callback',
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -108,5 +112,137 @@ describe('AuthService', () => {
       user: { id: 'user-id-1' },
       redirect: undefined,
     });
+  });
+
+  it('handles LINE callback and links matched members', async () => {
+    const state = 'line-state';
+    jest.spyOn(service, 'getPKCE').mockReturnValue({
+      codeVerifier: 'line-code-verifier',
+      codeChallenge: 'line-code-challenge',
+      redirect: '/joined',
+    });
+
+    jest.spyOn(axios, 'post').mockResolvedValueOnce({
+      data: { id_token: 'line-id-token' },
+    } as never);
+
+    mockTokenVerificationService.verifyLineIdToken.mockResolvedValue({
+      sub: 'line-user-sub',
+      aud: 'line-channel-id',
+      iss: 'https://access.line.me',
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      email: 'line-user@example.com',
+      name: 'LINE User',
+      picture: 'https://example.com/line-avatar.png',
+    });
+
+    mockUsersService.upsertUserFromIdentity.mockResolvedValue({
+      id: 'line-user-id',
+    });
+
+    const result = await service.handleLineCallback('line-auth-code', state);
+
+    expect(mockTokenVerificationService.verifyLineIdToken).toHaveBeenCalledWith(
+      'line-id-token',
+      'line-channel-id',
+    );
+    expect(mockUsersService.upsertUserFromIdentity).toHaveBeenCalledWith(
+      'line',
+      'line-user-sub',
+      'line-user@example.com',
+      'LINE User',
+      'https://example.com/line-avatar.png',
+    );
+    expect(mockPrismaService.lineGroupMember.updateMany).toHaveBeenCalledWith({
+      where: { lineUserId: 'line-user-sub' },
+      data: { userId: 'line-user-id' },
+    });
+    expect(
+      mockPrismaService.eventExpectedParticipant.updateMany,
+    ).toHaveBeenCalledWith({
+      where: { lineUserId: 'line-user-sub' },
+      data: { userId: 'line-user-id' },
+    });
+    expect(result).toEqual({
+      user: { id: 'line-user-id' },
+      redirect: '/joined',
+    });
+  });
+
+  it('throws when LINE callback state is missing or expired', async () => {
+    jest.spyOn(service, 'getPKCE').mockReturnValue(undefined);
+
+    await expect(
+      service.handleLineCallback('line-auth-code', 'missing-state'),
+    ).rejects.toThrow(new UnauthorizedException('Invalid or expired state'));
+  });
+
+  it('rejects LIFF login when access token belongs to another channel', async () => {
+    jest.spyOn(axios, 'get').mockResolvedValueOnce({
+      data: {
+        client_id: 'other-channel-id',
+        expires_in: 3600,
+      },
+    } as never);
+
+    await expect(service.handleLiffLogin('liff-access-token')).rejects.toThrow(
+      new UnauthorizedException('Invalid LIFF access token'),
+    );
+  });
+
+  it('rejects LIFF login when access token is expired', async () => {
+    jest.spyOn(axios, 'get').mockResolvedValueOnce({
+      data: {
+        client_id: 'line-channel-id',
+        expires_in: 0,
+      },
+    } as never);
+
+    await expect(service.handleLiffLogin('liff-access-token')).rejects.toThrow(
+      new UnauthorizedException('LIFF access token expired'),
+    );
+  });
+
+  it('handles LIFF login success path', async () => {
+    jest
+      .spyOn(axios, 'get')
+      .mockResolvedValueOnce({
+        data: {
+          client_id: 'line-channel-id',
+          expires_in: 3600,
+        },
+      } as never)
+      .mockResolvedValueOnce({
+        data: {
+          userId: 'line-user-sub',
+          displayName: 'LIFF User',
+          pictureUrl: 'https://example.com/liff-avatar.png',
+        },
+      } as never);
+
+    mockUsersService.upsertUserFromIdentity.mockResolvedValue({
+      id: 'line-user-id',
+    });
+
+    const result = await service.handleLiffLogin('liff-access-token');
+
+    expect(mockUsersService.upsertUserFromIdentity).toHaveBeenCalledWith(
+      'line',
+      'line-user-sub',
+      undefined,
+      'LIFF User',
+      'https://example.com/liff-avatar.png',
+    );
+    expect(mockPrismaService.lineGroupMember.updateMany).toHaveBeenCalledWith({
+      where: { lineUserId: 'line-user-sub' },
+      data: { userId: 'line-user-id' },
+    });
+    expect(
+      mockPrismaService.eventExpectedParticipant.updateMany,
+    ).toHaveBeenCalledWith({
+      where: { lineUserId: 'line-user-sub' },
+      data: { userId: 'line-user-id' },
+    });
+    expect(result).toEqual({ user: { id: 'line-user-id' } });
   });
 });
