@@ -223,7 +223,7 @@ export class AuthController {
 
     // Clear the session cookie with the same domain as it was set
     const isProduction = process.env.NODE_ENV === 'production';
-    res.clearCookie('connect.sid', {
+    res.clearCookie('synqer.sid', {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',

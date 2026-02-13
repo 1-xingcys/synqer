@@ -3,22 +3,12 @@ import { UsersService } from '../users/users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 import axios from 'axios';
-import * as jwt from 'jsonwebtoken';
+import { TokenVerificationService } from './services/token-verification.service';
 
 interface PKCEData {
   codeVerifier: string;
   codeChallenge: string;
   redirect?: string;
-}
-
-interface OAuthTokenPayload {
-  aud: string;
-  iss: string;
-  exp: number;
-  sub: string;
-  email?: string;
-  name?: string;
-  picture?: string;
 }
 
 @Injectable()
@@ -28,6 +18,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private prisma: PrismaService,
+    private tokenVerificationService: TokenVerificationService,
   ) {}
 
   // PKCE helpers
@@ -101,28 +92,12 @@ export class AuthService {
 
     const { id_token } = tokenResponse.data as { id_token: string };
 
-    // TODO: Verify id_token
-    // Decode and verify id_token
-    const decoded = jwt.decode(id_token, { complete: true });
-    if (!decoded || typeof decoded === 'string') {
-      throw new UnauthorizedException('Invalid ID token');
-    }
-
-    const payload = decoded.payload as OAuthTokenPayload;
-
-    // Verify claims
-    if (payload.aud !== process.env.GOOGLE_CLIENT_ID) {
-      throw new UnauthorizedException('Invalid audience');
-    }
-    if (
-      payload.iss !== 'https://accounts.google.com' &&
-      payload.iss !== 'accounts.google.com'
-    ) {
-      throw new UnauthorizedException('Invalid issuer');
-    }
-    if (payload.exp * 1000 < Date.now()) {
-      throw new UnauthorizedException('Token expired');
-    }
+    const payload = await this.tokenVerificationService.verifyIdToken({
+      token: id_token,
+      audience: process.env.GOOGLE_CLIENT_ID!,
+      issuers: ['https://accounts.google.com', 'accounts.google.com'],
+      jwksUrl: 'https://www.googleapis.com/oauth2/v3/certs',
+    });
 
     // Extract user info
     const { sub, email, name, picture } = payload;
@@ -186,24 +161,10 @@ export class AuthService {
 
     const { id_token } = tokenResponse.data as { id_token: string };
 
-    // Decode and verify id_token
-    const decoded = jwt.decode(id_token, { complete: true });
-    if (!decoded || typeof decoded === 'string') {
-      throw new UnauthorizedException('Invalid ID token');
-    }
-
-    const payload = decoded.payload as OAuthTokenPayload;
-
-    // Verify claims (使用 LINE Login Channel ID)
-    if (payload.aud !== process.env.LINE_LOGIN_CHANNEL_ID) {
-      throw new UnauthorizedException('Invalid audience');
-    }
-    if (!payload.iss.includes('line.me')) {
-      throw new UnauthorizedException('Invalid issuer');
-    }
-    if (payload.exp * 1000 < Date.now()) {
-      throw new UnauthorizedException('Token expired');
-    }
+    const payload = await this.tokenVerificationService.verifyLineIdToken(
+      id_token,
+      process.env.LINE_LOGIN_CHANNEL_ID!,
+    );
 
     // Extract user info
     const { sub, email, name, picture } = payload;
