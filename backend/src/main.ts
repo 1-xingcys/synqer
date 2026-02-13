@@ -22,6 +22,7 @@ async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';
   app.use(
     session({
+      name: 'synqer.sid',
       secret: process.env.SESSION_SECRET as string,
       resave: false,
       saveUninitialized: false,
