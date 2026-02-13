@@ -60,6 +60,10 @@ interface JwksFetchOptions {
 export class AuthService {
   private pkceStore = new Map<string, PKCEData>();
   private readonly jwksCache = new Map<string, JwksCacheEntry>();
+  private readonly jwksFetchInFlight = new Map<
+    string,
+    Promise<Map<string, string>>
+  >();
   private static readonly JWKS_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
   constructor(
@@ -350,7 +354,11 @@ export class AuthService {
       }
 
       throw new UnauthorizedException('Invalid ID token signature or claims');
-    } catch {
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       throw new UnauthorizedException('Invalid ID token signature or claims');
     }
   }
@@ -382,6 +390,10 @@ export class AuthService {
 
       return payload;
     } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
       if (axios.isAxiosError(error)) {
         const data = error.response?.data as
           | { error?: string; error_description?: string }
@@ -409,24 +421,62 @@ export class AuthService {
       return cached.keysByKid;
     }
 
-    const response = await axios.get<JwksResponse>(jwksUrl);
-    const keysByKid = new Map<string, string>();
-
-    for (const jwk of response.data.keys ?? []) {
-      if (!jwk.kid || !jwk.n || !jwk.e) continue;
-
-      const pem = this.jwkToPem(jwk as Jwk & { n: string; e: string });
-      keysByKid.set(jwk.kid, pem);
+    if (!options?.forceRefresh) {
+      const inFlight = this.jwksFetchInFlight.get(jwksUrl);
+      if (inFlight) {
+        return inFlight;
+      }
     }
 
-    const cacheTtlMs = this.getJwksCacheTtlMs(
-      response.headers['cache-control'] as string,
-    );
-    this.jwksCache.set(jwksUrl, {
-      keysByKid,
-      expiresAt: now + cacheTtlMs,
-    });
-    return keysByKid;
+    const fetchPromise = this.fetchAndCacheJwksKeys(jwksUrl, now);
+    if (!options?.forceRefresh) {
+      this.jwksFetchInFlight.set(
+        jwksUrl,
+        fetchPromise.finally(() => this.jwksFetchInFlight.delete(jwksUrl)),
+      );
+      return this.jwksFetchInFlight.get(jwksUrl)!;
+    }
+
+    return fetchPromise;
+  }
+
+  private async fetchAndCacheJwksKeys(
+    jwksUrl: string,
+    now: number,
+  ): Promise<Map<string, string>> {
+    try {
+      const response = await axios.get<JwksResponse>(jwksUrl);
+      const keysByKid = new Map<string, string>();
+
+      for (const jwk of response.data.keys ?? []) {
+        if (!jwk.kid?.trim() || !jwk.n?.trim() || !jwk.e?.trim()) continue;
+
+        const pem = this.jwkToPem(jwk as Jwk & { n: string; e: string });
+        keysByKid.set(jwk.kid, pem);
+      }
+
+      const rawCacheControl = response.headers['cache-control'] as unknown;
+      const cacheControlHeader =
+        typeof rawCacheControl === 'string'
+          ? rawCacheControl
+          : Array.isArray(rawCacheControl)
+            ? rawCacheControl.filter(
+                (value): value is string => typeof value === 'string',
+              )
+            : undefined;
+      const cacheTtlMs = this.getJwksCacheTtlMs(cacheControlHeader);
+      this.jwksCache.set(jwksUrl, {
+        keysByKid,
+        expiresAt: now + cacheTtlMs,
+      });
+      return keysByKid;
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      throw new UnauthorizedException('Failed to fetch JWKS keys');
+    }
   }
 
   private getJwksCacheTtlMs(cacheControlHeader?: string | string[]): number {
@@ -451,15 +501,19 @@ export class AuthService {
   }
 
   private jwkToPem(jwk: Jwk & { n: string; e: string }): string {
-    const keyObject = crypto.createPublicKey({
-      key: {
-        kty: jwk.kty,
-        n: jwk.n,
-        e: jwk.e,
-      },
-      format: 'jwk',
-    });
+    try {
+      const keyObject = crypto.createPublicKey({
+        key: {
+          kty: jwk.kty,
+          n: jwk.n,
+          e: jwk.e,
+        },
+        format: 'jwk',
+      });
 
-    return keyObject.export({ format: 'pem', type: 'spki' }).toString();
+      return keyObject.export({ format: 'pem', type: 'spki' }).toString();
+    } catch {
+      throw new UnauthorizedException('Invalid JWK key format');
+    }
   }
 }
