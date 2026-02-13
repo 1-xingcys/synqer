@@ -52,6 +52,10 @@ interface LineVerifyIdTokenResponse extends OAuthTokenPayload {
   nonce?: string;
 }
 
+interface JwksFetchOptions {
+  forceRefresh?: boolean;
+}
+
 @Injectable()
 export class AuthService {
   private pkceStore = new Map<string, PKCEData>();
@@ -312,7 +316,13 @@ export class AuthService {
 
     try {
       const header = decoded.header;
-      const keys = await this.getJwksKeys(jwksUrl);
+      let keys = await this.getJwksKeys(jwksUrl);
+
+      // If provider rotates signing keys, refresh once on kid cache miss.
+      if (header.kid && !keys.has(header.kid)) {
+        keys = await this.getJwksKeys(jwksUrl, { forceRefresh: true });
+      }
+
       const candidateKeys = header.kid
         ? [keys.get(header.kid)].filter((k): k is string => !!k)
         : Array.from(keys.values());
@@ -389,10 +399,13 @@ export class AuthService {
     }
   }
 
-  private async getJwksKeys(jwksUrl: string): Promise<Map<string, string>> {
+  private async getJwksKeys(
+    jwksUrl: string,
+    options?: JwksFetchOptions,
+  ): Promise<Map<string, string>> {
     const now = Date.now();
     const cached = this.jwksCache.get(jwksUrl);
-    if (cached && cached.expiresAt > now) {
+    if (!options?.forceRefresh && cached && cached.expiresAt > now) {
       return cached.keysByKid;
     }
 
@@ -406,11 +419,35 @@ export class AuthService {
       keysByKid.set(jwk.kid, pem);
     }
 
+    const cacheTtlMs = this.getJwksCacheTtlMs(
+      response.headers['cache-control'] as string,
+    );
     this.jwksCache.set(jwksUrl, {
       keysByKid,
-      expiresAt: now + AuthService.JWKS_CACHE_TTL_MS,
+      expiresAt: now + cacheTtlMs,
     });
     return keysByKid;
+  }
+
+  private getJwksCacheTtlMs(cacheControlHeader?: string | string[]): number {
+    const rawHeader = Array.isArray(cacheControlHeader)
+      ? cacheControlHeader.join(',')
+      : cacheControlHeader;
+    if (!rawHeader) {
+      return AuthService.JWKS_CACHE_TTL_MS;
+    }
+
+    const maxAgeMatch = rawHeader.match(/max-age=(\d+)/i);
+    if (!maxAgeMatch) {
+      return AuthService.JWKS_CACHE_TTL_MS;
+    }
+
+    const maxAgeSeconds = Number(maxAgeMatch[1]);
+    if (!Number.isFinite(maxAgeSeconds) || maxAgeSeconds <= 0) {
+      return AuthService.JWKS_CACHE_TTL_MS;
+    }
+
+    return maxAgeSeconds * 1000;
   }
 
   private jwkToPem(jwk: Jwk & { n: string; e: string }): string {
