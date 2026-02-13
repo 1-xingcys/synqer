@@ -21,9 +21,42 @@ interface OAuthTokenPayload {
   picture?: string;
 }
 
+interface Jwk {
+  kty: string;
+  kid: string;
+  use?: string;
+  alg?: string;
+  n?: string;
+  e?: string;
+  x5c?: string[];
+}
+
+interface JwksResponse {
+  keys: Jwk[];
+}
+
+interface JwksCacheEntry {
+  expiresAt: number;
+  keysByKid: Map<string, string>;
+}
+
+interface VerifyIdTokenOptions {
+  token: string;
+  audience: string;
+  issuers: [string, ...string[]];
+  jwksUrl: string;
+}
+
+interface LineVerifyIdTokenResponse extends OAuthTokenPayload {
+  iat?: number;
+  nonce?: string;
+}
+
 @Injectable()
 export class AuthService {
   private pkceStore = new Map<string, PKCEData>();
+  private readonly jwksCache = new Map<string, JwksCacheEntry>();
+  private static readonly JWKS_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
   constructor(
     private usersService: UsersService,
@@ -101,28 +134,12 @@ export class AuthService {
 
     const { id_token } = tokenResponse.data as { id_token: string };
 
-    // TODO: Verify id_token
-    // Decode and verify id_token
-    const decoded = jwt.decode(id_token, { complete: true });
-    if (!decoded || typeof decoded === 'string') {
-      throw new UnauthorizedException('Invalid ID token');
-    }
-
-    const payload = decoded.payload as OAuthTokenPayload;
-
-    // Verify claims
-    if (payload.aud !== process.env.GOOGLE_CLIENT_ID) {
-      throw new UnauthorizedException('Invalid audience');
-    }
-    if (
-      payload.iss !== 'https://accounts.google.com' &&
-      payload.iss !== 'accounts.google.com'
-    ) {
-      throw new UnauthorizedException('Invalid issuer');
-    }
-    if (payload.exp * 1000 < Date.now()) {
-      throw new UnauthorizedException('Token expired');
-    }
+    const payload = await this.verifyIdToken({
+      token: id_token,
+      audience: process.env.GOOGLE_CLIENT_ID!,
+      issuers: ['https://accounts.google.com', 'accounts.google.com'],
+      jwksUrl: 'https://www.googleapis.com/oauth2/v3/certs',
+    });
 
     // Extract user info
     const { sub, email, name, picture } = payload;
@@ -186,24 +203,7 @@ export class AuthService {
 
     const { id_token } = tokenResponse.data as { id_token: string };
 
-    // Decode and verify id_token
-    const decoded = jwt.decode(id_token, { complete: true });
-    if (!decoded || typeof decoded === 'string') {
-      throw new UnauthorizedException('Invalid ID token');
-    }
-
-    const payload = decoded.payload as OAuthTokenPayload;
-
-    // Verify claims (使用 LINE Login Channel ID)
-    if (payload.aud !== process.env.LINE_LOGIN_CHANNEL_ID) {
-      throw new UnauthorizedException('Invalid audience');
-    }
-    if (!payload.iss.includes('line.me')) {
-      throw new UnauthorizedException('Invalid issuer');
-    }
-    if (payload.exp * 1000 < Date.now()) {
-      throw new UnauthorizedException('Token expired');
-    }
+    const payload = await this.verifyLineIdToken(id_token);
 
     // Extract user info
     const { sub, email, name, picture } = payload;
@@ -297,5 +297,132 @@ export class AuthService {
     await this.linkUserToGroupMembers(user.id, userId);
 
     return { user };
+  }
+
+  private async verifyIdToken({
+    token,
+    audience,
+    issuers,
+    jwksUrl,
+  }: VerifyIdTokenOptions): Promise<OAuthTokenPayload> {
+    const decoded = jwt.decode(token, { complete: true });
+    if (!decoded || typeof decoded === 'string') {
+      throw new UnauthorizedException('Invalid ID token');
+    }
+
+    try {
+      const header = decoded.header;
+      const keys = await this.getJwksKeys(jwksUrl);
+      const candidateKeys = header.kid
+        ? [keys.get(header.kid)].filter((k): k is string => !!k)
+        : Array.from(keys.values());
+
+      if (candidateKeys.length === 0) {
+        throw new UnauthorizedException('Signing key not found');
+      }
+
+      for (const publicKey of candidateKeys) {
+        try {
+          const verified = jwt.verify(token, publicKey, {
+            algorithms: ['RS256'],
+            audience,
+            issuer: issuers,
+          });
+
+          if (!verified || typeof verified === 'string') {
+            continue;
+          }
+
+          return verified as OAuthTokenPayload;
+        } catch {
+          continue;
+        }
+      }
+
+      throw new UnauthorizedException('Invalid ID token signature or claims');
+    } catch {
+      throw new UnauthorizedException('Invalid ID token signature or claims');
+    }
+  }
+
+  private async verifyLineIdToken(
+    idToken: string,
+  ): Promise<LineVerifyIdTokenResponse> {
+    try {
+      const response = await axios.post<LineVerifyIdTokenResponse>(
+        'https://api.line.me/oauth2/v2.1/verify',
+        new URLSearchParams({
+          id_token: idToken,
+          client_id: process.env.LINE_LOGIN_CHANNEL_ID!,
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        },
+      );
+
+      const payload = response.data;
+      if (
+        payload.aud !== process.env.LINE_LOGIN_CHANNEL_ID ||
+        payload.iss !== 'https://access.line.me'
+      ) {
+        throw new UnauthorizedException('Invalid ID token claims');
+      }
+
+      return payload;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const data = error.response?.data as
+          | { error?: string; error_description?: string }
+          | undefined;
+        const reason = data?.error_description || data?.error;
+
+        throw new UnauthorizedException(
+          reason
+            ? `Invalid LINE ID token: ${reason}`
+            : 'Invalid ID token signature or claims',
+        );
+      }
+
+      throw new UnauthorizedException('Invalid ID token signature or claims');
+    }
+  }
+
+  private async getJwksKeys(jwksUrl: string): Promise<Map<string, string>> {
+    const now = Date.now();
+    const cached = this.jwksCache.get(jwksUrl);
+    if (cached && cached.expiresAt > now) {
+      return cached.keysByKid;
+    }
+
+    const response = await axios.get<JwksResponse>(jwksUrl);
+    const keysByKid = new Map<string, string>();
+
+    for (const jwk of response.data.keys ?? []) {
+      if (!jwk.kid || !jwk.n || !jwk.e) continue;
+
+      const pem = this.jwkToPem(jwk as Jwk & { n: string; e: string });
+      keysByKid.set(jwk.kid, pem);
+    }
+
+    this.jwksCache.set(jwksUrl, {
+      keysByKid,
+      expiresAt: now + AuthService.JWKS_CACHE_TTL_MS,
+    });
+    return keysByKid;
+  }
+
+  private jwkToPem(jwk: Jwk & { n: string; e: string }): string {
+    const keyObject = crypto.createPublicKey({
+      key: {
+        kty: jwk.kty,
+        n: jwk.n,
+        e: jwk.e,
+      },
+      format: 'jwk',
+    });
+
+    return keyObject.export({ format: 'pem', type: 'spki' }).toString();
   }
 }
