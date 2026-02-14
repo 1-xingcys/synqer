@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { EventListItem } from "@/types/event";
 import { HostedEventRowData } from "@/components/eventCommon/EventsOverview";
+import { apiFetchJson } from "@/lib/apiClient";
 
 // Extend the base event type with hosted-specific fields
 export interface ExtendedHostedEvent extends EventListItem {
@@ -8,44 +9,24 @@ export interface ExtendedHostedEvent extends EventListItem {
   votedCount?: number;
 }
 
+const hostedEventsKeys = {
+  all: ["hostedEvents"] as const,
+};
+
+async function fetchHostedEvents(): Promise<ExtendedHostedEvent[]> {
+  return apiFetchJson<ExtendedHostedEvent[]>("/events/my");
+}
+
 export function useHostedEvents() {
-  const [events, setEvents] = useState<ExtendedHostedEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchEvents = useCallback(async () => {
-    try {
-      if (!process.env.NEXT_PUBLIC_API) {
-        throw new Error("NEXT_PUBLIC_API is not set");
-      }
-      setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API}/events/my`, {
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch hosted events");
-      }
-
-      const data = (await response.json()) as ExtendedHostedEvent[];
-      setEvents(data);
-      setError(null);
-    } catch {
-      setError("Failed to load hosted events");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void fetchEvents();
-  }, [fetchEvents]);
+  const query = useQuery({
+    queryKey: hostedEventsKeys.all,
+    queryFn: fetchHostedEvents,
+  });
 
   return {
-    events,
-    loading,
-    error,
-    refetch: fetchEvents,
+    events: query.data ?? [],
+    loading: query.isLoading,
+    error: query.error?.message ?? null,
   };
 }
 

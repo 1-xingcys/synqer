@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetchJson } from "@/lib/apiClient";
 
 export interface LineGroup {
   id: string;
@@ -24,131 +25,47 @@ export interface LineGroupMember {
   lastSeenAt: string;
 }
 
+const lineGroupsKeys = {
+  all: ["lineGroups"] as const,
+  members: (groupId: string) =>
+    [...lineGroupsKeys.all, "members", groupId] as const,
+};
+
+async function fetchLineGroups(): Promise<LineGroup[]> {
+  return apiFetchJson<LineGroup[]>("/line-bot/groups");
+}
+
+async function fetchLineGroupMembers(
+  groupId: string,
+): Promise<LineGroupMember[]> {
+  return apiFetchJson<LineGroupMember[]>(`/line-bot/groups/${groupId}/members`);
+}
+
 export function useLineGroups() {
-  const [groups, setGroups] = useState<LineGroup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchGroups = useCallback(async () => {
-    try {
-      if (!process.env.NEXT_PUBLIC_API) {
-        throw new Error("NEXT_PUBLIC_API is not set");
-      }
-      setLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/line-bot/groups`,
-        {
-          credentials: "include",
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch LINE groups");
-      }
-
-      const data = (await response.json()) as LineGroup[];
-      setGroups(data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load groups");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void fetchGroups();
-  }, [fetchGroups]);
+  const query = useQuery({
+    queryKey: lineGroupsKeys.all,
+    queryFn: fetchLineGroups,
+  });
 
   return {
-    groups,
-    loading,
-    error,
-    refetch: fetchGroups,
+    groups: query.data ?? [],
+    loading: query.isLoading,
+    error: query.error?.message ?? null,
   };
 }
 
 export function useLineGroupMembers(groupId: string | null) {
-  const [members, setMembers] = useState<LineGroupMember[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Reset members when groupId becomes null
-    if (!groupId) {
-      setMembers((prev) => (prev.length === 0 ? prev : []));
-      return;
-    }
-
-    let cancelled = false;
-
-    const fetchMembers = async () => {
-      try {
-        if (!process.env.NEXT_PUBLIC_API) {
-          throw new Error("NEXT_PUBLIC_API is not set");
-        }
-        setLoading(true);
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API}/line-bot/groups/${groupId}/members`,
-          {
-            credentials: "include",
-          },
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch group members");
-        }
-
-        const data = (await response.json()) as LineGroupMember[];
-        if (!cancelled) {
-          setMembers(data);
-          setError(null);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(
-            err instanceof Error ? err.message : "Failed to load members",
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    void fetchMembers();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [groupId]);
-
-  const refetch = useCallback(async () => {
-    if (!groupId || !process.env.NEXT_PUBLIC_API) return;
-
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/line-bot/groups/${groupId}/members`,
-        { credentials: "include" },
-      );
-      if (response.ok) {
-        const data = (await response.json()) as LineGroupMember[];
-        setMembers(data);
-        setError(null);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load members");
-    } finally {
-      setLoading(false);
-    }
-  }, [groupId]);
+  const query = useQuery({
+    queryKey: groupId
+      ? lineGroupsKeys.members(groupId)
+      : lineGroupsKeys.members("none"),
+    queryFn: () => fetchLineGroupMembers(groupId as string),
+    enabled: !!groupId,
+  });
 
   return {
-    members,
-    loading,
-    error,
-    refetch,
+    members: query.data ?? [],
+    loading: !!groupId && query.isLoading,
+    error: query.error?.message ?? null,
   };
 }
