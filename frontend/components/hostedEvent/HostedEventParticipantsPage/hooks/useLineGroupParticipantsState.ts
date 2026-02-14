@@ -7,6 +7,7 @@ import {
   type LineGroupMember,
 } from "@/hooks/useLineGroups";
 import { SelectedParticipant, ParticipantListItem } from "../types";
+import { updateEventParticipants } from "./participantsApi";
 
 export function useLineGroupParticipantsState(eventId: string) {
   const {
@@ -126,26 +127,13 @@ export function useLineGroupParticipantsState(eventId: string) {
   const saveParticipants = useCallback(async () => {
     try {
       setSaving(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}/participation/members`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            participants: selectedParticipants.map((p) => ({
-              lineUserId: p.lineUserId,
-              userId: p.userId,
-            })),
-          }),
-        },
+      await updateEventParticipants(
+        eventId,
+        selectedParticipants.map((p) => ({
+          lineUserId: p.lineUserId,
+          userId: p.userId,
+        })),
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to save participants");
-      }
 
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
