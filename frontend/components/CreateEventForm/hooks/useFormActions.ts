@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
+import { apiFetchJson } from "@/lib/apiClient";
 import { CreateEventFormData } from "../types";
 import { combineDateAndTime } from "./utils";
 
@@ -10,6 +11,10 @@ interface UseFormActionsProps {
   hasUnsavedChanges: boolean;
   setLoading: (loading: boolean) => void;
   setShowCancelConfirm: (show: boolean) => void;
+}
+
+interface CreateEventResponse {
+  eventId: string;
 }
 
 export function useFormActions({
@@ -65,21 +70,11 @@ export function useFormActions({
               : undefined,
         };
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API}/events`, {
+        const result = await apiFetchJson<CreateEventResponse>("/events", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include",
           body: JSON.stringify(payload),
         });
-
-        if (!response.ok) {
-          const errorData = (await response.json().catch(() => ({}))) as {
-            message?: string;
-          };
-          throw new Error(errorData.message || "Failed to create event");
-        }
-
-        const result = (await response.json()) as { eventId: string };
         router.push(`/new/success/${result.eventId}`);
       } catch (error) {
         alert(
