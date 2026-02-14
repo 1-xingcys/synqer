@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
+import { apiFetchJson } from "@/lib/apiClient";
 
 export interface VotingDeadlineFormData {
   deadlineDate: Date | null;
@@ -19,6 +20,25 @@ export function useEventSettings(eventId: string) {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const updateVotingDeadline = useCallback(
+    async (votingDeadline?: string) => {
+      await apiFetchJson<{ id: string }>(`/events/${eventId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ votingDeadline }),
+      });
+    },
+    [eventId],
+  );
+
+  const deleteEvent = useCallback(async () => {
+    await apiFetchJson<{ success: boolean }>(`/events/${eventId}`, {
+      method: "DELETE",
+    });
+  }, [eventId]);
 
   // 計算活動最早的時段日期和時間（作為 deadline 的上限）
   const earliestSlot = useMemo(() => {
@@ -106,23 +126,7 @@ export function useEventSettings(eventId: string) {
         votingDeadline = deadline.toISOString();
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            votingDeadline,
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update event");
-      }
+      await updateVotingDeadline(votingDeadline);
 
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -132,29 +136,19 @@ export function useEventSettings(eventId: string) {
     } finally {
       setSaving(false);
     }
-  }, [eventId, formData, isDeadlineValid, refetch]);
+  }, [formData, isDeadlineValid, refetch, updateVotingDeadline]);
 
   const handleDelete = useCallback(async () => {
     try {
       setDeleting(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete event");
-      }
+      await deleteEvent();
 
       router.push("/hosted");
     } catch (error) {
       console.error("Failed to delete event:", error);
       setDeleting(false);
     }
-  }, [eventId, router]);
+  }, [deleteEvent, router]);
 
   const toggleDeleteConfirm = useCallback((show: boolean) => {
     setShowDeleteConfirm(show);
