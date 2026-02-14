@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { AttendedEventListItem } from "@/types/event";
 import { ExtendedAttendedEvent } from "./useFilteredAttendedEvents";
-
-// 保留舊介面以便向後相容
-export type AttendedEvent = AttendedEventListItem;
 
 export function useAttendedEvents() {
   const [events, setEvents] = useState<ExtendedAttendedEvent[]>([]);
