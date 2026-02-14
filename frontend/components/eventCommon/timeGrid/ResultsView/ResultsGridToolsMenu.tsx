@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, Copy, Share, Share2, X } from "lucide-react";
+import { createPortal } from "react-dom";
 import { TimeGranularity } from "../types";
 import { ResultsAvailabilityMode } from "./types";
 import { Z_INDEX } from "@/lib/zIndex";
@@ -206,16 +207,17 @@ export function ResultsGridToolsMenu({
         </div>
       )}
 
-      {isShareModalOpen && (
-        <>
-          <div
-            className={`fixed inset-0 ${Z_INDEX.MODAL_BACKDROP} bg-black/55 backdrop-blur-sm animate-in fade-in duration-200`}
-            onClick={() => setIsShareModalOpen(false)}
-          />
-          <div
-            className={`fixed inset-0 ${Z_INDEX.MODAL_CONTENT} p-3 sm:p-6 flex items-end sm:items-center justify-center pointer-events-none`}
-          >
-            <div className="w-full max-w-md pointer-events-auto animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300">
+      {typeof window !== "undefined" &&
+        isShareModalOpen &&
+        createPortal(
+          <>
+            <div
+              className={`fixed inset-0 ${Z_INDEX.MODAL_BACKDROP} bg-black/55 backdrop-blur-sm animate-in fade-in duration-200`}
+              onClick={() => setIsShareModalOpen(false)}
+            />
+            <div
+              className={`fixed ${Z_INDEX.MODAL_CONTENT} inset-x-4 bottom-4 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:max-w-md sm:w-full animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300`}
+            >
               <div className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/95 dark:bg-zinc-900/95 shadow-2xl overflow-hidden">
                 <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50/80 dark:bg-zinc-800/60">
                   <div className="min-w-0">
@@ -271,9 +273,9 @@ export function ResultsGridToolsMenu({
                 </div>
               </div>
             </div>
-          </div>
-        </>
-      )}
+          </>,
+          document.body,
+        )}
     </div>
   );
 }
