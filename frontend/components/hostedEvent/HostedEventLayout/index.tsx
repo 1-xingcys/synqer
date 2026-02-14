@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -10,11 +10,13 @@ import {
 import { EventInfoCompact } from "@/components/eventCommon/EventInfoCompact";
 import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
+import { TimeGridStickyHeaderSignalProvider } from "@/components/eventCommon/timeGrid/stickyHeaderSignalContext";
 import {
   HostedEventProvider,
   useHostedEventContext,
 } from "@/contexts/HostedEventContext";
 import { EventStatus } from "@/types/event";
+import { Z_INDEX } from "@/lib/zIndex";
 
 interface HostedEventLayoutProps {
   children: ReactNode;
@@ -26,6 +28,7 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
   const tCommon = useTranslations("common");
   const eventId = params.eventId as string;
   const { data, isLoading, error } = useHostedEventContext();
+  const [isGridStickyActive, setIsGridStickyActive] = useState(false);
 
   const tabs = [
     {
@@ -135,12 +138,24 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="mt-3">
+      <div
+        className={`sticky top-0 ${Z_INDEX.NAV_STICKY} mt-5 bg-white/100 dark:bg-zinc-900/100 backdrop-blur supports-[backdrop-filter]:bg-white/100 dark:supports-[backdrop-filter]:bg-zinc-900/100 transition-transform duration-200 ${
+          isGridStickyActive
+            ? "-translate-y-full pointer-events-none"
+            : "translate-y-0"
+        }`}
+      >
         <EventDetailNav tabs={tabs} />
       </div>
 
       {/* Page Content */}
-      <div className="mt-5">{children}</div>
+      <div className="mt-5">
+        <TimeGridStickyHeaderSignalProvider
+          setStickyActive={setIsGridStickyActive}
+        >
+          {children}
+        </TimeGridStickyHeaderSignalProvider>
+      </div>
     </div>
   );
 }

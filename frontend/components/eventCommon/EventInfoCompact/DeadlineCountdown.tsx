@@ -33,7 +33,7 @@ export function DeadlineCountdown({
 
   if (!votingDeadline) {
     return (
-      <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-3">
+      <div className="h-full bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-3">
         <div className="flex items-center justify-between mb-1">
           <h2 className="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">
             {t("deadline.title")}
@@ -66,23 +66,9 @@ export function DeadlineCountdown({
     return "text-blue-600 dark:text-blue-400";
   };
 
-  const getBgColor = () => {
-    if (isInactive || isExpired) return "bg-zinc-100 dark:bg-zinc-800";
-    if (isVeryCritical) return "bg-red-50 dark:bg-red-900/20";
-    if (isUrgent) return "bg-amber-50 dark:bg-amber-900/20";
-    return "bg-blue-50 dark:bg-blue-900/20";
-  };
-
-  const getBorderColor = () => {
-    if (isInactive || isExpired) return "border-zinc-200 dark:border-zinc-700";
-    if (isVeryCritical) return "border-red-200 dark:border-red-800";
-    if (isUrgent) return "border-amber-200 dark:border-amber-800";
-    return "border-blue-200 dark:border-blue-800";
-  };
-
   return (
     <div
-      className={`rounded-xl border p-3 ${getBgColor()} ${getBorderColor()}`}
+      className={`h-full rounded-xl border p-3 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800`}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
@@ -95,34 +81,28 @@ export function DeadlineCountdown({
       </div>
 
       {/* Countdown units */}
-      <div className="flex items-baseline gap-2">
+      <div className={`flex items-baseline gap-2 ${getStatusColor()}`}>
         <div className="text-center">
-          <span
-            className={`font-bold tabular-nums text-xl ${getStatusColor()}`}
-          >
+          <span className={`font-bold tabular-nums text-xl`}>
             {isExpired ? "00" : days.toString().padStart(2, "0")}
           </span>
-          <span className="text-zinc-500 dark:text-zinc-400 text-[10px] ml-0.5">
+          <span className="text-xs font-medium ml-0.5">
             {t("deadline.days")}
           </span>
         </div>
         <div className="text-center">
-          <span
-            className={`font-bold tabular-nums text-xl ${getStatusColor()}`}
-          >
+          <span className={`font-bold tabular-nums text-xl`}>
             {isExpired ? "00" : hours.toString().padStart(2, "0")}
           </span>
-          <span className="text-zinc-500 dark:text-zinc-400 text-[10px] ml-0.5">
+          <span className="text-xs font-medium ml-0.5">
             {t("deadline.hours")}
           </span>
         </div>
         <div className="text-center">
-          <span
-            className={`font-bold tabular-nums text-xl ${getStatusColor()}`}
-          >
+          <span className={`font-bold tabular-nums text-xl`}>
             {isExpired ? "00" : minutes.toString().padStart(2, "0")}
           </span>
-          <span className="text-zinc-500 dark:text-zinc-400 text-[10px] ml-0.5">
+          <span className="text-xs font-medium ml-0.5">
             {t("deadline.minutes")}
           </span>
         </div>

@@ -65,7 +65,7 @@ export function EventInfoDetail({
               {t("eventInfo.candidateDates")}
             </span>
           </div>
-          <p className="text-base font-mono text-zinc-900 dark:text-zinc-100 pl-6">
+          <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-6">
             {format(new Date(startDate), "yyyy/MM/dd")}
             <span className="mx-2 text-zinc-400">~</span>
             {format(new Date(endDate), "yyyy/MM/dd")}
@@ -79,7 +79,7 @@ export function EventInfoDetail({
               {t("eventInfo.candidateTime")}
             </span>
           </div>
-          <p className="text-base text-zinc-900 dark:text-zinc-100 font-mono pl-6">
+          <p className="text-sm sm:text-base text-zinc-900 dark:text-zinc-100 font-mono pl-6">
             {formatMinutesToTime(startMinuteOfDay)}
             <span className="mx-2 text-zinc-400">~</span>
             {formatMinutesToTime(endMinuteOfDay)}
@@ -96,7 +96,7 @@ export function EventInfoDetail({
               {t("eventInfo.votingDeadline")}
             </span>
           </div>
-          <p className="text-base font-mono text-zinc-900 dark:text-zinc-100 pl-6">
+          <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-6">
             {votingDeadline
               ? format(new Date(votingDeadline), "yyyy/MM/dd HH:mm")
               : t("eventInfo.noDeadline")}
