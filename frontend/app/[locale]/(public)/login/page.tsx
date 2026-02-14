@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import LoginPage from "@/components/LoginPage";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 /**
  * 驗證 redirect 路徑，防止 open redirect 攻擊
@@ -29,40 +30,17 @@ export default function Login() {
   const t = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [checking, setChecking] = useState(true);
+  const { user, loading } = useAuthContext();
 
-  // 如果已登入，重定向到 dashboard 或指定頁面
+  // 如果已登入，重定向到 redirect 或 dashboard
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        if (!process.env.NEXT_PUBLIC_API) {
-          throw new Error("NEXT_PUBLIC_API is not set");
-        }
+    if (!loading && user) {
+      const redirect = validateRedirectPath(searchParams.get("redirect"));
+      router.replace(redirect);
+    }
+  }, [loading, user, router, searchParams]);
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API}/auth/me`, {
-          credentials: "include",
-          cache: "no-store",
-        });
-
-        if (res.ok) {
-          // 已登入 → 跳轉到 redirect 或 dashboard
-          const redirect = validateRedirectPath(searchParams.get("redirect"));
-          router.replace(redirect);
-        } else {
-          // 未登入 → 顯示登入頁面
-          setChecking(false);
-        }
-      } catch (e) {
-        console.error(e);
-        // 發生錯誤當作未登入
-        setChecking(false);
-      }
-    };
-
-    void checkAuth();
-  }, [router, searchParams]);
-
-  if (checking) {
+  if (loading || user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
         <p className="text-zinc-600 dark:text-zinc-400">{t("loading")}</p>
