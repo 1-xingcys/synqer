@@ -19,13 +19,15 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prepare": "husky",
-    "reset-rich-menu": "ts-node scripts/reset-rich-menu.ts"
+    "reset-rich-menu": "ts-node scripts/reset-rich-menu.ts",
+    "openapi:generate": "npm run build && node scripts/generate-openapi.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/swagger": "^11.2.1",
     "@prisma/client": "^6.19.0",
     "@types/express-session": "^1.18.2",
     "@types/jsonwebtoken": "^9.0.10",
