@@ -12,6 +12,7 @@ export interface ExtendedHostedEvent extends EventListItem {
 const hostedEventsKeys = {
   all: ["hostedEvents"] as const,
 };
+export { hostedEventsKeys };
 
 async function fetchHostedEvents(): Promise<ExtendedHostedEvent[]> {
   return apiFetchJson<ExtendedHostedEvent[]>("/events/my");
@@ -21,6 +22,7 @@ export function useHostedEvents() {
   const query = useQuery({
     queryKey: hostedEventsKeys.all,
     queryFn: fetchHostedEvents,
+    refetchOnMount: "always",
   });
 
   return {

@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
 import { apiFetchJson } from "@/lib/apiClient";
+import { hostedEventsKeys } from "@/hooks/useHostedEvents";
 
 export interface VotingDeadlineFormData {
   deadlineDate: Date | null;
@@ -10,6 +12,7 @@ export interface VotingDeadlineFormData {
 
 export function useEventSettings(eventId: string) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: eventData, isLoading, refetch } = useHostedEventContext();
 
   const [formData, setFormData] = useState<VotingDeadlineFormData>({
@@ -142,13 +145,14 @@ export function useEventSettings(eventId: string) {
     try {
       setDeleting(true);
       await deleteEvent();
+      await queryClient.invalidateQueries({ queryKey: hostedEventsKeys.all });
 
       router.push("/hosted");
     } catch (error) {
       console.error("Failed to delete event:", error);
       setDeleting(false);
     }
-  }, [deleteEvent, router]);
+  }, [deleteEvent, queryClient, router]);
 
   const toggleDeleteConfirm = useCallback((show: boolean) => {
     setShowDeleteConfirm(show);
