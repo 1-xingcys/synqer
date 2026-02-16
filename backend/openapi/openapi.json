@@ -317,7 +317,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetailResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "GET /events/:eventId\n取得活動完整資料（含 slots、votes、participants）",
@@ -1348,6 +1355,292 @@
           "endDate",
           "startTime",
           "endTime"
+        ]
+      },
+      "EventDetailEventDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startMinuteOfDay": {
+            "type": "number"
+          },
+          "endMinuteOfDay": {
+            "type": "number"
+          },
+          "slotDurationMin": {
+            "type": "number"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "lineGroupId": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerId": {
+            "type": "string",
+            "nullable": true
+          },
+          "votingDeadline": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "confirmedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmedTimeRanges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "startDate",
+          "endDate",
+          "startMinuteOfDay",
+          "endMinuteOfDay",
+          "slotDurationMin",
+          "timeZone",
+          "lineGroupId",
+          "ownerId",
+          "votingDeadline",
+          "confirmedSlotIds",
+          "confirmedTimeRanges",
+          "status"
+        ]
+      },
+      "EventDetailLineGroupDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lineGroupId": {
+            "type": "string"
+          },
+          "groupName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "lineGroupId",
+          "groupName"
+        ]
+      },
+      "EventDetailSlotDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startMinute": {
+            "type": "number"
+          },
+          "endMinute": {
+            "type": "number"
+          },
+          "index": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "eventId",
+          "date",
+          "startMinute",
+          "endMinute",
+          "index"
+        ]
+      },
+      "EventDetailVoteDto": {
+        "type": "object",
+        "properties": {
+          "slotId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "userDisplayName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "slotId",
+          "userId",
+          "userDisplayName"
+        ]
+      },
+      "EventDetailParticipantDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "displayName"
+        ]
+      },
+      "EventDetailExpectedParticipantUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "avatarUrl"
+        ]
+      },
+      "EventDetailExpectedParticipantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lineUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "userId": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasVoted": {
+            "type": "boolean"
+          },
+          "reminderSentAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "user": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventDetailExpectedParticipantUserDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "lineUserId",
+          "userId",
+          "hasVoted",
+          "reminderSentAt",
+          "user"
+        ]
+      },
+      "EventDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "event": {
+            "$ref": "#/components/schemas/EventDetailEventDto"
+          },
+          "lineGroup": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventDetailLineGroupDto"
+              }
+            ]
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDetailSlotDto"
+            }
+          },
+          "votes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDetailVoteDto"
+            }
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDetailParticipantDto"
+            }
+          },
+          "expectedParticipants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDetailExpectedParticipantDto"
+            }
+          }
+        },
+        "required": [
+          "isDeleted",
+          "event",
+          "lineGroup",
+          "slots",
+          "votes",
+          "participants",
+          "expectedParticipants"
         ]
       },
       "UpdateEventDto": {

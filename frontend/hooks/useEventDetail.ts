@@ -1,73 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  EventStatus,
-  ConfirmedTimeRange,
-  ParticipantStatus,
-} from "@/types/event";
+import type { operations } from "@/generated/openapi";
 
-interface TimeSlot {
-  id: string;
-  eventId: string;
-  date: string;
-  startMinute: number;
-  endMinute: number;
-  index: number;
-}
-
-interface Vote {
-  slotId: string;
-  userId: string;
-  userDisplayName: string;
-}
-
-interface Participant {
-  userId: string;
-  displayName: string;
-}
-
-interface ExpectedParticipant {
-  id: string;
-  lineUserId?: string;
-  userId?: string;
-  hasVoted: boolean;
-  reminderSentAt?: string;
-  status?: ParticipantStatus;
-  user?: {
-    id: string;
-    displayName?: string;
-    avatarUrl?: string;
-  };
-  lineGroupMember?: {
-    displayName?: string;
-    pictureUrl?: string;
-  };
-}
-
-interface Event {
-  id: string;
-  title?: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-  startMinuteOfDay: number;
-  endMinuteOfDay: number;
-  slotDurationMin: number;
-  timeZone: string;
-  status: EventStatus;
-  confirmedSlotIds: string[];
-  confirmedTimeRanges: ConfirmedTimeRange[];
-  votingDeadline?: string;
-  lineGroupId?: string;
-}
-
-export interface EventDetailData {
-  isDeleted: boolean;
-  event: Event;
-  slots: TimeSlot[];
-  votes: Vote[];
-  participants: Participant[];
-  expectedParticipants: ExpectedParticipant[];
-}
+type EventDetailResponse =
+  operations["EventCoreController_findOne"]["responses"][200]["content"]["application/json"];
+export type EventDetailData = EventDetailResponse;
 
 // Query key factory for event detail
 export const eventDetailKeys = {
@@ -76,7 +12,7 @@ export const eventDetailKeys = {
 };
 
 // Fetch function
-async function fetchEventDetail(eventId: string): Promise<EventDetailData> {
+async function fetchEventDetail(eventId: string): Promise<EventDetailResponse> {
   if (!process.env.NEXT_PUBLIC_API) {
     throw new Error("NEXT_PUBLIC_API is not set");
   }
@@ -92,7 +28,7 @@ async function fetchEventDetail(eventId: string): Promise<EventDetailData> {
     throw new Error("Failed to fetch event data");
   }
 
-  return response.json() as Promise<EventDetailData>;
+  return response.json() as Promise<EventDetailResponse>;
 }
 
 // Patch votes function (incremental update)

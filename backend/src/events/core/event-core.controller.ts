@@ -18,6 +18,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { AttendedEventListItemDto } from './dto/attended-event-list-item.dto';
 import { HostedEventListItemDto } from './dto/hosted-event-list-item.dto';
+import { EventDetailResponseDto } from './dto/event-detail-response.dto';
 import { SessionAuthGuard, CurrentUser } from '../../auth';
 
 @Controller('events')
@@ -72,7 +73,9 @@ export class EventCoreController {
    * 取得活動完整資料（含 slots、votes、participants）
    */
   @Get(':eventId')
-  async findOne(@Param('eventId') eventId: string) {
+  async findOne(
+    @Param('eventId') eventId: string,
+  ): Promise<EventDetailResponseDto> {
     const result = await this.eventQueryService.findOne(eventId);
     if (!result) {
       throw new NotFoundException(`Event ${eventId} not found`);

@@ -730,7 +730,8 @@ export interface components {
             votingDeadline: string | null;
             confirmedSlotIds: string[];
             confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
-            status: string;
+            /** @enum {string} */
+            status: HostedEventListItemDtoStatus;
             expectedParticipantCount: number;
             votedCount: number;
         };
@@ -754,7 +755,7 @@ export interface components {
             confirmedSlotIds: string[];
             confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             /** @enum {string} */
-            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
+            status: AttendedEventListItemDtoStatus;
             hasVoted: boolean;
             expectedParticipantCount: number;
             votedCount: number;
@@ -773,6 +774,73 @@ export interface components {
             lineGroupId?: string;
             expectedLineUserIds?: string[];
         };
+        EventDetailEventDto: {
+            id: string;
+            title: string | null;
+            description: string | null;
+            /** Format: date-time */
+            startDate: string;
+            /** Format: date-time */
+            endDate: string;
+            startMinuteOfDay: number;
+            endMinuteOfDay: number;
+            slotDurationMin: number;
+            timeZone: string;
+            lineGroupId: string | null;
+            ownerId: string | null;
+            /** Format: date-time */
+            votingDeadline: string | null;
+            confirmedSlotIds: string[];
+            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
+            /** @enum {string} */
+            status: EventDetailEventDtoStatus;
+        };
+        EventDetailLineGroupDto: {
+            id: string;
+            lineGroupId: string;
+            groupName: string | null;
+        };
+        EventDetailSlotDto: {
+            id: string;
+            eventId: string;
+            /** Format: date-time */
+            date: string;
+            startMinute: number;
+            endMinute: number;
+            index: number;
+        };
+        EventDetailVoteDto: {
+            slotId: string;
+            userId: string;
+            userDisplayName: string;
+        };
+        EventDetailParticipantDto: {
+            userId: string;
+            displayName: string;
+        };
+        EventDetailExpectedParticipantUserDto: {
+            id: string;
+            displayName: string | null;
+            avatarUrl: string | null;
+        };
+        EventDetailExpectedParticipantDto: {
+            id: string;
+            lineUserId: string | null;
+            userId: string | null;
+            hasVoted: boolean;
+            /** Format: date-time */
+            reminderSentAt: string | null;
+            user: components["schemas"]["EventDetailExpectedParticipantUserDto"] | null;
+        };
+        EventDetailResponseDto: {
+            isDeleted: boolean;
+            event: components["schemas"]["EventDetailEventDto"];
+            lineGroup: components["schemas"]["EventDetailLineGroupDto"] | null;
+            slots: components["schemas"]["EventDetailSlotDto"][];
+            votes: components["schemas"]["EventDetailVoteDto"][];
+            participants: components["schemas"]["EventDetailParticipantDto"][];
+            expectedParticipants: components["schemas"]["EventDetailExpectedParticipantDto"][];
+        };
         UpdateEventDto: {
             title?: string;
             description?: string;
@@ -789,7 +857,7 @@ export interface components {
         VoteEventDto: {
             selectedSlotIds: string[];
             /** @enum {string} */
-            voteMode?: "available" | "unavailable";
+            voteMode?: VoteEventDtoVoteMode;
         };
         UpdateVoteDto: {
             addSlotIds?: string[];
@@ -1058,7 +1126,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["EventDetailResponseDto"];
+                };
             };
         };
     };
@@ -1596,4 +1666,26 @@ export interface operations {
             };
         };
     };
+}
+export enum HostedEventListItemDtoStatus {
+    VOTING = "VOTING",
+    VOTING_ENDED = "VOTING_ENDED",
+    CONFIRMED = "CONFIRMED",
+    COMPLETED = "COMPLETED"
+}
+export enum AttendedEventListItemDtoStatus {
+    VOTING = "VOTING",
+    VOTING_ENDED = "VOTING_ENDED",
+    CONFIRMED = "CONFIRMED",
+    COMPLETED = "COMPLETED"
+}
+export enum EventDetailEventDtoStatus {
+    VOTING = "VOTING",
+    VOTING_ENDED = "VOTING_ENDED",
+    CONFIRMED = "CONFIRMED",
+    COMPLETED = "COMPLETED"
+}
+export enum VoteEventDtoVoteMode {
+    available = "available",
+    unavailable = "unavailable"
 }
