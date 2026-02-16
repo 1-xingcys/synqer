@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/routing";
 import { EventStatus, ConfirmedTimeRange } from "@/types/event";
 import { ApiError, apiFetch, apiFetchJson } from "@/lib/apiClient";
+import { attendedEventsKeys } from "@/hooks/useAttendedEvents";
 
 interface EventHost {
   id: string;
@@ -94,6 +95,7 @@ async function joinEvent(eventId: string): Promise<void> {
 
 export function useEventJoin(eventId: string): UseEventJoinResult {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [joinError, setJoinError] = useState<string | null>(null);
 
   const eventQuery = useQuery({
@@ -110,7 +112,8 @@ export function useEventJoin(eventId: string): UseEventJoinResult {
 
   const joinMutation = useMutation({
     mutationFn: () => joinEvent(eventId),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: attendedEventsKeys.all });
       router.push(`/joined/${eventId}`);
     },
     onError: (error) => {
