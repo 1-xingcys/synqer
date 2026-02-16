@@ -20,6 +20,8 @@ import { AttendedEventListItemDto } from './dto/attended-event-list-item.dto';
 import { HostedEventListItemDto } from './dto/hosted-event-list-item.dto';
 import { EventDetailResponseDto } from './dto/event-detail-response.dto';
 import { HostedEventDetailResponseDto } from './dto/hosted-event-detail-response.dto';
+import { EventPublicInfoResponseDto } from './dto/event-public-info-response.dto';
+import { EventInfoResponseDto } from './dto/event-info-response.dto';
 import { SessionAuthGuard, CurrentUser } from '../../auth';
 
 @Controller('events')
@@ -89,7 +91,9 @@ export class EventCoreController {
    * 取得活動的公開資訊（用於加入確認頁面）
    */
   @Get(':eventId/public')
-  async getEventPublicInfo(@Param('eventId') eventId: string) {
+  async getEventPublicInfo(
+    @Param('eventId') eventId: string,
+  ): Promise<EventPublicInfoResponseDto> {
     const result = await this.eventQueryService.getEventPublicInfo(eventId);
     if (!result) {
       throw new NotFoundException(`Event ${eventId} not found`);
@@ -106,7 +110,7 @@ export class EventCoreController {
   async getEventInfo(
     @Param('eventId') eventId: string,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<EventInfoResponseDto> {
     const result = await this.eventQueryService.getEventInfo(eventId, userId);
     if (!result) {
       throw new NotFoundException(`Event ${eventId} not found`);

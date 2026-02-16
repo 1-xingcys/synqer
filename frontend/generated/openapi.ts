@@ -841,6 +841,84 @@ export interface components {
             participants: components["schemas"]["EventDetailParticipantDto"][];
             expectedParticipants: components["schemas"]["EventDetailExpectedParticipantDto"][];
         };
+        EventPublicHostDto: {
+            id: string;
+            displayName: string | null;
+            avatarUrl: string | null;
+        };
+        EventPublicInfoResponseDto: {
+            isDeleted: boolean;
+            id: string;
+            title: string | null;
+            description: string | null;
+            /** Format: date-time */
+            startDate: string;
+            /** Format: date-time */
+            endDate: string;
+            /** Format: date-time */
+            createdAt: string;
+            startMinuteOfDay?: number;
+            endMinuteOfDay?: number;
+            /** Format: date-time */
+            votingDeadline: string | null;
+            confirmedSlotIds: string[];
+            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
+            /** @enum {string} */
+            status: EventPublicInfoResponseDtoStatus;
+            expectedParticipantCount: number;
+            host?: components["schemas"]["EventPublicHostDto"] | null;
+        };
+        EventInfoEventDto: {
+            id: string;
+            title: string | null;
+            description: string | null;
+            /** Format: date-time */
+            startDate: string;
+            /** Format: date-time */
+            endDate: string;
+            startMinuteOfDay: number;
+            endMinuteOfDay: number;
+            slotDurationMin: number;
+            timeZone: string;
+            lineGroupId: string | null;
+            ownerId: string | null;
+            /** Format: date-time */
+            votingDeadline: string | null;
+            confirmedSlotIds: string[];
+            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
+            /** @enum {string} */
+            status: EventInfoEventDtoStatus;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        EventInfoHostDto: {
+            id: string;
+            displayName: string | null;
+            avatarUrl: string | null;
+        };
+        EventInfoExpectedParticipantUserDto: {
+            id: string;
+            displayName: string | null;
+            avatarUrl: string | null;
+        };
+        EventInfoExpectedParticipantDto: {
+            id: string;
+            lineUserId?: string;
+            userId?: string;
+            displayName?: string;
+            pictureUrl?: string;
+            hasVoted: boolean;
+            /** @enum {string} */
+            status: EventInfoExpectedParticipantDtoStatus;
+            user?: components["schemas"]["EventInfoExpectedParticipantUserDto"];
+        };
+        EventInfoResponseDto: {
+            isDeleted: boolean;
+            event: components["schemas"]["EventInfoEventDto"];
+            host: components["schemas"]["EventInfoHostDto"] | null;
+            expectedParticipants: components["schemas"]["EventInfoExpectedParticipantDto"][];
+            currentUserHasVoted: boolean;
+        };
         HostedEventParticipantDto: {
             userId: string;
             displayName: string;
@@ -1228,7 +1306,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["EventPublicInfoResponseDto"];
                 };
             };
         };
@@ -1248,7 +1326,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["EventInfoResponseDto"];
+                };
             };
         };
     };
@@ -1728,6 +1808,23 @@ export enum EventDetailEventDtoStatus {
     VOTING_ENDED = "VOTING_ENDED",
     CONFIRMED = "CONFIRMED",
     COMPLETED = "COMPLETED"
+}
+export enum EventPublicInfoResponseDtoStatus {
+    VOTING = "VOTING",
+    VOTING_ENDED = "VOTING_ENDED",
+    CONFIRMED = "CONFIRMED",
+    COMPLETED = "COMPLETED"
+}
+export enum EventInfoEventDtoStatus {
+    VOTING = "VOTING",
+    VOTING_ENDED = "VOTING_ENDED",
+    CONFIRMED = "CONFIRMED",
+    COMPLETED = "COMPLETED"
+}
+export enum EventInfoExpectedParticipantDtoStatus {
+    VOTED = "VOTED",
+    NOT_VOTED = "NOT_VOTED",
+    NOT_REGISTERED = "NOT_REGISTERED"
 }
 export enum VoteEventDtoVoteMode {
     available = "available",

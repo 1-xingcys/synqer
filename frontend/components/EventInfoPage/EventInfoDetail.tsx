@@ -14,7 +14,7 @@ interface EventInfoDetailProps {
   endDate: string;
   startMinuteOfDay: number;
   endMinuteOfDay: number;
-  votingDeadline?: string;
+  votingDeadline?: string | null;
   currentUserHasVoted: boolean;
 }
 

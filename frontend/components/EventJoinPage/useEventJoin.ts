@@ -3,33 +3,13 @@
 import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/routing";
-import { EventStatus, ConfirmedTimeRange } from "@/types/event";
 import { ApiError, apiFetch, apiFetchJson } from "@/lib/apiClient";
 import { attendedEventsKeys } from "@/hooks/useAttendedEvents";
+import type { operations } from "@/generated/openapi";
 
-interface EventHost {
-  id: string;
-  displayName: string | null;
-  avatarUrl: string | null;
-}
-
-export interface EventPublicInfo {
-  isDeleted: boolean;
-  id: string;
-  title: string | null;
-  description: string | null;
-  createdAt?: string;
-  startDate: string;
-  endDate: string;
-  startMinuteOfDay?: number;
-  endMinuteOfDay?: number;
-  votingDeadline: string | null;
-  confirmedSlotIds: string[];
-  confirmedTimeRanges: ConfirmedTimeRange[];
-  status: EventStatus;
-  expectedParticipantCount: number;
-  host?: EventHost | null;
-}
+type EventPublicInfoResponse =
+  operations["EventCoreController_getEventPublicInfo"]["responses"][200]["content"]["application/json"];
+export type EventPublicInfo = EventPublicInfoResponse;
 
 export interface ParticipationStatus {
   isParticipant: boolean;
