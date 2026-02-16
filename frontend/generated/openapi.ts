@@ -859,9 +859,20 @@ export interface components {
             /** @enum {string} */
             voteMode?: VoteEventDtoVoteMode;
         };
+        VoteEventResponseDto: {
+            success: boolean;
+            votedSlots: number;
+            /** @enum {string} */
+            voteMode: VoteEventResponseDtoVoteMode;
+        };
         UpdateVoteDto: {
             addSlotIds?: string[];
             removeSlotIds?: string[];
+        };
+        UpdateVoteResponseDto: {
+            success: boolean;
+            added: number;
+            removed: number;
         };
         ConfirmEventTimeDto: {
             slotIds: string[];
@@ -1332,7 +1343,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["VoteEventResponseDto"];
+                };
             };
         };
     };
@@ -1355,7 +1368,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UpdateVoteResponseDto"];
+                };
             };
         };
     };
@@ -1686,6 +1701,10 @@ export enum EventDetailEventDtoStatus {
     COMPLETED = "COMPLETED"
 }
 export enum VoteEventDtoVoteMode {
+    available = "available",
+    unavailable = "unavailable"
+}
+export enum VoteEventResponseDtoVoteMode {
     available = "available",
     unavailable = "unavailable"
 }

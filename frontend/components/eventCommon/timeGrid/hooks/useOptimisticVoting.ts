@@ -128,7 +128,7 @@ export function useOptimisticVoting({
   // 全量替換 mutation（用於 selectAll / clearSelection）
   const replaceMutation = useMutation({
     mutationFn: async ({ slotIds }: { slotIds: string[] }) =>
-      replaceVotesApi(eventId, slotIds, "available"),
+      replaceVotesApi(eventId, slotIds),
     onMutate: async ({ slotIds }) => {
       await queryClient.cancelQueries({
         queryKey: eventDetailKeys.detail(eventId),

@@ -1,9 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
+import { VoteEventDtoVoteMode } from "@/generated/openapi";
 import type { operations } from "@/generated/openapi";
 
 type EventDetailResponse =
   operations["EventCoreController_findOne"]["responses"][200]["content"]["application/json"];
 export type EventDetailData = EventDetailResponse;
+type VoteEventRequest =
+  operations["VotingController_vote"]["requestBody"]["content"]["application/json"];
+type VoteEventResponse =
+  operations["VotingController_vote"]["responses"][200]["content"]["application/json"];
+type UpdateVoteRequest =
+  operations["VotingController_updateVotes"]["requestBody"]["content"]["application/json"];
+type UpdateVoteResponse =
+  operations["VotingController_updateVotes"]["responses"][200]["content"]["application/json"];
 
 // Query key factory for event detail
 export const eventDetailKeys = {
@@ -36,10 +45,15 @@ export async function patchVotesApi(
   eventId: string,
   addSlotIds: string[],
   removeSlotIds: string[],
-): Promise<void> {
+): Promise<UpdateVoteResponse> {
   if (!process.env.NEXT_PUBLIC_API) {
     throw new Error("NEXT_PUBLIC_API is not set");
   }
+
+  const payload: UpdateVoteRequest = {
+    addSlotIds,
+    removeSlotIds,
+  };
 
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API}/events/${eventId}/voting`,
@@ -49,7 +63,7 @@ export async function patchVotesApi(
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ addSlotIds, removeSlotIds }),
+      body: JSON.stringify(payload),
     },
   );
 
@@ -59,17 +73,24 @@ export async function patchVotesApi(
     };
     throw new Error(errorData.message || "Failed to update votes");
   }
+
+  return response.json() as Promise<UpdateVoteResponse>;
 }
 
 // Replace votes function (full update)
 export async function replaceVotesApi(
   eventId: string,
   selectedSlotIds: string[],
-  voteMode: "available" | "unavailable" = "available",
-): Promise<void> {
+  voteMode: VoteEventRequest["voteMode"] = VoteEventDtoVoteMode.available,
+): Promise<VoteEventResponse> {
   if (!process.env.NEXT_PUBLIC_API) {
     throw new Error("NEXT_PUBLIC_API is not set");
   }
+
+  const payload: VoteEventRequest = {
+    selectedSlotIds,
+    voteMode,
+  };
 
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API}/events/${eventId}/voting`,
@@ -77,7 +98,7 @@ export async function replaceVotesApi(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ selectedSlotIds, voteMode }),
+      body: JSON.stringify(payload),
     },
   );
 
@@ -87,6 +108,8 @@ export async function replaceVotesApi(
     };
     throw new Error(errorData.message || "Failed to save votes");
   }
+
+  return response.json() as Promise<VoteEventResponse>;
 }
 
 export function useEventDetail(eventId: string) {

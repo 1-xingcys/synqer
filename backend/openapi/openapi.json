@@ -597,7 +597,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoteEventResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "POST /events/:eventId/voting\n儲存使用者的有空時段投票",
@@ -629,7 +636,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateVoteResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "PATCH /events/:eventId/voting\n更新投票（新增/移除特定 slots）",
@@ -1708,6 +1722,29 @@
           "selectedSlotIds"
         ]
       },
+      "VoteEventResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "votedSlots": {
+            "type": "number"
+          },
+          "voteMode": {
+            "type": "string",
+            "enum": [
+              "available",
+              "unavailable"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "votedSlots",
+          "voteMode"
+        ]
+      },
       "UpdateVoteDto": {
         "type": "object",
         "properties": {
@@ -1724,6 +1761,25 @@
             }
           }
         }
+      },
+      "UpdateVoteResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "added": {
+            "type": "number"
+          },
+          "removed": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "success",
+          "added",
+          "removed"
+        ]
       },
       "ConfirmEventTimeDto": {
         "type": "object",
