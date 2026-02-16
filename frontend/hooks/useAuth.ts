@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { User } from "@/types/auth";
+import type { LiffLoginRequest, LiffLoginResponse, User } from "@/types/auth";
 import {
   getLiffAccessToken,
   initializeLiff,
@@ -69,6 +69,7 @@ export function useAuth() {
           log("Access token", { hasToken: !!accessToken });
 
           if (accessToken) {
+            const payload: LiffLoginRequest = { accessToken };
             log("Calling /auth/liff/login...");
             const loginResponse = await fetch(
               `${process.env.NEXT_PUBLIC_API}/auth/liff/login`,
@@ -76,13 +77,14 @@ export function useAuth() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                body: JSON.stringify({ accessToken }),
+                body: JSON.stringify(payload),
               },
             );
             log("/auth/liff/login response", { status: loginResponse.status });
 
             if (loginResponse.ok) {
-              const userData = (await loginResponse.json()) as User;
+              const userData =
+                (await loginResponse.json()) as LiffLoginResponse;
               log("LIFF login success", { userId: userData.id });
               setUser(userData);
               setLoading(false);

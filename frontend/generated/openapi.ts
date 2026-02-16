@@ -696,6 +696,19 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        LiffLoginDto: {
+            accessToken: string;
+        };
+        AuthUserResponseDto: {
+            id: string;
+            displayName: string | null;
+            primaryEmail: string | null;
+            avatarUrl: string | null;
+            providers: string[];
+        };
+        LogoutResponseDto: {
+            message: string;
+        };
         CreateEventDto: {
             title?: string;
             description?: string;
@@ -847,13 +860,19 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LiffLoginDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AuthUserResponseDto"];
+                };
             };
         };
     };
@@ -870,7 +889,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AuthUserResponseDto"];
+                };
             };
         };
     };
@@ -887,7 +908,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LogoutResponseDto"];
+                };
             };
         };
     };
