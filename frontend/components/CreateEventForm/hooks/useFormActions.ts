@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
 import { apiFetchJson } from "@/lib/apiClient";
+import type { operations } from "@/generated/openapi";
 import { CreateEventFormData } from "../types";
 import { combineDateAndTime } from "./utils";
 
@@ -13,9 +14,10 @@ interface UseFormActionsProps {
   setShowCancelConfirm: (show: boolean) => void;
 }
 
-interface CreateEventResponse {
-  eventId: string;
-}
+type CreateEventRequest =
+  operations["EventCoreController_create"]["requestBody"]["content"]["application/json"];
+type CreateEventResponse =
+  operations["EventCoreController_create"]["responses"][201]["content"]["application/json"];
 
 export function useFormActions({
   formData,
@@ -53,7 +55,7 @@ export function useFormActions({
           votingDeadlineISO = deadlineDateTime.toISOString();
         }
 
-        const payload = {
+        const payload: CreateEventRequest = {
           title: formData.title,
           description: formData.description || undefined,
           startDate: formatDate(formData.startDate),

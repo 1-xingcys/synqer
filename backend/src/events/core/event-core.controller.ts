@@ -15,6 +15,7 @@ import { EventCreationService } from './services/event-creation.service';
 import { EventQueryService } from './services/event-query.service';
 import { EventUpdateService } from './services/event-update.service';
 import { CreateEventDto } from './dto/create-event.dto';
+import { CreateEventResponseDto } from './dto/create-event-response.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { AttendedEventListItemDto } from './dto/attended-event-list-item.dto';
 import { HostedEventListItemDto } from './dto/hosted-event-list-item.dto';
@@ -67,7 +68,7 @@ export class EventCoreController {
   async create(
     @Body() createEventDto: CreateEventDto,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<CreateEventResponseDto> {
     return this.eventCreationService.create(createEventDto, userId);
   }
 

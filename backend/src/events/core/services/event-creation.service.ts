@@ -90,22 +90,8 @@ export class EventCreationService {
       userId,
     );
 
-    // 計算實際加入的參與者數量（使用 repository 回傳的 creatorLineUserId）
-    const expectedParticipantsCount = this.calculateExpectedParticipantsCount(
-      userId,
-      uniqueLineUserIds,
-      result.creatorLineUserId,
-    );
-
     return {
       eventId: result.event.id,
-      shareUrl: `/events/${result.event.id}`,
-      meta: {
-        title: result.event.title,
-        totalSlots: slots.length,
-        lineGroupId: result.event.lineGroupId,
-        expectedParticipants: expectedParticipantsCount,
-      },
     };
   }
 

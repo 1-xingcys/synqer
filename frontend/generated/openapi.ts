@@ -774,6 +774,9 @@ export interface components {
             lineGroupId?: string;
             expectedLineUserIds?: string[];
         };
+        CreateEventResponseDto: {
+            eventId: string;
+        };
         EventDetailEventDto: {
             id: string;
             title: string | null;
@@ -1223,7 +1226,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CreateEventResponseDto"];
+                };
             };
         };
     };
