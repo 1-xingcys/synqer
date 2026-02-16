@@ -40,7 +40,7 @@ jobs:
         run: git diff --exit-code -- frontend/generated/openapi.ts
 
       - name: Frontend type check
-        run: npm --prefix frontend exec tsc --noEmit
+        run: npx --prefix frontend tsc --noEmit --project frontend/tsconfig.json
 
       - name: Backend build check
         run: npm --prefix backend run build
