@@ -19,6 +19,7 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { AttendedEventListItemDto } from './dto/attended-event-list-item.dto';
 import { HostedEventListItemDto } from './dto/hosted-event-list-item.dto';
 import { EventDetailResponseDto } from './dto/event-detail-response.dto';
+import { HostedEventDetailResponseDto } from './dto/hosted-event-detail-response.dto';
 import { SessionAuthGuard, CurrentUser } from '../../auth';
 
 @Controller('events')
@@ -122,7 +123,7 @@ export class EventCoreController {
   async findOneHosted(
     @Param('eventId') eventId: string,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<HostedEventDetailResponseDto> {
     const result = await this.eventQueryService.findOneHosted(eventId, userId);
     if (!result) {
       throw new NotFoundException(`Event ${eventId} not found`);

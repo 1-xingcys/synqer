@@ -457,7 +457,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostedEventDetailResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "GET /events/:eventId/hosted\n取得 Host 端的活動詳細資料（包含投票狀態）",
@@ -1655,6 +1662,118 @@
           "votes",
           "participants",
           "expectedParticipants"
+        ]
+      },
+      "HostedEventParticipantDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "hasVoted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "userId",
+          "displayName",
+          "hasVoted"
+        ]
+      },
+      "HostedEventExpectedParticipantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lineUserId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "pictureUrl": {
+            "type": "string"
+          },
+          "hasVoted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "hasVoted"
+        ]
+      },
+      "HostedEventVotingStatsDto": {
+        "type": "object",
+        "properties": {
+          "totalExpected": {
+            "type": "number"
+          },
+          "totalVoted": {
+            "type": "number"
+          },
+          "votingPercentage": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "totalExpected",
+          "totalVoted",
+          "votingPercentage"
+        ]
+      },
+      "HostedEventDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "event": {
+            "$ref": "#/components/schemas/EventDetailEventDto"
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDetailSlotDto"
+            }
+          },
+          "votes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDetailVoteDto"
+            }
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HostedEventParticipantDto"
+            }
+          },
+          "expectedParticipants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HostedEventExpectedParticipantDto"
+            }
+          },
+          "votingStats": {
+            "$ref": "#/components/schemas/HostedEventVotingStatsDto"
+          }
+        },
+        "required": [
+          "isDeleted",
+          "event",
+          "slots",
+          "votes",
+          "participants",
+          "expectedParticipants",
+          "votingStats"
         ]
       },
       "UpdateEventDto": {

@@ -1,72 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  EventStatus,
-  ParticipantStatus,
-  ConfirmedTimeRange,
-} from "@/types/event";
+import type { operations } from "@/generated/openapi";
 
-interface TimeSlot {
-  id: string;
-  eventId: string;
-  date: string;
-  startMinute: number;
-  endMinute: number;
-  index: number;
-}
-
-interface Vote {
-  slotId: string;
-  userId: string;
-  userDisplayName: string;
-}
-
-interface Participant {
-  userId: string;
-  displayName: string;
-  hasVoted: boolean;
-}
-
-interface ExpectedParticipant {
-  id: string;
-  lineUserId?: string;
-  userId?: string;
-  displayName?: string;
-  pictureUrl?: string;
-  hasVoted: boolean;
-  status: ParticipantStatus;
-}
-
-interface Event {
-  id: string;
-  title?: string;
-  description?: string;
-  startDate: string;
-  endDate: string;
-  startMinuteOfDay: number;
-  endMinuteOfDay: number;
-  slotDurationMin: number;
-  timeZone: string;
-  ownerId?: string;
-  lineGroupId?: string;
-  votingDeadline?: string;
-  confirmedSlotIds: string[];
-  confirmedTimeRanges: ConfirmedTimeRange[];
-  status: EventStatus;
-}
-
-export interface HostedEventDetailData {
-  isDeleted: boolean;
-  event: Event;
-  slots: TimeSlot[];
-  votes: Vote[];
-  participants: Participant[];
-  expectedParticipants: ExpectedParticipant[];
-  votingStats: {
-    totalExpected: number;
-    totalVoted: number;
-    votingPercentage: number;
-  };
-}
+type HostedEventDetailResponse =
+  operations["EventCoreController_findOneHosted"]["responses"][200]["content"]["application/json"];
+export type HostedEventDetailData = HostedEventDetailResponse;
 
 // Query key factory for hosted event
 export const hostedEventKeys = {
@@ -77,7 +14,7 @@ export const hostedEventKeys = {
 // Fetch function
 async function fetchHostedEventDetail(
   eventId: string,
-): Promise<HostedEventDetailData> {
+): Promise<HostedEventDetailResponse> {
   if (!process.env.NEXT_PUBLIC_API) {
     throw new Error("NEXT_PUBLIC_API is not set");
   }
@@ -96,7 +33,7 @@ async function fetchHostedEventDetail(
     throw new Error("Failed to fetch event data");
   }
 
-  return response.json() as Promise<HostedEventDetailData>;
+  return response.json() as Promise<HostedEventDetailResponse>;
 }
 
 export function useHostedEventDetail(eventId: string) {

@@ -1,5 +1,3 @@
-import { ParticipantStatus } from "@/types/event";
-
 export interface SelectedParticipant {
   id?: string;
   lineUserId?: string;
@@ -7,7 +5,6 @@ export interface SelectedParticipant {
   displayName: string;
   pictureUrl?: string | null;
   hasVoted?: boolean;
-  status?: ParticipantStatus;
 }
 
 export interface ParticipantListItem {

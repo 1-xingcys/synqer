@@ -841,6 +841,33 @@ export interface components {
             participants: components["schemas"]["EventDetailParticipantDto"][];
             expectedParticipants: components["schemas"]["EventDetailExpectedParticipantDto"][];
         };
+        HostedEventParticipantDto: {
+            userId: string;
+            displayName: string;
+            hasVoted: boolean;
+        };
+        HostedEventExpectedParticipantDto: {
+            id: string;
+            lineUserId?: string;
+            userId?: string;
+            displayName?: string;
+            pictureUrl?: string;
+            hasVoted: boolean;
+        };
+        HostedEventVotingStatsDto: {
+            totalExpected: number;
+            totalVoted: number;
+            votingPercentage: number;
+        };
+        HostedEventDetailResponseDto: {
+            isDeleted: boolean;
+            event: components["schemas"]["EventDetailEventDto"];
+            slots: components["schemas"]["EventDetailSlotDto"][];
+            votes: components["schemas"]["EventDetailVoteDto"][];
+            participants: components["schemas"]["HostedEventParticipantDto"][];
+            expectedParticipants: components["schemas"]["HostedEventExpectedParticipantDto"][];
+            votingStats: components["schemas"]["HostedEventVotingStatsDto"];
+        };
         UpdateEventDto: {
             title?: string;
             description?: string;
@@ -1240,7 +1267,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HostedEventDetailResponseDto"];
+                };
             };
         };
     };

@@ -40,7 +40,6 @@ export function useLineGroupParticipantsState(eventId: string) {
         displayName: p.displayName || "Unknown",
         pictureUrl: p.pictureUrl,
         hasVoted: p.hasVoted,
-        status: p.status,
       }));
       setSelectedParticipants(participants);
       setInitialParticipants(participants);
