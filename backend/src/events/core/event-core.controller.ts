@@ -17,6 +17,8 @@ import { EventUpdateService } from './services/event-update.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { CreateEventResponseDto } from './dto/create-event-response.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateEventResponseDto } from './dto/update-event-response.dto';
+import { RemoveEventResponseDto } from './dto/remove-event-response.dto';
 import { AttendedEventListItemDto } from './dto/attended-event-list-item.dto';
 import { HostedEventListItemDto } from './dto/hosted-event-list-item.dto';
 import { EventDetailResponseDto } from './dto/event-detail-response.dto';
@@ -146,7 +148,7 @@ export class EventCoreController {
     @Param('eventId') eventId: string,
     @Body() updateDto: UpdateEventDto,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<UpdateEventResponseDto> {
     return this.eventUpdateService.update(eventId, userId, updateDto);
   }
 
@@ -160,7 +162,7 @@ export class EventCoreController {
   async remove(
     @Param('eventId') eventId: string,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<RemoveEventResponseDto> {
     return this.eventUpdateService.remove(eventId, userId);
   }
 }

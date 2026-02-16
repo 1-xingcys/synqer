@@ -955,6 +955,18 @@ export interface components {
             timeZone?: string;
             votingDeadline?: string;
         };
+        UpdateEventResponseDto: {
+            id: string;
+            title: string | null;
+            description: string | null;
+            /** Format: date-time */
+            startDate: string;
+            /** Format: date-time */
+            endDate: string;
+        };
+        RemoveEventResponseDto: {
+            success: boolean;
+        };
         ParticipantInput: {
             lineUserId?: string;
             userId?: string;
@@ -1268,7 +1280,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RemoveEventResponseDto"];
+                };
             };
         };
     };
@@ -1291,7 +1305,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UpdateEventResponseDto"];
+                };
             };
         };
     };

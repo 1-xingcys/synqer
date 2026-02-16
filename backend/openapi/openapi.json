@@ -363,7 +363,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateEventResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "PATCH /events/:eventId\n更新活動設定",
@@ -385,7 +392,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemoveEventResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "DELETE /events/:eventId\n刪除活動",
@@ -2136,6 +2150,48 @@
             "type": "string"
           }
         }
+      },
+      "UpdateEventResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "startDate",
+          "endDate"
+        ]
+      },
+      "RemoveEventResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ]
       },
       "ParticipantInput": {
         "type": "object",
