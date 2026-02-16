@@ -413,8 +413,11 @@ describe('EventQueryService', () => {
       };
 
       mockEventRepository.findPublicInfo.mockResolvedValue(mockEvent);
-      mockEventMapper.mapEventToList.mockReturnValue({ id: eventId });
-      mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
+      mockEventMapper.mapEventToList.mockReturnValue({
+        id: eventId,
+        participantCount: 1,
+        status: 'VOTING',
+      });
 
       const result = await service.getEventPublicInfo(eventId);
 
@@ -425,6 +428,7 @@ describe('EventQueryService', () => {
         participantCount: 1,
         status: 'VOTING',
       });
+      expect(mockEventStatusService.computeEventStatus).not.toHaveBeenCalled();
     });
 
     it('should return null when event not found', async () => {
