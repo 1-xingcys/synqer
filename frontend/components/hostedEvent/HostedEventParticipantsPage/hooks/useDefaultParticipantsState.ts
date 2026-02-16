@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
 import { useUserSearch, type SearchedUser } from "@/hooks/useUserSearch";
 import { SelectedParticipant } from "../types";
+import { updateEventParticipants } from "./participantsApi";
 
 export function useDefaultParticipantsState(eventId: string) {
   const {
@@ -119,26 +120,13 @@ export function useDefaultParticipantsState(eventId: string) {
   const saveParticipants = useCallback(async () => {
     try {
       setSaving(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/${eventId}/participation/members`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            participants: selectedParticipants.map((p) => ({
-              lineUserId: p.lineUserId,
-              userId: p.userId,
-            })),
-          }),
-        },
+      await updateEventParticipants(
+        eventId,
+        selectedParticipants.map((p) => ({
+          lineUserId: p.lineUserId,
+          userId: p.userId,
+        })),
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to save participants");
-      }
 
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);

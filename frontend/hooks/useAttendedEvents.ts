@@ -1,50 +1,31 @@
-import { useState, useEffect, useCallback } from "react";
-import { AttendedEventListItem } from "@/types/event";
+import { useQuery } from "@tanstack/react-query";
 import { ExtendedAttendedEvent } from "./useFilteredAttendedEvents";
+import { apiFetchJson } from "@/lib/apiClient";
 
-// 保留舊介面以便向後相容
-export type AttendedEvent = AttendedEventListItem;
+const attendedEventsKeys = {
+  all: ["attendedEvents"] as const,
+};
+export { attendedEventsKeys };
+
+async function fetchAttendedEvents(): Promise<ExtendedAttendedEvent[]> {
+  return apiFetchJson<ExtendedAttendedEvent[]>("/events/attended");
+}
 
 export function useAttendedEvents() {
-  const [events, setEvents] = useState<ExtendedAttendedEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const query = useQuery({
+    queryKey: attendedEventsKeys.all,
+    queryFn: fetchAttendedEvents,
+    refetchOnMount: "always",
+  });
 
-  const fetchEvents = useCallback(async () => {
-    try {
-      if (!process.env.NEXT_PUBLIC_API) {
-        throw new Error("NEXT_PUBLIC_API is not set");
-      }
-      setLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/events/attended`,
-        {
-          credentials: "include",
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch attended events");
-      }
-
-      const data = (await response.json()) as ExtendedAttendedEvent[];
-      setEvents(data);
-      setError(null);
-    } catch {
-      setError("Failed to load attended events");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void fetchEvents();
-  }, [fetchEvents]);
+  const refetch = async () => {
+    await query.refetch();
+  };
 
   return {
-    events,
-    loading,
-    error,
-    refetch: fetchEvents,
+    events: query.data ?? [],
+    loading: query.isLoading,
+    error: query.error?.message ?? null,
+    refetch,
   };
 }
