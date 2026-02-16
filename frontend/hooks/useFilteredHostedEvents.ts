@@ -1,13 +1,12 @@
 import { useMemo } from "react";
 import { EventStatus } from "@/types/event";
-import { ExtendedHostedEvent, toHostedEventRowData } from "./useHostedEvents";
-import { HostedEventRowData } from "@/components/eventCommon/EventsOverview";
+import { HostedEventApiItem } from "./useHostedEvents";
 
 interface FilteredHostedEvents {
-  [EventStatus.VOTING]: HostedEventRowData[];
-  [EventStatus.VOTING_ENDED]: HostedEventRowData[];
-  [EventStatus.CONFIRMED]: HostedEventRowData[];
-  [EventStatus.COMPLETED]: HostedEventRowData[];
+  [EventStatus.VOTING]: HostedEventApiItem[];
+  [EventStatus.VOTING_ENDED]: HostedEventApiItem[];
+  [EventStatus.CONFIRMED]: HostedEventApiItem[];
+  [EventStatus.COMPLETED]: HostedEventApiItem[];
 }
 
 /**
@@ -19,21 +18,17 @@ interface FilteredHostedEvents {
  * Completed: By confirmed end date (closer = higher priority)
  */
 function sortHostedEvents(
-  events: HostedEventRowData[],
+  events: HostedEventApiItem[],
   category: EventStatus,
-): HostedEventRowData[] {
+): HostedEventApiItem[] {
   const now = new Date().getTime();
 
   return [...events].sort((a, b) => {
     switch (category) {
       case EventStatus.VOTING: {
         // Events where not everyone has voted come first
-        const aAllVoted =
-          (a.votedCount ?? 0) >=
-          (a.expectedParticipantCount ?? a.participantCount);
-        const bAllVoted =
-          (b.votedCount ?? 0) >=
-          (b.expectedParticipantCount ?? b.participantCount);
+        const aAllVoted = (a.votedCount ?? 0) >= a.expectedParticipantCount;
+        const bAllVoted = (b.votedCount ?? 0) >= b.expectedParticipantCount;
         if (aAllVoted !== bAllVoted) {
           return aAllVoted ? 1 : -1;
         }
@@ -99,7 +94,7 @@ function sortHostedEvents(
  * Hook to filter and sort hosted events by status
  */
 export function useFilteredHostedEvents(
-  events: ExtendedHostedEvent[],
+  events: HostedEventApiItem[],
 ): FilteredHostedEvents {
   return useMemo(() => {
     const filtered: FilteredHostedEvents = {
@@ -109,21 +104,20 @@ export function useFilteredHostedEvents(
       [EventStatus.COMPLETED]: [],
     };
 
-    // Categorize events by status and convert to row data
+    // Categorize events by status
     events.forEach((event) => {
-      const rowData = toHostedEventRowData(event);
       switch (event.status) {
         case EventStatus.VOTING:
-          filtered[EventStatus.VOTING].push(rowData);
+          filtered[EventStatus.VOTING].push(event);
           break;
         case EventStatus.VOTING_ENDED:
-          filtered[EventStatus.VOTING_ENDED].push(rowData);
+          filtered[EventStatus.VOTING_ENDED].push(event);
           break;
         case EventStatus.CONFIRMED:
-          filtered[EventStatus.CONFIRMED].push(rowData);
+          filtered[EventStatus.CONFIRMED].push(event);
           break;
         case EventStatus.COMPLETED:
-          filtered[EventStatus.COMPLETED].push(rowData);
+          filtered[EventStatus.COMPLETED].push(event);
           break;
       }
     });

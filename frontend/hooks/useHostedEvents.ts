@@ -1,21 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { EventListItem } from "@/types/event";
-import { HostedEventRowData } from "@/components/eventCommon/EventsOverview";
 import { apiFetchJson } from "@/lib/apiClient";
+import type { operations } from "@/generated/openapi";
 
-// Extend the base event type with hosted-specific fields
-export interface ExtendedHostedEvent extends EventListItem {
-  expectedParticipantCount?: number;
-  votedCount?: number;
-}
+type HostedEventsResponse =
+  operations["EventCoreController_findMyEvents"]["responses"][200]["content"]["application/json"];
+export type HostedEventApiItem = HostedEventsResponse[number];
 
 const hostedEventsKeys = {
   all: ["hostedEvents"] as const,
 };
 export { hostedEventsKeys };
 
-async function fetchHostedEvents(): Promise<ExtendedHostedEvent[]> {
-  return apiFetchJson<ExtendedHostedEvent[]>("/events/my");
+async function fetchHostedEvents(): Promise<HostedEventsResponse> {
+  return apiFetchJson<HostedEventsResponse>("/events/my");
 }
 
 export function useHostedEvents() {
@@ -29,17 +26,5 @@ export function useHostedEvents() {
     events: query.data ?? [],
     loading: query.isLoading,
     error: query.error?.message ?? null,
-  };
-}
-
-// Convert ExtendedHostedEvent to HostedEventRowData
-export function toHostedEventRowData(
-  event: ExtendedHostedEvent,
-): HostedEventRowData {
-  return {
-    ...event,
-    expectedParticipantCount:
-      event.expectedParticipantCount ?? event.participantCount,
-    votedCount: event.votedCount ?? 0,
   };
 }
