@@ -516,7 +516,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckParticipantStatusResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "GET /events/:eventId/participation\n檢查當前使用者是否已經是活動的參與者",
@@ -540,7 +547,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinEventResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "POST /events/:eventId/participation/join\n加入活動（透過分享連結）",
@@ -574,7 +588,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateParticipantsResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "PUT /events/:eventId/participation/members\n更新活動的預期參與者",
@@ -598,7 +619,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnvotedParticipantsResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "GET /events/:eventId/participation/unvoted\n取得活動中尚未投票的預期參與者（用於提醒功能）",
@@ -2207,6 +2235,40 @@
           "success"
         ]
       },
+      "CheckParticipantStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "isParticipant": {
+            "type": "boolean"
+          },
+          "hasVoted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "isParticipant",
+          "hasVoted"
+        ]
+      },
+      "JoinEventResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "alreadyJoined": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "alreadyJoined",
+          "message"
+        ]
+      },
       "ParticipantInput": {
         "type": "object",
         "properties": {
@@ -2230,6 +2292,79 @@
         },
         "required": [
           "participants"
+        ]
+      },
+      "UpdateParticipantsResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "success",
+          "count"
+        ]
+      },
+      "UnvotedParticipantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lineUserId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "pictureUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "reminderSentAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "lineUserId",
+          "userId",
+          "displayName",
+          "reminderSentAt"
+        ]
+      },
+      "UnvotedParticipantsResponseDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "lineGroupId": {
+            "type": "string"
+          },
+          "lineGroupLineId": {
+            "type": "string"
+          },
+          "unvotedParticipants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnvotedParticipantDto"
+            }
+          }
+        },
+        "required": [
+          "eventId",
+          "unvotedParticipants"
         ]
       },
       "VoteEventDto": {

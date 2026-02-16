@@ -967,12 +967,40 @@ export interface components {
         RemoveEventResponseDto: {
             success: boolean;
         };
+        CheckParticipantStatusResponseDto: {
+            isParticipant: boolean;
+            hasVoted: boolean;
+        };
+        JoinEventResponseDto: {
+            success: boolean;
+            alreadyJoined: boolean;
+            message: string;
+        };
         ParticipantInput: {
             lineUserId?: string;
             userId?: string;
         };
         UpdateParticipantsDto: {
             participants: components["schemas"]["ParticipantInput"][];
+        };
+        UpdateParticipantsResponseDto: {
+            success: boolean;
+            count: number;
+        };
+        UnvotedParticipantDto: {
+            id: string;
+            lineUserId: string;
+            userId: string | null;
+            displayName: string;
+            pictureUrl?: string | null;
+            /** Format: date-time */
+            reminderSentAt: string | null;
+        };
+        UnvotedParticipantsResponseDto: {
+            eventId: string;
+            lineGroupId?: string;
+            lineGroupLineId?: string;
+            unvotedParticipants: components["schemas"]["UnvotedParticipantDto"][];
         };
         VoteEventDto: {
             selectedSlotIds: string[];
@@ -1400,7 +1428,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CheckParticipantStatusResponseDto"];
+                };
             };
         };
     };
@@ -1419,7 +1449,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["JoinEventResponseDto"];
+                };
             };
         };
     };
@@ -1442,7 +1474,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UpdateParticipantsResponseDto"];
+                };
             };
         };
     };
@@ -1461,7 +1495,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UnvotedParticipantsResponseDto"];
+                };
             };
         };
     };

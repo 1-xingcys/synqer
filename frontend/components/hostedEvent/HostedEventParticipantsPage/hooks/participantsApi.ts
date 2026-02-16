@@ -1,16 +1,13 @@
 "use client";
 
 import { apiFetchJson } from "@/lib/apiClient";
+import type { operations } from "@/generated/openapi";
 
-interface ParticipantPayloadItem {
-  lineUserId?: string;
-  userId?: string;
-}
-
-interface UpdateParticipantsResponse {
-  success: boolean;
-  count: number;
-}
+type UpdateParticipantsRequest =
+  operations["ParticipationController_updateParticipants"]["requestBody"]["content"]["application/json"];
+type UpdateParticipantsResponse =
+  operations["ParticipationController_updateParticipants"]["responses"][200]["content"]["application/json"];
+type ParticipantPayloadItem = UpdateParticipantsRequest["participants"][number];
 
 export async function updateEventParticipants(
   eventId: string,

@@ -11,6 +11,10 @@ import {
 } from '@nestjs/common';
 import { ParticipantService } from './services/participant.service';
 import { UpdateParticipantsDto } from './dto/update-participants.dto';
+import { CheckParticipantStatusResponseDto } from './dto/check-participant-status-response.dto';
+import { JoinEventResponseDto } from './dto/join-event-response.dto';
+import { UpdateParticipantsResponseDto } from './dto/update-participants-response.dto';
+import { UnvotedParticipantsResponseDto } from './dto/unvoted-participants-response.dto';
 import { SessionAuthGuard, CurrentUser } from '../../auth';
 
 @Controller('events/:eventId/participation')
@@ -26,7 +30,7 @@ export class ParticipationController {
   async checkParticipantStatus(
     @Param('eventId') eventId: string,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<CheckParticipantStatusResponseDto> {
     return this.participantService.checkParticipantStatus(eventId, userId);
   }
 
@@ -40,7 +44,7 @@ export class ParticipationController {
   async joinEvent(
     @Param('eventId') eventId: string,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<JoinEventResponseDto> {
     return this.participantService.joinEvent(eventId, userId);
   }
 
@@ -54,7 +58,7 @@ export class ParticipationController {
     @Param('eventId') eventId: string,
     @Body() dto: UpdateParticipantsDto,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<UpdateParticipantsResponseDto> {
     return this.participantService.updateParticipants(eventId, userId, dto);
   }
 
@@ -64,7 +68,9 @@ export class ParticipationController {
    */
   @Get('unvoted')
   @UseGuards(SessionAuthGuard)
-  async getUnvotedParticipants(@Param('eventId') eventId: string) {
+  async getUnvotedParticipants(
+    @Param('eventId') eventId: string,
+  ): Promise<UnvotedParticipantsResponseDto> {
     return this.participantService.getUnvotedParticipants(eventId);
   }
 }

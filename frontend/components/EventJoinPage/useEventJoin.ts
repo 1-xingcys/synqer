@@ -10,11 +10,11 @@ import type { operations } from "@/generated/openapi";
 type EventPublicInfoResponse =
   operations["EventCoreController_getEventPublicInfo"]["responses"][200]["content"]["application/json"];
 export type EventPublicInfo = EventPublicInfoResponse;
-
-export interface ParticipationStatus {
-  isParticipant: boolean;
-  hasVoted: boolean;
-}
+type ParticipationStatusResponse =
+  operations["ParticipationController_checkParticipantStatus"]["responses"][200]["content"]["application/json"];
+type JoinEventResponse =
+  operations["ParticipationController_joinEvent"]["responses"][200]["content"]["application/json"];
+export type ParticipationStatus = ParticipationStatusResponse;
 
 export interface UseEventJoinResult {
   eventInfo: EventPublicInfo | null;
@@ -51,7 +51,7 @@ async function fetchParticipationStatus(
   return response.json() as Promise<ParticipationStatus>;
 }
 
-async function joinEvent(eventId: string): Promise<void> {
+async function joinEvent(eventId: string): Promise<JoinEventResponse> {
   const response = await apiFetch(`/events/${eventId}/participation/join`, {
     method: "POST",
   });
@@ -71,6 +71,8 @@ async function joinEvent(eventId: string): Promise<void> {
       payload,
     );
   }
+
+  return response.json() as Promise<JoinEventResponse>;
 }
 
 export function useEventJoin(eventId: string): UseEventJoinResult {
