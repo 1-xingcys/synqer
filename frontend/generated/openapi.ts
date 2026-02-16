@@ -997,6 +997,17 @@ export interface components {
         ConfirmEventTimeDto: {
             slotIds: string[];
         };
+        ConfirmEventTimeResponseDto: {
+            id: string;
+            confirmedSlotIds: string[];
+            /** @enum {string} */
+            status: ConfirmEventTimeResponseDtoStatus;
+        };
+        CancelConfirmedTimeResponseDto: {
+            id: string;
+            /** @enum {string} */
+            status: CancelConfirmedTimeResponseDtoStatus;
+        };
     };
     responses: never;
     parameters: never;
@@ -1523,7 +1534,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["ConfirmEventTimeResponseDto"];
+                };
             };
         };
     };
@@ -1542,7 +1555,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["CancelConfirmedTimeResponseDto"];
+                };
             };
         };
     };
@@ -1854,4 +1869,16 @@ export enum VoteEventDtoVoteMode {
 export enum VoteEventResponseDtoVoteMode {
     available = "available",
     unavailable = "unavailable"
+}
+export enum ConfirmEventTimeResponseDtoStatus {
+    VOTING = "VOTING",
+    VOTING_ENDED = "VOTING_ENDED",
+    CONFIRMED = "CONFIRMED",
+    COMPLETED = "COMPLETED"
+}
+export enum CancelConfirmedTimeResponseDtoStatus {
+    VOTING = "VOTING",
+    VOTING_ENDED = "VOTING_ENDED",
+    CONFIRMED = "CONFIRMED",
+    COMPLETED = "COMPLETED"
 }

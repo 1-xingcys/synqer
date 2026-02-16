@@ -712,7 +712,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmEventTimeResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "POST /events/:eventId/confirmation\n確認活動時間（僅限活動擁有者）",
@@ -734,7 +741,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelConfirmedTimeResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "DELETE /events/:eventId/confirmation\n取消確認的活動時間（僅限活動擁有者）",
@@ -2311,6 +2325,55 @@
         },
         "required": [
           "slotIds"
+        ]
+      },
+      "ConfirmEventTimeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "confirmedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "confirmedSlotIds",
+          "status"
+        ]
+      },
+      "CancelConfirmedTimeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "status"
         ]
       }
     }

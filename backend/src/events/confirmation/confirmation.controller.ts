@@ -10,6 +10,8 @@ import {
 } from '@nestjs/common';
 import { ConfirmationService } from './services/confirmation.service';
 import { ConfirmEventTimeDto } from './dto/confirm-event-time.dto';
+import { ConfirmEventTimeResponseDto } from './dto/confirm-event-time-response.dto';
+import { CancelConfirmedTimeResponseDto } from './dto/cancel-confirmed-time-response.dto';
 import { SessionAuthGuard, CurrentUser } from '../../auth';
 
 @Controller('events/:eventId/confirmation')
@@ -27,7 +29,7 @@ export class ConfirmationController {
     @Param('eventId') eventId: string,
     @Body() dto: ConfirmEventTimeDto,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<ConfirmEventTimeResponseDto> {
     return this.confirmationService.confirmEventTime(eventId, userId, dto);
   }
 
@@ -41,7 +43,7 @@ export class ConfirmationController {
   async cancelConfirmedTime(
     @Param('eventId') eventId: string,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<CancelConfirmedTimeResponseDto> {
     return this.confirmationService.cancelConfirmedTime(eventId, userId);
   }
 }
