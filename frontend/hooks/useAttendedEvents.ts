@@ -1,14 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
-import { ExtendedAttendedEvent } from "./useFilteredAttendedEvents";
 import { apiFetchJson } from "@/lib/apiClient";
+import type { operations } from "@/generated/openapi";
+
+type AttendedEventsResponse =
+  operations["EventCoreController_findAttendedEvents"]["responses"][200]["content"]["application/json"];
+export type AttendedEventApiItem = AttendedEventsResponse[number];
 
 const attendedEventsKeys = {
   all: ["attendedEvents"] as const,
 };
 export { attendedEventsKeys };
 
-async function fetchAttendedEvents(): Promise<ExtendedAttendedEvent[]> {
-  return apiFetchJson<ExtendedAttendedEvent[]>("/events/attended");
+async function fetchAttendedEvents(): Promise<AttendedEventsResponse> {
+  return apiFetchJson<AttendedEventsResponse>("/events/attended");
 }
 
 export function useAttendedEvents() {

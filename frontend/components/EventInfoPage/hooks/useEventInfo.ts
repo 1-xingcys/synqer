@@ -1,53 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  EventStatus,
-  ParticipantStatus,
-  ConfirmedTimeRange,
-} from "@/types/event";
+import type { operations } from "@/generated/openapi";
 
-interface ExpectedParticipant {
-  id: string;
-  lineUserId?: string;
-  userId?: string;
-  displayName?: string;
-  pictureUrl?: string;
-  hasVoted: boolean;
-  status: ParticipantStatus;
-  user?: {
-    id: string;
-    displayName?: string;
-    avatarUrl?: string;
-  };
-}
-
-interface EventHost {
-  id: string;
-  displayName: string | null;
-  avatarUrl: string | null;
-}
-
-interface EventInfoData {
-  isDeleted: boolean;
-  event: {
-    id: string;
-    title?: string;
-    description?: string;
-    startDate: string;
-    endDate: string;
-    startMinuteOfDay: number;
-    endMinuteOfDay: number;
-    slotDurationMin: number;
-    timeZone: string;
-    status: EventStatus;
-    confirmedSlotIds: string[];
-    confirmedTimeRanges: ConfirmedTimeRange[];
-    votingDeadline?: string;
-    createdAt: string;
-  };
-  host: EventHost | null;
-  expectedParticipants: ExpectedParticipant[];
-  currentUserHasVoted: boolean;
-}
+type EventInfoResponse =
+  operations["EventCoreController_getEventInfo"]["responses"][200]["content"]["application/json"];
+export type EventInfoData = EventInfoResponse;
+export type ExpectedParticipant = EventInfoData["expectedParticipants"][number];
+export type EventHost = EventInfoData["host"];
 
 // Query key factory for event info
 export const eventInfoKeys = {
@@ -56,7 +14,7 @@ export const eventInfoKeys = {
 };
 
 // Fetch function
-async function fetchEventInfo(eventId: string): Promise<EventInfoData> {
+async function fetchEventInfo(eventId: string): Promise<EventInfoResponse> {
   if (!process.env.NEXT_PUBLIC_API) {
     throw new Error("NEXT_PUBLIC_API is not set");
   }
@@ -72,7 +30,7 @@ async function fetchEventInfo(eventId: string): Promise<EventInfoData> {
     throw new Error("Failed to fetch event info");
   }
 
-  return response.json() as Promise<EventInfoData>;
+  return response.json() as Promise<EventInfoResponse>;
 }
 
 export function useEventInfo(eventId: string) {
@@ -90,5 +48,3 @@ export function useEventInfo(eventId: string) {
     refetch: query.refetch,
   };
 }
-
-export type { EventInfoData, ExpectedParticipant, EventHost };

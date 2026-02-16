@@ -17,7 +17,6 @@ export function useReadOnlyParticipantsState() {
       displayName: p.displayName || "Unknown",
       pictureUrl: p.pictureUrl,
       hasVoted: p.hasVoted,
-      status: p.status,
     }));
   }, [eventData]);
 

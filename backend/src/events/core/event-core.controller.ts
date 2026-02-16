@@ -15,7 +15,16 @@ import { EventCreationService } from './services/event-creation.service';
 import { EventQueryService } from './services/event-query.service';
 import { EventUpdateService } from './services/event-update.service';
 import { CreateEventDto } from './dto/create-event.dto';
+import { CreateEventResponseDto } from './dto/create-event-response.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { UpdateEventResponseDto } from './dto/update-event-response.dto';
+import { RemoveEventResponseDto } from './dto/remove-event-response.dto';
+import { AttendedEventListItemDto } from './dto/attended-event-list-item.dto';
+import { HostedEventListItemDto } from './dto/hosted-event-list-item.dto';
+import { EventDetailResponseDto } from './dto/event-detail-response.dto';
+import { HostedEventDetailResponseDto } from './dto/hosted-event-detail-response.dto';
+import { EventPublicInfoResponseDto } from './dto/event-public-info-response.dto';
+import { EventInfoResponseDto } from './dto/event-info-response.dto';
 import { SessionAuthGuard, CurrentUser } from '../../auth';
 
 @Controller('events')
@@ -32,7 +41,9 @@ export class EventCoreController {
    */
   @Get('my')
   @UseGuards(SessionAuthGuard)
-  async findMyEvents(@CurrentUser() userId: string) {
+  async findMyEvents(
+    @CurrentUser() userId: string,
+  ): Promise<HostedEventListItemDto[]> {
     return await this.eventQueryService.findUserEvents(userId);
   }
 
@@ -42,7 +53,9 @@ export class EventCoreController {
    */
   @Get('attended')
   @UseGuards(SessionAuthGuard)
-  async findAttendedEvents(@CurrentUser() userId: string) {
+  async findAttendedEvents(
+    @CurrentUser() userId: string,
+  ): Promise<AttendedEventListItemDto[]> {
     return await this.eventQueryService.findAttendedEvents(userId);
   }
 
@@ -57,7 +70,7 @@ export class EventCoreController {
   async create(
     @Body() createEventDto: CreateEventDto,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<CreateEventResponseDto> {
     return this.eventCreationService.create(createEventDto, userId);
   }
 
@@ -66,7 +79,9 @@ export class EventCoreController {
    * 取得活動完整資料（含 slots、votes、participants）
    */
   @Get(':eventId')
-  async findOne(@Param('eventId') eventId: string) {
+  async findOne(
+    @Param('eventId') eventId: string,
+  ): Promise<EventDetailResponseDto> {
     const result = await this.eventQueryService.findOne(eventId);
     if (!result) {
       throw new NotFoundException(`Event ${eventId} not found`);
@@ -79,7 +94,9 @@ export class EventCoreController {
    * 取得活動的公開資訊（用於加入確認頁面）
    */
   @Get(':eventId/public')
-  async getEventPublicInfo(@Param('eventId') eventId: string) {
+  async getEventPublicInfo(
+    @Param('eventId') eventId: string,
+  ): Promise<EventPublicInfoResponseDto> {
     const result = await this.eventQueryService.getEventPublicInfo(eventId);
     if (!result) {
       throw new NotFoundException(`Event ${eventId} not found`);
@@ -96,7 +113,7 @@ export class EventCoreController {
   async getEventInfo(
     @Param('eventId') eventId: string,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<EventInfoResponseDto> {
     const result = await this.eventQueryService.getEventInfo(eventId, userId);
     if (!result) {
       throw new NotFoundException(`Event ${eventId} not found`);
@@ -113,7 +130,7 @@ export class EventCoreController {
   async findOneHosted(
     @Param('eventId') eventId: string,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<HostedEventDetailResponseDto> {
     const result = await this.eventQueryService.findOneHosted(eventId, userId);
     if (!result) {
       throw new NotFoundException(`Event ${eventId} not found`);
@@ -131,7 +148,7 @@ export class EventCoreController {
     @Param('eventId') eventId: string,
     @Body() updateDto: UpdateEventDto,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<UpdateEventResponseDto> {
     return this.eventUpdateService.update(eventId, userId, updateDto);
   }
 
@@ -145,7 +162,7 @@ export class EventCoreController {
   async remove(
     @Param('eventId') eventId: string,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<RemoveEventResponseDto> {
     return this.eventUpdateService.remove(eventId, userId);
   }
 }

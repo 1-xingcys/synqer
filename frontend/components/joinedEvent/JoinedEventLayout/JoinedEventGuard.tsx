@@ -53,7 +53,7 @@ export function JoinedEventGuard({ children }: JoinedEventGuardProps) {
     return (
       <NotParticipantView
         eventId={data.event.id}
-        eventTitle={data.event.title}
+        eventTitle={data.event.title ?? undefined}
       />
     );
   }

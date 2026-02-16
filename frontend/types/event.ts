@@ -30,26 +30,6 @@ export interface ConfirmedTimeRange {
   slotIds: string[];
 }
 
-// 活動列表項目（用於 hosted 和 joined 頁面）
-export interface EventListItem {
-  id: string;
-  title: string | null;
-  description: string | null;
-  startDate: string;
-  endDate: string;
-  createdAt: string;
-  participantCount: number;
-  votingDeadline: string | null;
-  confirmedSlotIds: string[];
-  confirmedTimeRanges: ConfirmedTimeRange[];
-  status: EventStatus;
-}
-
-// 參與的活動項目（包含是否已投票）
-export interface AttendedEventListItem extends EventListItem {
-  hasVoted: boolean;
-}
-
 // 預期參與者
 export interface ExpectedParticipant {
   id: string;

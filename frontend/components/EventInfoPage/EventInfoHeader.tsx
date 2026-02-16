@@ -14,7 +14,7 @@ interface EventHost {
 
 interface EventInfoHeaderProps {
   eventId: string;
-  title?: string;
+  title?: string | null;
   host: EventHost | null;
   createdAt: string;
 }

@@ -35,9 +35,8 @@ export function useJoinedEventResults(
 
     return eventDetailData.expectedParticipants.map((p) => ({
       userId: p.userId || p.user?.id || p.id,
-      displayName:
-        p.user?.displayName || p.lineGroupMember?.displayName || "Unknown",
-      pictureUrl: p.user?.avatarUrl || p.lineGroupMember?.pictureUrl,
+      displayName: p.user?.displayName || p.lineUserId || "Unknown",
+      pictureUrl: p.user?.avatarUrl || undefined,
     }));
   }, [eventDetailData]);
 

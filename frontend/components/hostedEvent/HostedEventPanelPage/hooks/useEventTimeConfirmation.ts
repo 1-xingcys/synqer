@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { EventStatus } from "@/types/event";
+import type { operations } from "@/generated/openapi";
 import {
   hostedEventKeys,
   HostedEventDetailData,
@@ -27,11 +28,20 @@ interface UseEventTimeConfirmationReturn {
   handleResetEventTime: () => Promise<void>;
 }
 
+type ConfirmEventTimeRequest =
+  operations["ConfirmationController_confirmEventTime"]["requestBody"]["content"]["application/json"];
+type ConfirmEventTimeResponse =
+  operations["ConfirmationController_confirmEventTime"]["responses"][200]["content"]["application/json"];
+type CancelConfirmedTimeResponse =
+  operations["ConfirmationController_cancelConfirmedTime"]["responses"][200]["content"]["application/json"];
+
 // API functions
 async function confirmTimeApi(
   eventId: string,
   slotIds: string[],
-): Promise<void> {
+): Promise<ConfirmEventTimeResponse> {
+  const payload: ConfirmEventTimeRequest = { slotIds };
+
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation`,
     {
@@ -40,16 +50,20 @@ async function confirmTimeApi(
         "Content-Type": "application/json",
       },
       credentials: "include",
-      body: JSON.stringify({ slotIds }),
+      body: JSON.stringify(payload),
     },
   );
 
   if (!response.ok) {
     throw new Error("Failed to update confirmed time");
   }
+
+  return response.json() as Promise<ConfirmEventTimeResponse>;
 }
 
-async function deleteConfirmationApi(eventId: string): Promise<void> {
+async function deleteConfirmationApi(
+  eventId: string,
+): Promise<CancelConfirmedTimeResponse> {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation`,
     {
@@ -61,6 +75,8 @@ async function deleteConfirmationApi(eventId: string): Promise<void> {
   if (!response.ok) {
     throw new Error("Failed to reset event time");
   }
+
+  return response.json() as Promise<CancelConfirmedTimeResponse>;
 }
 
 export function useEventTimeConfirmation({

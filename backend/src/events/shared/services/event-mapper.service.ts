@@ -6,6 +6,19 @@ import { ConfirmedTimeSlotData } from '../interfaces/confirmed-time.interface';
 // 確認時段的資料結構（重新導出以保持向後兼容）
 export type ConfirmedTimeSlot = ConfirmedTimeSlotData;
 
+type MappedEventList = {
+  id: string;
+  title: string | null;
+  description: string | null;
+  startDate: Date;
+  endDate: Date;
+  createdAt: Date;
+  votingDeadline: Date | null;
+  confirmedSlotIds: string[];
+  confirmedTimeRanges: ReturnType<ConfirmedTimeService['mergeToTimeRanges']>;
+  status: ReturnType<EventStatusService['computeEventStatus']>;
+};
+
 /**
  * 活動數據轉換服務
  */
@@ -119,27 +132,23 @@ export class EventMapperService {
   /**
    * 映射事件為列表項格式
    */
-  mapEventToList(
-    event: {
-      id: string;
-      title: string | null;
-      description: string | null;
-      startDate: Date;
-      endDate: Date;
-      createdAt: Date;
-      votingDeadline: Date | null;
-      expectedParticipants?: Array<{ id: string }>;
-      confirmedTimeSlots?: ConfirmedTimeSlot[];
-    },
-    includeStatus = true,
-  ) {
+  mapEventToList(event: {
+    id: string;
+    title: string | null;
+    description: string | null;
+    startDate: Date;
+    endDate: Date;
+    createdAt: Date;
+    votingDeadline: Date | null;
+    confirmedTimeSlots?: ConfirmedTimeSlot[];
+  }): MappedEventList {
     const confirmedSlotIds =
       event.confirmedTimeSlots?.map((cts) => cts.slotId) || [];
     const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
       event.confirmedTimeSlots || [],
     );
 
-    const base = {
+    return {
       id: event.id,
       title: event.title,
       description: event.description,
@@ -149,22 +158,13 @@ export class EventMapperService {
       votingDeadline: event.votingDeadline,
       confirmedSlotIds,
       confirmedTimeRanges,
+      status: this.eventStatusService.computeEventStatus({
+        votingDeadline: event.votingDeadline,
+        confirmedTimeSlots: this.mapConfirmedSlotsForStatus(
+          event.confirmedTimeSlots,
+        ),
+      }),
     };
-
-    if (includeStatus) {
-      return {
-        ...base,
-        participantCount: event.expectedParticipants?.length || 0,
-        status: this.eventStatusService.computeEventStatus({
-          votingDeadline: event.votingDeadline,
-          confirmedTimeSlots: this.mapConfirmedSlotsForStatus(
-            event.confirmedTimeSlots,
-          ),
-        }),
-      };
-    }
-
-    return base;
   }
 
   /**

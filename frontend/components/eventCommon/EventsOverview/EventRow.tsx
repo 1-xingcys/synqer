@@ -69,8 +69,8 @@ export default function EventRow({
   };
 
   const votedCount = event.votedCount ?? 0;
-  const expectedCount =
-    event.expectedParticipantCount ?? event.participantCount;
+  const expectedCount = event.expectedParticipantCount;
+  const host = "host" in event ? event.host : null;
 
   // Render the status icon based on mode and variant
   const renderStatusIcon = () => {
@@ -185,21 +185,21 @@ export default function EventRow({
         </div>
 
         {/* Host - only show for joined mode */}
-        {isJoined && event.host && (
+        {isJoined && host && (
           <div className="flex items-center gap-2 shrink-0 min-w-[120px]">
             <Avatar className="w-5 h-5">
-              {event.host.avatarUrl ? (
+              {host.avatarUrl ? (
                 <AvatarImage
-                  src={event.host.avatarUrl}
-                  alt={event.host.displayName || ""}
+                  src={host.avatarUrl}
+                  alt={host.displayName || ""}
                 />
               ) : null}
               <AvatarFallback className="text-[10px]">
-                {(event.host.displayName || "?")[0].toUpperCase()}
+                {(host.displayName || "?")[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <span className="text-sm text-zinc-600 dark:text-zinc-400 truncate max-w-[80px]">
-              {event.host.displayName || t("unknownHost")}
+              {host.displayName || t("unknownHost")}
             </span>
           </div>
         )}
@@ -257,21 +257,21 @@ export default function EventRow({
             {/* Info Row */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-zinc-500 dark:text-zinc-400">
               {/* Host - only show for joined mode */}
-              {isJoined && event.host && (
+              {isJoined && host && (
                 <div className="flex items-center gap-1">
                   <Avatar className="w-4 h-4">
-                    {event.host.avatarUrl ? (
+                    {host.avatarUrl ? (
                       <AvatarImage
-                        src={event.host.avatarUrl}
-                        alt={event.host.displayName || ""}
+                        src={host.avatarUrl}
+                        alt={host.displayName || ""}
                       />
                     ) : null}
                     <AvatarFallback className="text-[8px]">
-                      {(event.host.displayName || "?")[0].toUpperCase()}
+                      {(host.displayName || "?")[0].toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <span className="truncate max-w-[60px]">
-                    {event.host.displayName || t("unknownHost")}
+                    {host.displayName || t("unknownHost")}
                   </span>
                 </div>
               )}

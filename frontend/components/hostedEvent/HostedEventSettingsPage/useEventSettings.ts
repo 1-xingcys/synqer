@@ -4,11 +4,19 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
 import { apiFetchJson } from "@/lib/apiClient";
 import { hostedEventsKeys } from "@/hooks/useHostedEvents";
+import type { operations } from "@/generated/openapi";
 
 export interface VotingDeadlineFormData {
   deadlineDate: Date | null;
   deadlineTime: string;
 }
+
+type UpdateEventRequest =
+  operations["EventCoreController_update"]["requestBody"]["content"]["application/json"];
+type UpdateEventResponse =
+  operations["EventCoreController_update"]["responses"][200]["content"]["application/json"];
+type RemoveEventResponse =
+  operations["EventCoreController_remove"]["responses"][200]["content"]["application/json"];
 
 export function useEventSettings(eventId: string) {
   const router = useRouter();
@@ -26,19 +34,21 @@ export function useEventSettings(eventId: string) {
 
   const updateVotingDeadline = useCallback(
     async (votingDeadline?: string) => {
-      await apiFetchJson<{ id: string }>(`/events/${eventId}`, {
+      const payload: UpdateEventRequest = { votingDeadline };
+
+      await apiFetchJson<UpdateEventResponse>(`/events/${eventId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ votingDeadline }),
+        body: JSON.stringify(payload),
       });
     },
     [eventId],
   );
 
   const deleteEvent = useCallback(async () => {
-    await apiFetchJson<{ success: boolean }>(`/events/${eventId}`, {
+    await apiFetchJson<RemoveEventResponse>(`/events/${eventId}`, {
       method: "DELETE",
     });
   }, [eventId]);

@@ -79,13 +79,6 @@ describe('EventCreationService', () => {
       expect(eventRepository.createWithSlotsAndParticipants).toHaveBeenCalled();
       expect(result).toEqual({
         eventId: 'event-123',
-        shareUrl: '/events/event-123',
-        meta: {
-          title: 'Test Event',
-          totalSlots: 2,
-          lineGroupId: null,
-          expectedParticipants: 1, // creator
-        },
       });
     });
 
@@ -99,7 +92,9 @@ describe('EventCreationService', () => {
 
       const result = await service.create(validDto);
 
-      expect(result.meta.expectedParticipants).toBe(0);
+      expect(result).toEqual({
+        eventId: 'event-456',
+      });
     });
 
     it('should handle 24:00 as end time', async () => {
@@ -220,7 +215,7 @@ describe('EventCreationService', () => {
       );
     });
 
-    it('should not count creator twice when creatorLineUserId is in expectedLineUserIds', async () => {
+    it('should return eventId even when repository includes creatorLineUserId', async () => {
       const dtoWithLineIds = {
         ...validDto,
         expectedLineUserIds: ['line-creator', 'line-other'],
@@ -234,8 +229,9 @@ describe('EventCreationService', () => {
 
       const result = await service.create(dtoWithLineIds, 'user-123');
 
-      // creator (1) + line-other (1) = 2, line-creator is not double counted
-      expect(result.meta.expectedParticipants).toBe(2);
+      expect(result).toEqual({
+        eventId: 'event-123',
+      });
     });
   });
 });

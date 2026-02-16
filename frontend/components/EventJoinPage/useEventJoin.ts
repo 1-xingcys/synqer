@@ -3,38 +3,18 @@
 import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/routing";
-import { EventStatus, ConfirmedTimeRange } from "@/types/event";
 import { ApiError, apiFetch, apiFetchJson } from "@/lib/apiClient";
 import { attendedEventsKeys } from "@/hooks/useAttendedEvents";
+import type { operations } from "@/generated/openapi";
 
-interface EventHost {
-  id: string;
-  displayName: string | null;
-  avatarUrl: string | null;
-}
-
-export interface EventPublicInfo {
-  isDeleted: boolean;
-  id: string;
-  title: string | null;
-  description: string | null;
-  createdAt?: string;
-  startDate: string;
-  endDate: string;
-  startMinuteOfDay?: number;
-  endMinuteOfDay?: number;
-  votingDeadline: string | null;
-  confirmedSlotIds: string[];
-  confirmedTimeRanges: ConfirmedTimeRange[];
-  status: EventStatus;
-  participantCount: number;
-  host?: EventHost | null;
-}
-
-export interface ParticipationStatus {
-  isParticipant: boolean;
-  hasVoted: boolean;
-}
+type EventPublicInfoResponse =
+  operations["EventCoreController_getEventPublicInfo"]["responses"][200]["content"]["application/json"];
+export type EventPublicInfo = EventPublicInfoResponse;
+type ParticipationStatusResponse =
+  operations["ParticipationController_checkParticipantStatus"]["responses"][200]["content"]["application/json"];
+type JoinEventResponse =
+  operations["ParticipationController_joinEvent"]["responses"][200]["content"]["application/json"];
+export type ParticipationStatus = ParticipationStatusResponse;
 
 export interface UseEventJoinResult {
   eventInfo: EventPublicInfo | null;
@@ -71,7 +51,7 @@ async function fetchParticipationStatus(
   return response.json() as Promise<ParticipationStatus>;
 }
 
-async function joinEvent(eventId: string): Promise<void> {
+async function joinEvent(eventId: string): Promise<JoinEventResponse> {
   const response = await apiFetch(`/events/${eventId}/participation/join`, {
     method: "POST",
   });
@@ -91,6 +71,8 @@ async function joinEvent(eventId: string): Promise<void> {
       payload,
     );
   }
+
+  return response.json() as Promise<JoinEventResponse>;
 }
 
 export function useEventJoin(eventId: string): UseEventJoinResult {

@@ -300,21 +300,14 @@ export class EventQueryService {
     if (event.isDeleted) {
       return {
         isDeleted: true,
-        ...this.eventMapper.mapEventToList(event, false),
-        participantCount: 0,
+        ...this.eventMapper.mapEventToList(event),
+        expectedParticipantCount: 0,
         status: this.eventStatusService.computeEventStatus({
           votingDeadline: event.votingDeadline,
           confirmedTimeSlots: [],
         }),
       };
     }
-
-    const confirmedTimeSlots = event.confirmedTimeSlots.map((cts) => ({
-      slotId: cts.slotId,
-      date: cts.slot.date,
-      startMinute: cts.slot.startMinute,
-      endMinute: cts.slot.endMinute,
-    }));
 
     const host = event.owner
       ? {
@@ -324,25 +317,13 @@ export class EventQueryService {
         }
       : null;
 
-    const votingTimeRange =
-      typeof event.startMinuteOfDay === 'number' &&
-      typeof event.endMinuteOfDay === 'number'
-        ? {
-            startMinuteOfDay: event.startMinuteOfDay,
-            endMinuteOfDay: event.endMinuteOfDay,
-          }
-        : {};
-
     return {
       isDeleted: false,
-      ...this.eventMapper.mapEventToList(event, false),
-      ...votingTimeRange,
+      ...this.eventMapper.mapEventToList(event),
+      expectedParticipantCount: event.expectedParticipants.length,
       host,
-      participantCount: event.expectedParticipants.length,
-      status: this.eventStatusService.computeEventStatus({
-        votingDeadline: event.votingDeadline,
-        confirmedTimeSlots,
-      }),
+      startMinuteOfDay: event.startMinuteOfDay,
+      endMinuteOfDay: event.endMinuteOfDay,
     };
   }
 

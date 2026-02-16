@@ -1,0 +1,2516 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/auth/google/start": {
+      "get": {
+        "operationId": "AuthController_googleStart",
+        "parameters": [
+          {
+            "name": "redirect",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/google/callback": {
+      "get": {
+        "operationId": "AuthController_googleCallback",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/line/start": {
+      "get": {
+        "operationId": "AuthController_lineStart",
+        "parameters": [
+          {
+            "name": "redirect",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/line/callback": {
+      "get": {
+        "operationId": "AuthController_lineCallback",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/liff/login": {
+      "post": {
+        "operationId": "AuthController_liffLogin",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiffLoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/users/search": {
+      "get": {
+        "operationId": "UsersController_searchUsers",
+        "parameters": [
+          {
+            "name": "q",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "GET /users/search?q=query\n搜尋已註冊的使用者",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/events/my": {
+      "get": {
+        "operationId": "EventCoreController_findMyEvents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HostedEventListItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "GET /events/my\n取得當前使用者建立的所有活動",
+        "tags": [
+          "EventCore"
+        ]
+      }
+    },
+    "/events/attended": {
+      "get": {
+        "operationId": "EventCoreController_findAttendedEvents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AttendedEventListItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "GET /events/attended\n取得當前使用者參與的所有活動（有投票紀錄的活動）",
+        "tags": [
+          "EventCore"
+        ]
+      }
+    },
+    "/events": {
+      "post": {
+        "operationId": "EventCoreController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateEventResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "POST /events\n建立新活動（包含自動展開 slots）\n需要登入，創建者會自動加入為參與者",
+        "tags": [
+          "EventCore"
+        ]
+      }
+    },
+    "/events/{eventId}": {
+      "get": {
+        "operationId": "EventCoreController_findOne",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "GET /events/:eventId\n取得活動完整資料（含 slots、votes、participants）",
+        "tags": [
+          "EventCore"
+        ]
+      },
+      "patch": {
+        "operationId": "EventCoreController_update",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateEventResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "PATCH /events/:eventId\n更新活動設定",
+        "tags": [
+          "EventCore"
+        ]
+      },
+      "delete": {
+        "operationId": "EventCoreController_remove",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemoveEventResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "DELETE /events/:eventId\n刪除活動",
+        "tags": [
+          "EventCore"
+        ]
+      }
+    },
+    "/events/{eventId}/public": {
+      "get": {
+        "operationId": "EventCoreController_getEventPublicInfo",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventPublicInfoResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "GET /events/:eventId/public\n取得活動的公開資訊（用於加入確認頁面）",
+        "tags": [
+          "EventCore"
+        ]
+      }
+    },
+    "/events/{eventId}/info": {
+      "get": {
+        "operationId": "EventCoreController_getEventInfo",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventInfoResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "GET /events/:eventId/info\n取得活動詳細資訊頁面（參與者視角，包含主辦人、參與者列表）",
+        "tags": [
+          "EventCore"
+        ]
+      }
+    },
+    "/events/{eventId}/hosted": {
+      "get": {
+        "operationId": "EventCoreController_findOneHosted",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostedEventDetailResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "GET /events/:eventId/hosted\n取得 Host 端的活動詳細資料（包含投票狀態）",
+        "tags": [
+          "EventCore"
+        ]
+      }
+    },
+    "/events/{eventId}/participation": {
+      "get": {
+        "operationId": "ParticipationController_checkParticipantStatus",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckParticipantStatusResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "GET /events/:eventId/participation\n檢查當前使用者是否已經是活動的參與者",
+        "tags": [
+          "Participation"
+        ]
+      }
+    },
+    "/events/{eventId}/participation/join": {
+      "post": {
+        "operationId": "ParticipationController_joinEvent",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinEventResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "POST /events/:eventId/participation/join\n加入活動（透過分享連結）",
+        "tags": [
+          "Participation"
+        ]
+      }
+    },
+    "/events/{eventId}/participation/members": {
+      "put": {
+        "operationId": "ParticipationController_updateParticipants",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateParticipantsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateParticipantsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "PUT /events/:eventId/participation/members\n更新活動的預期參與者",
+        "tags": [
+          "Participation"
+        ]
+      }
+    },
+    "/events/{eventId}/participation/unvoted": {
+      "get": {
+        "operationId": "ParticipationController_getUnvotedParticipants",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnvotedParticipantsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "GET /events/:eventId/participation/unvoted\n取得活動中尚未投票的預期參與者（用於提醒功能）",
+        "tags": [
+          "Participation"
+        ]
+      }
+    },
+    "/events/{eventId}/voting": {
+      "post": {
+        "operationId": "VotingController_vote",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoteEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoteEventResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "POST /events/:eventId/voting\n儲存使用者的有空時段投票",
+        "tags": [
+          "Voting"
+        ]
+      },
+      "patch": {
+        "operationId": "VotingController_updateVotes",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateVoteResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "PATCH /events/:eventId/voting\n更新投票（新增/移除特定 slots）",
+        "tags": [
+          "Voting"
+        ]
+      }
+    },
+    "/events/{eventId}/confirmation": {
+      "post": {
+        "operationId": "ConfirmationController_confirmEventTime",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmEventTimeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmEventTimeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "POST /events/:eventId/confirmation\n確認活動時間（僅限活動擁有者）",
+        "tags": [
+          "Confirmation"
+        ]
+      },
+      "delete": {
+        "operationId": "ConfirmationController_cancelConfirmedTime",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelConfirmedTimeResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "DELETE /events/:eventId/confirmation\n取消確認的活動時間（僅限活動擁有者）",
+        "tags": [
+          "Confirmation"
+        ]
+      }
+    },
+    "/line-bot/webhook": {
+      "post": {
+        "operationId": "LineBotController_handleWebhook",
+        "parameters": [
+          {
+            "name": "x-line-signature",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "LINE Webhook 端點\nLINE Platform 會將事件發送到這個端點",
+        "tags": [
+          "LineBot"
+        ]
+      }
+    },
+    "/line-bot/groups": {
+      "get": {
+        "operationId": "LineBotController_getGroups",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "取得所有活躍的 LINE 群組",
+        "tags": [
+          "LineBot"
+        ]
+      }
+    },
+    "/line-bot/groups/{groupId}/members": {
+      "get": {
+        "operationId": "LineBotController_getGroupMembers",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "取得特定群組的成員列表",
+        "tags": [
+          "LineBot"
+        ]
+      }
+    },
+    "/line-bot/groups/{groupId}/remind": {
+      "post": {
+        "operationId": "LineBotController_sendReminder",
+        "parameters": [
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "發送投票提醒到群組",
+        "tags": [
+          "LineBot"
+        ]
+      }
+    },
+    "/line-bot/events/{eventId}/notify-group": {
+      "post": {
+        "operationId": "LineBotController_notifyGroup",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "POST /line-bot/events/:eventId/notify-group\n發送活動通知到綁定的 LINE 群組",
+        "tags": [
+          "LineBot"
+        ]
+      }
+    },
+    "/line-bot/rich-menu": {
+      "get": {
+        "operationId": "LineBotController_listRichMenus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "LineBot"
+        ]
+      }
+    },
+    "/line-bot/rich-menu/{richMenuId}": {
+      "delete": {
+        "operationId": "LineBotController_deleteRichMenu",
+        "parameters": [
+          {
+            "name": "richMenuId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "刪除指定的 Rich Menu",
+        "tags": [
+          "LineBot"
+        ]
+      }
+    },
+    "/line-bot/rich-menu/default": {
+      "delete": {
+        "operationId": "LineBotController_cancelDefaultRichMenu",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "取消預設 Rich Menu",
+        "tags": [
+          "LineBot"
+        ]
+      }
+    },
+    "/google-calendar/status": {
+      "get": {
+        "operationId": "GoogleCalendarController_getStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "取得 Google Calendar 連結狀態\nGET /google-calendar/status",
+        "tags": [
+          "GoogleCalendar"
+        ]
+      }
+    },
+    "/google-calendar/connect": {
+      "get": {
+        "operationId": "GoogleCalendarController_connect",
+        "parameters": [
+          {
+            "name": "redirect",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "開始 Google Calendar 連結流程\nGET /google-calendar/connect\n會重導向到 Google OAuth",
+        "tags": [
+          "GoogleCalendar"
+        ]
+      }
+    },
+    "/google-calendar/callback": {
+      "get": {
+        "operationId": "GoogleCalendarController_callback",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Google Calendar OAuth callback\nGET /google-calendar/callback\nGoogle 會重導向到這個端點",
+        "tags": [
+          "GoogleCalendar"
+        ]
+      }
+    },
+    "/google-calendar/disconnect": {
+      "delete": {
+        "operationId": "GoogleCalendarController_disconnect",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "斷開 Google Calendar 連結\nDELETE /google-calendar/disconnect",
+        "tags": [
+          "GoogleCalendar"
+        ]
+      }
+    },
+    "/google-calendar/events/{eventId}/conflicts": {
+      "get": {
+        "operationId": "GoogleCalendarController_getConflictingSlots",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "取得指定活動時間範圍內的 Calendar 事件和衝突的時段\nGET /google-calendar/events/:eventId/conflicts",
+        "tags": [
+          "GoogleCalendar"
+        ]
+      }
+    },
+    "/google-calendar/events": {
+      "get": {
+        "operationId": "GoogleCalendarController_getEvents",
+        "parameters": [
+          {
+            "name": "timeMin",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timeMax",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "timeZone",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "取得指定時間範圍內的 Calendar 事件\nGET /google-calendar/events",
+        "tags": [
+          "GoogleCalendar"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Synqer API",
+    "description": "Generated API contract",
+    "version": "1.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "LiffLoginDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "accessToken"
+        ]
+      },
+      "AuthUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "providers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "primaryEmail",
+          "avatarUrl",
+          "providers"
+        ]
+      },
+      "LogoutResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "ConfirmedTimeRangeDto": {
+        "type": "object",
+        "properties": {
+          "startTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "slotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "startTime",
+          "endTime",
+          "slotIds"
+        ]
+      },
+      "HostedEventListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "votingDeadline": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "confirmedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmedTimeRanges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          },
+          "expectedParticipantCount": {
+            "type": "number"
+          },
+          "votedCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "startDate",
+          "endDate",
+          "createdAt",
+          "votingDeadline",
+          "confirmedSlotIds",
+          "confirmedTimeRanges",
+          "status",
+          "expectedParticipantCount",
+          "votedCount"
+        ]
+      },
+      "AttendedEventHostDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "avatarUrl"
+        ]
+      },
+      "AttendedEventListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "votingDeadline": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "confirmedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmedTimeRanges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          },
+          "hasVoted": {
+            "type": "boolean"
+          },
+          "expectedParticipantCount": {
+            "type": "number"
+          },
+          "votedCount": {
+            "type": "number"
+          },
+          "host": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AttendedEventHostDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "startDate",
+          "endDate",
+          "createdAt",
+          "votingDeadline",
+          "confirmedSlotIds",
+          "confirmedTimeRanges",
+          "status",
+          "hasVoted",
+          "expectedParticipantCount",
+          "votedCount",
+          "host"
+        ]
+      },
+      "CreateEventDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "startTime": {
+            "type": "string",
+            "pattern": "/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/"
+          },
+          "endTime": {
+            "type": "string",
+            "pattern": "/^(([01]?[0-9]|2[0-3]):[0-5][0-9]|24:00)$/"
+          },
+          "slotDurationMin": {
+            "type": "number",
+            "minimum": 5,
+            "maximum": 120
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "votingDeadline": {
+            "type": "string"
+          },
+          "lineGroupId": {
+            "type": "string"
+          },
+          "expectedLineUserIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "startDate",
+          "endDate",
+          "startTime",
+          "endTime"
+        ]
+      },
+      "CreateEventResponseDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventId"
+        ]
+      },
+      "EventDetailEventDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startMinuteOfDay": {
+            "type": "number"
+          },
+          "endMinuteOfDay": {
+            "type": "number"
+          },
+          "slotDurationMin": {
+            "type": "number"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "lineGroupId": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerId": {
+            "type": "string",
+            "nullable": true
+          },
+          "votingDeadline": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "confirmedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmedTimeRanges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "startDate",
+          "endDate",
+          "startMinuteOfDay",
+          "endMinuteOfDay",
+          "slotDurationMin",
+          "timeZone",
+          "lineGroupId",
+          "ownerId",
+          "votingDeadline",
+          "confirmedSlotIds",
+          "confirmedTimeRanges",
+          "status"
+        ]
+      },
+      "EventDetailLineGroupDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lineGroupId": {
+            "type": "string"
+          },
+          "groupName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "lineGroupId",
+          "groupName"
+        ]
+      },
+      "EventDetailSlotDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startMinute": {
+            "type": "number"
+          },
+          "endMinute": {
+            "type": "number"
+          },
+          "index": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "eventId",
+          "date",
+          "startMinute",
+          "endMinute",
+          "index"
+        ]
+      },
+      "EventDetailVoteDto": {
+        "type": "object",
+        "properties": {
+          "slotId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "userDisplayName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "slotId",
+          "userId",
+          "userDisplayName"
+        ]
+      },
+      "EventDetailParticipantDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "displayName"
+        ]
+      },
+      "EventDetailExpectedParticipantUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "avatarUrl"
+        ]
+      },
+      "EventDetailExpectedParticipantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lineUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "userId": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasVoted": {
+            "type": "boolean"
+          },
+          "reminderSentAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "user": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventDetailExpectedParticipantUserDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "lineUserId",
+          "userId",
+          "hasVoted",
+          "reminderSentAt",
+          "user"
+        ]
+      },
+      "EventDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "event": {
+            "$ref": "#/components/schemas/EventDetailEventDto"
+          },
+          "lineGroup": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventDetailLineGroupDto"
+              }
+            ]
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDetailSlotDto"
+            }
+          },
+          "votes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDetailVoteDto"
+            }
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDetailParticipantDto"
+            }
+          },
+          "expectedParticipants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDetailExpectedParticipantDto"
+            }
+          }
+        },
+        "required": [
+          "isDeleted",
+          "event",
+          "lineGroup",
+          "slots",
+          "votes",
+          "participants",
+          "expectedParticipants"
+        ]
+      },
+      "EventPublicHostDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "avatarUrl"
+        ]
+      },
+      "EventPublicInfoResponseDto": {
+        "type": "object",
+        "properties": {
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startMinuteOfDay": {
+            "type": "number"
+          },
+          "endMinuteOfDay": {
+            "type": "number"
+          },
+          "votingDeadline": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "confirmedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmedTimeRanges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          },
+          "expectedParticipantCount": {
+            "type": "number"
+          },
+          "host": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventPublicHostDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "isDeleted",
+          "id",
+          "title",
+          "description",
+          "startDate",
+          "endDate",
+          "createdAt",
+          "votingDeadline",
+          "confirmedSlotIds",
+          "confirmedTimeRanges",
+          "status",
+          "expectedParticipantCount"
+        ]
+      },
+      "EventInfoEventDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startMinuteOfDay": {
+            "type": "number"
+          },
+          "endMinuteOfDay": {
+            "type": "number"
+          },
+          "slotDurationMin": {
+            "type": "number"
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "lineGroupId": {
+            "type": "string",
+            "nullable": true
+          },
+          "ownerId": {
+            "type": "string",
+            "nullable": true
+          },
+          "votingDeadline": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "confirmedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmedTimeRanges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
+            }
+          },
+          "status": {
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ],
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "startDate",
+          "endDate",
+          "startMinuteOfDay",
+          "endMinuteOfDay",
+          "slotDurationMin",
+          "timeZone",
+          "lineGroupId",
+          "ownerId",
+          "votingDeadline",
+          "confirmedSlotIds",
+          "confirmedTimeRanges",
+          "status",
+          "createdAt"
+        ]
+      },
+      "EventInfoHostDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "avatarUrl"
+        ]
+      },
+      "EventInfoExpectedParticipantUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "avatarUrl"
+        ]
+      },
+      "EventInfoExpectedParticipantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lineUserId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "pictureUrl": {
+            "type": "string"
+          },
+          "hasVoted": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTED",
+              "NOT_VOTED",
+              "NOT_REGISTERED"
+            ]
+          },
+          "user": {
+            "$ref": "#/components/schemas/EventInfoExpectedParticipantUserDto"
+          }
+        },
+        "required": [
+          "id",
+          "hasVoted",
+          "status"
+        ]
+      },
+      "EventInfoResponseDto": {
+        "type": "object",
+        "properties": {
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "event": {
+            "$ref": "#/components/schemas/EventInfoEventDto"
+          },
+          "host": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventInfoHostDto"
+              }
+            ]
+          },
+          "expectedParticipants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventInfoExpectedParticipantDto"
+            }
+          },
+          "currentUserHasVoted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "isDeleted",
+          "event",
+          "host",
+          "expectedParticipants",
+          "currentUserHasVoted"
+        ]
+      },
+      "HostedEventParticipantDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "hasVoted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "userId",
+          "displayName",
+          "hasVoted"
+        ]
+      },
+      "HostedEventExpectedParticipantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lineUserId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "pictureUrl": {
+            "type": "string"
+          },
+          "hasVoted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "hasVoted"
+        ]
+      },
+      "HostedEventVotingStatsDto": {
+        "type": "object",
+        "properties": {
+          "totalExpected": {
+            "type": "number"
+          },
+          "totalVoted": {
+            "type": "number"
+          },
+          "votingPercentage": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "totalExpected",
+          "totalVoted",
+          "votingPercentage"
+        ]
+      },
+      "HostedEventDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "event": {
+            "$ref": "#/components/schemas/EventDetailEventDto"
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDetailSlotDto"
+            }
+          },
+          "votes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventDetailVoteDto"
+            }
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HostedEventParticipantDto"
+            }
+          },
+          "expectedParticipants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HostedEventExpectedParticipantDto"
+            }
+          },
+          "votingStats": {
+            "$ref": "#/components/schemas/HostedEventVotingStatsDto"
+          }
+        },
+        "required": [
+          "isDeleted",
+          "event",
+          "slots",
+          "votes",
+          "participants",
+          "expectedParticipants",
+          "votingStats"
+        ]
+      },
+      "UpdateEventDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "timeZone": {
+            "type": "string"
+          },
+          "votingDeadline": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateEventResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "startDate",
+          "endDate"
+        ]
+      },
+      "RemoveEventResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "CheckParticipantStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "isParticipant": {
+            "type": "boolean"
+          },
+          "hasVoted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "isParticipant",
+          "hasVoted"
+        ]
+      },
+      "JoinEventResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "alreadyJoined": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "alreadyJoined",
+          "message"
+        ]
+      },
+      "ParticipantInput": {
+        "type": "object",
+        "properties": {
+          "lineUserId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateParticipantsDto": {
+        "type": "object",
+        "properties": {
+          "participants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParticipantInput"
+            }
+          }
+        },
+        "required": [
+          "participants"
+        ]
+      },
+      "UpdateParticipantsResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "success",
+          "count"
+        ]
+      },
+      "UnvotedParticipantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lineUserId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "pictureUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "reminderSentAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "lineUserId",
+          "userId",
+          "displayName",
+          "reminderSentAt"
+        ]
+      },
+      "UnvotedParticipantsResponseDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "lineGroupId": {
+            "type": "string"
+          },
+          "lineGroupLineId": {
+            "type": "string"
+          },
+          "unvotedParticipants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnvotedParticipantDto"
+            }
+          }
+        },
+        "required": [
+          "eventId",
+          "unvotedParticipants"
+        ]
+      },
+      "VoteEventDto": {
+        "type": "object",
+        "properties": {
+          "selectedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "voteMode": {
+            "type": "string",
+            "enum": [
+              "available",
+              "unavailable"
+            ]
+          }
+        },
+        "required": [
+          "selectedSlotIds"
+        ]
+      },
+      "VoteEventResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "votedSlots": {
+            "type": "number"
+          },
+          "voteMode": {
+            "type": "string",
+            "enum": [
+              "available",
+              "unavailable"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "votedSlots",
+          "voteMode"
+        ]
+      },
+      "UpdateVoteDto": {
+        "type": "object",
+        "properties": {
+          "addSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "removeSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UpdateVoteResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "added": {
+            "type": "number"
+          },
+          "removed": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "success",
+          "added",
+          "removed"
+        ]
+      },
+      "ConfirmEventTimeDto": {
+        "type": "object",
+        "properties": {
+          "slotIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "slotIds"
+        ]
+      },
+      "ConfirmEventTimeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "confirmedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "confirmedSlotIds",
+          "status"
+        ]
+      },
+      "CancelConfirmedTimeResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ]
+      }
+    }
+  }
+}

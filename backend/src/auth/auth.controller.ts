@@ -21,6 +21,11 @@ import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { SessionAuthGuard } from './guards';
 import { CurrentUser } from './decorators';
+import {
+  AuthUserResponseDto,
+  LiffLoginDto,
+  LogoutResponseDto,
+} from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -125,16 +130,12 @@ export class AuthController {
   @Post('liff/login')
   @HttpCode(HttpStatus.OK)
   async liffLogin(
-    @Body('accessToken') accessToken: string,
+    @Body() body: LiffLoginDto,
     @Session() session: SessionData,
     @Req() req: Request,
-  ): Promise<{
-    id: string;
-    displayName: string | null;
-    primaryEmail: string | null;
-    avatarUrl: string | null;
-    providers: string[];
-  }> {
+  ): Promise<AuthUserResponseDto> {
+    const { accessToken } = body;
+
     if (!accessToken) {
       throw new BadRequestException('accessToken is required');
     }
@@ -182,13 +183,7 @@ export class AuthController {
   // Get current user
   @Get('me')
   @UseGuards(SessionAuthGuard)
-  async getMe(@CurrentUser() userId: string): Promise<{
-    id: string;
-    displayName: string | null;
-    primaryEmail: string | null;
-    avatarUrl: string | null;
-    providers: string[];
-  }> {
+  async getMe(@CurrentUser() userId: string): Promise<AuthUserResponseDto> {
     const user = await this.usersService.findUserById(userId);
 
     if (!user) {
@@ -208,7 +203,10 @@ export class AuthController {
   // Logout
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<LogoutResponseDto> {
     // Convert callback-based session.destroy to Promise
     await new Promise<void>((resolve, reject) => {
       req.session.destroy((err: Error | null) => {

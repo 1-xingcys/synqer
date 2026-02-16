@@ -203,18 +203,8 @@ describe('EventMapperService', () => {
         votingDeadline: null,
         confirmedSlotIds: [],
         confirmedTimeRanges: [],
-        participantCount: 1,
         status: 'VOTING',
       });
-    });
-
-    it('should map event without status when includeStatus is false', () => {
-      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
-
-      const result = service.mapEventToList(mockEvent, false);
-
-      expect(result).not.toHaveProperty('status');
-      expect(result).not.toHaveProperty('participantCount');
     });
 
     it('should handle event with confirmed time slots', () => {

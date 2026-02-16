@@ -1,18 +1,12 @@
 import { useMemo } from "react";
-import { EventStatus, AttendedEventListItem } from "@/types/event";
-import { EventRowHost } from "@/components/eventCommon/EventsOverview";
-
-export interface ExtendedAttendedEvent extends AttendedEventListItem {
-  host?: EventRowHost | null;
-  expectedParticipantCount?: number;
-  votedCount?: number;
-}
+import { EventStatus } from "@/types/event";
+import type { AttendedEventApiItem } from "./useAttendedEvents";
 
 interface FilteredEvents {
-  [EventStatus.VOTING]: ExtendedAttendedEvent[];
-  [EventStatus.VOTING_ENDED]: ExtendedAttendedEvent[];
-  [EventStatus.CONFIRMED]: ExtendedAttendedEvent[];
-  [EventStatus.COMPLETED]: ExtendedAttendedEvent[];
+  [EventStatus.VOTING]: AttendedEventApiItem[];
+  [EventStatus.VOTING_ENDED]: AttendedEventApiItem[];
+  [EventStatus.CONFIRMED]: AttendedEventApiItem[];
+  [EventStatus.COMPLETED]: AttendedEventApiItem[];
 }
 
 /**
@@ -24,9 +18,9 @@ interface FilteredEvents {
  * Completed: By confirmed end date (closer = higher priority)
  */
 function sortEvents(
-  events: ExtendedAttendedEvent[],
+  events: AttendedEventApiItem[],
   category: EventStatus,
-): ExtendedAttendedEvent[] {
+): AttendedEventApiItem[] {
   const now = new Date().getTime();
 
   return [...events].sort((a, b) => {
@@ -78,7 +72,7 @@ function sortEvents(
  * Hook to filter and sort attended events by status
  */
 export function useFilteredAttendedEvents(
-  events: ExtendedAttendedEvent[],
+  events: AttendedEventApiItem[],
 ): FilteredEvents {
   return useMemo(() => {
     const filtered: FilteredEvents = {

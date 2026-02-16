@@ -10,6 +10,10 @@ import {
 } from '@nestjs/common';
 import { VoteService } from './services/vote.service';
 import { VoteEventDto, UpdateVoteDto } from './dto/vote-event.dto';
+import {
+  VoteEventResponseDto,
+  UpdateVoteResponseDto,
+} from './dto/vote-response.dto';
 import { SessionAuthGuard, CurrentUser } from '../../auth';
 
 @Controller('events/:eventId/voting')
@@ -27,7 +31,7 @@ export class VotingController {
     @Param('eventId') eventId: string,
     @Body() voteDto: VoteEventDto,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<VoteEventResponseDto> {
     return this.voteService.vote(eventId, userId, voteDto);
   }
 
@@ -42,7 +46,7 @@ export class VotingController {
     @Param('eventId') eventId: string,
     @Body() updateVoteDto: UpdateVoteDto,
     @CurrentUser() userId: string,
-  ) {
+  ): Promise<UpdateVoteResponseDto> {
     return this.voteService.updateVotes(eventId, userId, updateVoteDto);
   }
 }
