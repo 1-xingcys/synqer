@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { VoteEventDtoVoteMode } from "@/generated/openapi";
 import type { operations } from "@/generated/openapi";
 
 type EventDetailResponse =
@@ -81,7 +80,7 @@ export async function patchVotesApi(
 export async function replaceVotesApi(
   eventId: string,
   selectedSlotIds: string[],
-  voteMode: VoteEventRequest["voteMode"] = VoteEventDtoVoteMode.available,
+  voteMode: VoteEventRequest["voteMode"] = "available",
 ): Promise<VoteEventResponse> {
   if (!process.env.NEXT_PUBLIC_API) {
     throw new Error("NEXT_PUBLIC_API is not set");

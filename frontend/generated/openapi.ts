@@ -731,7 +731,7 @@ export interface components {
             confirmedSlotIds: string[];
             confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             /** @enum {string} */
-            status: HostedEventListItemDtoStatus;
+            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
             expectedParticipantCount: number;
             votedCount: number;
         };
@@ -755,7 +755,7 @@ export interface components {
             confirmedSlotIds: string[];
             confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             /** @enum {string} */
-            status: AttendedEventListItemDtoStatus;
+            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
             hasVoted: boolean;
             expectedParticipantCount: number;
             votedCount: number;
@@ -796,7 +796,7 @@ export interface components {
             confirmedSlotIds: string[];
             confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             /** @enum {string} */
-            status: EventDetailEventDtoStatus;
+            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
         };
         EventDetailLineGroupDto: {
             id: string;
@@ -867,7 +867,7 @@ export interface components {
             confirmedSlotIds: string[];
             confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             /** @enum {string} */
-            status: EventPublicInfoResponseDtoStatus;
+            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
             expectedParticipantCount: number;
             host?: components["schemas"]["EventPublicHostDto"] | null;
         };
@@ -890,7 +890,7 @@ export interface components {
             confirmedSlotIds: string[];
             confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             /** @enum {string} */
-            status: EventInfoEventDtoStatus;
+            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
             /** Format: date-time */
             createdAt: string;
         };
@@ -912,7 +912,7 @@ export interface components {
             pictureUrl?: string;
             hasVoted: boolean;
             /** @enum {string} */
-            status: EventInfoExpectedParticipantDtoStatus;
+            status: "VOTED" | "NOT_VOTED" | "NOT_REGISTERED";
             user?: components["schemas"]["EventInfoExpectedParticipantUserDto"];
         };
         EventInfoResponseDto: {
@@ -1005,13 +1005,13 @@ export interface components {
         VoteEventDto: {
             selectedSlotIds: string[];
             /** @enum {string} */
-            voteMode?: VoteEventDtoVoteMode;
+            voteMode?: "available" | "unavailable";
         };
         VoteEventResponseDto: {
             success: boolean;
             votedSlots: number;
             /** @enum {string} */
-            voteMode: VoteEventResponseDtoVoteMode;
+            voteMode: "available" | "unavailable";
         };
         UpdateVoteDto: {
             addSlotIds?: string[];
@@ -1029,12 +1029,12 @@ export interface components {
             id: string;
             confirmedSlotIds: string[];
             /** @enum {string} */
-            status: ConfirmEventTimeResponseDtoStatus;
+            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
         };
         CancelConfirmedTimeResponseDto: {
             id: string;
             /** @enum {string} */
-            status: CancelConfirmedTimeResponseDtoStatus;
+            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
         };
     };
     responses: never;
@@ -1862,59 +1862,4 @@ export interface operations {
             };
         };
     };
-}
-export enum HostedEventListItemDtoStatus {
-    VOTING = "VOTING",
-    VOTING_ENDED = "VOTING_ENDED",
-    CONFIRMED = "CONFIRMED",
-    COMPLETED = "COMPLETED"
-}
-export enum AttendedEventListItemDtoStatus {
-    VOTING = "VOTING",
-    VOTING_ENDED = "VOTING_ENDED",
-    CONFIRMED = "CONFIRMED",
-    COMPLETED = "COMPLETED"
-}
-export enum EventDetailEventDtoStatus {
-    VOTING = "VOTING",
-    VOTING_ENDED = "VOTING_ENDED",
-    CONFIRMED = "CONFIRMED",
-    COMPLETED = "COMPLETED"
-}
-export enum EventPublicInfoResponseDtoStatus {
-    VOTING = "VOTING",
-    VOTING_ENDED = "VOTING_ENDED",
-    CONFIRMED = "CONFIRMED",
-    COMPLETED = "COMPLETED"
-}
-export enum EventInfoEventDtoStatus {
-    VOTING = "VOTING",
-    VOTING_ENDED = "VOTING_ENDED",
-    CONFIRMED = "CONFIRMED",
-    COMPLETED = "COMPLETED"
-}
-export enum EventInfoExpectedParticipantDtoStatus {
-    VOTED = "VOTED",
-    NOT_VOTED = "NOT_VOTED",
-    NOT_REGISTERED = "NOT_REGISTERED"
-}
-export enum VoteEventDtoVoteMode {
-    available = "available",
-    unavailable = "unavailable"
-}
-export enum VoteEventResponseDtoVoteMode {
-    available = "available",
-    unavailable = "unavailable"
-}
-export enum ConfirmEventTimeResponseDtoStatus {
-    VOTING = "VOTING",
-    VOTING_ENDED = "VOTING_ENDED",
-    CONFIRMED = "CONFIRMED",
-    COMPLETED = "COMPLETED"
-}
-export enum CancelConfirmedTimeResponseDtoStatus {
-    VOTING = "VOTING",
-    VOTING_ENDED = "VOTING_ENDED",
-    CONFIRMED = "CONFIRMED",
-    COMPLETED = "COMPLETED"
 }

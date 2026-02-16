@@ -22,6 +22,7 @@ export default tseslint.config(
       'jest.config.cjs',
       'postcss.config.mjs',
       'tailwind.config.ts',
+      'generated/openapi.ts',
     ],
   },
   // 使用 ESLint 推薦的基本規則

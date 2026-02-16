@@ -12,7 +12,7 @@
     "test:cov": "jest --coverage",
     "lint": "eslint --fix",
     "format": "prettier --write \"app/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\"",
-    "api:gen": "openapi-typescript ../backend/openapi/openapi.json --enum -o generated/openapi.ts",
+    "api:gen": "openapi-typescript ../backend/openapi/openapi.json -o generated/openapi.ts",
     "api:gen:check": "npm run api:gen && git diff --exit-code generated/openapi.ts"
   },
   "dependencies": {
