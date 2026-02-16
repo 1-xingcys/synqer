@@ -6,9 +6,4 @@ export { default as EmptyState } from "./EmptyState";
 export { default as EventsLayout } from "./EventsLayout";
 
 // Export types
-export type {
-  EventRowData,
-  HostedEventRowData,
-  EventRowHost,
-  EventRowMode,
-} from "./types";
+export type { EventRowData, HostedEventRowData, EventRowMode } from "./types";
