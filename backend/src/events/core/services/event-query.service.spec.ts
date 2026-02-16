@@ -119,6 +119,7 @@ describe('EventQueryService', () => {
       expect(eventRepository.findByParticipantUserId).toHaveBeenCalledWith(userId);
       expect(result).toHaveLength(1);
       expect(result[0].hasVoted).toBe(true);
+      expect(result[0].expectedParticipantCount).toBe(1);
       expect(result[0].host).toEqual({
         id: 'owner-1',
         displayName: 'Owner',
@@ -424,7 +425,7 @@ describe('EventQueryService', () => {
         isDeleted: false,
         id: eventId,
         host: null,
-        participantCount: 1,
+        expectedParticipantCount: 1,
         status: 'VOTING',
       });
       expect(mockEventStatusService.computeEventStatus).not.toHaveBeenCalled();
@@ -452,7 +453,7 @@ describe('EventQueryService', () => {
       const result = await service.getEventPublicInfo('event-123');
 
       expect(result?.isDeleted).toBe(true);
-      expect(result?.participantCount).toBe(0);
+      expect(result?.expectedParticipantCount).toBe(0);
     });
   });
 });

@@ -301,7 +301,7 @@ export class EventQueryService {
       return {
         isDeleted: true,
         ...this.eventMapper.mapEventToList(event),
-        participantCount: 0,
+        expectedParticipantCount: 0,
         status: this.eventStatusService.computeEventStatus({
           votingDeadline: event.votingDeadline,
           confirmedTimeSlots: [],
@@ -320,7 +320,7 @@ export class EventQueryService {
     return {
       isDeleted: false,
       ...this.eventMapper.mapEventToList(event),
-      participantCount: event.expectedParticipants.length,
+      expectedParticipantCount: event.expectedParticipants.length,
       host,
       startMinuteOfDay: event.startMinuteOfDay,
       endMinuteOfDay: event.endMinuteOfDay,

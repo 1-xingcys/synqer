@@ -27,7 +27,7 @@ export interface EventPublicInfo {
   confirmedSlotIds: string[];
   confirmedTimeRanges: ConfirmedTimeRange[];
   status: EventStatus;
-  participantCount: number;
+  expectedParticipantCount: number;
   host?: EventHost | null;
 }
 
