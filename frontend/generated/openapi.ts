@@ -709,6 +709,57 @@ export interface components {
         LogoutResponseDto: {
             message: string;
         };
+        ConfirmedTimeRangeDto: {
+            /** Format: date-time */
+            startTime: string;
+            /** Format: date-time */
+            endTime: string;
+            slotIds: string[];
+        };
+        HostedEventListItemDto: {
+            id: string;
+            title: string | null;
+            description: string | null;
+            /** Format: date-time */
+            startDate: string;
+            /** Format: date-time */
+            endDate: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            votingDeadline: string | null;
+            confirmedSlotIds: string[];
+            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
+            status: string;
+            expectedParticipantCount: number;
+            votedCount: number;
+        };
+        AttendedEventHostDto: {
+            id: string;
+            displayName: string | null;
+            avatarUrl: string | null;
+        };
+        AttendedEventListItemDto: {
+            id: string;
+            title: string | null;
+            description: string | null;
+            /** Format: date-time */
+            startDate: string;
+            /** Format: date-time */
+            endDate: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            votingDeadline: string | null;
+            confirmedSlotIds: string[];
+            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
+            /** @enum {string} */
+            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
+            hasVoted: boolean;
+            expectedParticipantCount: number;
+            votedCount: number;
+            host: components["schemas"]["AttendedEventHostDto"] | null;
+        };
         CreateEventDto: {
             title?: string;
             description?: string;
@@ -947,7 +998,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>[];
+                    "application/json": components["schemas"]["HostedEventListItemDto"][];
                 };
             };
         };
@@ -966,7 +1017,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>[];
+                    "application/json": components["schemas"]["AttendedEventListItemDto"][];
                 };
             };
         };

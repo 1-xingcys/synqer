@@ -239,7 +239,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "$ref": "#/components/schemas/HostedEventListItemDto"
                   }
                 }
               }
@@ -264,7 +264,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "$ref": "#/components/schemas/AttendedEventListItemDto"
                   }
                 }
               }
@@ -1089,6 +1089,212 @@
         },
         "required": [
           "message"
+        ]
+      },
+      "ConfirmedTimeRangeDto": {
+        "type": "object",
+        "properties": {
+          "startTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "slotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "startTime",
+          "endTime",
+          "slotIds"
+        ]
+      },
+      "HostedEventListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "votingDeadline": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "confirmedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmedTimeRanges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          },
+          "expectedParticipantCount": {
+            "type": "number"
+          },
+          "votedCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "startDate",
+          "endDate",
+          "createdAt",
+          "votingDeadline",
+          "confirmedSlotIds",
+          "confirmedTimeRanges",
+          "status",
+          "expectedParticipantCount",
+          "votedCount"
+        ]
+      },
+      "AttendedEventHostDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "avatarUrl"
+        ]
+      },
+      "AttendedEventListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "votingDeadline": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "confirmedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmedTimeRanges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          },
+          "hasVoted": {
+            "type": "boolean"
+          },
+          "expectedParticipantCount": {
+            "type": "number"
+          },
+          "votedCount": {
+            "type": "number"
+          },
+          "host": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AttendedEventHostDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "startDate",
+          "endDate",
+          "createdAt",
+          "votingDeadline",
+          "confirmedSlotIds",
+          "confirmedTimeRanges",
+          "status",
+          "hasVoted",
+          "expectedParticipantCount",
+          "votedCount",
+          "host"
         ]
       },
       "CreateEventDto": {

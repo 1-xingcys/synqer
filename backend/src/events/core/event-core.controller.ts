@@ -16,6 +16,8 @@ import { EventQueryService } from './services/event-query.service';
 import { EventUpdateService } from './services/event-update.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { AttendedEventListItemDto } from './dto/attended-event-list-item.dto';
+import { HostedEventListItemDto } from './dto/hosted-event-list-item.dto';
 import { SessionAuthGuard, CurrentUser } from '../../auth';
 
 @Controller('events')
@@ -32,7 +34,9 @@ export class EventCoreController {
    */
   @Get('my')
   @UseGuards(SessionAuthGuard)
-  async findMyEvents(@CurrentUser() userId: string) {
+  async findMyEvents(
+    @CurrentUser() userId: string,
+  ): Promise<HostedEventListItemDto[]> {
     return await this.eventQueryService.findUserEvents(userId);
   }
 
@@ -42,7 +46,9 @@ export class EventCoreController {
    */
   @Get('attended')
   @UseGuards(SessionAuthGuard)
-  async findAttendedEvents(@CurrentUser() userId: string) {
+  async findAttendedEvents(
+    @CurrentUser() userId: string,
+  ): Promise<AttendedEventListItemDto[]> {
     return await this.eventQueryService.findAttendedEvents(userId);
   }
 
