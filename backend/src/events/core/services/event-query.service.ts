@@ -320,6 +320,7 @@ export class EventQueryService {
     return {
       isDeleted: false,
       ...this.eventMapper.mapEventToList(event),
+      participantCount: event.expectedParticipants.length,
       host,
       startMinuteOfDay: event.startMinuteOfDay,
       endMinuteOfDay: event.endMinuteOfDay,

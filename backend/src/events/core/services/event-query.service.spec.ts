@@ -415,7 +415,6 @@ describe('EventQueryService', () => {
       mockEventRepository.findPublicInfo.mockResolvedValue(mockEvent);
       mockEventMapper.mapEventToList.mockReturnValue({
         id: eventId,
-        participantCount: 1,
         status: 'VOTING',
       });
 

@@ -203,7 +203,6 @@ describe('EventMapperService', () => {
         votingDeadline: null,
         confirmedSlotIds: [],
         confirmedTimeRanges: [],
-        participantCount: 1,
         status: 'VOTING',
       });
     });
