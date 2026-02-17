@@ -12,7 +12,6 @@ import {
   DatePagination,
   TimeColumn,
 } from "@/components/eventCommon/timeGrid/ui";
-import { useTimeGridStickyHeaderSignal } from "../stickyHeaderSignalContext";
 import { formatMinutesToTime } from "@/lib/utils";
 import { Z_INDEX } from "@/lib/zIndex";
 import {
@@ -71,7 +70,6 @@ export function ResultsHeatmapGrid({
   const gridRef = useRef<HTMLDivElement>(null);
   const stickySentinelRef = useRef<HTMLDivElement>(null);
   const [isStickyActive, setIsStickyActive] = useState(false);
-  const { setStickyActive } = useTimeGridStickyHeaderSignal();
   const { datesPerPage, slotHeight } = useResponsiveGrid();
 
   // Modal state
@@ -250,20 +248,19 @@ export function ResultsHeatmapGrid({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const active = !entry.isIntersecting;
+        const active =
+          !entry.isIntersecting && entry.boundingClientRect.top < 0;
         setIsStickyActive(active);
-        setStickyActive(active);
       },
-      { threshold: [1] },
+      { threshold: [0, 1] },
     );
 
     observer.observe(sentinel);
     return () => {
       observer.disconnect();
       setIsStickyActive(false);
-      setStickyActive(false);
     };
-  }, [setStickyActive]);
+  }, []);
 
   return (
     <div className="space-y-0">
