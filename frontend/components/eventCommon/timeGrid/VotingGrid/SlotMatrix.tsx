@@ -71,7 +71,6 @@ export const SlotMatrix = memo(function SlotMatrix({
                 isSelected={cell.isSelected}
                 isPartiallySelected={cell.isPartiallySelected}
                 isHovered={cell.isHovered}
-                isLongPressed={cell.isLongPressed}
                 isDragging={isDragging}
                 inRectangle={cell.inRectangle}
                 mergedRectBounds={mergedRectBounds}
