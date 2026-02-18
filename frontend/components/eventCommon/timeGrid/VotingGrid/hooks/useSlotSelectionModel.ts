@@ -9,7 +9,7 @@ import {
   getClearSelectionAvailableSlotIds,
   getSelectAllAvailableSlotIds,
   getMarkUnavailableDiff,
-} from "../../domain/selection";
+} from "../domain/selection";
 
 interface UseSlotSelectionModelProps {
   slots: TimeSlot[];
