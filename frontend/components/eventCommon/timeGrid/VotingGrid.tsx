@@ -16,8 +16,6 @@ import {
   GridToolsMenu,
 } from "./ui";
 
-export type { VotingGridProps };
-
 export default function VotingGrid({
   slots,
   votes,
