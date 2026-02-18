@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { VotingGridProps } from "./types";
-import { useVotingGridController } from "./hooks";
+import { VotingGridProps } from "../types";
+import { useVotingGridController } from "../hooks";
 import { formatMinutesToTime } from "@/lib/utils";
 import { Z_INDEX } from "@/lib/zIndex";
 import {
@@ -14,7 +14,7 @@ import {
   GoogleCalendarPanel,
   DatePagination,
   GridToolsMenu,
-} from "./ui";
+} from "../ui";
 
 export default function VotingGrid({
   slots,
