@@ -19,7 +19,6 @@ interface TimeSlotCellProps {
   isSelected: boolean;
   isPartiallySelected?: boolean;
   isHovered: boolean;
-  isLongPressed: boolean;
   isDragging: boolean;
   inRectangle: boolean;
   mergedRectBounds: MergedRectBounds | null;
@@ -44,7 +43,6 @@ export function TimeSlotCell({
   isSelected,
   isPartiallySelected = false,
   isHovered,
-  isLongPressed,
   isDragging,
   inRectangle,
   mergedRectBounds,
@@ -62,8 +60,6 @@ export function TimeSlotCell({
   onClick,
 }: TimeSlotCellProps) {
   const tJoined = useTranslations("joined");
-  const showTooltip =
-    (isHovered || isLongPressed) && voters.length > 0 && !isDragging;
 
   // Determine border style for rectangle selection
   // Only show blue border on the outer edges of the selection rectangle
@@ -225,25 +221,6 @@ export function TimeSlotCell({
           }`}
         >
           {voters.length}
-        </div>
-      )}
-
-      {/* Tooltip showing voters */}
-      {showTooltip && (
-        <div className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 pointer-events-none">
-          <div className="bg-gray-900 dark:bg-zinc-700 text-white text-xs rounded-lg px-3 py-2 shadow-lg whitespace-nowrap">
-            <div className="font-medium mb-1 text-gray-300 dark:text-zinc-300">
-              {tJoined("votersForSlot")}
-            </div>
-            {voters.map((voter, i) => (
-              <div key={i} className="flex items-center gap-1.5">
-                <span className="text-emerald-400">✓</span>
-                {voter}
-              </div>
-            ))}
-            {/* Arrow */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-zinc-700" />
-          </div>
         </div>
       )}
     </div>
