@@ -22,6 +22,12 @@ export interface Vote {
   pictureUrl?: string;
 }
 
+export interface StagedVote {
+  slotIds: string[];
+  baselineSlotIds: string[];
+  updatedAt: string;
+}
+
 export interface Participant {
   userId: string;
   displayName: string;
@@ -45,6 +51,8 @@ export interface GridPosition {
 export interface VotingGridProps {
   slots: TimeSlot[];
   votes: Vote[];
+  stagedVote: StagedVote | null;
+  currentUserHasVoted: boolean;
   currentUserId: string;
   currentUserDisplayName: string;
   eventId: string;
@@ -65,6 +73,7 @@ export interface SlotMatrixCellViewModel {
   mergedSlotIds: string[];
   isSelected: boolean;
   isPartiallySelected: boolean;
+  selectionTone: "none" | "committed" | "staged";
   isHovered: boolean;
   isLongPressed: boolean;
   inRectangle: boolean;

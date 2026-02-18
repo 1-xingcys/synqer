@@ -293,8 +293,9 @@ export function useMergedTimeGridSelectionInteraction({
         // Remove these slots
         onSelectionCommit([], slotIds);
       } else {
-        // Add these slots
-        onSelectionCommit(slotIds, []);
+        // For partial selection, only add missing slots to reach fully selected.
+        const missingSlotIds = slotIds.filter((id) => !selectedSlots.has(id));
+        onSelectionCommit(missingSlotIds, []);
       }
     },
     [getSlotIdsForCell, isCellFullySelected, selectedSlots, onSelectionCommit],

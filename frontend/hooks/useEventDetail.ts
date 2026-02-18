@@ -12,6 +12,12 @@ type UpdateVoteRequest =
   operations["VotingController_updateVotes"]["requestBody"]["content"]["application/json"];
 type UpdateVoteResponse =
   operations["VotingController_updateVotes"]["responses"][200]["content"]["application/json"];
+type UpdateStagedVoteRequest =
+  operations["VotingController_updateStagedVotes"]["requestBody"]["content"]["application/json"];
+type UpdateStagedVoteResponse =
+  operations["VotingController_updateStagedVotes"]["responses"][200]["content"]["application/json"];
+type CommitStagedVoteResponse =
+  operations["VotingController_commitStagedVotes"]["responses"][200]["content"]["application/json"];
 
 // Query key factory for event detail
 export const eventDetailKeys = {
@@ -109,6 +115,71 @@ export async function replaceVotesApi(
   }
 
   return response.json() as Promise<VoteEventResponse>;
+}
+
+// Patch staged votes function (incremental update for draft)
+export async function patchStagedVotesApi(
+  eventId: string,
+  addSlotIds: string[],
+  removeSlotIds: string[],
+  voteMode: UpdateStagedVoteRequest["voteMode"],
+): Promise<UpdateStagedVoteResponse> {
+  if (!process.env.NEXT_PUBLIC_API) {
+    throw new Error("NEXT_PUBLIC_API is not set");
+  }
+
+  const payload: UpdateStagedVoteRequest = {
+    addSlotIds,
+    removeSlotIds,
+    voteMode,
+  };
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/voting/staged`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    },
+  );
+
+  if (!response.ok) {
+    const errorData = (await response.json().catch(() => ({}))) as {
+      message?: string;
+    };
+    throw new Error(errorData.message || "Failed to update staged votes");
+  }
+
+  return response.json() as Promise<UpdateStagedVoteResponse>;
+}
+
+// Commit staged votes function
+export async function commitStagedVotesApi(
+  eventId: string,
+): Promise<CommitStagedVoteResponse> {
+  if (!process.env.NEXT_PUBLIC_API) {
+    throw new Error("NEXT_PUBLIC_API is not set");
+  }
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/voting/commit`,
+    {
+      method: "POST",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    const errorData = (await response.json().catch(() => ({}))) as {
+      message?: string;
+    };
+    throw new Error(errorData.message || "Failed to commit staged votes");
+  }
+
+  return response.json() as Promise<CommitStagedVoteResponse>;
 }
 
 export function useEventDetail(eventId: string) {

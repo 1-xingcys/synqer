@@ -18,6 +18,8 @@ import { VoteMode } from "@/types/event";
 interface UseVotingGridControllerProps {
   slots: VotingGridProps["slots"];
   votes: VotingGridProps["votes"];
+  stagedVote: VotingGridProps["stagedVote"];
+  currentUserHasVoted: VotingGridProps["currentUserHasVoted"];
   eventId: VotingGridProps["eventId"];
   currentUserId: VotingGridProps["currentUserId"];
   currentUserDisplayName: VotingGridProps["currentUserDisplayName"];
@@ -29,6 +31,9 @@ interface UseVotingGridControllerResult {
     setVoteMode: (mode: VoteMode) => void;
     clearSelection: () => void;
     selectAll: () => void;
+    hasStagedVoteDraft: boolean;
+    commitStagedVotes: () => void;
+    isCommitPending: boolean;
     isDayFullySelected: (dateKey: string) => boolean;
     selectEntireDay: (dateKey: string) => void;
   };
@@ -91,6 +96,8 @@ interface UseVotingGridControllerResult {
 export function useVotingGridController({
   slots,
   votes,
+  stagedVote,
+  currentUserHasVoted,
   eventId,
   currentUserId,
   currentUserDisplayName,
@@ -98,11 +105,19 @@ export function useVotingGridController({
   const [granularity, setGranularity] = useState<TimeGranularity>(30);
   const { datesPerPage, slotHeight } = useResponsiveGrid();
 
-  const { selectedSlots, toggleSlots, replaceAllSlots } = useOptimisticVoting({
+  const {
+    committedSlots,
+    stagedSlots,
+    hasStagedVoteDraft,
+    updateStagedVotes,
+    commitStagedVotes,
+    isCommitPending,
+  } = useOptimisticVoting({
     eventId,
     currentUserId,
     currentUserDisplayName,
     votes,
+    stagedVote,
   });
 
   const { slotsByDate, dates, timeSlots } = useSlotGridModel({ slots });
@@ -111,6 +126,7 @@ export function useVotingGridController({
     voteMode,
     setVoteMode,
     displaySelection: modeDisplaySelection,
+    committedDisplaySelection,
     commitDisplaySelectionChange,
     selectEntireDay,
     clearSelection,
@@ -120,9 +136,11 @@ export function useVotingGridController({
   } = useSlotSelectionModel({
     slots,
     slotsByDate,
-    selectedSlots,
-    onSelectionCommit: toggleSlots,
-    onReplaceAll: replaceAllSlots,
+    committedSlots,
+    stagedSlots,
+    hasStagedVoteDraft,
+    hasVoted: currentUserHasVoted,
+    onSelectionCommit: updateStagedVotes,
   });
 
   const { mergedTimeRows } = useMergedTimeRowsModel({
@@ -211,6 +229,8 @@ export function useVotingGridController({
     longPressCell,
     isInDragRectangle,
     getVotersForMergedRow,
+    committedDisplaySelection,
+    hasStagedVoteDraft,
     getCalendarProjectionForCell,
   });
 
@@ -237,6 +257,9 @@ export function useVotingGridController({
       setVoteMode,
       clearSelection,
       selectAll,
+      hasStagedVoteDraft,
+      commitStagedVotes,
+      isCommitPending,
       isDayFullySelected,
       selectEntireDay,
     },

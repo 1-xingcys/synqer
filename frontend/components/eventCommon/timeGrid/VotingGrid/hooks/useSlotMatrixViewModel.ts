@@ -19,6 +19,8 @@ interface UseSlotMatrixViewModelProps {
   paginatedDates: string[];
   slotsByDate: Record<string, TimeSlot[]>;
   displaySelection: Set<string>;
+  committedDisplaySelection: Set<string>;
+  hasStagedVoteDraft: boolean;
   hoveredCell: CellPosition | null;
   longPressCell: CellPosition | null;
   isInDragRectangle: (rowIndex: number, dateIndex: number) => boolean;
@@ -41,6 +43,8 @@ export function useSlotMatrixViewModel({
   paginatedDates,
   slotsByDate,
   displaySelection,
+  committedDisplaySelection,
+  hasStagedVoteDraft,
   hoveredCell,
   longPressCell,
   isInDragRectangle,
@@ -74,6 +78,21 @@ export function useSlotMatrixViewModel({
         const isPartiallySelected =
           selectedCount > 0 && selectedCount < row.slotIndices.length;
 
+        const hasSelectionDiff =
+          isSelected &&
+          mergedSlotIds.some(
+            (slotId) =>
+              displaySelection.has(slotId) !==
+              committedDisplaySelection.has(slotId),
+          );
+
+        const selectionTone: SlotMatrixCellViewModel["selectionTone"] =
+          isSelected
+            ? hasStagedVoteDraft && hasSelectionDiff
+              ? "staged"
+              : "committed"
+            : "none";
+
         const calendarProjection = getCalendarProjectionForCell(
           rowIndex,
           dateKey,
@@ -87,6 +106,7 @@ export function useSlotMatrixViewModel({
           mergedSlotIds,
           isSelected,
           isPartiallySelected,
+          selectionTone,
           isHovered:
             hoveredCell?.rowIndex === rowIndex &&
             hoveredCell?.dateIndex === dateIndex,
@@ -109,6 +129,8 @@ export function useSlotMatrixViewModel({
     paginatedDates,
     slotsByDate,
     displaySelection,
+    committedDisplaySelection,
+    hasStagedVoteDraft,
     hoveredCell,
     longPressCell,
     isInDragRectangle,
