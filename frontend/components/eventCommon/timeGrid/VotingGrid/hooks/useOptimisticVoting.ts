@@ -8,7 +8,7 @@ import {
   eventDetailKeys,
   EventDetailData,
 } from "@/hooks/useEventDetail";
-import { Vote } from "../types";
+import { Vote } from "../../types";
 
 interface UseOptimisticVotingProps {
   eventId: string;

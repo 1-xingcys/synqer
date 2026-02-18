@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { MergedTimeRow } from "../types";
+import { MergedTimeRow } from "../../types";
 
 interface MergedTimeGridPosition {
   rowIndex: number;

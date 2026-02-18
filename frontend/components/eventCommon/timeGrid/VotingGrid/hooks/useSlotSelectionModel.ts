@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import { TimeSlot } from "../types";
+import { TimeSlot } from "../../types";
 import { VoteMode } from "@/types/event";
 import {
   projectSelectionForMode,
@@ -9,7 +9,7 @@ import {
   getClearSelectionAvailableSlotIds,
   getSelectAllAvailableSlotIds,
   getMarkUnavailableDiff,
-} from "../domain/selection";
+} from "../../domain/selection";
 
 interface UseSlotSelectionModelProps {
   slots: TimeSlot[];

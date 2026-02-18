@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Vote } from "../types";
+import { Vote } from "../../types";
 
 interface UseFilteredVotesProps {
   votes: Vote[];

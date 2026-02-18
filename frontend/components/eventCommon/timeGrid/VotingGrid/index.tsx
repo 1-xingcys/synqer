@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { VotingGridProps } from "../types";
-import { useVotingGridController } from "../hooks";
+import { useVotingGridController } from "./hooks/useVotingGridController";
 import { formatMinutesToTime } from "@/lib/utils";
 import { Z_INDEX } from "@/lib/zIndex";
 import {

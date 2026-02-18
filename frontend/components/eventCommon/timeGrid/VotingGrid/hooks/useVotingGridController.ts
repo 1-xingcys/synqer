@@ -1,18 +1,18 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { Vote, TimeGranularity, VotingGridProps } from "../types";
+import { Vote, TimeGranularity, VotingGridProps } from "../../types";
 import { useCalendarConflictSyncApi } from "./useCalendarConflictSyncApi";
 import { useMergedTimeGridSelectionInteraction } from "./useMergedTimeGridSelectionInteraction";
-import { useMergedTimeRowsModel } from "./useMergedTimeRowsModel";
-import { useResponsiveGrid } from "./useResponsiveGrid";
-import { usePaginatedDates } from "./usePaginatedDates";
+import { useMergedTimeRowsModel } from "../../hooks/useMergedTimeRowsModel";
+import { useResponsiveGrid } from "../../hooks/useResponsiveGrid";
+import { usePaginatedDates } from "../../hooks/usePaginatedDates";
 import { useOptimisticVoting } from "./useOptimisticVoting";
 import { useCalendarOverlayProjection } from "./useCalendarOverlayProjection";
 import { useSlotMatrixViewModel } from "./useSlotMatrixViewModel";
-import { useSlotGridModel } from "./useSlotGridModel";
+import { useSlotGridModel } from "../../hooks/useSlotGridModel";
 import { useSlotSelectionModel } from "./useSlotSelectionModel";
-import { groupVotesBySlot } from "../utils";
+import { groupVotesBySlot } from "../../utils";
 import { VoteMode } from "@/types/event";
 
 interface UseVotingGridControllerProps {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import { buildCalendarOverlayProjection } from "./useCalendarOverlayProjection";
-import type { CalendarEvent, MergedTimeRow, TimeSlot } from "../types";
+import type { CalendarEvent, MergedTimeRow, TimeSlot } from "../../types";
 
 function event(id: string): CalendarEvent {
   return {
