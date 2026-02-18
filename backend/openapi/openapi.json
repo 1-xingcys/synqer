@@ -334,7 +334,7 @@
             }
           }
         },
-        "summary": "GET /events/:eventId\n取得活動完整資料（含 slots、votes、participants）",
+        "summary": "GET /events/:eventId\n取得活動完整資料",
         "tags": [
           "EventCore"
         ]
@@ -710,6 +710,78 @@
           }
         },
         "summary": "PATCH /events/:eventId/voting\n更新投票（新增/移除特定 slots）",
+        "tags": [
+          "Voting"
+        ]
+      }
+    },
+    "/events/{eventId}/voting/staged": {
+      "patch": {
+        "operationId": "VotingController_updateStagedVotes",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStagedVoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateStagedVoteResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "PATCH /events/:eventId/voting/staged\n更新 staged vote 草稿（新增/移除特定 slots）",
+        "tags": [
+          "Voting"
+        ]
+      }
+    },
+    "/events/{eventId}/voting/commit": {
+      "post": {
+        "operationId": "VotingController_commitStagedVotes",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommitStagedVoteResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "POST /events/:eventId/voting/commit\n提交 staged vote 草稿為 committed votes",
         "tags": [
           "Voting"
         ]
@@ -1617,6 +1689,32 @@
           "userDisplayName"
         ]
       },
+      "EventDetailStagedVoteDto": {
+        "type": "object",
+        "properties": {
+          "slotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "baselineSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slotIds",
+          "baselineSlotIds",
+          "updatedAt"
+        ]
+      },
       "EventDetailParticipantDto": {
         "type": "object",
         "properties": {
@@ -1722,6 +1820,14 @@
               "$ref": "#/components/schemas/EventDetailVoteDto"
             }
           },
+          "stagedVote": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventDetailStagedVoteDto"
+              }
+            ]
+          },
           "participants": {
             "type": "array",
             "items": {
@@ -1741,6 +1847,7 @@
           "lineGroup",
           "slots",
           "votes",
+          "stagedVote",
           "participants",
           "expectedParticipants"
         ]
@@ -2445,6 +2552,60 @@
           "success",
           "added",
           "removed"
+        ]
+      },
+      "UpdateStagedVoteDto": {
+        "type": "object",
+        "properties": {
+          "addSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "removeSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "voteMode": {
+            "type": "string",
+            "enum": [
+              "available",
+              "unavailable"
+            ]
+          }
+        }
+      },
+      "UpdateStagedVoteResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "stagedSlotCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "success",
+          "stagedSlotCount"
+        ]
+      },
+      "CommitStagedVoteResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "committedSlots": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "success",
+          "committedSlots"
         ]
       },
       "ConfirmEventTimeDto": {
