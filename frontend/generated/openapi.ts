@@ -222,7 +222,7 @@ export interface paths {
         };
         /**
          * GET /events/:eventId
-         *     取得活動完整資料（含 slots、votes、participants）
+         *     取得活動完整資料
          */
         get: operations["EventCoreController_findOne"];
         put?: never;
