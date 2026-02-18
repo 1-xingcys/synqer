@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import { TimeSlot } from "../types";
+import { TimeSlot } from "../../types";
 import { VoteMode } from "@/types/event";
 import {
   projectSelectionForMode,

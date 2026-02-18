@@ -2,21 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { VotingGridProps } from "./types";
-import { useVotingGridController } from "./hooks";
+import { VotingGridProps } from "../types";
+import { useVotingGridController } from "./hooks/useVotingGridController";
 import { formatMinutesToTime } from "@/lib/utils";
 import { Z_INDEX } from "@/lib/zIndex";
-import {
-  GridLegend,
-  DateHeader,
-  TimeColumn,
-  SlotMatrix,
-  GoogleCalendarPanel,
-  DatePagination,
-  GridToolsMenu,
-} from "./ui";
-
-export type { VotingGridProps };
+import { DateHeader, TimeColumn, DatePagination } from "../ui";
+import { GridLegend } from "./GridLegend";
+import { SlotMatrix } from "./SlotMatrix";
+import { GoogleCalendarPanel } from "./GoogleCalendarPanel";
+import { GridToolsMenu } from "./GridToolsMenu";
 
 export default function VotingGrid({
   slots,

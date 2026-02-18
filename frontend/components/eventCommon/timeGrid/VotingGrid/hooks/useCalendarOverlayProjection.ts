@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useCallback } from "react";
-import { CalendarEvent, MergedTimeRow, TimeSlot } from "../types";
+import { CalendarEvent, MergedTimeRow, TimeSlot } from "../../types";
 
 interface CalendarOverlayProjectionParams {
   mergedTimeRows: MergedTimeRow[];

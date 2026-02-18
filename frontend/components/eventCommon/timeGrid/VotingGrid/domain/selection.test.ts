@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { VoteMode } from "../../../../types/event";
+import { VoteMode } from "../../../../../types/event";
 import {
   projectSelectionForMode,
   mapDisplayDiffToAvailableDiff,

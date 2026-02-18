@@ -7,7 +7,7 @@ import {
   TimeSlot,
   SlotMatrixCellViewModel,
   SlotMatrixRowViewModel,
-} from "../types";
+} from "../../types";
 
 interface CellPosition {
   rowIndex: number;

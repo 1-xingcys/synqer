@@ -2,8 +2,8 @@
 
 import { useState, useCallback, useEffect, useMemo } from "react";
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
-import { CalendarEvent, TimeSlot } from "../types";
-import { mapCalendarEventsToSlots } from "../utils";
+import { CalendarEvent, TimeSlot } from "../../types";
+import { mapCalendarEventsToSlots } from "../../utils";
 
 interface UseCalendarConflictSyncApiProps {
   eventId?: string;
