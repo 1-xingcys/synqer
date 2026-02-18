@@ -222,7 +222,7 @@ export interface paths {
         };
         /**
          * GET /events/:eventId
-         *     取得活動完整資料（含 slots、votes、participants）
+         *     取得活動完整資料
          */
         get: operations["EventCoreController_findOne"];
         put?: never;
@@ -403,6 +403,46 @@ export interface paths {
          *     更新投票（新增/移除特定 slots）
          */
         patch: operations["VotingController_updateVotes"];
+        trace?: never;
+    };
+    "/events/{eventId}/voting/staged": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * PATCH /events/:eventId/voting/staged
+         *     更新 staged vote 草稿（新增/移除特定 slots）
+         */
+        patch: operations["VotingController_updateStagedVotes"];
+        trace?: never;
+    };
+    "/events/{eventId}/voting/commit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /events/:eventId/voting/commit
+         *     提交 staged vote 草稿為 committed votes
+         */
+        post: operations["VotingController_commitStagedVotes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/events/{eventId}/confirmation": {
@@ -817,6 +857,12 @@ export interface components {
             userId: string;
             userDisplayName: string;
         };
+        EventDetailStagedVoteDto: {
+            slotIds: string[];
+            baselineSlotIds: string[];
+            /** Format: date-time */
+            updatedAt: string;
+        };
         EventDetailParticipantDto: {
             userId: string;
             displayName: string;
@@ -841,6 +887,7 @@ export interface components {
             lineGroup: components["schemas"]["EventDetailLineGroupDto"] | null;
             slots: components["schemas"]["EventDetailSlotDto"][];
             votes: components["schemas"]["EventDetailVoteDto"][];
+            stagedVote: components["schemas"]["EventDetailStagedVoteDto"] | null;
             participants: components["schemas"]["EventDetailParticipantDto"][];
             expectedParticipants: components["schemas"]["EventDetailExpectedParticipantDto"][];
         };
@@ -1021,6 +1068,20 @@ export interface components {
             success: boolean;
             added: number;
             removed: number;
+        };
+        UpdateStagedVoteDto: {
+            addSlotIds?: string[];
+            removeSlotIds?: string[];
+            /** @enum {string} */
+            voteMode?: "available" | "unavailable";
+        };
+        UpdateStagedVoteResponseDto: {
+            success: boolean;
+            stagedSlotCount: number;
+        };
+        CommitStagedVoteResponseDto: {
+            success: boolean;
+            committedSlots: number;
         };
         ConfirmEventTimeDto: {
             slotIds: string[];
@@ -1547,6 +1608,52 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UpdateVoteResponseDto"];
+                };
+            };
+        };
+    };
+    VotingController_updateStagedVotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateStagedVoteDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UpdateStagedVoteResponseDto"];
+                };
+            };
+        };
+    };
+    VotingController_commitStagedVotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommitStagedVoteResponseDto"];
                 };
             };
         };

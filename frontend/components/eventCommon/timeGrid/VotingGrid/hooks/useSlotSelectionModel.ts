@@ -14,20 +14,21 @@ import {
 interface UseSlotSelectionModelProps {
   slots: TimeSlot[];
   slotsByDate: Record<string, TimeSlot[]>;
-  /** 從 React Query cache 派生的當前使用者已選 slot IDs */
-  selectedSlots: Set<string>;
-  /** 增量更新 callback */
-  onSelectionCommit: (addSlotIds: string[], removeSlotIds: string[]) => void;
-  /** 全量替換 callback（用於 selectAll / clearSelection） */
-  onReplaceAll: (slotIds: string[]) => void;
+  committedSlots: Set<string>;
+  stagedSlots: Set<string>;
+  hasStagedVoteDraft: boolean;
+  hasVoted: boolean;
+  onSelectionCommit: (
+    addSlotIds: string[],
+    removeSlotIds: string[],
+    voteMode: VoteMode,
+  ) => void;
 }
 
 interface UseSlotSelectionModelReturn {
-  // State
   displaySelection: Set<string>;
+  committedDisplaySelection: Set<string>;
   voteMode: VoteMode;
-
-  // Actions
   setVoteMode: (mode: VoteMode) => void;
   commitDisplaySelectionChange: (
     addDisplaySlotIds: string[],
@@ -40,25 +41,74 @@ interface UseSlotSelectionModelReturn {
   isDayFullySelected: (dateKey: string) => boolean;
 }
 
+function diffSets(currentSet: Set<string>, targetSet: Set<string>) {
+  const addSlotIds: string[] = [];
+  const removeSlotIds: string[] = [];
+
+  targetSet.forEach((slotId) => {
+    if (!currentSet.has(slotId)) addSlotIds.push(slotId);
+  });
+
+  currentSet.forEach((slotId) => {
+    if (!targetSet.has(slotId)) removeSlotIds.push(slotId);
+  });
+
+  return { addSlotIds, removeSlotIds };
+}
+
 /**
- * 封裝投票選取規則：
- * 依據 voteMode 在顯示層與 canonical available 狀態間轉換，並輸出增量/全量更新操作。
+ * staged/committed 投票的選取規則：
+ * - has staged draft: 以 staged canonical available slots 為主
+ * - no staged + hasVoted: 以 committed available slots 為主
+ * - no staged + !hasVoted:
+ *   - available mode 預設全沒空（available=[]）
+ *   - unavailable mode 預設全有空（available=all）
  */
 export function useSlotSelectionModel({
   slots,
   slotsByDate,
-  selectedSlots,
+  committedSlots,
+  stagedSlots,
+  hasStagedVoteDraft,
+  hasVoted,
   onSelectionCommit,
-  onReplaceAll,
 }: UseSlotSelectionModelProps): UseSlotSelectionModelReturn {
   const [voteMode, setVoteModeState] = useState<VoteMode>(VoteMode.AVAILABLE);
-  const allSlotIds = useMemo(() => slots.map((s) => s.id), [slots]);
+  const allSlotIds = useMemo(() => slots.map((slot) => slot.id), [slots]);
 
-  // UI-level selection projected by current vote mode.
+  const effectiveAvailableSlots = useMemo(() => {
+    if (hasStagedVoteDraft) {
+      return new Set(stagedSlots);
+    }
+
+    if (hasVoted) {
+      return new Set(committedSlots);
+    }
+
+    if (voteMode === VoteMode.UNAVAILABLE) {
+      return new Set(allSlotIds);
+    }
+
+    return new Set<string>();
+  }, [
+    hasStagedVoteDraft,
+    stagedSlots,
+    hasVoted,
+    committedSlots,
+    voteMode,
+    allSlotIds,
+  ]);
+
   const displaySelection = useMemo(
-    () => projectSelectionForMode(selectedSlots, allSlotIds, voteMode),
-    [selectedSlots, allSlotIds, voteMode],
+    () =>
+      projectSelectionForMode(effectiveAvailableSlots, allSlotIds, voteMode),
+    [effectiveAvailableSlots, allSlotIds, voteMode],
   );
+
+  const committedDisplaySelection = useMemo(() => {
+    if (!hasVoted) return new Set<string>();
+    return projectSelectionForMode(committedSlots, allSlotIds, voteMode);
+  }, [hasVoted, committedSlots, allSlotIds, voteMode]);
 
   const commitDisplaySelectionChange = useCallback(
     (addDisplaySlotIds: string[], removeDisplaySlotIds: string[]) => {
@@ -67,13 +117,11 @@ export function useSlotSelectionModel({
         addDisplaySlotIds,
         removeDisplaySlotIds,
       );
-
-      onSelectionCommit(addSlotIds, removeSlotIds);
+      onSelectionCommit(addSlotIds, removeSlotIds, voteMode);
     },
     [voteMode, onSelectionCommit],
   );
 
-  // Check if a day is fully selected
   const isDayFullySelected = useCallback(
     (dateKey: string) => {
       const daySlots = slotsByDate[dateKey] || [];
@@ -85,60 +133,67 @@ export function useSlotSelectionModel({
     [slotsByDate, displaySelection],
   );
 
-  // Select entire day in current display mode — 增量更新
   const selectEntireDay = useCallback(
     (dateKey: string) => {
       const daySlots = slotsByDate[dateKey] || [];
+      const daySlotIds = daySlots.map((slot) => slot.id);
       const allSelected = daySlots.every((slot) =>
         displaySelection.has(slot.id),
       );
-      const daySlotIds = daySlots.map((slot) => slot.id);
 
       if (allSelected) {
-        // Toggle day off in display selection.
         commitDisplaySelectionChange([], daySlotIds);
       } else {
-        // Toggle day on in display selection.
-        const toAdd = daySlotIds.filter((id) => !displaySelection.has(id));
+        const toAdd = daySlotIds.filter(
+          (slotId) => !displaySelection.has(slotId),
+        );
         commitDisplaySelectionChange(toAdd, []);
       }
     },
     [slotsByDate, displaySelection, commitDisplaySelectionChange],
   );
 
-  // Vote mode change handler
   const setVoteMode = useCallback((newMode: VoteMode) => {
     setVoteModeState(newMode);
   }, []);
 
-  // Clear selection in current display mode.
   const clearSelection = useCallback(() => {
-    onReplaceAll(getClearSelectionAvailableSlotIds(voteMode, allSlotIds));
-  }, [onReplaceAll, voteMode, allSlotIds]);
+    const targetAvailable = new Set(
+      getClearSelectionAvailableSlotIds(voteMode, allSlotIds),
+    );
+    const { addSlotIds, removeSlotIds } = diffSets(
+      effectiveAvailableSlots,
+      targetAvailable,
+    );
+    onSelectionCommit(addSlotIds, removeSlotIds, voteMode);
+  }, [voteMode, allSlotIds, effectiveAvailableSlots, onSelectionCommit]);
 
-  // Select all in current display mode.
   const selectAll = useCallback(() => {
-    onReplaceAll(getSelectAllAvailableSlotIds(voteMode, allSlotIds));
-  }, [onReplaceAll, voteMode, allSlotIds]);
+    const targetAvailable = new Set(
+      getSelectAllAvailableSlotIds(voteMode, allSlotIds),
+    );
+    const { addSlotIds, removeSlotIds } = diffSets(
+      effectiveAvailableSlots,
+      targetAvailable,
+    );
+    onSelectionCommit(addSlotIds, removeSlotIds, voteMode);
+  }, [voteMode, allSlotIds, effectiveAvailableSlots, onSelectionCommit]);
 
-  // Apply conflicts from calendar (mark as unavailable in canonical model).
   const applyConflicts = useCallback(
     (conflictingSlotIds: string[]) => {
       const { addSlotIds, removeSlotIds } = getMarkUnavailableDiff(
-        selectedSlots,
+        effectiveAvailableSlots,
         conflictingSlotIds,
       );
-      onSelectionCommit(addSlotIds, removeSlotIds);
+      onSelectionCommit(addSlotIds, removeSlotIds, voteMode);
     },
-    [selectedSlots, onSelectionCommit],
+    [effectiveAvailableSlots, onSelectionCommit, voteMode],
   );
 
   return {
-    // State
     displaySelection,
+    committedDisplaySelection,
     voteMode,
-
-    // Actions
     setVoteMode,
     commitDisplaySelectionChange,
     selectEntireDay,

@@ -13,9 +13,16 @@ describe('VoteRepository', () => {
     eventVote: {
       deleteMany: jest.fn(),
       createMany: jest.fn(),
+      findMany: jest.fn(),
     },
     eventExpectedParticipant: {
       updateMany: jest.fn(),
+      findFirst: jest.fn(),
+    },
+    eventStagedVote: {
+      findUnique: jest.fn(),
+      upsert: jest.fn(),
+      deleteMany: jest.fn(),
     },
     $transaction: jest.fn(),
   };
@@ -66,6 +73,144 @@ describe('VoteRepository', () => {
       const result = await repository.findEventVotingInfo('nonexistent');
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('findParticipantVoteStatus', () => {
+    it('should find participant vote status', async () => {
+      const eventId = 'event-123';
+      const userId = 'user-123';
+      const mockStatus = { hasVoted: true };
+
+      mockPrismaService.eventExpectedParticipant.findFirst.mockResolvedValue(
+        mockStatus,
+      );
+
+      const result = await repository.findParticipantVoteStatus(eventId, userId);
+
+      expect(prismaService.eventExpectedParticipant.findFirst).toHaveBeenCalledWith({
+        where: {
+          eventId,
+          userId,
+          isRemoved: false,
+        },
+        select: {
+          hasVoted: true,
+        },
+      });
+      expect(result).toEqual(mockStatus);
+    });
+  });
+
+  describe('findUserCommittedSlotIds', () => {
+    it('should return committed slot ids for user', async () => {
+      mockPrismaService.eventVote.findMany.mockResolvedValue([
+        { slotId: 'slot-1' },
+        { slotId: 'slot-2' },
+      ]);
+
+      const result = await repository.findUserCommittedSlotIds(
+        'event-123',
+        'user-123',
+      );
+
+      expect(prismaService.eventVote.findMany).toHaveBeenCalledWith({
+        where: {
+          eventId: 'event-123',
+          userId: 'user-123',
+        },
+        select: {
+          slotId: true,
+        },
+      });
+      expect(result).toEqual(['slot-1', 'slot-2']);
+    });
+  });
+
+  describe('findUserStagedVote', () => {
+    it('should find staged vote by composite key', async () => {
+      const mockStagedVote = {
+        slotIds: ['slot-1'],
+        baselineSlotIds: ['slot-1'],
+        updatedAt: new Date('2026-02-18T00:00:00.000Z'),
+      };
+      mockPrismaService.eventStagedVote.findUnique.mockResolvedValue(
+        mockStagedVote,
+      );
+
+      const result = await repository.findUserStagedVote('event-123', 'user-123');
+
+      expect(prismaService.eventStagedVote.findUnique).toHaveBeenCalledWith({
+        where: {
+          eventId_userId: {
+            eventId: 'event-123',
+            userId: 'user-123',
+          },
+        },
+        select: {
+          slotIds: true,
+          baselineSlotIds: true,
+          updatedAt: true,
+        },
+      });
+      expect(result).toEqual(mockStagedVote);
+    });
+  });
+
+  describe('upsertStagedVote', () => {
+    it('should upsert staged vote with slot ids', async () => {
+      mockPrismaService.eventStagedVote.upsert.mockResolvedValue({
+        slotIds: ['slot-1'],
+        baselineSlotIds: ['slot-2'],
+      });
+
+      const result = await repository.upsertStagedVote(
+        'event-123',
+        'user-123',
+        ['slot-1'],
+        ['slot-2'],
+      );
+
+      expect(prismaService.eventStagedVote.upsert).toHaveBeenCalledWith({
+        where: {
+          eventId_userId: {
+            eventId: 'event-123',
+            userId: 'user-123',
+          },
+        },
+        create: {
+          eventId: 'event-123',
+          userId: 'user-123',
+          slotIds: ['slot-1'],
+          baselineSlotIds: ['slot-2'],
+        },
+        update: {
+          slotIds: ['slot-1'],
+          baselineSlotIds: ['slot-2'],
+        },
+      });
+      expect(result).toEqual({
+        slotIds: ['slot-1'],
+        baselineSlotIds: ['slot-2'],
+      });
+    });
+  });
+
+  describe('deleteStagedVote', () => {
+    it('should delete staged vote by event and user', async () => {
+      mockPrismaService.eventStagedVote.deleteMany.mockResolvedValue({
+        count: 1,
+      });
+
+      const result = await repository.deleteStagedVote('event-123', 'user-123');
+
+      expect(prismaService.eventStagedVote.deleteMany).toHaveBeenCalledWith({
+        where: {
+          eventId: 'event-123',
+          userId: 'user-123',
+        },
+      });
+      expect(result).toEqual({ count: 1 });
     });
   });
 
@@ -427,6 +572,53 @@ describe('VoteRepository', () => {
 
       expect(callOrder).toEqual(['update']);
       expect(result).toEqual({ addSlotIds: [], removeSlotIds: [] });
+    });
+  });
+
+  describe('commitStagedVotesInTransaction', () => {
+    it('should replace committed votes, mark hasVoted, and clear staged in transaction', async () => {
+      const callOrder: string[] = [];
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        const mockPrisma = {
+          eventVote: {
+            deleteMany: jest.fn().mockImplementation(() => {
+              callOrder.push('delete-votes');
+              return Promise.resolve({ count: 1 });
+            }),
+            createMany: jest.fn().mockImplementation(() => {
+              callOrder.push('create-votes');
+              return Promise.resolve({ count: 2 });
+            }),
+          },
+          eventExpectedParticipant: {
+            updateMany: jest.fn().mockImplementation(() => {
+              callOrder.push('update-status');
+              return Promise.resolve({ count: 1 });
+            }),
+          },
+          eventStagedVote: {
+            deleteMany: jest.fn().mockImplementation(() => {
+              callOrder.push('delete-staged');
+              return Promise.resolve({ count: 1 });
+            }),
+          },
+        };
+        return callback(mockPrisma as any);
+      });
+
+      const result = await repository.commitStagedVotesInTransaction(
+        'event-123',
+        'user-123',
+        ['slot-1', 'slot-2'],
+      );
+
+      expect(callOrder).toEqual([
+        'delete-votes',
+        'create-votes',
+        'update-status',
+        'delete-staged',
+      ]);
+      expect(result).toEqual({ availableSlotIds: ['slot-1', 'slot-2'] });
     });
   });
 });

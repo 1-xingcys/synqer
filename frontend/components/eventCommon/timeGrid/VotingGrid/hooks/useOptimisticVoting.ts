@@ -3,64 +3,111 @@
 import { useCallback, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  patchVotesApi,
-  replaceVotesApi,
+  patchStagedVotesApi,
+  commitStagedVotesApi,
   eventDetailKeys,
   EventDetailData,
 } from "@/hooks/useEventDetail";
-import { Vote } from "../../types";
+import { Vote, StagedVote } from "../../types";
+import { VoteMode } from "@/types/event";
 
 interface UseOptimisticVotingProps {
   eventId: string;
   currentUserId: string;
   currentUserDisplayName: string;
   votes: Vote[];
+  stagedVote: StagedVote | null;
 }
 
 interface UseOptimisticVotingReturn {
-  /** 當前使用者已投票的 slot IDs（從 cache 派生） */
-  selectedSlots: Set<string>;
-  /** 增量更新投票：新增 addSlotIds、移除 removeSlotIds */
-  toggleSlots: (addSlotIds: string[], removeSlotIds: string[]) => void;
-  /** 全量替換投票（用於 selectAll / clearSelection 等） */
-  replaceAllSlots: (slotIds: string[]) => void;
-  /** mutation 是否正在進行 */
+  committedSlots: Set<string>;
+  stagedSlots: Set<string>;
+  hasStagedVoteDraft: boolean;
+  updateStagedVotes: (
+    addSlotIds: string[],
+    removeSlotIds: string[],
+    voteMode: VoteMode,
+  ) => void;
+  commitStagedVotes: () => void;
+  isPatchPending: boolean;
+  isCommitPending: boolean;
   isPending: boolean;
 }
 
+function getCurrentUserCommittedSlots(
+  data: EventDetailData,
+  currentUserId: string,
+): Set<string> {
+  return new Set(
+    data.votes
+      .filter((vote) => vote.userId === currentUserId)
+      .map((vote) => vote.slotId),
+  );
+}
+
+function getCurrentUserHasVoted(
+  data: EventDetailData,
+  currentUserId: string,
+): boolean {
+  return data.expectedParticipants.some(
+    (participant) =>
+      (participant.userId === currentUserId ||
+        participant.user?.id === currentUserId) &&
+      participant.hasVoted,
+  );
+}
+
+function orderByAllSlotIds(
+  slotIdSet: Set<string>,
+  allSlotIds: string[],
+): string[] {
+  return allSlotIds.filter((slotId) => slotIdSet.has(slotId));
+}
+
+function areOrderedSlotIdsEqual(left: string[], right: string[]): boolean {
+  if (left.length !== right.length) return false;
+  return left.every((slotId, index) => slotId === right[index]);
+}
+
 /**
- * 封裝投票的樂觀更新流程：
- * 從 query cache 派生當前使用者選取，並提供增量/全量 mutation 與回滾機制。
+ * staged 投票的樂觀更新：
+ * - PATCH /voting/staged 只更新草稿
+ * - POST /voting/commit 才覆蓋 committed votes
  */
 export function useOptimisticVoting({
   eventId,
   currentUserId,
   currentUserDisplayName,
   votes,
+  stagedVote,
 }: UseOptimisticVotingProps): UseOptimisticVotingReturn {
   const queryClient = useQueryClient();
 
-  // 從 votes 資料派生當前使用者的已選 slot IDs
-  const selectedSlots = useMemo(() => {
-    const set = new Set<string>();
-    for (const vote of votes) {
-      if (vote.userId === currentUserId) {
-        set.add(vote.slotId);
-      }
-    }
-    return set;
+  const committedSlots = useMemo(() => {
+    return new Set(
+      votes
+        .filter((vote) => vote.userId === currentUserId)
+        .map((vote) => vote.slotId),
+    );
   }, [votes, currentUserId]);
 
-  // 增量更新 mutation
+  const stagedSlots = useMemo(
+    () => new Set(stagedVote?.slotIds ?? []),
+    [stagedVote],
+  );
+  const hasStagedVoteDraft = stagedVote !== null;
+
   const patchMutation = useMutation({
     mutationFn: ({
       addSlotIds,
       removeSlotIds,
+      voteMode,
     }: {
       addSlotIds: string[];
       removeSlotIds: string[];
-    }) => patchVotesApi(eventId, addSlotIds, removeSlotIds),
-    onMutate: async ({ addSlotIds, removeSlotIds }) => {
+      voteMode: VoteMode;
+    }) => patchStagedVotesApi(eventId, addSlotIds, removeSlotIds, voteMode),
+    onMutate: async ({ addSlotIds, removeSlotIds, voteMode }) => {
       await queryClient.cancelQueries({
         queryKey: eventDetailKeys.detail(eventId),
       });
@@ -69,41 +116,64 @@ export function useOptimisticVoting({
         eventDetailKeys.detail(eventId),
       );
 
-      // 樂觀更新 cache
       queryClient.setQueryData<EventDetailData>(
         eventDetailKeys.detail(eventId),
         (old) => {
           if (!old) return old;
 
-          let newVotes = [...old.votes];
+          const allSlotIds = old.slots.map((slot) => slot.id);
+          const currentCommittedSlots = getCurrentUserCommittedSlots(
+            old,
+            currentUserId,
+          );
+          const currentHasVoted = getCurrentUserHasVoted(old, currentUserId);
 
-          // 移除 removeSlotIds
-          if (removeSlotIds.length > 0) {
-            const removeSet = new Set(removeSlotIds);
-            newVotes = newVotes.filter(
-              (v) => !(removeSet.has(v.slotId) && v.userId === currentUserId),
-            );
+          let baseAvailableSlots: Set<string>;
+          let baselineAvailableSlots: Set<string>;
+
+          if (old.stagedVote) {
+            baseAvailableSlots = new Set(old.stagedVote.slotIds);
+            baselineAvailableSlots = new Set(old.stagedVote.baselineSlotIds);
+          } else if (currentHasVoted) {
+            baseAvailableSlots = new Set(currentCommittedSlots);
+            baselineAvailableSlots = new Set(currentCommittedSlots);
+          } else if (voteMode === VoteMode.UNAVAILABLE) {
+            baseAvailableSlots = new Set(allSlotIds);
+            baselineAvailableSlots = new Set(allSlotIds);
+          } else {
+            baseAvailableSlots = new Set<string>();
+            baselineAvailableSlots = new Set<string>();
           }
 
-          // 新增 addSlotIds
-          if (addSlotIds.length > 0) {
-            const existingSlotIds = new Set(
-              newVotes
-                .filter((v) => v.userId === currentUserId)
-                .map((v) => v.slotId),
-            );
-            for (const slotId of addSlotIds) {
-              if (!existingSlotIds.has(slotId)) {
-                newVotes.push({
-                  slotId,
-                  userId: currentUserId,
-                  userDisplayName: currentUserDisplayName,
-                });
-              }
-            }
+          addSlotIds.forEach((slotId) => baseAvailableSlots.add(slotId));
+          removeSlotIds.forEach((slotId) => baseAvailableSlots.delete(slotId));
+
+          const orderedNextSlotIds = orderByAllSlotIds(
+            baseAvailableSlots,
+            allSlotIds,
+          );
+          const orderedBaselineSlotIds = orderByAllSlotIds(
+            baselineAvailableSlots,
+            allSlotIds,
+          );
+
+          if (
+            areOrderedSlotIdsEqual(orderedNextSlotIds, orderedBaselineSlotIds)
+          ) {
+            return {
+              ...old,
+              stagedVote: null,
+            };
           }
 
-          return { ...old, votes: newVotes };
+          return {
+            ...old,
+            stagedVote: {
+              slotIds: orderedNextSlotIds,
+              baselineSlotIds: orderedBaselineSlotIds,
+              updatedAt: new Date().toISOString(),
+            },
+          };
         },
       );
 
@@ -118,18 +188,15 @@ export function useOptimisticVoting({
       }
     },
     onSettled: () => {
-      // 背景同步確保一致性
       void queryClient.invalidateQueries({
         queryKey: eventDetailKeys.detail(eventId),
       });
     },
   });
 
-  // 全量替換 mutation（用於 selectAll / clearSelection）
-  const replaceMutation = useMutation({
-    mutationFn: async ({ slotIds }: { slotIds: string[] }) =>
-      replaceVotesApi(eventId, slotIds),
-    onMutate: async ({ slotIds }) => {
+  const commitMutation = useMutation({
+    mutationFn: async () => commitStagedVotesApi(eventId),
+    onMutate: async () => {
       await queryClient.cancelQueries({
         queryKey: eventDetailKeys.detail(eventId),
       });
@@ -141,21 +208,43 @@ export function useOptimisticVoting({
       queryClient.setQueryData<EventDetailData>(
         eventDetailKeys.detail(eventId),
         (old) => {
-          if (!old) return old;
+          if (!old || !old.stagedVote) return old;
 
-          // 移除當前使用者的所有投票
+          const stagedSlotSet = new Set(old.stagedVote.slotIds);
+          const orderedStagedSlotIds = old.slots
+            .map((slot) => slot.id)
+            .filter((slotId) => stagedSlotSet.has(slotId));
+
           const otherVotes = old.votes.filter(
-            (v) => v.userId !== currentUserId,
+            (vote) => vote.userId !== currentUserId,
           );
-
-          // 新增新的投票
-          const newUserVotes: Vote[] = slotIds.map((slotId) => ({
+          const newUserVotes: Vote[] = orderedStagedSlotIds.map((slotId) => ({
             slotId,
             userId: currentUserId,
             userDisplayName: currentUserDisplayName,
           }));
 
-          return { ...old, votes: [...otherVotes, ...newUserVotes] };
+          const expectedParticipants = old.expectedParticipants.map(
+            (participant) => {
+              if (
+                participant.userId === currentUserId ||
+                participant.user?.id === currentUserId
+              ) {
+                return {
+                  ...participant,
+                  hasVoted: true,
+                };
+              }
+              return participant;
+            },
+          );
+
+          return {
+            ...old,
+            votes: [...otherVotes, ...newUserVotes],
+            stagedVote: null,
+            expectedParticipants,
+          };
         },
       );
 
@@ -176,25 +265,26 @@ export function useOptimisticVoting({
     },
   });
 
-  const toggleSlots = useCallback(
-    (addSlotIds: string[], removeSlotIds: string[]) => {
+  const updateStagedVotes = useCallback(
+    (addSlotIds: string[], removeSlotIds: string[], voteMode: VoteMode) => {
       if (addSlotIds.length === 0 && removeSlotIds.length === 0) return;
-      patchMutation.mutate({ addSlotIds, removeSlotIds });
+      patchMutation.mutate({ addSlotIds, removeSlotIds, voteMode });
     },
     [patchMutation],
   );
 
-  const replaceAllSlots = useCallback(
-    (slotIds: string[]) => {
-      replaceMutation.mutate({ slotIds });
-    },
-    [replaceMutation],
-  );
+  const commitStagedVotes = useCallback(() => {
+    commitMutation.mutate();
+  }, [commitMutation]);
 
   return {
-    selectedSlots,
-    toggleSlots,
-    replaceAllSlots,
-    isPending: patchMutation.isPending || replaceMutation.isPending,
+    committedSlots,
+    stagedSlots,
+    hasStagedVoteDraft,
+    updateStagedVotes,
+    commitStagedVotes,
+    isPatchPending: patchMutation.isPending,
+    isCommitPending: commitMutation.isPending,
+    isPending: patchMutation.isPending || commitMutation.isPending,
   };
 }

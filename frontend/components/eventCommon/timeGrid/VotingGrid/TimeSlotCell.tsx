@@ -18,6 +18,7 @@ interface TimeSlotCellProps {
   dateIndex: number;
   isSelected: boolean;
   isPartiallySelected?: boolean;
+  selectionTone?: "none" | "committed" | "staged";
   isHovered: boolean;
   isDragging: boolean;
   inRectangle: boolean;
@@ -42,6 +43,7 @@ export function TimeSlotCell({
   dateIndex,
   isSelected,
   isPartiallySelected = false,
+  selectionTone = "none",
   isHovered,
   isDragging,
   inRectangle,
@@ -103,15 +105,21 @@ export function TimeSlotCell({
   // Determine background color based on selection state and vote mode
   const getBackgroundClass = () => {
     if (isSelected) {
+      if (selectionTone === "staged") {
+        return voteMode === VoteMode.AVAILABLE
+          ? "bg-emerald-300 dark:bg-emerald-400"
+          : "bg-rose-300 dark:bg-rose-400";
+      }
+
       return voteMode === VoteMode.AVAILABLE
         ? "bg-emerald-500 dark:bg-emerald-600"
-        : "bg-rose-500 dark:bg-rose-600";
+        : "bg-rose-500 dark:bg-rose-500";
     }
     if (isPartiallySelected) {
       // Striped pattern for partial selection
       return voteMode === VoteMode.AVAILABLE
-        ? "bg-emerald-200 dark:bg-emerald-800/50"
-        : "bg-rose-200 dark:bg-rose-800/50";
+        ? "bg-emerald-200 dark:bg-emerald-700"
+        : "bg-rose-200 dark:bg-rose-800";
     }
     return "bg-white dark:bg-zinc-900";
   };
@@ -210,9 +218,13 @@ export function TimeSlotCell({
         <div
           className={`absolute bottom-1 right-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
             isSelected
-              ? voteMode === VoteMode.AVAILABLE
-                ? "bg-emerald-600 dark:bg-emerald-700 text-white"
-                : "bg-rose-600 dark:bg-rose-700 text-white"
+              ? selectionTone === "staged"
+                ? voteMode === VoteMode.AVAILABLE
+                  ? "bg-emerald-400 dark:bg-emerald-500 text-white"
+                  : "bg-rose-400 dark:bg-rose-500 text-white"
+                : voteMode === VoteMode.AVAILABLE
+                  ? "bg-emerald-600 dark:bg-emerald-700 text-white"
+                  : "bg-rose-600 dark:bg-rose-700 text-white"
               : isPartiallySelected
                 ? voteMode === VoteMode.AVAILABLE
                   ? "bg-emerald-400 dark:bg-emerald-600 text-white"

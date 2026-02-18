@@ -70,6 +70,7 @@ export const SlotMatrix = memo(function SlotMatrix({
                 dateIndex={cell.dateIndex}
                 isSelected={cell.isSelected}
                 isPartiallySelected={cell.isPartiallySelected}
+                selectionTone={cell.selectionTone}
                 isHovered={cell.isHovered}
                 isDragging={isDragging}
                 inRectangle={cell.inRectangle}

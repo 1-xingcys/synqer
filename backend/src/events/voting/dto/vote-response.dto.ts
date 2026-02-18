@@ -11,3 +11,13 @@ export class UpdateVoteResponseDto {
   added!: number;
   removed!: number;
 }
+
+export class UpdateStagedVoteResponseDto {
+  success!: boolean;
+  stagedSlotCount!: number;
+}
+
+export class CommitStagedVoteResponseDto {
+  success!: boolean;
+  committedSlots!: number;
+}

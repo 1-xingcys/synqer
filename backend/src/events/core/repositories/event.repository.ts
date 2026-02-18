@@ -91,6 +91,7 @@ export class EventRepository {
           select: {
             id: true,
             userId: true,
+            hasVoted: true,
           },
         },
         votes: {
@@ -137,6 +138,7 @@ export class EventRepository {
           select: {
             id: true,
             userId: true,
+            hasVoted: true,
           },
         },
         votes: {
@@ -228,6 +230,25 @@ export class EventRepository {
             },
           },
         },
+      },
+    });
+  }
+
+  /**
+   * 查詢指定使用者在活動中的暫存投票草稿
+   */
+  async findStagedVoteByEventAndUser(eventId: string, userId: string) {
+    return this.prisma.eventStagedVote.findUnique({
+      where: {
+        eventId_userId: {
+          eventId,
+          userId,
+        },
+      },
+      select: {
+        slotIds: true,
+        baselineSlotIds: true,
+        updatedAt: true,
       },
     });
   }

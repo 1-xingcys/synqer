@@ -25,6 +25,12 @@ export default function JoinedEventPage() {
 
   const { event } = eventDetailData;
   const isVoting = event.status === EventStatus.VOTING;
+  const currentUserHasVoted = eventDetailData.expectedParticipants.some(
+    (participant) =>
+      (participant.userId === user?.id.toString() ||
+        participant.user?.id === user?.id.toString()) &&
+      participant.hasVoted,
+  );
 
   if (isVoting && user) {
     return (
@@ -33,6 +39,8 @@ export default function JoinedEventPage() {
         <VotingGrid
           slots={eventDetailData.slots}
           votes={eventDetailData.votes}
+          stagedVote={eventDetailData.stagedVote}
+          currentUserHasVoted={currentUserHasVoted}
           currentUserId={user.id.toString()}
           currentUserDisplayName={user.displayName || ""}
           eventId={eventId}

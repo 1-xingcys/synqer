@@ -76,13 +76,15 @@ export class EventCoreController {
 
   /**
    * GET /events/:eventId
-   * 取得活動完整資料（含 slots、votes、participants）
+   * 取得活動完整資料
    */
   @Get(':eventId')
+  @UseGuards(SessionAuthGuard)
   async findOne(
     @Param('eventId') eventId: string,
+    @CurrentUser() userId: string,
   ): Promise<EventDetailResponseDto> {
-    const result = await this.eventQueryService.findOne(eventId);
+    const result = await this.eventQueryService.findOne(eventId, userId);
     if (!result) {
       throw new NotFoundException(`Event ${eventId} not found`);
     }

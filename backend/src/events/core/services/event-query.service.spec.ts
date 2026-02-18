@@ -14,6 +14,7 @@ describe('EventQueryService', () => {
     findByOwnerId: jest.fn(),
     findByParticipantUserId: jest.fn(),
     findOneWithDetails: jest.fn(),
+    findStagedVoteByEventAndUser: jest.fn(),
     findPublicInfo: jest.fn(),
   };
 
@@ -61,8 +62,8 @@ describe('EventQueryService', () => {
           id: 'event-1',
           title: 'Event 1',
           expectedParticipants: [
-            { id: 'ep-1', userId: 'user-1' },
-            { id: 'ep-2', userId: 'user-2' },
+            { id: 'ep-1', userId: 'user-1', hasVoted: true },
+            { id: 'ep-2', userId: 'user-2', hasVoted: false },
           ],
           votes: [{ userId: 'user-1' }],
         },
@@ -102,7 +103,7 @@ describe('EventQueryService', () => {
         {
           id: 'event-1',
           title: 'Event 1',
-          expectedParticipants: [{ id: 'ep-1', userId }],
+          expectedParticipants: [{ id: 'ep-1', userId, hasVoted: true }],
           votes: [{ userId }],
           owner: { id: 'owner-1', displayName: 'Owner', avatarUrl: null },
         },
@@ -132,7 +133,7 @@ describe('EventQueryService', () => {
       const mockEvents = [
         {
           id: 'event-1',
-          expectedParticipants: [{ id: 'ep-1', userId }],
+          expectedParticipants: [{ id: 'ep-1', userId, hasVoted: false }],
           votes: [], // no votes
           owner: null,
         },
@@ -151,21 +152,23 @@ describe('EventQueryService', () => {
   describe('findOne', () => {
     it('should return event details', async () => {
       const eventId = 'event-123';
+      const userId = 'user-1';
       const mockEvent = {
         id: eventId,
         isDeleted: false,
-        expectedParticipants: [{ id: 'ep-1', userId: 'user-1' }],
-        votes: [{ userId: 'user-1', slotId: 'slot-1', user: { displayName: 'User 1' } }],
+        expectedParticipants: [{ id: 'ep-1', userId, hasVoted: true }],
+        votes: [{ userId, slotId: 'slot-1', user: { displayName: 'User 1' } }],
         slots: [{ id: 'slot-1' }],
         lineGroup: null,
       };
 
       mockEventRepository.findOneWithDetails.mockResolvedValue(mockEvent);
+      mockEventRepository.findStagedVoteByEventAndUser.mockResolvedValue(null);
       mockEventMapper.mapEventToDetail.mockReturnValue({ id: eventId });
-      mockEventMapper.mapVotes.mockReturnValue([{ slotId: 'slot-1', userId: 'user-1' }]);
-      mockEventMapper.extractParticipants.mockReturnValue([{ userId: 'user-1' }]);
+      mockEventMapper.mapVotes.mockReturnValue([{ slotId: 'slot-1', userId }]);
+      mockEventMapper.extractParticipants.mockReturnValue([{ userId }]);
 
-      const result = await service.findOne(eventId);
+      const result = await service.findOne(eventId, userId);
 
       expect(result).toEqual({
         isDeleted: false,
@@ -173,17 +176,54 @@ describe('EventQueryService', () => {
         lineGroup: null,
         slots: [{ id: 'slot-1' }],
         votes: [{ slotId: 'slot-1', userId: 'user-1' }],
+        stagedVote: null,
         participants: [{ userId: 'user-1' }],
         expectedParticipants: expect.any(Array),
       });
     });
 
     it('should return null when event not found', async () => {
+      const userId = 'user-1';
       mockEventRepository.findOneWithDetails.mockResolvedValue(null);
 
-      const result = await service.findOne('nonexistent');
+      const result = await service.findOne('nonexistent', userId);
 
       expect(result).toBeNull();
+    });
+
+    it('should include staged vote for current user when userId is provided', async () => {
+      const eventId = 'event-123';
+      const userId = 'user-1';
+      const mockEvent = {
+        id: eventId,
+        isDeleted: false,
+        expectedParticipants: [{ id: 'ep-1', userId, hasVoted: true }],
+        votes: [{ userId, slotId: 'slot-1', user: { displayName: 'User 1' } }],
+        slots: [{ id: 'slot-1' }],
+        lineGroup: null,
+      };
+
+      mockEventRepository.findOneWithDetails.mockResolvedValue(mockEvent);
+      mockEventRepository.findStagedVoteByEventAndUser.mockResolvedValue({
+        slotIds: ['slot-1'],
+        baselineSlotIds: ['slot-1'],
+        updatedAt: new Date('2026-02-18T00:00:00.000Z'),
+      });
+      mockEventMapper.mapEventToDetail.mockReturnValue({ id: eventId });
+      mockEventMapper.mapVotes.mockReturnValue([{ slotId: 'slot-1', userId }]);
+      mockEventMapper.extractParticipants.mockReturnValue([{ userId }]);
+
+      const result = await service.findOne(eventId, userId);
+
+      expect(eventRepository.findStagedVoteByEventAndUser).toHaveBeenCalledWith(
+        eventId,
+        userId,
+      );
+      expect(result?.stagedVote).toEqual({
+        slotIds: ['slot-1'],
+        baselineSlotIds: ['slot-1'],
+        updatedAt: new Date('2026-02-18T00:00:00.000Z'),
+      });
     });
 
     it('should return deleted event with empty arrays', async () => {
@@ -197,8 +237,9 @@ describe('EventQueryService', () => {
 
       mockEventRepository.findOneWithDetails.mockResolvedValue(mockEvent);
       mockEventMapper.mapEventToDetail.mockReturnValue({ id: 'event-123' });
+      mockEventRepository.findStagedVoteByEventAndUser.mockResolvedValue(null);
 
-      const result = await service.findOne('event-123');
+      const result = await service.findOne('event-123', 'user-1');
 
       expect(result).toEqual({
         isDeleted: true,
@@ -206,6 +247,7 @@ describe('EventQueryService', () => {
         lineGroup: null,
         slots: [],
         votes: [],
+        stagedVote: null,
         participants: [],
         expectedParticipants: [],
       });
@@ -220,7 +262,7 @@ describe('EventQueryService', () => {
         id: eventId,
         ownerId: userId,
         isDeleted: false,
-        expectedParticipants: [{ id: 'ep-1', userId: 'user-1' }],
+        expectedParticipants: [{ id: 'ep-1', userId: 'user-1', hasVoted: true }],
         votes: [{ userId: 'user-1', user: { displayName: 'User 1' } }],
         slots: [],
       };
@@ -297,8 +339,8 @@ describe('EventQueryService', () => {
       createdAt: new Date('2024-01-01'),
       votingDeadline: null,
       expectedParticipants: [
-        { id: 'ep-1', userId: 'participant-1', lineUserId: null, user: { id: 'participant-1', displayName: 'Participant 1', avatarUrl: 'https://example.com/avatar1.jpg' } },
-        { id: 'ep-2', userId: 'participant-2', lineUserId: null, user: { id: 'participant-2', displayName: 'Participant 2', avatarUrl: null } },
+        { id: 'ep-1', userId: 'participant-1', lineUserId: null, hasVoted: true, user: { id: 'participant-1', displayName: 'Participant 1', avatarUrl: 'https://example.com/avatar1.jpg' } },
+        { id: 'ep-2', userId: 'participant-2', lineUserId: null, hasVoted: false, user: { id: 'participant-2', displayName: 'Participant 2', avatarUrl: null } },
       ],
       votes: [{ userId: 'participant-1', slotId: 'slot-1' }],
       owner: { id: 'owner-123', displayName: 'Owner', avatarUrl: 'https://example.com/owner.jpg' },

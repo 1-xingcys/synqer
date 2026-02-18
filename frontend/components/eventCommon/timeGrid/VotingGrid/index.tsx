@@ -11,10 +11,13 @@ import { GridLegend } from "./GridLegend";
 import { SlotMatrix } from "./SlotMatrix";
 import { GoogleCalendarPanel } from "./GoogleCalendarPanel";
 import { GridToolsMenu } from "./GridToolsMenu";
+import { VoteCommitBar } from "./VoteCommitBar";
 
 export default function VotingGrid({
   slots,
   votes,
+  stagedVote,
+  currentUserHasVoted,
   eventId,
   currentUserId,
   currentUserDisplayName,
@@ -26,6 +29,8 @@ export default function VotingGrid({
   const { selection, pagination, matrix, calendar } = useVotingGridController({
     slots,
     votes,
+    stagedVote,
+    currentUserHasVoted,
     eventId,
     currentUserId,
     currentUserDisplayName,
@@ -36,6 +41,9 @@ export default function VotingGrid({
     setVoteMode,
     clearSelection,
     selectAll,
+    hasStagedVoteDraft,
+    commitStagedVotes,
+    isCommitPending,
     isDayFullySelected,
     selectEntireDay,
   } = selection;
@@ -127,7 +135,11 @@ export default function VotingGrid({
         <div
           className={`sticky top-0 ${Z_INDEX.GRID_BASE} bg-white dark:bg-zinc-900 backdrop-blur supports-[backdrop-filter]:bg-white/100 dark:supports-[backdrop-filter]:bg-zinc-900/100 space-y-2 sm:space-y-4`}
         >
-          <div className="h-[8px]" />
+          <VoteCommitBar
+            hasStagedVoteDraft={hasStagedVoteDraft}
+            isCommitPending={isCommitPending}
+            onCommit={commitStagedVotes}
+          />
           <div className="flex items-center gap-2">
             <div className="flex-1 min-w-0">
               <DatePagination
@@ -193,6 +205,7 @@ export default function VotingGrid({
         <div className="mt-2 sm:mt-4">
           <GridLegend
             voteMode={voteMode}
+            hasStagedVoteDraft={hasStagedVoteDraft}
             showCalendarOnGrid={showCalendarOnGrid}
             calendarEvents={calendarEvents}
           />
