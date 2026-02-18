@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { VotingGridProps } from "./types";
 import { useVotingGridController } from "./hooks";
 import { formatMinutesToTime } from "@/lib/utils";
-import { useTimeGridStickyHeaderSignal } from "./stickyHeaderSignalContext";
 import { Z_INDEX } from "@/lib/zIndex";
 import {
   GridLegend,
@@ -30,7 +29,6 @@ export default function VotingGrid({
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [isStickyActive, setIsStickyActive] = useState(false);
   const stickySentinelRef = useRef<HTMLDivElement>(null);
-  const { setStickyActive } = useTimeGridStickyHeaderSignal();
   const { selection, pagination, matrix, calendar } = useVotingGridController({
     slots,
     votes,
@@ -111,20 +109,19 @@ export default function VotingGrid({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const active = !entry.isIntersecting;
+        const active =
+          !entry.isIntersecting && entry.boundingClientRect.top < 0;
         setIsStickyActive(active);
-        setStickyActive(active);
       },
-      { threshold: [1] },
+      { threshold: [0, 1] },
     );
 
     observer.observe(sentinel);
     return () => {
       observer.disconnect();
       setIsStickyActive(false);
-      setStickyActive(false);
     };
-  }, [setStickyActive]);
+  }, []);
 
   return (
     <div
