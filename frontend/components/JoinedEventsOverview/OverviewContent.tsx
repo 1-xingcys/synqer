@@ -6,9 +6,9 @@ import { useFilteredAttendedEvents } from "@/hooks/useFilteredAttendedEvents";
 import {
   EventSection,
   EmptyState,
-} from "@/components/eventCommon/EventsOverview";
+} from "@/components/eventCommon/eventsOverview";
 import { EventStatus } from "@/types/event";
-import { EventRowMode } from "@/components/eventCommon/EventsOverview/types";
+import { EventRowMode } from "@/components/eventCommon/eventsOverview/types";
 
 const TOP_N = 5;
 

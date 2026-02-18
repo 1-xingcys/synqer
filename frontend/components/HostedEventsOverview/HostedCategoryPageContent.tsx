@@ -3,9 +3,9 @@
 import { useTranslations } from "next-intl";
 import { useHostedEvents } from "@/hooks/useHostedEvents";
 import { useFilteredHostedEvents } from "@/hooks/useFilteredHostedEvents";
-import { EventListWithPagination } from "@/components/eventCommon/EventsOverview";
+import { EventListWithPagination } from "@/components/eventCommon/eventsOverview";
 import { EventStatus } from "@/types/event";
-import { EventRowMode } from "@/components/eventCommon/EventsOverview/types";
+import { EventRowMode } from "@/components/eventCommon/eventsOverview/types";
 
 const TRANSLATION_NS = "hostedEvents";
 
