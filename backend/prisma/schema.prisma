@@ -20,6 +20,7 @@ model User {
 
   identities               AuthIdentity[]
   votes                    EventVote[]
+  stagedVotes              EventStagedVote[]
   lineGroupMemberships     LineGroupMember[]
   expectedParticipants     EventExpectedParticipant[]
   googleCalendarConnection GoogleCalendarConnection?
@@ -133,6 +134,7 @@ model Event {
 
   slots                EventTimeSlot[]
   votes                EventVote[]
+  stagedVotes          EventStagedVote[]
   expectedParticipants EventExpectedParticipant[]
   confirmedTimeSlots   ConfirmedEventTimeSlot[]
 
@@ -199,6 +201,25 @@ model EventVote {
   @@unique([eventId, slotId, userId])
   @@index([eventId])
   @@index([slotId])
+  @@index([userId])
+}
+
+// 暫存投票紀錄：每個使用者在每個活動只保留一份草稿
+// slotIds 儲存 canonical available slots（可為空陣列，代表已建立草稿且全部沒空）
+model EventStagedVote {
+  id        String   @id @default(cuid())
+  eventId   String
+  userId    String
+  slotIds         String[] @default([])
+  baselineSlotIds String[] @default([]) // 草稿建立時的 baseline available slots，用於判斷 staged 是否回到初始狀態
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId])
   @@index([userId])
 }
 
