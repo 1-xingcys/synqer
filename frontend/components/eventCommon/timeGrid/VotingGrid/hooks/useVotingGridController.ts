@@ -95,7 +95,7 @@ export function useVotingGridController({
   currentUserId,
   currentUserDisplayName,
 }: UseVotingGridControllerProps): UseVotingGridControllerResult {
-  const [granularity, setGranularity] = useState<TimeGranularity>(15);
+  const [granularity, setGranularity] = useState<TimeGranularity>(30);
   const { datesPerPage, slotHeight } = useResponsiveGrid();
 
   const { selectedSlots, toggleSlots, replaceAllSlots } = useOptimisticVoting({
