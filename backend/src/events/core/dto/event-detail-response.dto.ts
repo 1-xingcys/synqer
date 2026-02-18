@@ -60,12 +60,19 @@ export class EventDetailExpectedParticipantDto {
   user!: EventDetailExpectedParticipantUserDto | null;
 }
 
+export class EventDetailStagedVoteDto {
+  slotIds!: string[];
+  baselineSlotIds!: string[];
+  updatedAt!: Date;
+}
+
 export class EventDetailResponseDto {
   isDeleted!: boolean;
   event!: EventDetailEventDto;
   lineGroup!: EventDetailLineGroupDto | null;
   slots!: EventDetailSlotDto[];
   votes!: EventDetailVoteDto[];
+  stagedVote!: EventDetailStagedVoteDto | null;
   participants!: EventDetailParticipantDto[];
   expectedParticipants!: EventDetailExpectedParticipantDto[];
 }

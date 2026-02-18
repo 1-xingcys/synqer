@@ -25,6 +25,9 @@ describe('EventRepository', () => {
     lineGroupMember: {
       findMany: jest.fn(),
     },
+    eventStagedVote: {
+      findUnique: jest.fn(),
+    },
     $transaction: jest.fn(),
   };
 
@@ -246,6 +249,42 @@ describe('EventRepository', () => {
         }),
       });
       expect(result).toEqual(mockEvent);
+    });
+  });
+
+  describe('findStagedVoteByEventAndUser', () => {
+    it('should find staged vote by event and user', async () => {
+      const eventId = 'event-123';
+      const userId = 'user-123';
+      const mockStagedVote = {
+        slotIds: ['slot-1'],
+        baselineSlotIds: ['slot-1'],
+        updatedAt: new Date('2026-02-18T00:00:00.000Z'),
+      };
+
+      mockPrismaService.eventStagedVote.findUnique.mockResolvedValue(
+        mockStagedVote,
+      );
+
+      const result = await repository.findStagedVoteByEventAndUser(
+        eventId,
+        userId,
+      );
+
+      expect(prismaService.eventStagedVote.findUnique).toHaveBeenCalledWith({
+        where: {
+          eventId_userId: {
+            eventId,
+            userId,
+          },
+        },
+        select: {
+          slotIds: true,
+          baselineSlotIds: true,
+          updatedAt: true,
+        },
+      });
+      expect(result).toEqual(mockStagedVote);
     });
   });
 

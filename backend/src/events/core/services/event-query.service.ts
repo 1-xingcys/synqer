@@ -3,13 +3,6 @@ import { EventRepository } from '../repositories/event.repository';
 import { EventMapperService } from '../../shared/services/event-mapper.service';
 import { EventStatusService } from '../../shared/services/event-status.service';
 
-interface VoteStats<T extends { userId: string }> {
-  activeParticipantUserIds: Set<string>;
-  filteredVotes: T[];
-  votedUserIds: Set<string>;
-  votedCount: number;
-}
-
 /**
  * 活動查詢服務（業務邏輯層）
  */
@@ -29,10 +22,9 @@ export class EventQueryService {
 
     return events.map((event) => {
       const expectedParticipantCount = event.expectedParticipants.length;
-      const { votedCount } = this.calculateVoteStats(
-        event.expectedParticipants,
-        event.votes,
-      );
+      const votedCount = event.expectedParticipants.filter(
+        (ep) => ep.hasVoted,
+      ).length;
 
       return {
         ...this.eventMapper.mapEventToList(event),
@@ -50,12 +42,15 @@ export class EventQueryService {
 
     return events.map((event) => {
       const expectedParticipantCount = event.expectedParticipants.length;
-      const { activeParticipantUserIds, votedUserIds, votedCount } =
-        this.calculateVoteStats(event.expectedParticipants, event.votes);
+      const votedCount = event.expectedParticipants.filter(
+        (ep) => ep.hasVoted,
+      ).length;
+      const currentUserParticipant = event.expectedParticipants.find(
+        (ep) => ep.userId === userId,
+      );
 
       // 檢查當前用戶是否已投票（且未被移除）
-      const hasVoted =
-        activeParticipantUserIds.has(userId) && votedUserIds.has(userId);
+      const hasVoted = Boolean(currentUserParticipant?.hasVoted);
 
       return {
         ...this.eventMapper.mapEventToList(event),
@@ -76,7 +71,7 @@ export class EventQueryService {
   /**
    * 查詢單個活動詳情
    */
-  async findOne(eventId: string) {
+  async findOne(eventId: string, userId: string) {
     const event = await this.eventRepository.findOneWithDetails(eventId);
 
     if (!event) {
@@ -91,12 +86,13 @@ export class EventQueryService {
         lineGroup: event.lineGroup,
         slots: [],
         votes: [],
+        stagedVote: null,
         participants: [],
         expectedParticipants: [],
       };
     }
 
-    const { filteredVotes, votedUserIds } = this.calculateVoteStats(
+    const filteredVotes = this.filterVotesByActiveParticipants(
       event.expectedParticipants,
       event.votes,
     );
@@ -104,18 +100,20 @@ export class EventQueryService {
     const votes = this.eventMapper.mapVotes(filteredVotes);
     const participants = this.eventMapper.extractParticipants(filteredVotes);
 
+    const stagedVote = await this.eventRepository.findStagedVoteByEventAndUser(
+      eventId,
+      userId,
+    );
+
     // 整理預期參與者資料
-    const expectedParticipants = event.expectedParticipants.map((ep) => {
-      const hasVoted = ep.userId ? votedUserIds.has(ep.userId) : false;
-      return {
-        id: ep.id,
-        lineUserId: ep.lineUserId,
-        userId: ep.userId,
-        hasVoted,
-        reminderSentAt: ep.reminderSentAt,
-        user: ep.user,
-      };
-    });
+    const expectedParticipants = event.expectedParticipants.map((ep) => ({
+      id: ep.id,
+      lineUserId: ep.lineUserId,
+      userId: ep.userId,
+      hasVoted: ep.hasVoted,
+      reminderSentAt: ep.reminderSentAt,
+      user: ep.user,
+    }));
 
     return {
       isDeleted: false,
@@ -123,6 +121,7 @@ export class EventQueryService {
       lineGroup: event.lineGroup,
       slots: event.slots,
       votes,
+      stagedVote,
       participants,
       expectedParticipants,
     };
@@ -159,7 +158,7 @@ export class EventQueryService {
       };
     }
 
-    const { filteredVotes, votedUserIds } = this.calculateVoteStats(
+    const filteredVotes = this.filterVotesByActiveParticipants(
       event.expectedParticipants,
       event.votes,
     );
@@ -169,17 +168,14 @@ export class EventQueryService {
       this.eventMapper.extractParticipantsForHost(filteredVotes);
 
     // 整理預期參與者資料
-    const expectedParticipants = event.expectedParticipants.map((ep) => {
-      const hasVoted = ep.userId ? votedUserIds.has(ep.userId) : false;
-      return {
-        id: ep.id,
-        lineUserId: ep.lineUserId || undefined,
-        userId: ep.userId || undefined,
-        displayName: ep.user?.displayName || undefined,
-        pictureUrl: ep.user?.avatarUrl || undefined,
-        hasVoted,
-      };
-    });
+    const expectedParticipants = event.expectedParticipants.map((ep) => ({
+      id: ep.id,
+      lineUserId: ep.lineUserId || undefined,
+      userId: ep.userId || undefined,
+      displayName: ep.user?.displayName || undefined,
+      pictureUrl: ep.user?.avatarUrl || undefined,
+      hasVoted: ep.hasVoted,
+    }));
 
     const votingStats = this.eventMapper.calculateVotingStats(
       expectedParticipants,
@@ -232,38 +228,33 @@ export class EventQueryService {
       };
     }
 
-    const { votedUserIds } = this.calculateVoteStats(
-      event.expectedParticipants,
-      event.votes,
-    );
-
     // 整理預期參與者資料（包含使用者資訊）
-    const expectedParticipants = event.expectedParticipants.map((ep) => {
-      const hasVoted = ep.userId ? votedUserIds.has(ep.userId) : false;
-      return {
-        id: ep.id,
-        lineUserId: ep.lineUserId || undefined,
-        userId: ep.userId || undefined,
-        displayName: ep.user?.displayName || undefined,
-        pictureUrl: ep.user?.avatarUrl || undefined,
-        hasVoted,
-        status: this.eventStatusService.computeParticipantStatus({
-          userId: ep.userId,
-          lineUserId: ep.lineUserId,
-          hasVoted,
-        }),
-        user: ep.user
-          ? {
-              id: ep.user.id,
-              displayName: ep.user.displayName,
-              avatarUrl: ep.user.avatarUrl,
-            }
-          : undefined,
-      };
-    });
+    const expectedParticipants = event.expectedParticipants.map((ep) => ({
+      id: ep.id,
+      lineUserId: ep.lineUserId || undefined,
+      userId: ep.userId || undefined,
+      displayName: ep.user?.displayName || undefined,
+      pictureUrl: ep.user?.avatarUrl || undefined,
+      hasVoted: ep.hasVoted,
+      status: this.eventStatusService.computeParticipantStatus({
+        userId: ep.userId,
+        lineUserId: ep.lineUserId,
+        hasVoted: ep.hasVoted,
+      }),
+      user: ep.user
+        ? {
+            id: ep.user.id,
+            displayName: ep.user.displayName,
+            avatarUrl: ep.user.avatarUrl,
+          }
+        : undefined,
+    }));
 
     // 檢查當前使用者是否已投票
-    const currentUserHasVoted = votedUserIds.has(userId);
+    const currentUserParticipant = event.expectedParticipants.find(
+      (ep) => ep.userId === userId,
+    );
+    const currentUserHasVoted = Boolean(currentUserParticipant?.hasVoted);
 
     // 主辦人資訊
     const host = event.owner
@@ -327,38 +318,16 @@ export class EventQueryService {
     };
   }
 
-  /**
-   * 計算投票統計資料（過濾已移除參與者的投票）
-   */
-  private calculateVoteStats<T extends { userId: string }>(
+  private filterVotesByActiveParticipants<T extends { userId: string }>(
     expectedParticipants: Array<{ userId: string | null }>,
     votes: T[],
-  ): VoteStats<T> {
-    // 取得未被移除的預期參與者的 userId 集合
-    const activeParticipantUserIds = new Set<string>(
+  ): T[] {
+    const activeParticipantUserIds = new Set(
       expectedParticipants
         .filter((ep) => ep.userId)
         .map((ep) => ep.userId as string),
     );
 
-    // 過濾 votes，只保留未被移除的預期參與者的投票
-    const filteredVotes = votes.filter((v) =>
-      activeParticipantUserIds.has(v.userId),
-    );
-
-    // 從過濾後的 votes 表建立已投票的 userId Set
-    const votedUserIds = new Set<string>(filteredVotes.map((v) => v.userId));
-
-    // 計算 expectedParticipants 中已投票的人數
-    const votedCount = expectedParticipants.filter(
-      (p) => p.userId && votedUserIds.has(p.userId),
-    ).length;
-
-    return {
-      activeParticipantUserIds,
-      filteredVotes,
-      votedUserIds,
-      votedCount,
-    };
+    return votes.filter((v) => activeParticipantUserIds.has(v.userId));
   }
 }
