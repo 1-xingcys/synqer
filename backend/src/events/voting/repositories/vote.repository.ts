@@ -23,6 +23,105 @@ export class VoteRepository {
   }
 
   /**
+   * 查詢使用者在活動中的 hasVoted 狀態
+   */
+  async findParticipantVoteStatus(eventId: string, userId: string) {
+    return this.prisma.eventExpectedParticipant.findFirst({
+      where: {
+        eventId,
+        userId,
+        isRemoved: false,
+      },
+      select: {
+        hasVoted: true,
+      },
+    });
+  }
+
+  /**
+   * 查詢使用者目前已提交（committed）的 available slot IDs
+   */
+  async findUserCommittedSlotIds(eventId: string, userId: string) {
+    const rows = await this.prisma.eventVote.findMany({
+      where: {
+        eventId,
+        userId,
+      },
+      select: {
+        slotId: true,
+      },
+    });
+    return rows.map((row) => row.slotId);
+  }
+
+  /**
+   * 查詢使用者目前的 staged 草稿
+   */
+  async findUserStagedVote(eventId: string, userId: string) {
+    return this.prisma.eventStagedVote.findUnique({
+      where: {
+        eventId_userId: {
+          eventId,
+          userId,
+        },
+      },
+      select: {
+        slotIds: true,
+        baselineSlotIds: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  /**
+   * upsert staged 草稿
+   */
+  async upsertStagedVote(
+    eventId: string,
+    userId: string,
+    slotIds: string[],
+    baselineSlotIds: string[],
+    prismaClient?: Prisma.TransactionClient,
+  ) {
+    const client = prismaClient || this.prisma;
+    return client.eventStagedVote.upsert({
+      where: {
+        eventId_userId: {
+          eventId,
+          userId,
+        },
+      },
+      create: {
+        eventId,
+        userId,
+        slotIds,
+        baselineSlotIds,
+      },
+      update: {
+        slotIds,
+        baselineSlotIds,
+      },
+    });
+  }
+
+  /**
+   * 刪除 staged 草稿
+   */
+  async deleteStagedVote(
+    eventId: string,
+    userId: string,
+    prismaClient?: Prisma.TransactionClient,
+  ) {
+    const client = prismaClient || this.prisma;
+    return client.eventStagedVote.deleteMany({
+      where: {
+        eventId,
+        userId,
+      },
+    });
+  }
+
+  /**
    * 刪除使用者在活動中的所有投票
    */
   async deleteUserVotes(
@@ -176,6 +275,30 @@ export class VoteRepository {
         await this.updateParticipantVoteStatus(eventId, userId, true, prisma);
 
         return { addSlotIds, removeSlotIds };
+      },
+    );
+  }
+
+  /**
+   * 將 staged 草稿提交為 committed votes 並清除草稿
+   */
+  async commitStagedVotesInTransaction(
+    eventId: string,
+    userId: string,
+    availableSlotIds: string[],
+  ) {
+    return this.prisma.$transaction(
+      async (prisma: Prisma.TransactionClient) => {
+        await this.deleteUserVotes(eventId, userId, prisma);
+
+        if (availableSlotIds.length > 0) {
+          await this.createVotes(eventId, userId, availableSlotIds, prisma);
+        }
+
+        await this.updateParticipantVoteStatus(eventId, userId, true, prisma);
+        await this.deleteStagedVote(eventId, userId, prisma);
+
+        return { availableSlotIds };
       },
     );
   }

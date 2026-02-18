@@ -30,3 +30,23 @@ export class UpdateVoteDto {
   @IsString({ each: true })
   removeSlotIds?: string[]; // 移除投票（標記沒空）
 }
+
+/**
+ * 暫存投票增量更新 DTO
+ * 用於 PATCH /events/:eventId/voting/staged
+ */
+export class UpdateStagedVoteDto {
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  addSlotIds?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  removeSlotIds?: string[];
+
+  @IsOptional()
+  @IsEnum(VoteMode)
+  voteMode?: VoteMode;
+}
