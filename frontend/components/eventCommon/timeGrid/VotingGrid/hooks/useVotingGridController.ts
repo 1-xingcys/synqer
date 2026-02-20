@@ -7,7 +7,10 @@ import { useMergedTimeGridSelectionInteraction } from "./useMergedTimeGridSelect
 import { useMergedTimeRowsModel } from "../../hooks/useMergedTimeRowsModel";
 import { useResponsiveGrid } from "../../hooks/useResponsiveGrid";
 import { usePaginatedDates } from "../../hooks/usePaginatedDates";
-import { useOptimisticVoting } from "./useOptimisticVoting";
+import {
+  useOptimisticVoting,
+  type CommitFeedback,
+} from "./useOptimisticVoting";
 import { useCalendarOverlayProjection } from "./useCalendarOverlayProjection";
 import { useSlotMatrixViewModel } from "./useSlotMatrixViewModel";
 import { useSlotGridModel } from "../../hooks/useSlotGridModel";
@@ -22,7 +25,7 @@ interface UseVotingGridControllerProps {
   currentUserHasVoted: VotingGridProps["currentUserHasVoted"];
   eventId: VotingGridProps["eventId"];
   currentUserId: VotingGridProps["currentUserId"];
-  currentUserDisplayName: VotingGridProps["currentUserDisplayName"];
+  eventTitle: VotingGridProps["eventTitle"];
 }
 
 interface UseVotingGridControllerResult {
@@ -34,6 +37,7 @@ interface UseVotingGridControllerResult {
     hasStagedVoteDraft: boolean;
     commitStagedVotes: () => void;
     isCommitPending: boolean;
+    commitFeedback: CommitFeedback;
     isDayFullySelected: (dateKey: string) => boolean;
     selectEntireDay: (dateKey: string) => void;
   };
@@ -100,7 +104,7 @@ export function useVotingGridController({
   currentUserHasVoted,
   eventId,
   currentUserId,
-  currentUserDisplayName,
+  eventTitle,
 }: UseVotingGridControllerProps): UseVotingGridControllerResult {
   const [granularity, setGranularity] = useState<TimeGranularity>(30);
   const { datesPerPage, slotHeight } = useResponsiveGrid();
@@ -109,13 +113,14 @@ export function useVotingGridController({
     committedSlots,
     stagedSlots,
     hasStagedVoteDraft,
+    commitFeedback,
     updateStagedVotes,
     commitStagedVotes,
     isCommitPending,
   } = useOptimisticVoting({
     eventId,
     currentUserId,
-    currentUserDisplayName,
+    eventTitle,
     votes,
     stagedVote,
   });
@@ -260,6 +265,7 @@ export function useVotingGridController({
       hasStagedVoteDraft,
       commitStagedVotes,
       isCommitPending,
+      commitFeedback,
       isDayFullySelected,
       selectEntireDay,
     },

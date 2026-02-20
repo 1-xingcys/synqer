@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   patchStagedVotesApi,
@@ -8,21 +8,30 @@ import {
   eventDetailKeys,
   EventDetailData,
 } from "@/hooks/useEventDetail";
+import {
+  ShareResult,
+  shareVoteCommitFlexMessage,
+} from "@/lib/line-flex-message";
+import { getLiff } from "@/lib/liff";
 import { Vote, StagedVote } from "../../types";
 import { VoteMode } from "@/types/event";
 
 interface UseOptimisticVotingProps {
   eventId: string;
   currentUserId: string;
-  currentUserDisplayName: string;
+  eventTitle: string;
   votes: Vote[];
   stagedVote: StagedVote | null;
 }
+
+export type CommitFeedback = "idle" | "success" | "error";
+export type CommitShareFeedback = "idle" | "success" | "error";
 
 interface UseOptimisticVotingReturn {
   committedSlots: Set<string>;
   stagedSlots: Set<string>;
   hasStagedVoteDraft: boolean;
+  commitFeedback: CommitFeedback;
   updateStagedVotes: (
     addSlotIds: string[],
     removeSlotIds: string[],
@@ -77,11 +86,14 @@ function areOrderedSlotIdsEqual(left: string[], right: string[]): boolean {
 export function useOptimisticVoting({
   eventId,
   currentUserId,
-  currentUserDisplayName,
+  eventTitle,
   votes,
   stagedVote,
 }: UseOptimisticVotingProps): UseOptimisticVotingReturn {
   const queryClient = useQueryClient();
+  const [commitFeedback, setCommitFeedback] = useState<CommitFeedback>("idle");
+  const [commitShareFeedback, setCommitShareFeedback] =
+    useState<CommitShareFeedback>("idle");
 
   const committedSlots = useMemo(() => {
     return new Set(
@@ -96,6 +108,17 @@ export function useOptimisticVoting({
     [stagedVote],
   );
   const hasStagedVoteDraft = stagedVote !== null;
+
+  useEffect(() => {
+    if (commitFeedback === "idle" && commitShareFeedback === "idle") return;
+
+    const timerId = window.setTimeout(() => {
+      setCommitFeedback("idle");
+      setCommitShareFeedback("idle");
+    }, 1500);
+
+    return () => window.clearTimeout(timerId);
+  }, [commitFeedback, commitShareFeedback]);
 
   const patchMutation = useMutation({
     mutationFn: ({
@@ -197,66 +220,43 @@ export function useOptimisticVoting({
   const commitMutation = useMutation({
     mutationFn: async () => commitStagedVotesApi(eventId),
     onMutate: async () => {
+      setCommitFeedback("idle");
+      setCommitShareFeedback("idle");
+
       await queryClient.cancelQueries({
         queryKey: eventDetailKeys.detail(eventId),
       });
 
-      const previousData = queryClient.getQueryData<EventDetailData>(
+      const currentData = queryClient.getQueryData<EventDetailData>(
         eventDetailKeys.detail(eventId),
       );
 
-      queryClient.setQueryData<EventDetailData>(
-        eventDetailKeys.detail(eventId),
-        (old) => {
-          if (!old || !old.stagedVote) return old;
-
-          const stagedSlotSet = new Set(old.stagedVote.slotIds);
-          const orderedStagedSlotIds = old.slots
-            .map((slot) => slot.id)
-            .filter((slotId) => stagedSlotSet.has(slotId));
-
-          const otherVotes = old.votes.filter(
-            (vote) => vote.userId !== currentUserId,
-          );
-          const newUserVotes: Vote[] = orderedStagedSlotIds.map((slotId) => ({
-            slotId,
-            userId: currentUserId,
-            userDisplayName: currentUserDisplayName,
-          }));
-
-          const expectedParticipants = old.expectedParticipants.map(
-            (participant) => {
-              if (
-                participant.userId === currentUserId ||
-                participant.user?.id === currentUserId
-              ) {
-                return {
-                  ...participant,
-                  hasVoted: true,
-                };
-              }
-              return participant;
-            },
-          );
-
-          return {
-            ...old,
-            votes: [...otherVotes, ...newUserVotes],
-            stagedVote: null,
-            expectedParticipants,
-          };
-        },
-      );
-
-      return { previousData };
+      return {
+        hadVotedBeforeCommit: currentData
+          ? getCurrentUserHasVoted(currentData, currentUserId)
+          : false,
+      };
     },
-    onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(
-          eventDetailKeys.detail(eventId),
-          context.previousData,
+    onSuccess: async (_response, _variables, context) => {
+      setCommitFeedback("success");
+
+      const liff = await getLiff();
+      if (liff?.isInClient() && context?.hadVotedBeforeCommit) {
+        const shareResult = await shareVoteCommitFlexMessage({
+          eventId,
+          eventTitle,
+          voterUserId: currentUserId,
+        });
+        setCommitShareFeedback(
+          shareResult === ShareResult.Success ? "success" : "error",
         );
+      } else {
+        setCommitShareFeedback("idle");
       }
+    },
+    onError: () => {
+      setCommitFeedback("error");
+      setCommitShareFeedback("idle");
     },
     onSettled: () => {
       void queryClient.invalidateQueries({
@@ -274,6 +274,7 @@ export function useOptimisticVoting({
   );
 
   const commitStagedVotes = useCallback(() => {
+    if (commitMutation.isPending) return;
     commitMutation.mutate();
   }, [commitMutation]);
 
@@ -281,6 +282,7 @@ export function useOptimisticVoting({
     committedSlots,
     stagedSlots,
     hasStagedVoteDraft,
+    commitFeedback,
     updateStagedVotes,
     commitStagedVotes,
     isPatchPending: patchMutation.isPending,

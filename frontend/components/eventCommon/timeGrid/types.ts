@@ -54,8 +54,8 @@ export interface VotingGridProps {
   stagedVote: StagedVote | null;
   currentUserHasVoted: boolean;
   currentUserId: string;
-  currentUserDisplayName: string;
   eventId: string;
+  eventTitle: string;
 }
 
 export interface RectangleBounds {

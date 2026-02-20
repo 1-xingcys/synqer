@@ -20,7 +20,7 @@ export default function VotingGrid({
   currentUserHasVoted,
   eventId,
   currentUserId,
-  currentUserDisplayName,
+  eventTitle,
 }: VotingGridProps) {
   const tJoined = useTranslations("joined");
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
@@ -33,7 +33,7 @@ export default function VotingGrid({
     currentUserHasVoted,
     eventId,
     currentUserId,
-    currentUserDisplayName,
+    eventTitle,
   });
 
   const {
@@ -44,6 +44,7 @@ export default function VotingGrid({
     hasStagedVoteDraft,
     commitStagedVotes,
     isCommitPending,
+    commitFeedback,
     isDayFullySelected,
     selectEntireDay,
   } = selection;
@@ -137,7 +138,9 @@ export default function VotingGrid({
         >
           <VoteCommitBar
             hasStagedVoteDraft={hasStagedVoteDraft}
+            hasCommittedVote={currentUserHasVoted}
             isCommitPending={isCommitPending}
+            commitFeedback={commitFeedback}
             onCommit={commitStagedVotes}
           />
           <div className="flex items-center gap-2">
