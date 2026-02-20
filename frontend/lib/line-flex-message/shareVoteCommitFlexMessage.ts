@@ -41,10 +41,7 @@ function getVoteShareCopy(localePrefix: string): VoteShareCopy {
 }
 
 function buildVoteResultsUrl(info: VoteCommitShareInfo): string {
-  const pathname =
-    typeof window !== "undefined" ? window.location.pathname : "";
-  const localePrefix = getLocalePrefix(pathname);
-  const resultsPath = `${localePrefix}/joined/${info.eventId}/results`;
+  const resultsPath = `/joined/${info.eventId}/results`;
   const liffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
 
   if (!liffId && typeof window === "undefined") {
@@ -60,10 +57,7 @@ function buildVoteResultsUrl(info: VoteCommitShareInfo): string {
 }
 
 function buildGoVoteUrl(info: VoteCommitShareInfo): string {
-  const pathname =
-    typeof window !== "undefined" ? window.location.pathname : "";
-  const localePrefix = getLocalePrefix(pathname);
-  const voteUrl = `${localePrefix}/events/${info.eventId}`;
+  const voteUrl = `/events/${info.eventId}`;
   const liffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
 
   if (!liffId && typeof window === "undefined") {
