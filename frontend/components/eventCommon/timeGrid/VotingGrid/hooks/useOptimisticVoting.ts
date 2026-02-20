@@ -241,7 +241,7 @@ export function useOptimisticVoting({
       setCommitFeedback("success");
 
       const liff = await getLiff();
-      if (liff?.isInClient() && context?.hadVotedBeforeCommit) {
+      if (liff?.isInClient() && !context?.hadVotedBeforeCommit) {
         const shareResult = await shareVoteCommitFlexMessage({
           eventId,
           eventTitle,

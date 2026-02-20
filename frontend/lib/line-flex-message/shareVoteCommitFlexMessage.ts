@@ -12,6 +12,7 @@ interface VoteShareCopy {
   viewLabel: string;
   untitledEvent: string;
   goVote: string;
+  eventPrefix: string;
 }
 
 function getLocalePrefix(pathname: string): string {
@@ -26,6 +27,7 @@ function getVoteShareCopy(localePrefix: string): VoteShareCopy {
       viewLabel: "查看",
       untitledEvent: "未命名活動",
       goVote: "前往投票",
+      eventPrefix: "活動：",
     };
   }
 
@@ -34,6 +36,7 @@ function getVoteShareCopy(localePrefix: string): VoteShareCopy {
     viewLabel: "View",
     untitledEvent: "Untitled Event",
     goVote: "Go Vote",
+    eventPrefix: "Event: ",
   };
 }
 
@@ -105,7 +108,7 @@ export function buildVoteCommitShareFlexMessage(info: VoteCommitShareInfo) {
           },
           {
             type: "text",
-            text: `活動：${title}`,
+            text: `${copy.eventPrefix}${title}`,
             wrap: true,
             margin: "sm",
             size: "sm",
