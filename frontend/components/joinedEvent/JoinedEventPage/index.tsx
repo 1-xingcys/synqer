@@ -42,8 +42,8 @@ export default function JoinedEventPage() {
           stagedVote={eventDetailData.stagedVote}
           currentUserHasVoted={currentUserHasVoted}
           currentUserId={user.id.toString()}
-          currentUserDisplayName={user.displayName || ""}
           eventId={eventId}
+          eventTitle={event.title || tJoined("untitledEvent")}
         />
       </div>
     );

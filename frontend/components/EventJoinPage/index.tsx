@@ -1,12 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useEventJoin } from "./useEventJoin";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorView } from "./ErrorView";
-import { AlreadyParticipantView } from "./AlreadyParticipantView";
 import { JoinConfirmView } from "./JoinConfirmView";
 import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
+import { useRouter } from "@/i18n/routing";
 
 interface EventJoinPageProps {
   eventId: string;
@@ -14,6 +15,7 @@ interface EventJoinPageProps {
 
 export default function EventJoinPage({ eventId }: EventJoinPageProps) {
   const t = useTranslations();
+  const router = useRouter();
   const {
     eventInfo,
     participationStatus,
@@ -23,11 +25,26 @@ export default function EventJoinPage({ eventId }: EventJoinPageProps) {
     handleJoin,
   } = useEventJoin(eventId);
 
+  useEffect(() => {
+    if (
+      !loading &&
+      !eventInfo?.isDeleted &&
+      participationStatus?.isParticipant
+    ) {
+      router.replace(`/joined/${eventId}`);
+    }
+  }, [
+    eventId,
+    eventInfo?.isDeleted,
+    loading,
+    participationStatus?.isParticipant,
+    router,
+  ]);
+
   if (loading) {
     return <LoadingSpinner />;
   }
 
-  // 已刪除活動的 UI 提示
   if (eventInfo?.isDeleted) {
     return (
       <DeletedEventView
@@ -43,14 +60,10 @@ export default function EventJoinPage({ eventId }: EventJoinPageProps) {
     return <ErrorView error={error} />;
   }
 
-  // 如果使用者已經是參與者
   if (participationStatus?.isParticipant) {
-    return (
-      <AlreadyParticipantView eventId={eventId} eventTitle={eventInfo.title} />
-    );
+    return <LoadingSpinner />;
   }
 
-  // 加入確認頁面
   return (
     <JoinConfirmView
       eventInfo={eventInfo}
