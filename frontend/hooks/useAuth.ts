@@ -10,6 +10,7 @@ import { debugLog } from "@/components/DebugConsole";
 
 const log = (message: string, data?: unknown) =>
   debugLog("useAuth", message, data);
+const LIFF_LOGIN_REDIRECT_TIMEOUT_MS = 15000;
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -58,9 +59,22 @@ export function useAuth() {
 
         if (liffState.isInClient && !liffState.isLoggedIn) {
           log("LIFF: triggering login");
-          setTimeout(() => setLoading(false), 5000);
-          await liffLogin(window.location.href);
-          return;
+          const fallbackTimer = window.setTimeout(() => {
+            log("LIFF login redirect timeout, fallback to /login");
+            setLoading(false);
+          }, LIFF_LOGIN_REDIRECT_TIMEOUT_MS);
+
+          try {
+            await liffLogin(window.location.href);
+            // 正常情況會立即跳轉到 LINE Login，回來後重新走 useAuth。
+            return;
+          } catch (error) {
+            window.clearTimeout(fallbackTimer);
+            log("LIFF login trigger failed", { error: String(error) });
+            setUser(null);
+            setLoading(false);
+            return;
+          }
         }
 
         if (liffState.isLoggedIn) {
