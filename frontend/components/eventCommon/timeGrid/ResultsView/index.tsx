@@ -14,7 +14,6 @@ import { ResultsHeatmapGrid } from "./ResultsHeatmapGrid";
 import { useFilteredVotes } from "./hooks/useFilteredVotes";
 import { TimeGranularity } from "../types";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
-import { useLiff } from "@/hooks/useLiff";
 import { Z_INDEX } from "@/lib/zIndex";
 
 export type { ResultsViewProps, SlotRangeInfo };
@@ -140,23 +139,11 @@ export default function ResultsView({
   );
 
   // Share link with filter state (for results page)
-  const { isInClient } = useLiff();
   const { copied: linkCopied, copy } = useCopyToClipboard();
 
   // Build shareable link: joined/[eventId]/results?selected=...
   const getShareableLink = useCallback((): string => {
-    const liffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
-    const resultsPath = `/joined/${eventId}/results`;
-
-    // Build base URL based on environment
-    let baseUrl: string;
-    if (isInClient && liffId) {
-      baseUrl = `https://liff.line.me/${liffId}${resultsPath}`;
-    } else {
-      baseUrl = `${window.location.origin}${resultsPath}`;
-    }
-
-    const url = new URL(baseUrl);
+    const url = new URL(`${window.location.origin}/joined/${eventId}/results`);
     url.searchParams.set(
       SELECTED_PARAM,
       serializeSelectionParam(selectedParticipants),
@@ -166,7 +153,6 @@ export default function ResultsView({
     return url.toString();
   }, [
     eventId,
-    isInClient,
     serializeSelectionParam,
     selectedParticipants,
     availabilityMode,

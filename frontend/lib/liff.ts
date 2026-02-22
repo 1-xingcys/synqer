@@ -86,6 +86,39 @@ export function isLiffEnabled(): boolean {
 }
 
 /**
+ * 檢查目前是否為 LINE App 內建瀏覽器
+ */
+export function isLineUserAgent(): boolean {
+  if (typeof navigator === "undefined") return false;
+  return /Line/i.test(navigator.userAgent);
+}
+
+/**
+ * 產生目前頁面的 LIFF 入口網址
+ */
+export function buildLiffEntryUrl(currentUrl?: string): string | null {
+  const liffId = getLiffId();
+  if (!liffId) return null;
+
+  const sourceUrl =
+    currentUrl ?? (typeof window !== "undefined" ? window.location.href : "");
+  if (!sourceUrl) return null;
+
+  try {
+    const url = new URL(sourceUrl);
+
+    // 已經是 LIFF launch callback，不需要再轉
+    if (url.searchParams.has("liff.state")) {
+      return null;
+    }
+
+    return `https://liff.line.me/${liffId}${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * 動態載入 LIFF SDK
  */
 async function loadLiffSdk(): Promise<typeof import("@line/liff").default> {

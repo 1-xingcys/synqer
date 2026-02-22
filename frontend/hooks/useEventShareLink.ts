@@ -2,12 +2,10 @@
 
 import { useMemo, useCallback } from "react";
 import { useCopyToClipboard } from "./useCopyToClipboard";
-import { useLiff } from "./useLiff";
 
 /**
  * 活動分享連結 hook
- * - LIFF 環境：使用 LIFF URL
- * - 一般瀏覽器：使用原生 URL
+ * - 一律使用原生 URL，提升跨平台可開啟性
  */
 export function useEventShareLink(eventId: string): {
   shareUrl: string;
@@ -15,17 +13,11 @@ export function useEventShareLink(eventId: string): {
   copyLink: (e?: React.MouseEvent) => Promise<void>;
 } {
   const { copied, copy } = useCopyToClipboard();
-  const { isInClient } = useLiff();
 
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-
-    const liffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
-    if (isInClient && liffId) {
-      return `https://liff.line.me/${liffId}/events/${eventId}`;
-    }
     return `${window.location.origin}/events/${eventId}`;
-  }, [isInClient, eventId]);
+  }, [eventId]);
 
   const copyLink = useCallback(
     (e?: React.MouseEvent) => {

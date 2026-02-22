@@ -2,20 +2,23 @@
 
 import { useEffect, useState } from "react";
 import {
+  buildLiffEntryUrl,
   getLiffStatePath,
   handleLiffPathRedirect,
   initializeLiff,
+  isLineUserAgent,
   isLiffEnabled,
 } from "@/lib/liff";
 import { debugLog } from "@/components/DebugConsole";
 
 const log = (message: string, data?: unknown) =>
   debugLog("LiffPath", message, data);
+const LIFF_AUTO_REDIRECT_KEY = "synqer:liff-auto-redirect:url";
 
 /**
  * LiffPathHandler
  *
- * 處理 LIFF 路徑重定向的組件。
+ * 處理 LIFF 路徑重定向與 LINE client 中轉 LIFF 的組件。
  * 當使用 https://liff.line.me/{liffId}/{path} 格式開啟時，
  * LINE 會把 {path} 存在 liff.state query parameter 中，
  * 這個組件負責檢測並重定向到正確的路徑。
@@ -36,43 +39,82 @@ export function LiffPathHandler({
 
   useEffect(() => {
     const handleLiffPath = async () => {
-      // 檢查是否有 liff.state 參數
-      const liffPath = getLiffStatePath();
+      try {
+        // 檢查是否有 liff.state 參數
+        const liffPath = getLiffStatePath();
 
-      if (!liffPath) {
-        log("No liff.state path found");
-        setStatus("done");
-        return;
-      }
+        if (liffPath) {
+          log("Found liff.state path", { liffPath });
 
-      log("Found liff.state path", { liffPath });
+          // 檢查是否需要重定向
+          const targetPath = handleLiffPathRedirect();
 
-      // 檢查是否需要重定向
-      const targetPath = handleLiffPathRedirect();
+          if (!targetPath) {
+            log("No redirect needed");
+            setStatus("done");
+            return;
+          }
 
-      if (!targetPath) {
-        log("No redirect needed");
-        setStatus("done");
-        return;
-      }
+          log("Redirecting to liff path", { targetPath });
+          setStatus("redirecting");
 
-      log("Redirecting to liff path", { targetPath });
-      setStatus("redirecting");
+          // 如果有 LIFF ID，先初始化 LIFF 以確保登入狀態被保留
+          if (isLiffEnabled()) {
+            try {
+              await initializeLiff();
+              log("LIFF initialized before redirect");
+            } catch (e) {
+              log("LIFF init failed during path redirect", {
+                error: String(e),
+              });
+            }
+          }
 
-      // 如果有 LIFF ID，先初始化 LIFF 以確保登入狀態被保留
-      if (isLiffEnabled()) {
-        try {
-          await initializeLiff();
-          log("LIFF initialized before redirect");
-        } catch (e) {
-          log("LIFF init failed during path redirect", { error: String(e) });
+          // 使用 window.location.replace 進行硬重定向
+          // 這確保在任何其他 React 邏輯執行之前完成重定向
+          // 並且不會在瀏覽器歷史中產生新條目
+          window.location.replace(targetPath);
+          return;
         }
-      }
 
-      // 使用 window.location.replace 進行硬重定向
-      // 這確保在任何其他 React 邏輯執行之前完成重定向
-      // 並且不會在瀏覽器歷史中產生新條目
-      window.location.replace(targetPath);
+        // 沒有 liff.state，嘗試將 LINE 內建瀏覽器中打開的原生網址中轉到 LIFF
+        if (!isLiffEnabled() || !isLineUserAgent()) {
+          log("Skip LIFF auto redirect");
+          setStatus("done");
+          return;
+        }
+
+        const currentUrl = window.location.href;
+        const lastAttemptUrl =
+          sessionStorage.getItem(LIFF_AUTO_REDIRECT_KEY) ?? "";
+        if (lastAttemptUrl === currentUrl) {
+          log("Skip LIFF auto redirect (already attempted)", { currentUrl });
+          setStatus("done");
+          return;
+        }
+
+        const liffState = await initializeLiff();
+        if (liffState.isInClient) {
+          log("Already in LIFF client");
+          setStatus("done");
+          return;
+        }
+
+        const liffEntryUrl = buildLiffEntryUrl(currentUrl);
+        if (!liffEntryUrl) {
+          log("Unable to build LIFF entry URL");
+          setStatus("done");
+          return;
+        }
+
+        sessionStorage.setItem(LIFF_AUTO_REDIRECT_KEY, currentUrl);
+        log("Redirecting LINE browser to LIFF", { liffEntryUrl });
+        setStatus("redirecting");
+        window.location.replace(liffEntryUrl);
+      } catch (error) {
+        log("LiffPathHandler failed", { error: String(error) });
+        setStatus("done");
+      }
     };
 
     void handleLiffPath();
