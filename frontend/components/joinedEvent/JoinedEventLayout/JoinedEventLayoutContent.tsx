@@ -97,6 +97,11 @@ export function JoinedEventLayoutContent({
 
   // Determine event status
   const isVoting = event.status === EventStatus.VOTING;
+  const isHost = Boolean(
+    user?.id !== undefined &&
+      event.ownerId !== null &&
+      user.id.toString() === event.ownerId.toString(),
+  );
 
   // Generate tabs with dynamic overview label
   const tabs = [
@@ -130,6 +135,7 @@ export function JoinedEventLayoutContent({
           endMinuteOfDay={event.endMinuteOfDay}
           hasVoted={hasVoted}
           eventId={eventId}
+          managementHref={isHost ? `/hosted/${eventId}` : undefined}
         />
       </div>
 
