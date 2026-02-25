@@ -93,13 +93,13 @@ export function useFormActions({
     if (hasUnsavedChanges) {
       setShowCancelConfirm(true);
     } else {
-      router.back();
+      router.push("/joined");
     }
   }, [hasUnsavedChanges, router, setShowCancelConfirm]);
 
   const confirmCancel = useCallback(() => {
     setShowCancelConfirm(false);
-    router.back();
+    router.push("/joined");
   }, [router, setShowCancelConfirm]);
 
   const cancelConfirmCancel = useCallback(() => {
