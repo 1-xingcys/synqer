@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TITLE_MAX_LENGTH } from "@shared/event-validation.constants";
+import { useLiff } from "@/hooks/useLiff";
 import { cn } from "@/lib/utils";
 import { LineGroupSection } from "./LineGroupSection";
 import { useFormStateContext } from "./CreateEventFormContext";
@@ -15,6 +16,7 @@ import { useLineGroupFields } from "./hooks/useLineGroupFields";
 export function GeneralSection() {
   const t = useTranslations();
   const { user } = useAuthContext();
+  const { isInClient: isInLiff } = useLiff();
 
   const {
     state: { formData, setFormData },
@@ -106,13 +108,15 @@ export function GeneralSection() {
             </div>
           </div>
 
-          {/* LINE Group Selection (only for LINE users) */}
-          <LineGroupSection
-            selectedGroupId={formData.lineGroupId}
-            selectedMemberIds={formData.selectedLineUserIds}
-            onGroupChange={handleLineGroupChange}
-            onMembersChange={handleSelectedMembersChange}
-          />
+          {/* LINE Group Selection (only in LIFF) */}
+          {isInLiff && (
+            <LineGroupSection
+              selectedGroupId={formData.lineGroupId}
+              selectedMemberIds={formData.selectedLineUserIds}
+              onGroupChange={handleLineGroupChange}
+              onMembersChange={handleSelectedMembersChange}
+            />
+          )}
         </div>
       </div>
     </div>
