@@ -44,7 +44,7 @@ export default function PublicHeader() {
                     onClick={() => router.push("/joined")}
                     className="px-4 py-2 lg:px-5 lg:py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    {t("gotoApp")}
+                    {t("startUsing")}
                   </button>
                 )}
                 <UserMenu />
