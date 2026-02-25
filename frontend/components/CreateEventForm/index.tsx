@@ -35,7 +35,7 @@ function CreateEventFormContent() {
         <div className="relative">
           {/* Connecting line from step 1 to last step */}
           <div
-            className="absolute left-[0.8rem] lg:left-[2.3rem] w-0.5 bg-border"
+            className="absolute left-[0.8rem] lg:left-[2.3rem] w-0.5 bg-border z-[1]"
             style={{
               top: "3rem",
               bottom: "1.5rem",

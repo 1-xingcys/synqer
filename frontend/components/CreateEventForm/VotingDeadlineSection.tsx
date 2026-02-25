@@ -32,7 +32,7 @@ export function VotingDeadlineSection() {
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">
       <div className="flex items-start gap-6">
         {/* Step Number */}
-        <div className="shrink-0 flex flex-col items-center relative">
+        <div className="shrink-0 flex flex-col items-center relative z-10">
           <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
             3
           </div>
