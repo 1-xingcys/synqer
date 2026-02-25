@@ -5,7 +5,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { TITLE_MAX_LENGTH } from "./types";
+import { TITLE_MAX_LENGTH } from "@shared/event-validation.constants";
 import { cn } from "@/lib/utils";
 import { LineGroupSection } from "./LineGroupSection";
 import { useFormStateContext } from "./CreateEventFormContext";

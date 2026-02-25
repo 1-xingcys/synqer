@@ -6,6 +6,7 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const nextConfig: NextConfig = {
   output: "standalone", // 启用 standalone 模式以优化 Docker 镜像大小
   experimental: {
+    externalDir: true,
     viewTransition: true,
   },
   images: {
