@@ -568,6 +568,7 @@
     },
     "hostedEventHint": "You are the host of this event",
     "goToEvent": "Go To Vote Page",
+    "goToManagementPage": "Management page",
     "copyVoteLink": "Vote Link",
     "goToVotePage": "Vote Page",
     "pageTitle": "Event Info",
