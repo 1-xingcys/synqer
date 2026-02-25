@@ -67,9 +67,6 @@ export function GeneralSection() {
                   {user?.displayName || user?.primaryEmail || "You"}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {t("createEvent.general.hostDescription")}
-              </p>
             </div>
 
             {/* Event Name - Takes remaining space */}

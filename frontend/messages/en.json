@@ -766,7 +766,6 @@
     "general": {
       "title": "General",
       "host": "Host",
-      "hostDescription": "You are the host of this event",
       "eventName": "Event name",
       "eventNamePlaceholder": "e.g., Team dinner time poll",
       "description": "Description",

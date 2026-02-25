@@ -762,11 +762,10 @@
   },
   "createEvent": {
     "title": "建立新活動",
-    "description": "建立一個新的活動來收集參與者的可用時間",
+    "description": "建立新活動來統計參與者的有空時間",
     "general": {
       "title": "General",
       "host": "Host",
-      "hostDescription": "你是這個活動的主辦者",
       "eventName": "Event name",
       "eventNamePlaceholder": "例如：團隊聚餐時間投票",
       "description": "Description",
@@ -806,8 +805,8 @@
       "startTimeTooSoonError": "活動開始時間必須至少在 1 小時後，以確保有足夠的投票時間"
     },
     "votingDeadline": {
-      "title": "投票截止時間",
-      "description": "設定參與者投票的截止時間",
+      "title": "Voting Deadline",
+      "description": "設定活動的投票截止時間",
       "date": "截止日期",
       "time": "截止時間",
       "autoSync": "自動與活動開始時間同步",
