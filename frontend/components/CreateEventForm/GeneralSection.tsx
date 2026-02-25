@@ -16,7 +16,9 @@ export function GeneralSection() {
   const t = useTranslations();
   const { user } = useAuthContext();
 
-  const { formData, setFormData } = useFormStateContext();
+  const {
+    state: { formData, setFormData },
+  } = useFormStateContext();
 
   const { titleCharCount, updateTitle } = useTextFields(formData, setFormData);
 

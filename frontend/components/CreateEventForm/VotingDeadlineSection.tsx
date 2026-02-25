@@ -7,18 +7,19 @@ import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
-import { useFormValidation, ValidationError } from "./hooks/useFormValidation";
+import { ValidationError } from "./hooks/useFormValidation";
 import { getToday } from "./hooks/utils";
 
 export function VotingDeadlineSection() {
   const t = useTranslations();
 
-  const { formData, setFormData } = useFormStateContext();
+  const {
+    state: { formData, setFormData },
+    validation: { errors },
+  } = useFormStateContext();
 
   const { handleVotingDeadlineDateChange, handleVotingDeadlineTimeChange } =
     useDateTimeFields(setFormData);
-
-  const { errors } = useFormValidation(formData);
 
   const hasDeadlineAfterStartError = errors.has(
     ValidationError.DeadlineAfterStart,
