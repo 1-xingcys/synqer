@@ -39,7 +39,6 @@ function CreateEventFormContent() {
             style={{
               top: "3rem",
               bottom: "1.5rem",
-              zIndex: 1,
             }}
           />
           <GeneralSection />

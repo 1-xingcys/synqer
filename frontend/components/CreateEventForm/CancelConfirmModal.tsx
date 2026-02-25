@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Z_INDEX } from "@/lib/zIndex";
 import { useFormStateContext } from "./CreateEventFormContext";
 
 export function CancelConfirmModal() {
@@ -18,15 +19,26 @@ export function CancelConfirmModal() {
       return;
     }
 
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalHtmlOverscrollBehavior =
+      document.documentElement.style.overscrollBehavior;
     const originalOverflow = document.body.style.overflow;
+    const originalTouchAction = document.body.style.touchAction;
     const originalPaddingRight = document.body.style.paddingRight;
     const scrollbarWidth =
       window.innerWidth - document.documentElement.clientWidth;
 
+    document.documentElement.style.overflow = "hidden";
+    document.documentElement.style.overscrollBehavior = "none";
     document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
     if (scrollbarWidth > 0) {
       document.body.style.paddingRight = `${scrollbarWidth}px`;
     }
+
+    const preventTouchMove = (event: TouchEvent) => {
+      event.preventDefault();
+    };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -34,11 +46,19 @@ export function CancelConfirmModal() {
       }
     };
 
+    document.addEventListener("touchmove", preventTouchMove, {
+      passive: false,
+    });
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
+      document.removeEventListener("touchmove", preventTouchMove);
       window.removeEventListener("keydown", handleKeyDown);
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      document.documentElement.style.overscrollBehavior =
+        originalHtmlOverscrollBehavior;
       document.body.style.overflow = originalOverflow;
+      document.body.style.touchAction = originalTouchAction;
       document.body.style.paddingRight = originalPaddingRight;
     };
   }, [showCancelConfirm, cancelConfirmCancel]);
@@ -48,12 +68,14 @@ export function CancelConfirmModal() {
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-[100]">
+    <div className={`fixed inset-0 ${Z_INDEX.MODAL_BACKDROP}`}>
       <div
         className="absolute inset-0 bg-black/50"
         onClick={cancelConfirmCancel}
       />
-      <div className="relative flex min-h-full items-center justify-center p-4">
+      <div
+        className={`relative ${Z_INDEX.MODAL_CONTENT} flex min-h-full items-center justify-center p-4`}
+      >
         <div className="w-full max-w-md rounded-lg border border-border bg-background p-6 shadow-lg">
           <div className="flex items-start gap-4">
             <div className="flex-1">
