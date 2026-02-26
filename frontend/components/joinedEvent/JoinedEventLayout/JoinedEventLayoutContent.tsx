@@ -83,19 +83,8 @@ export function JoinedEventLayoutContent({
     );
   }
 
-  const { event, expectedParticipants } = data;
+  const { event } = data;
 
-  // Check if current user has voted
-  const hasVoted = user
-    ? expectedParticipants.some(
-        (p) =>
-          (p.userId === user.id.toString() ||
-            p.user?.id === user.id.toString()) &&
-          p.hasVoted,
-      )
-    : false;
-
-  // Determine event status
   const isVoting = event.status === EventStatus.VOTING;
   const isHost = Boolean(
     user?.id !== undefined &&
@@ -103,21 +92,42 @@ export function JoinedEventLayoutContent({
       user.id.toString() === event.ownerId.toString(),
   );
 
-  // Generate tabs with dynamic overview label
-  const tabs = [
-    {
-      id: "overview",
-      label: isVoting ? t("joined.tabs.vote") : t("joined.tabs.overview"),
-      href: `/joined/${eventId}`,
-      icon: NavIcons.overview,
-    },
-    {
-      id: "results",
-      label: t("joined.tabs.results"),
-      href: `/joined/${eventId}/results`,
-      icon: NavIcons.results,
-    },
-  ];
+  // Generate detail tabs
+  const tabs = isVoting
+    ? [
+        {
+          id: "status",
+          label: t("joined.tabs.overview"),
+          href: `/joined/${eventId}/status`,
+          icon: NavIcons.overview,
+        },
+        {
+          id: "vote",
+          label: t("joined.tabs.vote"),
+          href: `/joined/${eventId}`,
+          icon: NavIcons.vote,
+        },
+        {
+          id: "results",
+          label: t("joined.tabs.results"),
+          href: `/joined/${eventId}/results`,
+          icon: NavIcons.results,
+        },
+      ]
+    : [
+        {
+          id: "overview",
+          label: t("joined.tabs.overview"),
+          href: `/joined/${eventId}`,
+          icon: NavIcons.overview,
+        },
+        {
+          id: "results",
+          label: t("joined.tabs.results"),
+          href: `/joined/${eventId}/results`,
+          icon: NavIcons.results,
+        },
+      ];
 
   return (
     <div className="py-4 sm:py-8 flex flex-col">
@@ -133,9 +143,9 @@ export function JoinedEventLayoutContent({
           endDate={event.endDate}
           startMinuteOfDay={event.startMinuteOfDay}
           endMinuteOfDay={event.endMinuteOfDay}
-          hasVoted={hasVoted}
           eventId={eventId}
           managementHref={isHost ? `/hosted/${eventId}` : undefined}
+          showMetaRow={false}
         />
       </div>
 

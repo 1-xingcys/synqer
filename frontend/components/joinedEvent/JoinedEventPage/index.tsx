@@ -6,10 +6,11 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
 import { EventStatus } from "@/types/event";
 import VotingGrid from "@/components/eventCommon/timeGrid/VotingGrid";
+import { EventInfoDetail } from "@/components/EventInfoPage/EventInfoDetail";
+import { VotingInstruction } from "./StatusDescription";
 import { VotingEndedView } from "./VotingEndedView";
 import { ConfirmedView } from "./ConfirmedView";
 import { CompletedView } from "./CompletedView";
-import { VotingInstruction } from "./StatusDescription";
 
 export default function JoinedEventPage() {
   const params = useParams();
@@ -25,6 +26,7 @@ export default function JoinedEventPage() {
 
   const { event } = eventDetailData;
   const isVoting = event.status === EventStatus.VOTING;
+
   const currentUserHasVoted = eventDetailData.expectedParticipants.some(
     (participant) =>
       (participant.userId === user?.id.toString() ||
@@ -50,22 +52,38 @@ export default function JoinedEventPage() {
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-      {event.status === EventStatus.VOTING_ENDED && (
-        <VotingEndedView eventId={eventId} />
-      )}
+    <div className="space-y-5">
+      <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+        {event.status === EventStatus.VOTING_ENDED && (
+          <VotingEndedView eventId={eventId} />
+        )}
 
-      {event.status === EventStatus.CONFIRMED && (
-        <ConfirmedView
-          eventTitle={event.title || tJoined("untitledEvent")}
-          eventDescription={event.description}
-          confirmedTimeRanges={event.confirmedTimeRanges}
+        {event.status === EventStatus.CONFIRMED && (
+          <ConfirmedView
+            eventTitle={event.title || tJoined("untitledEvent")}
+            eventDescription={event.description}
+            confirmedTimeRanges={event.confirmedTimeRanges}
+          />
+        )}
+
+        {event.status === EventStatus.COMPLETED && (
+          <CompletedView confirmedTimeRanges={event.confirmedTimeRanges} />
+        )}
+      </div>
+
+      <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 sm:p-6">
+        <EventInfoDetail
+          status={event.status}
+          startDate={event.startDate}
+          endDate={event.endDate}
+          startMinuteOfDay={event.startMinuteOfDay}
+          endMinuteOfDay={event.endMinuteOfDay}
+          votingDeadline={event.votingDeadline}
+          currentUserHasVoted={currentUserHasVoted}
+          showTitle={false}
+          embedded
         />
-      )}
-
-      {event.status === EventStatus.COMPLETED && (
-        <CompletedView confirmedTimeRanges={event.confirmedTimeRanges} />
-      )}
+      </div>
     </div>
   );
 }

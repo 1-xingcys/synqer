@@ -16,7 +16,6 @@ import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatus } from "@/types/event";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
-import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
 import { VotingStatusBar } from "./VotingStatusBar";
 import { DeadlineCountdown } from "./DeadlineCountdown";
 import { VotingProgress } from "./VotingProgress";
@@ -36,13 +35,13 @@ interface EventInfoCompactProps {
   endDate: string;
   startMinuteOfDay: number;
   endMinuteOfDay: number;
-  hasVoted?: boolean;
   /** 是否為 hosted 頁面（不顯示 Status Description，顯示前往按鈕） */
   isHosted?: boolean;
   eventId: string;
   eventStatus?: EventStatus;
   votingStatus?: VotingStatusProps;
   managementHref?: string;
+  showMetaRow?: boolean;
 }
 
 export function EventInfoCompact({
@@ -51,12 +50,12 @@ export function EventInfoCompact({
   endDate,
   startMinuteOfDay,
   endMinuteOfDay,
-  hasVoted,
   isHosted = false,
   eventId,
   eventStatus,
   votingStatus,
   managementHref,
+  showMetaRow = true,
 }: EventInfoCompactProps) {
   const t = useTranslations();
   const { copied, copyLink: handleCopyLink } = useEventShareLink(eventId || "");
@@ -92,7 +91,7 @@ export function EventInfoCompact({
 
   const metaRow = !isHosted ? (
     <TransitionLink
-      href={`/joined/info/${eventId}/`}
+      href={`/joined/${eventId}/status`}
       className="group flex flex-wrap items-center gap-x-1 sm:gap-x-2 gap-y-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 decoration-zinc-400 dark:decoration-zinc-500 underline-offset-2 transition-all"
     >
       {metaRowContent}
@@ -196,12 +195,11 @@ export function EventInfoCompact({
                 <span>{t("eventInfo.goToManagementPage")}</span>
               </Link>
             )}
-            {hasVoted !== undefined && <VoteStatusText hasVoted={hasVoted} />}
           </div>
         </div>
 
         {/* Meta Row */}
-        {metaRow}
+        {showMetaRow && metaRow}
       </div>
 
       {/* Actions & Voting Status */}
