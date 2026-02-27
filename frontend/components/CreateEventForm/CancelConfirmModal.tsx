@@ -92,7 +92,7 @@ export function CancelConfirmModal() {
             <Button variant="outline" onClick={cancelConfirmCancel}>
               {t("createEvent.cancelConfirm.keepEditing")}
             </Button>
-            <Button variant="destructive" onClick={confirmCancel}>
+            <Button variant="destructive" onClick={() => void confirmCancel()}>
               {t("createEvent.cancelConfirm.discard")}
             </Button>
           </div>
