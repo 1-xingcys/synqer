@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
 import { EventStatus } from "@/types/event";
-import { EventInfoDetail } from "@/components/EventInfoPage/EventInfoDetail";
+import { EventInfoDetail } from "@/components/joinedEvent/eventInformation/EventInfoDetail";
 import { VotingEndedView } from "./VotingEndedView";
 import { ConfirmedView } from "./ConfirmedView";
 import { CompletedView } from "./CompletedView";
@@ -64,7 +64,6 @@ export default function JoinedEventPage() {
           endMinuteOfDay={event.endMinuteOfDay}
           votingDeadline={event.votingDeadline}
           currentUserHasVoted={currentUserHasVoted}
-          showTitle={false}
         />
       </div>
     </div>

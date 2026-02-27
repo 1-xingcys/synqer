@@ -2,12 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import { Users } from "lucide-react";
-import type { ExpectedParticipant } from "./hooks/useEventInfo";
+import type { EventInformationParticipant } from "./types";
 import { VotedParticipantList } from "./VotedParticipantList";
 import { NotVotedParticipantList } from "./NotVotedParticipantList";
 
 interface EventInfoParticipantsProps {
-  expectedParticipants: ExpectedParticipant[];
+  expectedParticipants: EventInformationParticipant[];
   currentUserId?: string;
 }
 
@@ -18,10 +18,9 @@ export function EventInfoParticipants({
   const t = useTranslations();
 
   // Get participant display info
-  const getParticipantDisplayInfo = (p: ExpectedParticipant) => {
-    const displayName =
-      p.user?.displayName || p.displayName || t("joinedEvents.unknownHost");
-    const avatarUrl = p.user?.avatarUrl || p.pictureUrl;
+  const getParticipantDisplayInfo = (p: EventInformationParticipant) => {
+    const displayName = p.user?.displayName || t("joinedEvents.unknownHost");
+    const avatarUrl = p.user?.avatarUrl || undefined;
     return { displayName, avatarUrl };
   };
 

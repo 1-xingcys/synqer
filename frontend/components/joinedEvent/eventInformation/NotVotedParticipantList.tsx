@@ -2,14 +2,13 @@
 
 import { useTranslations } from "next-intl";
 import { AlertCircle } from "lucide-react";
-import { ParticipantStatus } from "@/types/event";
-import type { ExpectedParticipant } from "./hooks/useEventInfo";
+import type { EventInformationParticipant } from "./types";
 import { ParticipantItem } from "./ParticipantItem";
 
 interface NotVotedParticipantListProps {
-  participants: ExpectedParticipant[];
+  participants: EventInformationParticipant[];
   currentUserId?: string;
-  getDisplayInfo: (p: ExpectedParticipant) => {
+  getDisplayInfo: (p: EventInformationParticipant) => {
     displayName: string;
     avatarUrl?: string;
   };
@@ -40,8 +39,7 @@ export function NotVotedParticipantList({
             !!currentUserId &&
             (participant.userId === currentUserId ||
               participant.user?.id === currentUserId);
-          const isNotRegistered =
-            participant.status === ParticipantStatus.NOT_REGISTERED;
+          const isNotRegistered = !participant.userId && !participant.user;
 
           return (
             <ParticipantItem
