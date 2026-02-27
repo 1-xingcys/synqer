@@ -7,7 +7,6 @@ import {
   EventDetailNav,
   NavIcons,
 } from "@/components/eventCommon/EventDetailNav";
-import { EventInfoCompact } from "@/components/eventCommon/EventInfoCompact";
 import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
 import {
@@ -16,6 +15,7 @@ import {
 } from "@/contexts/HostedEventContext";
 import { EventStatus } from "@/types/event";
 import { Z_INDEX } from "@/lib/zIndex";
+import { EventInfoCompact } from "./EventInfoCompact";
 
 interface HostedEventLayoutProps {
   children: ReactNode;
@@ -123,7 +123,6 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
           endDate={event.endDate}
           startMinuteOfDay={event.startMinuteOfDay}
           endMinuteOfDay={event.endMinuteOfDay}
-          isHosted={true}
           eventId={eventId}
           votingStatus={{
             votingDeadline: event.votingDeadline,

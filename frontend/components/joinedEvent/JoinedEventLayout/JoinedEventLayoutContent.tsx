@@ -7,13 +7,13 @@ import {
   EventDetailNav,
   NavIcons,
 } from "@/components/eventCommon/EventDetailNav";
-import { EventInfoCompact } from "@/components/eventCommon/EventInfoCompact";
 import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
 import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { EventStatus } from "@/types/event";
 import { Z_INDEX } from "@/lib/zIndex";
+import { EventHeaderRow } from "./EventHeaderRow";
 
 interface JoinedEventLayoutContentProps {
   children: ReactNode;
@@ -134,18 +134,11 @@ export function JoinedEventLayoutContent({
       {/* Back Button */}
       <BackButton href="/joined" label={t("joined.backToJoined")} />
 
-      {/* Event Info Compact */}
+      {/* Event Header */}
       <div className="mt-5">
-        <EventInfoCompact
-          eventStatus={event.status}
+        <EventHeaderRow
           title={event.title}
-          startDate={event.startDate}
-          endDate={event.endDate}
-          startMinuteOfDay={event.startMinuteOfDay}
-          endMinuteOfDay={event.endMinuteOfDay}
-          eventId={eventId}
           managementHref={isHost ? `/hosted/${eventId}` : undefined}
-          showMetaRow={false}
         />
       </div>
 
