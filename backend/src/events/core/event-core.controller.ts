@@ -24,7 +24,6 @@ import { HostedEventListItemDto } from './dto/hosted-event-list-item.dto';
 import { EventDetailResponseDto } from './dto/event-detail-response.dto';
 import { HostedEventDetailResponseDto } from './dto/hosted-event-detail-response.dto';
 import { EventPublicInfoResponseDto } from './dto/event-public-info-response.dto';
-import { EventInfoResponseDto } from './dto/event-info-response.dto';
 import { SessionAuthGuard, CurrentUser } from '../../auth';
 
 @Controller('events')
@@ -100,23 +99,6 @@ export class EventCoreController {
     @Param('eventId') eventId: string,
   ): Promise<EventPublicInfoResponseDto> {
     const result = await this.eventQueryService.getEventPublicInfo(eventId);
-    if (!result) {
-      throw new NotFoundException(`Event ${eventId} not found`);
-    }
-    return result;
-  }
-
-  /**
-   * GET /events/:eventId/info
-   * 取得活動詳細資訊頁面（參與者視角，包含主辦人、參與者列表）
-   */
-  @Get(':eventId/info')
-  @UseGuards(SessionAuthGuard)
-  async getEventInfo(
-    @Param('eventId') eventId: string,
-    @CurrentUser() userId: string,
-  ): Promise<EventInfoResponseDto> {
-    const result = await this.eventQueryService.getEventInfo(eventId, userId);
     if (!result) {
       throw new NotFoundException(`Event ${eventId} not found`);
     }

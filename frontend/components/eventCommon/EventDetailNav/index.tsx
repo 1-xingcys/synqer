@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { Link } from "@/i18n/routing";
-import { Info, Users, Settings, BarChart3 } from "lucide-react";
+import { Info, Users, Settings, BarChart3, Vote } from "lucide-react";
 
 export interface NavTab {
   id: string;
@@ -20,25 +20,10 @@ export function EventDetailNav({ tabs }: EventDetailNavProps) {
 
   // Determine active tab based on pathname
   const getActiveTabId = () => {
-    // Find the tab whose href matches the current path most specifically
-    // Sort by href length descending to match more specific routes first
+    // Match exact/full tab href first (works with locale prefix via endsWith)
     const sortedTabs = [...tabs].sort((a, b) => b.href.length - a.href.length);
     for (const tab of sortedTabs) {
-      if (pathname?.endsWith(tab.href.split("/").pop() || "")) {
-        // Check if we're on an exact match for sub-routes
-        if (
-          tab.href.includes("/participants") &&
-          pathname?.endsWith("/participants")
-        ) {
-          return tab.id;
-        }
-        if (tab.href.includes("/results") && pathname?.endsWith("/results")) {
-          return tab.id;
-        }
-        if (tab.href.includes("/settings") && pathname?.endsWith("/settings")) {
-          return tab.id;
-        }
-      }
+      if (pathname === tab.href || pathname?.endsWith(tab.href)) return tab.id;
     }
     // Default to first tab (overview)
     return tabs[0]?.id || "";
@@ -73,6 +58,7 @@ export function EventDetailNav({ tabs }: EventDetailNavProps) {
 
 export const NavIcons = {
   overview: <Info className="w-4 h-4" />,
+  vote: <Vote className="w-4 h-4" />,
   participants: <Users className="w-4 h-4" />,
   settings: <Settings className="w-4 h-4" />,
   results: <BarChart3 className="w-4 h-4" />,

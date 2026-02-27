@@ -2,13 +2,13 @@
 
 import { useTranslations } from "next-intl";
 import { CheckCheck } from "lucide-react";
-import type { ExpectedParticipant } from "./hooks/useEventInfo";
+import type { EventInformationParticipant } from "./types";
 import { ParticipantItem } from "./ParticipantItem";
 
 interface VotedParticipantListProps {
-  participants: ExpectedParticipant[];
+  participants: EventInformationParticipant[];
   currentUserId?: string;
-  getDisplayInfo: (p: ExpectedParticipant) => {
+  getDisplayInfo: (p: EventInformationParticipant) => {
     displayName: string;
     avatarUrl?: string;
   };

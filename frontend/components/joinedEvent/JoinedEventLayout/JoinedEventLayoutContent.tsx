@@ -7,13 +7,13 @@ import {
   EventDetailNav,
   NavIcons,
 } from "@/components/eventCommon/EventDetailNav";
-import { EventInfoCompact } from "@/components/eventCommon/EventInfoCompact";
 import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
 import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { EventStatus } from "@/types/event";
 import { Z_INDEX } from "@/lib/zIndex";
+import { EventHeaderRow } from "./EventHeaderRow";
 
 interface JoinedEventLayoutContentProps {
   children: ReactNode;
@@ -83,19 +83,8 @@ export function JoinedEventLayoutContent({
     );
   }
 
-  const { event, expectedParticipants } = data;
+  const { event } = data;
 
-  // Check if current user has voted
-  const hasVoted = user
-    ? expectedParticipants.some(
-        (p) =>
-          (p.userId === user.id.toString() ||
-            p.user?.id === user.id.toString()) &&
-          p.hasVoted,
-      )
-    : false;
-
-  // Determine event status
   const isVoting = event.status === EventStatus.VOTING;
   const isHost = Boolean(
     user?.id !== undefined &&
@@ -103,38 +92,52 @@ export function JoinedEventLayoutContent({
       user.id.toString() === event.ownerId.toString(),
   );
 
-  // Generate tabs with dynamic overview label
-  const tabs = [
-    {
-      id: "overview",
-      label: isVoting ? t("joined.tabs.vote") : t("joined.tabs.overview"),
-      href: `/joined/${eventId}`,
-      icon: NavIcons.overview,
-    },
-    {
-      id: "results",
-      label: t("joined.tabs.results"),
-      href: `/joined/${eventId}/results`,
-      icon: NavIcons.results,
-    },
-  ];
+  // Generate detail tabs
+  const tabs = isVoting
+    ? [
+        {
+          id: "overview",
+          label: t("joined.tabs.overview"),
+          href: `/joined/${eventId}`,
+          icon: NavIcons.overview,
+        },
+        {
+          id: "vote",
+          label: t("joined.tabs.vote"),
+          href: `/joined/${eventId}/vote`,
+          icon: NavIcons.vote,
+        },
+        {
+          id: "results",
+          label: t("joined.tabs.results"),
+          href: `/joined/${eventId}/results`,
+          icon: NavIcons.results,
+        },
+      ]
+    : [
+        {
+          id: "overview",
+          label: t("joined.tabs.overview"),
+          href: `/joined/${eventId}`,
+          icon: NavIcons.overview,
+        },
+        {
+          id: "results",
+          label: t("joined.tabs.results"),
+          href: `/joined/${eventId}/results`,
+          icon: NavIcons.results,
+        },
+      ];
 
   return (
     <div className="py-4 sm:py-8 flex flex-col">
       {/* Back Button */}
       <BackButton href="/joined" label={t("joined.backToJoined")} />
 
-      {/* Event Info Compact */}
+      {/* Event Header */}
       <div className="mt-5">
-        <EventInfoCompact
-          eventStatus={event.status}
+        <EventHeaderRow
           title={event.title}
-          startDate={event.startDate}
-          endDate={event.endDate}
-          startMinuteOfDay={event.startMinuteOfDay}
-          endMinuteOfDay={event.endMinuteOfDay}
-          hasVoted={hasVoted}
-          eventId={eventId}
           managementHref={isHost ? `/hosted/${eventId}` : undefined}
         />
       </div>

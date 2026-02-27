@@ -261,26 +261,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events/{eventId}/info": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /events/:eventId/info
-         *     取得活動詳細資訊頁面（參與者視角，包含主辦人、參與者列表）
-         */
-        get: operations["EventCoreController_getEventInfo"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/events/{eventId}/hosted": {
         parameters: {
             query?: never;
@@ -918,57 +898,6 @@ export interface components {
             expectedParticipantCount: number;
             host?: components["schemas"]["EventPublicHostDto"] | null;
         };
-        EventInfoEventDto: {
-            id: string;
-            title: string | null;
-            description: string | null;
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
-            startMinuteOfDay: number;
-            endMinuteOfDay: number;
-            slotDurationMin: number;
-            timeZone: string;
-            lineGroupId: string | null;
-            ownerId: string | null;
-            /** Format: date-time */
-            votingDeadline: string | null;
-            confirmedSlotIds: string[];
-            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
-            /** @enum {string} */
-            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
-            /** Format: date-time */
-            createdAt: string;
-        };
-        EventInfoHostDto: {
-            id: string;
-            displayName: string | null;
-            avatarUrl: string | null;
-        };
-        EventInfoExpectedParticipantUserDto: {
-            id: string;
-            displayName: string | null;
-            avatarUrl: string | null;
-        };
-        EventInfoExpectedParticipantDto: {
-            id: string;
-            lineUserId?: string;
-            userId?: string;
-            displayName?: string;
-            pictureUrl?: string;
-            hasVoted: boolean;
-            /** @enum {string} */
-            status: "VOTED" | "NOT_VOTED" | "NOT_REGISTERED";
-            user?: components["schemas"]["EventInfoExpectedParticipantUserDto"];
-        };
-        EventInfoResponseDto: {
-            isDeleted: boolean;
-            event: components["schemas"]["EventInfoEventDto"];
-            host: components["schemas"]["EventInfoHostDto"] | null;
-            expectedParticipants: components["schemas"]["EventInfoExpectedParticipantDto"][];
-            currentUserHasVoted: boolean;
-        };
         HostedEventParticipantDto: {
             userId: string;
             displayName: string;
@@ -1428,27 +1357,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EventPublicInfoResponseDto"];
-                };
-            };
-        };
-    };
-    EventCoreController_getEventInfo: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                eventId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EventInfoResponseDto"];
                 };
             };
         };

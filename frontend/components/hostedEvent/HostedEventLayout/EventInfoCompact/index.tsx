@@ -3,20 +3,11 @@
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { Link } from "@/i18n/routing";
-import { TransitionLink } from "@/components/ui/TransitionLink";
-import {
-  ExternalLink,
-  Copy,
-  CheckCheck,
-  Calendar,
-  Clock,
-  ChevronRight,
-} from "lucide-react";
+import { ExternalLink, Copy, CheckCheck, Calendar, Clock } from "lucide-react";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatus } from "@/types/event";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
-import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
 import { VotingStatusBar } from "./VotingStatusBar";
 import { DeadlineCountdown } from "./DeadlineCountdown";
 import { VotingProgress } from "./VotingProgress";
@@ -36,13 +27,9 @@ interface EventInfoCompactProps {
   endDate: string;
   startMinuteOfDay: number;
   endMinuteOfDay: number;
-  hasVoted?: boolean;
-  /** 是否為 hosted 頁面（不顯示 Status Description，顯示前往按鈕） */
-  isHosted?: boolean;
   eventId: string;
   eventStatus?: EventStatus;
   votingStatus?: VotingStatusProps;
-  managementHref?: string;
 }
 
 export function EventInfoCompact({
@@ -51,21 +38,15 @@ export function EventInfoCompact({
   endDate,
   startMinuteOfDay,
   endMinuteOfDay,
-  hasVoted,
-  isHosted = false,
   eventId,
   eventStatus,
   votingStatus,
-  managementHref,
 }: EventInfoCompactProps) {
   const t = useTranslations();
   const { copied, copyLink: handleCopyLink } = useEventShareLink(eventId || "");
 
-  const showActions = isHosted && eventId;
-
-  // ========== Pre-render: Meta Row Content ==========
-  const metaRowContent = (
-    <>
+  const metaRow = (
+    <div className="flex flex-wrap items-center gap-x-1 sm:gap-x-2 gap-y-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
       {eventStatus && (
         <>
           <EventStatusText status={eventStatus} />
@@ -87,20 +68,6 @@ export function EventInfoCompact({
           {formatMinutesToTime(endMinuteOfDay)}
         </span>
       </div>
-    </>
-  );
-
-  const metaRow = !isHosted ? (
-    <TransitionLink
-      href={`/joined/info/${eventId}/`}
-      className="group flex flex-wrap items-center gap-x-1 sm:gap-x-2 gap-y-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 decoration-zinc-400 dark:decoration-zinc-500 underline-offset-2 transition-all"
-    >
-      {metaRowContent}
-      <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors ml-0.5" />
-    </TransitionLink>
-  ) : (
-    <div className="flex flex-wrap items-center gap-x-1 sm:gap-x-2 gap-y-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
-      {metaRowContent}
     </div>
   );
 
@@ -122,7 +89,7 @@ export function EventInfoCompact({
 
   const goToVoteButton = (size: "sm" | "lg") => (
     <Link
-      href={`/joined/${eventId}`}
+      href={`/joined/${eventId}/vote`}
       className={`flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium text-sm transition-all active:scale-[0.98] shadow-sm shadow-blue-500/20 ${
         size === "sm" ? "flex-1 px-4 py-2" : "px-5 py-2.5 w-full"
       }`}
@@ -179,38 +146,17 @@ export function EventInfoCompact({
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6">
-      {/* Title & Meta Info */}
       <div className="flex flex-col gap-2 sm:gap-3">
-        {/* Title Row */}
-        <div className="flex items-start justify-between gap-4">
-          <h1 className="text-2xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-50 leading-tight tracking-tight">
-            {title || t("event.untitled")}
-          </h1>
-          <div className="shrink-0 pt-1 flex items-center gap-2">
-            {managementHref && (
-              <Link
-                href={managementHref}
-                className="inline-flex items-center justify-center gap-1 rounded-md border border-sky-200 bg-sky-50 px-2 py-1 text-[11px] font-medium text-sky-700 transition-colors hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-900/20 dark:text-sky-200 dark:hover:bg-sky-900/30 sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-xs"
-              >
-                <ExternalLink className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                <span>{t("eventInfo.goToManagementPage")}</span>
-              </Link>
-            )}
-            {hasVoted !== undefined && <VoteStatusText hasVoted={hasVoted} />}
-          </div>
-        </div>
-
-        {/* Meta Row */}
+        <h1 className="text-2xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-50 leading-tight tracking-tight">
+          {title || t("event.untitled")}
+        </h1>
         {metaRow}
       </div>
 
-      {/* Actions & Voting Status */}
-      {showActions && (
-        <>
-          {mobileActions}
-          {desktopActions}
-        </>
-      )}
+      <>
+        {mobileActions}
+        {desktopActions}
+      </>
     </div>
   );
 }

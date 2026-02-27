@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
-import { Calendar, Clock, Timer, Info } from "lucide-react";
+import { Calendar, Clock, Timer } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
 import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
@@ -30,12 +30,7 @@ export function EventInfoDetail({
   const t = useTranslations();
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl py-4 px-5 sm:py-5 sm:px-6 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-      {/* Status Section */}
-      <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4 flex items-center gap-2">
-        <Info className="w-5 h-5" />
-        {t("eventInfo.status")}
-      </h2>
+    <>
       <div className="flex flex-wrap items-center justify-between gap-4 p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
         <div className="flex flex-col gap-1">
           <span className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
@@ -103,6 +98,6 @@ export function EventInfoDetail({
           </p>
         </div>
       </div>
-    </div>
+    </>
   );
 }
