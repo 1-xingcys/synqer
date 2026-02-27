@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,6 +10,7 @@ import { TITLE_MAX_LENGTH } from "@shared/event-validation.constants";
 import { useLiff } from "@/hooks/useLiff";
 import { cn } from "@/lib/utils";
 import { LineGroupSection } from "./LineGroupSection";
+import { LineGroupInfoModal } from "./LineGroupInfoModal";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useTextFields } from "./hooks/useTextFields";
 import { useLineGroupFields } from "./hooks/useLineGroupFields";
@@ -17,6 +19,7 @@ export function GeneralSection() {
   const t = useTranslations();
   const { user } = useAuthContext();
   const { isInClient: isInLiff } = useLiff();
+  const [showLineGroupInfoModal, setShowLineGroupInfoModal] = useState(false);
 
   const {
     state: { formData, setFormData },
@@ -115,10 +118,16 @@ export function GeneralSection() {
               selectedMemberIds={formData.selectedLineUserIds}
               onGroupChange={handleLineGroupChange}
               onMembersChange={handleSelectedMembersChange}
+              onOpenInfo={() => setShowLineGroupInfoModal(true)}
             />
           )}
         </div>
       </div>
+
+      <LineGroupInfoModal
+        isOpen={showLineGroupInfoModal}
+        onClose={() => setShowLineGroupInfoModal(false)}
+      />
     </div>
   );
 }

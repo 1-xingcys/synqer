@@ -8,7 +8,7 @@ import {
   useLineGroupMembers,
   LineGroupMember,
 } from "@/hooks/useLineGroups";
-import { Users } from "lucide-react";
+import { CircleHelp, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ interface LineGroupSectionProps {
   selectedMemberIds: string[];
   onGroupChange: (groupId: string | null) => void;
   onMembersChange: (memberIds: string[]) => void;
+  onOpenInfo?: () => void;
 }
 
 export function LineGroupSection({
@@ -35,6 +36,7 @@ export function LineGroupSection({
   selectedMemberIds,
   onGroupChange,
   onMembersChange,
+  onOpenInfo,
 }: LineGroupSectionProps) {
   const t = useTranslations();
   const { user } = useAuthContext();
@@ -96,7 +98,19 @@ export function LineGroupSection({
     <div className="space-y-4">
       {/* LINE Group Dropdown */}
       <div className="space-y-1.5">
-        <Label>{t("createEvent.lineGroup.selectGroup")}</Label>
+        <div className="flex items-center">
+          <Label>{t("createEvent.lineGroup.selectGroup")}</Label>
+          {onOpenInfo && (
+            <button
+              type="button"
+              onClick={onOpenInfo}
+              className="inline-flex h-6 w-6 items-center justify-center text-muted-foreground"
+              aria-label={t("createEvent.lineGroup.openDetailAriaLabel")}
+            >
+              <CircleHelp className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
         <Select
           value={selectedGroupId ?? "none"}
           onValueChange={(value) =>
