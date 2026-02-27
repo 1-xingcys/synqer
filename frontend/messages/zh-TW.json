@@ -762,11 +762,10 @@
   },
   "createEvent": {
     "title": "建立新活動",
-    "description": "建立一個新的活動來收集參與者的可用時間",
+    "description": "建立新活動來統計參與者的有空時間",
     "general": {
       "title": "General",
       "host": "Host",
-      "hostDescription": "你是這個活動的主辦者",
       "eventName": "Event name",
       "eventNamePlaceholder": "例如：團隊聚餐時間投票",
       "description": "Description",
@@ -775,8 +774,29 @@
       "charLimitReached": "（已達上限）"
     },
     "lineGroup": {
-      "selectGroup": "LINE 群組",
-      "selectGroupHint": "選擇 LINE 群組以邀請成員",
+      "selectGroup": "綁定 LINE 群組",
+      "openDetailAriaLabel": "開啟綁定 LINE 群組詳細說明",
+      "selectGroupHint": "為指定群組啟用 LINE Bot 進階功能。",
+      "modal": {
+        "title": "關於綁定 LINE 群組",
+        "intro": "綁定 LINE 群組後，可啟用更多群組活動管理功能。",
+        "quickShareNote": "如果你只是想快速在群組內發起投票，不綁定 LINE 群組也能輕鬆分享活動資訊。",
+        "features": {
+          "title": "核心功能",
+          "item1": "預先設定需要參與投票的群組成員",
+          "item2": "透過 LINE 官方帳號提醒尚未投票的成員",
+          "item3": "在聊天室更新投票進度與投票率"
+        },
+        "requirements": {
+          "title": "使用條件",
+          "item1": "需先將 LINE 官方帳號加入目標群組"
+        },
+        "limitations": {
+          "title": "限制",
+          "item1": "由於目前官方帳號尚非 LINE 認證企業帳號，僅能同步曾在群組內與官方帳號互動（例如發言）的成員，名單可能不完整"
+        },
+        "close": "關閉"
+      },
       "noGroupSelected": "未選擇群組",
       "unnamedGroup": "未命名群組",
       "noGroups": "沒有可用的 LINE 群組，請先將 Bot 加入群組",
@@ -806,8 +826,8 @@
       "startTimeTooSoonError": "活動開始時間必須至少在 1 小時後，以確保有足夠的投票時間"
     },
     "votingDeadline": {
-      "title": "投票截止時間",
-      "description": "設定參與者投票的截止時間",
+      "title": "Voting Deadline",
+      "description": "設定活動的投票截止時間",
       "date": "截止日期",
       "time": "截止時間",
       "autoSync": "自動與活動開始時間同步",
@@ -830,9 +850,9 @@
       "unnamedEvent": "未命名活動",
       "nextSteps": "下一步",
       "goToManage": "前往管理頁面",
-      "goToManageDescription": "查看活動詳情、管理參與者",
+      "goToManageDescription": "決定最終時間、管理參與者",
       "goToVote": "前往投票頁面",
-      "goToVoteDescription": "填寫自己的可用時間",
+      "goToVoteDescription": "填寫自己的有空時間",
       "copyLink": "複製投票連結",
       "copyLinkDescription": "分享連結給朋友參與投票",
       "linkCopied": "連結已複製！",

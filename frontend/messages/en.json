@@ -766,7 +766,6 @@
     "general": {
       "title": "General",
       "host": "Host",
-      "hostDescription": "You are the host of this event",
       "eventName": "Event name",
       "eventNamePlaceholder": "e.g., Team dinner time poll",
       "description": "Description",
@@ -775,8 +774,29 @@
       "charLimitReached": "(limit reached)"
     },
     "lineGroup": {
-      "selectGroup": "LINE Group",
-      "selectGroupHint": "Select a LINE group to invite members",
+      "selectGroup": "Bind LINE Group",
+      "openDetailAriaLabel": "Open bind LINE group details",
+      "selectGroupHint": "Enable advanced LINE Bot features for a specific group.",
+      "modal": {
+        "title": "About binding a LINE group",
+        "intro": "Binding a LINE group unlocks additional group-focused management features for your event.",
+        "quickShareNote": "If you only need to start voting quickly in a group, you can still share event info to LINE groups without binding one.",
+        "features": {
+          "title": "What you can use after binding",
+          "item1": "Pre-configure expected voters from selected group members",
+          "item2": "Send reminders to members who have not voted via the LINE Official Account",
+          "item3": "Post voting progress and participation-rate updates to the group chat"
+        },
+        "requirements": {
+          "title": "Requirements",
+          "item1": "The LINE Official Account must be added to the target group first"
+        },
+        "limitations": {
+          "title": "Limitations",
+          "item1": "Because the official account is not yet a LINE verified business account, only members who have interacted in the group (for example, sent messages) can be synced, so the member list may be incomplete"
+        },
+        "close": "Close"
+      },
       "noGroupSelected": "No group selected",
       "unnamedGroup": "Unnamed Group",
       "noGroups": "No LINE groups available. Add the bot to a group first.",
@@ -830,7 +850,7 @@
       "unnamedEvent": "Unnamed event",
       "nextSteps": "Next steps",
       "goToManage": "Go to management page",
-      "goToManageDescription": "View event details, manage participants",
+      "goToManageDescription": "Set final time, manage participants",
       "goToVote": "Go to voting page",
       "goToVoteDescription": "Fill in your available times",
       "copyLink": "Copy voting link",

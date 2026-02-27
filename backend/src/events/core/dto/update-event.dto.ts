@@ -1,5 +1,8 @@
 import { IsString, IsOptional, IsISO8601, MaxLength } from 'class-validator';
-import { TITLE_MAX_LENGTH, DESCRIPTION_MAX_LENGTH } from './create-event.dto';
+import {
+  TITLE_MAX_LENGTH,
+  DESCRIPTION_MAX_LENGTH,
+} from '../../../../shared/event-validation.constants';
 
 /**
  * 更新活動 DTO

@@ -1,22 +1,21 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
+import { CreateEventFormData } from "../types";
 import {
-  CreateEventFormData,
   TITLE_MAX_LENGTH,
   DESCRIPTION_MAX_LENGTH,
-} from "../types";
+} from "@shared/event-validation.constants";
 
 function countCharacters(str: string): number {
-  return [...str].length;
+  return str.length;
 }
 
 function truncateToMaxChars(str: string, maxChars: number): string {
-  const chars = [...str];
-  if (chars.length <= maxChars) {
+  if (str.length <= maxChars) {
     return str;
   }
-  return chars.slice(0, maxChars).join("");
+  return str.slice(0, maxChars);
 }
 
 export function useTextFields(

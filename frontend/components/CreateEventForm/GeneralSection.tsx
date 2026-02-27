@@ -1,13 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { TITLE_MAX_LENGTH } from "./types";
+import { TITLE_MAX_LENGTH } from "@shared/event-validation.constants";
+import { useLiff } from "@/hooks/useLiff";
 import { cn } from "@/lib/utils";
 import { LineGroupSection } from "./LineGroupSection";
+import { LineGroupInfoModal } from "./LineGroupInfoModal";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useTextFields } from "./hooks/useTextFields";
 import { useLineGroupFields } from "./hooks/useLineGroupFields";
@@ -15,8 +18,12 @@ import { useLineGroupFields } from "./hooks/useLineGroupFields";
 export function GeneralSection() {
   const t = useTranslations();
   const { user } = useAuthContext();
+  const { isInClient: isInLiff } = useLiff();
+  const [showLineGroupInfoModal, setShowLineGroupInfoModal] = useState(false);
 
-  const { formData, setFormData } = useFormStateContext();
+  const {
+    state: { formData, setFormData },
+  } = useFormStateContext();
 
   const { titleCharCount, updateTitle } = useTextFields(formData, setFormData);
 
@@ -67,9 +74,6 @@ export function GeneralSection() {
                   {user?.displayName || user?.primaryEmail || "You"}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {t("createEvent.general.hostDescription")}
-              </p>
             </div>
 
             {/* Event Name - Takes remaining space */}
@@ -107,15 +111,23 @@ export function GeneralSection() {
             </div>
           </div>
 
-          {/* LINE Group Selection (only for LINE users) */}
-          <LineGroupSection
-            selectedGroupId={formData.lineGroupId}
-            selectedMemberIds={formData.selectedLineUserIds}
-            onGroupChange={handleLineGroupChange}
-            onMembersChange={handleSelectedMembersChange}
-          />
+          {/* LINE Group Selection (only in LIFF) */}
+          {isInLiff && (
+            <LineGroupSection
+              selectedGroupId={formData.lineGroupId}
+              selectedMemberIds={formData.selectedLineUserIds}
+              onGroupChange={handleLineGroupChange}
+              onMembersChange={handleSelectedMembersChange}
+              onOpenInfo={() => setShowLineGroupInfoModal(true)}
+            />
+          )}
         </div>
       </div>
+
+      <LineGroupInfoModal
+        isOpen={showLineGroupInfoModal}
+        onClose={() => setShowLineGroupInfoModal(false)}
+      />
     </div>
   );
 }

@@ -9,21 +9,14 @@ import { GeneralSection } from "./GeneralSection";
 import { ConfigurationSection } from "./ConfigurationSection";
 import { VotingDeadlineSection } from "./VotingDeadlineSection";
 import { FormActions } from "./FormActions";
-import { useFormValidation } from "./hooks/useFormValidation";
-import { useFormActions } from "./hooks/useFormActions";
+import { CancelConfirmModal } from "./CancelConfirmModal";
 
 function CreateEventFormContent() {
   const t = useTranslations();
 
-  const { formData, setLoading, setShowCancelConfirm } = useFormStateContext();
-
-  const { hasUnsavedChanges } = useFormValidation(formData);
-  const { handleSubmit } = useFormActions({
-    formData,
-    hasUnsavedChanges,
-    setLoading,
-    setShowCancelConfirm,
-  });
+  const {
+    actions: { handleSubmit },
+  } = useFormStateContext();
 
   return (
     <div className="max-w-4xl mx-auto py-8 pr-4">
@@ -42,11 +35,10 @@ function CreateEventFormContent() {
         <div className="relative">
           {/* Connecting line from step 1 to last step */}
           <div
-            className="absolute left-[0.8rem] lg:left-[2.3rem] w-0.5 bg-border"
+            className="absolute left-[0.8rem] lg:left-[2.3rem] w-0.5 bg-border z-[1]"
             style={{
               top: "3rem",
               bottom: "1.5rem",
-              zIndex: 1,
             }}
           />
           <GeneralSection />
@@ -56,6 +48,8 @@ function CreateEventFormContent() {
 
         <FormActions />
       </form>
+
+      <CancelConfirmModal />
     </div>
   );
 }

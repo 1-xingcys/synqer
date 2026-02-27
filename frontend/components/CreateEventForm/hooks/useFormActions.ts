@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
+import { useLiff } from "@/hooks/useLiff";
 import { apiFetchJson } from "@/lib/apiClient";
 import type { operations } from "@/generated/openapi";
 import { CreateEventFormData } from "../types";
@@ -26,6 +27,7 @@ export function useFormActions({
   setShowCancelConfirm,
 }: UseFormActionsProps) {
   const router = useRouter();
+  const { isInClient: isInLiff, closeWindow } = useLiff();
 
   const formatDate = (date: Date): string => {
     const year = date.getFullYear();
@@ -92,15 +94,32 @@ export function useFormActions({
   const handleCancel = useCallback(() => {
     if (hasUnsavedChanges) {
       setShowCancelConfirm(true);
-    } else {
-      router.back();
+      return;
     }
-  }, [hasUnsavedChanges, router, setShowCancelConfirm]);
 
-  const confirmCancel = useCallback(() => {
+    const shouldCloseLiffWindow =
+      typeof window !== "undefined" && isInLiff && window.history.length <= 1;
+    if (shouldCloseLiffWindow) {
+      void closeWindow();
+      return;
+    }
+
+    router.push("/joined");
+  }, [closeWindow, hasUnsavedChanges, isInLiff, router, setShowCancelConfirm]);
+
+  const confirmCancel = useCallback(async () => {
+    const shouldCloseLiffWindow =
+      typeof window !== "undefined" && isInLiff && window.history.length <= 1;
+
     setShowCancelConfirm(false);
-    router.back();
-  }, [router, setShowCancelConfirm]);
+
+    if (shouldCloseLiffWindow) {
+      await closeWindow();
+      return;
+    }
+
+    router.push("/joined");
+  }, [closeWindow, isInLiff, router, setShowCancelConfirm]);
 
   const cancelConfirmCancel = useCallback(() => {
     setShowCancelConfirm(false);

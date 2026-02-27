@@ -10,10 +10,10 @@ import {
   MaxLength,
   Matches,
 } from 'class-validator';
-
-// Character limits (same as frontend)
-export const TITLE_MAX_LENGTH = 50;
-export const DESCRIPTION_MAX_LENGTH = 500;
+import {
+  TITLE_MAX_LENGTH,
+  DESCRIPTION_MAX_LENGTH,
+} from '../../../../shared/event-validation.constants';
 
 export class CreateEventDto {
   @IsOptional()
