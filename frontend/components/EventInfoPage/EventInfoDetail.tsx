@@ -17,7 +17,6 @@ interface EventInfoDetailProps {
   votingDeadline?: string | null;
   currentUserHasVoted: boolean;
   showTitle?: boolean;
-  embedded?: boolean;
 }
 
 export function EventInfoDetail({
@@ -29,18 +28,11 @@ export function EventInfoDetail({
   votingDeadline,
   currentUserHasVoted,
   showTitle = true,
-  embedded = false,
 }: EventInfoDetailProps) {
   const t = useTranslations();
 
   return (
-    <div
-      className={
-        embedded
-          ? "py-0 px-0"
-          : "bg-white dark:bg-zinc-900 rounded-2xl py-4 px-5 sm:py-5 sm:px-6 border border-zinc-200 dark:border-zinc-800 shadow-sm"
-      }
-    >
+    <>
       {/* Status Section */}
       {showTitle && (
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4 flex items-center gap-2">
@@ -115,6 +107,6 @@ export function EventInfoDetail({
           </p>
         </div>
       </div>
-    </div>
+    </>
   );
 }

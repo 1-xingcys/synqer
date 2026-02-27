@@ -50,16 +50,18 @@ export default function JoinedEventStatusPage() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-8">
       <div className="lg:col-span-2 space-y-5">
-        <EventInfoDetail
-          status={event.status}
-          startDate={event.startDate}
-          endDate={event.endDate}
-          startMinuteOfDay={event.startMinuteOfDay}
-          endMinuteOfDay={event.endMinuteOfDay}
-          votingDeadline={event.votingDeadline}
-          currentUserHasVoted={currentUserHasVoted}
-          showTitle={false}
-        />
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl py-4 px-5 sm:py-5 sm:px-6 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+          <EventInfoDetail
+            status={event.status}
+            startDate={event.startDate}
+            endDate={event.endDate}
+            startMinuteOfDay={event.startMinuteOfDay}
+            endMinuteOfDay={event.endMinuteOfDay}
+            votingDeadline={event.votingDeadline}
+            currentUserHasVoted={currentUserHasVoted}
+            showTitle={false}
+          />
+        </div>
       </div>
 
       <div className="lg:col-span-1">

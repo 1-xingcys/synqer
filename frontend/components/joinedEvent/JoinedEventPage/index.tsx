@@ -65,7 +65,6 @@ export default function JoinedEventPage() {
           votingDeadline={event.votingDeadline}
           currentUserHasVoted={currentUserHasVoted}
           showTitle={false}
-          embedded
         />
       </div>
     </div>
