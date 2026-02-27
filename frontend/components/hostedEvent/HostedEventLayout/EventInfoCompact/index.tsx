@@ -3,13 +3,7 @@
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { Link } from "@/i18n/routing";
-import {
-  ExternalLink,
-  Copy,
-  CheckCheck,
-  Calendar,
-  Clock,
-} from "lucide-react";
+import { ExternalLink, Copy, CheckCheck, Calendar, Clock } from "lucide-react";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatus } from "@/types/event";
@@ -62,7 +56,8 @@ export function EventInfoCompact({
       <div className="flex items-center gap-1">
         <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400" />
         <span className="font-mono">
-          {format(new Date(startDate), "M/d")} ~ {format(new Date(endDate), "M/d")}
+          {format(new Date(startDate), "M/d")} ~{" "}
+          {format(new Date(endDate), "M/d")}
         </span>
       </div>
       <span className="text-zinc-300 dark:text-zinc-600">•</span>

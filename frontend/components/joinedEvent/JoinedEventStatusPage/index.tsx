@@ -22,11 +22,12 @@ export default function JoinedEventStatusPage() {
   );
   const participantsForInfoCard: EventInfoExpectedParticipant[] =
     expectedParticipants.map((participant) => {
-      const status: EventInfoExpectedParticipant["status"] = participant.hasVoted
-        ? "VOTED"
-        : participant.userId || participant.user
-          ? "NOT_VOTED"
-          : "NOT_REGISTERED";
+      const status: EventInfoExpectedParticipant["status"] =
+        participant.hasVoted
+          ? "VOTED"
+          : participant.userId || participant.user
+            ? "NOT_VOTED"
+            : "NOT_REGISTERED";
 
       return {
         id: participant.id,
