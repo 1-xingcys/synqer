@@ -1,7 +1,7 @@
 # 多阶段构建：构建阶段
 FROM node:20-alpine AS builder
 
-WORKDIR /app
+WORKDIR /app/frontend
 
 # 接收构建参数（NEXT_PUBLIC_* 环境变量需要在构建时存在）
 ARG NEXT_PUBLIC_API
@@ -12,13 +12,14 @@ ENV NEXT_PUBLIC_API=${NEXT_PUBLIC_API}
 ENV NEXT_PUBLIC_LINE_LIFF_ID=${NEXT_PUBLIC_LINE_LIFF_ID}
 
 # 复制 package 文件
-COPY package*.json ./
+COPY frontend/package*.json ./
 
 # 安装依赖（包括 devDependencies，因为需要构建工具）
 RUN npm ci
 
-# 复制源代码
-COPY . .
+# 复制前端源码与共享常数
+COPY frontend/. ./
+COPY backend/shared ../backend/shared
 
 # 构建应用（standalone 模式会生成优化的输出）
 # NEXT_PUBLIC_* 环境变量会在此阶段被嵌入到客户端代码中
@@ -36,13 +37,12 @@ ENV HOSTNAME=0.0.0.0
 
 # 从构建阶段复制 standalone 输出
 # Next.js standalone 模式会生成 .next/standalone 目录，包含运行所需的所有文件
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
+COPY --from=builder /app/frontend/.next/standalone ./
+COPY --from=builder /app/frontend/.next/static ./.next/static
+COPY --from=builder /app/frontend/public ./public
 
 # 暴露端口 8080（GCP 要求）
 EXPOSE 8080
 
 # 启动应用
 CMD ["node", "server.js"]
-
