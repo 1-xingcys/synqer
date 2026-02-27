@@ -3,15 +3,13 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
-      - '-f'
-      - 'frontend/Dockerfile'
       - '--build-arg'
       - 'NEXT_PUBLIC_API=${_NEXT_PUBLIC_API}'
       - '--build-arg'
       - 'NEXT_PUBLIC_LINE_LIFF_ID=${_NEXT_PUBLIC_LINE_LIFF_ID}'
       - '--tag'
       - '${_IMAGE_NAME}:${_TAG}'
-      - '.'
+      - 'frontend'
     id: 'build-image'
 
   # 推送镜像到 Artifact Registry
