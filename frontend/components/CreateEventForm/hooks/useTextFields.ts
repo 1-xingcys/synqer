@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { CreateEventFormData } from "../types";
 import {
+  CreateEventFormData,
   TITLE_MAX_LENGTH,
   DESCRIPTION_MAX_LENGTH,
-} from "@shared/event-validation.constants";
+} from "../types";
 
 function countCharacters(str: string): number {
   return str.length;
