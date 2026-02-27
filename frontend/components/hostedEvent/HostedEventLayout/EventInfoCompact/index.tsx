@@ -89,7 +89,7 @@ export function EventInfoCompact({
 
   const goToVoteButton = (size: "sm" | "lg") => (
     <Link
-      href={`/joined/${eventId}`}
+      href={`/joined/${eventId}/vote`}
       className={`flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium text-sm transition-all active:scale-[0.98] shadow-sm shadow-blue-500/20 ${
         size === "sm" ? "flex-1 px-4 py-2" : "px-5 py-2.5 w-full"
       }`}

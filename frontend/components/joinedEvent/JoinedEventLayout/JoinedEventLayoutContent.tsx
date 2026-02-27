@@ -96,15 +96,15 @@ export function JoinedEventLayoutContent({
   const tabs = isVoting
     ? [
         {
-          id: "status",
+          id: "overview",
           label: t("joined.tabs.overview"),
-          href: `/joined/${eventId}/status`,
+          href: `/joined/${eventId}`,
           icon: NavIcons.overview,
         },
         {
           id: "vote",
           label: t("joined.tabs.vote"),
-          href: `/joined/${eventId}`,
+          href: `/joined/${eventId}/vote`,
           icon: NavIcons.vote,
         },
         {

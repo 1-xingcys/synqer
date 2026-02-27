@@ -1,5 +1,5 @@
-import JoinedEventStatusPage from "@/components/joinedEvent/JoinedEventStatusPage";
+import JoinedEventPage from "@/components/joinedEvent/JoinedEventPage";
 
 export default function Page() {
-  return <JoinedEventStatusPage />;
+  return <JoinedEventPage />;
 }

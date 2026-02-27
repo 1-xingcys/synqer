@@ -5,12 +5,11 @@ import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
 import { EventStatus } from "@/types/event";
-import VotingGrid from "@/components/eventCommon/timeGrid/VotingGrid";
 import { EventInfoDetail } from "@/components/EventInfoPage/EventInfoDetail";
-import { VotingInstruction } from "./StatusDescription";
 import { VotingEndedView } from "./VotingEndedView";
 import { ConfirmedView } from "./ConfirmedView";
 import { CompletedView } from "./CompletedView";
+import JoinedEventStatusPage from "@/components/joinedEvent/JoinedEventStatusPage";
 
 export default function JoinedEventPage() {
   const params = useParams();
@@ -34,22 +33,7 @@ export default function JoinedEventPage() {
       participant.hasVoted,
   );
 
-  if (isVoting && user) {
-    return (
-      <div className="space-y-4 sm:space-y-6">
-        <VotingInstruction />
-        <VotingGrid
-          slots={eventDetailData.slots}
-          votes={eventDetailData.votes}
-          stagedVote={eventDetailData.stagedVote}
-          currentUserHasVoted={currentUserHasVoted}
-          currentUserId={user.id.toString()}
-          eventId={eventId}
-          eventTitle={event.title || tJoined("untitledEvent")}
-        />
-      </div>
-    );
-  }
+  if (isVoting) return <JoinedEventStatusPage />;
 
   return (
     <div className="space-y-5">
