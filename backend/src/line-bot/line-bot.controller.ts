@@ -12,11 +12,16 @@ import {
   BadRequestException,
   Req,
 } from '@nestjs/common';
+import { ApiOkResponse } from '@nestjs/swagger';
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
 import { LineBotService } from './line-bot.service';
 import { RichMenuService } from './services';
 import type { WebhookRequestBody } from './dto/webhook-event.dto';
+import {
+  LineGroupMemberDto,
+  LineGroupSummaryDto,
+} from './dto/line-group-response.dto';
 import { SessionAuthGuard, CurrentUser } from '../auth';
 
 @Controller('line-bot')
@@ -61,7 +66,10 @@ export class LineBotController {
    */
   @Get('my-groups')
   @UseGuards(SessionAuthGuard)
-  async getMyGroups(@CurrentUser() userId: string) {
+  @ApiOkResponse({ type: LineGroupSummaryDto, isArray: true })
+  async getMyGroups(
+    @CurrentUser() userId: string,
+  ): Promise<LineGroupSummaryDto[]> {
     const groups = await this.lineBotService.getGroupsForUser(userId);
     return groups.map((group) => ({
       id: group.id,
@@ -78,10 +86,11 @@ export class LineBotController {
    */
   @Get('my-groups/:groupId/members')
   @UseGuards(SessionAuthGuard)
+  @ApiOkResponse({ type: LineGroupMemberDto, isArray: true })
   async getMyGroupMembers(
     @CurrentUser() userId: string,
     @Param('groupId') groupId: string,
-  ) {
+  ): Promise<LineGroupMemberDto[]> {
     const members = await this.lineBotService.getGroupMembersForUser(
       userId,
       groupId,

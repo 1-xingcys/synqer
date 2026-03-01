@@ -850,24 +850,34 @@
         ]
       }
     },
-    "/line-bot/groups": {
+    "/line-bot/my-groups": {
       "get": {
-        "operationId": "LineBotController_getGroups",
+        "operationId": "LineBotController_getMyGroups",
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LineGroupSummaryDto"
+                  }
+                }
+              }
+            }
           }
         },
-        "summary": "取得所有活躍的 LINE 群組",
+        "summary": "取得當前使用者所在的活躍 LINE 群組",
         "tags": [
           "LineBot"
         ]
       }
     },
-    "/line-bot/groups/{groupId}/members": {
+    "/line-bot/my-groups/{groupId}/members": {
       "get": {
-        "operationId": "LineBotController_getGroupMembers",
+        "operationId": "LineBotController_getMyGroupMembers",
         "parameters": [
           {
             "name": "groupId",
@@ -880,10 +890,20 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LineGroupMemberDto"
+                  }
+                }
+              }
+            }
           }
         },
-        "summary": "取得特定群組的成員列表",
+        "summary": "取得當前使用者所在群組的成員列表",
         "tags": [
           "LineBot"
         ]
@@ -2431,6 +2451,109 @@
         "required": [
           "id",
           "status"
+        ]
+      },
+      "LineGroupSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lineGroupId": {
+            "type": "string"
+          },
+          "groupName": {
+            "type": "string",
+            "nullable": true
+          },
+          "memberCount": {
+            "type": "number"
+          },
+          "botJoinedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "lineGroupId",
+          "groupName",
+          "memberCount",
+          "botJoinedAt",
+          "updatedAt"
+        ]
+      },
+      "LinkedUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "avatarUrl"
+        ]
+      },
+      "LineGroupMemberDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lineUserId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "pictureUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "isLinked": {
+            "type": "boolean"
+          },
+          "linkedUser": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LinkedUserDto"
+              }
+            ]
+          },
+          "firstSeenAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastSeenAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "lineUserId",
+          "displayName",
+          "pictureUrl",
+          "isLinked",
+          "linkedUser",
+          "firstSeenAt",
+          "lastSeenAt"
         ]
       }
     }
