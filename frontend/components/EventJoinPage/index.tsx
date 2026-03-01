@@ -8,6 +8,7 @@ import { ErrorView } from "./ErrorView";
 import { JoinConfirmView } from "./JoinConfirmView";
 import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
 import { useRouter } from "@/i18n/routing";
+import { EventStatus } from "@/types/event";
 
 interface EventJoinPageProps {
   eventId: string;
@@ -28,18 +29,17 @@ export default function EventJoinPage({ eventId }: EventJoinPageProps) {
   useEffect(() => {
     if (
       !loading &&
-      !eventInfo?.isDeleted &&
+      eventInfo &&
+      !eventInfo.isDeleted &&
       participationStatus?.isParticipant
     ) {
-      router.replace(`/joined/${eventId}`);
+      const redirectPath =
+        eventInfo.status === EventStatus.VOTING
+          ? `/joined/${eventId}/vote`
+          : `/joined/${eventId}`;
+      router.replace(redirectPath);
     }
-  }, [
-    eventId,
-    eventInfo?.isDeleted,
-    loading,
-    participationStatus?.isParticipant,
-    router,
-  ]);
+  }, [eventId, eventInfo, loading, participationStatus?.isParticipant, router]);
 
   if (loading) {
     return <LoadingSpinner />;
