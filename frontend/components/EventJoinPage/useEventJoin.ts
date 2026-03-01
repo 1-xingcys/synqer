@@ -96,7 +96,7 @@ export function useEventJoin(eventId: string): UseEventJoinResult {
     mutationFn: () => joinEvent(eventId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: attendedEventsKeys.all });
-      router.push(`/joined/${eventId}`);
+      router.push(`/joined/${eventId}/vote`);
     },
     onError: (error) => {
       setJoinError(
