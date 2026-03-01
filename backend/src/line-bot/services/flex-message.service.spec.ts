@@ -95,7 +95,7 @@ describe('FlexMessageService', () => {
         const button = footer.contents[0];
         expect(button.action.label).toBe('前往投票');
         expect(button.action.uri).toBe(
-          'https://liff.line.me/test-liff-id/joined/event-1',
+          'https://liff.line.me/test-liff-id/joined/event-1/vote',
         );
       });
     });
@@ -340,7 +340,7 @@ describe('FlexMessageService', () => {
 
         const result = newService.buildEventFlexMessage(event);
         const footer = (result.contents as any).footer;
-        expect(footer.contents[0].action.uri).toBe('/joined/event-1');
+        expect(footer.contents[0].action.uri).toBe('/joined/event-1/vote');
       });
     });
   });
