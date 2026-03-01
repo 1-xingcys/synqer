@@ -31,20 +31,22 @@ const lineGroupsKeys = {
     [...lineGroupsKeys.all, "members", groupId] as const,
 };
 
-async function fetchLineGroups(): Promise<LineGroup[]> {
-  return apiFetchJson<LineGroup[]>("/line-bot/groups");
+async function fetchMyLineGroups(): Promise<LineGroup[]> {
+  return apiFetchJson<LineGroup[]>("/line-bot/my-groups");
 }
 
-async function fetchLineGroupMembers(
+async function fetchMyLineGroupMembers(
   groupId: string,
 ): Promise<LineGroupMember[]> {
-  return apiFetchJson<LineGroupMember[]>(`/line-bot/groups/${groupId}/members`);
+  return apiFetchJson<LineGroupMember[]>(
+    `/line-bot/my-groups/${groupId}/members`,
+  );
 }
 
 export function useLineGroups() {
   const query = useQuery({
     queryKey: lineGroupsKeys.all,
-    queryFn: fetchLineGroups,
+    queryFn: fetchMyLineGroups,
   });
 
   return {
@@ -59,7 +61,7 @@ export function useLineGroupMembers(groupId: string | null) {
     queryKey: groupId
       ? lineGroupsKeys.members(groupId)
       : lineGroupsKeys.members("none"),
-    queryFn: () => fetchLineGroupMembers(groupId as string),
+    queryFn: () => fetchMyLineGroupMembers(groupId as string),
     enabled: !!groupId,
   });
 
