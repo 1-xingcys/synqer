@@ -1,29 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
+import type { operations } from "@/generated/openapi";
 import { apiFetchJson } from "@/lib/apiClient";
 
-export interface LineGroup {
-  id: string;
-  lineGroupId: string;
-  groupName: string | null;
-  memberCount: number;
-  botJoinedAt: string;
-  updatedAt: string;
-}
+export type LineGroup =
+  operations["LineBotController_getMyGroups"]["responses"][200]["content"]["application/json"][number];
 
-export interface LineGroupMember {
-  id: string;
-  lineUserId: string;
-  displayName: string | null;
-  pictureUrl: string | null;
-  isLinked: boolean;
-  linkedUser: {
-    id: string;
-    displayName: string | null;
-    avatarUrl: string | null;
-  } | null;
-  firstSeenAt: string;
-  lastSeenAt: string;
-}
+export type LineGroupMember =
+  operations["LineBotController_getMyGroupMembers"]["responses"][200]["content"]["application/json"][number];
 
 const lineGroupsKeys = {
   all: ["lineGroups"] as const,
