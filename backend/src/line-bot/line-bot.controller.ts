@@ -57,12 +57,12 @@ export class LineBotController {
   }
 
   /**
-   * 取得所有活躍的 LINE 群組
+   * 取得當前使用者所在的活躍 LINE 群組
    */
-  @Get('groups')
+  @Get('my-groups')
   @UseGuards(SessionAuthGuard)
-  async getGroups() {
-    const groups = await this.lineBotService.getActiveGroups();
+  async getMyGroups(@CurrentUser() userId: string) {
+    const groups = await this.lineBotService.getGroupsForUser(userId);
     return groups.map((group) => ({
       id: group.id,
       lineGroupId: group.lineGroupId,
@@ -74,12 +74,18 @@ export class LineBotController {
   }
 
   /**
-   * 取得特定群組的成員列表
+   * 取得當前使用者所在群組的成員列表
    */
-  @Get('groups/:groupId/members')
+  @Get('my-groups/:groupId/members')
   @UseGuards(SessionAuthGuard)
-  async getGroupMembers(@Param('groupId') groupId: string) {
-    const members = await this.lineBotService.getGroupMembers(groupId);
+  async getMyGroupMembers(
+    @CurrentUser() userId: string,
+    @Param('groupId') groupId: string,
+  ) {
+    const members = await this.lineBotService.getGroupMembersForUser(
+      userId,
+      groupId,
+    );
     return members.map((member) => ({
       id: member.id,
       lineUserId: member.lineUserId,

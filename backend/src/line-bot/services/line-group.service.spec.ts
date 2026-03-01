@@ -16,6 +16,7 @@ describe('LineGroupService', () => {
       updateMany: jest.fn(),
     },
     lineGroupMember: {
+      findFirst: jest.fn(),
       findMany: jest.fn(),
       upsert: jest.fn(),
       updateMany: jest.fn(),
@@ -280,33 +281,40 @@ describe('LineGroupService', () => {
     });
   });
 
-  describe('getActiveGroups', () => {
-    it('should return all active groups with member counts', async () => {
+  describe('getGroupsForUser', () => {
+    it('should return active groups that include the current user', async () => {
       const mockGroups = [
         {
           id: 'group-1',
           lineGroupId: 'line-group-1',
           isActive: true,
-          members: [{ id: 'member-1' }],
           _count: { members: 1 },
         },
       ];
 
       mockPrismaService.lineGroup.findMany.mockResolvedValue(mockGroups as any);
 
-      const result = await service.getActiveGroups();
+      const result = await service.getGroupsForUser('user-1');
 
       expect(mockPrismaService.lineGroup.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { isActive: true },
+          where: {
+            isActive: true,
+            members: {
+              some: {
+                userId: 'user-1',
+                isActive: true,
+              },
+            },
+          },
         }),
       );
       expect(result).toEqual(mockGroups);
     });
   });
 
-  describe('getGroupMembers', () => {
-    it('should return active members of a group', async () => {
+  describe('getGroupMembersForUser', () => {
+    it('should return active members of a group the current user belongs to', async () => {
       const mockMembers = [
         {
           id: 'member-1',
@@ -321,13 +329,35 @@ describe('LineGroupService', () => {
         mockMembers as any,
       );
 
-      const result = await service.getGroupMembers('db-group-id');
+      mockPrismaService.lineGroupMember.findFirst.mockResolvedValue({
+        id: 'membership-1',
+      } as any);
+
+      const result = await service.getGroupMembersForUser(
+        'user-1',
+        'db-group-id',
+      );
+
+      expect(mockPrismaService.lineGroupMember.findFirst).toHaveBeenCalledWith({
+        where: {
+          lineGroupId: 'db-group-id',
+          userId: 'user-1',
+          isActive: true,
+          lineGroup: {
+            isActive: true,
+          },
+        },
+        select: { id: true },
+      });
 
       expect(mockPrismaService.lineGroupMember.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
             lineGroupId: 'db-group-id',
             isActive: true,
+            lineGroup: {
+              isActive: true,
+            },
           },
         }),
       );
