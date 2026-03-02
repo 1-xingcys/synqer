@@ -449,12 +449,12 @@ export class LineBotService implements OnModuleInit {
 
   // ============ 群組查詢（供 Controller 使用）============
 
-  async getActiveGroups() {
-    return this.lineGroup.getActiveGroups();
+  async getGroupsForUser(userId: string) {
+    return this.lineGroup.getGroupsForUser(userId);
   }
 
-  async getGroupMembers(lineGroupDbId: string) {
-    return this.lineGroup.getGroupMembers(lineGroupDbId);
+  async getGroupMembersForUser(userId: string, lineGroupDbId: string) {
+    return this.lineGroup.getGroupMembersForUser(userId, lineGroupDbId);
   }
 
   async getGroupByLineGroupId(lineGroupId: string) {

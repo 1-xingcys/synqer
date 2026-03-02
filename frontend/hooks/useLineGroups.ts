@@ -1,29 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
+import type { operations } from "@/generated/openapi";
 import { apiFetchJson } from "@/lib/apiClient";
 
-export interface LineGroup {
-  id: string;
-  lineGroupId: string;
-  groupName: string | null;
-  memberCount: number;
-  botJoinedAt: string;
-  updatedAt: string;
-}
+export type LineGroup =
+  operations["LineBotController_getMyGroups"]["responses"][200]["content"]["application/json"][number];
 
-export interface LineGroupMember {
-  id: string;
-  lineUserId: string;
-  displayName: string | null;
-  pictureUrl: string | null;
-  isLinked: boolean;
-  linkedUser: {
-    id: string;
-    displayName: string | null;
-    avatarUrl: string | null;
-  } | null;
-  firstSeenAt: string;
-  lastSeenAt: string;
-}
+export type LineGroupMember =
+  operations["LineBotController_getMyGroupMembers"]["responses"][200]["content"]["application/json"][number];
 
 const lineGroupsKeys = {
   all: ["lineGroups"] as const,
@@ -31,20 +14,22 @@ const lineGroupsKeys = {
     [...lineGroupsKeys.all, "members", groupId] as const,
 };
 
-async function fetchLineGroups(): Promise<LineGroup[]> {
-  return apiFetchJson<LineGroup[]>("/line-bot/groups");
+async function fetchMyLineGroups(): Promise<LineGroup[]> {
+  return apiFetchJson<LineGroup[]>("/line-bot/my-groups");
 }
 
-async function fetchLineGroupMembers(
+async function fetchMyLineGroupMembers(
   groupId: string,
 ): Promise<LineGroupMember[]> {
-  return apiFetchJson<LineGroupMember[]>(`/line-bot/groups/${groupId}/members`);
+  return apiFetchJson<LineGroupMember[]>(
+    `/line-bot/my-groups/${groupId}/members`,
+  );
 }
 
 export function useLineGroups() {
   const query = useQuery({
     queryKey: lineGroupsKeys.all,
-    queryFn: fetchLineGroups,
+    queryFn: fetchMyLineGroups,
   });
 
   return {
@@ -59,7 +44,7 @@ export function useLineGroupMembers(groupId: string | null) {
     queryKey: groupId
       ? lineGroupsKeys.members(groupId)
       : lineGroupsKeys.members("none"),
-    queryFn: () => fetchLineGroupMembers(groupId as string),
+    queryFn: () => fetchMyLineGroupMembers(groupId as string),
     enabled: !!groupId,
   });
 

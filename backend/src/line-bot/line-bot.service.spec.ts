@@ -58,8 +58,8 @@ describe('LineBotService', () => {
     ensureGroupExists: jest.fn(),
     upsertMember: jest.fn(),
     deactivateMembers: jest.fn(),
-    getActiveGroups: jest.fn(),
-    getGroupMembers: jest.fn(),
+    getGroupsForUser: jest.fn(),
+    getGroupMembersForUser: jest.fn(),
     getGroupByLineGroupId: jest.fn(),
     linkUserToMembers: jest.fn(),
   };
@@ -650,28 +650,34 @@ describe('LineBotService', () => {
     });
   });
 
-  describe('getActiveGroups', () => {
+  describe('getGroupsForUser', () => {
     it('should delegate to LineGroupService', async () => {
       const mockGroups = [{ id: 'group-1' }];
-      mockLineGroupService.getActiveGroups.mockResolvedValue(mockGroups as any);
+      mockLineGroupService.getGroupsForUser.mockResolvedValue(mockGroups as any);
 
-      const result = await service.getActiveGroups();
+      const result = await service.getGroupsForUser('user-1');
 
-      expect(mockLineGroupService.getActiveGroups).toHaveBeenCalled();
+      expect(mockLineGroupService.getGroupsForUser).toHaveBeenCalledWith(
+        'user-1',
+      );
       expect(result).toEqual(mockGroups);
     });
   });
 
-  describe('getGroupMembers', () => {
+  describe('getGroupMembersForUser', () => {
     it('should delegate to LineGroupService', async () => {
       const mockMembers = [{ id: 'member-1' }];
-      mockLineGroupService.getGroupMembers.mockResolvedValue(
+      mockLineGroupService.getGroupMembersForUser.mockResolvedValue(
         mockMembers as any,
       );
 
-      const result = await service.getGroupMembers('group-id');
+      const result = await service.getGroupMembersForUser(
+        'user-1',
+        'group-id',
+      );
 
-      expect(mockLineGroupService.getGroupMembers).toHaveBeenCalledWith(
+      expect(mockLineGroupService.getGroupMembersForUser).toHaveBeenCalledWith(
+        'user-1',
         'group-id',
       );
       expect(result).toEqual(mockMembers);

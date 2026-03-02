@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { LineApiService } from './line-api.service';
 
@@ -147,13 +147,20 @@ export class LineGroupService {
   }
 
   /**
-   * 取得所有活躍的群組
+   * 取得當前使用者所在的活躍群組
    */
-  async getActiveGroups() {
+  async getGroupsForUser(userId: string) {
     return this.prisma.lineGroup.findMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        members: {
+          some: {
+            userId,
+            isActive: true,
+          },
+        },
+      },
       include: {
-        members: { where: { isActive: true } },
         _count: {
           select: { members: { where: { isActive: true } } },
         },
@@ -163,13 +170,32 @@ export class LineGroupService {
   }
 
   /**
-   * 取得群組的所有活躍成員
+   * 取得當前使用者所在群組的所有活躍成員
    */
-  async getGroupMembers(lineGroupDbId: string) {
+  async getGroupMembersForUser(userId: string, lineGroupDbId: string) {
+    const membership = await this.prisma.lineGroupMember.findFirst({
+      where: {
+        lineGroupId: lineGroupDbId,
+        userId,
+        isActive: true,
+        lineGroup: {
+          isActive: true,
+        },
+      },
+      select: { id: true },
+    });
+
+    if (!membership) {
+      throw new NotFoundException('LINE group not found');
+    }
+
     return this.prisma.lineGroupMember.findMany({
       where: {
         lineGroupId: lineGroupDbId,
         isActive: true,
+        lineGroup: {
+          isActive: true,
+        },
       },
       include: {
         user: {

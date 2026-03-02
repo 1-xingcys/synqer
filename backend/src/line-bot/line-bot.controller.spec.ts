@@ -15,8 +15,8 @@ describe('LineBotController', () => {
   const mockLineBotService = {
     verifySignature: jest.fn(),
     handleWebhookEvents: jest.fn(),
-    getActiveGroups: jest.fn(),
-    getGroupMembers: jest.fn(),
+    getGroupsForUser: jest.fn(),
+    getGroupMembersForUser: jest.fn(),
     sendVoteReminder: jest.fn(),
   };
 
@@ -120,7 +120,7 @@ describe('LineBotController', () => {
     });
   });
 
-  describe('getGroups', () => {
+  describe('getMyGroups', () => {
     it('should return formatted groups list', async () => {
       const mockGroups = [
         {
@@ -133,9 +133,9 @@ describe('LineBotController', () => {
         },
       ];
 
-      mockLineBotService.getActiveGroups.mockResolvedValue(mockGroups as any);
+      mockLineBotService.getGroupsForUser.mockResolvedValue(mockGroups as any);
 
-      const result = await controller.getGroups();
+      const result = await controller.getMyGroups('user-1');
 
       expect(result).toEqual([
         {
@@ -150,15 +150,15 @@ describe('LineBotController', () => {
     });
 
     it('should return empty array when no groups', async () => {
-      mockLineBotService.getActiveGroups.mockResolvedValue([]);
+      mockLineBotService.getGroupsForUser.mockResolvedValue([]);
 
-      const result = await controller.getGroups();
+      const result = await controller.getMyGroups('user-1');
 
       expect(result).toEqual([]);
     });
   });
 
-  describe('getGroupMembers', () => {
+  describe('getMyGroupMembers', () => {
     it('should return formatted members list', async () => {
       const mockMembers = [
         {
@@ -177,9 +177,11 @@ describe('LineBotController', () => {
         },
       ];
 
-      mockLineBotService.getGroupMembers.mockResolvedValue(mockMembers as any);
+      mockLineBotService.getGroupMembersForUser.mockResolvedValue(
+        mockMembers as any,
+      );
 
-      const result = await controller.getGroupMembers('group-1');
+      const result = await controller.getMyGroupMembers('user-1', 'group-1');
 
       expect(result).toEqual([
         {
@@ -213,9 +215,11 @@ describe('LineBotController', () => {
         },
       ];
 
-      mockLineBotService.getGroupMembers.mockResolvedValue(mockMembers as any);
+      mockLineBotService.getGroupMembersForUser.mockResolvedValue(
+        mockMembers as any,
+      );
 
-      const result = await controller.getGroupMembers('group-1');
+      const result = await controller.getMyGroupMembers('user-1', 'group-1');
 
       expect(result[0].isLinked).toBe(false);
       expect(result[0].linkedUser).toBeNull();

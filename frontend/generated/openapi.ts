@@ -469,15 +469,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/line-bot/groups": {
+    "/line-bot/my-groups": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** 取得所有活躍的 LINE 群組 */
-        get: operations["LineBotController_getGroups"];
+        /** 取得當前使用者所在的活躍 LINE 群組 */
+        get: operations["LineBotController_getMyGroups"];
         put?: never;
         post?: never;
         delete?: never;
@@ -486,15 +486,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/line-bot/groups/{groupId}/members": {
+    "/line-bot/my-groups/{groupId}/members": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** 取得特定群組的成員列表 */
-        get: operations["LineBotController_getGroupMembers"];
+        /** 取得當前使用者所在群組的成員列表 */
+        get: operations["LineBotController_getMyGroupMembers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1025,6 +1025,33 @@ export interface components {
             id: string;
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
+        };
+        LineGroupSummaryDto: {
+            id: string;
+            lineGroupId: string;
+            groupName: string | null;
+            memberCount: number;
+            /** Format: date-time */
+            botJoinedAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        LinkedUserDto: {
+            id: string;
+            displayName: string | null;
+            avatarUrl: string | null;
+        };
+        LineGroupMemberDto: {
+            id: string;
+            lineUserId: string;
+            displayName: string | null;
+            pictureUrl: string | null;
+            isLinked: boolean;
+            linkedUser: components["schemas"]["LinkedUserDto"] | null;
+            /** Format: date-time */
+            firstSeenAt: string;
+            /** Format: date-time */
+            lastSeenAt: string;
         };
     };
     responses: never;
@@ -1631,7 +1658,7 @@ export interface operations {
             };
         };
     };
-    LineBotController_getGroups: {
+    LineBotController_getMyGroups: {
         parameters: {
             query?: never;
             header?: never;
@@ -1644,11 +1671,13 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LineGroupSummaryDto"][];
+                };
             };
         };
     };
-    LineBotController_getGroupMembers: {
+    LineBotController_getMyGroupMembers: {
         parameters: {
             query?: never;
             header?: never;
@@ -1663,7 +1692,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LineGroupMemberDto"][];
+                };
             };
         };
     };
