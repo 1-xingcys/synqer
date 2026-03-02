@@ -284,7 +284,7 @@ export default function CreateEventSuccessPage() {
             icon={<Vote className="w-5 h-5" />}
             title={t("goToVote")}
             description={t("goToVoteDescription")}
-            onClick={() => router.push(`/joined/${eventId}`)}
+            onClick={() => router.push(`/joined/${eventId}/vote`)}
             showArrow={true}
           />
 

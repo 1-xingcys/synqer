@@ -41,7 +41,12 @@ export default function EventRow({
   const { copied, copyLink: handleCopyLink } = useEventShareLink(event.id);
 
   const isJoined = mode === EventRowMode.JOINED;
-  const linkHref = isJoined ? `/joined/${event.id}` : `/hosted/${event.id}`;
+  const isJoinedVoting = event.status === EventStatus.VOTING;
+  const linkHref = isJoined
+    ? isJoinedVoting
+      ? `/joined/${event.id}/vote`
+      : `/joined/${event.id}`
+    : `/hosted/${event.id}`;
 
   // Check if hasVoted exists (for joined events)
   const hasVoted = "hasVoted" in event ? event.hasVoted : false;

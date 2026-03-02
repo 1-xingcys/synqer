@@ -483,7 +483,7 @@ export class FlexMessageService {
 
     switch (event.status) {
       case EventStatus.VOTING:
-        uri = `${this.liffUrl}/joined/${event.id}`;
+        uri = `${this.liffUrl}/joined/${event.id}/vote`;
         label = '前往投票';
         break;
       case EventStatus.VOTING_ENDED:
