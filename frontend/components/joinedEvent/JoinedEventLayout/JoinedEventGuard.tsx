@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { NotParticipantView } from "./NotParticipantView";
@@ -19,18 +20,7 @@ export function JoinedEventGuard({ children }: JoinedEventGuardProps) {
 
   // Show loading while checking
   if (isLoading) {
-    return (
-      <div className="py-8">
-        <div className="flex items-center justify-center min-h-[40vh]">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-zinc-600 dark:text-zinc-400">
-              {t("common.loading")}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingState label={t("common.loading")} viewport="section" />;
   }
 
   // 已刪除活動直接放行，讓 JoinedEventLayoutContent 處理顯示

@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import LoginPage from "@/components/LoginPage";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useAuthContext } from "@/contexts/AuthContext";
 
 /**
@@ -27,7 +27,6 @@ const validateRedirectPath = (redirect: string | null): string => {
 };
 
 export default function Login() {
-  const t = useTranslations("common");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading } = useAuthContext();
@@ -42,9 +41,11 @@ export default function Login() {
 
   if (loading || user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-        <p className="text-zinc-600 dark:text-zinc-400">{t("loading")}</p>
-      </div>
+      <LoadingState
+        viewport="screen"
+        background="muted"
+        spinnerTone="neutral"
+      />
     );
   }
 

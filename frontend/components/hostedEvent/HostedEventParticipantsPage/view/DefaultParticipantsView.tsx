@@ -10,6 +10,7 @@ import {
 } from "../components";
 import { SelectedParticipant } from "../types";
 import { SearchedUser } from "@/hooks/useUserSearch";
+import { LoadingState } from "@/components/ui/loading-state";
 
 interface DefaultParticipantsViewProps {
   searchQuery: string;
@@ -60,9 +61,14 @@ export function DefaultParticipantsView({
         {isSearching ? (
           // Show search results
           searchLoading ? (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-4">
-              {t("common.loading")}
-            </p>
+            <LoadingState
+              label={t("common.loading")}
+              viewport="none"
+              layout="row"
+              spinnerSize="sm"
+              textSize="sm"
+              className="py-4"
+            />
           ) : searchResults.length === 0 ? (
             <EmptyState type="noResults" />
           ) : (

@@ -19,12 +19,13 @@ import {
   Send,
   Share2,
   Check,
-  Loader2,
   Copy,
   Calendar,
 } from "lucide-react";
 import { ActionButton, ActionButtonVariant } from "./ActionButton";
 import { formatMinutesToTime } from "@/lib/utils";
+import { LoadingState } from "@/components/ui/loading-state";
+import { Spinner } from "@/components/ui/spinner";
 
 const SendStatus = {
   Idle: "idle",
@@ -144,7 +145,7 @@ export default function CreateEventSuccessPage() {
   const getLineShareButtonProps = () => {
     let icon: React.ReactNode;
     if (sendStatus === SendStatus.Sending) {
-      icon = <Loader2 className="w-5 h-5 animate-spin" />;
+      icon = <Spinner size="sm" />;
     } else if (sendStatus === SendStatus.Success) {
       icon = <Check className="w-5 h-5" />;
     } else if (hasLinkedGroup) {
@@ -203,11 +204,7 @@ export default function CreateEventSuccessPage() {
   const copyLinkButtonProps = getCopyLinkButtonProps();
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="w-8 h-8 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
-      </div>
-    );
+    return <LoadingState viewport="section" spinnerTone="neutral" />;
   }
 
   if (!eventData) {

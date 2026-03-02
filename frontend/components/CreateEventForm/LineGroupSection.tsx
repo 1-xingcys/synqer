@@ -14,6 +14,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { LoadingState } from "@/components/ui/loading-state";
 import {
   Select,
   SelectContent,
@@ -21,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
 interface LineGroupSectionProps {
@@ -120,9 +122,14 @@ export function LineGroupSection({
           <SelectTrigger className="w-full">
             <SelectValue
               placeholder={
-                groupsLoading
-                  ? t("common.loading")
-                  : t("createEvent.lineGroup.noGroupSelected")
+                groupsLoading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Spinner size="xs" tone="current" />
+                    {t("common.loading")}
+                  </span>
+                ) : (
+                  t("createEvent.lineGroup.noGroupSelected")
+                )
               }
             />
           </SelectTrigger>
@@ -181,9 +188,15 @@ export function LineGroupSection({
           </div>
 
           {membersLoading ? (
-            <div className="py-4 text-center text-sm text-muted-foreground">
-              {t("common.loading")}
-            </div>
+            <LoadingState
+              label={t("common.loading")}
+              viewport="none"
+              layout="row"
+              spinnerSize="sm"
+              textSize="sm"
+              className="py-4"
+              labelClassName="text-muted-foreground"
+            />
           ) : sortedMembers.length === 0 ? (
             <div className="py-4 text-center text-sm text-muted-foreground">
               {t("createEvent.lineGroup.noMembers")}

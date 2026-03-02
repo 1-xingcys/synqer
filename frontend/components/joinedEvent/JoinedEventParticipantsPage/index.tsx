@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useMemo, useState } from "react";
 import { FilterTabs } from "./FilterTabs";
 import { SearchInput } from "./SearchInput";
@@ -69,14 +70,11 @@ export default function JoinedEventParticipantsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-lg text-zinc-600 dark:text-zinc-300">
-            {t("event.loading")}
-          </p>
-        </div>
-      </div>
+      <LoadingState
+        label={t("event.loading")}
+        viewport="section"
+        textSize="lg"
+      />
     );
   }
 

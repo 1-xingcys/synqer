@@ -10,6 +10,7 @@ import {
 } from "../components";
 import { SelectedParticipant, ParticipantListItem } from "../types";
 import { LineGroupMember } from "@/hooks/useLineGroups";
+import { LoadingState } from "@/components/ui/loading-state";
 
 interface LineGroupParticipantsViewProps {
   searchQuery: string;
@@ -68,9 +69,13 @@ export function LineGroupParticipantsView({
     >
       {membersLoading ? (
         <div className="p-4">
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center">
-            {t("common.loading")}
-          </p>
+          <LoadingState
+            label={t("common.loading")}
+            viewport="none"
+            layout="row"
+            spinnerSize="sm"
+            textSize="sm"
+          />
         </div>
       ) : filteredLineGroupList.length === 0 ? (
         <div className="p-4">
