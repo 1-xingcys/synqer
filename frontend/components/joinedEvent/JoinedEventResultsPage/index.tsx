@@ -1,8 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useJoinedEventResults } from "./useJoinedEventResults";
-import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorView } from "./ErrorView";
 
 interface JoinedEventResultsPageProps {
@@ -12,11 +13,18 @@ interface JoinedEventResultsPageProps {
 export default function JoinedEventResultsPage({
   eventId,
 }: JoinedEventResultsPageProps) {
+  const tEvent = useTranslations("event");
   const { data, isLoading, error, participantsWithAvatars, votesWithAvatars } =
     useJoinedEventResults(eventId);
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return (
+      <LoadingState
+        label={tEvent("loading")}
+        viewport="section"
+        textSize="lg"
+      />
+    );
   }
 
   if (error || !data) {

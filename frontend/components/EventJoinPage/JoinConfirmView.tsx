@@ -4,15 +4,9 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { format } from "date-fns";
-import {
-  CalendarDays,
-  Clock3,
-  Loader2,
-  UserPlus,
-  User,
-  Hourglass,
-} from "lucide-react";
+import { CalendarDays, Clock3, UserPlus, User, Hourglass } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/utils";
+import { Spinner } from "@/components/ui/spinner";
 import { EventPublicInfo } from "./useEventJoin";
 
 interface JoinConfirmViewProps {
@@ -137,7 +131,7 @@ export function JoinConfirmView({
             >
               {joining ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Spinner size="sm" />
                   {t("eventJoin.joining")}
                 </>
               ) : (

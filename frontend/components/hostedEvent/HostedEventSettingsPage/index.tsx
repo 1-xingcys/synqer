@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LoadingState } from "@/components/ui/loading-state";
 import { VotingDeadlinePicker } from "./VotingDeadlinePicker";
 import { useEventSettings } from "./useEventSettings";
 import { DangerZone } from "./DangerZone";
@@ -32,13 +33,7 @@ export default function HostedEventSettingsPage() {
   } = useEventSettings(eventId);
 
   if (isLoading && (!eventData || !earliestSlot || !formData)) {
-    return (
-      <div className="flex items-center justify-center min-h-[40vh]">
-        <p className="text-zinc-600 dark:text-zinc-400">
-          {t("common.loading")}
-        </p>
-      </div>
-    );
+    return <LoadingState label={t("common.loading")} viewport="section" />;
   }
 
   // Check if voting is no longer allowed (vote ended, confirmed, complete)

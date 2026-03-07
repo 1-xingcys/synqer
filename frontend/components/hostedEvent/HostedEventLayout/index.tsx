@@ -9,6 +9,7 @@ import {
 } from "@/components/eventCommon/EventDetailNav";
 import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
+import { LoadingState } from "@/components/ui/loading-state";
 import {
   HostedEventProvider,
   useHostedEventContext,
@@ -24,7 +25,6 @@ interface HostedEventLayoutProps {
 function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
   const params = useParams();
   const t = useTranslations("hosted");
-  const tCommon = useTranslations("common");
   const eventId = params.eventId as string;
   const { data, isLoading, error } = useHostedEventContext();
 
@@ -50,18 +50,7 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
   ];
 
   if (isLoading) {
-    return (
-      <div className="py-8">
-        <div className="flex items-center justify-center min-h-[40vh]">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-zinc-600 dark:text-zinc-400">
-              {tCommon("loading")}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingState viewport="section" />;
   }
 
   // 已刪除活動的 UI 提示

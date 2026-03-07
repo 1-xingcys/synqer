@@ -10,6 +10,7 @@ import {
   isLiffEnabled,
 } from "@/lib/liff";
 import { debugLog } from "@/components/DebugConsole";
+import { LoadingState } from "@/components/ui/loading-state";
 
 const log = (message: string, data?: unknown) =>
   debugLog("LiffPath", message, data);
@@ -124,9 +125,11 @@ export function LiffPathHandler({
   // 這可以避免在重定向過程中載入 children 的 chunks，防止 "Failed to load chunk" 錯誤
   if (status === "checking" || status === "redirecting") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-        <div className="w-8 h-8 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
-      </div>
+      <LoadingState
+        viewport="screen"
+        background="muted"
+        spinnerTone="neutral"
+      />
     );
   }
 

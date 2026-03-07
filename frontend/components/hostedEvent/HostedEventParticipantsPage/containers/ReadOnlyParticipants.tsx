@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useReadOnlyParticipantsState } from "../hooks";
 import { ReadOnlyParticipantsView } from "../view";
 
@@ -10,13 +11,7 @@ export function ReadOnlyParticipants() {
     useReadOnlyParticipantsState();
 
   if (eventLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[40vh]">
-        <p className="text-zinc-600 dark:text-zinc-400">
-          {t("common.loading")}
-        </p>
-      </div>
-    );
+    return <LoadingState label={t("common.loading")} viewport="section" />;
   }
 
   return (

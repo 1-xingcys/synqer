@@ -2,9 +2,9 @@
 
 import { ReactNode, useEffect } from "react";
 import { useRouter, usePathname } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
 import Header from "@/components/Header";
 import Sidebar from "@/components/ui/Sidebar";
+import { LoadingState } from "@/components/ui/loading-state";
 import { SidebarProvider, useSidebar } from "@/contexts/SidebarContext";
 import { useAuthContext } from "@/contexts/AuthContext";
 
@@ -48,7 +48,6 @@ function ProtectedLayoutContent({ children }: ProtectedLayoutProps) {
 export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const t = useTranslations("common");
   const { user, loading } = useAuthContext();
 
   useEffect(() => {
@@ -59,14 +58,12 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   }, [loading, user, pathname, router]);
 
   if (loading || !user) {
-    // Loading 狀態
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
-          <p className="text-zinc-600 dark:text-zinc-400">{t("loading")}</p>
-        </div>
-      </div>
+      <LoadingState
+        viewport="screen"
+        background="muted"
+        spinnerTone="neutral"
+      />
     );
   }
 

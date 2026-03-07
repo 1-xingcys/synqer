@@ -3,10 +3,10 @@
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useEventJoin } from "./useEventJoin";
-import { LoadingSpinner } from "./LoadingSpinner";
 import { ErrorView } from "./ErrorView";
 import { JoinConfirmView } from "./JoinConfirmView";
 import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
+import { LoadingState } from "@/components/ui/loading-state";
 import { useRouter } from "@/i18n/routing";
 import { EventStatus } from "@/types/event";
 
@@ -42,7 +42,13 @@ export default function EventJoinPage({ eventId }: EventJoinPageProps) {
   }, [eventId, eventInfo, loading, participationStatus?.isParticipant, router]);
 
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <LoadingState
+        label={t("common.loading")}
+        viewport="section"
+        textSize="base"
+      />
+    );
   }
 
   if (eventInfo?.isDeleted) {
@@ -61,7 +67,13 @@ export default function EventJoinPage({ eventId }: EventJoinPageProps) {
   }
 
   if (participationStatus?.isParticipant) {
-    return <LoadingSpinner />;
+    return (
+      <LoadingState
+        label={t("common.loading")}
+        viewport="section"
+        textSize="base"
+      />
+    );
   }
 
   return (

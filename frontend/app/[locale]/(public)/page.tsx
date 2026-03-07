@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/routing";
 import { useAuthContext } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { LoadingState } from "@/components/ui/loading-state";
 import Image from "next/image";
 
 // Floating calendar/schedule icon component with animation
@@ -259,14 +260,12 @@ export default function LandingPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-zinc-900">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
-          <p className="text-zinc-600 dark:text-zinc-400">
-            {commonT("loading")}
-          </p>
-        </div>
-      </div>
+      <LoadingState
+        label={commonT("loading")}
+        viewport="screen"
+        background="surface"
+        spinnerTone="neutral"
+      />
     );
   }
 

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 interface DangerZoneProps {
   showDeleteConfirm: boolean;
@@ -70,7 +71,14 @@ export function DangerZone({
                   disabled={deleting}
                   className="flex-1 sm:flex-none"
                 >
-                  {deleting ? t("common.loading") : t("common.delete")}
+                  {deleting ? (
+                    <>
+                      <Spinner size="sm" tone="current" className="mr-2" />
+                      {t("common.loading")}
+                    </>
+                  ) : (
+                    t("common.delete")
+                  )}
                 </Button>
                 <Button
                   variant="outline"

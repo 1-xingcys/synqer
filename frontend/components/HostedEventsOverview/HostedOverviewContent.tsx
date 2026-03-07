@@ -9,6 +9,7 @@ import {
 } from "@/components/eventCommon/eventsOverview";
 import { EventStatus } from "@/types/event";
 import { EventRowMode } from "@/components/eventCommon/eventsOverview/types";
+import { LoadingState } from "@/components/ui/loading-state";
 
 const TOP_N = 5;
 const TRANSLATION_NS = "hostedEvents";
@@ -19,14 +20,7 @@ export default function HostedOverviewContent() {
   const filteredEvents = useFilteredHostedEvents(events);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
-          <p className="text-zinc-600 dark:text-zinc-400">{t("loading")}</p>
-        </div>
-      </div>
-    );
+    return <LoadingState label={t("loading")} spinnerTone="neutral" />;
   }
 
   if (error) {

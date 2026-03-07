@@ -1,8 +1,9 @@
 "use client";
 
-import { Check, Loader2 } from "lucide-react";
+import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 interface SaveButtonProps {
   saving: boolean;
@@ -27,7 +28,7 @@ export function SaveButton({
     >
       {saving ? (
         <>
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          <Spinner size="sm" className="mr-2" />
           {t("common.saving")}
         </>
       ) : saveSuccess ? (
