@@ -1,4 +1,4 @@
-import { getLiff } from "@/lib/liff";
+import { getLiff, getLiffId } from "@/lib/liff";
 
 export interface EventShareInfo {
   eventId: string;
@@ -75,13 +75,25 @@ function formatDeadline(
   return `${copy.deadlinePrefix}${month}/${day}${copy.openingParenthesis}${weekday}${copy.closingParenthesis}${hours}:${minutes}`;
 }
 
-function buildEventShareFlexMessage(info: EventShareInfo, voteUrl: string) {
+function buildEventVoteUrl(eventId: string, localePrefix: string): string {
+  const votePath = `${localePrefix}/events/${eventId}`;
+  const liffId = getLiffId();
+
+  if (!liffId) {
+    throw new Error("LIFF ID is not configured");
+  }
+
+  return new URL(`https://liff.line.me/${liffId}${votePath}`).toString();
+}
+
+function buildEventShareFlexMessage(info: EventShareInfo) {
   const pathname =
     typeof window !== "undefined" ? window.location.pathname : "";
   const localePrefix = getLocalePrefix(pathname);
   const copy = getEventShareCopy(localePrefix);
   const title = info.title || copy.untitledEvent;
   const deadline = formatDeadline(info.votingDeadline, copy);
+  const voteUrl = buildEventVoteUrl(info.eventId, localePrefix);
 
   const bodyContents: Array<Record<string, unknown>> = [
     {
@@ -164,7 +176,6 @@ function buildEventShareFlexMessage(info: EventShareInfo, voteUrl: string) {
  */
 export async function shareEventFlexMessage(
   info: EventShareInfo,
-  voteUrl: string,
 ): Promise<ShareResult> {
   const liff = await getLiff();
   if (!liff || !liff.isInClient()) {
@@ -172,7 +183,7 @@ export async function shareEventFlexMessage(
   }
 
   try {
-    const flexMessage = buildEventShareFlexMessage(info, voteUrl);
+    const flexMessage = buildEventShareFlexMessage(info);
     const result = await liff.shareTargetPicker([
       flexMessage as Parameters<typeof liff.shareTargetPicker>[0][number],
     ]);
