@@ -2,64 +2,191 @@
 
 import { useMemo } from "react";
 import { SelectedTimeRange } from "../EventTimeSelector";
-import { ConfirmedTimeRange } from "@/types/event";
+import { StagedConfirmation } from "@/types/event";
+
+interface EventSlot {
+  id: string;
+  date: string | Date;
+  startMinute: number;
+  endMinute: number;
+}
 
 interface UseEventTimeSelectionOptions {
+  slots: EventSlot[];
   totalParticipants: number;
   confirmedSlotIds?: string[];
-  confirmedTimeRanges?: ConfirmedTimeRange[];
-  isResetMode: boolean;
+  stagedConfirmation?: StagedConfirmation | null;
 }
 
 interface UseEventTimeSelectionReturn {
-  /** 已確認的時間範圍（轉換為 SelectedTimeRange 格式） */
-  confirmedTimeRangesDisplay: SelectedTimeRange[];
-  /** 所有已確認的 slot IDs（用於 grid 高亮） */
-  selectedSlotIdsSet: Set<string>;
+  displayRanges: SelectedTimeRange[];
+  committedSlotIdsSet: Set<string>;
+  stagedSlotIdsSet: Set<string> | null;
+  stagedBaselineSlotIdsSet: Set<string> | null;
+  effectiveSlotIdsSet: Set<string>;
+  hasStagedChanges: boolean;
+}
+
+function sortSlots(slots: EventSlot[]) {
+  return [...slots].sort((left, right) => {
+    const leftDate = new Date(left.date).getTime();
+    const rightDate = new Date(right.date).getTime();
+    if (leftDate !== rightDate) return leftDate - rightDate;
+    return left.startMinute - right.startMinute;
+  });
+}
+
+function buildRangesFromSlotIds(
+  slotIds: string[],
+  slots: EventSlot[],
+  totalParticipants: number,
+  options: { idPrefix: string; isConfirmed: boolean; isStaged: boolean },
+): SelectedTimeRange[] {
+  if (slotIds.length === 0) return [];
+
+  const slotsById = new Map(slots.map((slot) => [slot.id, slot]));
+  const sortedSlots = sortSlots(
+    slotIds
+      .map((slotId) => slotsById.get(slotId))
+      .filter((slot): slot is EventSlot => Boolean(slot)),
+  );
+
+  if (sortedSlots.length === 0) return [];
+
+  const ranges: SelectedTimeRange[] = [];
+  let currentRange: SelectedTimeRange | null = null;
+
+  sortedSlots.forEach((slot) => {
+    const slotDate = new Date(slot.date);
+    const dateKey = slotDate.toISOString().split("T")[0];
+
+    if (!currentRange) {
+      currentRange = {
+        id: `${options.idPrefix}-${slot.id}`,
+        startDate: dateKey,
+        endDate: dateKey,
+        startTime: slot.startMinute,
+        endTime: slot.endMinute,
+        slotIds: [slot.id],
+        availableCount: 0,
+        totalParticipants,
+        isConfirmed: options.isConfirmed,
+        isStaged: options.isStaged,
+      };
+      return;
+    }
+
+    const isSameDate = currentRange.endDate === dateKey;
+    const isContiguous =
+      isSameDate && currentRange.endTime === slot.startMinute;
+
+    if (isContiguous) {
+      currentRange.endTime = slot.endMinute;
+      currentRange.slotIds.push(slot.id);
+      return;
+    }
+
+    ranges.push(currentRange);
+    currentRange = {
+      id: `${options.idPrefix}-${slot.id}`,
+      startDate: dateKey,
+      endDate: dateKey,
+      startTime: slot.startMinute,
+      endTime: slot.endMinute,
+      slotIds: [slot.id],
+      availableCount: 0,
+      totalParticipants,
+      isConfirmed: options.isConfirmed,
+      isStaged: options.isStaged,
+    };
+  });
+
+  if (currentRange) {
+    ranges.push(currentRange);
+  }
+
+  return ranges;
 }
 
 export function useEventTimeSelection({
+  slots,
   totalParticipants,
   confirmedSlotIds,
-  confirmedTimeRanges,
-  isResetMode,
+  stagedConfirmation,
 }: UseEventTimeSelectionOptions): UseEventTimeSelectionReturn {
-  // Convert confirmed time ranges to SelectedTimeRange format for display
-  const confirmedTimeRangesDisplay = useMemo((): SelectedTimeRange[] => {
-    if (isResetMode || !confirmedTimeRanges || confirmedTimeRanges.length === 0)
-      return [];
+  const committedSlotIdsSet = useMemo(
+    () => new Set(confirmedSlotIds ?? []),
+    [confirmedSlotIds],
+  );
 
-    return confirmedTimeRanges.map((range) => {
-      const startDate = new Date(range.startTime);
-      const endDate = new Date(range.endTime);
+  const stagedSlotIdsSet = useMemo(
+    () => (stagedConfirmation ? new Set(stagedConfirmation.slotIds) : null),
+    [stagedConfirmation],
+  );
 
-      // 後端使用 UTC 時間儲存，需要用 UTC 方法取得時間
-      return {
-        id: `confirmed-${range.slotIds.join("-")}`,
-        startDate: startDate.toISOString().split("T")[0],
-        endDate: endDate.toISOString().split("T")[0],
-        startTime: startDate.getUTCHours() * 60 + startDate.getUTCMinutes(),
-        endTime: endDate.getUTCHours() * 60 + endDate.getUTCMinutes(),
-        slotIds: range.slotIds,
-        availableCount: 0, // 已確認的時間不需要顯示 available
+  const stagedBaselineSlotIdsSet = useMemo(
+    () =>
+      stagedConfirmation ? new Set(stagedConfirmation.baselineSlotIds) : null,
+    [stagedConfirmation],
+  );
+
+  const effectiveSlotIdsSet = useMemo(
+    () => stagedSlotIdsSet ?? committedSlotIdsSet,
+    [stagedSlotIdsSet, committedSlotIdsSet],
+  );
+
+  const displayRanges = useMemo(() => {
+    if (stagedConfirmation) {
+      const stagedSlotIdSet = new Set(stagedConfirmation.slotIds);
+      const baselineSlotIdSet = new Set(stagedConfirmation.baselineSlotIds);
+
+      const committedRanges = buildRangesFromSlotIds(
+        stagedConfirmation.baselineSlotIds.filter((slotId) =>
+          stagedSlotIdSet.has(slotId),
+        ),
+        slots,
         totalParticipants,
-        isConfirmed: true,
-      };
-    });
-  }, [confirmedTimeRanges, isResetMode, totalParticipants]);
+        {
+          idPrefix: "confirmed",
+          isConfirmed: true,
+          isStaged: false,
+        },
+      );
 
-  // Get all confirmed slot IDs as a Set (for grid highlight)
-  const selectedSlotIdsSet = useMemo(() => {
-    const slotIdSet = new Set<string>();
-    // Add confirmed slot IDs from the event (unless in reset mode)
-    if (!isResetMode && confirmedSlotIds) {
-      confirmedSlotIds.forEach((id) => slotIdSet.add(id));
+      const stagedRanges = buildRangesFromSlotIds(
+        stagedConfirmation.slotIds.filter(
+          (slotId) => !baselineSlotIdSet.has(slotId),
+        ),
+        slots,
+        totalParticipants,
+        {
+          idPrefix: "staged",
+          isConfirmed: false,
+          isStaged: true,
+        },
+      );
+
+      return [...committedRanges, ...stagedRanges];
     }
-    return slotIdSet;
-  }, [confirmedSlotIds, isResetMode]);
+
+    return buildRangesFromSlotIds(
+      confirmedSlotIds ?? [],
+      slots,
+      totalParticipants,
+      {
+        idPrefix: "confirmed",
+        isConfirmed: true,
+        isStaged: false,
+      },
+    );
+  }, [confirmedSlotIds, slots, stagedConfirmation, totalParticipants]);
 
   return {
-    confirmedTimeRangesDisplay,
-    selectedSlotIdsSet,
+    displayRanges,
+    committedSlotIdsSet,
+    stagedSlotIdsSet,
+    stagedBaselineSlotIdsSet,
+    effectiveSlotIdsSet,
+    hasStagedChanges: Boolean(stagedConfirmation),
   };
 }

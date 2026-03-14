@@ -41,8 +41,12 @@ interface ResultsHeatmapGridProps {
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;
   onAddToEventTime?: (info: SlotRangeInfo) => Promise<boolean>;
-  // Selected slot IDs to display with border highlight
-  selectedSlotIds?: Set<string>;
+  // Committed slot IDs to display with persistent highlight
+  committedSlotIds?: Set<string>;
+  // Staged slot IDs to display with draft highlight
+  stagedSlotIds?: Set<string> | null;
+  // Baseline slot IDs used to tell whether staged slots are newly added
+  stagedBaselineSlotIds?: Set<string> | null;
   getShareableLink: () => string;
   onCopyShareLink: () => void;
   linkCopied: boolean;
@@ -61,7 +65,9 @@ export function ResultsHeatmapGrid({
   canAddToEventTime = false,
   isVotingPhase = false,
   onAddToEventTime,
-  selectedSlotIds,
+  committedSlotIds,
+  stagedSlotIds,
+  stagedBaselineSlotIds,
   getShareableLink,
   onCopyShareLink,
   linkCopied,
@@ -106,16 +112,42 @@ export function ResultsHeatmapGrid({
     selectedParticipants,
   });
 
-  // Check if a merged row cell contains any selected slots
-  const isMergedCellSelected = useCallback(
-    (slotIndices: number[], dateKey: string): boolean => {
-      if (!selectedSlotIds || selectedSlotIds.size === 0) return false;
-      return slotIndices.some((idx) => {
-        const slot = slotsByDate[dateKey]?.[idx];
-        return slot && selectedSlotIds.has(slot.id);
-      });
+  const getCellSelectionState = useCallback(
+    (slotIndices: number[], dateKey: string) => {
+      const slotIds = slotIndices
+        .map((idx) => slotsByDate[dateKey]?.[idx]?.id)
+        .filter((slotId): slotId is string => Boolean(slotId));
+
+      const hasCommitted = Boolean(
+        committedSlotIds &&
+          slotIds.some((slotId) => committedSlotIds.has(slotId)),
+      );
+      const hasStaged = Boolean(
+        stagedSlotIds && slotIds.some((slotId) => stagedSlotIds.has(slotId)),
+      );
+      const hasStagedBaseline = Boolean(
+        stagedBaselineSlotIds &&
+          slotIds.some((slotId) => stagedBaselineSlotIds.has(slotId)),
+      );
+      const hasStagedRemoved = Boolean(
+        stagedBaselineSlotIds &&
+          stagedSlotIds &&
+          slotIds.some(
+            (slotId) =>
+              stagedBaselineSlotIds.has(slotId) && !stagedSlotIds.has(slotId),
+          ),
+      );
+
+      if (stagedSlotIds) {
+        if (hasStaged && !hasStagedBaseline) return "staged-add";
+        if (hasStagedRemoved) return "staged-remove";
+        if (hasCommitted || hasStagedBaseline) return "committed";
+        return "none";
+      }
+
+      return hasCommitted ? "committed" : "none";
     },
-    [slotsByDate, selectedSlotIds],
+    [committedSlotIds, stagedBaselineSlotIds, stagedSlotIds, slotsByDate],
   );
 
   // Get selected cell boundaries for border rendering
@@ -125,18 +157,18 @@ export function ResultsHeatmapGrid({
       dateIndex: number,
       slotIndices: number[],
       dateKey: string,
+      targetState: "none" | "committed" | "staged-add" | "staged-remove",
     ): {
       isTop: boolean;
       isBottom: boolean;
       isLeft: boolean;
       isRight: boolean;
     } => {
-      if (!selectedSlotIds || selectedSlotIds.size === 0) {
+      if (targetState === "none") {
         return { isTop: false, isBottom: false, isLeft: false, isRight: false };
       }
 
-      const isSelected = isMergedCellSelected(slotIndices, dateKey);
-      if (!isSelected) {
+      if (getCellSelectionState(slotIndices, dateKey) !== targetState) {
         return { isTop: false, isBottom: false, isLeft: false, isRight: false };
       }
 
@@ -145,7 +177,9 @@ export function ResultsHeatmapGrid({
         const adjDateKey = paginatedDates[dIdx];
         const adjRow = mergedTimeRows[rIdx];
         if (!adjDateKey || !adjRow) return false;
-        return isMergedCellSelected(adjRow.slotIndices, adjDateKey);
+        return (
+          getCellSelectionState(adjRow.slotIndices, adjDateKey) === targetState
+        );
       };
 
       const isTop =
@@ -161,7 +195,7 @@ export function ResultsHeatmapGrid({
 
       return { isTop, isBottom, isLeft, isRight };
     },
-    [selectedSlotIds, isMergedCellSelected, paginatedDates, mergedTimeRows],
+    [getCellSelectionState, paginatedDates, mergedTimeRows],
   );
 
   // Format date for modal
@@ -335,15 +369,17 @@ export function ResultsHeatmapGrid({
                       isDragging && isInDragRectangle(rowIndex, dateIndex);
 
                     // Check if this cell is part of selected event times
-                    const isSelectedEventTime = isMergedCellSelected(
+                    const selectionState = getCellSelectionState(
                       row.slotIndices,
                       dateKey,
                     );
+                    const isSelectedEventTime = selectionState !== "none";
                     const selectedBoundaries = getSelectedCellBoundaries(
                       rowIndex,
                       dateIndex,
                       row.slotIndices,
                       dateKey,
+                      selectionState,
                     );
 
                     // Determine border classes for selection rectangle (drag selection)
@@ -367,22 +403,26 @@ export function ResultsHeatmapGrid({
                     let selectedEventTimeBorderClasses = "";
                     if (isSelectedEventTime && !inSelection) {
                       const borders = [];
+                      const borderColorClass =
+                        selectionState === "staged-add"
+                          ? "border-orange-500 dark:border-orange-400"
+                          : selectionState === "staged-remove"
+                            ? "border-blue-500 dark:border-blue-400"
+                            : "border-blue-500 dark:border-blue-400";
+                      const borderStyleClass =
+                        selectionState === "staged-add" ||
+                        selectionState === "staged-remove"
+                          ? "border-dashed"
+                          : "";
                       if (selectedBoundaries.isTop)
-                        borders.push(
-                          "border-t-2 border-t-orange-500 dark:border-t-orange-400",
-                        );
+                        borders.push(`border-t-2 ${borderColorClass}`);
                       if (selectedBoundaries.isBottom)
-                        borders.push(
-                          "border-b-2 border-b-orange-500 dark:border-b-orange-400",
-                        );
+                        borders.push(`border-b-2 ${borderColorClass}`);
                       if (selectedBoundaries.isLeft)
-                        borders.push(
-                          "border-l-2 border-l-orange-500 dark:border-l-orange-400",
-                        );
+                        borders.push(`border-l-2 ${borderColorClass}`);
                       if (selectedBoundaries.isRight)
-                        borders.push(
-                          "border-r-2 border-r-orange-500 dark:border-r-orange-400",
-                        );
+                        borders.push(`border-r-2 ${borderColorClass}`);
+                      if (borderStyleClass) borders.push(borderStyleClass);
                       selectedEventTimeBorderClasses = borders.join(" ");
                     }
 
@@ -415,7 +455,15 @@ export function ResultsHeatmapGrid({
                       >
                         {/* Selected event time indicator */}
                         {isSelectedEventTime && !inSelection && (
-                          <div className="absolute inset-0 bg-orange-100/50 dark:bg-orange-900/30 pointer-events-none" />
+                          <div
+                            className={`absolute inset-0 pointer-events-none ${
+                              selectionState === "staged-add"
+                                ? "bg-orange-100/30 dark:bg-orange-900/15"
+                                : selectionState === "staged-remove"
+                                  ? "bg-blue-100/25 dark:bg-blue-900/15"
+                                  : "bg-blue-100/35 dark:bg-blue-900/20"
+                            }`}
+                          />
                         )}
 
                         {/* Vote count */}
@@ -424,7 +472,13 @@ export function ResultsHeatmapGrid({
                             className={`
                               absolute inset-0 flex items-center justify-center pointer-events-none
                               text-xs sm:text-sm font-semibold
-                              ${isSelectedEventTime ? "text-orange-700 dark:text-orange-300" : colors.text}
+                              ${
+                                isSelectedEventTime
+                                  ? selectionState === "staged-add"
+                                    ? "text-orange-700 dark:text-orange-300"
+                                    : "text-blue-700 dark:text-blue-300"
+                                  : colors.text
+                              }
                             `}
                           >
                             {cellCount}

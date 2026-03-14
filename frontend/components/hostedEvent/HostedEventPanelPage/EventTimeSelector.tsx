@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { formatMinutesToTime } from "@/lib/utils";
-import { Calendar, X, RotateCcw, Trash2 } from "lucide-react";
+import { AlertTriangle, Calendar, Loader2, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Z_INDEX } from "@/lib/zIndex";
 
@@ -18,13 +18,19 @@ export interface SelectedTimeRange {
   availableCount: number;
   totalParticipants: number;
   isConfirmed?: boolean;
+  isStaged?: boolean;
 }
 
 interface EventTimeSelectorProps {
   selectedRanges: SelectedTimeRange[];
   onRemove: (id: string) => void;
-  onReset: () => void | Promise<void>;
   hasConfirmedTime: boolean;
+  hasStagedChanges?: boolean;
+  onCommit: () => void;
+  onDiscard: () => void;
+  isCommitPending?: boolean;
+  isDiscardPending?: boolean;
+  isVotingPhase?: boolean;
 }
 
 // Confirmation Dialog Component
@@ -34,8 +40,10 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
   icon: LucideIcon;
   title: string;
+  description?: string;
   cancelText: string;
   confirmText: string;
+  isConfirmDisabled?: boolean;
 }
 
 function ConfirmDialog({
@@ -44,8 +52,10 @@ function ConfirmDialog({
   onConfirm,
   icon: Icon,
   title,
+  description,
   cancelText,
   confirmText,
+  isConfirmDisabled = false,
 }: ConfirmDialogProps) {
   if (!isOpen) return null;
 
@@ -62,6 +72,11 @@ function ConfirmDialog({
           <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
             {title}
           </h3>
+          {description && (
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 whitespace-pre-line">
+              {description}
+            </p>
+          )}
         </div>
 
         <div className="flex gap-3 mt-6">
@@ -73,6 +88,7 @@ function ConfirmDialog({
           </button>
           <button
             onClick={onConfirm}
+            disabled={isConfirmDisabled}
             className="flex-1 px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors whitespace-nowrap"
           >
             {confirmText}
@@ -86,14 +102,16 @@ function ConfirmDialog({
 export function EventTimeSelector({
   selectedRanges,
   onRemove,
-  onReset,
   hasConfirmedTime,
+  hasStagedChanges = false,
+  onCommit,
+  onDiscard,
+  isCommitPending = false,
+  isDiscardPending = false,
+  isVotingPhase = false,
 }: EventTimeSelectorProps) {
   const t = useTranslations("hosted");
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [showRemoveConfirm, setShowRemoveConfirm] = useState<string | null>(
-    null,
-  );
+  const [showCommitConfirm, setShowCommitConfirm] = useState(false);
 
   const formatDateRange = (startDate: string, endDate: string) => {
     const start = new Date(startDate);
@@ -105,30 +123,26 @@ export function EventTimeSelector({
     return `${format(start, "M/d")} - ${format(end, "M/d")}`;
   };
 
-  const handleResetClick = () => {
-    setShowResetConfirm(true);
-  };
-
-  const handleConfirmReset = async () => {
-    await onReset();
-    setShowResetConfirm(false);
-  };
-
-  const handleRemoveClick = (id: string) => {
-    setShowRemoveConfirm(id);
-  };
-
-  const handleConfirmRemove = () => {
-    if (showRemoveConfirm) {
-      onRemove(showRemoveConfirm);
-      setShowRemoveConfirm(null);
+  const handleCommitClick = () => {
+    if (isVotingPhase) {
+      setShowCommitConfirm(true);
+      return;
     }
+    void onCommit();
+  };
+
+  const handleConfirmCommit = () => {
+    onCommit();
+    setShowCommitConfirm(false);
   };
 
   const isEmpty = selectedRanges.length === 0;
 
   // Determine title based on state
   const getTitle = () => {
+    if (hasStagedChanges) {
+      return t("eventTimeSelector.stagedTitle");
+    }
     if (hasConfirmedTime) {
       return t("eventTimeSelector.confirmedTitle");
     }
@@ -139,25 +153,13 @@ export function EventTimeSelector({
     <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            </div>
-            <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
-              {getTitle()}
-            </h3>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           </div>
-
-          {hasConfirmedTime && (
-            <button
-              onClick={handleResetClick}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
-            >
-              <RotateCcw className="w-3 h-3" />
-              {t("eventTimeSelector.reset")}
-            </button>
-          )}
+          <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+            {getTitle()}
+          </h3>
         </div>
       </div>
 
@@ -169,7 +171,11 @@ export function EventTimeSelector({
             {selectedRanges.map((range) => (
               <div
                 key={range.id}
-                className="flex items-center justify-between rounded-lg px-3 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800"
+                className={`flex items-center justify-between rounded-lg px-3 py-2.5 border ${
+                  range.isStaged
+                    ? "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
+                    : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                }`}
               >
                 <div className="flex items-center gap-2 text-sm flex-wrap min-w-0">
                   {/* Date and time */}
@@ -185,7 +191,7 @@ export function EventTimeSelector({
 
                 {/* Remove button */}
                 <button
-                  onClick={() => handleRemoveClick(range.id)}
+                  onClick={() => onRemove(range.id)}
                   className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0"
                   title={t("eventTimeSelector.remove")}
                 >
@@ -201,26 +207,42 @@ export function EventTimeSelector({
         )}
       </div>
 
-      {/* Reset Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={showResetConfirm}
-        onClose={() => setShowResetConfirm(false)}
-        onConfirm={() => void handleConfirmReset()}
-        icon={RotateCcw}
-        title={t("eventTimeSelector.resetConfirmTitle")}
-        cancelText={t("eventTimeSelector.cancel")}
-        confirmText={t("eventTimeSelector.resetConfirm")}
-      />
+      {hasStagedChanges && (
+        <div className="px-4 pb-4 flex items-center gap-2">
+          <button
+            onClick={() => void onDiscard()}
+            disabled={isCommitPending || isDiscardPending}
+            className="flex-1 px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors disabled:opacity-50"
+          >
+            {t("eventTimeSelector.discard")}
+          </button>
+          <button
+            onClick={handleCommitClick}
+            disabled={isCommitPending || isDiscardPending}
+            className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+          >
+            {isCommitPending
+              ? t("eventTimeSelector.saving")
+              : t("eventTimeSelector.save")}
+            {isCommitPending && <Loader2 className="w-4 h-4 animate-spin" />}
+          </button>
+        </div>
+      )}
 
-      {/* Remove Confirmation Dialog */}
       <ConfirmDialog
-        isOpen={showRemoveConfirm !== null}
-        onClose={() => setShowRemoveConfirm(null)}
-        onConfirm={handleConfirmRemove}
-        icon={Trash2}
-        title={t("eventTimeSelector.removeConfirmTitle")}
-        cancelText={t("eventTimeSelector.cancel")}
-        confirmText={t("eventTimeSelector.removeConfirm")}
+        isOpen={showCommitConfirm}
+        onClose={() => setShowCommitConfirm(false)}
+        onConfirm={() => void handleConfirmCommit()}
+        icon={AlertTriangle}
+        title={t("confirmDialog.votingWarning")}
+        description={t("confirmDialog.votingWarningDetail")}
+        cancelText={t("confirmDialog.cancel")}
+        confirmText={
+          isCommitPending
+            ? t("confirmDialog.confirming")
+            : t("confirmDialog.confirm")
+        }
+        isConfirmDisabled={isCommitPending}
       />
     </div>
   );

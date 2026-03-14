@@ -1,17 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Check, X, Info } from "lucide-react";
 import { Vote, Participant } from "../../types";
 import { ResultsAvailabilityMode } from "../types";
 import { Z_INDEX } from "@/lib/zIndex";
-import {
-  VotingConfirmView,
-  AddButtonView,
-  CloseButtonView,
-} from "./footerViews";
+import { AddButtonView, CloseButtonView } from "./footerViews";
 
 export interface SlotRangeInfo {
   startDate: string;
@@ -57,29 +53,25 @@ export function SlotDetailModal({
   const tHosted = useTranslations("hosted");
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Voting phase confirmation dialog state
-  const [showVotingConfirmDialog, setShowVotingConfirmDialog] = useState(false);
-
   // Detect if it's a range based on dateLabel containing "~"
   const showRangeHint = isRange || dateLabel.includes("~");
   const isUnavailableMode = mode === "unavailable";
   const primaryCount = isUnavailableMode ? nonVoters.length : voters.length;
 
   const handleClose = useCallback(() => {
-    setShowVotingConfirmDialog(false);
     onClose();
   }, [onClose]);
 
-  // Close on escape key (but not when showing confirm dialog)
+  // Close on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !showVotingConfirmDialog) handleClose();
+      if (e.key === "Escape") handleClose();
     };
     if (isOpen) {
       document.addEventListener("keydown", handleEscape);
       return () => document.removeEventListener("keydown", handleEscape);
     }
-  }, [isOpen, showVotingConfirmDialog, handleClose]);
+  }, [isOpen, handleClose]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -91,16 +83,6 @@ export function SlotDetailModal({
     }
   }, [isOpen]);
 
-  const handleAddButtonClick = () => {
-    if (isVotingPhase) {
-      // Show confirmation dialog for voting phase
-      setShowVotingConfirmDialog(true);
-    } else {
-      // Direct add for non-voting phase
-      void handleConfirmAdd();
-    }
-  };
-
   const handleConfirmAdd = async () => {
     if (onAddToEventTime && rangeInfo) {
       const success = await onAddToEventTime(rangeInfo);
@@ -108,10 +90,6 @@ export function SlotDetailModal({
         handleClose();
       }
     }
-  };
-
-  const handleCancelConfirm = () => {
-    setShowVotingConfirmDialog(false);
   };
 
   if (!isOpen) return null;
@@ -338,21 +316,11 @@ export function SlotDetailModal({
           {/* Footer - Add to Event Time (for Host) or Close (mobile) */}
           <div className="px-5 py-3 border-t border-gray-100 dark:border-zinc-800">
             {canAddToEventTime && onAddToEventTime && rangeInfo ? (
-              <div className="space-y-2">
-                {showVotingConfirmDialog ? (
-                  <VotingConfirmView
-                    onCancel={handleCancelConfirm}
-                    onConfirm={() => void handleConfirmAdd()}
-                    tHosted={tHosted}
-                  />
-                ) : (
-                  <AddButtonView
-                    isVotingPhase={isVotingPhase}
-                    onAdd={handleAddButtonClick}
-                    tHosted={tHosted}
-                  />
-                )}
-              </div>
+              <AddButtonView
+                isVotingPhase={isVotingPhase}
+                onAdd={() => void handleConfirmAdd()}
+                tHosted={tHosted}
+              />
             ) : (
               <CloseButtonView onClose={handleClose} t={t} />
             )}

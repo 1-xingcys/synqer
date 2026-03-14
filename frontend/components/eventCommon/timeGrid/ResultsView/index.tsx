@@ -43,7 +43,9 @@ export default function ResultsView({
   canAddToEventTime = false,
   isVotingPhase = false,
   onAddToEventTime,
-  selectedSlotIds,
+  committedSlotIds,
+  stagedSlotIds,
+  stagedBaselineSlotIds,
 }: ResultsViewProps) {
   const t = useTranslations("joined");
   const searchParams = useSearchParams();
@@ -232,7 +234,9 @@ export default function ResultsView({
             canAddToEventTime={canAddToEventTime}
             isVotingPhase={isVotingPhase}
             onAddToEventTime={onAddToEventTime}
-            selectedSlotIds={selectedSlotIds}
+            committedSlotIds={committedSlotIds}
+            stagedSlotIds={stagedSlotIds}
+            stagedBaselineSlotIds={stagedBaselineSlotIds}
             mode={availabilityMode}
             onModeChange={handleModeChange}
             granularity={granularity}

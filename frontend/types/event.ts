@@ -1,3 +1,5 @@
+import type { components } from "@/generated/openapi";
+
 // 活動狀態
 export const EventStatus = {
   VOTING: "VOTING", // 正在進行投票 (活動創建後 ~ 投票 deadline)
@@ -24,11 +26,10 @@ export const VoteMode = {
 export type VoteMode = (typeof VoteMode)[keyof typeof VoteMode];
 
 // 合併後的時間範圍（連續時段合併成一個範圍）
-export interface ConfirmedTimeRange {
-  startTime: string; // ISO 8601 格式
-  endTime: string; // ISO 8601 格式
-  slotIds: string[];
-}
+export type ConfirmedTimeRange = components["schemas"]["ConfirmedTimeRangeDto"];
+
+export type StagedConfirmation =
+  components["schemas"]["HostedEventStagedConfirmationDto"];
 
 // 預期參與者
 export interface ExpectedParticipant {

@@ -3,49 +3,64 @@
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { EventStatus } from "@/types/event";
 import type { operations } from "@/generated/openapi";
 import {
   hostedEventKeys,
   HostedEventDetailData,
 } from "@/hooks/useHostedEventDetail";
+import type { StagedConfirmation } from "@/types/event";
 
 interface UseEventTimeConfirmationOptions {
   eventId: string;
-  eventStatus: EventStatus;
   confirmedSlotIds?: string[];
+  stagedConfirmation?: StagedConfirmation | null;
 }
 
 interface UseEventTimeConfirmationReturn {
-  // Add/Remove confirmation
   confirmError: string | null;
   addConfirmedTime: (slotIds: string[]) => Promise<boolean>;
   removeConfirmedTime: (slotIdsToRemove: string[]) => Promise<boolean>;
-
-  // Reset
-  isResetMode: boolean;
-  resetError: string | null;
-  handleResetEventTime: () => Promise<void>;
+  commitStagedConfirmation: () => Promise<void>;
+  discardStagedConfirmation: () => Promise<void>;
+  isCommitPending: boolean;
+  isDiscardPending: boolean;
 }
 
-type ConfirmEventTimeRequest =
-  operations["ConfirmationController_confirmEventTime"]["requestBody"]["content"]["application/json"];
-type ConfirmEventTimeResponse =
-  operations["ConfirmationController_confirmEventTime"]["responses"][200]["content"]["application/json"];
-type CancelConfirmedTimeResponse =
-  operations["ConfirmationController_cancelConfirmedTime"]["responses"][200]["content"]["application/json"];
+type UpdateStagedConfirmationRequest =
+  operations["ConfirmationController_updateStagedConfirmation"]["requestBody"]["content"]["application/json"];
+type UpdateStagedConfirmationResponse =
+  operations["ConfirmationController_updateStagedConfirmation"]["responses"][200]["content"]["application/json"];
+type CommitStagedConfirmationResponse =
+  operations["ConfirmationController_commitStagedConfirmation"]["responses"][200]["content"]["application/json"];
+type DiscardStagedConfirmationResponse =
+  operations["ConfirmationController_discardStagedConfirmation"]["responses"][200]["content"]["application/json"];
 
-// API functions
-async function confirmTimeApi(
+function orderByAllSlotIds(
+  slotIds: Set<string>,
+  allSlotIds: string[],
+): string[] {
+  return allSlotIds.filter((slotId) => slotIds.has(slotId));
+}
+
+function areOrderedSlotIdsEqual(left: string[], right: string[]): boolean {
+  if (left.length !== right.length) return false;
+  return left.every((slotId, index) => slotId === right[index]);
+}
+
+async function patchStagedConfirmationApi(
   eventId: string,
-  slotIds: string[],
-): Promise<ConfirmEventTimeResponse> {
-  const payload: ConfirmEventTimeRequest = { slotIds };
+  addSlotIds: string[],
+  removeSlotIds: string[],
+): Promise<UpdateStagedConfirmationResponse> {
+  const payload: UpdateStagedConfirmationRequest = {
+    addSlotIds,
+    removeSlotIds,
+  };
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation`,
+    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation/staged`,
     {
-      method: "POST",
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
@@ -55,17 +70,35 @@ async function confirmTimeApi(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to update confirmed time");
+    throw new Error("Failed to update staged confirmation");
   }
 
-  return response.json() as Promise<ConfirmEventTimeResponse>;
+  return response.json() as Promise<UpdateStagedConfirmationResponse>;
 }
 
-async function deleteConfirmationApi(
+async function commitStagedConfirmationApi(
   eventId: string,
-): Promise<CancelConfirmedTimeResponse> {
+): Promise<CommitStagedConfirmationResponse> {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation`,
+    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation/commit`,
+    {
+      method: "POST",
+      credentials: "include",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to commit staged confirmation");
+  }
+
+  return response.json() as Promise<CommitStagedConfirmationResponse>;
+}
+
+async function discardStagedConfirmationApi(
+  eventId: string,
+): Promise<DiscardStagedConfirmationResponse> {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation/staged`,
     {
       method: "DELETE",
       credentials: "include",
@@ -73,106 +106,74 @@ async function deleteConfirmationApi(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to reset event time");
+    throw new Error("Failed to discard staged confirmation");
   }
 
-  return response.json() as Promise<CancelConfirmedTimeResponse>;
+  return response.json() as Promise<DiscardStagedConfirmationResponse>;
 }
 
 export function useEventTimeConfirmation({
   eventId,
   confirmedSlotIds = [],
+  stagedConfirmation = null,
 }: UseEventTimeConfirmationOptions): UseEventTimeConfirmationReturn {
   const t = useTranslations();
   const queryClient = useQueryClient();
   const queryKey = hostedEventKeys.detail(eventId);
-
   const [confirmError, setConfirmError] = useState<string | null>(null);
-  const [resetError, setResetError] = useState<string | null>(null);
 
-  const [isResetMode, setIsResetMode] = useState(false);
-
-  const addMutation = useMutation({
-    mutationFn: async (newSlotIds: string[]) => {
-      const allSlotIds = [...new Set([...confirmedSlotIds, ...newSlotIds])];
-      await confirmTimeApi(eventId, allSlotIds);
-      return allSlotIds;
-    },
-    onMutate: async (newSlotIds) => {
+  const patchMutation = useMutation({
+    mutationFn: ({
+      addSlotIds,
+      removeSlotIds,
+    }: {
+      addSlotIds: string[];
+      removeSlotIds: string[];
+    }) => patchStagedConfirmationApi(eventId, addSlotIds, removeSlotIds),
+    onMutate: async ({ addSlotIds, removeSlotIds }) => {
       setConfirmError(null);
       await queryClient.cancelQueries({ queryKey });
 
       const previousData =
         queryClient.getQueryData<HostedEventDetailData>(queryKey);
 
-      // 樂觀更新：只更新 confirmedSlotIds
-      if (previousData) {
-        const allSlotIds = [...new Set([...confirmedSlotIds, ...newSlotIds])];
-        queryClient.setQueryData<HostedEventDetailData>(queryKey, {
-          ...previousData,
-          event: {
-            ...previousData.event,
-            confirmedSlotIds: allSlotIds,
-          },
-        });
-      }
+      queryClient.setQueryData<HostedEventDetailData>(queryKey, (old) => {
+        if (!old) return old;
 
-      return { previousData };
-    },
-    onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(queryKey, context.previousData);
-      }
-      setConfirmError(t("hosted.confirmError"));
-    },
-    onSuccess: () => {
-      setIsResetMode(false);
-    },
-    onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey });
-    },
-  });
-
-  const removeMutation = useMutation({
-    mutationFn: async (slotIdsToRemove: string[]) => {
-      const remainingSlotIds = confirmedSlotIds.filter(
-        (id) => !slotIdsToRemove.includes(id),
-      );
-
-      if (remainingSlotIds.length === 0) {
-        await deleteConfirmationApi(eventId);
-      } else {
-        await confirmTimeApi(eventId, remainingSlotIds);
-      }
-
-      return remainingSlotIds;
-    },
-    onMutate: async (slotIdsToRemove) => {
-      setConfirmError(null);
-      await queryClient.cancelQueries({ queryKey });
-
-      const previousData =
-        queryClient.getQueryData<HostedEventDetailData>(queryKey);
-
-      if (previousData) {
-        const slotIdsToRemoveSet = new Set(slotIdsToRemove);
-        const remainingSlotIds = confirmedSlotIds.filter(
-          (id) => !slotIdsToRemoveSet.has(id),
+        const allSlotIds = old.slots.map((slot) => slot.id);
+        const baselineSlotIds =
+          old.stagedConfirmation?.baselineSlotIds ?? old.event.confirmedSlotIds;
+        const nextSlotIds = new Set(
+          old.stagedConfirmation?.slotIds ?? old.event.confirmedSlotIds,
         );
-        const remainingTimeRanges = (
-          previousData.event.confirmedTimeRanges ?? []
-        ).filter(
-          (range) => !range.slotIds.some((id) => slotIdsToRemoveSet.has(id)),
+
+        addSlotIds.forEach((slotId) => nextSlotIds.add(slotId));
+        removeSlotIds.forEach((slotId) => nextSlotIds.delete(slotId));
+
+        const orderedNextSlotIds = orderByAllSlotIds(nextSlotIds, allSlotIds);
+        const orderedBaselineSlotIds = orderByAllSlotIds(
+          new Set(baselineSlotIds),
+          allSlotIds,
         );
-        queryClient.setQueryData<HostedEventDetailData>(queryKey, {
-          ...previousData,
-          event: {
-            ...previousData.event,
-            confirmedSlotIds: remainingSlotIds,
-            confirmedTimeRanges: remainingTimeRanges,
+
+        if (
+          areOrderedSlotIdsEqual(orderedNextSlotIds, orderedBaselineSlotIds)
+        ) {
+          return {
+            ...old,
+            stagedConfirmation: null,
+          };
+        }
+
+        return {
+          ...old,
+          stagedConfirmation: {
+            slotIds: orderedNextSlotIds,
+            baselineSlotIds: orderedBaselineSlotIds,
+            updatedAt: new Date().toISOString(),
           },
-        });
-      }
+        };
+      });
 
       return { previousData };
     },
@@ -187,74 +188,113 @@ export function useEventTimeConfirmation({
     },
   });
 
-  const resetMutation = useMutation({
-    mutationFn: async () => {
-      await deleteConfirmationApi(eventId);
+  const commitMutation = useMutation({
+    mutationFn: async () => commitStagedConfirmationApi(eventId),
+    onMutate: () => {
+      setConfirmError(null);
     },
+    onSuccess: (response) => {
+      queryClient.setQueryData<HostedEventDetailData>(queryKey, (old) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          event: {
+            ...old.event,
+            confirmedSlotIds: response.confirmedSlotIds,
+            status: response.status,
+          },
+          stagedConfirmation: null,
+        };
+      });
+    },
+    onError: () => {
+      setConfirmError(t("hosted.confirmError"));
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  const discardMutation = useMutation({
+    mutationFn: async () => discardStagedConfirmationApi(eventId),
     onMutate: async () => {
-      setResetError(null);
+      setConfirmError(null);
       await queryClient.cancelQueries({ queryKey });
 
       const previousData =
         queryClient.getQueryData<HostedEventDetailData>(queryKey);
 
-      if (previousData) {
-        queryClient.setQueryData<HostedEventDetailData>(queryKey, {
-          ...previousData,
-          event: {
-            ...previousData.event,
-            confirmedSlotIds: [],
-            confirmedTimeRanges: [],
-          },
-        });
-      }
+      queryClient.setQueryData<HostedEventDetailData>(queryKey, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          stagedConfirmation: null,
+        };
+      });
 
-      setIsResetMode(true);
       return { previousData };
     },
     onError: (_err, _variables, context) => {
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData);
       }
-      setIsResetMode(false);
-      setResetError(t("hosted.resetError"));
+      setConfirmError(t("hosted.confirmError"));
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey });
     },
   });
 
-  // Wrapper functions - trigger mutation and return immediately for optimistic UX
   const addConfirmedTime = useCallback(
     (slotIds: string[]): Promise<boolean> => {
-      addMutation.mutate(slotIds);
+      const currentSlotIds = new Set(
+        stagedConfirmation?.slotIds ?? confirmedSlotIds,
+      );
+      const addSlotIds = slotIds.filter(
+        (slotId) => !currentSlotIds.has(slotId),
+      );
+      if (addSlotIds.length === 0) return Promise.resolve(true);
+      patchMutation.mutate({ addSlotIds, removeSlotIds: [] });
       return Promise.resolve(true);
     },
-    [addMutation],
+    [confirmedSlotIds, patchMutation, stagedConfirmation],
   );
 
   const removeConfirmedTime = useCallback(
     (slotIdsToRemove: string[]): Promise<boolean> => {
-      removeMutation.mutate(slotIdsToRemove);
+      const currentSlotIds = new Set(
+        stagedConfirmation?.slotIds ?? confirmedSlotIds,
+      );
+      const removeSlotIds = slotIdsToRemove.filter((slotId) =>
+        currentSlotIds.has(slotId),
+      );
+      if (removeSlotIds.length === 0) return Promise.resolve(true);
+      patchMutation.mutate({ addSlotIds: [], removeSlotIds });
       return Promise.resolve(true);
     },
-    [removeMutation],
+    [confirmedSlotIds, patchMutation, stagedConfirmation],
   );
 
-  const handleResetEventTime = useCallback(() => {
-    resetMutation.mutate();
+  const handleCommit = useCallback(() => {
+    if (commitMutation.isPending) return Promise.resolve();
+    commitMutation.mutate();
     return Promise.resolve();
-  }, [resetMutation]);
+  }, [commitMutation]);
+
+  const handleDiscard = useCallback(() => {
+    if (discardMutation.isPending) return Promise.resolve();
+    discardMutation.mutate();
+    return Promise.resolve();
+  }, [discardMutation]);
 
   return {
-    // Add/Remove
     confirmError,
     addConfirmedTime,
     removeConfirmedTime,
-
-    // Reset
-    isResetMode,
-    resetError,
-    handleResetEventTime,
+    commitStagedConfirmation: handleCommit,
+    discardStagedConfirmation: handleDiscard,
+    isCommitPending: commitMutation.isPending,
+    isDiscardPending: discardMutation.isPending,
   };
 }
