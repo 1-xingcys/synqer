@@ -42,11 +42,8 @@ export default function CreateEventSuccessPage() {
   const router = useRouter();
   const { user } = useAuthContext();
   const { isInClient: isInLiff, isInitialized: liffInitialized } = useLiff();
-  const {
-    shareUrl,
-    copied: linkCopied,
-    copyLink: handleCopyLink,
-  } = useEventShareLink(eventId);
+  const { copied: linkCopied, copyLink: handleCopyLink } =
+    useEventShareLink(eventId);
   const { data, isLoading, error } = useEventDetail(eventId);
 
   const [sendStatus, setSendStatus] = useState<SendStatus>(SendStatus.Idle);
@@ -97,7 +94,7 @@ export default function CreateEventSuccessPage() {
         votingDeadline: votingDeadline || undefined,
       };
 
-      const result = await shareEventFlexMessage(shareInfo, shareUrl);
+      const result = await shareEventFlexMessage(shareInfo);
       if (result === ShareResult.Success) {
         setSendStatus(SendStatus.Success);
       } else if (result === ShareResult.Cancelled) {
