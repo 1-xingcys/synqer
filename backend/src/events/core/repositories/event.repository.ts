@@ -254,6 +254,20 @@ export class EventRepository {
   }
 
   /**
+   * 查詢活動的暫存確認時間草稿
+   */
+  async findStagedConfirmationByEventId(eventId: string) {
+    return this.prisma.eventStagedConfirmation.findUnique({
+      where: { eventId },
+      select: {
+        slotIds: true,
+        baselineSlotIds: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  /**
    * 查詢活動公開資訊
    */
   async findPublicInfo(eventId: string) {

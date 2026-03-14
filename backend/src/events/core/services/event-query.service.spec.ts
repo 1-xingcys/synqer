@@ -15,6 +15,7 @@ describe('EventQueryService', () => {
     findByParticipantUserId: jest.fn(),
     findOneWithDetails: jest.fn(),
     findStagedVoteByEventAndUser: jest.fn(),
+    findStagedConfirmationByEventId: jest.fn(),
     findPublicInfo: jest.fn(),
   };
 
@@ -268,6 +269,9 @@ describe('EventQueryService', () => {
       };
 
       mockEventRepository.findOneWithDetails.mockResolvedValue(mockEvent);
+      mockEventRepository.findStagedConfirmationByEventId.mockResolvedValue(
+        null,
+      );
       mockEventMapper.mapEventToDetail.mockReturnValue({ id: eventId });
       mockEventMapper.mapVotes.mockReturnValue([]);
       mockEventMapper.extractParticipantsForHost.mockReturnValue([]);
@@ -279,6 +283,7 @@ describe('EventQueryService', () => {
 
       const result = await service.findOneHosted(eventId, userId);
 
+      expect(result?.stagedConfirmation).toBeNull();
       expect(result?.votingStats).toEqual({
         totalExpected: 1,
         totalVoted: 1,

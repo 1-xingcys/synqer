@@ -148,6 +148,7 @@ export class EventQueryService {
         event: this.eventMapper.mapEventToDetail(event),
         slots: [],
         votes: [],
+        stagedConfirmation: null,
         participants: [],
         expectedParticipants: [],
         votingStats: {
@@ -166,6 +167,8 @@ export class EventQueryService {
     const votes = this.eventMapper.mapVotes(filteredVotes);
     const participants =
       this.eventMapper.extractParticipantsForHost(filteredVotes);
+    const stagedConfirmation =
+      await this.eventRepository.findStagedConfirmationByEventId(eventId);
 
     // 整理預期參與者資料
     const expectedParticipants = event.expectedParticipants.map((ep) => ({
@@ -187,6 +190,7 @@ export class EventQueryService {
       event: this.eventMapper.mapEventToDetail(event),
       slots: event.slots,
       votes,
+      stagedConfirmation,
       participants,
       expectedParticipants,
       votingStats,
