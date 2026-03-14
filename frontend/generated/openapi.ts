@@ -468,7 +468,7 @@ export interface paths {
         head?: never;
         /**
          * PATCH /events/:eventId/confirmation/staged
-         *     更新 staged confirmation 草稿（新增/移除特定 slots）
+         *     更新 staged confirmation 草稿
          */
         patch: operations["ConfirmationController_updateStagedConfirmation"];
         trace?: never;

@@ -861,7 +861,7 @@
             }
           }
         },
-        "summary": "PATCH /events/:eventId/confirmation/staged\n更新 staged confirmation 草稿（新增/移除特定 slots）",
+        "summary": "PATCH /events/:eventId/confirmation/staged\n更新 staged confirmation 草稿",
         "tags": [
           "Confirmation"
         ]
