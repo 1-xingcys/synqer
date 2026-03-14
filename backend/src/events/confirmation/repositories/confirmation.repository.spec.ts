@@ -13,6 +13,12 @@ describe('ConfirmationRepository', () => {
     confirmedEventTimeSlot: {
       deleteMany: jest.fn(),
       createMany: jest.fn(),
+      findMany: jest.fn(),
+    },
+    eventStagedConfirmation: {
+      findUnique: jest.fn(),
+      upsert: jest.fn(),
+      deleteMany: jest.fn(),
     },
     event: {
       findUnique: jest.fn(),
@@ -216,6 +222,31 @@ describe('ConfirmationRepository', () => {
         where: { id: eventId },
       });
       expect(result).toEqual(expectedEvent);
+    });
+  });
+
+  describe('findStagedConfirmation', () => {
+    it('should return staged confirmation draft', async () => {
+      const stagedConfirmation = {
+        slotIds: ['slot-1'],
+        baselineSlotIds: [],
+        updatedAt: new Date(),
+      };
+      mockPrismaService.eventStagedConfirmation.findUnique.mockResolvedValue(
+        stagedConfirmation,
+      );
+
+      const result = await repository.findStagedConfirmation('event-123');
+
+      expect(prismaService.eventStagedConfirmation.findUnique).toHaveBeenCalledWith({
+        where: { eventId: 'event-123' },
+        select: {
+          slotIds: true,
+          baselineSlotIds: true,
+          updatedAt: true,
+        },
+      });
+      expect(result).toEqual(stagedConfirmation);
     });
   });
 });
