@@ -6,6 +6,7 @@ import type { CommitFeedback } from "./hooks/useOptimisticVoting";
 interface VoteCommitBarProps {
   hasStagedVoteDraft: boolean;
   hasCommittedVote: boolean;
+  isPatchPending: boolean;
   isCommitPending: boolean;
   commitFeedback: CommitFeedback;
   onCommit: () => void;
@@ -14,6 +15,7 @@ interface VoteCommitBarProps {
 export function VoteCommitBar({
   hasStagedVoteDraft,
   hasCommittedVote,
+  isPatchPending,
   isCommitPending,
   commitFeedback,
   onCommit,
@@ -64,7 +66,7 @@ export function VoteCommitBar({
         </p>
         <button
           onClick={onCommit}
-          disabled={isCommitPending}
+          disabled={isPatchPending || isCommitPending}
           className={`shrink-0 rounded-lg disabled:opacity-60 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-medium px-3 py-1.5 transition-colors ${
             commitFeedback === "error"
               ? "bg-rose-600 hover:bg-rose-700"
