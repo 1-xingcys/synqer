@@ -1,11 +1,10 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { useEventDetail } from "@/hooks/useEventDetail";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { LoadingState } from "@/components/ui/loading-state";
+import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
 import { useMemo, useState } from "react";
 import { FilterTabs } from "./FilterTabs";
 import { SearchInput } from "./SearchInput";
@@ -14,12 +13,10 @@ import { ParticipantListItem } from "./ParticipantListItem";
 import { FilterType, ParticipantItem } from "./types";
 
 export default function JoinedEventParticipantsPage() {
-  const params = useParams();
-  const eventId = params.eventId as string;
   const t = useTranslations();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  const { data: eventDetailData, isLoading, error } = useEventDetail(eventId);
+  const { data: eventDetailData, isLoading, error } = useJoinedEventContext();
 
   const [filter, setFilter] = useState<FilterType>("all");
   const [searchQuery, setSearchQuery] = useState("");
