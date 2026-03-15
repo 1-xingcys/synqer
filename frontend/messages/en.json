@@ -341,11 +341,12 @@
       "completed": "This event has been completed."
     },
     "eventTimeSelector": {
-      "confirmedTitle": "Confirmed Event Time",
-      "stagedTitle": "Unsubmitted Event Time",
-      "emptyTitle": "Event Time",
+      "title": "Event Time",
+      "statusConfirmed": "Confirmed",
+      "statusUnconfirmed": "Event time not confirmed yet",
+      "statusPendingChanges": "Unsubmitted Changes",
       "emptyHint": "Click or drag to select time slots from the results below to confirm the event time",
-      "noConfirmedTime": "No confirmed event time yet",
+      "noConfirmedTime": "No confirmed event time",
       "reset": "Reset",
       "remove": "Remove",
       "cancel": "Cancel",

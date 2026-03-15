@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { format } from "date-fns";
+import { useLocale, useTranslations } from "next-intl";
 import { formatMinutesToTime } from "@/lib/utils";
-import { AlertTriangle, Calendar, Loader2, X } from "lucide-react";
+import { AlertTriangle, Loader2, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Z_INDEX } from "@/lib/zIndex";
 
@@ -15,10 +14,9 @@ export interface SelectedTimeRange {
   startTime: number;
   endTime: number;
   slotIds: string[];
-  availableCount: number;
-  totalParticipants: number;
   isConfirmed?: boolean;
   isStaged?: boolean;
+  isToBeRemoved?: boolean;
 }
 
 interface EventTimeSelectorProps {
@@ -103,24 +101,38 @@ export function EventTimeSelector({
   selectedRanges,
   onRemove,
   hasConfirmedTime,
-  hasStagedChanges = false,
+  hasStagedChanges,
   onCommit,
   onDiscard,
-  isCommitPending = false,
-  isDiscardPending = false,
-  isVotingPhase = false,
+  isCommitPending,
+  isDiscardPending,
+  isVotingPhase,
 }: EventTimeSelectorProps) {
+  const locale = useLocale();
   const t = useTranslations("hosted");
   const [showCommitConfirm, setShowCommitConfirm] = useState(false);
 
-  const formatDateRange = (startDate: string, endDate: string) => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+  const formatLocalizedDate = (dateString: string) => {
+    const date = new Date(`${dateString}T00:00:00`);
+    const dateLocale = locale === "zh-TW" ? "zh-TW" : "en-US";
+    const dateText = new Intl.DateTimeFormat(dateLocale, {
+      month: "numeric",
+      day: "numeric",
+    }).format(date);
+    const weekdayText = new Intl.DateTimeFormat(dateLocale, {
+      weekday: locale === "zh-TW" ? "narrow" : "short",
+    }).format(date);
 
+    return locale === "zh-TW"
+      ? `${dateText}（${weekdayText}）`
+      : `${dateText} (${weekdayText})`;
+  };
+
+  const formatDateRange = (startDate: string, endDate: string) => {
     if (startDate === endDate) {
-      return format(start, "M/d (EEE)");
+      return formatLocalizedDate(startDate);
     }
-    return `${format(start, "M/d")} - ${format(end, "M/d")}`;
+    return `${formatLocalizedDate(startDate)} - ${formatLocalizedDate(endDate)}`;
   };
 
   const handleCommitClick = () => {
@@ -138,28 +150,34 @@ export function EventTimeSelector({
 
   const isEmpty = selectedRanges.length === 0;
 
-  // Determine title based on state
-  const getTitle = () => {
-    if (hasStagedChanges) {
-      return t("eventTimeSelector.stagedTitle");
-    }
-    if (hasConfirmedTime) {
-      return t("eventTimeSelector.confirmedTitle");
-    }
-    return t("eventTimeSelector.emptyTitle");
-  };
+  const statusText = hasStagedChanges
+    ? {
+        label: t("eventTimeSelector.statusPendingChanges"),
+        className: "text-orange-600 dark:text-orange-400 border-none",
+      }
+    : hasConfirmedTime
+      ? {
+          label: t("eventTimeSelector.statusConfirmed"),
+          className: "text-emerald-600 dark:text-emerald-400 border-none",
+        }
+      : {
+          label: t("eventTimeSelector.statusUnconfirmed"),
+          className: "text-orange-600 dark:text-orange-400 border-none",
+        };
 
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          </div>
+        <div className="flex items-center justify-between gap-3">
           <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
-            {getTitle()}
+            {t("eventTimeSelector.title")}
           </h3>
+          <span
+            className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${statusText.className}`}
+          >
+            {statusText.label}
+          </span>
         </div>
       </div>
 
@@ -172,9 +190,11 @@ export function EventTimeSelector({
               <div
                 key={range.id}
                 className={`flex items-center justify-between rounded-lg px-3 py-2.5 border ${
-                  range.isStaged
-                    ? "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
-                    : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+                  range.isToBeRemoved
+                    ? "border-dashed bg-rose-100 dark:bg-rose-900/15 border-rose-300 dark:border-rose-800"
+                    : range.isStaged
+                      ? "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
+                      : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
                 }`}
               >
                 <div className="flex items-center gap-2 text-sm flex-wrap min-w-0">
@@ -189,14 +209,15 @@ export function EventTimeSelector({
                   </span>
                 </div>
 
-                {/* Remove button */}
-                <button
-                  onClick={() => onRemove(range.id)}
-                  className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0"
-                  title={t("eventTimeSelector.remove")}
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                {!range.isToBeRemoved && (
+                  <button
+                    onClick={() => onRemove(range.id)}
+                    className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0"
+                    title={t("eventTimeSelector.remove")}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             ))}
           </div>

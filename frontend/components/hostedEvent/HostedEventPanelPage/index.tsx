@@ -22,7 +22,7 @@ export default function HostedEventPanelPage() {
   const { data } = useHostedEventContext();
 
   // Participants and votes data
-  const { participantsWithAvatars, votesWithAvatars, totalParticipants } =
+  const { participantsWithAvatars, votesWithAvatars } =
     useParticipantsData(data);
 
   // Event time confirmation/reset logic (with optimistic updates)
@@ -45,11 +45,9 @@ export default function HostedEventPanelPage() {
     committedSlotIdsSet,
     stagedSlotIdsSet,
     stagedBaselineSlotIdsSet,
-    effectiveSlotIdsSet,
     hasStagedChanges,
   } = useEventTimeSelection({
     slots: data?.slots ?? [],
-    totalParticipants,
     confirmedSlotIds: data?.event.confirmedSlotIds,
     stagedConfirmation: data?.stagedConfirmation,
   });
@@ -85,7 +83,7 @@ export default function HostedEventPanelPage() {
   const isConfirmed = event.status === EventStatus.CONFIRMED;
   const isCompleted = event.status === EventStatus.COMPLETED;
   const showResultsView = isVotingPhase || isVotingEnded || isConfirmed;
-  const hasConfirmedTime = effectiveSlotIdsSet.size > 0;
+  const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
 
   return (
     <div className="space-y-3 sm:space-y-6">
@@ -105,20 +103,18 @@ export default function HostedEventPanelPage() {
             {t("hosted.eventTimeSelector.emptyHint")}
           </p>
           {/* Event Time Selector - Show confirmed times */}
-          {/* Hide when voting is in progress and no confirmed time */}
-          {!(isVotingPhase && !hasConfirmedTime) && (
-            <EventTimeSelector
-              selectedRanges={displayRanges}
-              onRemove={(id) => void handleRemoveConfirmedTime(id)}
-              hasConfirmedTime={hasConfirmedTime}
-              hasStagedChanges={hasStagedChanges}
-              onCommit={() => void commitStagedConfirmation()}
-              onDiscard={() => void discardStagedConfirmation()}
-              isCommitPending={isCommitPending}
-              isDiscardPending={isDiscardPending}
-              isVotingPhase={isVotingPhase}
-            />
-          )}
+          {/* Hide when voting is in progress and there is nothing to show yet */}
+          <EventTimeSelector
+            selectedRanges={displayRanges}
+            onRemove={(id) => void handleRemoveConfirmedTime(id)}
+            hasConfirmedTime={hasCommittedConfirmation}
+            hasStagedChanges={hasStagedChanges}
+            onCommit={() => void commitStagedConfirmation()}
+            onDiscard={() => void discardStagedConfirmation()}
+            isCommitPending={isCommitPending}
+            isDiscardPending={isDiscardPending}
+            isVotingPhase={isVotingPhase}
+          />
 
           {/* Results View with HeatMap */}
           <ResultsView

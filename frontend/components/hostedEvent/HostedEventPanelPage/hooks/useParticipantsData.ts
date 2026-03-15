@@ -7,7 +7,6 @@ import { Vote, Participant } from "@/components/eventCommon/timeGrid/types";
 interface UseParticipantsDataReturn {
   participantsWithAvatars: Participant[];
   votesWithAvatars: Vote[];
-  totalParticipants: number;
 }
 
 export function useParticipantsData(
@@ -48,6 +47,5 @@ export function useParticipantsData(
   return {
     participantsWithAvatars,
     votesWithAvatars,
-    totalParticipants: participantsWithAvatars.length,
   };
 }

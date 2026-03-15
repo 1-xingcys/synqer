@@ -407,7 +407,7 @@ export function ResultsHeatmapGrid({
                         selectionState === "staged-add"
                           ? "border-orange-500 dark:border-orange-400"
                           : selectionState === "staged-remove"
-                            ? "border-blue-500 dark:border-blue-400"
+                            ? "border-rose-300 dark:border-rose-700"
                             : "border-blue-500 dark:border-blue-400";
                       const borderStyleClass =
                         selectionState === "staged-add" ||
@@ -460,7 +460,7 @@ export function ResultsHeatmapGrid({
                               selectionState === "staged-add"
                                 ? "bg-orange-100/30 dark:bg-orange-900/15"
                                 : selectionState === "staged-remove"
-                                  ? "bg-blue-100/25 dark:bg-blue-900/15"
+                                  ? "bg-rose-100/70 dark:bg-rose-900/10"
                                   : "bg-blue-100/35 dark:bg-blue-900/20"
                             }`}
                           />
@@ -476,7 +476,9 @@ export function ResultsHeatmapGrid({
                                 isSelectedEventTime
                                   ? selectionState === "staged-add"
                                     ? "text-orange-700 dark:text-orange-300"
-                                    : "text-blue-700 dark:text-blue-300"
+                                    : selectionState === "staged-remove"
+                                      ? "text-rose-700 dark:text-rose-300"
+                                      : "text-blue-700 dark:text-blue-300"
                                   : colors.text
                               }
                             `}

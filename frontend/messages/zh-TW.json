@@ -341,11 +341,12 @@
       "completed": "此活動已結束。"
     },
     "eventTimeSelector": {
-      "confirmedTitle": "已確認的活動時間",
-      "stagedTitle": "尚未提交的活動時間",
-      "emptyTitle": "活動時間",
+      "title": "活動時間",
+      "statusConfirmed": "已確認",
+      "statusUnconfirmed": "尚未確認活動時間",
+      "statusPendingChanges": "有未提交的變更",
       "emptyHint": "從下方投票結果中點選或拖曳選擇活動時段",
-      "noConfirmedTime": "尚未確認活動時間",
+      "noConfirmedTime": "沒有活動時間",
       "reset": "重新選擇",
       "remove": "移除",
       "cancel": "取消",

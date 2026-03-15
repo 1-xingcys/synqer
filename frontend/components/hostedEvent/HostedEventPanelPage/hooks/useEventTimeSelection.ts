@@ -13,7 +13,6 @@ interface EventSlot {
 
 interface UseEventTimeSelectionOptions {
   slots: EventSlot[];
-  totalParticipants: number;
   confirmedSlotIds?: string[];
   stagedConfirmation?: StagedConfirmation | null;
 }
@@ -23,7 +22,6 @@ interface UseEventTimeSelectionReturn {
   committedSlotIdsSet: Set<string>;
   stagedSlotIdsSet: Set<string> | null;
   stagedBaselineSlotIdsSet: Set<string> | null;
-  effectiveSlotIdsSet: Set<string>;
   hasStagedChanges: boolean;
 }
 
@@ -39,8 +37,12 @@ function sortSlots(slots: EventSlot[]) {
 function buildRangesFromSlotIds(
   slotIds: string[],
   slots: EventSlot[],
-  totalParticipants: number,
-  options: { idPrefix: string; isConfirmed: boolean; isStaged: boolean },
+  options: {
+    idPrefix: string;
+    isConfirmed: boolean;
+    isStaged: boolean;
+    isToBeRemoved?: boolean;
+  },
 ): SelectedTimeRange[] {
   if (slotIds.length === 0) return [];
 
@@ -68,10 +70,9 @@ function buildRangesFromSlotIds(
         startTime: slot.startMinute,
         endTime: slot.endMinute,
         slotIds: [slot.id],
-        availableCount: 0,
-        totalParticipants,
         isConfirmed: options.isConfirmed,
         isStaged: options.isStaged,
+        isToBeRemoved: options.isToBeRemoved,
       };
       return;
     }
@@ -94,10 +95,9 @@ function buildRangesFromSlotIds(
       startTime: slot.startMinute,
       endTime: slot.endMinute,
       slotIds: [slot.id],
-      availableCount: 0,
-      totalParticipants,
       isConfirmed: options.isConfirmed,
       isStaged: options.isStaged,
+      isToBeRemoved: options.isToBeRemoved,
     };
   });
 
@@ -110,7 +110,6 @@ function buildRangesFromSlotIds(
 
 export function useEventTimeSelection({
   slots,
-  totalParticipants,
   confirmedSlotIds,
   stagedConfirmation,
 }: UseEventTimeSelectionOptions): UseEventTimeSelectionReturn {
@@ -130,11 +129,6 @@ export function useEventTimeSelection({
     [stagedConfirmation],
   );
 
-  const effectiveSlotIdsSet = useMemo(
-    () => stagedSlotIdsSet ?? committedSlotIdsSet,
-    [stagedSlotIdsSet, committedSlotIdsSet],
-  );
-
   const displayRanges = useMemo(() => {
     if (stagedConfirmation) {
       const stagedSlotIdSet = new Set(stagedConfirmation.slotIds);
@@ -145,7 +139,6 @@ export function useEventTimeSelection({
           stagedSlotIdSet.has(slotId),
         ),
         slots,
-        totalParticipants,
         {
           idPrefix: "confirmed",
           isConfirmed: true,
@@ -158,7 +151,6 @@ export function useEventTimeSelection({
           (slotId) => !baselineSlotIdSet.has(slotId),
         ),
         slots,
-        totalParticipants,
         {
           idPrefix: "staged",
           isConfirmed: false,
@@ -166,27 +158,34 @@ export function useEventTimeSelection({
         },
       );
 
-      return [...committedRanges, ...stagedRanges];
+      const removedRanges = buildRangesFromSlotIds(
+        stagedConfirmation.baselineSlotIds.filter(
+          (slotId) => !stagedSlotIdSet.has(slotId),
+        ),
+        slots,
+        {
+          idPrefix: "removed",
+          isConfirmed: false,
+          isStaged: false,
+          isToBeRemoved: true,
+        },
+      );
+
+      return [...committedRanges, ...stagedRanges, ...removedRanges];
     }
 
-    return buildRangesFromSlotIds(
-      confirmedSlotIds ?? [],
-      slots,
-      totalParticipants,
-      {
-        idPrefix: "confirmed",
-        isConfirmed: true,
-        isStaged: false,
-      },
-    );
-  }, [confirmedSlotIds, slots, stagedConfirmation, totalParticipants]);
+    return buildRangesFromSlotIds(confirmedSlotIds ?? [], slots, {
+      idPrefix: "confirmed",
+      isConfirmed: true,
+      isStaged: false,
+    });
+  }, [confirmedSlotIds, slots, stagedConfirmation]);
 
   return {
     displayRanges,
     committedSlotIdsSet,
     stagedSlotIdsSet,
     stagedBaselineSlotIdsSet,
-    effectiveSlotIdsSet,
     hasStagedChanges: Boolean(stagedConfirmation),
   };
 }
