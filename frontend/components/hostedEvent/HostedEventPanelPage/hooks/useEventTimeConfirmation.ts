@@ -22,6 +22,7 @@ interface UseEventTimeConfirmationReturn {
   removeConfirmedTime: (slotIdsToRemove: string[]) => Promise<boolean>;
   commitStagedConfirmation: () => Promise<void>;
   discardStagedConfirmation: () => Promise<void>;
+  isPatchPending: boolean;
   isCommitPending: boolean;
   isDiscardPending: boolean;
 }
@@ -277,16 +278,28 @@ export function useEventTimeConfirmation({
   );
 
   const handleCommit = useCallback(() => {
-    if (commitMutation.isPending) return Promise.resolve();
+    if (
+      patchMutation.isPending ||
+      commitMutation.isPending ||
+      discardMutation.isPending
+    ) {
+      return Promise.resolve();
+    }
     commitMutation.mutate();
     return Promise.resolve();
-  }, [commitMutation]);
+  }, [commitMutation, discardMutation, patchMutation]);
 
   const handleDiscard = useCallback(() => {
-    if (discardMutation.isPending) return Promise.resolve();
+    if (
+      patchMutation.isPending ||
+      commitMutation.isPending ||
+      discardMutation.isPending
+    ) {
+      return Promise.resolve();
+    }
     discardMutation.mutate();
     return Promise.resolve();
-  }, [discardMutation]);
+  }, [commitMutation, discardMutation, patchMutation]);
 
   return {
     confirmError,
@@ -294,6 +307,7 @@ export function useEventTimeConfirmation({
     removeConfirmedTime,
     commitStagedConfirmation: handleCommit,
     discardStagedConfirmation: handleDiscard,
+    isPatchPending: patchMutation.isPending,
     isCommitPending: commitMutation.isPending,
     isDiscardPending: discardMutation.isPending,
   };

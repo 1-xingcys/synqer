@@ -23,12 +23,13 @@ interface EventTimeSelectorProps {
   selectedRanges: SelectedTimeRange[];
   onRemove: (id: string) => void;
   hasConfirmedTime: boolean;
-  hasStagedChanges?: boolean;
+  hasStagedChanges: boolean;
   onCommit: () => void;
   onDiscard: () => void;
-  isCommitPending?: boolean;
-  isDiscardPending?: boolean;
-  isVotingPhase?: boolean;
+  isPatchPending: boolean;
+  isCommitPending: boolean;
+  isDiscardPending: boolean;
+  isVotingPhase: boolean;
 }
 
 // Confirmation Dialog Component
@@ -104,6 +105,7 @@ export function EventTimeSelector({
   hasStagedChanges,
   onCommit,
   onDiscard,
+  isPatchPending,
   isCommitPending,
   isDiscardPending,
   isVotingPhase,
@@ -232,14 +234,14 @@ export function EventTimeSelector({
         <div className="px-4 pb-4 flex items-center gap-2">
           <button
             onClick={() => void onDiscard()}
-            disabled={isCommitPending || isDiscardPending}
+            disabled={isPatchPending || isCommitPending || isDiscardPending}
             className="flex-1 px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors disabled:opacity-50"
           >
             {t("eventTimeSelector.discard")}
           </button>
           <button
             onClick={handleCommitClick}
-            disabled={isCommitPending || isDiscardPending}
+            disabled={isPatchPending || isCommitPending || isDiscardPending}
             className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
           >
             {isCommitPending

@@ -32,6 +32,7 @@ export default function HostedEventPanelPage() {
     removeConfirmedTime,
     commitStagedConfirmation,
     discardStagedConfirmation,
+    isPatchPending,
     isCommitPending,
     isDiscardPending,
   } = useEventTimeConfirmation({
@@ -111,6 +112,7 @@ export default function HostedEventPanelPage() {
             hasStagedChanges={hasStagedChanges}
             onCommit={() => void commitStagedConfirmation()}
             onDiscard={() => void discardStagedConfirmation()}
+            isPatchPending={isPatchPending}
             isCommitPending={isCommitPending}
             isDiscardPending={isDiscardPending}
             isVotingPhase={isVotingPhase}
