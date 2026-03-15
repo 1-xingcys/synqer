@@ -235,9 +235,47 @@ export function useOptimisticVoting({
         hadVotedBeforeCommit: currentData
           ? getCurrentUserHasVoted(currentData, currentUserId)
           : false,
+        committedSlotIds: currentData?.stagedVote?.slotIds ?? [],
       };
     },
     onSuccess: async (_response, _variables, context) => {
+      queryClient.setQueryData<EventDetailData>(
+        eventDetailKeys.detail(eventId),
+        (old) => {
+          if (!old) return old;
+
+          const orderedCommittedSlotIds = orderByAllSlotIds(
+            new Set(context?.committedSlotIds ?? []),
+            old.slots.map((slot) => slot.id),
+          );
+
+          const expectedParticipant = old.expectedParticipants.find(
+            (item) =>
+              item.userId === currentUserId || item.user?.id === currentUserId,
+          );
+
+          const userDisplayName =
+            expectedParticipant?.user?.displayName ?? "Unknown";
+
+          const orderedCommittedVotes = orderedCommittedSlotIds.map(
+            (slotId) => ({
+              slotId,
+              userId: currentUserId,
+              userDisplayName,
+            }),
+          );
+
+          return {
+            ...old,
+            stagedVote: null,
+            votes: [
+              ...old.votes.filter((vote) => vote.userId !== currentUserId),
+              ...orderedCommittedVotes,
+            ],
+          };
+        },
+      );
+
       setCommitFeedback("success");
 
       const liff = await getLiff();
