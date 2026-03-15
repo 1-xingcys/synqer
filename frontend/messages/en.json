@@ -341,13 +341,18 @@
       "completed": "This event has been completed."
     },
     "eventTimeSelector": {
-      "confirmedTitle": "Confirmed Event Time",
-      "emptyTitle": "Event Time",
+      "title": "Event Time",
+      "statusConfirmed": "Confirmed",
+      "statusUnconfirmed": "Event time not confirmed yet",
+      "statusPendingChanges": "Unsubmitted Changes",
       "emptyHint": "Click or drag to select time slots from the results below to confirm the event time",
-      "noConfirmedTime": "No confirmed event time yet",
+      "noConfirmedTime": "No confirmed event time",
       "reset": "Reset",
       "remove": "Remove",
       "cancel": "Cancel",
+      "discard": "Discard Changes",
+      "save": "Submit Changes",
+      "saving": "Submitting",
       "resetConfirmTitle": "Clear All Event Times?",
       "resetConfirmDesc": "This will clear all confirmed times and revert to 'Voting Ended' status",
       "resetConfirm": "Clear",
@@ -356,7 +361,7 @@
       "removeConfirm": "Remove"
     },
     "addToEventTime": {
-      "button": "Add to Event Time",
+      "button": "Add to Staged Event Time",
       "adding": "Adding...",
       "votingHint": "Voting is still in progress",
       "votingConfirmHint": "Voting will end immediately after confirmation",

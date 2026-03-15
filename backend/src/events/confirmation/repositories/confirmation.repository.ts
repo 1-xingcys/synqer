@@ -43,6 +43,7 @@ export class ConfirmationRepository {
     prismaClient?: Prisma.TransactionClient,
   ) {
     const client = prismaClient || this.prisma;
+    if (slotIds.length === 0) return;
     return client.confirmedEventTimeSlot.createMany({
       data: slotIds.map((slotId) => ({
         eventId,
@@ -62,6 +63,86 @@ export class ConfirmationRepository {
 
         // 新增新的確認時段
         await this.createConfirmedSlots(eventId, slotIds, prisma);
+      },
+    );
+  }
+
+  /**
+   * 查詢活動目前已確認的 slot IDs
+   */
+  async findConfirmedSlotIds(eventId: string) {
+    const rows = await this.prisma.confirmedEventTimeSlot.findMany({
+      where: { eventId },
+      select: { slotId: true },
+    });
+    return rows.map((row) => row.slotId);
+  }
+
+  /**
+   * 查詢活動目前的 staged confirmation 草稿
+   */
+  async findStagedConfirmation(eventId: string) {
+    return this.prisma.eventStagedConfirmation.findUnique({
+      where: { eventId },
+      select: {
+        slotIds: true,
+        baselineSlotIds: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  /**
+   * upsert staged confirmation 草稿
+   */
+  async upsertStagedConfirmation(
+    eventId: string,
+    slotIds: string[],
+    baselineSlotIds: string[],
+    prismaClient?: Prisma.TransactionClient,
+  ) {
+    const client = prismaClient || this.prisma;
+    return client.eventStagedConfirmation.upsert({
+      where: { eventId },
+      create: {
+        eventId,
+        slotIds,
+        baselineSlotIds,
+      },
+      update: {
+        slotIds,
+        baselineSlotIds,
+      },
+    });
+  }
+
+  /**
+   * 刪除 staged confirmation 草稿
+   */
+  async deleteStagedConfirmation(
+    eventId: string,
+    prismaClient?: Prisma.TransactionClient,
+  ) {
+    const client = prismaClient || this.prisma;
+    return client.eventStagedConfirmation.deleteMany({
+      where: { eventId },
+    });
+  }
+
+  /**
+   * 提交 staged confirmation 草稿並清除草稿
+   */
+  async commitStagedConfirmationInTransaction(
+    eventId: string,
+    slotIds: string[],
+  ) {
+    return this.prisma.$transaction(
+      async (prisma: Prisma.TransactionClient) => {
+        await this.deleteAllConfirmedSlots(eventId, prisma);
+        if (slotIds.length > 0) {
+          await this.createConfirmedSlots(eventId, slotIds, prisma);
+        }
+        await this.deleteStagedConfirmation(eventId, prisma);
       },
     );
   }

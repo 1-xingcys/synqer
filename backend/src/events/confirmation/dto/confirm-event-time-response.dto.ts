@@ -5,3 +5,14 @@ export class ConfirmEventTimeResponseDto {
   confirmedSlotIds!: string[];
   status!: EventStatus;
 }
+
+export class UpdateStagedConfirmationResponseDto {
+  success!: boolean;
+  stagedSlotCount!: number;
+}
+
+export class CommitStagedConfirmationResponseDto {
+  id!: string;
+  confirmedSlotIds!: string[];
+  status!: EventStatus;
+}

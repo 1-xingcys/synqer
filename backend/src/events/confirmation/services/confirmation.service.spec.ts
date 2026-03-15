@@ -4,12 +4,14 @@ import { ConfirmationService } from './confirmation.service';
 import { ConfirmationRepository } from '../repositories/confirmation.repository';
 import { EventStatusService } from '../../shared/services/event-status.service';
 import { EventAuthorizationService } from '../../shared/services/event-authorization.service';
+import { TimeSlotRepository } from '../../shared/repositories/time-slot.repository';
 
 describe('ConfirmationService', () => {
   let service: ConfirmationService;
   let confirmationRepository: jest.Mocked<ConfirmationRepository>;
   let eventStatusService: jest.Mocked<EventStatusService>;
   let eventAuthorizationService: jest.Mocked<EventAuthorizationService>;
+  let timeSlotRepository: jest.Mocked<TimeSlotRepository>;
 
   const mockConfirmationRepository = {
     findSlotsByIdsAndEventId: jest.fn(),
@@ -17,6 +19,11 @@ describe('ConfirmationService', () => {
     findEventWithConfirmedSlots: jest.fn(),
     deleteAllConfirmedSlots: jest.fn(),
     findEventBasicInfo: jest.fn(),
+    findConfirmedSlotIds: jest.fn(),
+    findStagedConfirmation: jest.fn(),
+    upsertStagedConfirmation: jest.fn(),
+    deleteStagedConfirmation: jest.fn(),
+    commitStagedConfirmationInTransaction: jest.fn(),
   };
 
   const mockEventStatusService = {
@@ -27,6 +34,10 @@ describe('ConfirmationService', () => {
     verifyOwner: jest.fn(),
   };
 
+  const mockTimeSlotRepository = {
+    findIdsByEventId: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -34,6 +45,7 @@ describe('ConfirmationService', () => {
         { provide: ConfirmationRepository, useValue: mockConfirmationRepository },
         { provide: EventStatusService, useValue: mockEventStatusService },
         { provide: EventAuthorizationService, useValue: mockEventAuthorizationService },
+        { provide: TimeSlotRepository, useValue: mockTimeSlotRepository },
       ],
     }).compile();
 
@@ -41,6 +53,7 @@ describe('ConfirmationService', () => {
     confirmationRepository = module.get(ConfirmationRepository);
     eventStatusService = module.get(EventStatusService);
     eventAuthorizationService = module.get(EventAuthorizationService);
+    timeSlotRepository = module.get(TimeSlotRepository);
 
     jest.clearAllMocks();
   });
@@ -205,6 +218,82 @@ describe('ConfirmationService', () => {
       await expect(service.cancelConfirmedTime(eventId, userId)).rejects.toThrow(
         new BadRequestException('Event not found'),
       );
+    });
+  });
+
+  describe('updateStagedConfirmation', () => {
+    const eventId = 'event-123';
+    const userId = 'user-123';
+
+    it('should create staged confirmation draft from confirmed slots', async () => {
+      mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
+      mockTimeSlotRepository.findIdsByEventId.mockResolvedValue([
+        'slot-1',
+        'slot-2',
+        'slot-3',
+      ]);
+      mockConfirmationRepository.findStagedConfirmation.mockResolvedValue(null);
+      mockConfirmationRepository.findConfirmedSlotIds.mockResolvedValue(['slot-1']);
+
+      const result = await service.updateStagedConfirmation(eventId, userId, {
+        addSlotIds: ['slot-2'],
+      });
+
+      expect(timeSlotRepository.findIdsByEventId).toHaveBeenCalledWith(eventId);
+      expect(confirmationRepository.upsertStagedConfirmation).toHaveBeenCalledWith(
+        eventId,
+        ['slot-1', 'slot-2'],
+        ['slot-1'],
+      );
+      expect(result).toEqual({
+        success: true,
+        stagedSlotCount: 2,
+      });
+    });
+  });
+
+  describe('commitStagedConfirmation', () => {
+    const eventId = 'event-123';
+    const userId = 'user-123';
+
+    it('should commit staged confirmation successfully', async () => {
+      mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
+      mockTimeSlotRepository.findIdsByEventId.mockResolvedValue(['slot-1', 'slot-2']);
+      mockConfirmationRepository.findStagedConfirmation.mockResolvedValue({
+        slotIds: ['slot-1'],
+        baselineSlotIds: [],
+        updatedAt: new Date('2026-03-14T00:00:00.000Z'),
+      });
+      mockConfirmationRepository.commitStagedConfirmationInTransaction.mockResolvedValue(
+        undefined,
+      );
+      mockConfirmationRepository.findEventWithConfirmedSlots.mockResolvedValue({
+        id: eventId,
+        votingDeadline: null,
+        confirmedTimeSlots: [
+          {
+            slotId: 'slot-1',
+            slot: {
+              date: new Date('2026-03-20'),
+              startMinute: 540,
+              endMinute: 600,
+            },
+          },
+        ],
+      });
+      mockEventStatusService.computeEventStatus.mockReturnValue('CONFIRMED');
+
+      const result = await service.commitStagedConfirmation(eventId, userId);
+
+      expect(confirmationRepository.commitStagedConfirmationInTransaction).toHaveBeenCalledWith(
+        eventId,
+        ['slot-1'],
+      );
+      expect(result).toEqual({
+        id: eventId,
+        confirmedSlotIds: ['slot-1'],
+        status: 'CONFIRMED',
+      });
     });
   });
 });

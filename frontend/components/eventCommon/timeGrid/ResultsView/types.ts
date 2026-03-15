@@ -20,6 +20,10 @@ export interface ResultsViewProps {
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;
   onAddToEventTime?: (info: SlotRangeInfo) => Promise<boolean>;
-  // Selected slot IDs to display with border highlight
-  selectedSlotIds?: Set<string>;
+  // Committed slot IDs to display with persistent highlight
+  committedSlotIds?: Set<string>;
+  // Staged slot IDs to display with draft highlight
+  stagedSlotIds?: Set<string> | null;
+  // Baseline slot IDs for the staged draft
+  stagedBaselineSlotIds?: Set<string> | null;
 }

@@ -25,11 +25,18 @@ export class HostedEventVotingStatsDto {
   votingPercentage!: number;
 }
 
+export class HostedEventStagedConfirmationDto {
+  slotIds!: string[];
+  baselineSlotIds!: string[];
+  updatedAt!: Date;
+}
+
 export class HostedEventDetailResponseDto {
   isDeleted!: boolean;
   event!: EventDetailEventDto;
   slots!: EventDetailSlotDto[];
   votes!: EventDetailVoteDto[];
+  stagedConfirmation!: HostedEventStagedConfirmationDto | null;
   participants!: HostedEventParticipantDto[];
   expectedParticipants!: HostedEventExpectedParticipantDto[];
   votingStats!: HostedEventVotingStatsDto;

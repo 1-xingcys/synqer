@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Delete,
+  Patch,
   Param,
   Body,
   HttpCode,
@@ -9,9 +10,19 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ConfirmationService } from './services/confirmation.service';
-import { ConfirmEventTimeDto } from './dto/confirm-event-time.dto';
-import { ConfirmEventTimeResponseDto } from './dto/confirm-event-time-response.dto';
-import { CancelConfirmedTimeResponseDto } from './dto/cancel-confirmed-time-response.dto';
+import {
+  ConfirmEventTimeDto,
+  UpdateStagedConfirmationDto,
+} from './dto/confirm-event-time.dto';
+import {
+  CommitStagedConfirmationResponseDto,
+  ConfirmEventTimeResponseDto,
+  UpdateStagedConfirmationResponseDto,
+} from './dto/confirm-event-time-response.dto';
+import {
+  CancelConfirmedTimeResponseDto,
+  DiscardStagedConfirmationResponseDto,
+} from './dto/cancel-confirmed-time-response.dto';
 import { SessionAuthGuard, CurrentUser } from '../../auth';
 
 @Controller('events/:eventId/confirmation')
@@ -34,6 +45,39 @@ export class ConfirmationController {
   }
 
   /**
+   * PATCH /events/:eventId/confirmation/staged
+   * 更新 staged confirmation 草稿
+   */
+  @Patch('staged')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionAuthGuard)
+  async updateStagedConfirmation(
+    @Param('eventId') eventId: string,
+    @Body() dto: UpdateStagedConfirmationDto,
+    @CurrentUser() userId: string,
+  ): Promise<UpdateStagedConfirmationResponseDto> {
+    return this.confirmationService.updateStagedConfirmation(
+      eventId,
+      userId,
+      dto,
+    );
+  }
+
+  /**
+   * POST /events/:eventId/confirmation/commit
+   * 提交 staged confirmation 草稿為正式 confirmed time
+   */
+  @Post('commit')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionAuthGuard)
+  async commitStagedConfirmation(
+    @Param('eventId') eventId: string,
+    @CurrentUser() userId: string,
+  ): Promise<CommitStagedConfirmationResponseDto> {
+    return this.confirmationService.commitStagedConfirmation(eventId, userId);
+  }
+
+  /**
    * DELETE /events/:eventId/confirmation
    * 取消確認的活動時間（僅限活動擁有者）
    */
@@ -45,5 +89,19 @@ export class ConfirmationController {
     @CurrentUser() userId: string,
   ): Promise<CancelConfirmedTimeResponseDto> {
     return this.confirmationService.cancelConfirmedTime(eventId, userId);
+  }
+
+  /**
+   * DELETE /events/:eventId/confirmation/staged
+   * 捨棄 staged confirmation 草稿
+   */
+  @Delete('staged')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(SessionAuthGuard)
+  async discardStagedConfirmation(
+    @Param('eventId') eventId: string,
+    @CurrentUser() userId: string,
+  ): Promise<DiscardStagedConfirmationResponseDto> {
+    return this.confirmationService.discardStagedConfirmation(eventId, userId);
   }
 }

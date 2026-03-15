@@ -826,6 +826,107 @@
         ]
       }
     },
+    "/events/{eventId}/confirmation/staged": {
+      "patch": {
+        "operationId": "ConfirmationController_updateStagedConfirmation",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStagedConfirmationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateStagedConfirmationResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "PATCH /events/:eventId/confirmation/staged\n更新 staged confirmation 草稿",
+        "tags": [
+          "Confirmation"
+        ]
+      },
+      "delete": {
+        "operationId": "ConfirmationController_discardStagedConfirmation",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscardStagedConfirmationResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "DELETE /events/:eventId/confirmation/staged\n捨棄 staged confirmation 草稿",
+        "tags": [
+          "Confirmation"
+        ]
+      }
+    },
+    "/events/{eventId}/confirmation/commit": {
+      "post": {
+        "operationId": "ConfirmationController_commitStagedConfirmation",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommitStagedConfirmationResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "POST /events/:eventId/confirmation/commit\n提交 staged confirmation 草稿為正式 confirmed time",
+        "tags": [
+          "Confirmation"
+        ]
+      }
+    },
     "/line-bot/webhook": {
       "post": {
         "operationId": "LineBotController_handleWebhook",
@@ -1950,6 +2051,32 @@
           "expectedParticipantCount"
         ]
       },
+      "HostedEventStagedConfirmationDto": {
+        "type": "object",
+        "properties": {
+          "slotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "baselineSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slotIds",
+          "baselineSlotIds",
+          "updatedAt"
+        ]
+      },
       "HostedEventParticipantDto": {
         "type": "object",
         "properties": {
@@ -2036,6 +2163,14 @@
               "$ref": "#/components/schemas/EventDetailVoteDto"
             }
           },
+          "stagedConfirmation": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/HostedEventStagedConfirmationDto"
+              }
+            ]
+          },
           "participants": {
             "type": "array",
             "items": {
@@ -2057,6 +2192,7 @@
           "event",
           "slots",
           "votes",
+          "stagedConfirmation",
           "participants",
           "expectedParticipants",
           "votingStats"
@@ -2432,6 +2568,66 @@
           "status"
         ]
       },
+      "UpdateStagedConfirmationDto": {
+        "type": "object",
+        "properties": {
+          "addSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "removeSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UpdateStagedConfirmationResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "stagedSlotCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "success",
+          "stagedSlotCount"
+        ]
+      },
+      "CommitStagedConfirmationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "confirmedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "confirmedSlotIds",
+          "status"
+        ]
+      },
       "CancelConfirmedTimeResponseDto": {
         "type": "object",
         "properties": {
@@ -2451,6 +2647,17 @@
         "required": [
           "id",
           "status"
+        ]
+      },
+      "DiscardStagedConfirmationResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
         ]
       },
       "LineGroupSummaryDto": {

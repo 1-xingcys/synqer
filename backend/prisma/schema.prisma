@@ -137,6 +137,7 @@ model Event {
   stagedVotes          EventStagedVote[]
   expectedParticipants EventExpectedParticipant[]
   confirmedTimeSlots   ConfirmedEventTimeSlot[]
+  stagedConfirmation   EventStagedConfirmation?
 
   @@index([lineGroupId])
   @@index([ownerId])
@@ -234,5 +235,19 @@ model ConfirmedEventTimeSlot {
   slot  EventTimeSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, slotId])
+  @@index([eventId])
+}
+
+// Host 確認時段的暫存草稿
+model EventStagedConfirmation {
+  id              String   @id @default(cuid())
+  eventId         String   @unique
+  slotIds         String[] @default([])
+  baselineSlotIds String[] @default([])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
   @@index([eventId])
 }

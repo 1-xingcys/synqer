@@ -449,6 +449,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/events/{eventId}/confirmation/staged": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * DELETE /events/:eventId/confirmation/staged
+         *     捨棄 staged confirmation 草稿
+         */
+        delete: operations["ConfirmationController_discardStagedConfirmation"];
+        options?: never;
+        head?: never;
+        /**
+         * PATCH /events/:eventId/confirmation/staged
+         *     更新 staged confirmation 草稿
+         */
+        patch: operations["ConfirmationController_updateStagedConfirmation"];
+        trace?: never;
+    };
+    "/events/{eventId}/confirmation/commit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /events/:eventId/confirmation/commit
+         *     提交 staged confirmation 草稿為正式 confirmed time
+         */
+        post: operations["ConfirmationController_commitStagedConfirmation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/line-bot/webhook": {
         parameters: {
             query?: never;
@@ -898,6 +942,12 @@ export interface components {
             expectedParticipantCount: number;
             host?: components["schemas"]["EventPublicHostDto"] | null;
         };
+        HostedEventStagedConfirmationDto: {
+            slotIds: string[];
+            baselineSlotIds: string[];
+            /** Format: date-time */
+            updatedAt: string;
+        };
         HostedEventParticipantDto: {
             userId: string;
             displayName: string;
@@ -921,6 +971,7 @@ export interface components {
             event: components["schemas"]["EventDetailEventDto"];
             slots: components["schemas"]["EventDetailSlotDto"][];
             votes: components["schemas"]["EventDetailVoteDto"][];
+            stagedConfirmation: components["schemas"]["HostedEventStagedConfirmationDto"] | null;
             participants: components["schemas"]["HostedEventParticipantDto"][];
             expectedParticipants: components["schemas"]["HostedEventExpectedParticipantDto"][];
             votingStats: components["schemas"]["HostedEventVotingStatsDto"];
@@ -1021,10 +1072,27 @@ export interface components {
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
         };
+        UpdateStagedConfirmationDto: {
+            addSlotIds?: string[];
+            removeSlotIds?: string[];
+        };
+        UpdateStagedConfirmationResponseDto: {
+            success: boolean;
+            stagedSlotCount: number;
+        };
+        CommitStagedConfirmationResponseDto: {
+            id: string;
+            confirmedSlotIds: string[];
+            /** @enum {string} */
+            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
+        };
         CancelConfirmedTimeResponseDto: {
             id: string;
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
+        };
+        DiscardStagedConfirmationResponseDto: {
+            success: boolean;
         };
         LineGroupSummaryDto: {
             id: string;
@@ -1635,6 +1703,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CancelConfirmedTimeResponseDto"];
+                };
+            };
+        };
+    };
+    ConfirmationController_discardStagedConfirmation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscardStagedConfirmationResponseDto"];
+                };
+            };
+        };
+    };
+    ConfirmationController_updateStagedConfirmation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateStagedConfirmationDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UpdateStagedConfirmationResponseDto"];
+                };
+            };
+        };
+    };
+    ConfirmationController_commitStagedConfirmation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommitStagedConfirmationResponseDto"];
                 };
             };
         };

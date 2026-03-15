@@ -341,13 +341,18 @@
       "completed": "此活動已結束。"
     },
     "eventTimeSelector": {
-      "confirmedTitle": "已確認的活動時間",
-      "emptyTitle": "活動時間",
+      "title": "活動時間",
+      "statusConfirmed": "已確認",
+      "statusUnconfirmed": "尚未確認活動時間",
+      "statusPendingChanges": "有未提交的變更",
       "emptyHint": "從下方投票結果中點選或拖曳選擇活動時段",
-      "noConfirmedTime": "尚未確認活動時間",
+      "noConfirmedTime": "沒有活動時間",
       "reset": "重新選擇",
       "remove": "移除",
       "cancel": "取消",
+      "discard": "捨棄變更",
+      "save": "提交變更",
+      "saving": "提交中",
       "resetConfirmTitle": "清除所有活動時間？",
       "resetConfirmDesc": "這將清除所有已確認的時間，活動狀態會退回「投票結束」",
       "resetConfirm": "確定清除",
@@ -356,7 +361,7 @@
       "removeConfirm": "確定移除"
     },
     "addToEventTime": {
-      "button": "加入活動時間",
+      "button": "加入預選活動時間",
       "adding": "加入中...",
       "votingHint": "投票仍在進行中",
       "votingConfirmHint": "確認後投票將立即結束",
