@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Check, X, Info } from "lucide-react";
 import { Vote, Participant } from "../../types";
@@ -52,6 +52,7 @@ export function SlotDetailModal({
   const t = useTranslations("joined");
   const tHosted = useTranslations("hosted");
   const modalRef = useRef<HTMLDivElement>(null);
+  const [isAdding, setIsAdding] = useState(false);
 
   // Detect if it's a range based on dateLabel containing "~"
   const showRangeHint = isRange || dateLabel.includes("~");
@@ -84,11 +85,16 @@ export function SlotDetailModal({
   }, [isOpen]);
 
   const handleConfirmAdd = async () => {
-    if (onAddToEventTime && rangeInfo) {
+    if (!onAddToEventTime || !rangeInfo || isAdding) return;
+
+    setIsAdding(true);
+    try {
       const success = await onAddToEventTime(rangeInfo);
       if (success) {
         handleClose();
       }
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -319,6 +325,7 @@ export function SlotDetailModal({
               <AddButtonView
                 isVotingPhase={isVotingPhase}
                 onAdd={() => void handleConfirmAdd()}
+                isLoading={isAdding}
                 tHosted={tHosted}
               />
             ) : (

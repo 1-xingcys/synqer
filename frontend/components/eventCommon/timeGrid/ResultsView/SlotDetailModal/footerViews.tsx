@@ -1,27 +1,36 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { AlertTriangle, Plus } from "lucide-react";
+import { AlertTriangle, Loader2, Plus } from "lucide-react";
 
 interface AddButtonViewProps {
   isVotingPhase: boolean;
   onAdd: () => void;
+  isLoading: boolean;
   tHosted: ReturnType<typeof useTranslations>;
 }
 
 export function AddButtonView({
   isVotingPhase,
   onAdd,
+  isLoading,
   tHosted,
 }: AddButtonViewProps) {
   return (
     <>
       <button
         onClick={onAdd}
-        className="w-full py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center justify-center gap-2"
+        disabled={isLoading}
+        className="w-full py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <Plus className="w-4 h-4" />
-        {tHosted("addToEventTime.button")}
+        {isLoading ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <Plus className="w-4 h-4" />
+        )}
+        {isLoading
+          ? tHosted("addToEventTime.adding")
+          : tHosted("addToEventTime.button")}
       </button>
       {isVotingPhase && (
         <p className="text-xs text-amber-600 dark:text-amber-400 text-center flex items-center justify-center gap-1">

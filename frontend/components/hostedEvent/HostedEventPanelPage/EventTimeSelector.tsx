@@ -21,7 +21,7 @@ export interface SelectedTimeRange {
 
 interface EventTimeSelectorProps {
   selectedRanges: SelectedTimeRange[];
-  onRemove: (id: string) => void;
+  onRemove: (id: string) => Promise<void>;
   hasConfirmedTime: boolean;
   hasStagedChanges: boolean;
   onCommit: () => void;
@@ -113,6 +113,7 @@ export function EventTimeSelector({
   const locale = useLocale();
   const t = useTranslations("hosted");
   const [showCommitConfirm, setShowCommitConfirm] = useState(false);
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
   const formatLocalizedDate = (dateString: string) => {
     const date = new Date(`${dateString}T00:00:00`);
@@ -150,7 +151,17 @@ export function EventTimeSelector({
     setShowCommitConfirm(false);
   };
 
+  const handleRemoveClick = async (rangeId: string) => {
+    setPendingRemoveId(rangeId);
+    try {
+      await onRemove(rangeId);
+    } finally {
+      setPendingRemoveId((current) => (current === rangeId ? null : current));
+    }
+  };
+
   const isEmpty = selectedRanges.length === 0;
+  const isActionPending = isPatchPending || isCommitPending || isDiscardPending;
 
   const statusText = hasStagedChanges
     ? {
@@ -213,11 +224,16 @@ export function EventTimeSelector({
 
                 {!range.isToBeRemoved && (
                   <button
-                    onClick={() => onRemove(range.id)}
-                    className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0"
+                    onClick={() => void handleRemoveClick(range.id)}
+                    disabled={isActionPending}
+                    className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     title={t("eventTimeSelector.remove")}
                   >
-                    <X className="w-4 h-4" />
+                    {pendingRemoveId === range.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <X className="w-4 h-4" />
+                    )}
                   </button>
                 )}
               </div>
@@ -234,20 +250,23 @@ export function EventTimeSelector({
         <div className="px-4 pb-4 flex items-center gap-2">
           <button
             onClick={() => void onDiscard()}
-            disabled={isPatchPending || isCommitPending || isDiscardPending}
+            disabled={isActionPending}
             className="flex-1 px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-lg transition-colors disabled:opacity-50"
           >
-            {t("eventTimeSelector.discard")}
+            <span className="inline-flex items-center justify-center gap-2">
+              {isDiscardPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              {t("eventTimeSelector.discard")}
+            </span>
           </button>
           <button
             onClick={handleCommitClick}
-            disabled={isPatchPending || isCommitPending || isDiscardPending}
+            disabled={isActionPending}
             className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
           >
+            {isCommitPending && <Loader2 className="w-4 h-4 animate-spin" />}
             {isCommitPending
               ? t("eventTimeSelector.saving")
               : t("eventTimeSelector.save")}
-            {isCommitPending && <Loader2 className="w-4 h-4 animate-spin" />}
           </button>
         </div>
       )}

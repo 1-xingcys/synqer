@@ -131,13 +131,11 @@ export function useEventTimeConfirmation({
       addSlotIds: string[];
       removeSlotIds: string[];
     }) => patchStagedConfirmationApi(eventId, addSlotIds, removeSlotIds),
-    onMutate: async ({ addSlotIds, removeSlotIds }) => {
+    onMutate: async () => {
       setConfirmError(null);
       await queryClient.cancelQueries({ queryKey });
-
-      const previousData =
-        queryClient.getQueryData<HostedEventDetailData>(queryKey);
-
+    },
+    onSuccess: (_response, { addSlotIds, removeSlotIds }) => {
       queryClient.setQueryData<HostedEventDetailData>(queryKey, (old) => {
         if (!old) return old;
 
@@ -175,13 +173,8 @@ export function useEventTimeConfirmation({
           },
         };
       });
-
-      return { previousData };
     },
-    onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(queryKey, context.previousData);
-      }
+    onError: () => {
       setConfirmError(t("hosted.confirmError"));
     },
     onSettled: () => {
@@ -248,33 +241,71 @@ export function useEventTimeConfirmation({
   });
 
   const addConfirmedTime = useCallback(
-    (slotIds: string[]): Promise<boolean> => {
+    async (slotIds: string[]): Promise<boolean> => {
+      if (
+        patchMutation.isPending ||
+        commitMutation.isPending ||
+        discardMutation.isPending
+      ) {
+        return false;
+      }
+
       const currentSlotIds = new Set(
         stagedConfirmation?.slotIds ?? confirmedSlotIds,
       );
       const addSlotIds = slotIds.filter(
         (slotId) => !currentSlotIds.has(slotId),
       );
-      if (addSlotIds.length === 0) return Promise.resolve(true);
-      patchMutation.mutate({ addSlotIds, removeSlotIds: [] });
-      return Promise.resolve(true);
+      if (addSlotIds.length === 0) return true;
+
+      try {
+        await patchMutation.mutateAsync({ addSlotIds, removeSlotIds: [] });
+        return true;
+      } catch {
+        return false;
+      }
     },
-    [confirmedSlotIds, patchMutation, stagedConfirmation],
+    [
+      commitMutation.isPending,
+      confirmedSlotIds,
+      discardMutation.isPending,
+      patchMutation,
+      stagedConfirmation,
+    ],
   );
 
   const removeConfirmedTime = useCallback(
-    (slotIdsToRemove: string[]): Promise<boolean> => {
+    async (slotIdsToRemove: string[]): Promise<boolean> => {
+      if (
+        patchMutation.isPending ||
+        commitMutation.isPending ||
+        discardMutation.isPending
+      ) {
+        return false;
+      }
+
       const currentSlotIds = new Set(
         stagedConfirmation?.slotIds ?? confirmedSlotIds,
       );
       const removeSlotIds = slotIdsToRemove.filter((slotId) =>
         currentSlotIds.has(slotId),
       );
-      if (removeSlotIds.length === 0) return Promise.resolve(true);
-      patchMutation.mutate({ addSlotIds: [], removeSlotIds });
-      return Promise.resolve(true);
+      if (removeSlotIds.length === 0) return true;
+
+      try {
+        await patchMutation.mutateAsync({ addSlotIds: [], removeSlotIds });
+        return true;
+      } catch {
+        return false;
+      }
     },
-    [confirmedSlotIds, patchMutation, stagedConfirmation],
+    [
+      commitMutation.isPending,
+      confirmedSlotIds,
+      discardMutation.isPending,
+      patchMutation,
+      stagedConfirmation,
+    ],
   );
 
   const handleCommit = useCallback(() => {

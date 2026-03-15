@@ -107,7 +107,7 @@ export default function HostedEventPanelPage() {
           {/* Hide when voting is in progress and there is nothing to show yet */}
           <EventTimeSelector
             selectedRanges={displayRanges}
-            onRemove={(id) => void handleRemoveConfirmedTime(id)}
+            onRemove={handleRemoveConfirmedTime}
             hasConfirmedTime={hasCommittedConfirmation}
             hasStagedChanges={hasStagedChanges}
             onCommit={() => void commitStagedConfirmation()}
