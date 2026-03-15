@@ -272,6 +272,12 @@ export function useOptimisticVoting({
               ...old.votes.filter((vote) => vote.userId !== currentUserId),
               ...orderedCommittedVotes,
             ],
+            expectedParticipants: old.expectedParticipants.map((participant) =>
+              participant.userId === currentUserId ||
+              participant.user?.id === currentUserId
+                ? { ...participant, hasVoted: true }
+                : participant,
+            ),
           };
         },
       );
