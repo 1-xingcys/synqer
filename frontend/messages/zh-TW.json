@@ -361,7 +361,7 @@
       "removeConfirm": "確定移除"
     },
     "addToEventTime": {
-      "button": "加入活動時間",
+      "button": "加入預選活動時間",
       "adding": "加入中...",
       "votingHint": "投票仍在進行中",
       "votingConfirmHint": "確認後投票將立即結束",

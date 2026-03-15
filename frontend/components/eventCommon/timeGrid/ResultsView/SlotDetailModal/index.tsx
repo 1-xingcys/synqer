@@ -50,7 +50,6 @@ export function SlotDetailModal({
   rangeInfo,
 }: SlotDetailModalProps) {
   const t = useTranslations("joined");
-  const tHosted = useTranslations("hosted");
   const modalRef = useRef<HTMLDivElement>(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -326,7 +325,6 @@ export function SlotDetailModal({
                 isVotingPhase={isVotingPhase}
                 onAdd={() => void handleConfirmAdd()}
                 isLoading={isAdding}
-                tHosted={tHosted}
               />
             ) : (
               <CloseButtonView onClose={handleClose} t={t} />

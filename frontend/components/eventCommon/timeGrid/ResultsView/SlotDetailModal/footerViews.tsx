@@ -7,15 +7,14 @@ interface AddButtonViewProps {
   isVotingPhase: boolean;
   onAdd: () => void;
   isLoading: boolean;
-  tHosted: ReturnType<typeof useTranslations>;
 }
 
 export function AddButtonView({
   isVotingPhase,
   onAdd,
   isLoading,
-  tHosted,
 }: AddButtonViewProps) {
+  const t = useTranslations("hosted");
   return (
     <>
       <button
@@ -28,14 +27,12 @@ export function AddButtonView({
         ) : (
           <Plus className="w-4 h-4" />
         )}
-        {isLoading
-          ? tHosted("addToEventTime.adding")
-          : tHosted("addToEventTime.button")}
+        {isLoading ? t("addToEventTime.adding") : t("addToEventTime.button")}
       </button>
       {isVotingPhase && (
         <p className="text-xs text-amber-600 dark:text-amber-400 text-center flex items-center justify-center gap-1">
           <AlertTriangle className="w-3 h-3" />
-          {tHosted("addToEventTime.votingHint")}
+          {t("addToEventTime.votingHint")}
         </p>
       )}
     </>

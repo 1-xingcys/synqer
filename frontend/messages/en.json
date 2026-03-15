@@ -361,7 +361,7 @@
       "removeConfirm": "Remove"
     },
     "addToEventTime": {
-      "button": "Add to Event Time",
+      "button": "Add to Staged Event Time",
       "adding": "Adding...",
       "votingHint": "Voting is still in progress",
       "votingConfirmHint": "Voting will end immediately after confirmation",
