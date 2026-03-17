@@ -2,6 +2,12 @@ import { EventCapabilities } from "@/types/event";
 
 export type TimeGranularity = 15 | 30 | 60;
 
+export interface GridAxisColumn {
+  key: string;
+  kind: "date";
+  rawValue: string;
+}
+
 export interface MergedTimeRow {
   startMinute: number;
   endMinute: number;

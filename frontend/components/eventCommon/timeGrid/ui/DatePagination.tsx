@@ -2,46 +2,58 @@
 
 import { useMemo, useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
+import { GridAxisColumn } from "../types";
 
 interface DatePaginationProps {
-  dates: string[];
+  dates?: string[];
+  columns?: GridAxisColumn[];
   currentPage: number;
   datesPerPage: number;
   onPageChange: (page: number) => void;
 }
 
 export function DatePagination({
-  dates,
+  dates = [],
+  columns,
   currentPage,
   datesPerPage,
   onPageChange,
 }: DatePaginationProps) {
+  const axisColumns =
+    columns ??
+    dates.map((dateKey) => ({ key: dateKey, kind: "date", rawValue: dateKey }));
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const totalPages = Math.ceil(dates.length / datesPerPage);
+  const totalPages = Math.ceil(axisColumns.length / datesPerPage);
 
   // Get date range for current page
   const { startDate, endDate } = useMemo(() => {
     const startIdx = currentPage * datesPerPage;
-    const endIdx = Math.min(startIdx + datesPerPage - 1, dates.length - 1);
+    const endIdx = Math.min(
+      startIdx + datesPerPage - 1,
+      axisColumns.length - 1,
+    );
     return {
-      startDate: dates[startIdx],
-      endDate: dates[endIdx],
+      startDate: axisColumns[startIdx]?.rawValue,
+      endDate: axisColumns[endIdx]?.rawValue,
     };
-  }, [dates, currentPage, datesPerPage]);
+  }, [axisColumns, currentPage, datesPerPage]);
 
   // Get all page ranges for dropdown
   const pageRanges = useMemo(() => {
     return Array.from({ length: totalPages }).map((_, pageIdx) => {
       const startIdx = pageIdx * datesPerPage;
-      const endIdx = Math.min(startIdx + datesPerPage - 1, dates.length - 1);
+      const endIdx = Math.min(
+        startIdx + datesPerPage - 1,
+        axisColumns.length - 1,
+      );
       return {
         pageIdx,
-        startDate: dates[startIdx],
-        endDate: dates[endIdx],
+        startDate: axisColumns[startIdx]?.rawValue,
+        endDate: axisColumns[endIdx]?.rawValue,
       };
     });
-  }, [dates, datesPerPage, totalPages]);
+  }, [axisColumns, datesPerPage, totalPages]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -64,7 +76,8 @@ export function DatePagination({
   if (totalPages <= 0) return null;
 
   // Format: YYYY/MM/DD
-  const formatPageDate = (dateStr: string) => {
+  const formatPageDate = (dateStr?: string) => {
+    if (!dateStr) return "";
     return format(new Date(dateStr), "yyyy/M/d");
   };
 

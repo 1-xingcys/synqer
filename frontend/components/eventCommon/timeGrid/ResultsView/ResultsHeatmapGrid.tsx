@@ -87,7 +87,9 @@ export function ResultsHeatmapGrid({
     rangeInfo: SlotRangeInfo;
   } | null>(null);
 
-  const { slotsByDate, dates, timeSlots } = useSlotGridModel({ slots });
+  const { slotsByDate, dates, columns, timeSlots } = useSlotGridModel({
+    slots,
+  });
 
   // Merged rows for granularity (using shared hook)
   const { mergedTimeRows } = useMergedTimeRowsModel({ timeSlots, granularity });
@@ -307,7 +309,7 @@ export function ResultsHeatmapGrid({
         <div className="flex items-center gap-2">
           <div className="flex-1 min-w-0">
             <DatePagination
-              dates={dates}
+              columns={columns}
               currentPage={currentPage}
               datesPerPage={datesPerPage}
               onPageChange={setCurrentPage}
@@ -325,7 +327,9 @@ export function ResultsHeatmapGrid({
         </div>
 
         <DateHeader
-          dates={paginatedDates}
+          columns={columns.filter((column) =>
+            paginatedDates.includes(column.key),
+          )}
           selectable={false}
           firstTimeLabel={firstTimeLabel}
           isStickyActive={isStickyActive}

@@ -1,19 +1,22 @@
 "use client";
 
 import { useLocale } from "next-intl";
+import { GridAxisColumn } from "../types";
 import { formatDateHeader } from "../utils";
 
 interface DateHeaderProps {
-  dates: string[];
-  isDayFullySelected?: (dateKey: string) => boolean;
-  onSelectDay?: (dateKey: string) => void;
+  dates?: string[];
+  columns?: GridAxisColumn[];
+  isDayFullySelected?: (columnKey: string) => boolean;
+  onSelectDay?: (columnKey: string) => void;
   firstTimeLabel?: string;
   isStickyActive?: boolean;
   selectable?: boolean;
 }
 
 export function DateHeader({
-  dates,
+  dates = [],
+  columns,
   isDayFullySelected,
   onSelectDay,
   firstTimeLabel,
@@ -22,6 +25,9 @@ export function DateHeader({
 }: DateHeaderProps) {
   const locale = useLocale();
   const showBottomGridLine = isStickyActive;
+  const axisColumns =
+    columns ??
+    dates.map((dateKey) => ({ key: dateKey, kind: "date", rawValue: dateKey }));
 
   return (
     <div className="relative flex">
@@ -34,9 +40,12 @@ export function DateHeader({
         )}
       </div>
       {/* Date columns */}
-      {dates.map((dateKey) => {
-        const { weekday, day, month } = formatDateHeader(dateKey, locale);
-        const isFullySelected = isDayFullySelected?.(dateKey) ?? false;
+      {axisColumns.map((column) => {
+        const { weekday, day, month } = formatDateHeader(
+          column.rawValue,
+          locale,
+        );
+        const isFullySelected = isDayFullySelected?.(column.key) ?? false;
 
         const content = (
           <>
@@ -61,7 +70,7 @@ export function DateHeader({
         if (!selectable) {
           return (
             <div
-              key={dateKey}
+              key={column.key}
               className="flex-1 min-w-0 p-1 sm:p-2 text-center rounded-t-lg mx-px sm:mx-0.5"
             >
               {content}
@@ -71,8 +80,8 @@ export function DateHeader({
 
         return (
           <button
-            key={dateKey}
-            onClick={() => onSelectDay?.(dateKey)}
+            key={column.key}
+            onClick={() => onSelectDay?.(column.key)}
             className={`flex-1 min-w-0 p-1 sm:p-2 text-center cursor-pointer transition-all rounded-t-lg mx-px sm:mx-0.5 ${
               isFullySelected
                 ? "bg-blue-100 dark:bg-blue-900/30"

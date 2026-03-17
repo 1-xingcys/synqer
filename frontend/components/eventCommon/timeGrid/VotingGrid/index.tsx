@@ -52,8 +52,13 @@ export default function VotingGrid({
     selectEntireDay,
   } = selection;
 
-  const { dates, paginatedDates, currentPage, datesPerPage, handlePageChange } =
-    pagination;
+  const {
+    columns,
+    paginatedDates,
+    currentPage,
+    datesPerPage,
+    handlePageChange,
+  } = pagination;
 
   const {
     granularity,
@@ -151,7 +156,7 @@ export default function VotingGrid({
           <div className="flex items-center gap-2">
             <div className="flex-1 min-w-0">
               <DatePagination
-                dates={dates}
+                columns={columns}
                 currentPage={currentPage}
                 datesPerPage={datesPerPage}
                 onPageChange={handlePageChange}
@@ -172,7 +177,9 @@ export default function VotingGrid({
           </div>
 
           <DateHeader
-            dates={paginatedDates}
+            columns={columns.filter((column) =>
+              paginatedDates.includes(column.key),
+            )}
             isDayFullySelected={isDayFullySelected}
             onSelectDay={selectEntireDay}
             firstTimeLabel={firstTimeLabel}

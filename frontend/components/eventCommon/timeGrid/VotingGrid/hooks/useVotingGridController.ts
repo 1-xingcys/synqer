@@ -17,6 +17,7 @@ import { useSlotGridModel } from "../../hooks/useSlotGridModel";
 import { useSlotSelectionModel } from "./useSlotSelectionModel";
 import { groupVotesBySlot } from "../../utils";
 import { EventCapabilities, VoteMode } from "@/types/event";
+import { GridAxisColumn } from "../../types";
 
 interface UseVotingGridControllerProps {
   slots: VotingGridProps["slots"];
@@ -44,6 +45,7 @@ interface UseVotingGridControllerResult {
     selectEntireDay: (dateKey: string) => void;
   };
   pagination: {
+    columns: GridAxisColumn[];
     dates: string[];
     paginatedDates: string[];
     currentPage: number;
@@ -130,7 +132,9 @@ export function useVotingGridController({
     stagedVote,
   });
 
-  const { slotsByDate, dates, timeSlots } = useSlotGridModel({ slots });
+  const { slotsByDate, dates, columns, timeSlots } = useSlotGridModel({
+    slots,
+  });
 
   const {
     voteMode,
@@ -280,6 +284,7 @@ export function useVotingGridController({
       selectEntireDay,
     },
     pagination: {
+      columns,
       dates,
       paginatedDates,
       currentPage,

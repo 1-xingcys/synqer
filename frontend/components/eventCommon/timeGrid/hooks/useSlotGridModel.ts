@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { TimeSlot } from "../types";
-import { groupSlotsByDate } from "../utils";
+import { GridAxisColumn, TimeSlot } from "../types";
+import { buildDateAxisColumns, groupSlotsByDate } from "../utils";
 
 interface UseSlotGridModelProps {
   slots: TimeSlot[];
@@ -11,6 +11,7 @@ interface UseSlotGridModelProps {
 interface UseSlotGridModelReturn {
   slotsByDate: Record<string, TimeSlot[]>;
   dates: string[];
+  columns: GridAxisColumn[];
   timeSlots: TimeSlot[];
 }
 
@@ -26,6 +27,7 @@ export function useSlotGridModel({
 
   // Get sorted dates
   const dates = useMemo(() => Object.keys(slotsByDate).sort(), [slotsByDate]);
+  const columns = useMemo(() => buildDateAxisColumns(dates), [dates]);
 
   // Get time slots from first date (all dates have same time slots)
   const timeSlots = useMemo(
@@ -36,6 +38,7 @@ export function useSlotGridModel({
   return {
     slotsByDate,
     dates,
+    columns,
     timeSlots,
   };
 }

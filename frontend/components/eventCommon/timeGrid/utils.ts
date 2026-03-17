@@ -1,4 +1,4 @@
-import { TimeSlot, Vote, CalendarEvent } from "./types";
+import { TimeSlot, Vote, CalendarEvent, GridAxisColumn } from "./types";
 
 // Map app locale to date-fns locale string
 const getDateLocale = (locale: string): string => {
@@ -20,6 +20,14 @@ export const formatDateHeader = (
   const day = date.getDate();
   const month = date.toLocaleDateString(dateLocale, { month: "short" });
   return { weekday, day, month };
+};
+
+export const buildDateAxisColumns = (dateKeys: string[]): GridAxisColumn[] => {
+  return dateKeys.map((dateKey) => ({
+    key: dateKey,
+    kind: "date",
+    rawValue: dateKey,
+  }));
 };
 
 // Group slots by date
