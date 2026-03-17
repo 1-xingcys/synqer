@@ -1,8 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { EventType } from '@prisma/client';
 import { GoogleCalendarService } from './google-calendar.service';
 import { PrismaService } from '../prisma/prisma.service';
 import axios from 'axios';
+import { EventCapabilitiesService } from '../events/shared/services/event-capabilities.service';
+import { EventScheduleService } from '../events/shared/services/event-schedule.service';
 
 // Mock axios
 jest.mock('axios');
@@ -18,6 +21,8 @@ const mockedJwt = jwt as jest.Mocked<typeof jwt>;
 describe('GoogleCalendarService', () => {
   let service: GoogleCalendarService;
   let prismaService: PrismaService;
+  let eventCapabilitiesService: jest.Mocked<EventCapabilitiesService>;
+  let eventScheduleService: jest.Mocked<EventScheduleService>;
 
   const mockPrismaService = {
     googleCalendarConnection: {
@@ -29,6 +34,14 @@ describe('GoogleCalendarService', () => {
     event: {
       findUnique: jest.fn(),
     },
+  };
+
+  const mockEventCapabilitiesService = {
+    buildCapabilities: jest.fn(),
+  };
+
+  const mockEventScheduleService = {
+    getCalendarRange: jest.fn(),
   };
 
   // Use fake timers to prevent setTimeout from keeping Jest open
@@ -53,11 +66,21 @@ describe('GoogleCalendarService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: EventCapabilitiesService,
+          useValue: mockEventCapabilitiesService,
+        },
+        {
+          provide: EventScheduleService,
+          useValue: mockEventScheduleService,
+        },
       ],
     }).compile();
 
     service = module.get<GoogleCalendarService>(GoogleCalendarService);
     prismaService = module.get<PrismaService>(PrismaService);
+    eventCapabilitiesService = module.get(EventCapabilitiesService);
+    eventScheduleService = module.get(EventScheduleService);
 
     // Reset all mocks
     jest.clearAllMocks();
@@ -505,9 +528,12 @@ describe('GoogleCalendarService', () => {
     it('should return conflicting slot IDs', async () => {
       const mockEvent = {
         id: 'event-123',
+        type: EventType.ONE_TIME,
         startDate: new Date('2024-01-15T00:00:00.000Z'),
         endDate: new Date('2024-01-15T00:00:00.000Z'),
         timeZone: 'Asia/Taipei',
+        oneTimeSchedule: null,
+        recurringSchedule: null,
         slots: [
           {
             id: 'slot-1',
@@ -530,6 +556,15 @@ describe('GoogleCalendarService', () => {
         ],
       };
       mockPrismaService.event.findUnique.mockResolvedValue(mockEvent);
+      mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
+        supportsCompletion: true,
+        supportsCalendarConflict: true,
+        supportsAddToCalendar: true,
+      });
+      mockEventScheduleService.getCalendarRange.mockReturnValue({
+        timeMin: new Date('2024-01-15T00:00:00.000Z'),
+        timeMax: new Date('2024-01-16T00:00:00.000Z'),
+      });
 
       const mockConnection = {
         accessToken: 'test-access-token',
@@ -563,6 +598,38 @@ describe('GoogleCalendarService', () => {
       expect(result.conflictingSlotIds).not.toContain('slot-1');
       // slot-3 (14:00-14:15) should not conflict
       expect(result.conflictingSlotIds).not.toContain('slot-3');
+    });
+
+    it('should reject calendar conflict checks for recurring events', async () => {
+      mockPrismaService.event.findUnique.mockResolvedValue({
+        id: 'event-123',
+        type: EventType.RECURRING,
+        isDeleted: false,
+        timeZone: 'Asia/Taipei',
+        oneTimeSchedule: null,
+        recurringSchedule: {
+          weekdays: ['MONDAY'],
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
+        slots: [],
+      });
+      mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
+        supportsCompletion: false,
+        supportsCalendarConflict: false,
+        supportsAddToCalendar: false,
+      });
+
+      await expect(
+        service.getConflictingSlots('user-123', 'event-123'),
+      ).rejects.toThrow(
+        new BadRequestException(
+          'Google Calendar conflict check is not supported for this event type',
+        ),
+      );
+
+      expect(eventScheduleService.getCalendarRange).not.toHaveBeenCalled();
     });
   });
 });

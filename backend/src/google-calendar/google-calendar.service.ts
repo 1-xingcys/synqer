@@ -16,6 +16,8 @@ import {
   CalendarConnectionStatus,
   CalendarConflictResult,
 } from './google-api.types';
+import { EventCapabilitiesService } from '../events/shared/services/event-capabilities.service';
+import { EventScheduleService } from '../events/shared/services/event-schedule.service';
 
 @Injectable()
 export class GoogleCalendarService {
@@ -29,7 +31,11 @@ export class GoogleCalendarService {
     'https://www.googleapis.com/auth/calendar.readonly',
   ].join(' ');
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventCapabilitiesService: EventCapabilitiesService,
+    private eventScheduleService: EventScheduleService,
+  ) {}
 
   // PKCE helpers
   private generateCodeVerifier(): string {
@@ -356,6 +362,8 @@ export class GoogleCalendarService {
       where: { id: eventId },
       include: {
         slots: true,
+        oneTimeSchedule: true,
+        recurringSchedule: true,
       },
     });
 
@@ -363,11 +371,27 @@ export class GoogleCalendarService {
       throw new BadRequestException('Event not found');
     }
 
+    const capabilities = this.eventCapabilitiesService.buildCapabilities(
+      event.type,
+    );
+    if (!capabilities.supportsCalendarConflict) {
+      throw new BadRequestException(
+        'Google Calendar conflict check is not supported for this event type',
+      );
+    }
+
+    const calendarRange = this.eventScheduleService.getCalendarRange(event);
+    if (!calendarRange) {
+      throw new BadRequestException(
+        'Google Calendar conflict check is not supported for this event type',
+      );
+    }
+
     // Get calendar events for the event's date range
     const calendarEvents = await this.getCalendarEvents(
       userId,
-      event.startDate,
-      new Date(event.endDate.getTime() + 24 * 60 * 60 * 1000), // Add 1 day buffer
+      calendarRange.timeMin,
+      calendarRange.timeMax,
       event.timeZone,
     );
 
