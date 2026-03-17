@@ -3,12 +3,14 @@ import { EventQueryService } from './event-query.service';
 import { EventRepository } from '../repositories/event.repository';
 import { EventMapperService } from '../../shared/services/event-mapper.service';
 import { EventStatusService } from '../../shared/services/event-status.service';
+import { EventScheduleService } from '../../shared/services/event-schedule.service';
 
 describe('EventQueryService', () => {
   let service: EventQueryService;
   let eventRepository: jest.Mocked<EventRepository>;
   let eventMapper: jest.Mocked<EventMapperService>;
   let eventStatusService: jest.Mocked<EventStatusService>;
+  let eventScheduleService: jest.Mocked<EventScheduleService>;
 
   const mockEventRepository = {
     findByOwnerId: jest.fn(),
@@ -33,6 +35,10 @@ describe('EventQueryService', () => {
     computeParticipantStatus: jest.fn(),
   };
 
+  const mockEventScheduleService = {
+    resolveSchedule: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -40,6 +46,7 @@ describe('EventQueryService', () => {
         { provide: EventRepository, useValue: mockEventRepository },
         { provide: EventMapperService, useValue: mockEventMapper },
         { provide: EventStatusService, useValue: mockEventStatusService },
+        { provide: EventScheduleService, useValue: mockEventScheduleService },
       ],
     }).compile();
 
@@ -47,6 +54,7 @@ describe('EventQueryService', () => {
     eventRepository = module.get(EventRepository);
     eventMapper = module.get(EventMapperService);
     eventStatusService = module.get(EventStatusService);
+    eventScheduleService = module.get(EventScheduleService);
 
     jest.clearAllMocks();
   });
@@ -352,6 +360,12 @@ describe('EventQueryService', () => {
         id: eventId,
         status: 'VOTING',
       });
+      mockEventScheduleService.resolveSchedule.mockReturnValue({
+        type: 'ONE_TIME',
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 600,
+        slotDurationMin: 15,
+      });
 
       const result = await service.getEventPublicInfo(eventId);
 
@@ -361,6 +375,8 @@ describe('EventQueryService', () => {
         host: null,
         expectedParticipantCount: 1,
         status: 'VOTING',
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 600,
       });
       expect(mockEventStatusService.computeEventStatus).not.toHaveBeenCalled();
     });

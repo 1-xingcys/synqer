@@ -4,6 +4,7 @@ import { EventMapperService } from './event-mapper.service';
 import { EventStatusService } from './event-status.service';
 import { ConfirmedTimeService } from './confirmed-time.service';
 import { EventCapabilitiesService } from './event-capabilities.service';
+import { EventScheduleService } from './event-schedule.service';
 
 describe('EventMapperService', () => {
   let service: EventMapperService;
@@ -33,6 +34,7 @@ describe('EventMapperService', () => {
           provide: EventCapabilitiesService,
           useValue: mockEventCapabilitiesService,
         },
+        EventScheduleService,
       ],
     }).compile();
 

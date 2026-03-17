@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { EventType, Weekday } from '@prisma/client';
+import { EventType } from '@prisma/client';
 import { EventStatusService } from './event-status.service';
 import { ConfirmedTimeService } from './confirmed-time.service';
 import { ConfirmedTimeSlotData } from '../interfaces/confirmed-time.interface';
-import {
-  EventCapabilities,
-  EventScheduleSummary,
-} from '../interfaces/event-contract.interface';
+import { EventCapabilities } from '../interfaces/event-contract.interface';
 import { EventCapabilitiesService } from './event-capabilities.service';
+import {
+  EventScheduleService,
+  EventScheduleSource,
+} from './event-schedule.service';
 
 // 確認時段的資料結構（重新導出以保持向後兼容）
 export type ConfirmedTimeSlot = ConfirmedTimeSlotData;
@@ -36,6 +37,7 @@ export class EventMapperService {
     private eventStatusService: EventStatusService,
     private confirmedTimeService: ConfirmedTimeService,
     private eventCapabilitiesService: EventCapabilitiesService,
+    private eventScheduleService: EventScheduleService,
   ) {}
 
   /**
@@ -153,11 +155,11 @@ export class EventMapperService {
     startMinuteOfDay?: number;
     endMinuteOfDay?: number;
     slotDurationMin?: number;
-    oneTimeSchedule: OneTimeScheduleRecord | null;
-    recurringSchedule: RecurringScheduleRecord | null;
+    oneTimeSchedule: EventScheduleSource['oneTimeSchedule'];
+    recurringSchedule: EventScheduleSource['recurringSchedule'];
     confirmedTimeSlots?: ConfirmedTimeSlot[];
   }): MappedEventList {
-    const schedule = this.resolveSchedule(event);
+    const schedule = this.eventScheduleService.resolveSchedule(event);
     const confirmedSlotIds =
       event.confirmedTimeSlots?.map((cts) => cts.slotId) || [];
     const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
@@ -203,11 +205,11 @@ export class EventMapperService {
     lineGroupId: string | null;
     ownerId: string | null;
     votingDeadline: Date | null;
-    oneTimeSchedule: OneTimeScheduleRecord | null;
-    recurringSchedule: RecurringScheduleRecord | null;
+    oneTimeSchedule: EventScheduleSource['oneTimeSchedule'];
+    recurringSchedule: EventScheduleSource['recurringSchedule'];
     confirmedTimeSlots?: ConfirmedTimeSlot[];
   }) {
-    const schedule = this.resolveSchedule(event);
+    const schedule = this.eventScheduleService.resolveSchedule(event);
     const confirmedSlotIds =
       event.confirmedTimeSlots?.map((cts) => cts.slotId) || [];
     const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
@@ -240,53 +242,4 @@ export class EventMapperService {
       capabilities: this.eventCapabilitiesService.buildCapabilities(event.type),
     };
   }
-
-  private resolveSchedule(event: {
-    type: EventType;
-    startDate?: Date;
-    endDate?: Date;
-    startMinuteOfDay?: number;
-    endMinuteOfDay?: number;
-    slotDurationMin?: number;
-    oneTimeSchedule: OneTimeScheduleRecord | null;
-    recurringSchedule: RecurringScheduleRecord | null;
-  }): EventScheduleSummary {
-    if (event.type === EventType.RECURRING && event.recurringSchedule) {
-      return {
-        type: EventType.RECURRING,
-        weekdays: event.recurringSchedule.weekdays,
-        startMinuteOfDay: event.recurringSchedule.startMinuteOfDay,
-        endMinuteOfDay: event.recurringSchedule.endMinuteOfDay,
-        slotDurationMin: event.recurringSchedule.slotDurationMin,
-      };
-    }
-
-    return {
-      type: EventType.ONE_TIME,
-      startDate:
-        event.oneTimeSchedule?.startDate ?? event.startDate ?? new Date(0),
-      endDate: event.oneTimeSchedule?.endDate ?? event.endDate ?? new Date(0),
-      startMinuteOfDay:
-        event.oneTimeSchedule?.startMinuteOfDay ?? event.startMinuteOfDay ?? 0,
-      endMinuteOfDay:
-        event.oneTimeSchedule?.endMinuteOfDay ?? event.endMinuteOfDay ?? 0,
-      slotDurationMin:
-        event.oneTimeSchedule?.slotDurationMin ?? event.slotDurationMin ?? 15,
-    };
-  }
 }
-
-type OneTimeScheduleRecord = {
-  startDate: Date;
-  endDate: Date;
-  startMinuteOfDay: number;
-  endMinuteOfDay: number;
-  slotDurationMin: number;
-};
-
-type RecurringScheduleRecord = {
-  weekdays: Weekday[];
-  startMinuteOfDay: number;
-  endMinuteOfDay: number;
-  slotDurationMin: number;
-};

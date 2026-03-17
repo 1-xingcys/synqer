@@ -1,13 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
+import { EventType } from '@prisma/client';
 import { EventUpdateService } from './event-update.service';
 import { EventRepository } from '../repositories/event.repository';
 import { EventAuthorizationService } from '../../shared/services/event-authorization.service';
+import { EventScheduleService } from '../../shared/services/event-schedule.service';
 
 describe('EventUpdateService', () => {
   let service: EventUpdateService;
   let eventRepository: jest.Mocked<EventRepository>;
   let eventAuthorizationService: jest.Mocked<EventAuthorizationService>;
+  let eventScheduleService: jest.Mocked<EventScheduleService>;
 
   const mockEventRepository = {
     findOneBasic: jest.fn(),
@@ -19,18 +22,25 @@ describe('EventUpdateService', () => {
     verifyOwner: jest.fn(),
   };
 
+  const mockEventScheduleService = {
+    resolveSchedule: jest.fn(),
+    getEventStartInstant: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EventUpdateService,
         { provide: EventRepository, useValue: mockEventRepository },
         { provide: EventAuthorizationService, useValue: mockEventAuthorizationService },
+        { provide: EventScheduleService, useValue: mockEventScheduleService },
       ],
     }).compile();
 
     service = module.get<EventUpdateService>(EventUpdateService);
     eventRepository = module.get(EventRepository);
     eventAuthorizationService = module.get(EventAuthorizationService);
+    eventScheduleService = module.get(EventScheduleService);
 
     jest.clearAllMocks();
   });
@@ -47,14 +57,25 @@ describe('EventUpdateService', () => {
       const updateDto = { title: 'New Title' };
       const updatedEvent = {
         id: eventId,
+        type: EventType.ONE_TIME,
         title: 'New Title',
         description: 'Description',
         startDate: new Date('2024-12-25'),
         endDate: new Date('2024-12-25'),
+        oneTimeSchedule: null,
+        recurringSchedule: null,
       };
 
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.update.mockResolvedValue(updatedEvent);
+      mockEventScheduleService.resolveSchedule.mockReturnValue({
+        type: EventType.ONE_TIME,
+        startDate: new Date('2024-12-25'),
+        endDate: new Date('2024-12-25'),
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 600,
+        slotDurationMin: 15,
+      });
 
       const result = await service.update(eventId, userId, updateDto);
 
@@ -73,14 +94,25 @@ describe('EventUpdateService', () => {
       const updateDto = { description: 'New Description' };
       const updatedEvent = {
         id: eventId,
+        type: EventType.ONE_TIME,
         title: 'Title',
         description: 'New Description',
         startDate: new Date(),
         endDate: new Date(),
+        oneTimeSchedule: null,
+        recurringSchedule: null,
       };
 
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.update.mockResolvedValue(updatedEvent);
+      mockEventScheduleService.resolveSchedule.mockReturnValue({
+        type: EventType.ONE_TIME,
+        startDate: updatedEvent.startDate,
+        endDate: updatedEvent.endDate,
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 600,
+        slotDurationMin: 15,
+      });
 
       const result = await service.update(eventId, userId, updateDto);
 
@@ -92,14 +124,25 @@ describe('EventUpdateService', () => {
       const updateDto = { timeZone: 'America/New_York' };
       const updatedEvent = {
         id: eventId,
+        type: EventType.ONE_TIME,
         title: 'Title',
         description: null,
         startDate: new Date(),
         endDate: new Date(),
+        oneTimeSchedule: null,
+        recurringSchedule: null,
       };
 
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.update.mockResolvedValue(updatedEvent);
+      mockEventScheduleService.resolveSchedule.mockReturnValue({
+        type: EventType.ONE_TIME,
+        startDate: updatedEvent.startDate,
+        endDate: updatedEvent.endDate,
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 600,
+        slotDurationMin: 15,
+      });
 
       await service.update(eventId, userId, updateDto);
 
@@ -110,20 +153,37 @@ describe('EventUpdateService', () => {
       const updateDto = { votingDeadline: '2024-12-24T08:00:00Z' };
       const mockEvent = {
         id: eventId,
+        type: EventType.ONE_TIME,
         startDate: new Date('2024-12-25'),
-        startMinuteOfDay: 540, // 09:00
+        startMinuteOfDay: 540,
+        oneTimeSchedule: null,
+        recurringSchedule: null,
       };
       const updatedEvent = {
         id: eventId,
+        type: EventType.ONE_TIME,
         title: 'Title',
         description: null,
         startDate: new Date('2024-12-25'),
         endDate: new Date('2024-12-25'),
+        oneTimeSchedule: null,
+        recurringSchedule: null,
       };
 
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.findOneBasic.mockResolvedValue(mockEvent);
       mockEventRepository.update.mockResolvedValue(updatedEvent);
+      mockEventScheduleService.getEventStartInstant.mockReturnValue(
+        new Date('2024-12-25T09:00:00.000Z'),
+      );
+      mockEventScheduleService.resolveSchedule.mockReturnValue({
+        type: EventType.ONE_TIME,
+        startDate: updatedEvent.startDate,
+        endDate: updatedEvent.endDate,
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 600,
+        slotDurationMin: 15,
+      });
 
       await service.update(eventId, userId, updateDto);
 
@@ -137,12 +197,18 @@ describe('EventUpdateService', () => {
       const updateDto = { votingDeadline: '2024-12-25T10:00:00Z' };
       const mockEvent = {
         id: eventId,
+        type: EventType.ONE_TIME,
         startDate: new Date('2024-12-25'),
-        startMinuteOfDay: 540, // 09:00
+        startMinuteOfDay: 540,
+        oneTimeSchedule: null,
+        recurringSchedule: null,
       };
 
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.findOneBasic.mockResolvedValue(mockEvent);
+      mockEventScheduleService.getEventStartInstant.mockReturnValue(
+        new Date('2024-12-25T09:00:00.000Z'),
+      );
 
       await expect(service.update(eventId, userId, updateDto)).rejects.toThrow(
         new BadRequestException('Voting deadline must be before or at the event start time'),
@@ -164,12 +230,18 @@ describe('EventUpdateService', () => {
       const updateDto = { votingDeadline: 'invalid-date' };
       const mockEvent = {
         id: eventId,
+        type: EventType.ONE_TIME,
         startDate: new Date('2024-12-25'),
         startMinuteOfDay: 540,
+        oneTimeSchedule: null,
+        recurringSchedule: null,
       };
 
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.findOneBasic.mockResolvedValue(mockEvent);
+      mockEventScheduleService.getEventStartInstant.mockReturnValue(
+        new Date('2024-12-25T09:00:00.000Z'),
+      );
 
       await expect(service.update(eventId, userId, updateDto)).rejects.toThrow(
         new BadRequestException('Invalid voting deadline'),
@@ -184,14 +256,25 @@ describe('EventUpdateService', () => {
       };
       const updatedEvent = {
         id: eventId,
+        type: EventType.ONE_TIME,
         title: 'New Title',
         description: 'New Description',
         startDate: new Date(),
         endDate: new Date(),
+        oneTimeSchedule: null,
+        recurringSchedule: null,
       };
 
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.update.mockResolvedValue(updatedEvent);
+      mockEventScheduleService.resolveSchedule.mockReturnValue({
+        type: EventType.ONE_TIME,
+        startDate: updatedEvent.startDate,
+        endDate: updatedEvent.endDate,
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 600,
+        slotDurationMin: 15,
+      });
 
       await service.update(eventId, userId, updateDto);
 
@@ -206,14 +289,25 @@ describe('EventUpdateService', () => {
       const updateDto = { title: 'New Title' };
       const updatedEvent = {
         id: eventId,
+        type: EventType.ONE_TIME,
         title: 'New Title',
         description: null,
         startDate: new Date(),
         endDate: new Date(),
+        oneTimeSchedule: null,
+        recurringSchedule: null,
       };
 
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.update.mockResolvedValue(updatedEvent);
+      mockEventScheduleService.resolveSchedule.mockReturnValue({
+        type: EventType.ONE_TIME,
+        startDate: updatedEvent.startDate,
+        endDate: updatedEvent.endDate,
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 600,
+        slotDurationMin: 15,
+      });
 
       await service.update(eventId, userId, updateDto);
 
