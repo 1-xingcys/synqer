@@ -1,10 +1,5 @@
 import type { operations } from "@/generated/openapi";
-import {
-  EventCapabilities,
-  EventSchedule,
-  EventType,
-  normalizeEventType,
-} from "@/types/event";
+import { EventCapabilities, EventSchedule, EventType } from "@/types/event";
 
 type HostedEventsResponse =
   operations["EventCoreController_findMyEvents"]["responses"][200]["content"]["application/json"];
@@ -16,7 +11,7 @@ type HostedEventDetailResponse =
   operations["EventCoreController_findOneHosted"]["responses"][200]["content"]["application/json"];
 
 type EventLike = {
-  type: unknown;
+  type: EventType;
   capabilities: EventCapabilities;
   startDate: string;
   endDate: string;
@@ -31,9 +26,7 @@ export type NormalizedEventLike<T extends EventLike> = Omit<T, "type"> & {
 };
 
 function buildSchedule(event: EventLike): EventSchedule {
-  const type = normalizeEventType(event.type);
-
-  if (type === EventType.RECURRING) {
+  if (event.type === "RECURRING") {
     return {
       kind: "RECURRING",
       startMinuteOfDay: event.startMinuteOfDay,
@@ -55,11 +48,8 @@ function buildSchedule(event: EventLike): EventSchedule {
 export function normalizeEventLike<T extends EventLike>(
   event: T,
 ): NormalizedEventLike<T> {
-  const type = normalizeEventType(event.type);
-
   return {
     ...event,
-    type,
     schedule: buildSchedule(event),
   };
 }

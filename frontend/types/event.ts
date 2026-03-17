@@ -1,10 +1,6 @@
 import type { components } from "@/generated/openapi";
 
-export const EventType = {
-  ONE_TIME: "ONE_TIME",
-  RECURRING: "RECURRING",
-} as const;
-export type EventType = (typeof EventType)[keyof typeof EventType];
+export type EventType = components["schemas"]["EventType"];
 
 // 活動狀態
 export const EventStatus = {
@@ -59,12 +55,6 @@ export interface RecurringEventSchedule {
 }
 
 export type EventSchedule = OneTimeEventSchedule | RecurringEventSchedule;
-
-export function normalizeEventType(value: unknown): EventType {
-  return value === EventType.RECURRING
-    ? EventType.RECURRING
-    : EventType.ONE_TIME;
-}
 
 export function supportsCompletion(event: EventWithCapabilities): boolean {
   return event.capabilities.supportsCompletion;
