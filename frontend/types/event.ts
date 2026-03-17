@@ -1,5 +1,11 @@
 import type { components } from "@/generated/openapi";
 
+export const EventType = {
+  ONE_TIME: "ONE_TIME",
+  RECURRING: "RECURRING",
+} as const;
+export type EventType = (typeof EventType)[keyof typeof EventType];
+
 // 活動狀態
 export const EventStatus = {
   VOTING: "VOTING", // 正在進行投票 (活動創建後 ~ 投票 deadline)
@@ -34,6 +40,30 @@ export type StagedConfirmation =
 
 export interface EventWithCapabilities {
   capabilities: EventCapabilities;
+}
+
+export interface OneTimeEventSchedule {
+  kind: "ONE_TIME";
+  startDate: string;
+  endDate: string;
+  startMinuteOfDay?: number;
+  endMinuteOfDay?: number;
+  slotDurationMin?: number;
+}
+
+export interface RecurringEventSchedule {
+  kind: "RECURRING";
+  startMinuteOfDay?: number;
+  endMinuteOfDay?: number;
+  slotDurationMin?: number;
+}
+
+export type EventSchedule = OneTimeEventSchedule | RecurringEventSchedule;
+
+export function normalizeEventType(value: unknown): EventType {
+  return value === EventType.RECURRING
+    ? EventType.RECURRING
+    : EventType.ONE_TIME;
 }
 
 export function supportsCompletion(event: EventWithCapabilities): boolean {

@@ -1,10 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiFetchJson } from "@/lib/apiClient";
 import type { operations } from "@/generated/openapi";
+import {
+  normalizeAttendedEventsResponse,
+  type NormalizedEventLike,
+} from "@/lib/event-normalizers";
 
 type AttendedEventsResponse =
   operations["EventCoreController_findAttendedEvents"]["responses"][200]["content"]["application/json"];
-export type AttendedEventApiItem = AttendedEventsResponse[number];
+export type AttendedEventApiItem = NormalizedEventLike<
+  AttendedEventsResponse[number]
+>;
 
 const attendedEventsKeys = {
   all: ["attendedEvents"] as const,
@@ -19,6 +25,7 @@ export function useAttendedEvents() {
   const query = useQuery({
     queryKey: attendedEventsKeys.all,
     queryFn: fetchAttendedEvents,
+    select: normalizeAttendedEventsResponse,
     refetchOnMount: "always",
   });
 

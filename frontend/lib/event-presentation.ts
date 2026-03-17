@@ -2,6 +2,7 @@ import {
   EventStatus,
   EventWithCapabilities,
   ConfirmedTimeRange,
+  EventSchedule,
 } from "@/types/event";
 
 type EventWithDateRange = EventWithCapabilities & {
@@ -9,9 +10,17 @@ type EventWithDateRange = EventWithCapabilities & {
   endDate: string;
   votingDeadline?: string | null;
   confirmedTimeRanges?: ConfirmedTimeRange[];
+  schedule?: EventSchedule;
 };
 
 export function getEventCandidateDateRange(event: EventWithDateRange) {
+  if (event.schedule?.kind === "ONE_TIME") {
+    return {
+      start: new Date(event.schedule.startDate),
+      end: new Date(event.schedule.endDate),
+    };
+  }
+
   return {
     start: new Date(event.startDate),
     end: new Date(event.endDate),
