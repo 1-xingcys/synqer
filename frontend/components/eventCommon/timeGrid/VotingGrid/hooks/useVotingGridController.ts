@@ -16,7 +16,7 @@ import { useSlotMatrixViewModel } from "./useSlotMatrixViewModel";
 import { useSlotGridModel } from "../../hooks/useSlotGridModel";
 import { useSlotSelectionModel } from "./useSlotSelectionModel";
 import { groupVotesBySlot } from "../../utils";
-import { VoteMode } from "@/types/event";
+import { EventCapabilities, VoteMode } from "@/types/event";
 
 interface UseVotingGridControllerProps {
   slots: VotingGridProps["slots"];
@@ -26,6 +26,7 @@ interface UseVotingGridControllerProps {
   eventId: VotingGridProps["eventId"];
   currentUserId: VotingGridProps["currentUserId"];
   eventTitle: VotingGridProps["eventTitle"];
+  capabilities: EventCapabilities;
 }
 
 interface UseVotingGridControllerResult {
@@ -88,6 +89,7 @@ interface UseVotingGridControllerResult {
     loadingCalendar: boolean;
     showCalendarOnGrid: boolean;
     setShowCalendarOnGrid: (show: boolean) => void;
+    isCalendarSupported: boolean;
     connectCalendar: () => void;
     disconnectCalendar: () => Promise<void>;
     markConflictsAsUnavailable: () => void;
@@ -106,6 +108,7 @@ export function useVotingGridController({
   eventId,
   currentUserId,
   eventTitle,
+  capabilities,
 }: UseVotingGridControllerProps): UseVotingGridControllerResult {
   const [granularity, setGranularity] = useState<TimeGranularity>(30);
   const { datesPerPage, slotHeight } = useResponsiveGrid();
@@ -194,7 +197,11 @@ export function useVotingGridController({
     setShowCalendarOnGrid,
     connectCalendar,
     disconnectCalendar,
-  } = useCalendarConflictSyncApi({ eventId, slots });
+  } = useCalendarConflictSyncApi({
+    eventId,
+    slots,
+    enabled: capabilities.supportsCalendarConflict,
+  });
 
   const { getCalendarProjectionForCell } = useCalendarOverlayProjection({
     mergedTimeRows,
@@ -304,6 +311,7 @@ export function useVotingGridController({
       loadingCalendar,
       showCalendarOnGrid,
       setShowCalendarOnGrid,
+      isCalendarSupported: capabilities.supportsCalendarConflict,
       connectCalendar,
       disconnectCalendar,
       markConflictsAsUnavailable,

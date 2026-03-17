@@ -21,6 +21,7 @@ export default function VotingGrid({
   eventId,
   currentUserId,
   eventTitle,
+  capabilities,
 }: VotingGridProps) {
   const tJoined = useTranslations("joined");
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
@@ -34,6 +35,7 @@ export default function VotingGrid({
     eventId,
     currentUserId,
     eventTitle,
+    capabilities,
   });
 
   const {
@@ -79,6 +81,7 @@ export default function VotingGrid({
     loadingCalendar,
     showCalendarOnGrid,
     setShowCalendarOnGrid,
+    isCalendarSupported,
     connectCalendar,
     disconnectCalendar,
     markConflictsAsUnavailable,
@@ -161,6 +164,7 @@ export default function VotingGrid({
               onGranularityChange={setGranularity}
               onSelectAll={selectAll}
               onClearSelection={clearSelection}
+              showCalendarTools={isCalendarSupported}
               calendarStatus={calendarStatus}
               onOpenCalendarPanel={() => setIsCalendarModalOpen(true)}
               onDisconnectCalendar={disconnectCalendar}
@@ -217,7 +221,7 @@ export default function VotingGrid({
         </div>
       </div>
 
-      {isCalendarModalOpen && (
+      {isCalendarSupported && isCalendarModalOpen && (
         <>
           <div
             className={`fixed inset-0 ${Z_INDEX.MODAL_BACKDROP} bg-black/55 backdrop-blur-sm animate-in fade-in duration-200`}

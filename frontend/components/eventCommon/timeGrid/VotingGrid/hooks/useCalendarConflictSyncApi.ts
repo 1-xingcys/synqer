@@ -8,6 +8,7 @@ import { mapCalendarEventsToSlots } from "../../utils";
 interface UseCalendarConflictSyncApiProps {
   eventId?: string;
   slots: TimeSlot[];
+  enabled: boolean;
 }
 
 interface UseCalendarConflictSyncApiReturn {
@@ -35,6 +36,7 @@ interface UseCalendarConflictSyncApiReturn {
 export function useCalendarConflictSyncApi({
   eventId,
   slots,
+  enabled,
 }: UseCalendarConflictSyncApiProps): UseCalendarConflictSyncApiReturn {
   const {
     status: calendarStatus,
@@ -57,7 +59,7 @@ export function useCalendarConflictSyncApi({
 
   // Load calendar conflicts
   const loadCalendarConflicts = useCallback(async () => {
-    if (!eventId || !calendarStatus?.connected) return;
+    if (!enabled || !eventId || !calendarStatus?.connected) return;
 
     setLoadingCalendar(true);
     try {
@@ -71,14 +73,21 @@ export function useCalendarConflictSyncApi({
     } finally {
       setLoadingCalendar(false);
     }
-  }, [eventId, calendarStatus?.connected, getConflictingSlots]);
+  }, [enabled, eventId, calendarStatus?.connected, getConflictingSlots]);
 
   // Auto-load calendar conflicts when connected
   useEffect(() => {
-    if (calendarStatus?.connected && eventId) {
+    if (enabled && calendarStatus?.connected && eventId) {
       void loadCalendarConflicts();
     }
-  }, [calendarStatus?.connected, eventId, loadCalendarConflicts]);
+  }, [enabled, calendarStatus?.connected, eventId, loadCalendarConflicts]);
+
+  useEffect(() => {
+    if (enabled) return;
+    setCalendarEvents([]);
+    setConflictingSlotIds([]);
+    setShowCalendarOnGrid(false);
+  }, [enabled]);
 
   return {
     // State
@@ -87,7 +96,7 @@ export function useCalendarConflictSyncApi({
     calendarEvents,
     conflictingSlotIds,
     loadingCalendar,
-    showCalendarOnGrid,
+    showCalendarOnGrid: enabled ? showCalendarOnGrid : false,
 
     // Computed
     calendarEventsForSlot,

@@ -13,6 +13,7 @@ interface GridToolsMenuProps {
   onGranularityChange: (granularity: TimeGranularity) => void;
   onSelectAll: () => void;
   onClearSelection: () => void;
+  showCalendarTools: boolean;
   calendarStatus: { connected: boolean; googleEmail?: string } | null;
   onOpenCalendarPanel: () => void;
   onDisconnectCalendar: () => Promise<void>;
@@ -31,6 +32,7 @@ export function GridToolsMenu({
   onGranularityChange,
   onSelectAll,
   onClearSelection,
+  showCalendarTools,
   calendarStatus,
   onOpenCalendarPanel,
   onDisconnectCalendar,
@@ -214,12 +216,16 @@ export function GridToolsMenu({
           </div>
           {quickActionButtons}
 
-          <div className="my-1 border-t border-zinc-200 dark:border-zinc-700" />
+          {showCalendarTools && (
+            <>
+              <div className="my-1 border-t border-zinc-200 dark:border-zinc-700" />
 
-          <div className="px-3 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
-            {tJoined("mobileTools.integration")}
-          </div>
-          {integrationButtons}
+              <div className="px-3 py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">
+                {tJoined("mobileTools.integration")}
+              </div>
+              {integrationButtons}
+            </>
+          )}
         </div>
       )}
     </div>
