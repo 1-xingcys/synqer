@@ -1351,6 +1351,13 @@
           "message"
         ]
       },
+      "EventType": {
+        "type": "string",
+        "enum": [
+          "ONE_TIME",
+          "RECURRING"
+        ]
+      },
       "ConfirmedTimeRangeDto": {
         "type": "object",
         "properties": {
@@ -1397,11 +1404,15 @@
       "HostedEventListItemDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
           "id": {
             "type": "string"
-          },
-          "type": {
-            "type": "object"
           },
           "title": {
             "type": "string",
@@ -1460,8 +1471,8 @@
           }
         },
         "required": [
-          "id",
           "type",
+          "id",
           "title",
           "description",
           "startDate",
@@ -1500,11 +1511,15 @@
       "AttendedEventListItemDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
           "id": {
             "type": "string"
-          },
-          "type": {
-            "type": "object"
           },
           "title": {
             "type": "string",
@@ -1574,8 +1589,8 @@
           }
         },
         "required": [
-          "id",
           "type",
+          "id",
           "title",
           "description",
           "startDate",
@@ -1659,11 +1674,15 @@
       "EventDetailEventDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
           "id": {
             "type": "string"
-          },
-          "type": {
-            "type": "object"
           },
           "title": {
             "type": "string",
@@ -1732,8 +1751,8 @@
           }
         },
         "required": [
-          "id",
           "type",
+          "id",
           "title",
           "description",
           "startDate",
@@ -2009,14 +2028,18 @@
       "EventPublicInfoResponseDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
           "isDeleted": {
             "type": "boolean"
           },
           "id": {
             "type": "string"
-          },
-          "type": {
-            "type": "object"
           },
           "title": {
             "type": "string",
@@ -2086,9 +2109,9 @@
           }
         },
         "required": [
+          "type",
           "isDeleted",
           "id",
-          "type",
           "title",
           "description",
           "startDate",

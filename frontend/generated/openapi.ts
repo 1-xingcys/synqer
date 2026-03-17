@@ -780,8 +780,14 @@ export interface components {
             endTime: string;
             slotIds: string[];
         };
+        EventCapabilitiesDto: {
+            supportsCompletion: boolean;
+            supportsCalendarConflict: boolean;
+            supportsAddToCalendar: boolean;
+        };
         HostedEventListItemDto: {
             id: string;
+            type: Record<string, never>;
             title: string | null;
             description: string | null;
             /** Format: date-time */
@@ -796,6 +802,7 @@ export interface components {
             confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
+            capabilities: components["schemas"]["EventCapabilitiesDto"];
             expectedParticipantCount: number;
             votedCount: number;
         };
@@ -806,6 +813,7 @@ export interface components {
         };
         AttendedEventListItemDto: {
             id: string;
+            type: Record<string, never>;
             title: string | null;
             description: string | null;
             /** Format: date-time */
@@ -820,6 +828,7 @@ export interface components {
             confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
+            capabilities: components["schemas"]["EventCapabilitiesDto"];
             hasVoted: boolean;
             expectedParticipantCount: number;
             votedCount: number;
@@ -843,6 +852,7 @@ export interface components {
         };
         EventDetailEventDto: {
             id: string;
+            type: Record<string, never>;
             title: string | null;
             description: string | null;
             /** Format: date-time */
@@ -861,6 +871,7 @@ export interface components {
             confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
+            capabilities: components["schemas"]["EventCapabilitiesDto"];
         };
         EventDetailLineGroupDto: {
             id: string;
@@ -923,6 +934,7 @@ export interface components {
         EventPublicInfoResponseDto: {
             isDeleted: boolean;
             id: string;
+            type: Record<string, never>;
             title: string | null;
             description: string | null;
             /** Format: date-time */
@@ -939,6 +951,7 @@ export interface components {
             confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
+            capabilities: components["schemas"]["EventCapabilitiesDto"];
             expectedParticipantCount: number;
             host?: components["schemas"]["EventPublicHostDto"] | null;
         };
