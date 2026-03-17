@@ -48,6 +48,7 @@ export default function JoinedEventVotePage() {
         currentUserId={user.id.toString()}
         eventId={eventId}
         eventTitle={eventDetailData.event.title || tJoined("untitledEvent")}
+        capabilities={eventDetailData.event.capabilities}
       />
     </div>
   );

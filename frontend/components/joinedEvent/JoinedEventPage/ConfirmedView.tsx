@@ -10,12 +10,14 @@ interface ConfirmedViewProps {
   eventTitle: string;
   eventDescription?: string | null;
   confirmedTimeRanges: ConfirmedTimeRange[];
+  supportsAddToCalendar: boolean;
 }
 
 export function ConfirmedView({
   eventTitle,
   eventDescription,
   confirmedTimeRanges,
+  supportsAddToCalendar,
 }: ConfirmedViewProps) {
   const t = useTranslations("joined");
 
@@ -48,7 +50,7 @@ export function ConfirmedView({
       )}
 
       {/* Add to Google Calendar */}
-      {confirmedTimeRanges.length > 0 && (
+      {supportsAddToCalendar && confirmedTimeRanges.length > 0 && (
         <AddToCalendarPanel
           eventTitle={eventTitle}
           eventDescription={eventDescription}

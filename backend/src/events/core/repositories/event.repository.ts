@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { Prisma, Event } from '@prisma/client';
+import { Prisma, Event, EventSlotAxisType, EventType } from '@prisma/client';
 
 /**
  * 活動資料存取層
@@ -17,6 +17,7 @@ export class EventRepository {
     eventData: {
       title?: string;
       description?: string;
+      type: EventType;
       ownerId: string | null;
       startDate: Date;
       endDate: Date;
@@ -41,7 +42,20 @@ export class EventRepository {
     return this.prisma.$transaction(async (prisma) => {
       // 建立 Event
       const event = await prisma.event.create({
-        data: eventData,
+        data: {
+          ...eventData,
+        },
+      });
+
+      await prisma.oneTimeEventSchedule.create({
+        data: {
+          eventId: event.id,
+          startDate: eventData.startDate,
+          endDate: eventData.endDate,
+          startMinuteOfDay: eventData.startMinuteOfDay,
+          endMinuteOfDay: eventData.endMinuteOfDay,
+          slotDurationMin: eventData.slotDurationMin,
+        },
       });
 
       // 建立時間槽
@@ -50,6 +64,9 @@ export class EventRepository {
           data: slots.map((slot, index) => ({
             eventId: event.id,
             date: slot.date,
+            axisType: EventSlotAxisType.DATE,
+            axisDate: slot.date,
+            axisWeekday: null,
             startMinute: slot.startMinute,
             endMinute: slot.endMinute,
             index,
@@ -111,6 +128,8 @@ export class EventRepository {
             },
           },
         },
+        oneTimeSchedule: true,
+        recurringSchedule: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -165,6 +184,8 @@ export class EventRepository {
             },
           },
         },
+        oneTimeSchedule: true,
+        recurringSchedule: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -230,6 +251,8 @@ export class EventRepository {
             },
           },
         },
+        oneTimeSchedule: true,
+        recurringSchedule: true,
       },
     });
   }
@@ -297,6 +320,8 @@ export class EventRepository {
             },
           },
         },
+        oneTimeSchedule: true,
+        recurringSchedule: true,
       },
     });
   }
@@ -307,10 +332,9 @@ export class EventRepository {
   async findOneBasic(eventId: string) {
     return this.prisma.event.findUnique({
       where: { id: eventId },
-      select: {
-        id: true,
-        startDate: true,
-        startMinuteOfDay: true,
+      include: {
+        oneTimeSchedule: true,
+        recurringSchedule: true,
       },
     });
   }
@@ -322,6 +346,10 @@ export class EventRepository {
     return this.prisma.event.update({
       where: { id: eventId },
       data,
+      include: {
+        oneTimeSchedule: true,
+        recurringSchedule: true,
+      },
     });
   }
 

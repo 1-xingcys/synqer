@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import type { operations } from "@/generated/openapi";
+import { normalizeEventDetailResponse } from "@/lib/event-normalizers";
 
-type EventDetailResponse =
+type RawEventDetailResponse =
   operations["EventCoreController_findOne"]["responses"][200]["content"]["application/json"];
-export type EventDetailData = EventDetailResponse;
+export type EventDetailData = ReturnType<typeof normalizeEventDetailResponse>;
 type VoteEventRequest =
   operations["VotingController_vote"]["requestBody"]["content"]["application/json"];
 type VoteEventResponse =
@@ -26,7 +27,9 @@ export const eventDetailKeys = {
 };
 
 // Fetch function
-async function fetchEventDetail(eventId: string): Promise<EventDetailResponse> {
+async function fetchEventDetail(
+  eventId: string,
+): Promise<RawEventDetailResponse> {
   if (!process.env.NEXT_PUBLIC_API) {
     throw new Error("NEXT_PUBLIC_API is not set");
   }
@@ -42,7 +45,7 @@ async function fetchEventDetail(eventId: string): Promise<EventDetailResponse> {
     throw new Error("Failed to fetch event data");
   }
 
-  return response.json() as Promise<EventDetailResponse>;
+  return response.json() as Promise<RawEventDetailResponse>;
 }
 
 // Patch votes function (incremental update)
@@ -186,6 +189,7 @@ export function useEventDetail(eventId: string) {
   const query = useQuery({
     queryKey: eventDetailKeys.detail(eventId),
     queryFn: () => fetchEventDetail(eventId),
+    select: normalizeEventDetailResponse,
     enabled: !!eventId,
   });
 

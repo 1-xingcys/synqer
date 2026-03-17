@@ -1351,6 +1351,13 @@
           "message"
         ]
       },
+      "EventType": {
+        "type": "string",
+        "enum": [
+          "ONE_TIME",
+          "RECURRING"
+        ]
+      },
       "ConfirmedTimeRangeDto": {
         "type": "object",
         "properties": {
@@ -1375,9 +1382,35 @@
           "slotIds"
         ]
       },
+      "EventCapabilitiesDto": {
+        "type": "object",
+        "properties": {
+          "supportsCompletion": {
+            "type": "boolean"
+          },
+          "supportsCalendarConflict": {
+            "type": "boolean"
+          },
+          "supportsAddToCalendar": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "supportsCompletion",
+          "supportsCalendarConflict",
+          "supportsAddToCalendar"
+        ]
+      },
       "HostedEventListItemDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
           "id": {
             "type": "string"
           },
@@ -1427,6 +1460,9 @@
               "COMPLETED"
             ]
           },
+          "capabilities": {
+            "$ref": "#/components/schemas/EventCapabilitiesDto"
+          },
           "expectedParticipantCount": {
             "type": "number"
           },
@@ -1435,6 +1471,7 @@
           }
         },
         "required": [
+          "type",
           "id",
           "title",
           "description",
@@ -1445,6 +1482,7 @@
           "confirmedSlotIds",
           "confirmedTimeRanges",
           "status",
+          "capabilities",
           "expectedParticipantCount",
           "votedCount"
         ]
@@ -1473,6 +1511,13 @@
       "AttendedEventListItemDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
           "id": {
             "type": "string"
           },
@@ -1522,6 +1567,9 @@
               "COMPLETED"
             ]
           },
+          "capabilities": {
+            "$ref": "#/components/schemas/EventCapabilitiesDto"
+          },
           "hasVoted": {
             "type": "boolean"
           },
@@ -1541,6 +1589,7 @@
           }
         },
         "required": [
+          "type",
           "id",
           "title",
           "description",
@@ -1551,6 +1600,7 @@
           "confirmedSlotIds",
           "confirmedTimeRanges",
           "status",
+          "capabilities",
           "hasVoted",
           "expectedParticipantCount",
           "votedCount",
@@ -1624,6 +1674,13 @@
       "EventDetailEventDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
           "id": {
             "type": "string"
           },
@@ -1688,9 +1745,13 @@
               "CONFIRMED",
               "COMPLETED"
             ]
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/EventCapabilitiesDto"
           }
         },
         "required": [
+          "type",
           "id",
           "title",
           "description",
@@ -1705,7 +1766,8 @@
           "votingDeadline",
           "confirmedSlotIds",
           "confirmedTimeRanges",
-          "status"
+          "status",
+          "capabilities"
         ]
       },
       "EventDetailLineGroupDto": {
@@ -1966,6 +2028,13 @@
       "EventPublicInfoResponseDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
           "isDeleted": {
             "type": "boolean"
           },
@@ -2024,6 +2093,9 @@
               "COMPLETED"
             ]
           },
+          "capabilities": {
+            "$ref": "#/components/schemas/EventCapabilitiesDto"
+          },
           "expectedParticipantCount": {
             "type": "number"
           },
@@ -2037,6 +2109,7 @@
           }
         },
         "required": [
+          "type",
           "isDeleted",
           "id",
           "title",
@@ -2048,6 +2121,7 @@
           "confirmedSlotIds",
           "confirmedTimeRanges",
           "status",
+          "capabilities",
           "expectedParticipantCount"
         ]
       },

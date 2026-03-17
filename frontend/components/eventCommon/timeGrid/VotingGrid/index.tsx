@@ -21,6 +21,7 @@ export default function VotingGrid({
   eventId,
   currentUserId,
   eventTitle,
+  capabilities,
 }: VotingGridProps) {
   const tJoined = useTranslations("joined");
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
@@ -34,6 +35,7 @@ export default function VotingGrid({
     eventId,
     currentUserId,
     eventTitle,
+    capabilities,
   });
 
   const {
@@ -50,8 +52,13 @@ export default function VotingGrid({
     selectEntireDay,
   } = selection;
 
-  const { dates, paginatedDates, currentPage, datesPerPage, handlePageChange } =
-    pagination;
+  const {
+    columns,
+    paginatedDates,
+    currentPage,
+    datesPerPage,
+    handlePageChange,
+  } = pagination;
 
   const {
     granularity,
@@ -79,6 +86,7 @@ export default function VotingGrid({
     loadingCalendar,
     showCalendarOnGrid,
     setShowCalendarOnGrid,
+    isCalendarSupported,
     connectCalendar,
     disconnectCalendar,
     markConflictsAsUnavailable,
@@ -148,7 +156,7 @@ export default function VotingGrid({
           <div className="flex items-center gap-2">
             <div className="flex-1 min-w-0">
               <DatePagination
-                dates={dates}
+                columns={columns}
                 currentPage={currentPage}
                 datesPerPage={datesPerPage}
                 onPageChange={handlePageChange}
@@ -161,6 +169,7 @@ export default function VotingGrid({
               onGranularityChange={setGranularity}
               onSelectAll={selectAll}
               onClearSelection={clearSelection}
+              showCalendarTools={isCalendarSupported}
               calendarStatus={calendarStatus}
               onOpenCalendarPanel={() => setIsCalendarModalOpen(true)}
               onDisconnectCalendar={disconnectCalendar}
@@ -168,7 +177,9 @@ export default function VotingGrid({
           </div>
 
           <DateHeader
-            dates={paginatedDates}
+            columns={columns.filter((column) =>
+              paginatedDates.includes(column.key),
+            )}
             isDayFullySelected={isDayFullySelected}
             onSelectDay={selectEntireDay}
             firstTimeLabel={firstTimeLabel}
@@ -217,7 +228,7 @@ export default function VotingGrid({
         </div>
       </div>
 
-      {isCalendarModalOpen && (
+      {isCalendarSupported && isCalendarModalOpen && (
         <>
           <div
             className={`fixed inset-0 ${Z_INDEX.MODAL_BACKDROP} bg-black/55 backdrop-blur-sm animate-in fade-in duration-200`}

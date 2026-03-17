@@ -71,6 +71,7 @@ export class ConfirmationService {
       id: updatedEvent.id,
       confirmedSlotIds: confirmedTimeSlots.map((s) => s.slotId),
       status: this.eventStatusService.computeEventStatus({
+        eventType: updatedEvent.type,
         votingDeadline: updatedEvent.votingDeadline,
         confirmedTimeSlots,
       }),
@@ -196,6 +197,7 @@ export class ConfirmationService {
       id: updatedEvent.id,
       confirmedSlotIds: confirmedTimeSlots.map((slot) => slot.slotId),
       status: this.eventStatusService.computeEventStatus({
+        eventType: updatedEvent.type,
         votingDeadline: updatedEvent.votingDeadline,
         confirmedTimeSlots,
       }),
@@ -221,6 +223,7 @@ export class ConfirmationService {
     return {
       id: updatedEvent.id,
       status: this.eventStatusService.computeEventStatus({
+        eventType: updatedEvent.type,
         votingDeadline: updatedEvent.votingDeadline,
         confirmedTimeSlots: [],
       }),

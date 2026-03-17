@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { EventType } from '@prisma/client';
 import {
   EventStatusService,
   EventStatus,
@@ -90,6 +91,25 @@ describe('EventStatusService', () => {
       });
 
       expect(result).toBe(EventStatus.COMPLETED);
+    });
+
+    it('should return CONFIRMED for recurring events with confirmed slots', () => {
+      const pastDate = new Date('2020-01-01T00:00:00.000Z');
+
+      const result = service.computeEventStatus({
+        eventType: EventType.RECURRING,
+        votingDeadline: null,
+        confirmedTimeSlots: [
+          {
+            slotId: 'slot-1',
+            date: pastDate,
+            startMinute: 540,
+            endMinute: 600,
+          },
+        ],
+      });
+
+      expect(result).toBe(EventStatus.CONFIRMED);
     });
 
     it('should use latest end time to determine COMPLETED status', () => {

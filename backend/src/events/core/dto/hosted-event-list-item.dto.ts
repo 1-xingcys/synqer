@@ -1,4 +1,7 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { EventStatus } from '../../shared/services/event-status.service';
+import { EventType } from '@prisma/client';
+import { EventCapabilities } from '../../shared/interfaces/event-contract.interface';
 
 export class ConfirmedTimeRangeDto {
   startTime!: Date;
@@ -6,8 +9,16 @@ export class ConfirmedTimeRangeDto {
   slotIds!: string[];
 }
 
+export class EventCapabilitiesDto implements EventCapabilities {
+  supportsCompletion!: boolean;
+  supportsCalendarConflict!: boolean;
+  supportsAddToCalendar!: boolean;
+}
+
 export class HostedEventListItemDto {
   id!: string;
+  @ApiProperty({ enum: EventType, enumName: 'EventType' })
+  type!: EventType;
   title!: string | null;
   description!: string | null;
   startDate!: Date;
@@ -17,6 +28,7 @@ export class HostedEventListItemDto {
   confirmedSlotIds!: string[];
   confirmedTimeRanges!: ConfirmedTimeRangeDto[];
   status!: EventStatus;
+  capabilities!: EventCapabilitiesDto;
   expectedParticipantCount!: number;
   votedCount!: number;
 }

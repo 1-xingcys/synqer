@@ -1,9 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import type { operations } from "@/generated/openapi";
+import { normalizeHostedEventDetailResponse } from "@/lib/event-normalizers";
 
-type HostedEventDetailResponse =
+type RawHostedEventDetailResponse =
   operations["EventCoreController_findOneHosted"]["responses"][200]["content"]["application/json"];
-export type HostedEventDetailData = HostedEventDetailResponse;
+export type HostedEventDetailData = ReturnType<
+  typeof normalizeHostedEventDetailResponse
+>;
 
 // Query key factory for hosted event
 export const hostedEventKeys = {
@@ -14,7 +17,7 @@ export const hostedEventKeys = {
 // Fetch function
 async function fetchHostedEventDetail(
   eventId: string,
-): Promise<HostedEventDetailResponse> {
+): Promise<RawHostedEventDetailResponse> {
   if (!process.env.NEXT_PUBLIC_API) {
     throw new Error("NEXT_PUBLIC_API is not set");
   }
@@ -33,13 +36,14 @@ async function fetchHostedEventDetail(
     throw new Error("Failed to fetch event data");
   }
 
-  return response.json() as Promise<HostedEventDetailResponse>;
+  return response.json() as Promise<RawHostedEventDetailResponse>;
 }
 
 export function useHostedEventDetail(eventId: string) {
   const query = useQuery({
     queryKey: hostedEventKeys.detail(eventId),
     queryFn: () => fetchHostedEventDetail(eventId),
+    select: normalizeHostedEventDetailResponse,
     enabled: !!eventId,
   });
 

@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { UpdateEventDto } from '../dto/update-event.dto';
 import { EventRepository } from '../repositories/event.repository';
 import { EventAuthorizationService } from '../../shared/services/event-authorization.service';
+import { EventScheduleService } from '../../shared/services/event-schedule.service';
 
 /**
  * 活動更新服務（業務邏輯層）
@@ -12,6 +13,7 @@ export class EventUpdateService {
   constructor(
     private eventRepository: EventRepository,
     private eventAuthorizationService: EventAuthorizationService,
+    private eventScheduleService: EventScheduleService,
   ) {}
 
   /**
@@ -48,13 +50,14 @@ export class EventUpdateService {
     }
 
     const updatedEvent = await this.eventRepository.update(eventId, updateData);
+    const schedule = this.eventScheduleService.resolveSchedule(updatedEvent);
 
     return {
       id: updatedEvent.id,
       title: updatedEvent.title,
       description: updatedEvent.description,
-      startDate: updatedEvent.startDate,
-      endDate: updatedEvent.endDate,
+      startDate: schedule.startDate ?? updatedEvent.startDate,
+      endDate: schedule.endDate ?? updatedEvent.endDate,
     };
   }
 
@@ -86,13 +89,9 @@ export class EventUpdateService {
       throw new BadRequestException('Invalid voting deadline');
     }
 
-    // 計算活動開始時間（startDate + startMinuteOfDay）
-    const eventStart = new Date(event.startDate);
-    const hours = Math.floor(event.startMinuteOfDay / 60);
-    const minutes = event.startMinuteOfDay % 60;
-    eventStart.setUTCHours(hours, minutes, 0, 0);
+    const eventStart = this.eventScheduleService.getEventStartInstant(event);
 
-    if (deadline > eventStart) {
+    if (eventStart && deadline > eventStart) {
       throw new BadRequestException(
         'Voting deadline must be before or at the event start time',
       );

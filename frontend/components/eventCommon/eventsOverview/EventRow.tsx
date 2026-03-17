@@ -23,6 +23,7 @@ import {
 import { format } from "date-fns";
 import { EventRowData, HostedEventRowData, EventRowMode } from "./types";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
+import { getEventCandidateDateRange } from "@/lib/event-presentation";
 
 interface EventRowProps {
   event: EventRowData | HostedEventRowData;
@@ -53,11 +54,7 @@ export default function EventRow({
 
   // Format time range based on variant
   const getTimeRange = () => {
-    // 使用活動的日期範圍
-    return {
-      start: new Date(event.startDate),
-      end: new Date(event.endDate),
-    };
+    return getEventCandidateDateRange(event);
   };
 
   const timeRange = getTimeRange();

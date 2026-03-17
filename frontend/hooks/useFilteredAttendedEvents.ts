@@ -1,6 +1,10 @@
 import { useMemo } from "react";
 import { EventStatus } from "@/types/event";
 import type { AttendedEventApiItem } from "./useAttendedEvents";
+import {
+  getEventConfirmedEndTime,
+  getEventConfirmedStartTime,
+} from "@/lib/event-presentation";
 
 interface FilteredEvents {
   [EventStatus.VOTING]: AttendedEventApiItem[];
@@ -49,17 +53,17 @@ function sortEvents(
       }
 
       case EventStatus.CONFIRMED: {
-        // By start date (closer to now = higher priority)
-        const startA = new Date(a.startDate).getTime();
-        const startB = new Date(b.startDate).getTime();
-        return Math.abs(startA - now) - Math.abs(startB - now);
+        return (
+          Math.abs(getEventConfirmedStartTime(a) - now) -
+          Math.abs(getEventConfirmedStartTime(b) - now)
+        );
       }
 
       case EventStatus.COMPLETED: {
-        // By end date (closer to now = higher priority)
-        const endA = new Date(a.endDate).getTime();
-        const endB = new Date(b.endDate).getTime();
-        return Math.abs(endA - now) - Math.abs(endB - now);
+        return (
+          Math.abs(getEventConfirmedEndTime(a) - now) -
+          Math.abs(getEventConfirmedEndTime(b) - now)
+        );
       }
 
       default:

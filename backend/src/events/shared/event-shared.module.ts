@@ -7,6 +7,8 @@ import { EventStatusService } from './services/event-status.service';
 import { EventAuthorizationService } from './services/event-authorization.service';
 import { EventMapperService } from './services/event-mapper.service';
 import { ConfirmedTimeService } from './services/confirmed-time.service';
+import { EventCapabilitiesService } from './services/event-capabilities.service';
+import { EventScheduleService } from './services/event-schedule.service';
 
 // Repositories
 import { EventBaseRepository } from './repositories/event.repository';
@@ -20,6 +22,8 @@ import { TimeSlotRepository } from './repositories/time-slot.repository';
     EventAuthorizationService,
     EventMapperService,
     ConfirmedTimeService,
+    EventCapabilitiesService,
+    EventScheduleService,
     EventBaseRepository,
     TimeSlotRepository,
   ],
@@ -29,6 +33,8 @@ import { TimeSlotRepository } from './repositories/time-slot.repository';
     EventAuthorizationService,
     EventMapperService,
     ConfirmedTimeService,
+    EventCapabilitiesService,
+    EventScheduleService,
     EventBaseRepository,
     TimeSlotRepository,
   ],

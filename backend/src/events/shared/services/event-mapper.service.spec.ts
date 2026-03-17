@@ -1,12 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { EventType } from '@prisma/client';
 import { EventMapperService } from './event-mapper.service';
 import { EventStatusService } from './event-status.service';
 import { ConfirmedTimeService } from './confirmed-time.service';
+import { EventCapabilitiesService } from './event-capabilities.service';
+import { EventScheduleService } from './event-schedule.service';
 
 describe('EventMapperService', () => {
   let service: EventMapperService;
   let eventStatusService: jest.Mocked<EventStatusService>;
   let confirmedTimeService: jest.Mocked<ConfirmedTimeService>;
+  let eventCapabilitiesService: jest.Mocked<EventCapabilitiesService>;
 
   const mockEventStatusService = {
     computeEventStatus: jest.fn(),
@@ -16,18 +20,28 @@ describe('EventMapperService', () => {
     mergeToTimeRanges: jest.fn(),
   };
 
+  const mockEventCapabilitiesService = {
+    buildCapabilities: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EventMapperService,
         { provide: EventStatusService, useValue: mockEventStatusService },
         { provide: ConfirmedTimeService, useValue: mockConfirmedTimeService },
+        {
+          provide: EventCapabilitiesService,
+          useValue: mockEventCapabilitiesService,
+        },
+        EventScheduleService,
       ],
     }).compile();
 
     service = module.get<EventMapperService>(EventMapperService);
     eventStatusService = module.get(EventStatusService);
     confirmedTimeService = module.get(ConfirmedTimeService);
+    eventCapabilitiesService = module.get(EventCapabilitiesService);
 
     jest.clearAllMocks();
   });
@@ -177,6 +191,7 @@ describe('EventMapperService', () => {
   describe('mapEventToList', () => {
     const mockEvent = {
       id: 'event-123',
+      type: EventType.ONE_TIME,
       title: 'Test Event',
       description: 'Description',
       startDate: new Date('2024-12-25'),
@@ -190,11 +205,17 @@ describe('EventMapperService', () => {
     it('should map event to list format with status', () => {
       mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
       mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
+      mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
+        supportsCompletion: true,
+        supportsCalendarConflict: true,
+        supportsAddToCalendar: true,
+      });
 
       const result = service.mapEventToList(mockEvent);
 
       expect(result).toEqual({
         id: 'event-123',
+        type: EventType.ONE_TIME,
         title: 'Test Event',
         description: 'Description',
         startDate: new Date('2024-12-25'),
@@ -204,6 +225,16 @@ describe('EventMapperService', () => {
         confirmedSlotIds: [],
         confirmedTimeRanges: [],
         status: 'VOTING',
+        capabilities: {
+          supportsCompletion: true,
+          supportsCalendarConflict: true,
+          supportsAddToCalendar: true,
+        },
+      });
+      expect(eventStatusService.computeEventStatus).toHaveBeenCalledWith({
+        eventType: EventType.ONE_TIME,
+        votingDeadline: null,
+        confirmedTimeSlots: undefined,
       });
     });
 
@@ -222,6 +253,11 @@ describe('EventMapperService', () => {
         { startTime: new Date(), endTime: new Date(), slotIds: ['slot-1'] },
       ]);
       mockEventStatusService.computeEventStatus.mockReturnValue('CONFIRMED');
+      mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
+        supportsCompletion: true,
+        supportsCalendarConflict: true,
+        supportsAddToCalendar: true,
+      });
 
       const result = service.mapEventToList(eventWithConfirmed);
 
@@ -233,6 +269,7 @@ describe('EventMapperService', () => {
   describe('mapEventToDetail', () => {
     const mockEvent = {
       id: 'event-123',
+      type: EventType.ONE_TIME,
       title: 'Test Event',
       description: 'Description',
       startDate: new Date('2024-12-25'),
@@ -250,11 +287,17 @@ describe('EventMapperService', () => {
     it('should map event to detail format', () => {
       mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
       mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
+      mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
+        supportsCompletion: true,
+        supportsCalendarConflict: true,
+        supportsAddToCalendar: true,
+      });
 
       const result = service.mapEventToDetail(mockEvent);
 
       expect(result).toEqual({
         id: 'event-123',
+        type: EventType.ONE_TIME,
         title: 'Test Event',
         description: 'Description',
         startDate: new Date('2024-12-25'),
@@ -269,6 +312,11 @@ describe('EventMapperService', () => {
         confirmedSlotIds: [],
         confirmedTimeRanges: [],
         status: 'VOTING',
+        capabilities: {
+          supportsCompletion: true,
+          supportsCalendarConflict: true,
+          supportsAddToCalendar: true,
+        },
       });
     });
 
