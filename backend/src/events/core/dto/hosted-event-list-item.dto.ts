@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { EventStatus } from '../../shared/services/event-status.service';
 import { EventType } from '@prisma/client';
 import { EventCapabilities } from '../../shared/interfaces/event-contract.interface';
@@ -16,6 +17,7 @@ export class EventCapabilitiesDto implements EventCapabilities {
 
 export class HostedEventListItemDto {
   id!: string;
+  @ApiProperty({ enum: EventType, enumName: 'EventType' })
   type!: EventType;
   title!: string | null;
   description!: string | null;

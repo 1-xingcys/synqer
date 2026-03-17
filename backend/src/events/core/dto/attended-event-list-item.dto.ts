@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { EventStatus } from '../../shared/services/event-status.service';
 import { EventType } from '@prisma/client';
 import {
@@ -13,6 +14,7 @@ export class AttendedEventHostDto {
 
 export class AttendedEventListItemDto {
   id!: string;
+  @ApiProperty({ enum: EventType, enumName: 'EventType' })
   type!: EventType;
   title!: string | null;
   description!: string | null;
