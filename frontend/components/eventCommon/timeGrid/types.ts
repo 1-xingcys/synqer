@@ -1,3 +1,5 @@
+import { EventCapabilities } from "@/types/event";
+
 export type TimeGranularity = 15 | 30 | 60;
 
 export interface MergedTimeRow {
@@ -56,6 +58,7 @@ export interface VotingGridProps {
   currentUserId: string;
   eventId: string;
   eventTitle: string;
+  capabilities: EventCapabilities;
 }
 
 export interface RectangleBounds {

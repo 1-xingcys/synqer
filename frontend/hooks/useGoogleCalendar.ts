@@ -99,7 +99,7 @@ export function useGoogleCalendar() {
         );
 
         if (!res.ok) {
-          if (res.status === 401) {
+          if (res.status === 400 || res.status === 401) {
             // Calendar 未連結或 token 過期
             return null;
           }

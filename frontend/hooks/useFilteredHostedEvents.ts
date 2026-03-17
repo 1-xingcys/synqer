@@ -1,6 +1,10 @@
 import { useMemo } from "react";
 import { EventStatus } from "@/types/event";
 import { HostedEventApiItem } from "./useHostedEvents";
+import {
+  getEventConfirmedEndTime,
+  getEventConfirmedStartTime,
+} from "@/lib/event-presentation";
 
 interface FilteredHostedEvents {
   [EventStatus.VOTING]: HostedEventApiItem[];
@@ -52,36 +56,18 @@ function sortHostedEvents(
 
       case EventStatus.CONFIRMED: {
         // By confirmed start date (closer to now = higher priority)
-        // Use the first confirmedTimeRange's startTime
-        const confirmedStartA =
-          a.confirmedTimeRanges && a.confirmedTimeRanges.length > 0
-            ? new Date(a.confirmedTimeRanges[0].startTime).getTime()
-            : Infinity;
-        const confirmedStartB =
-          b.confirmedTimeRanges && b.confirmedTimeRanges.length > 0
-            ? new Date(b.confirmedTimeRanges[0].startTime).getTime()
-            : Infinity;
         return (
-          Math.abs(confirmedStartA - now) - Math.abs(confirmedStartB - now)
+          Math.abs(getEventConfirmedStartTime(a) - now) -
+          Math.abs(getEventConfirmedStartTime(b) - now)
         );
       }
 
       case EventStatus.COMPLETED: {
         // By confirmed end date (closer to now = higher priority)
-        // Use the last confirmedTimeRange's endTime
-        const confirmedEndA =
-          a.confirmedTimeRanges && a.confirmedTimeRanges.length > 0
-            ? new Date(
-                a.confirmedTimeRanges[a.confirmedTimeRanges.length - 1].endTime,
-              ).getTime()
-            : Infinity;
-        const confirmedEndB =
-          b.confirmedTimeRanges && b.confirmedTimeRanges.length > 0
-            ? new Date(
-                b.confirmedTimeRanges[b.confirmedTimeRanges.length - 1].endTime,
-              ).getTime()
-            : Infinity;
-        return Math.abs(confirmedEndA - now) - Math.abs(confirmedEndB - now);
+        return (
+          Math.abs(getEventConfirmedEndTime(a) - now) -
+          Math.abs(getEventConfirmedEndTime(b) - now)
+        );
       }
 
       default:

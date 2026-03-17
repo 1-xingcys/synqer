@@ -27,9 +27,28 @@ export type VoteMode = (typeof VoteMode)[keyof typeof VoteMode];
 
 // 合併後的時間範圍（連續時段合併成一個範圍）
 export type ConfirmedTimeRange = components["schemas"]["ConfirmedTimeRangeDto"];
+export type EventCapabilities = components["schemas"]["EventCapabilitiesDto"];
 
 export type StagedConfirmation =
   components["schemas"]["HostedEventStagedConfirmationDto"];
+
+export interface EventWithCapabilities {
+  capabilities: EventCapabilities;
+}
+
+export function supportsCompletion(event: EventWithCapabilities): boolean {
+  return event.capabilities.supportsCompletion;
+}
+
+export function supportsCalendarConflict(
+  event: EventWithCapabilities,
+): boolean {
+  return event.capabilities.supportsCalendarConflict;
+}
+
+export function supportsAddToCalendar(event: EventWithCapabilities): boolean {
+  return event.capabilities.supportsAddToCalendar;
+}
 
 // 預期參與者
 export interface ExpectedParticipant {
