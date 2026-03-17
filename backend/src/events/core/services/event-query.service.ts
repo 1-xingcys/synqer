@@ -214,6 +214,7 @@ export class EventQueryService {
         ...this.eventMapper.mapEventToList(event),
         expectedParticipantCount: 0,
         status: this.eventStatusService.computeEventStatus({
+          eventType: event.type,
           votingDeadline: event.votingDeadline,
           confirmedTimeSlots: [],
         }),

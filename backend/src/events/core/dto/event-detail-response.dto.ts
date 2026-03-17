@@ -1,8 +1,13 @@
 import { EventStatus } from '../../shared/services/event-status.service';
-import { ConfirmedTimeRangeDto } from './hosted-event-list-item.dto';
+import { EventType } from '@prisma/client';
+import {
+  ConfirmedTimeRangeDto,
+  EventCapabilitiesDto,
+} from './hosted-event-list-item.dto';
 
 export class EventDetailEventDto {
   id!: string;
+  type!: EventType;
   title!: string | null;
   description!: string | null;
   startDate!: Date;
@@ -17,6 +22,7 @@ export class EventDetailEventDto {
   confirmedSlotIds!: string[];
   confirmedTimeRanges!: ConfirmedTimeRangeDto[];
   status!: EventStatus;
+  capabilities!: EventCapabilitiesDto;
 }
 
 export class EventDetailLineGroupDto {

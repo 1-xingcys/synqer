@@ -1,4 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { EventType } from '@prisma/client';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { TimeSlotService } from '../../shared/services/time-slot.service';
 import { EventRepository } from '../repositories/event.repository';
@@ -75,6 +76,7 @@ export class EventCreationService {
       {
         title,
         description,
+        type: EventType.ONE_TIME,
         ownerId: userId || null,
         startDate: startDateObj,
         endDate: endDateObj,
