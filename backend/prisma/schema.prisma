@@ -10,6 +10,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum EventType {
+  ONE_TIME
+  RECURRING
+}
+
+enum EventSlotAxisType {
+  DATE
+  WEEKDAY
+}
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
 model User {
   id           String   @id @default(cuid())
   displayName  String?
@@ -105,6 +125,7 @@ model Event {
   id          String  @id @default(cuid())
   title       String?
   description String?
+  type        EventType @default(ONE_TIME)
   ownerId     String? // 活動擁有者
   owner       User?   @relation("OwnedEvents", fields: [ownerId], references: [id], onDelete: SetNull)
 
@@ -138,9 +159,12 @@ model Event {
   expectedParticipants EventExpectedParticipant[]
   confirmedTimeSlots   ConfirmedEventTimeSlot[]
   stagedConfirmation   EventStagedConfirmation?
+  oneTimeSchedule      OneTimeEventSchedule?
+  recurringSchedule    RecurringEventSchedule?
 
   @@index([lineGroupId])
   @@index([ownerId])
+  @@index([type])
 }
 
 // 預期應該投票的參與者
@@ -172,9 +196,12 @@ model EventExpectedParticipant {
 
 // 時間格子（slot）已展開
 model EventTimeSlot {
-  id          String   @id @default(cuid())
+  id          String            @id @default(cuid())
   eventId     String
   date        DateTime // 該 slot 的日期
+  axisType    EventSlotAxisType @default(DATE)
+  axisDate    DateTime?
+  axisWeekday Weekday?
   startMinute Int // 當天的起始分鐘
   endMinute   Int // 當天的結束分鐘
   index       Int // 用於表格排序定位
@@ -185,6 +212,39 @@ model EventTimeSlot {
 
   @@index([eventId])
   @@index([eventId, date])
+  @@index([eventId, axisType, axisDate])
+  @@index([eventId, axisType, axisWeekday])
+}
+
+model OneTimeEventSchedule {
+  id               String   @id @default(cuid())
+  eventId          String   @unique
+  startDate        DateTime
+  endDate          DateTime
+  startMinuteOfDay Int
+  endMinuteOfDay   Int
+  slotDurationMin  Int      @default(15)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+model RecurringEventSchedule {
+  id               String    @id @default(cuid())
+  eventId          String    @unique
+  weekdays         Weekday[] @default([])
+  startMinuteOfDay Int
+  endMinuteOfDay   Int
+  slotDurationMin  Int       @default(15)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
 }
 
 // 投票紀錄：有紀錄 = 有空，無紀錄 = 沒空或未填
