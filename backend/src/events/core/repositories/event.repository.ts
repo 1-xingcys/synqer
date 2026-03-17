@@ -332,10 +332,9 @@ export class EventRepository {
   async findOneBasic(eventId: string) {
     return this.prisma.event.findUnique({
       where: { id: eventId },
-      select: {
-        id: true,
-        startDate: true,
-        startMinuteOfDay: true,
+      include: {
+        oneTimeSchedule: true,
+        recurringSchedule: true,
       },
     });
   }
@@ -347,6 +346,10 @@ export class EventRepository {
     return this.prisma.event.update({
       where: { id: eventId },
       data,
+      include: {
+        oneTimeSchedule: true,
+        recurringSchedule: true,
+      },
     });
   }
 

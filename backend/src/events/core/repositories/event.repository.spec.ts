@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { EventType } from '@prisma/client';
 import { EventRepository } from './event.repository';
 import { PrismaService } from '../../../prisma/prisma.service';
 
@@ -54,6 +55,7 @@ describe('EventRepository', () => {
       const eventData = {
         title: 'Test Event',
         description: 'Description',
+        type: EventType.ONE_TIME,
         ownerId: 'user-123',
         startDate: new Date('2024-12-25'),
         endDate: new Date('2024-12-25'),
@@ -76,6 +78,9 @@ describe('EventRepository', () => {
         const mockPrisma = {
           event: {
             create: jest.fn().mockResolvedValue(mockEvent),
+          },
+          oneTimeEventSchedule: {
+            create: jest.fn().mockResolvedValue({}),
           },
           eventTimeSlot: {
             createMany: jest.fn().mockResolvedValue({ count: 1 }),
@@ -107,6 +112,7 @@ describe('EventRepository', () => {
     it('should handle event creation without creator', async () => {
       const eventData = {
         title: 'Test Event',
+        type: EventType.ONE_TIME,
         ownerId: null,
         startDate: new Date(),
         endDate: new Date(),
@@ -126,6 +132,9 @@ describe('EventRepository', () => {
         const mockPrisma = {
           event: {
             create: jest.fn().mockResolvedValue(mockEvent),
+          },
+          oneTimeEventSchedule: {
+            create: jest.fn().mockResolvedValue({}),
           },
           eventTimeSlot: {
             createMany: jest.fn().mockResolvedValue({ count: 0 }),
@@ -293,8 +302,11 @@ describe('EventRepository', () => {
       const eventId = 'event-123';
       const mockEvent = {
         id: eventId,
+        type: 'ONE_TIME',
         startDate: new Date(),
         startMinuteOfDay: 540,
+        oneTimeSchedule: null,
+        recurringSchedule: null,
       };
 
       mockPrismaService.event.findUnique.mockResolvedValue(mockEvent);
@@ -303,10 +315,9 @@ describe('EventRepository', () => {
 
       expect(prismaService.event.findUnique).toHaveBeenCalledWith({
         where: { id: eventId },
-        select: {
-          id: true,
-          startDate: true,
-          startMinuteOfDay: true,
+        include: {
+          oneTimeSchedule: true,
+          recurringSchedule: true,
         },
       });
       expect(result).toEqual(mockEvent);
@@ -317,7 +328,12 @@ describe('EventRepository', () => {
     it('should update event', async () => {
       const eventId = 'event-123';
       const updateData = { title: 'New Title' };
-      const updatedEvent = { id: eventId, title: 'New Title' };
+      const updatedEvent = {
+        id: eventId,
+        title: 'New Title',
+        oneTimeSchedule: null,
+        recurringSchedule: null,
+      };
 
       mockPrismaService.event.update.mockResolvedValue(updatedEvent);
 
@@ -326,6 +342,10 @@ describe('EventRepository', () => {
       expect(prismaService.event.update).toHaveBeenCalledWith({
         where: { id: eventId },
         data: updateData,
+        include: {
+          oneTimeSchedule: true,
+          recurringSchedule: true,
+        },
       });
       expect(result).toEqual(updatedEvent);
     });
