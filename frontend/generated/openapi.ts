@@ -773,6 +773,8 @@ export interface components {
         LogoutResponseDto: {
             message: string;
         };
+        /** @enum {string} */
+        EventType: "ONE_TIME" | "RECURRING";
         ConfirmedTimeRangeDto: {
             /** Format: date-time */
             startTime: string;
@@ -786,8 +788,8 @@ export interface components {
             supportsAddToCalendar: boolean;
         };
         HostedEventListItemDto: {
+            type: components["schemas"]["EventType"];
             id: string;
-            type: Record<string, never>;
             title: string | null;
             description: string | null;
             /** Format: date-time */
@@ -812,8 +814,8 @@ export interface components {
             avatarUrl: string | null;
         };
         AttendedEventListItemDto: {
+            type: components["schemas"]["EventType"];
             id: string;
-            type: Record<string, never>;
             title: string | null;
             description: string | null;
             /** Format: date-time */
@@ -851,8 +853,8 @@ export interface components {
             eventId: string;
         };
         EventDetailEventDto: {
+            type: components["schemas"]["EventType"];
             id: string;
-            type: Record<string, never>;
             title: string | null;
             description: string | null;
             /** Format: date-time */
@@ -932,9 +934,9 @@ export interface components {
             avatarUrl: string | null;
         };
         EventPublicInfoResponseDto: {
+            type: components["schemas"]["EventType"];
             isDeleted: boolean;
             id: string;
-            type: Record<string, never>;
             title: string | null;
             description: string | null;
             /** Format: date-time */
