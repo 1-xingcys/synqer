@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { EventType } from '@prisma/client';
 
 // 活動狀態
 export enum EventStatus {
@@ -33,15 +34,21 @@ export class EventStatusService {
    * @param event 活動資訊，包含 confirmedTimeSlots（已確認的時段）
    */
   computeEventStatus(event: {
+    eventType?: EventType;
     votingDeadline: Date | null;
     confirmedTimeSlots?: ConfirmedSlotInfo[];
   }): EventStatus {
     const now = new Date();
+    const eventType = event.eventType ?? EventType.ONE_TIME;
     const hasConfirmedSlots =
       event.confirmedTimeSlots && event.confirmedTimeSlots.length > 0;
 
     // 如果有確認的活動時段
     if (hasConfirmedSlots) {
+      if (eventType === EventType.RECURRING) {
+        return EventStatus.CONFIRMED;
+      }
+
       // 找出最晚的時段結束時間
       const latestEndTime = this.getLatestEndTime(event.confirmedTimeSlots!);
       if (latestEndTime && now > latestEndTime) {
