@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
-import { EventStatus } from "@/types/event";
+import { EventStatus, supportsAddToCalendar } from "@/types/event";
 import { EventInfoDetail } from "@/components/joinedEvent/eventInformation/EventInfoDetail";
 import { EventInfoParticipants } from "@/components/joinedEvent/eventInformation/EventInfoParticipants";
 import { VotingEndedView } from "./VotingEndedView";
@@ -73,6 +73,7 @@ export default function JoinedEventPage() {
             eventTitle={event.title || tJoined("untitledEvent")}
             eventDescription={event.description}
             confirmedTimeRanges={event.confirmedTimeRanges}
+            supportsAddToCalendar={supportsAddToCalendar(event)}
           />
         )}
 
