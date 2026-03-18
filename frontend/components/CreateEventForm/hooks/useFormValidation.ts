@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { CreateEventFormData, MIN_HOURS_BEFORE_EVENT } from "../types";
+import {
+  CreateEventFormData,
+  DEFAULT_EVENT_TYPE,
+  MIN_HOURS_BEFORE_EVENT,
+} from "../types";
 import {
   parseTimeToMinutes,
   combineDateAndTime,
@@ -14,14 +18,20 @@ export enum ValidationError {
   StartTimeTooSoon = "StartTimeTooSoon",
   DeadlineAfterStart = "DeadlineAfterStart",
   DeadlineInPast = "DeadlineInPast",
+  WeekdaysRequired = "WeekdaysRequired",
 }
 
 export function useFormValidation(formData: CreateEventFormData) {
   const errors = useMemo(() => {
     const errorSet = new Set<ValidationError>();
+    const isRecurring = formData.eventType === "RECURRING";
 
     if (!formData.title.trim()) {
       errorSet.add(ValidationError.TitleRequired);
+    }
+
+    if (isRecurring && formData.weekdays.length === 0) {
+      errorSet.add(ValidationError.WeekdaysRequired);
     }
 
     const startMinutes = parseTimeToMinutes(formData.startTime);
@@ -30,7 +40,7 @@ export function useFormValidation(formData: CreateEventFormData) {
       errorSet.add(ValidationError.StartTimeAfterEndTime);
     }
 
-    if (formData.startDate) {
+    if (!isRecurring && formData.startDate) {
       const eventStartDateTime = combineDateAndTime(
         formData.startDate,
         formData.startTime,
@@ -58,7 +68,7 @@ export function useFormValidation(formData: CreateEventFormData) {
         errorSet.add(ValidationError.DeadlineInPast);
       }
 
-      if (formData.startDate) {
+      if (!isRecurring && formData.startDate) {
         const startDateTime = combineDateAndTime(
           formData.startDate,
           formData.startTime,
@@ -82,10 +92,12 @@ export function useFormValidation(formData: CreateEventFormData) {
     };
 
     return (
+      formData.eventType !== DEFAULT_EVENT_TYPE ||
       formData.title.trim() !== "" ||
       formData.description.trim() !== "" ||
       !isSameDay(formData.startDate, defaultDate) ||
       !isSameDay(formData.endDate, defaultDate) ||
+      formData.weekdays.length > 0 ||
       formData.startTime !== defaultTime ||
       formData.endTime !== "24:00" ||
       formData.votingDeadlineManuallySet ||

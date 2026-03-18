@@ -770,6 +770,11 @@
     "description": "建立新活動來統計參與者的有空時間",
     "general": {
       "title": "General",
+      "eventType": "活動類型",
+      "eventTypeOptions": {
+        "oneTime": "特定日期",
+        "recurring": "每週固定"
+      },
       "host": "Host",
       "eventName": "Event name",
       "eventNamePlaceholder": "例如：團隊聚餐時間投票",
@@ -819,8 +824,12 @@
     "configuration": {
       "title": "Configuration",
       "description": "設定活動的候選日期與時間區間",
+      "recurringDescription": "設定每週固定可投票的星期與時間區間",
       "startDate": "開始日期",
       "endDate": "結束日期",
+      "weekdays": "投票星期",
+      "weekdaysHint": "至少選 1 天，最多 7 天",
+      "weekdaysError": "請至少選擇一天作為 recurring 活動的候選星期",
       "selectDate": "選擇日期",
       "startTime": "開始時間",
       "endTime": "結束時間",
@@ -833,6 +842,9 @@
     "votingDeadline": {
       "title": "Voting Deadline",
       "description": "設定活動的投票截止時間",
+      "recurringDescription": "可選填 recurring 活動的投票截止時間",
+      "optional": "選填，不設定也可以直接建立活動",
+      "clear": "清除",
       "date": "截止日期",
       "time": "截止時間",
       "autoSync": "自動與活動開始時間同步",

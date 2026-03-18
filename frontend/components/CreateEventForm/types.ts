@@ -1,12 +1,18 @@
+import type { EventType, Weekday } from "@/types/event";
+
 export const MIN_HOURS_BEFORE_EVENT = 1;
 export const TITLE_MAX_LENGTH = 50;
 export const DESCRIPTION_MAX_LENGTH = 500;
 
+export const DEFAULT_EVENT_TYPE: EventType = "ONE_TIME";
+
 export interface CreateEventFormData {
+  eventType: EventType;
   title: string;
   description: string;
   startDate: Date | null;
   endDate: Date | null;
+  weekdays: Weekday[];
   startTime: string;
   endTime: string;
   timeZone: string;
