@@ -1,16 +1,16 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { format } from "date-fns";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { ExternalLink, Copy, CheckCheck, Calendar, Clock } from "lucide-react";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { formatMinutesToTime } from "@/lib/utils";
-import { EventStatus } from "@/types/event";
+import { EventSchedule, EventStatus } from "@/types/event";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
 import { VotingStatusBar } from "./VotingStatusBar";
 import { DeadlineCountdown } from "./DeadlineCountdown";
 import { VotingProgress } from "./VotingProgress";
+import { formatEventScheduleSummary } from "@/lib/event-presentation";
 
 interface VotingStatusProps {
   votingDeadline?: string | null;
@@ -27,6 +27,7 @@ interface EventInfoCompactProps {
   endDate: string;
   startMinuteOfDay: number;
   endMinuteOfDay: number;
+  schedule?: EventSchedule;
   eventId: string;
   eventStatus?: EventStatus;
   votingStatus?: VotingStatusProps;
@@ -38,12 +39,27 @@ export function EventInfoCompact({
   endDate,
   startMinuteOfDay,
   endMinuteOfDay,
+  schedule,
   eventId,
   eventStatus,
   votingStatus,
 }: EventInfoCompactProps) {
   const t = useTranslations();
+  const locale = useLocale();
   const { copied, copyLink: handleCopyLink } = useEventShareLink(eventId || "");
+  const scheduleSummary = formatEventScheduleSummary(
+    {
+      startDate,
+      endDate,
+      schedule,
+      capabilities: {
+        supportsAddToCalendar: false,
+        supportsCalendarConflict: false,
+        supportsCompletion: false,
+      },
+    },
+    locale,
+  );
 
   const metaRow = (
     <div className="flex flex-wrap items-center gap-x-1 sm:gap-x-2 gap-y-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
@@ -55,19 +71,20 @@ export function EventInfoCompact({
       )}
       <div className="flex items-center gap-1">
         <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400" />
-        <span className="font-mono">
-          {format(new Date(startDate), "M/d")} ~{" "}
-          {format(new Date(endDate), "M/d")}
-        </span>
+        <span className="font-mono">{scheduleSummary}</span>
       </div>
-      <span className="text-zinc-300 dark:text-zinc-600">•</span>
-      <div className="flex items-center gap-1">
-        <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400" />
-        <span className="font-mono">
-          {formatMinutesToTime(startMinuteOfDay)} ~{" "}
-          {formatMinutesToTime(endMinuteOfDay)}
-        </span>
-      </div>
+      {schedule?.kind !== "RECURRING" && (
+        <>
+          <span className="text-zinc-300 dark:text-zinc-600">•</span>
+          <div className="flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400" />
+            <span className="font-mono">
+              {formatMinutesToTime(startMinuteOfDay)} ~{" "}
+              {formatMinutesToTime(endMinuteOfDay)}
+            </span>
+          </div>
+        </>
+      )}
     </div>
   );
 

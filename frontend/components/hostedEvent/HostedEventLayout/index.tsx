@@ -112,6 +112,7 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
           endDate={event.endDate}
           startMinuteOfDay={event.startMinuteOfDay}
           endMinuteOfDay={event.endMinuteOfDay}
+          schedule={event.schedule}
           eventId={eventId}
           votingStatus={{
             votingDeadline: event.votingDeadline,

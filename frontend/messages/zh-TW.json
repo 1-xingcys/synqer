@@ -590,6 +590,7 @@
     "noDeadline": "未設定截止時間",
     "candidateInfo": "投票候選時間",
     "candidateDates": "候選日期",
+    "candidateWeekdays": "候選星期",
     "candidateTime": "候選時段",
     "myVotingStatus": "我的投票狀態",
     "participantsStatus": "參與者",

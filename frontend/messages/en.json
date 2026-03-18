@@ -590,6 +590,7 @@
     "noDeadline": "No deadline set",
     "candidateInfo": "Candidate Time Range",
     "candidateDates": "Candidate Dates",
+    "candidateWeekdays": "Candidate Weekdays",
     "candidateTime": "Candidate Time",
     "myVotingStatus": "My Voting Status",
     "participantsStatus": "Participants",

@@ -181,6 +181,7 @@ export default function HostedEventPanelPage() {
                   </h4>
                   <ConfirmedTimeDisplay
                     timeRanges={event.confirmedTimeRanges}
+                    slots={slots}
                     className="text-zinc-600 dark:text-zinc-400"
                   />
                 </div>

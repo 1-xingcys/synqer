@@ -1,17 +1,21 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { Calendar, Clock, Timer } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
 import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
-import { EventStatus } from "@/types/event";
+import { EventSchedule, EventStatus, EventType, Weekday } from "@/types/event";
+import { formatWeekdayLabel } from "@/lib/weekdays";
 
 interface EventInfoDetailProps {
+  eventType: EventType;
   status: EventStatus;
   startDate: string;
   endDate: string;
+  weekdays?: Weekday[];
+  schedule?: EventSchedule;
   startMinuteOfDay: number;
   endMinuteOfDay: number;
   votingDeadline?: string | null;
@@ -19,15 +23,23 @@ interface EventInfoDetailProps {
 }
 
 export function EventInfoDetail({
+  eventType,
   status,
   startDate,
   endDate,
+  weekdays,
+  schedule,
   startMinuteOfDay,
   endMinuteOfDay,
   votingDeadline,
   currentUserHasVoted,
 }: EventInfoDetailProps) {
   const t = useTranslations();
+  const locale = useLocale();
+  const isRecurring = eventType === "RECURRING";
+  const recurringWeekdays =
+    weekdays ??
+    (schedule?.kind === "RECURRING" ? schedule.weekdays : undefined);
 
   return (
     <>
@@ -57,13 +69,20 @@ export function EventInfoDetail({
           <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1">
             <Calendar className="w-4 h-4" />
             <span className="text-sm font-medium">
-              {t("eventInfo.candidateDates")}
+              {isRecurring
+                ? t("eventInfo.candidateWeekdays")
+                : t("eventInfo.candidateDates")}
             </span>
           </div>
           <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-6">
-            {format(new Date(startDate), "yyyy/MM/dd")}
-            <span className="mx-2 text-zinc-400">~</span>
-            {format(new Date(endDate), "yyyy/MM/dd")}
+            {isRecurring && recurringWeekdays?.length
+              ? recurringWeekdays
+                  .map((weekday) => formatWeekdayLabel(weekday, locale))
+                  .join(", ")
+              : [
+                  format(new Date(startDate), "yyyy/MM/dd"),
+                  format(new Date(endDate), "yyyy/MM/dd"),
+                ].join(" ~ ")}
           </p>
         </div>
 

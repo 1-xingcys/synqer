@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatMinutesToTime } from "@/lib/utils";
+import { formatAxisKeyLabel } from "@/lib/event-presentation";
+import type { EventSlotAxisType } from "@/types/event";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Z_INDEX } from "@/lib/zIndex";
@@ -11,6 +13,7 @@ export interface SelectedTimeRange {
   id: string;
   startDate: string;
   endDate: string;
+  axisType: EventSlotAxisType;
   startTime: number;
   endTime: number;
   slotIds: string[];
@@ -115,27 +118,15 @@ export function EventTimeSelector({
   const [showCommitConfirm, setShowCommitConfirm] = useState(false);
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
-  const formatLocalizedDate = (dateString: string) => {
-    const date = new Date(`${dateString}T00:00:00`);
-    const dateLocale = locale === "zh-TW" ? "zh-TW" : "en-US";
-    const dateText = new Intl.DateTimeFormat(dateLocale, {
-      month: "numeric",
-      day: "numeric",
-    }).format(date);
-    const weekdayText = new Intl.DateTimeFormat(dateLocale, {
-      weekday: locale === "zh-TW" ? "narrow" : "short",
-    }).format(date);
-
-    return locale === "zh-TW"
-      ? `${dateText}（${weekdayText}）`
-      : `${dateText} (${weekdayText})`;
-  };
-
-  const formatDateRange = (startDate: string, endDate: string) => {
+  const formatDateRange = (
+    startDate: string,
+    endDate: string,
+    axisType: EventSlotAxisType,
+  ) => {
     if (startDate === endDate) {
-      return formatLocalizedDate(startDate);
+      return formatAxisKeyLabel(startDate, axisType, locale);
     }
-    return `${formatLocalizedDate(startDate)} - ${formatLocalizedDate(endDate)}`;
+    return `${formatAxisKeyLabel(startDate, axisType, locale)} - ${formatAxisKeyLabel(endDate, axisType, locale)}`;
   };
 
   const handleCommitClick = () => {
@@ -213,7 +204,11 @@ export function EventTimeSelector({
                 <div className="flex items-center gap-2 text-sm flex-wrap min-w-0">
                   {/* Date and time */}
                   <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {formatDateRange(range.startDate, range.endDate)}
+                    {formatDateRange(
+                      range.startDate,
+                      range.endDate,
+                      range.axisType,
+                    )}
                   </span>
                   <span className="text-zinc-400">•</span>
                   <span className="font-mono text-xs text-zinc-600 dark:text-zinc-400">

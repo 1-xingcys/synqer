@@ -110,7 +110,11 @@ export function ConfigurationSection() {
                       )}
                       onClick={() => toggleWeekday(weekday)}
                     >
-                      {formatWeekdayLabel(weekday, locale)}
+                      {formatWeekdayLabel(
+                        weekday,
+                        locale,
+                        locale.startsWith("zh") ? "narrow" : "short",
+                      )}
                     </Button>
                   );
                 })}

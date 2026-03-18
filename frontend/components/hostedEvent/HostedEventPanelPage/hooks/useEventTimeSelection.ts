@@ -2,11 +2,13 @@
 
 import { useMemo } from "react";
 import { SelectedTimeRange } from "../EventTimeSelector";
-import { StagedConfirmation } from "@/types/event";
+import { EventSlotAxisType, StagedConfirmation, Weekday } from "@/types/event";
 
 interface EventSlot {
   id: string;
   date: string | Date;
+  axisType?: EventSlotAxisType;
+  axisWeekday?: Weekday | null;
   startMinute: number;
   endMinute: number;
 }
@@ -26,7 +28,29 @@ interface UseEventTimeSelectionReturn {
 }
 
 function sortSlots(slots: EventSlot[]) {
+  const weekdayOrder: Weekday[] = [
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
+    "SUNDAY",
+  ];
+
   return [...slots].sort((left, right) => {
+    if (
+      left.axisType === "WEEKDAY" &&
+      right.axisType === "WEEKDAY" &&
+      left.axisWeekday &&
+      right.axisWeekday
+    ) {
+      const weekdayDiff =
+        weekdayOrder.indexOf(left.axisWeekday) -
+        weekdayOrder.indexOf(right.axisWeekday);
+      if (weekdayDiff !== 0) return weekdayDiff;
+    }
+
     const leftDate = new Date(left.date).getTime();
     const rightDate = new Date(right.date).getTime();
     if (leftDate !== rightDate) return leftDate - rightDate;
@@ -59,14 +83,18 @@ function buildRangesFromSlotIds(
   let currentRange: SelectedTimeRange | null = null;
 
   sortedSlots.forEach((slot) => {
-    const slotDate = new Date(slot.date);
-    const dateKey = slotDate.toISOString().split("T")[0];
+    const axisType = slot.axisType === "WEEKDAY" ? "WEEKDAY" : "DATE";
+    const dateKey =
+      axisType === "WEEKDAY" && slot.axisWeekday
+        ? slot.axisWeekday
+        : new Date(slot.date).toISOString().split("T")[0];
 
     if (!currentRange) {
       currentRange = {
         id: `${options.idPrefix}-${slot.id}`,
         startDate: dateKey,
         endDate: dateKey,
+        axisType,
         startTime: slot.startMinute,
         endTime: slot.endMinute,
         slotIds: [slot.id],
@@ -77,7 +105,8 @@ function buildRangesFromSlotIds(
       return;
     }
 
-    const isSameDate = currentRange.endDate === dateKey;
+    const isSameDate =
+      currentRange.axisType === axisType && currentRange.endDate === dateKey;
     const isContiguous =
       isSameDate && currentRange.endTime === slot.startMinute;
 
@@ -92,6 +121,7 @@ function buildRangesFromSlotIds(
       id: `${options.idPrefix}-${slot.id}`,
       startDate: dateKey,
       endDate: dateKey,
+      axisType,
       startTime: slot.startMinute,
       endTime: slot.endMinute,
       slotIds: [slot.id],
