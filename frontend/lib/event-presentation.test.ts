@@ -7,6 +7,7 @@ import {
 } from "@/types/event";
 import {
   formatAxisKeyLabel,
+  formatEventCandidateDaySummary,
   formatEventScheduleSummary,
   getEventSortTime,
 } from "@/lib/event-presentation";
@@ -20,6 +21,8 @@ type EventFixture = EventWithCapabilities & {
 };
 
 const recurringEvent: EventFixture = {
+  type: "RECURRING",
+  weekdays: ["MONDAY", "WEDNESDAY", "FRIDAY"],
   startDate: "2025-01-15T12:00:00.000Z",
   endDate: "2025-01-15T12:00:00.000Z",
   votingDeadline: "2025-01-20T12:00:00.000Z",
@@ -41,6 +44,12 @@ describe("event-presentation", () => {
   it("formats recurring schedule summary with weekday labels and time range", () => {
     expect(formatEventScheduleSummary(recurringEvent, "en-US")).toBe(
       "Mon, Wed, Fri • 09:00 ~ 11:00",
+    );
+  });
+
+  it("formats recurring candidate day summary without time range", () => {
+    expect(formatEventCandidateDaySummary(recurringEvent, "en-US")).toBe(
+      "Mon, Wed, Fri",
     );
   });
 

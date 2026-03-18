@@ -1,9 +1,11 @@
 import {
   EventStatus,
   EventSlotAxisType,
+  EventType,
   EventWithCapabilities,
   ConfirmedTimeRange,
   EventSchedule,
+  Weekday,
 } from "@/types/event";
 import { formatMinutesToTime } from "@/lib/utils";
 import { formatWeekdayLabel } from "@/lib/weekdays";
@@ -11,10 +13,53 @@ import { formatWeekdayLabel } from "@/lib/weekdays";
 type EventWithDateRange = EventWithCapabilities & {
   startDate: string;
   endDate: string;
+  type?: EventType;
+  weekdays?: Weekday[];
   votingDeadline?: string | null;
   confirmedTimeRanges?: ConfirmedTimeRange[];
   schedule?: EventSchedule;
 };
+
+export function formatEventCandidateDaySummary(
+  event: Pick<
+    EventWithDateRange,
+    "startDate" | "endDate" | "type" | "weekdays" | "schedule"
+  >,
+  locale: string,
+): string {
+  const recurringWeekdays =
+    event.type === "RECURRING"
+      ? (event.weekdays ??
+        (event.schedule?.kind === "RECURRING"
+          ? event.schedule.weekdays
+          : undefined))
+      : undefined;
+
+  if (recurringWeekdays?.length) {
+    return recurringWeekdays
+      .map((weekday) =>
+        formatWeekdayLabel(
+          weekday,
+          locale,
+          locale.startsWith("zh") ? "narrow" : "short",
+        ),
+      )
+      .join(", ");
+  }
+
+  const start = new Date(event.startDate);
+  const end = new Date(event.endDate);
+  return [
+    `${start.getFullYear()}/${(start.getMonth() + 1).toString().padStart(2, "0")}/${start
+      .getDate()
+      .toString()
+      .padStart(2, "0")}`,
+    `${end.getFullYear()}/${(end.getMonth() + 1).toString().padStart(2, "0")}/${end
+      .getDate()
+      .toString()
+      .padStart(2, "0")}`,
+  ].join(" ~ ");
+}
 
 export function getEventCandidateDateRange(event: EventWithDateRange) {
   if (event.schedule?.kind === "ONE_TIME") {

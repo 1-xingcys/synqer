@@ -1,12 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { format } from "date-fns";
 import { CalendarDays, Clock3, UserPlus, User, Hourglass } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
+import { formatEventCandidateDaySummary } from "@/lib/event-presentation";
 import { EventPublicInfo } from "./useEventJoin";
 
 interface JoinConfirmViewProps {
@@ -21,6 +22,9 @@ export function JoinConfirmView({
   onJoin,
 }: JoinConfirmViewProps) {
   const t = useTranslations();
+  const locale = useLocale();
+  const isRecurring = eventInfo.type === "RECURRING";
+  const candidateDaySummary = formatEventCandidateDaySummary(eventInfo, locale);
 
   return (
     <div className="min-h-[60vh] py-8">
@@ -72,13 +76,13 @@ export function JoinConfirmView({
               <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1">
                 <CalendarDays className="w-4 h-4" />
                 <span className="text-xs sm:text-sm font-medium">
-                  {t("eventJoin.votingDateRange")}
+                  {isRecurring
+                    ? t("eventInfo.candidateWeekdays")
+                    : t("eventJoin.votingDateRange")}
                 </span>
               </div>
               <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-5 sm:pl-6">
-                {format(new Date(eventInfo.startDate), "yyyy/MM/dd")}
-                <span className="mx-2 text-zinc-400">~</span>
-                {format(new Date(eventInfo.endDate), "yyyy/MM/dd")}
+                {candidateDaySummary}
               </p>
             </div>
 
