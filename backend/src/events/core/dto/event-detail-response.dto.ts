@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { EventStatus } from '../../shared/services/event-status.service';
-import { EventType } from '@prisma/client';
+import { EventType, Weekday } from '@prisma/client';
 import {
   ConfirmedTimeRangeDto,
   EventCapabilitiesDto,
@@ -14,6 +14,13 @@ export class EventDetailEventDto {
   description!: string | null;
   startDate!: Date;
   endDate!: Date;
+  @ApiProperty({
+    enum: Weekday,
+    enumName: 'Weekday',
+    isArray: true,
+    required: false,
+  })
+  weekdays?: Weekday[];
   startMinuteOfDay!: number;
   endMinuteOfDay!: number;
   slotDurationMin!: number;
