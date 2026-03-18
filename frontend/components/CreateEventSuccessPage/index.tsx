@@ -23,7 +23,6 @@ import {
   Calendar,
 } from "lucide-react";
 import { ActionButton, ActionButtonVariant } from "./ActionButton";
-import { formatMinutesToTime } from "@/lib/utils";
 import { LoadingState } from "@/components/ui/loading-state";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -57,27 +56,11 @@ export default function CreateEventSuccessPage() {
   const eventData = data?.event;
   const eventTitle = eventData?.title;
   const lineGroupId = eventData?.lineGroupId;
-  const startDate = eventData?.startDate?.split("T")[0];
-  const endDate = eventData?.endDate?.split("T")[0];
-  const startTime = eventData
-    ? formatMinutesToTime(eventData.startMinuteOfDay)
-    : undefined;
-  const endTime = eventData
-    ? formatMinutesToTime(eventData.endMinuteOfDay)
-    : undefined;
   const votingDeadline = eventData?.votingDeadline;
 
   // 分享到 LINE（使用 shareTargetPicker）
   const handleShareToLine = async () => {
-    if (
-      !eventId ||
-      !startDate ||
-      !endDate ||
-      !startTime ||
-      !endTime ||
-      sendStatus === SendStatus.Sending
-    )
-      return;
+    if (!eventId || sendStatus === SendStatus.Sending) return;
 
     setSendStatus(SendStatus.Sending);
 
@@ -87,10 +70,6 @@ export default function CreateEventSuccessPage() {
         title: eventTitle || "",
         hostName: user?.displayName || "未知",
         hostAvatarUrl: user?.avatarUrl || undefined,
-        startDate,
-        endDate,
-        startTime,
-        endTime,
         votingDeadline: votingDeadline || undefined,
       };
 

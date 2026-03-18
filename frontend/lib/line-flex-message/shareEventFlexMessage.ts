@@ -5,10 +5,6 @@ export interface EventShareInfo {
   title: string;
   hostName: string;
   hostAvatarUrl?: string;
-  startDate: string; // YYYY-MM-DD
-  endDate: string; // YYYY-MM-DD
-  startTime: string; // HH:mm
-  endTime: string; // HH:mm
   votingDeadline?: string; // ISO string
 }
 
