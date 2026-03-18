@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { Prisma, Event, EventSlotAxisType, EventType } from '@prisma/client';
+import {
+  Prisma,
+  Event,
+  EventSlotAxisType,
+  EventType,
+  Weekday,
+} from '@prisma/client';
 
 /**
  * 活動資料存取層
@@ -75,6 +81,99 @@ export class EventRepository {
       }
 
       // 建立預期參與者，並取得 creatorLineUserId
+      const { participants, creatorLineUserId } =
+        await this.buildParticipantData(
+          prisma,
+          event.id,
+          creatorUserId,
+          participantData,
+        );
+
+      if (participants.length > 0) {
+        await prisma.eventExpectedParticipant.createMany({
+          data: participants,
+        });
+      }
+
+      return { event, creatorLineUserId };
+    });
+  }
+
+  async createRecurringWithSlotsAndParticipants(
+    eventData: {
+      title?: string;
+      description?: string;
+      type: EventType;
+      ownerId: string | null;
+      startDate: Date;
+      endDate: Date;
+      startMinuteOfDay: number;
+      endMinuteOfDay: number;
+      slotDurationMin: number;
+      timeZone: string;
+      votingDeadline: Date | null;
+      lineGroupId: string | null;
+      weekdays: Weekday[];
+    },
+    slots: Array<{
+      date: Date;
+      weekday: Weekday;
+      startMinute: number;
+      endMinute: number;
+    }>,
+    participantData: Array<{
+      eventId?: string;
+      lineUserId?: string;
+      userId?: string;
+    }>,
+    creatorUserId?: string,
+  ): Promise<{
+    event: Event;
+    creatorLineUserId?: string;
+  }> {
+    return this.prisma.$transaction(async (prisma) => {
+      const event = await prisma.event.create({
+        data: {
+          title: eventData.title,
+          description: eventData.description,
+          type: eventData.type,
+          ownerId: eventData.ownerId,
+          startDate: eventData.startDate,
+          endDate: eventData.endDate,
+          startMinuteOfDay: eventData.startMinuteOfDay,
+          endMinuteOfDay: eventData.endMinuteOfDay,
+          slotDurationMin: eventData.slotDurationMin,
+          timeZone: eventData.timeZone,
+          votingDeadline: eventData.votingDeadline,
+          lineGroupId: eventData.lineGroupId,
+        },
+      });
+
+      await prisma.recurringEventSchedule.create({
+        data: {
+          eventId: event.id,
+          weekdays: eventData.weekdays,
+          startMinuteOfDay: eventData.startMinuteOfDay,
+          endMinuteOfDay: eventData.endMinuteOfDay,
+          slotDurationMin: eventData.slotDurationMin,
+        },
+      });
+
+      if (slots.length > 0) {
+        await prisma.eventTimeSlot.createMany({
+          data: slots.map((slot, index) => ({
+            eventId: event.id,
+            date: slot.date,
+            axisType: EventSlotAxisType.WEEKDAY,
+            axisDate: null,
+            axisWeekday: slot.weekday,
+            startMinute: slot.startMinute,
+            endMinute: slot.endMinute,
+            index,
+          })),
+        });
+      }
+
       const { participants, creatorLineUserId } =
         await this.buildParticipantData(
           prisma,
