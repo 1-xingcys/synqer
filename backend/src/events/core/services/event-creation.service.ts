@@ -99,14 +99,18 @@ export class EventCreationService {
           userId,
         );
     } else {
-      this.validateOneTimeDates(startDate, endDate);
+      const oneTimeDateRange = this.requireOneTimeDateRange(startDate, endDate);
       if (votingDeadline) {
-        this.validateVotingDeadline(votingDeadline, startDate!, startTime);
+        this.validateVotingDeadline(
+          votingDeadline,
+          oneTimeDateRange.startDate,
+          startTime,
+        );
       }
 
       // 解析日期
-      const startDateObj = new Date(startDate!);
-      const endDateObj = new Date(endDate!);
+      const startDateObj = new Date(oneTimeDateRange.startDate);
+      const endDateObj = new Date(oneTimeDateRange.endDate);
 
       // 生成時間槽
       const slots = this.timeSlotService.generateTimeSlots(
@@ -147,7 +151,7 @@ export class EventCreationService {
   /**
    * 驗證日期範圍：startDate <= endDate
    */
-  private validateOneTimeDates(startDate?: string, endDate?: string) {
+  private requireOneTimeDateRange(startDate?: string, endDate?: string) {
     if (!startDate || !endDate) {
       throw new BadRequestException('Start date and end date are required');
     }
@@ -157,6 +161,8 @@ export class EventCreationService {
         'Start date must be before or equal to end date',
       );
     }
+
+    return { startDate, endDate };
   }
 
   /**
