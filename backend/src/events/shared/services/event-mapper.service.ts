@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventType } from '@prisma/client';
+import { EventType, Weekday } from '@prisma/client';
 import { EventStatusService } from './event-status.service';
 import { ConfirmedTimeService } from './confirmed-time.service';
 import { ConfirmedTimeSlotData } from '../interfaces/confirmed-time.interface';
@@ -20,6 +20,7 @@ type MappedEventList = {
   description: string | null;
   startDate: Date;
   endDate: Date;
+  weekdays?: Weekday[];
   createdAt: Date;
   votingDeadline: Date | null;
   confirmedSlotIds: string[];
@@ -171,8 +172,9 @@ export class EventMapperService {
       type: event.type,
       title: event.title,
       description: event.description,
-      startDate: schedule.startDate ?? new Date(0),
-      endDate: schedule.endDate ?? new Date(0),
+      startDate: schedule.startDate ?? event.createdAt,
+      endDate: schedule.endDate ?? event.createdAt,
+      weekdays: schedule.weekdays,
       createdAt: event.createdAt,
       votingDeadline: event.votingDeadline,
       confirmedSlotIds,
@@ -198,6 +200,7 @@ export class EventMapperService {
     description: string | null;
     startDate?: Date;
     endDate?: Date;
+    createdAt: Date;
     startMinuteOfDay?: number;
     endMinuteOfDay?: number;
     slotDurationMin?: number;
@@ -221,8 +224,9 @@ export class EventMapperService {
       type: event.type,
       title: event.title,
       description: event.description,
-      startDate: schedule.startDate ?? new Date(0),
-      endDate: schedule.endDate ?? new Date(0),
+      startDate: schedule.startDate ?? event.createdAt,
+      endDate: schedule.endDate ?? event.createdAt,
+      weekdays: schedule.weekdays,
       startMinuteOfDay: schedule.startMinuteOfDay,
       endMinuteOfDay: schedule.endMinuteOfDay,
       slotDurationMin: schedule.slotDurationMin,

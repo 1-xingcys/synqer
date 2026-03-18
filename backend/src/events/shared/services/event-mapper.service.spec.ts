@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventType } from '@prisma/client';
+import { EventType, Weekday } from '@prisma/client';
 import { EventMapperService } from './event-mapper.service';
 import { EventStatusService } from './event-status.service';
 import { ConfirmedTimeService } from './confirmed-time.service';
@@ -264,6 +264,41 @@ describe('EventMapperService', () => {
       expect(result.confirmedSlotIds).toEqual(['slot-1']);
       expect(result.status).toBe('CONFIRMED');
     });
+
+    it('should use createdAt fallback and expose weekdays for recurring events', () => {
+      const recurringEvent = {
+        id: 'event-recurring-123',
+        type: EventType.RECURRING,
+        title: 'Recurring Event',
+        description: 'Recurring Description',
+        createdAt: new Date('2024-12-01'),
+        votingDeadline: null,
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 1080,
+        slotDurationMin: 15,
+        recurringSchedule: {
+          weekdays: [Weekday.MONDAY, Weekday.WEDNESDAY],
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 1080,
+          slotDurationMin: 15,
+        },
+        confirmedTimeSlots: [],
+      };
+
+      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
+      mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
+      mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
+        supportsCompletion: false,
+        supportsCalendarConflict: false,
+        supportsAddToCalendar: false,
+      });
+
+      const result = service.mapEventToList(recurringEvent);
+
+      expect(result.startDate).toEqual(new Date('2024-12-01'));
+      expect(result.endDate).toEqual(new Date('2024-12-01'));
+      expect(result.weekdays).toEqual([Weekday.MONDAY, Weekday.WEDNESDAY]);
+    });
   });
 
   describe('mapEventToDetail', () => {
@@ -274,6 +309,7 @@ describe('EventMapperService', () => {
       description: 'Description',
       startDate: new Date('2024-12-25'),
       endDate: new Date('2024-12-26'),
+      createdAt: new Date('2024-12-01'),
       startMinuteOfDay: 540,
       endMinuteOfDay: 1080,
       slotDurationMin: 15,
