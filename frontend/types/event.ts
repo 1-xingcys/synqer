@@ -2,6 +2,7 @@ import type { components } from "@/generated/openapi";
 
 export type EventType = components["schemas"]["EventType"];
 export type Weekday = components["schemas"]["Weekday"];
+export type EventSlotAxisType = components["schemas"]["EventSlotAxisType"];
 
 // 活動狀態
 export const EventStatus = {

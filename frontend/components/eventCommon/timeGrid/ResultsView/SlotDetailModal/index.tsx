@@ -5,17 +5,9 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Check, X, Info } from "lucide-react";
 import { Vote, Participant } from "../../types";
-import { ResultsAvailabilityMode } from "../types";
+import { ResultsAvailabilityMode, SlotRangeInfo } from "../types";
 import { Z_INDEX } from "@/lib/zIndex";
 import { AddButtonView, CloseButtonView } from "./footerViews";
-
-export interface SlotRangeInfo {
-  startDate: string;
-  endDate: string;
-  startTime: number;
-  endTime: number;
-  slotIds: string[];
-}
 
 interface SlotDetailModalProps {
   isOpen: boolean;

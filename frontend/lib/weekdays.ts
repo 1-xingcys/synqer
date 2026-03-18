@@ -1,6 +1,4 @@
-import type { components } from "@/generated/openapi";
-
-export type Weekday = components["schemas"]["Weekday"];
+import type { Weekday } from "@/types/event";
 
 const CANONICAL_WEEKDAY_ORDER: Weekday[] = [
   "MONDAY",
@@ -66,9 +64,13 @@ export function getOrderedWeekdays(locale: string): Weekday[] {
   ];
 }
 
-export function formatWeekdayLabel(weekday: Weekday, locale: string): string {
+export function formatWeekdayLabel(
+  weekday: Weekday,
+  locale: string,
+  formatOption: "narrow" | "short" | "long" = "short",
+): string {
   return new Intl.DateTimeFormat(locale, {
-    weekday: locale === "zh-TW" ? "narrow" : "short",
+    weekday: formatOption,
     timeZone: "UTC",
   }).format(WEEKDAY_REFERENCE_DATE[weekday]);
 }

@@ -1,11 +1,12 @@
-import { EventCapabilities } from "@/types/event";
+import { EventCapabilities, EventSlotAxisType, Weekday } from "@/types/event";
 
 export type TimeGranularity = 15 | 30 | 60;
 
 export interface GridAxisColumn {
   key: string;
-  kind: "date";
+  kind: "date" | "weekday";
   rawValue: string;
+  axisWeekday?: Weekday;
 }
 
 export interface MergedTimeRow {
@@ -18,6 +19,8 @@ export interface MergedTimeRow {
 export interface TimeSlot {
   id: string;
   date: string;
+  axisType?: EventSlotAxisType;
+  axisWeekday?: Weekday | null;
   startMinute: number;
   endMinute: number;
   index: number;
