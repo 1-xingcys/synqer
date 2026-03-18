@@ -1358,6 +1358,18 @@
           "RECURRING"
         ]
       },
+      "Weekday": {
+        "type": "string",
+        "enum": [
+          "MONDAY",
+          "TUESDAY",
+          "WEDNESDAY",
+          "THURSDAY",
+          "FRIDAY",
+          "SATURDAY",
+          "SUNDAY"
+        ]
+      },
       "ConfirmedTimeRangeDto": {
         "type": "object",
         "properties": {
@@ -1410,6 +1422,12 @@
                 "$ref": "#/components/schemas/EventType"
               }
             ]
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Weekday"
+            }
           },
           "id": {
             "type": "string"
@@ -1518,6 +1536,12 @@
               }
             ]
           },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Weekday"
+            }
+          },
           "id": {
             "type": "string"
           },
@@ -1610,6 +1634,13 @@
       "CreateEventDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
           "title": {
             "type": "string",
             "maxLength": 50
@@ -1623,6 +1654,14 @@
           },
           "endDate": {
             "type": "string"
+          },
+          "weekdays": {
+            "minItems": 1,
+            "maxItems": 7,
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
           },
           "startTime": {
             "type": "string",
@@ -1654,8 +1693,6 @@
           }
         },
         "required": [
-          "startDate",
-          "endDate",
           "startTime",
           "endTime"
         ]
@@ -1680,6 +1717,12 @@
                 "$ref": "#/components/schemas/EventType"
               }
             ]
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Weekday"
+            }
           },
           "id": {
             "type": "string"
@@ -2034,6 +2077,12 @@
                 "$ref": "#/components/schemas/EventType"
               }
             ]
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Weekday"
+            }
           },
           "isDeleted": {
             "type": "boolean"

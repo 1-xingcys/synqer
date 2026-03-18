@@ -775,6 +775,8 @@ export interface components {
         };
         /** @enum {string} */
         EventType: "ONE_TIME" | "RECURRING";
+        /** @enum {string} */
+        Weekday: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
         ConfirmedTimeRangeDto: {
             /** Format: date-time */
             startTime: string;
@@ -789,6 +791,7 @@ export interface components {
         };
         HostedEventListItemDto: {
             type: components["schemas"]["EventType"];
+            weekdays?: components["schemas"]["Weekday"][];
             id: string;
             title: string | null;
             description: string | null;
@@ -815,6 +818,7 @@ export interface components {
         };
         AttendedEventListItemDto: {
             type: components["schemas"]["EventType"];
+            weekdays?: components["schemas"]["Weekday"][];
             id: string;
             title: string | null;
             description: string | null;
@@ -837,10 +841,12 @@ export interface components {
             host: components["schemas"]["AttendedEventHostDto"] | null;
         };
         CreateEventDto: {
+            type?: components["schemas"]["EventType"];
             title?: string;
             description?: string;
-            startDate: string;
-            endDate: string;
+            startDate?: string;
+            endDate?: string;
+            weekdays?: Record<string, never>[];
             startTime: string;
             endTime: string;
             slotDurationMin?: number;
@@ -854,6 +860,7 @@ export interface components {
         };
         EventDetailEventDto: {
             type: components["schemas"]["EventType"];
+            weekdays?: components["schemas"]["Weekday"][];
             id: string;
             title: string | null;
             description: string | null;
@@ -935,6 +942,7 @@ export interface components {
         };
         EventPublicInfoResponseDto: {
             type: components["schemas"]["EventType"];
+            weekdays?: components["schemas"]["Weekday"][];
             isDeleted: boolean;
             id: string;
             title: string | null;
