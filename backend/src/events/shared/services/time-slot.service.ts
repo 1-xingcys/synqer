@@ -1,10 +1,29 @@
 import { Injectable } from '@nestjs/common';
+import { Weekday } from '@prisma/client';
+
+type OneTimeSlot = { date: Date; startMinute: number; endMinute: number };
+type RecurringSlot = {
+  date: Date;
+  weekday: Weekday;
+  startMinute: number;
+  endMinute: number;
+};
 
 /**
  * 時間槽生成和處理服務（純邏輯，不存取資料庫）
  */
 @Injectable()
 export class TimeSlotService {
+  private readonly recurringLegacyDates: Record<Weekday, Date> = {
+    [Weekday.MONDAY]: new Date('2000-01-03T00:00:00.000Z'),
+    [Weekday.TUESDAY]: new Date('2000-01-04T00:00:00.000Z'),
+    [Weekday.WEDNESDAY]: new Date('2000-01-05T00:00:00.000Z'),
+    [Weekday.THURSDAY]: new Date('2000-01-06T00:00:00.000Z'),
+    [Weekday.FRIDAY]: new Date('2000-01-07T00:00:00.000Z'),
+    [Weekday.SATURDAY]: new Date('2000-01-08T00:00:00.000Z'),
+    [Weekday.SUNDAY]: new Date('2000-01-09T00:00:00.000Z'),
+  };
+
   /**
    * 工具：將時間字串轉換為分鐘數（例如 "09:00" -> 540）
    */
@@ -23,9 +42,8 @@ export class TimeSlotService {
     startMinuteOfDay: number,
     endMinuteOfDay: number,
     slotDurationMin: number,
-  ): Array<{ date: Date; startMinute: number; endMinute: number }> {
-    const slots: Array<{ date: Date; startMinute: number; endMinute: number }> =
-      [];
+  ): OneTimeSlot[] {
+    const slots: OneTimeSlot[] = [];
 
     // 遍歷每一天
     const currentDate = new Date(startDate);
@@ -50,5 +68,51 @@ export class TimeSlotService {
     }
 
     return slots;
+  }
+
+  generateRecurringTimeSlots(
+    weekdays: Weekday[],
+    startMinuteOfDay: number,
+    endMinuteOfDay: number,
+    slotDurationMin: number,
+  ): RecurringSlot[] {
+    const slots: RecurringSlot[] = [];
+
+    for (const weekday of weekdays) {
+      const date = this.getRecurringLegacyDate(weekday);
+      let currentMinute = startMinuteOfDay;
+
+      while (currentMinute < endMinuteOfDay) {
+        const nextMinute = Math.min(
+          currentMinute + slotDurationMin,
+          endMinuteOfDay,
+        );
+        slots.push({
+          date,
+          weekday,
+          startMinute: currentMinute,
+          endMinute: nextMinute,
+        });
+        currentMinute = nextMinute;
+      }
+    }
+
+    return slots;
+  }
+
+  getRecurringLegacyDateRange(weekdays: Weekday[]) {
+    const dates = weekdays.map((weekday) =>
+      this.getRecurringLegacyDate(weekday),
+    );
+    const sortedDates = [...dates].sort((a, b) => a.getTime() - b.getTime());
+
+    return {
+      startDate: sortedDates[0],
+      endDate: sortedDates[sortedDates.length - 1],
+    };
+  }
+
+  private getRecurringLegacyDate(weekday: Weekday) {
+    return new Date(this.recurringLegacyDates[weekday]);
   }
 }
