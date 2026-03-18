@@ -62,6 +62,7 @@ export class CreateEventDto {
   @ValidateIf(
     (o: CreateEventValidationTarget) => o.type === EventType.RECURRING,
   )
+  @ApiPropertyOptional({ enum: Weekday, enumName: 'Weekday', isArray: true })
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(7)

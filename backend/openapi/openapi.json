@@ -1641,6 +1641,14 @@
               }
             ]
           },
+          "weekdays": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 7,
+            "items": {
+              "$ref": "#/components/schemas/Weekday"
+            }
+          },
           "title": {
             "type": "string",
             "maxLength": 50
@@ -1654,14 +1662,6 @@
           },
           "endDate": {
             "type": "string"
-          },
-          "weekdays": {
-            "minItems": 1,
-            "maxItems": 7,
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
           },
           "startTime": {
             "type": "string",

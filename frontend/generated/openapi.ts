@@ -842,11 +842,11 @@ export interface components {
         };
         CreateEventDto: {
             type?: components["schemas"]["EventType"];
+            weekdays?: components["schemas"]["Weekday"][];
             title?: string;
             description?: string;
             startDate?: string;
             endDate?: string;
-            weekdays?: Record<string, never>[];
             startTime: string;
             endTime: string;
             slotDurationMin?: number;
