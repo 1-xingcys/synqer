@@ -1,10 +1,6 @@
 import { useMemo } from "react";
 import { EventStatus } from "@/types/event";
 import type { AttendedEventApiItem } from "./useAttendedEvents";
-import {
-  getEventConfirmedEndTime,
-  getEventConfirmedStartTime,
-} from "@/lib/event-presentation";
 
 interface FilteredEvents {
   [EventStatus.VOTING]: AttendedEventApiItem[];
@@ -17,9 +13,7 @@ interface FilteredEvents {
  * Sort events based on the category's ordering rules
  *
  * Voting: Unvoted first, then by deadline (closer = higher priority)
- * Voting Ended: By start date (closer = higher priority)
- * Confirmed: By confirmed start date (closer = higher priority)
- * Completed: By confirmed end date (closer = higher priority)
+ * Voting Ended / Confirmed / Completed: By creation time (newer first)
  */
 function sortEvents(
   events: AttendedEventApiItem[],
@@ -46,23 +40,20 @@ function sortEvents(
       }
 
       case EventStatus.VOTING_ENDED: {
-        // By start date (closer to now = higher priority)
-        const startA = new Date(a.startDate).getTime();
-        const startB = new Date(b.startDate).getTime();
-        return Math.abs(startA - now) - Math.abs(startB - now);
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       }
 
       case EventStatus.CONFIRMED: {
         return (
-          Math.abs(getEventConfirmedStartTime(a) - now) -
-          Math.abs(getEventConfirmedStartTime(b) - now)
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
       }
 
       case EventStatus.COMPLETED: {
         return (
-          Math.abs(getEventConfirmedEndTime(a) - now) -
-          Math.abs(getEventConfirmedEndTime(b) - now)
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
       }
 
