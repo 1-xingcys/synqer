@@ -380,5 +380,64 @@ describe('EventMapperService', () => {
       expect(result.confirmedSlotIds).toEqual(['slot-1']);
       expect(result.confirmedTimeRanges).toEqual([mockTimeRange]);
     });
+
+    it('should map recurring event detail with weekdays and recurring capabilities', () => {
+      const recurringEvent = {
+        id: 'event-recurring-123',
+        type: EventType.RECURRING,
+        title: 'Recurring Event',
+        description: 'Recurring Description',
+        createdAt: new Date('2024-12-01'),
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 1080,
+        slotDurationMin: 15,
+        timeZone: 'Asia/Taipei',
+        lineGroupId: null,
+        ownerId: 'user-123',
+        votingDeadline: null,
+        recurringSchedule: {
+          weekdays: [Weekday.TUESDAY, Weekday.THURSDAY],
+          startMinuteOfDay: 600,
+          endMinuteOfDay: 720,
+          slotDurationMin: 30,
+        },
+        confirmedTimeSlots: [],
+      };
+
+      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
+      mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
+      mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
+        supportsCompletion: false,
+        supportsCalendarConflict: false,
+        supportsAddToCalendar: false,
+      });
+
+      const result = service.mapEventToDetail(recurringEvent);
+
+      expect(result).toEqual({
+        id: 'event-recurring-123',
+        type: EventType.RECURRING,
+        title: 'Recurring Event',
+        description: 'Recurring Description',
+        startDate: new Date('2024-12-01'),
+        endDate: new Date('2024-12-01'),
+        weekdays: [Weekday.TUESDAY, Weekday.THURSDAY],
+        startMinuteOfDay: 600,
+        endMinuteOfDay: 720,
+        slotDurationMin: 30,
+        timeZone: 'Asia/Taipei',
+        lineGroupId: null,
+        ownerId: 'user-123',
+        votingDeadline: null,
+        confirmedSlotIds: [],
+        confirmedTimeRanges: [],
+        status: 'VOTING',
+        capabilities: {
+          supportsCompletion: false,
+          supportsCalendarConflict: false,
+          supportsAddToCalendar: false,
+        },
+      });
+    });
   });
 });
