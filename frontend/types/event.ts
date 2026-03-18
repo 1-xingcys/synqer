@@ -1,6 +1,7 @@
 import type { components } from "@/generated/openapi";
 
 export type EventType = components["schemas"]["EventType"];
+export type Weekday = components["schemas"]["Weekday"];
 
 // 活動狀態
 export const EventStatus = {
@@ -49,6 +50,7 @@ export interface OneTimeEventSchedule {
 
 export interface RecurringEventSchedule {
   kind: "RECURRING";
+  weekdays?: Weekday[];
   startMinuteOfDay?: number;
   endMinuteOfDay?: number;
   slotDurationMin?: number;

@@ -1,5 +1,10 @@
 import type { operations } from "@/generated/openapi";
-import { EventCapabilities, EventSchedule, EventType } from "@/types/event";
+import {
+  EventCapabilities,
+  EventSchedule,
+  EventType,
+  Weekday,
+} from "@/types/event";
 
 type HostedEventsResponse =
   operations["EventCoreController_findMyEvents"]["responses"][200]["content"]["application/json"];
@@ -15,6 +20,7 @@ type EventLike = {
   capabilities: EventCapabilities;
   startDate: string;
   endDate: string;
+  weekdays?: Weekday[];
   startMinuteOfDay?: number;
   endMinuteOfDay?: number;
   slotDurationMin?: number;
@@ -29,6 +35,7 @@ function buildSchedule(event: EventLike): EventSchedule {
   if (event.type === "RECURRING") {
     return {
       kind: "RECURRING",
+      weekdays: event.weekdays,
       startMinuteOfDay: event.startMinuteOfDay,
       endMinuteOfDay: event.endMinuteOfDay,
       slotDurationMin: event.slotDurationMin,
