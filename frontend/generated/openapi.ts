@@ -887,7 +887,11 @@ export interface components {
             lineGroupId: string;
             groupName: string | null;
         };
+        /** @enum {string} */
+        EventSlotAxisType: "DATE" | "WEEKDAY";
         EventDetailSlotDto: {
+            axisType: components["schemas"]["EventSlotAxisType"];
+            axisWeekday?: components["schemas"]["Weekday"] | null;
             id: string;
             eventId: string;
             /** Format: date-time */

@@ -1833,9 +1833,31 @@
           "groupName"
         ]
       },
+      "EventSlotAxisType": {
+        "type": "string",
+        "enum": [
+          "DATE",
+          "WEEKDAY"
+        ]
+      },
       "EventDetailSlotDto": {
         "type": "object",
         "properties": {
+          "axisType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventSlotAxisType"
+              }
+            ]
+          },
+          "axisWeekday": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Weekday"
+              }
+            ]
+          },
           "id": {
             "type": "string"
           },
@@ -1857,6 +1879,7 @@
           }
         },
         "required": [
+          "axisType",
           "id",
           "eventId",
           "date",
