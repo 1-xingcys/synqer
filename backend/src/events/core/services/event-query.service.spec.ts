@@ -261,6 +261,49 @@ describe('EventQueryService', () => {
         expectedParticipants: [],
       });
     });
+
+    it('should preserve recurring slot axis metadata in detail response', async () => {
+      const eventId = 'event-recurring';
+      const userId = 'user-1';
+      const mockEvent = {
+        id: eventId,
+        isDeleted: false,
+        expectedParticipants: [{ id: 'ep-1', userId, hasVoted: false }],
+        votes: [],
+        slots: [
+          {
+            id: 'slot-1',
+            date: new Date('2000-01-03T00:00:00.000Z'),
+            axisType: 'WEEKDAY',
+            axisWeekday: 'MONDAY',
+            startMinute: 540,
+            endMinute: 570,
+            index: 0,
+          },
+        ],
+        lineGroup: null,
+      };
+
+      mockEventRepository.findOneWithDetails.mockResolvedValue(mockEvent);
+      mockEventRepository.findStagedVoteByEventAndUser.mockResolvedValue(null);
+      mockEventMapper.mapEventToDetail.mockReturnValue({ id: eventId });
+      mockEventMapper.mapVotes.mockReturnValue([]);
+      mockEventMapper.extractParticipants.mockReturnValue([]);
+
+      const result = await service.findOne(eventId, userId);
+
+      expect(result?.slots).toEqual([
+        {
+          id: 'slot-1',
+          date: new Date('2000-01-03T00:00:00.000Z'),
+          axisType: 'WEEKDAY',
+          axisWeekday: 'MONDAY',
+          startMinute: 540,
+          endMinute: 570,
+          index: 0,
+        },
+      ]);
+    });
   });
 
   describe('findOneHosted', () => {
@@ -404,6 +447,43 @@ describe('EventQueryService', () => {
 
       expect(result?.isDeleted).toBe(true);
       expect(result?.expectedParticipantCount).toBe(0);
+    });
+
+    it('should use recurring schedule minutes for recurring public info', async () => {
+      const mockEvent = {
+        id: 'event-recurring',
+        type: 'RECURRING',
+        isDeleted: false,
+        votingDeadline: null,
+        expectedParticipants: [{ id: 'ep-1' }, { id: 'ep-2' }],
+        confirmedTimeSlots: [],
+        owner: null,
+      };
+
+      mockEventRepository.findPublicInfo.mockResolvedValue(mockEvent);
+      mockEventMapper.mapEventToList.mockReturnValue({
+        id: 'event-recurring',
+        status: 'VOTING',
+      });
+      mockEventScheduleService.resolveSchedule.mockReturnValue({
+        type: 'RECURRING',
+        weekdays: ['MONDAY', 'WEDNESDAY'],
+        startMinuteOfDay: 600,
+        endMinuteOfDay: 720,
+        slotDurationMin: 30,
+      });
+
+      const result = await service.getEventPublicInfo('event-recurring');
+
+      expect(result).toEqual({
+        isDeleted: false,
+        id: 'event-recurring',
+        status: 'VOTING',
+        expectedParticipantCount: 2,
+        host: null,
+        startMinuteOfDay: 600,
+        endMinuteOfDay: 720,
+      });
     });
   });
 });
