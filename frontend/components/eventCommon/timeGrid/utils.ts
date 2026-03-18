@@ -1,3 +1,4 @@
+import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
 import { TimeSlot, Vote, CalendarEvent, GridAxisColumn } from "./types";
 
 // Map app locale to date-fns locale string
@@ -9,12 +10,17 @@ const getDateLocale = (locale: string): string => {
   return localeMap[locale] || locale;
 };
 
-// Format date header information
-export const formatDateHeader = (
-  dateStr: string,
+export const formatAxisHeader = (
+  column: GridAxisColumn,
   locale: string = "en",
-): { weekday: string; day: number; month: string } => {
-  const date = new Date(dateStr);
+): { weekday: string; day?: number; month?: string } => {
+  if (column.kind === "weekday" && column.axisWeekday) {
+    return {
+      weekday: formatWeekdayLabel(column.axisWeekday, locale),
+    };
+  }
+
+  const date = new Date(column.rawValue);
   const dateLocale = getDateLocale(locale);
   const weekday = date.toLocaleDateString(dateLocale, { weekday: "short" });
   const day = date.getDate();
@@ -22,23 +28,102 @@ export const formatDateHeader = (
   return { weekday, day, month };
 };
 
-export const buildDateAxisColumns = (dateKeys: string[]): GridAxisColumn[] => {
-  return dateKeys.map((dateKey) => ({
-    key: dateKey,
-    kind: "date",
-    rawValue: dateKey,
-  }));
+export const formatAxisPageRange = (
+  startColumn: GridAxisColumn | undefined,
+  endColumn: GridAxisColumn | undefined,
+  locale: string,
+): string => {
+  if (!startColumn || !endColumn) return "";
+
+  if (startColumn.kind === "weekday" && endColumn.kind === "weekday") {
+    const startLabel =
+      startColumn.axisWeekday &&
+      formatWeekdayLabel(startColumn.axisWeekday, locale);
+    const endLabel =
+      endColumn.axisWeekday &&
+      formatWeekdayLabel(endColumn.axisWeekday, locale);
+
+    if (!startLabel || !endLabel) return "";
+    return startLabel === endLabel ? startLabel : `${startLabel} ~ ${endLabel}`;
+  }
+
+  const startLabel = formatDatePageValue(startColumn.rawValue);
+  const endLabel = formatDatePageValue(endColumn.rawValue);
+  return startLabel === endLabel ? startLabel : `${startLabel} ~ ${endLabel}`;
 };
 
-// Group slots by date
-export const groupSlotsByDate = (
+const formatDatePageValue = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+};
+
+export const buildAxisColumns = (
+  axisKeys: string[],
+  slotsByAxis: Record<string, TimeSlot[]>,
+): GridAxisColumn[] => {
+  return axisKeys.map((axisKey) => {
+    const firstSlot = slotsByAxis[axisKey]?.[0];
+
+    if (firstSlot?.axisType === "WEEKDAY" && firstSlot.axisWeekday) {
+      return {
+        key: axisKey,
+        kind: "weekday",
+        rawValue: axisKey,
+        axisWeekday: firstSlot.axisWeekday,
+      };
+    }
+
+    return {
+      key: axisKey,
+      kind: "date",
+      rawValue: axisKey,
+    };
+  });
+};
+
+export const getSlotAxisKey = (slot: TimeSlot): string => {
+  if (slot.axisType === "WEEKDAY" && slot.axisWeekday) {
+    return slot.axisWeekday;
+  }
+
+  return slot.date.split("T")[0];
+};
+
+export const sortAxisKeys = (
+  axisKeys: string[],
+  slotsByAxis: Record<string, TimeSlot[]>,
+  locale: string,
+): string[] => {
+  return [...axisKeys].sort((left, right) => {
+    const leftSlot = slotsByAxis[left]?.[0];
+    const rightSlot = slotsByAxis[right]?.[0];
+
+    if (
+      leftSlot?.axisType === "WEEKDAY" &&
+      rightSlot?.axisType === "WEEKDAY" &&
+      leftSlot.axisWeekday &&
+      rightSlot.axisWeekday
+    ) {
+      const orderedWeekdays = getOrderedWeekdays(locale);
+      return (
+        orderedWeekdays.indexOf(leftSlot.axisWeekday) -
+        orderedWeekdays.indexOf(rightSlot.axisWeekday)
+      );
+    }
+
+    return left.localeCompare(right);
+  });
+};
+
+// Group slots by axis key
+export const groupSlotsByAxis = (
   slots: TimeSlot[],
 ): Record<string, TimeSlot[]> => {
   return slots.reduce(
     (acc, slot) => {
-      const dateKey = slot.date.split("T")[0];
-      if (!acc[dateKey]) acc[dateKey] = [];
-      acc[dateKey].push(slot);
+      const axisKey = getSlotAxisKey(slot);
+      if (!acc[axisKey]) acc[axisKey] = [];
+      acc[axisKey].push(slot);
       return acc;
     },
     {} as Record<string, TimeSlot[]>,
