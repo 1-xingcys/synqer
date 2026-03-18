@@ -4,6 +4,10 @@ import { CreateEventDto } from '../dto/create-event.dto';
 import { TimeSlotService } from '../../shared/services/time-slot.service';
 import { EventRepository } from '../repositories/event.repository';
 
+type EventCreationResult = Awaited<
+  ReturnType<EventRepository['createWithSlotsAndParticipants']>
+>;
+
 /**
  * 活動創建服務（業務邏輯層）
  */
@@ -55,7 +59,7 @@ export class EventCreationService {
       lineUserId,
     }));
 
-    let result;
+    let result: EventCreationResult;
 
     if (type === EventType.RECURRING) {
       this.validateRecurringWeekdays(weekdays);

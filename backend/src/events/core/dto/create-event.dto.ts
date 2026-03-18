@@ -21,6 +21,10 @@ import {
   DESCRIPTION_MAX_LENGTH,
 } from '../../../../shared/event-validation.constants';
 
+type CreateEventValidationTarget = {
+  type?: EventType;
+};
+
 export class CreateEventDto {
   @ApiPropertyOptional({ enum: EventType, enumName: 'EventType' })
   @IsOptional()
@@ -41,15 +45,23 @@ export class CreateEventDto {
   })
   description?: string;
 
-  @ValidateIf((o) => (o.type ?? EventType.ONE_TIME) === EventType.ONE_TIME)
+  @ValidateIf(
+    (o: CreateEventValidationTarget) =>
+      (o.type ?? EventType.ONE_TIME) === EventType.ONE_TIME,
+  )
   @IsDateString()
   startDate?: string; // "2025-08-12"
 
-  @ValidateIf((o) => (o.type ?? EventType.ONE_TIME) === EventType.ONE_TIME)
+  @ValidateIf(
+    (o: CreateEventValidationTarget) =>
+      (o.type ?? EventType.ONE_TIME) === EventType.ONE_TIME,
+  )
   @IsDateString()
   endDate?: string; // "2025-08-15"
 
-  @ValidateIf((o) => o.type === EventType.RECURRING)
+  @ValidateIf(
+    (o: CreateEventValidationTarget) => o.type === EventType.RECURRING,
+  )
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(7)
