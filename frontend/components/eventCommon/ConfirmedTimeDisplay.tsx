@@ -33,11 +33,7 @@ export function ConfirmedTimeDisplay({
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      {displayItems.map(([index, label]) => (
-        <div key={index} className="text-sm">
-          {label}
-        </div>
-      ))}
+      {displayItems.map(([_], label) => label)}
     </div>
   );
 }

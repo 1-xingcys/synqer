@@ -1,12 +1,13 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
 import { EventStatus } from "@/types/event";
 import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
 import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
+import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { EventTimeSelector } from "./EventTimeSelector";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import {
@@ -14,12 +15,17 @@ import {
   useEventTimeConfirmation,
   useParticipantsData,
 } from "./hooks";
+import { buildHostedEventResultText } from "../resultText";
 
 export default function HostedEventPanelPage() {
   const params = useParams();
   const eventId = params.eventId as string;
   const t = useTranslations();
+  const tEventInfo = useTranslations("eventInfo");
+  const locale = useLocale();
   const { data } = useHostedEventContext();
+  const { copied: resultTextCopied, copy: copyResultText } =
+    useCopyToClipboard();
 
   // Participants and votes data
   const { participantsWithAvatars, votesWithAvatars } =
@@ -86,6 +92,55 @@ export default function HostedEventPanelPage() {
   const showResultsView = isVotingPhase || isVotingEnded || isConfirmed;
   const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
   const hasDisplayableConfirmedTime = event.confirmedSelections.length > 0;
+  const resultText = (() => {
+    if (!isConfirmed) return "";
+
+    const confirmedSlotIds = new Set(event.confirmedSlotIds);
+    const confirmedSlots = (data.slots || [])
+      .filter((slot) => confirmedSlotIds.has(slot.id))
+      .map((slot) => ({
+        id: slot.id,
+        axisDate: slot.axisDate,
+        startMinute: slot.startMinute,
+        endMinute: slot.endMinute,
+      }))
+      .sort((a, b) =>
+        a.axisDate === b.axisDate
+          ? a.startMinute - b.startMinute
+          : a.axisDate.localeCompare(b.axisDate),
+      );
+
+    if (confirmedSlots.length === 0) return "";
+
+    return buildHostedEventResultText({
+      eventTitle: event.title || t("event.untitled"),
+      confirmedSlots,
+      votes: data.votes || [],
+      expectedParticipants: data.expectedParticipants || [],
+      locale,
+      copy: {
+        title: tEventInfo("resultText.title"),
+        eventLine: (eventTitle) =>
+          tEventInfo("resultText.event", { eventTitle }),
+        confirmedCountLine: (count) =>
+          tEventInfo("resultText.confirmedCount", { count }),
+        availableLine: (availableCount, totalExpected, percentage) =>
+          tEventInfo("resultText.available", {
+            availableCount,
+            totalExpected,
+            percentage,
+          }),
+        unavailableLine: (names) =>
+          tEventInfo("resultText.unavailable", { names }),
+        none: tEventInfo("resultText.none"),
+      },
+    });
+  })();
+
+  const handleCopyResultText = () => {
+    if (!resultText) return Promise.resolve();
+    return copyResultText(resultText);
+  };
 
   return (
     <div className="space-y-3 sm:space-y-6">
@@ -117,6 +172,9 @@ export default function HostedEventPanelPage() {
             isCommitPending={isCommitPending}
             isDiscardPending={isDiscardPending}
             isVotingPhase={isVotingPhase}
+            showShareResultButton={isConfirmed && resultText.length > 0}
+            resultTextCopied={resultTextCopied}
+            onCopyResultText={() => void handleCopyResultText()}
           />
 
           {/* Results View with HeatMap */}

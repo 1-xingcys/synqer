@@ -1,11 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocale, useTranslations } from "next-intl";
 import { formatMinutesToTime } from "@/lib/utils";
 import { formatAxisKeyLabel } from "@/lib/event-presentation";
 import type { EventSlotAxisType } from "@/types/event";
-import { AlertTriangle, Loader2, X } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCheck,
+  Copy,
+  Loader2,
+  Share2,
+  X,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Z_INDEX } from "@/lib/zIndex";
 
@@ -33,6 +41,9 @@ interface EventTimeSelectorProps {
   isCommitPending: boolean;
   isDiscardPending: boolean;
   isVotingPhase: boolean;
+  showShareResultButton?: boolean;
+  resultTextCopied?: boolean;
+  onCopyResultText?: () => void;
 }
 
 // Confirmation Dialog Component
@@ -112,11 +123,17 @@ export function EventTimeSelector({
   isCommitPending,
   isDiscardPending,
   isVotingPhase,
+  showShareResultButton = false,
+  resultTextCopied = false,
+  onCopyResultText,
 }: EventTimeSelectorProps) {
   const locale = useLocale();
   const t = useTranslations("hosted");
+  const tCommon = useTranslations("common");
+  const tEventInfo = useTranslations("eventInfo");
   const [showCommitConfirm, setShowCommitConfirm] = useState(false);
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
+  const [isShareResultModalOpen, setIsShareResultModalOpen] = useState(false);
 
   const formatDateRange = (
     startDate: string,
@@ -128,6 +145,24 @@ export function EventTimeSelector({
     }
     return `${formatAxisKeyLabel(startDate, axisType, locale)} - ${formatAxisKeyLabel(endDate, axisType, locale)}`;
   };
+  useEffect(() => {
+    if (!isShareResultModalOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsShareResultModalOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isShareResultModalOpen]);
 
   const handleCommitClick = () => {
     if (isVotingPhase) {
@@ -177,11 +212,23 @@ export function EventTimeSelector({
           <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
             {t("eventTimeSelector.title")}
           </h3>
-          <span
-            className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${statusText.className}`}
-          >
-            {statusText.label}
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${statusText.className}`}
+            >
+              {statusText.label}
+            </span>
+            {showShareResultButton && (
+              <button
+                onClick={() => setIsShareResultModalOpen(true)}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/35"
+                title={tEventInfo("shareResult")}
+                aria-label={tEventInfo("shareResult")}
+              >
+                <Share2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -281,6 +328,72 @@ export function EventTimeSelector({
         }
         isConfirmDisabled={isCommitPending}
       />
+
+      {typeof window !== "undefined" &&
+        isShareResultModalOpen &&
+        createPortal(
+          <>
+            <div
+              className={`fixed inset-0 ${Z_INDEX.MODAL_BACKDROP} bg-black/55 backdrop-blur-sm animate-in fade-in duration-200`}
+              onClick={() => setIsShareResultModalOpen(false)}
+            />
+            <div
+              className={`fixed ${Z_INDEX.MODAL_CONTENT} inset-x-4 bottom-4 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300`}
+            >
+              <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white/95 shadow-2xl dark:border-zinc-700 dark:bg-zinc-900/95">
+                <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-50/80 px-4 py-3 dark:border-zinc-700 dark:bg-zinc-800/60 sm:px-5">
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                      {tEventInfo("shareResultTitle")}
+                    </h3>
+                    <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                      {tEventInfo("shareResultHint")}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsShareResultModalOpen(false)}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white/90 text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800/90 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                    aria-label={tCommon("close")}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="space-y-2 p-4">
+                  <button
+                    onClick={() => {
+                      if (onCopyResultText) {
+                        onCopyResultText();
+                      }
+                    }}
+                    className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
+                      resultTextCopied
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300"
+                        : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/70 dark:text-zinc-200 dark:hover:bg-zinc-700/70"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      {resultTextCopied ? (
+                        <CheckCheck className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                      <span className="font-medium">
+                        {resultTextCopied
+                          ? tEventInfo("resultTextCopied")
+                          : tEventInfo("copyResultText")}
+                      </span>
+                    </span>
+                    <span className="mt-1 block text-xs text-zinc-500 dark:text-zinc-400">
+                      {tEventInfo("copyResultTextHint")}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>,
+          document.body,
+        )}
     </div>
   );
 }
