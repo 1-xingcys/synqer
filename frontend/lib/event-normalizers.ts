@@ -14,13 +14,22 @@ type EventDetailResponse =
   operations["EventCoreController_findOne"]["responses"][200]["content"]["application/json"];
 type HostedEventDetailResponse =
   operations["EventCoreController_findOneHosted"]["responses"][200]["content"]["application/json"];
+type EventPublicInfoResponse =
+  operations["EventCoreController_getEventPublicInfo"]["responses"][200]["content"]["application/json"];
 
 type EventLike = {
   type: EventType;
   capabilities: EventCapabilities;
-  startDate: string;
-  endDate: string;
   weekdays?: Weekday[];
+  schedule: {
+    kind: EventType;
+    startDate?: string;
+    endDate?: string;
+    weekdays?: Weekday[];
+    startMinuteOfDay?: number;
+    endMinuteOfDay?: number;
+    slotDurationMin?: number;
+  };
   startMinuteOfDay?: number;
   endMinuteOfDay?: number;
   slotDurationMin?: number;
@@ -28,37 +37,38 @@ type EventLike = {
 
 export type NormalizedEventLike<T extends EventLike> = Omit<
   T,
-  "type" | "startDate" | "endDate"
+  "type" | "schedule"
 > & {
   type: EventType;
   schedule: EventSchedule;
 };
 
 function buildSchedule(event: EventLike): EventSchedule {
-  if (event.type === "RECURRING") {
+  if (event.schedule.kind === "RECURRING") {
     return {
       kind: "RECURRING",
-      weekdays: event.weekdays,
-      startMinuteOfDay: event.startMinuteOfDay,
-      endMinuteOfDay: event.endMinuteOfDay,
-      slotDurationMin: event.slotDurationMin,
+      weekdays: event.schedule.weekdays ?? event.weekdays,
+      startMinuteOfDay:
+        event.schedule.startMinuteOfDay ?? event.startMinuteOfDay,
+      endMinuteOfDay: event.schedule.endMinuteOfDay ?? event.endMinuteOfDay,
+      slotDurationMin: event.schedule.slotDurationMin ?? event.slotDurationMin,
     };
   }
 
   return {
     kind: "ONE_TIME",
-    startDate: event.startDate,
-    endDate: event.endDate,
-    startMinuteOfDay: event.startMinuteOfDay,
-    endMinuteOfDay: event.endMinuteOfDay,
-    slotDurationMin: event.slotDurationMin,
+    startDate: event.schedule.startDate ?? "",
+    endDate: event.schedule.endDate ?? "",
+    startMinuteOfDay: event.schedule.startMinuteOfDay ?? event.startMinuteOfDay,
+    endMinuteOfDay: event.schedule.endMinuteOfDay ?? event.endMinuteOfDay,
+    slotDurationMin: event.schedule.slotDurationMin ?? event.slotDurationMin,
   };
 }
 
 export function normalizeEventLike<T extends EventLike>(
   event: T,
 ): NormalizedEventLike<T> {
-  const { startDate: _startDate, endDate: _endDate, type, ...rest } = event;
+  const { type, schedule: _schedule, ...rest } = event;
   return {
     ...rest,
     type,
@@ -90,4 +100,10 @@ export function normalizeHostedEventDetailResponse(
     ...response,
     event: normalizeEventLike(response.event),
   };
+}
+
+export function normalizeEventPublicInfoResponse(
+  response: EventPublicInfoResponse,
+) {
+  return normalizeEventLike(response);
 }
