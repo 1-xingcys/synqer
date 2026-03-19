@@ -23,8 +23,6 @@ interface VotingStatusProps {
 
 interface EventInfoCompactProps {
   title?: string | null;
-  startDate: string;
-  endDate: string;
   startMinuteOfDay: number;
   endMinuteOfDay: number;
   schedule?: EventSchedule;
@@ -35,8 +33,6 @@ interface EventInfoCompactProps {
 
 export function EventInfoCompact({
   title,
-  startDate,
-  endDate,
   startMinuteOfDay,
   endMinuteOfDay,
   schedule,
@@ -49,8 +45,6 @@ export function EventInfoCompact({
   const { copied, copyLink: handleCopyLink } = useEventShareLink(eventId || "");
   const scheduleSummary = formatEventScheduleSummary(
     {
-      startDate,
-      endDate,
       schedule,
       capabilities: {
         supportsAddToCalendar: false,

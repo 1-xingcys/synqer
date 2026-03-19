@@ -23,7 +23,6 @@ import {
 import { format } from "date-fns";
 import { EventRowData, HostedEventRowData, EventRowMode } from "./types";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
-import { getEventCandidateDateRange } from "@/lib/event-presentation";
 import { formatWeekdayLabel } from "@/lib/weekdays";
 
 interface EventRowProps {
@@ -53,12 +52,6 @@ export default function EventRow({
   // Check if hasVoted exists (for joined events)
   const hasVoted = "hasVoted" in event ? event.hasVoted : false;
 
-  // Format time range based on variant
-  const getTimeRange = () => {
-    return getEventCandidateDateRange(event);
-  };
-
-  const timeRange = getTimeRange();
   const formatDateRange = () => {
     if (
       event.schedule?.kind === "RECURRING" &&
@@ -69,15 +62,23 @@ export default function EventRow({
         .join(", ");
     }
 
-    const start = format(timeRange.start, "MMM d");
-    const end = format(timeRange.end, "MMM d, yyyy");
-    const startYear = timeRange.start.getFullYear();
-    const endYear = timeRange.end.getFullYear();
+    const startDate =
+      event.schedule?.kind === "ONE_TIME"
+        ? new Date(event.schedule.startDate)
+        : new Date(event.startDate);
+    const endDate =
+      event.schedule?.kind === "ONE_TIME"
+        ? new Date(event.schedule.endDate)
+        : new Date(event.endDate);
+    const start = format(startDate, "MMM d");
+    const end = format(endDate, "MMM d, yyyy");
+    const startYear = startDate.getFullYear();
+    const endYear = endDate.getFullYear();
 
     if (startYear === endYear) {
       return `${start} - ${end}`;
     }
-    return `${format(timeRange.start, "MMM d, yyyy")} - ${end}`;
+    return `${format(startDate, "MMM d, yyyy")} - ${end}`;
   };
 
   const votedCount = event.votedCount ?? 0;

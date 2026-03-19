@@ -6,7 +6,8 @@ import { ConfirmedTimeRange } from "@/types/event";
 interface AddToCalendarPanelProps {
   eventTitle: string;
   eventDescription?: string | null;
-  confirmedTimeRanges: ConfirmedTimeRange[];
+  // One-time only: recurring events never render this panel.
+  oneTimeConfirmedTimeRanges: ConfirmedTimeRange[];
 }
 
 // Google brand colors
@@ -151,11 +152,11 @@ function generateGoogleCalendarUrl(
 export function AddToCalendarPanel({
   eventTitle,
   eventDescription,
-  confirmedTimeRanges,
+  oneTimeConfirmedTimeRanges,
 }: AddToCalendarPanelProps) {
   const t = useTranslations("joined");
 
-  if (confirmedTimeRanges.length === 0) {
+  if (oneTimeConfirmedTimeRanges.length === 0) {
     return null;
   }
 
@@ -221,7 +222,7 @@ export function AddToCalendarPanel({
 
         {/* Time Ranges */}
         <div className="space-y-2">
-          {confirmedTimeRanges.map((range, index) => (
+          {oneTimeConfirmedTimeRanges.map((range, index) => (
             <div
               key={index}
               className="flex items-center justify-between gap-2 bg-white dark:bg-zinc-900 rounded-lg p-2.5 sm:p-3 border border-gray-100 dark:border-zinc-800"

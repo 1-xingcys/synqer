@@ -42,8 +42,6 @@ export default function JoinedEventPage() {
             <EventInfoDetail
               eventType={event.type}
               status={event.status}
-              startDate={event.startDate}
-              endDate={event.endDate}
               weekdays={event.weekdays}
               schedule={event.schedule}
               startMinuteOfDay={event.startMinuteOfDay}
@@ -93,8 +91,6 @@ export default function JoinedEventPage() {
         <EventInfoDetail
           eventType={event.type}
           status={event.status}
-          startDate={event.startDate}
-          endDate={event.endDate}
           weekdays={event.weekdays}
           schedule={event.schedule}
           startMinuteOfDay={event.startMinuteOfDay}

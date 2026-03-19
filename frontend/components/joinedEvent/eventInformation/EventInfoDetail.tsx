@@ -12,8 +12,8 @@ import { formatWeekdayLabel } from "@/lib/weekdays";
 interface EventInfoDetailProps {
   eventType: EventType;
   status: EventStatus;
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   weekdays?: Weekday[];
   schedule?: EventSchedule;
   startMinuteOfDay: number;
@@ -40,6 +40,21 @@ export function EventInfoDetail({
   const recurringWeekdays =
     weekdays ??
     (schedule?.kind === "RECURRING" ? schedule.weekdays : undefined);
+  const oneTimeStartDate =
+    schedule?.kind === "ONE_TIME" ? schedule.startDate : startDate;
+  const oneTimeEndDate =
+    schedule?.kind === "ONE_TIME" ? schedule.endDate : endDate;
+  const candidateDayText =
+    isRecurring && recurringWeekdays?.length
+      ? recurringWeekdays
+          .map((weekday) => formatWeekdayLabel(weekday, locale))
+          .join(", ")
+      : oneTimeStartDate && oneTimeEndDate
+        ? [
+            format(new Date(oneTimeStartDate), "yyyy/MM/dd"),
+            format(new Date(oneTimeEndDate), "yyyy/MM/dd"),
+          ].join(" ~ ")
+        : "-";
 
   return (
     <>
@@ -75,14 +90,7 @@ export function EventInfoDetail({
             </span>
           </div>
           <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-6">
-            {isRecurring && recurringWeekdays?.length
-              ? recurringWeekdays
-                  .map((weekday) => formatWeekdayLabel(weekday, locale))
-                  .join(", ")
-              : [
-                  format(new Date(startDate), "yyyy/MM/dd"),
-                  format(new Date(endDate), "yyyy/MM/dd"),
-                ].join(" ~ ")}
+            {candidateDayText}
           </p>
         </div>
 

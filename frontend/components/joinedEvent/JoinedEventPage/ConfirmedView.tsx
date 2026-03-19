@@ -59,7 +59,7 @@ export function ConfirmedView({
         <AddToCalendarPanel
           eventTitle={eventTitle}
           eventDescription={eventDescription}
-          confirmedTimeRanges={confirmedTimeRanges}
+          oneTimeConfirmedTimeRanges={confirmedTimeRanges}
         />
       )}
     </div>
