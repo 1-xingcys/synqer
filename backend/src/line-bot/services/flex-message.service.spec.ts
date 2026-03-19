@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
+import { EventType } from '@prisma/client';
 import { FlexMessageService, EventInfo } from './flex-message.service';
 import { EventStatus } from '../../events/shared/services/event-status.service';
 
@@ -36,6 +37,7 @@ describe('FlexMessageService', () => {
   describe('buildEventFlexMessage', () => {
     const baseEvent: EventInfo = {
       id: 'event-1',
+      type: EventType.ONE_TIME,
       title: 'Test Event',
       description: 'Test Description',
       status: EventStatus.VOTING,
@@ -285,6 +287,7 @@ describe('FlexMessageService', () => {
     it('should handle event without voting deadline', () => {
       const event: EventInfo = {
         id: 'event-1',
+        type: EventType.ONE_TIME,
         title: 'Test Event',
         description: null,
         status: EventStatus.VOTING,
@@ -302,6 +305,7 @@ describe('FlexMessageService', () => {
     it('should handle event without description', () => {
       const event: EventInfo = {
         id: 'event-1',
+        type: EventType.ONE_TIME,
         title: 'Test Event',
         description: null,
         status: EventStatus.VOTING,
@@ -329,6 +333,7 @@ describe('FlexMessageService', () => {
           testModule.get<FlexMessageService>(FlexMessageService);
         const event: EventInfo = {
           id: 'event-1',
+          type: EventType.ONE_TIME,
           title: 'Test Event',
           description: null,
           status: EventStatus.VOTING,

@@ -5,6 +5,10 @@ import { EventCapabilities } from '../../shared/interfaces/event-contract.interf
 import { ConfirmedSelectionKind } from '../../shared/interfaces/confirmed-time.interface';
 
 export class ConfirmedTimeRangeDto {
+  @ApiProperty({
+    description:
+      'One-time compatibility field. Recurring clients should prefer confirmedSelections.',
+  })
   startTime!: Date;
   endTime!: Date;
   slotIds!: string[];

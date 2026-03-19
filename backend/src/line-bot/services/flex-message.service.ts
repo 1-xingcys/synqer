@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { EventType } from '@prisma/client';
 import { EventStatus } from '../../events/shared/services/event-status.service';
 
 /**
@@ -159,11 +160,13 @@ export interface ConfirmedTimeRange {
  */
 export interface EventInfo {
   id: string;
+  type: EventType;
   title: string | null;
   description: string | null;
   status: EventStatus;
   votingDeadline: Date | null;
   confirmedTimeSlots: ConfirmedSlotInfo[];
+  // One-time compatibility field. Recurring should use dedicated summary text instead.
   confirmedTimeRanges: ConfirmedTimeRange[];
   host: {
     displayName: string;
@@ -457,6 +460,12 @@ export class FlexMessageService {
         };
 
       case EventStatus.CONFIRMED:
+        if (event.type === EventType.RECURRING) {
+          return {
+            label: '活動時間',
+            value: '每週固定時段已確認',
+          };
+        }
         if (event.confirmedTimeRanges.length > 0) {
           // 使用合併後的時間範圍來顯示
           const timeStr = this.formatConfirmedTimeRanges(
@@ -578,9 +587,10 @@ export class FlexMessageService {
   }
 
   /**
-   * 活動分享資訊（用於建構分享用 Flex Message）
+   * One-time 活動分享資訊（用於建構分享用 Flex Message）
+   * Recurring 目前不走這條 date-range 分享契約。
    */
-  buildEventShareFlexMessage(shareInfo: {
+  buildOneTimeEventShareFlexMessage(shareInfo: {
     eventId: string;
     title: string | null;
     hostName: string;
@@ -600,7 +610,7 @@ export class FlexMessageService {
   }
 
   /**
-   * 建構活動分享 Bubble
+   * 建構 one-time 活動分享 Bubble
    */
   private buildEventShareBubble(shareInfo: {
     eventId: string;

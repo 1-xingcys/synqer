@@ -321,6 +321,7 @@ export class LineBotService implements OnModuleInit {
       }));
 
       const status = this.eventStatusService.computeEventStatus({
+        eventType: event.type,
         votingDeadline: event.votingDeadline,
         confirmedTimeSlots,
       });
@@ -357,6 +358,7 @@ export class LineBotService implements OnModuleInit {
 
       result.push({
         id: event.id,
+        type: event.type,
         title: event.title,
         description: event.description,
         status,
@@ -617,8 +619,8 @@ export class LineBotService implements OnModuleInit {
       );
     }
 
-    // 建構分享用 Flex Message
-    const flexMsg = this.flexMessage.buildEventShareFlexMessage({
+    // One-time 專用分享訊息。Recurring 不應走這條 date-range 契約。
+    const flexMsg = this.flexMessage.buildOneTimeEventShareFlexMessage({
       eventId: event.id,
       title: event.title,
       hostName: host.displayName,
