@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
+import { EventSlotAxisType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 import axios from 'axios';
@@ -399,9 +400,13 @@ export class GoogleCalendarService {
     const conflictingSlotIds: string[] = [];
 
     for (const slot of event.slots) {
+      if (slot.axisType !== EventSlotAxisType.DATE || slot.axisDate == null) {
+        continue;
+      }
+
       // Convert slot time to actual datetime
       // 使用 setUTCHours 確保在任何伺服器時區都能正確處理時間
-      const slotDate = new Date(slot.date);
+      const slotDate = new Date(slot.axisDate);
       const slotStart = new Date(slotDate);
       slotStart.setUTCHours(0, 0, 0, 0);
       slotStart.setUTCMinutes(slot.startMinute);

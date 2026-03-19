@@ -289,13 +289,16 @@ export class LineBotService implements OnModuleInit {
             slot: {
               select: {
                 id: true,
-                date: true,
+                axisType: true,
+                axisDate: true,
+                axisWeekday: true,
                 startMinute: true,
                 endMinute: true,
               },
             },
           },
         },
+        oneTimeSchedule: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -315,7 +318,8 @@ export class LineBotService implements OnModuleInit {
       // 建構確認時段資訊（用於 EventInfo 和狀態計算）
       const confirmedTimeSlots = event.confirmedTimeSlots.map((cts) => ({
         slotId: cts.slotId,
-        date: cts.slot.date,
+        axisType: cts.slot.axisType,
+        axisDate: cts.slot.axisDate,
         startMinute: cts.slot.startMinute,
         endMinute: cts.slot.endMinute,
       }));
@@ -557,13 +561,16 @@ export class LineBotService implements OnModuleInit {
             slot: {
               select: {
                 id: true,
-                date: true,
+                axisType: true,
+                axisDate: true,
+                axisWeekday: true,
                 startMinute: true,
                 endMinute: true,
               },
             },
           },
         },
+        oneTimeSchedule: true,
       },
     });
 
@@ -620,15 +627,22 @@ export class LineBotService implements OnModuleInit {
     }
 
     // One-time 專用分享訊息。Recurring 不應走這條 date-range 契約。
+    if (!event.oneTimeSchedule) {
+      return {
+        success: false,
+        error: 'Recurring events do not support one-time share notification',
+      };
+    }
+
     const flexMsg = this.flexMessage.buildOneTimeEventShareFlexMessage({
       eventId: event.id,
       title: event.title,
       hostName: host.displayName,
       hostAvatarUrl: host.pictureUrl,
-      startDate: event.startDate,
-      endDate: event.endDate,
-      startTime: formatTime(event.startMinuteOfDay),
-      endTime: formatTime(event.endMinuteOfDay),
+      startDate: event.oneTimeSchedule.startDate,
+      endDate: event.oneTimeSchedule.endDate,
+      startTime: formatTime(event.oneTimeSchedule.startMinuteOfDay),
+      endTime: formatTime(event.oneTimeSchedule.endMinuteOfDay),
       votingDeadline: event.votingDeadline,
     });
 

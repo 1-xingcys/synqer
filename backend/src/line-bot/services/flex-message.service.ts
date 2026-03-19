@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventType } from '@prisma/client';
+import { EventSlotAxisType, EventType } from '@prisma/client';
 import { EventStatus } from '../../events/shared/services/event-status.service';
 import {
   ConfirmedSelection,
@@ -145,7 +145,8 @@ interface FlexAction {
  */
 export interface ConfirmedSlotInfo {
   slotId: string;
-  date: Date;
+  axisType: EventSlotAxisType;
+  axisDate?: Date | null;
   startMinute: number;
   endMinute: number;
 }
