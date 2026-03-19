@@ -6,8 +6,8 @@ import { EventSlotAxisType, StagedConfirmation, Weekday } from "@/types/event";
 
 interface EventSlot {
   id: string;
-  date: string | Date;
-  axisType?: EventSlotAxisType;
+  axisType: EventSlotAxisType;
+  axisDate?: string | Date | null;
   axisWeekday?: Weekday | null;
   startMinute: number;
   endMinute: number;
@@ -51,8 +51,12 @@ function sortSlots(slots: EventSlot[]) {
       if (weekdayDiff !== 0) return weekdayDiff;
     }
 
-    const leftDate = new Date(left.date).getTime();
-    const rightDate = new Date(right.date).getTime();
+    if (!left.axisDate || !right.axisDate) {
+      throw new Error("DATE slot is missing axisDate");
+    }
+
+    const leftDate = new Date(left.axisDate).getTime();
+    const rightDate = new Date(right.axisDate).getTime();
     if (leftDate !== rightDate) return leftDate - rightDate;
     return left.startMinute - right.startMinute;
   });
@@ -87,7 +91,14 @@ function buildRangesFromSlotIds(
     const dateKey =
       axisType === "WEEKDAY" && slot.axisWeekday
         ? slot.axisWeekday
-        : new Date(slot.date).toISOString().split("T")[0];
+        : new Date(
+            slot.axisDate ??
+              (() => {
+                throw new Error(`DATE slot ${slot.id} is missing axisDate`);
+              })(),
+          )
+            .toISOString()
+            .split("T")[0];
 
     if (!currentRange) {
       currentRange = {

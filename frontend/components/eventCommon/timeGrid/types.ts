@@ -18,8 +18,8 @@ export interface MergedTimeRow {
 
 export interface TimeSlot {
   id: string;
-  date: string;
-  axisType?: EventSlotAxisType;
+  axisType: EventSlotAxisType;
+  axisDate?: string | null;
   axisWeekday?: Weekday | null;
   startMinute: number;
   endMinute: number;

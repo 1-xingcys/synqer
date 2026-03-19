@@ -12,8 +12,8 @@ import { TimeSlot } from "@/components/eventCommon/timeGrid/types";
 const recurringSlots: TimeSlot[] = [
   {
     id: "slot-mon",
-    date: "2000-01-03T00:00:00.000Z",
     axisType: "WEEKDAY",
+    axisDate: null,
     axisWeekday: "MONDAY",
     startMinute: 540,
     endMinute: 570,
@@ -21,8 +21,8 @@ const recurringSlots: TimeSlot[] = [
   },
   {
     id: "slot-fri",
-    date: "2000-01-07T00:00:00.000Z",
     axisType: "WEEKDAY",
+    axisDate: null,
     axisWeekday: "FRIDAY",
     startMinute: 540,
     endMinute: 570,
@@ -30,8 +30,8 @@ const recurringSlots: TimeSlot[] = [
   },
   {
     id: "slot-wed",
-    date: "2000-01-05T00:00:00.000Z",
     axisType: "WEEKDAY",
+    axisDate: null,
     axisWeekday: "WEDNESDAY",
     startMinute: 540,
     endMinute: 570,

@@ -86,7 +86,11 @@ export const getSlotAxisKey = (slot: TimeSlot): string => {
     return slot.axisWeekday;
   }
 
-  return slot.date.split("T")[0];
+  if (!slot.axisDate) {
+    throw new Error(`DATE slot ${slot.id} is missing axisDate`);
+  }
+
+  return slot.axisDate.split("T")[0];
 };
 
 export const sortAxisKeys = (
@@ -172,7 +176,11 @@ export const mapCalendarEventsToSlots = (
   const eventMap = new Map<string, CalendarEvent[]>();
 
   for (const slot of slots) {
-    const slotDate = new Date(slot.date);
+    if (slot.axisType !== "DATE" || !slot.axisDate) {
+      continue;
+    }
+
+    const slotDate = new Date(slot.axisDate);
     const slotStart = new Date(slotDate);
     slotStart.setHours(0, 0, 0, 0);
     slotStart.setMinutes(slot.startMinute);
