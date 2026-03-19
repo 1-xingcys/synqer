@@ -1,6 +1,6 @@
-import { ConfirmedTimeRange } from "@/types/event";
-import { TimeSlot } from "@/components/eventCommon/timeGrid/types";
+import { ConfirmedSelection, ConfirmedTimeRange } from "@/types/event";
 import { formatWeekdayLabel } from "@/lib/weekdays";
+import { formatMinutesToTime } from "@/lib/utils";
 
 export function formatDefaultConfirmedTimeRange(
   range: ConfirmedTimeRange,
@@ -40,53 +40,41 @@ export function formatDefaultConfirmedTimeRange(
   return `${startDateStr} ${startTimeStr} - ${endDateStr} ${endTimeStr}`;
 }
 
-export function formatRecurringConfirmedTimeRange(
-  range: ConfirmedTimeRange,
+export function formatConfirmedSelection(
+  selection: ConfirmedSelection,
   locale: string,
-  slotsById: Map<string, TimeSlot>,
 ): string | null {
-  const slots = range.slotIds
-    .map((slotId) => slotsById.get(slotId))
-    .filter((slot): slot is TimeSlot => Boolean(slot));
+  if (selection.kind === "ONE_TIME_RANGE") {
+    if (!selection.startTime || !selection.endTime) {
+      return null;
+    }
+
+    return formatDefaultConfirmedTimeRange(
+      {
+        startTime: selection.startTime,
+        endTime: selection.endTime,
+        slotIds: selection.slotIds,
+      },
+      locale,
+    );
+  }
 
   if (
-    slots.length === 0 ||
-    slots[0].axisType !== "WEEKDAY" ||
-    !slots[0].axisWeekday
+    selection.kind !== "WEEKDAY_RANGE" ||
+    !selection.weekday ||
+    typeof selection.startMinute !== "number" ||
+    typeof selection.endMinute !== "number"
   ) {
     return null;
   }
 
-  const sortedSlots = [...slots].sort((left, right) => {
-    if (left.startMinute !== right.startMinute) {
-      return left.startMinute - right.startMinute;
-    }
-    return left.endMinute - right.endMinute;
-  });
-
-  const weekday = sortedSlots[0].axisWeekday;
-  if (!weekday) {
-    return null;
-  }
-
-  const weekdayLabel = formatWeekdayLabel(weekday, locale);
-  const timeFormatter = new Intl.DateTimeFormat(locale, {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "UTC",
-  });
-
-  return `${weekdayLabel} ${timeFormatter.format(new Date(range.startTime))} - ${timeFormatter.format(new Date(range.endTime))}`;
+  const weekdayLabel = formatWeekdayLabel(selection.weekday, locale);
+  return `${weekdayLabel} ${formatMinutesToTime(selection.startMinute)} - ${formatMinutesToTime(selection.endMinute)}`;
 }
 
 export function formatConfirmedTimeRange(
   range: ConfirmedTimeRange,
   locale: string,
-  slotsById: Map<string, TimeSlot>,
 ): string {
-  return (
-    formatRecurringConfirmedTimeRange(range, locale, slotsById) ??
-    formatDefaultConfirmedTimeRange(range, locale)
-  );
+  return formatDefaultConfirmedTimeRange(range, locale);
 }

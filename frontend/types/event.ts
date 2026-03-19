@@ -3,6 +3,8 @@ import type { components } from "@/generated/openapi";
 export type EventType = components["schemas"]["EventType"];
 export type Weekday = components["schemas"]["Weekday"];
 export type EventSlotAxisType = components["schemas"]["EventSlotAxisType"];
+export type ConfirmedSelectionKind =
+  components["schemas"]["ConfirmedSelectionKind"];
 
 // 活動狀態
 export const EventStatus = {
@@ -31,6 +33,7 @@ export type VoteMode = (typeof VoteMode)[keyof typeof VoteMode];
 
 // 合併後的時間範圍（連續時段合併成一個範圍）
 export type ConfirmedTimeRange = components["schemas"]["ConfirmedTimeRangeDto"];
+export type ConfirmedSelection = components["schemas"]["ConfirmedSelectionDto"];
 export type EventCapabilities = components["schemas"]["EventCapabilitiesDto"];
 
 export type StagedConfirmation =
