@@ -1394,6 +1394,56 @@
           "slotIds"
         ]
       },
+      "ConfirmedSelectionKind": {
+        "type": "string",
+        "enum": [
+          "ONE_TIME_RANGE",
+          "WEEKDAY_RANGE"
+        ]
+      },
+      "ConfirmedSelectionDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConfirmedSelectionKind"
+              }
+            ]
+          },
+          "weekday": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Weekday"
+              }
+            ]
+          },
+          "slotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "startTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endTime": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startMinute": {
+            "type": "number"
+          },
+          "endMinute": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "kind",
+          "slotIds"
+        ]
+      },
       "EventCapabilitiesDto": {
         "type": "object",
         "properties": {
@@ -1469,6 +1519,12 @@
               "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
             }
           },
+          "confirmedSelections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedSelectionDto"
+            }
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -1499,6 +1555,7 @@
           "votingDeadline",
           "confirmedSlotIds",
           "confirmedTimeRanges",
+          "confirmedSelections",
           "status",
           "capabilities",
           "expectedParticipantCount",
@@ -1582,6 +1639,12 @@
               "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
             }
           },
+          "confirmedSelections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedSelectionDto"
+            }
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -1623,6 +1686,7 @@
           "votingDeadline",
           "confirmedSlotIds",
           "confirmedTimeRanges",
+          "confirmedSelections",
           "status",
           "capabilities",
           "hasVoted",
@@ -1780,6 +1844,12 @@
               "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
             }
           },
+          "confirmedSelections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedSelectionDto"
+            }
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -1809,6 +1879,7 @@
           "votingDeadline",
           "confirmedSlotIds",
           "confirmedTimeRanges",
+          "confirmedSelections",
           "status",
           "capabilities"
         ]
@@ -2156,6 +2227,12 @@
               "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
             }
           },
+          "confirmedSelections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedSelectionDto"
+            }
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -2192,6 +2269,7 @@
           "votingDeadline",
           "confirmedSlotIds",
           "confirmedTimeRanges",
+          "confirmedSelections",
           "status",
           "capabilities",
           "expectedParticipantCount"
