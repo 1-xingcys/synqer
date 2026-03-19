@@ -119,8 +119,6 @@ export class EventCreationService {
     }
 
     const normalizedWeekdays = this.normalizeWeekdays(input.weekdays!);
-    const legacyDateRange =
-      this.timeSlotService.getRecurringLegacyDateRange(normalizedWeekdays);
     const slots = this.timeSlotService.generateRecurringTimeSlots(
       normalizedWeekdays,
       input.startMinuteOfDay,
@@ -134,8 +132,6 @@ export class EventCreationService {
         description: input.description,
         type: EventType.RECURRING,
         ownerId: userId || null,
-        startDate: legacyDateRange.startDate,
-        endDate: legacyDateRange.endDate,
         startMinuteOfDay: input.startMinuteOfDay,
         endMinuteOfDay: input.endMinuteOfDay,
         slotDurationMin: input.slotDurationMin,

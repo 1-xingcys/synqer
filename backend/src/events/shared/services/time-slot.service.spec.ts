@@ -204,17 +204,4 @@ describe('TimeSlotService', () => {
       });
     });
   });
-
-  describe('getRecurringLegacyDateRange', () => {
-    it('should return canonical date range spanning selected weekdays', () => {
-      const result = service.getRecurringLegacyDateRange([
-        Weekday.WEDNESDAY,
-        Weekday.FRIDAY,
-        Weekday.MONDAY,
-      ]);
-
-      expect(result.startDate.toISOString()).toBe('2000-01-03T00:00:00.000Z');
-      expect(result.endDate.toISOString()).toBe('2000-01-07T00:00:00.000Z');
-    });
-  });
 });

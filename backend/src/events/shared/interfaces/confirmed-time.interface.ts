@@ -8,8 +8,8 @@ export interface ConfirmedTimeSlotData {
   slot: {
     id: string;
     axisType: EventSlotAxisType;
-    axisDate?: Date | null;
-    axisWeekday?: Weekday | null;
+    axisDate: Date | null;
+    axisWeekday: Weekday | null;
     startMinute: number;
     endMinute: number;
   };

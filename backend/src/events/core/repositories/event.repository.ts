@@ -110,8 +110,6 @@ export class EventRepository {
       description?: string;
       type: EventType;
       ownerId: string | null;
-      startDate: Date;
-      endDate: Date;
       startMinuteOfDay: number;
       endMinuteOfDay: number;
       slotDurationMin: number;
@@ -121,7 +119,6 @@ export class EventRepository {
       weekdays: Weekday[];
     },
     slots: Array<{
-      date: Date;
       weekday: Weekday;
       startMinute: number;
       endMinute: number;

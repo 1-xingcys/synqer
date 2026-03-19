@@ -19,7 +19,6 @@ describe('EventCreationService', () => {
     parseTimeToMinutes: jest.fn(),
     generateTimeSlots: jest.fn(),
     generateRecurringTimeSlots: jest.fn(),
-    getRecurringLegacyDateRange: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -67,16 +66,11 @@ describe('EventCreationService', () => {
       mockTimeSlotService.generateTimeSlots.mockReturnValue(mockSlots);
       mockTimeSlotService.generateRecurringTimeSlots.mockReturnValue([
         {
-          date: new Date('2000-01-03T00:00:00.000Z'),
           weekday: Weekday.MONDAY,
           startMinute: 540,
           endMinute: 555,
         },
       ]);
-      mockTimeSlotService.getRecurringLegacyDateRange.mockReturnValue({
-        startDate: new Date('2000-01-03T00:00:00.000Z'),
-        endDate: new Date('2000-01-07T00:00:00.000Z'),
-      });
     });
 
     it('should create an event successfully', async () => {

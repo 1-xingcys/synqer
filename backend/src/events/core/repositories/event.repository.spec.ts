@@ -197,8 +197,6 @@ describe('EventRepository', () => {
         description: 'Recurring Description',
         type: EventType.RECURRING,
         ownerId: 'user-123',
-        startDate: new Date('2000-01-03T00:00:00.000Z'),
-        endDate: new Date('2000-01-07T00:00:00.000Z'),
         startMinuteOfDay: 540,
         endMinuteOfDay: 1080,
         slotDurationMin: 15,
@@ -209,7 +207,6 @@ describe('EventRepository', () => {
       };
       const slots = [
         {
-          date: new Date('2000-01-03T00:00:00.000Z'),
           weekday: Weekday.MONDAY,
           startMinute: 540,
           endMinute: 555,
