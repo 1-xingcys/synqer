@@ -10,9 +10,6 @@ import {
   EventScheduleSource,
 } from './event-schedule.service';
 
-// 確認時段的資料結構（重新導出以保持向後兼容）
-export type ConfirmedTimeSlot = ConfirmedTimeSlotData;
-
 type MappedEventList = {
   id: string;
   type: EventType;
@@ -135,7 +132,7 @@ export class EventMapperService {
   /**
    * 將確認時段轉換為狀態計算所需的格式
    */
-  mapConfirmedSlotsForStatus(confirmedTimeSlots?: ConfirmedTimeSlot[]) {
+  mapConfirmedSlotsForStatus(confirmedTimeSlots?: ConfirmedTimeSlotData[]) {
     if (!confirmedTimeSlots || confirmedTimeSlots.length === 0) {
       return undefined;
     }
@@ -159,7 +156,7 @@ export class EventMapperService {
     votingDeadline: Date | null;
     oneTimeSchedule: EventScheduleSource['oneTimeSchedule'];
     recurringSchedule: EventScheduleSource['recurringSchedule'];
-    confirmedTimeSlots?: ConfirmedTimeSlot[];
+    confirmedTimeSlots?: ConfirmedTimeSlotData[];
   }): MappedEventList {
     const schedule = this.eventScheduleService.resolveSchedule(event);
     const confirmedSlotIds =
@@ -212,7 +209,7 @@ export class EventMapperService {
     votingDeadline: Date | null;
     oneTimeSchedule: EventScheduleSource['oneTimeSchedule'];
     recurringSchedule: EventScheduleSource['recurringSchedule'];
-    confirmedTimeSlots?: ConfirmedTimeSlot[];
+    confirmedTimeSlots?: ConfirmedTimeSlotData[];
   }) {
     const schedule = this.eventScheduleService.resolveSchedule(event);
     const confirmedSlotIds =
