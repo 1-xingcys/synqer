@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { EventSlotAxisType, Weekday } from '@prisma/client';
 import { EventRepository } from '../repositories/event.repository';
 import { EventMapperService } from '../../shared/services/event-mapper.service';
 import { EventStatusService } from '../../shared/services/event-status.service';
@@ -120,7 +119,7 @@ export class EventQueryService {
       isDeleted: false,
       event: this.eventMapper.mapEventToDetail(event),
       lineGroup: event.lineGroup,
-      slots: this.mapSlots(event.slots),
+      slots: event.slots,
       votes,
       stagedVote,
       participants,
@@ -189,7 +188,7 @@ export class EventQueryService {
     return {
       isDeleted: false,
       event: this.eventMapper.mapEventToDetail(event),
-      slots: this.mapSlots(event.slots),
+      slots: event.slots,
       votes,
       stagedConfirmation,
       participants,
@@ -249,55 +248,5 @@ export class EventQueryService {
     );
 
     return votes.filter((v) => activeParticipantUserIds.has(v.userId));
-  }
-
-  private mapSlots(
-    slots: Array<{
-      id: string;
-      eventId: string;
-      axisType: EventSlotAxisType;
-      axisDate: Date | null;
-      axisWeekday: Weekday | null;
-      startMinute: number;
-      endMinute: number;
-      index: number;
-    }>,
-  ) {
-    return slots.map((slot) => ({
-      id: slot.id,
-      eventId: slot.eventId,
-      date: this.getSlotDate(slot.axisType, slot.axisDate, slot.axisWeekday),
-      axisType: slot.axisType,
-      axisWeekday: slot.axisWeekday,
-      startMinute: slot.startMinute,
-      endMinute: slot.endMinute,
-      index: slot.index,
-    }));
-  }
-
-  private getSlotDate(
-    axisType: EventSlotAxisType,
-    axisDate: Date | null,
-    axisWeekday: Weekday | null,
-  ) {
-    if (axisType === EventSlotAxisType.DATE && axisDate) {
-      return axisDate;
-    }
-
-    const anchorDates: Record<Weekday, Date> = {
-      [Weekday.MONDAY]: new Date('2000-01-03T00:00:00.000Z'),
-      [Weekday.TUESDAY]: new Date('2000-01-04T00:00:00.000Z'),
-      [Weekday.WEDNESDAY]: new Date('2000-01-05T00:00:00.000Z'),
-      [Weekday.THURSDAY]: new Date('2000-01-06T00:00:00.000Z'),
-      [Weekday.FRIDAY]: new Date('2000-01-07T00:00:00.000Z'),
-      [Weekday.SATURDAY]: new Date('2000-01-08T00:00:00.000Z'),
-      [Weekday.SUNDAY]: new Date('2000-01-09T00:00:00.000Z'),
-    };
-
-    if (!axisWeekday) {
-      throw new Error('Slot is missing axisDate and axisWeekday');
-    }
-
-    return anchorDates[axisWeekday];
   }
 }

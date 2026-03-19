@@ -190,8 +190,8 @@ describe('EventQueryService', () => {
           {
             id: 'slot-1',
             eventId: eventId,
-            date: new Date('2024-12-25T00:00:00.000Z'),
             axisType: 'DATE',
+            axisDate: new Date('2024-12-25T00:00:00.000Z'),
             axisWeekday: null,
             startMinute: 540,
             endMinute: 570,
@@ -322,8 +322,8 @@ describe('EventQueryService', () => {
         {
           id: 'slot-1',
           eventId: eventId,
-          date: new Date('2000-01-03T00:00:00.000Z'),
           axisType: 'WEEKDAY',
+          axisDate: null,
           axisWeekday: 'MONDAY',
           startMinute: 540,
           endMinute: 570,

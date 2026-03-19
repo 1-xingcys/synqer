@@ -33,9 +33,9 @@ export class EventDetailLineGroupDto {
 export class EventDetailSlotDto {
   id!: string;
   eventId!: string;
-  date!: Date;
   @ApiProperty({ enum: EventSlotAxisType, enumName: 'EventSlotAxisType' })
   axisType!: EventSlotAxisType;
+  axisDate!: Date | null;
   @ApiProperty({ enum: Weekday, enumName: 'Weekday', required: false })
   axisWeekday!: Weekday | null;
   startMinute!: number;
