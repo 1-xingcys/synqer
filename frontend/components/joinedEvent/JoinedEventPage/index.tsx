@@ -42,10 +42,7 @@ export default function JoinedEventPage() {
             <EventInfoDetail
               eventType={event.type}
               status={event.status}
-              weekdays={event.weekdays}
               schedule={event.schedule}
-              startMinuteOfDay={event.startMinuteOfDay}
-              endMinuteOfDay={event.endMinuteOfDay}
               votingDeadline={event.votingDeadline}
               currentUserHasVoted={currentUserHasVoted}
             />
@@ -87,10 +84,7 @@ export default function JoinedEventPage() {
         <EventInfoDetail
           eventType={event.type}
           status={event.status}
-          weekdays={event.weekdays}
           schedule={event.schedule}
-          startMinuteOfDay={event.startMinuteOfDay}
-          endMinuteOfDay={event.endMinuteOfDay}
           votingDeadline={event.votingDeadline}
           currentUserHasVoted={currentUserHasVoted}
         />

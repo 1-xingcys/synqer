@@ -94,9 +94,9 @@ export function JoinConfirmView({
                 </span>
               </div>
               <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-5 sm:pl-6">
-                {typeof eventInfo.startMinuteOfDay === "number" &&
-                typeof eventInfo.endMinuteOfDay === "number"
-                  ? `${formatMinutesToTime(eventInfo.startMinuteOfDay)} ~ ${formatMinutesToTime(eventInfo.endMinuteOfDay)}`
+                {typeof eventInfo.schedule.startMinuteOfDay === "number" &&
+                typeof eventInfo.schedule.endMinuteOfDay === "number"
+                  ? `${formatMinutesToTime(eventInfo.schedule.startMinuteOfDay)} ~ ${formatMinutesToTime(eventInfo.schedule.endMinuteOfDay)}`
                   : "-"}
               </p>
             </div>

@@ -23,9 +23,7 @@ interface VotingStatusProps {
 
 interface EventInfoCompactProps {
   title?: string | null;
-  startMinuteOfDay: number;
-  endMinuteOfDay: number;
-  schedule?: EventSchedule;
+  schedule: EventSchedule;
   eventId: string;
   eventStatus?: EventStatus;
   votingStatus?: VotingStatusProps;
@@ -33,8 +31,6 @@ interface EventInfoCompactProps {
 
 export function EventInfoCompact({
   title,
-  startMinuteOfDay,
-  endMinuteOfDay,
   schedule,
   eventId,
   eventStatus,
@@ -67,14 +63,14 @@ export function EventInfoCompact({
         <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400" />
         <span className="font-mono">{scheduleSummary}</span>
       </div>
-      {schedule?.kind !== "RECURRING" && (
+      {schedule.kind !== "RECURRING" && (
         <>
           <span className="text-zinc-300 dark:text-zinc-600">•</span>
           <div className="flex items-center gap-1">
             <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400" />
             <span className="font-mono">
-              {formatMinutesToTime(startMinuteOfDay)} ~{" "}
-              {formatMinutesToTime(endMinuteOfDay)}
+              {formatMinutesToTime(schedule.startMinuteOfDay)} ~{" "}
+              {formatMinutesToTime(schedule.endMinuteOfDay)}
             </span>
           </div>
         </>

@@ -6,16 +6,13 @@ import { Calendar, Clock, Timer } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
 import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
-import { EventSchedule, EventStatus, EventType, Weekday } from "@/types/event";
+import { EventSchedule, EventStatus, EventType } from "@/types/event";
 import { formatWeekdayLabel } from "@/lib/weekdays";
 
 interface EventInfoDetailProps {
   eventType: EventType;
   status: EventStatus;
-  weekdays?: Weekday[];
-  schedule?: EventSchedule;
-  startMinuteOfDay: number;
-  endMinuteOfDay: number;
+  schedule: EventSchedule;
   votingDeadline?: string | null;
   currentUserHasVoted: boolean;
 }
@@ -23,10 +20,7 @@ interface EventInfoDetailProps {
 export function EventInfoDetail({
   eventType,
   status,
-  weekdays,
   schedule,
-  startMinuteOfDay,
-  endMinuteOfDay,
   votingDeadline,
   currentUserHasVoted,
 }: EventInfoDetailProps) {
@@ -34,14 +28,13 @@ export function EventInfoDetail({
   const locale = useLocale();
   const isRecurring = eventType === "RECURRING";
   const recurringWeekdays =
-    weekdays ??
-    (schedule?.kind === "RECURRING" ? schedule.weekdays : undefined);
+    schedule.kind === "RECURRING" ? schedule.weekdays : undefined;
   const candidateDayText =
     isRecurring && recurringWeekdays?.length
       ? recurringWeekdays
           .map((weekday) => formatWeekdayLabel(weekday, locale))
           .join(", ")
-      : schedule?.kind === "ONE_TIME"
+      : schedule.kind === "ONE_TIME"
         ? [
             format(new Date(schedule.startDate), "yyyy/MM/dd"),
             format(new Date(schedule.endDate), "yyyy/MM/dd"),
@@ -94,9 +87,9 @@ export function EventInfoDetail({
             </span>
           </div>
           <p className="text-sm sm:text-base text-zinc-900 dark:text-zinc-100 font-mono pl-6">
-            {formatMinutesToTime(startMinuteOfDay)}
+            {formatMinutesToTime(schedule.startMinuteOfDay ?? 0)}
             <span className="mx-2 text-zinc-400">~</span>
-            {formatMinutesToTime(endMinuteOfDay)}
+            {formatMinutesToTime(schedule.endMinuteOfDay ?? 0)}
           </p>
         </div>
       </div>

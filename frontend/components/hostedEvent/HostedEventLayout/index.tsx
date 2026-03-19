@@ -108,8 +108,6 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
         <EventInfoCompact
           eventStatus={event.status}
           title={event.title}
-          startMinuteOfDay={event.startMinuteOfDay}
-          endMinuteOfDay={event.endMinuteOfDay}
           schedule={event.schedule}
           eventId={eventId}
           votingStatus={{
