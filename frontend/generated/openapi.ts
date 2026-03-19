@@ -814,10 +814,6 @@ export interface components {
             description: string | null;
             schedule: components["schemas"]["EventScheduleDto"];
             /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
-            /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             votingDeadline: string | null;
@@ -841,10 +837,6 @@ export interface components {
             title: string | null;
             description: string | null;
             schedule: components["schemas"]["EventScheduleDto"];
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
@@ -884,10 +876,6 @@ export interface components {
             title: string | null;
             description: string | null;
             schedule: components["schemas"]["EventScheduleDto"];
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
             startMinuteOfDay: number;
             endMinuteOfDay: number;
             slotDurationMin: number;
@@ -972,10 +960,6 @@ export interface components {
             title: string | null;
             description: string | null;
             schedule: components["schemas"]["EventScheduleDto"];
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
             /** Format: date-time */
             createdAt: string;
             startMinuteOfDay?: number;
