@@ -4,7 +4,6 @@ import { ConfirmedTimeService } from './confirmed-time.service';
 import {
   ConfirmedSelectionKind,
   ConfirmedTimeSlotData,
-  ConfirmedTimeRange,
 } from '../interfaces/confirmed-time.interface';
 
 describe('ConfirmedTimeService', () => {
@@ -242,116 +241,6 @@ describe('ConfirmedTimeService', () => {
       expect(result[1].startTime.getUTCHours()).toBe(14);
       expect(result[1].endTime.getUTCHours()).toBe(14);
       expect(result[1].endTime.getUTCMinutes()).toBe(30);
-    });
-  });
-
-  describe('formatTimeRange', () => {
-    it('should format same day range correctly', () => {
-      const range: ConfirmedTimeRange = {
-        startTime: new Date('2024-12-25T09:00:00.000Z'),
-        endTime: new Date('2024-12-25T10:30:00.000Z'),
-        slotIds: ['slot-1'],
-      };
-
-      const result = service.formatTimeRange(range);
-
-      expect(result).toBe('12/25 09:00 - 10:30');
-    });
-
-    it('should format cross-day range correctly', () => {
-      const range: ConfirmedTimeRange = {
-        startTime: new Date('2024-12-25T22:00:00.000Z'),
-        endTime: new Date('2024-12-26T01:00:00.000Z'),
-        slotIds: ['slot-1'],
-      };
-
-      const result = service.formatTimeRange(range);
-
-      expect(result).toBe('12/25 22:00 - 12/26 01:00');
-    });
-  });
-
-  describe('formatTimeRangesSummary', () => {
-    it('should return empty string for empty array', () => {
-      expect(service.formatTimeRangesSummary([])).toBe('');
-    });
-
-    it('should format single range', () => {
-      const ranges: ConfirmedTimeRange[] = [
-        {
-          startTime: new Date('2024-12-25T09:00:00.000Z'),
-          endTime: new Date('2024-12-25T10:00:00.000Z'),
-          slotIds: ['slot-1'],
-        },
-      ];
-
-      const result = service.formatTimeRangesSummary(ranges);
-
-      expect(result).toBe('12/25 09:00 - 10:00');
-    });
-
-    it('should format multiple ranges', () => {
-      const ranges: ConfirmedTimeRange[] = [
-        {
-          startTime: new Date('2024-12-25T09:00:00.000Z'),
-          endTime: new Date('2024-12-25T10:00:00.000Z'),
-          slotIds: ['slot-1'],
-        },
-        {
-          startTime: new Date('2024-12-25T14:00:00.000Z'),
-          endTime: new Date('2024-12-25T15:00:00.000Z'),
-          slotIds: ['slot-2'],
-        },
-      ];
-
-      const result = service.formatTimeRangesSummary(ranges);
-
-      expect(result).toBe('12/25 09:00 - 10:00\n12/25 14:00 - 15:00');
-    });
-
-    it('should truncate with maxDisplay', () => {
-      const ranges: ConfirmedTimeRange[] = [
-        {
-          startTime: new Date('2024-12-25T09:00:00.000Z'),
-          endTime: new Date('2024-12-25T10:00:00.000Z'),
-          slotIds: ['slot-1'],
-        },
-        {
-          startTime: new Date('2024-12-25T14:00:00.000Z'),
-          endTime: new Date('2024-12-25T15:00:00.000Z'),
-          slotIds: ['slot-2'],
-        },
-        {
-          startTime: new Date('2024-12-26T09:00:00.000Z'),
-          endTime: new Date('2024-12-26T10:00:00.000Z'),
-          slotIds: ['slot-3'],
-        },
-      ];
-
-      const result = service.formatTimeRangesSummary(ranges, 2);
-
-      expect(result).toBe(
-        '12/25 09:00 - 10:00\n12/25 14:00 - 15:00\n(+1 個時段)',
-      );
-    });
-
-    it('should not truncate when maxDisplay is greater than or equal to ranges length', () => {
-      const ranges: ConfirmedTimeRange[] = [
-        {
-          startTime: new Date('2024-12-25T09:00:00.000Z'),
-          endTime: new Date('2024-12-25T10:00:00.000Z'),
-          slotIds: ['slot-1'],
-        },
-        {
-          startTime: new Date('2024-12-25T14:00:00.000Z'),
-          endTime: new Date('2024-12-25T15:00:00.000Z'),
-          slotIds: ['slot-2'],
-        },
-      ];
-
-      const result = service.formatTimeRangesSummary(ranges, 3);
-
-      expect(result).toBe('12/25 09:00 - 10:00\n12/25 14:00 - 15:00');
     });
   });
 

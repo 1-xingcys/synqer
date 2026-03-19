@@ -17,7 +17,6 @@ describe('EventMapperService', () => {
   };
 
   const mockConfirmedTimeService = {
-    mergeToTimeRanges: jest.fn(),
     mergeToSelections: jest.fn(),
   };
 
@@ -45,7 +44,6 @@ describe('EventMapperService', () => {
     eventCapabilitiesService = module.get(EventCapabilitiesService);
 
     jest.clearAllMocks();
-    mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
     mockConfirmedTimeService.mergeToSelections.mockReturnValue([]);
   });
 
@@ -212,7 +210,6 @@ describe('EventMapperService', () => {
     };
 
     it('should map event to list format with status', () => {
-      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
       mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
       mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
         supportsCompletion: true,

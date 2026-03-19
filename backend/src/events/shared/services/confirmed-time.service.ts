@@ -4,8 +4,13 @@ import {
   ConfirmedSelection,
   ConfirmedSelectionKind,
   ConfirmedTimeSlotData,
-  ConfirmedTimeRange,
 } from '../interfaces/confirmed-time.interface';
+
+type OneTimeConfirmedRange = {
+  startTime: Date;
+  endTime: Date;
+  slotIds: string[];
+};
 
 /**
  * 確認時間處理服務
@@ -29,7 +34,7 @@ export class ConfirmedTimeService {
    */
   mergeToTimeRanges(
     confirmedTimeSlots: ConfirmedTimeSlotData[],
-  ): ConfirmedTimeRange[] {
+  ): OneTimeConfirmedRange[] {
     if (!confirmedTimeSlots || confirmedTimeSlots.length === 0) {
       return [];
     }
@@ -42,8 +47,8 @@ export class ConfirmedTimeService {
       return a.slot.startMinute - b.slot.startMinute;
     });
 
-    const ranges: ConfirmedTimeRange[] = [];
-    let currentRange: ConfirmedTimeRange | null = null;
+    const ranges: OneTimeConfirmedRange[] = [];
+    let currentRange: OneTimeConfirmedRange | null = null;
 
     for (const cts of sortedSlots) {
       const slotDate = new Date(cts.slot.date);
@@ -163,53 +168,6 @@ export class ConfirmedTimeService {
 
     return selections;
   }
-
-  /**
-   * 格式化時間範圍為可讀字串（用於 LINE Bot 等）
-   */
-  formatTimeRange(range: ConfirmedTimeRange): string {
-    const startDate = range.startTime;
-    const endDate = range.endTime;
-
-    const dateStr = this.formatDate(startDate);
-    const startTimeStr = this.formatTime(startDate);
-    const endTimeStr = this.formatTime(endDate);
-
-    // 如果是同一天
-    if (this.isSameDay(startDate, endDate)) {
-      return `${dateStr} ${startTimeStr} - ${endTimeStr}`;
-    }
-
-    // 跨天的情況
-    const endDateStr = this.formatDate(endDate);
-    return `${dateStr} ${startTimeStr} - ${endDateStr} ${endTimeStr}`;
-  }
-
-  /**
-   * 格式化所有時間範圍為摘要字串
-   * @param ranges 時間範圍陣列
-   * @param maxDisplay 最多顯示幾個（用於預覽模式）
-   */
-  formatTimeRangesSummary(
-    ranges: ConfirmedTimeRange[],
-    maxDisplay?: number,
-  ): string {
-    if (ranges.length === 0) {
-      return '';
-    }
-
-    if (maxDisplay && ranges.length > maxDisplay) {
-      const displayed = ranges.slice(0, maxDisplay);
-      const remaining = ranges.length - maxDisplay;
-      const displayedStr = displayed
-        .map((r) => this.formatTimeRange(r))
-        .join('\n');
-      return `${displayedStr}\n(+${remaining} 個時段)`;
-    }
-
-    return ranges.map((r) => this.formatTimeRange(r)).join('\n');
-  }
-
   /**
    * 建立完整的 DateTime
    * 使用 setUTCHours 確保在任何伺服器時區都能正確處理時間
@@ -221,25 +179,5 @@ export class ConfirmedTimeService {
     const minutes = minuteOfDay % 60;
     result.setUTCHours(hours, minutes, 0, 0);
     return result;
-  }
-
-  private formatDate(date: Date): string {
-    const month = date.getUTCMonth() + 1;
-    const day = date.getUTCDate();
-    return `${month}/${day}`;
-  }
-
-  private formatTime(date: Date): string {
-    const hours = date.getUTCHours().toString().padStart(2, '0');
-    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  }
-
-  private isSameDay(date1: Date, date2: Date): boolean {
-    return (
-      date1.getUTCFullYear() === date2.getUTCFullYear() &&
-      date1.getUTCMonth() === date2.getUTCMonth() &&
-      date1.getUTCDate() === date2.getUTCDate()
-    );
   }
 }

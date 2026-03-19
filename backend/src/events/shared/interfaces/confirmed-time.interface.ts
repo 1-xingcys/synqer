@@ -15,16 +15,6 @@ export interface ConfirmedTimeSlotData {
   };
 }
 
-/**
- * 合併後的時間範圍
- * 連續的時段會被合併成一個範圍
- */
-export interface ConfirmedTimeRange {
-  startTime: Date; // 開始時間（完整的 DateTime）
-  endTime: Date; // 結束時間（完整的 DateTime）
-  slotIds: string[]; // 包含的時段 ID
-}
-
 export const ConfirmedSelectionKind = {
   ONE_TIME_RANGE: 'ONE_TIME_RANGE',
   WEEKDAY_RANGE: 'WEEKDAY_RANGE',
