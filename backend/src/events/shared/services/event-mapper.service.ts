@@ -18,6 +18,15 @@ type MappedEventList = {
   type: EventType;
   title: string | null;
   description: string | null;
+  schedule: {
+    kind: EventType;
+    startDate?: Date;
+    endDate?: Date;
+    weekdays?: Weekday[];
+    startMinuteOfDay: number;
+    endMinuteOfDay: number;
+    slotDurationMin: number;
+  };
   startDate: Date;
   endDate: Date;
   weekdays?: Weekday[];
@@ -172,6 +181,15 @@ export class EventMapperService {
       type: event.type,
       title: event.title,
       description: event.description,
+      schedule: {
+        kind: schedule.type,
+        startDate: schedule.startDate,
+        endDate: schedule.endDate,
+        weekdays: schedule.weekdays,
+        startMinuteOfDay: schedule.startMinuteOfDay,
+        endMinuteOfDay: schedule.endMinuteOfDay,
+        slotDurationMin: schedule.slotDurationMin,
+      },
       startDate: schedule.startDate ?? event.createdAt,
       endDate: schedule.endDate ?? event.createdAt,
       weekdays: schedule.weekdays,
@@ -224,6 +242,15 @@ export class EventMapperService {
       type: event.type,
       title: event.title,
       description: event.description,
+      schedule: {
+        kind: schedule.type,
+        startDate: schedule.startDate,
+        endDate: schedule.endDate,
+        weekdays: schedule.weekdays,
+        startMinuteOfDay: schedule.startMinuteOfDay,
+        endMinuteOfDay: schedule.endMinuteOfDay,
+        slotDurationMin: schedule.slotDurationMin,
+      },
       startDate: schedule.startDate ?? event.createdAt,
       endDate: schedule.endDate ?? event.createdAt,
       weekdays: schedule.weekdays,

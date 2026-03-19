@@ -4,6 +4,7 @@ import { EventSlotAxisType, EventType, Weekday } from '@prisma/client';
 import {
   ConfirmedSelectionDto,
   EventCapabilitiesDto,
+  EventScheduleDto,
 } from './hosted-event-list-item.dto';
 
 export class EventDetailEventDto {
@@ -12,6 +13,7 @@ export class EventDetailEventDto {
   type!: EventType;
   title!: string | null;
   description!: string | null;
+  schedule!: EventScheduleDto;
   startDate!: Date;
   endDate!: Date;
   @ApiProperty({

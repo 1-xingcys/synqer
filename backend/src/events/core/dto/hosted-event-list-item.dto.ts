@@ -29,12 +29,33 @@ export class EventCapabilitiesDto implements EventCapabilities {
   supportsAddToCalendar!: boolean;
 }
 
+export class EventScheduleDto {
+  @ApiProperty({ enum: EventType, enumName: 'EventType' })
+  kind!: EventType;
+
+  startDate?: Date;
+  endDate?: Date;
+
+  @ApiProperty({
+    enum: Weekday,
+    enumName: 'Weekday',
+    isArray: true,
+    required: false,
+  })
+  weekdays?: Weekday[];
+
+  startMinuteOfDay!: number;
+  endMinuteOfDay!: number;
+  slotDurationMin!: number;
+}
+
 export class HostedEventListItemDto {
   id!: string;
   @ApiProperty({ enum: EventType, enumName: 'EventType' })
   type!: EventType;
   title!: string | null;
   description!: string | null;
+  schedule!: EventScheduleDto;
   startDate!: Date;
   endDate!: Date;
   @ApiProperty({
