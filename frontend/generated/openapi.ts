@@ -777,16 +777,6 @@ export interface components {
         EventType: "ONE_TIME" | "RECURRING";
         /** @enum {string} */
         Weekday: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
-        ConfirmedTimeRangeDto: {
-            /**
-             * Format: date-time
-             * @description One-time compatibility field. Recurring clients should prefer confirmedSelections.
-             */
-            startTime: string;
-            /** Format: date-time */
-            endTime: string;
-            slotIds: string[];
-        };
         /** @enum {string} */
         ConfirmedSelectionKind: "ONE_TIME_RANGE" | "WEEKDAY_RANGE";
         ConfirmedSelectionDto: {
@@ -820,7 +810,6 @@ export interface components {
             /** Format: date-time */
             votingDeadline: string | null;
             confirmedSlotIds: string[];
-            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             confirmedSelections: components["schemas"]["ConfirmedSelectionDto"][];
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
@@ -848,7 +837,6 @@ export interface components {
             /** Format: date-time */
             votingDeadline: string | null;
             confirmedSlotIds: string[];
-            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             confirmedSelections: components["schemas"]["ConfirmedSelectionDto"][];
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
@@ -895,7 +883,6 @@ export interface components {
             /** Format: date-time */
             votingDeadline: string | null;
             confirmedSlotIds: string[];
-            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             confirmedSelections: components["schemas"]["ConfirmedSelectionDto"][];
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
@@ -981,7 +968,6 @@ export interface components {
             /** Format: date-time */
             votingDeadline: string | null;
             confirmedSlotIds: string[];
-            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
             confirmedSelections: components["schemas"]["ConfirmedSelectionDto"][];
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
