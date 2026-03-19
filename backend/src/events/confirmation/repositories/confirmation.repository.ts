@@ -159,7 +159,9 @@ export class ConfirmationRepository {
             slot: {
               select: {
                 id: true,
-                date: true,
+                axisType: true,
+                axisDate: true,
+                axisWeekday: true,
                 startMinute: true,
                 endMinute: true,
               },

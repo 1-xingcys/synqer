@@ -130,21 +130,6 @@ export class EventMapperService {
   }
 
   /**
-   * 將確認時段轉換為狀態計算所需的格式
-   */
-  mapConfirmedSlotsForStatus(confirmedTimeSlots?: ConfirmedTimeSlotData[]) {
-    if (!confirmedTimeSlots || confirmedTimeSlots.length === 0) {
-      return undefined;
-    }
-    return confirmedTimeSlots.map((cts) => ({
-      slotId: cts.slotId,
-      date: cts.slot.date,
-      startMinute: cts.slot.startMinute,
-      endMinute: cts.slot.endMinute,
-    }));
-  }
-
-  /**
    * 映射事件為列表項格式
    */
   mapEventToList(event: {
@@ -186,9 +171,7 @@ export class EventMapperService {
       status: this.eventStatusService.computeEventStatus({
         eventType: event.type,
         votingDeadline: event.votingDeadline,
-        confirmedTimeSlots: this.mapConfirmedSlotsForStatus(
-          event.confirmedTimeSlots,
-        ),
+        confirmedTimeSlots: event.confirmedTimeSlots,
       }),
       capabilities: this.eventCapabilitiesService.buildCapabilities(event.type),
     };
@@ -241,9 +224,7 @@ export class EventMapperService {
       status: this.eventStatusService.computeEventStatus({
         eventType: event.type,
         votingDeadline: event.votingDeadline,
-        confirmedTimeSlots: this.mapConfirmedSlotsForStatus(
-          event.confirmedTimeSlots,
-        ),
+        confirmedTimeSlots: event.confirmedTimeSlots,
       }),
       capabilities: this.eventCapabilitiesService.buildCapabilities(event.type),
     };

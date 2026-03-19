@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventType } from '@prisma/client';
+import { EventSlotAxisType, EventType } from '@prisma/client';
 import {
   EventStatusService,
   EventStatus,
@@ -64,9 +64,14 @@ describe('EventStatusService', () => {
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
-            date: futureDate,
-            startMinute: 540, // 09:00
-            endMinute: 600, // 10:00
+            slot: {
+              id: 'slot-1',
+              axisType: EventSlotAxisType.DATE,
+              axisDate: futureDate,
+              axisWeekday: null,
+              startMinute: 540, // 09:00
+              endMinute: 600, // 10:00
+            },
           },
         ],
       });
@@ -83,9 +88,14 @@ describe('EventStatusService', () => {
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
-            date: pastDate,
-            startMinute: 540,
-            endMinute: 600,
+            slot: {
+              id: 'slot-1',
+              axisType: EventSlotAxisType.DATE,
+              axisDate: pastDate,
+              axisWeekday: null,
+              startMinute: 540,
+              endMinute: 600,
+            },
           },
         ],
       });
@@ -102,9 +112,14 @@ describe('EventStatusService', () => {
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
-            date: pastDate,
-            startMinute: 540,
-            endMinute: 600,
+            slot: {
+              id: 'slot-1',
+              axisType: EventSlotAxisType.WEEKDAY,
+              axisDate: null,
+              axisWeekday: 'MONDAY',
+              startMinute: 540,
+              endMinute: 600,
+            },
           },
         ],
       });
@@ -124,15 +139,25 @@ describe('EventStatusService', () => {
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
-            date: pastDate,
-            startMinute: 540,
-            endMinute: 600,
+            slot: {
+              id: 'slot-1',
+              axisType: EventSlotAxisType.DATE,
+              axisDate: pastDate,
+              axisWeekday: null,
+              startMinute: 540,
+              endMinute: 600,
+            },
           },
           {
             slotId: 'slot-2',
-            date: futureDate,
-            startMinute: 540,
-            endMinute: 600,
+            slot: {
+              id: 'slot-2',
+              axisType: EventSlotAxisType.DATE,
+              axisDate: futureDate,
+              axisWeekday: null,
+              startMinute: 540,
+              endMinute: 600,
+            },
           },
         ],
       });
@@ -149,15 +174,25 @@ describe('EventStatusService', () => {
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
-            date: pastDate,
-            startMinute: 540, // 09:00
-            endMinute: 600, // 10:00
+            slot: {
+              id: 'slot-1',
+              axisType: EventSlotAxisType.DATE,
+              axisDate: pastDate,
+              axisWeekday: null,
+              startMinute: 540, // 09:00
+              endMinute: 600, // 10:00
+            },
           },
           {
             slotId: 'slot-2',
-            date: pastDate,
-            startMinute: 840, // 14:00
-            endMinute: 900, // 15:00
+            slot: {
+              id: 'slot-2',
+              axisType: EventSlotAxisType.DATE,
+              axisDate: pastDate,
+              axisWeekday: null,
+              startMinute: 840, // 14:00
+              endMinute: 900, // 15:00
+            },
           },
         ],
       });

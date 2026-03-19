@@ -60,20 +60,13 @@ export class ConfirmationService {
       throw new BadRequestException('Event not found');
     }
 
-    const confirmedTimeSlots = updatedEvent.confirmedTimeSlots.map((cts) => ({
-      slotId: cts.slotId,
-      date: cts.slot.date,
-      startMinute: cts.slot.startMinute,
-      endMinute: cts.slot.endMinute,
-    }));
-
     return {
       id: updatedEvent.id,
-      confirmedSlotIds: confirmedTimeSlots.map((s) => s.slotId),
+      confirmedSlotIds: updatedEvent.confirmedTimeSlots.map((s) => s.slotId),
       status: this.eventStatusService.computeEventStatus({
         eventType: updatedEvent.type,
         votingDeadline: updatedEvent.votingDeadline,
-        confirmedTimeSlots,
+        confirmedTimeSlots: updatedEvent.confirmedTimeSlots,
       }),
     };
   }
@@ -186,20 +179,15 @@ export class ConfirmationService {
       throw new BadRequestException('Event not found');
     }
 
-    const confirmedTimeSlots = updatedEvent.confirmedTimeSlots.map((cts) => ({
-      slotId: cts.slotId,
-      date: cts.slot.date,
-      startMinute: cts.slot.startMinute,
-      endMinute: cts.slot.endMinute,
-    }));
-
     return {
       id: updatedEvent.id,
-      confirmedSlotIds: confirmedTimeSlots.map((slot) => slot.slotId),
+      confirmedSlotIds: updatedEvent.confirmedTimeSlots.map(
+        (slot) => slot.slotId,
+      ),
       status: this.eventStatusService.computeEventStatus({
         eventType: updatedEvent.type,
         votingDeadline: updatedEvent.votingDeadline,
-        confirmedTimeSlots,
+        confirmedTimeSlots: updatedEvent.confirmedTimeSlots,
       }),
     };
   }

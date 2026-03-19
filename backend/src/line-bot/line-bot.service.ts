@@ -315,19 +315,10 @@ export class LineBotService implements OnModuleInit {
         event.confirmedTimeSlots,
       );
 
-      // 建構確認時段資訊（用於 EventInfo 和狀態計算）
-      const confirmedTimeSlots = event.confirmedTimeSlots.map((cts) => ({
-        slotId: cts.slotId,
-        axisType: cts.slot.axisType,
-        axisDate: cts.slot.axisDate,
-        startMinute: cts.slot.startMinute,
-        endMinute: cts.slot.endMinute,
-      }));
-
       const status = this.eventStatusService.computeEventStatus({
         eventType: event.type,
         votingDeadline: event.votingDeadline,
-        confirmedTimeSlots,
+        confirmedTimeSlots: event.confirmedTimeSlots,
       });
 
       // 排除已結束的活動
@@ -367,7 +358,7 @@ export class LineBotService implements OnModuleInit {
         description: event.description,
         status,
         votingDeadline: event.votingDeadline,
-        confirmedTimeSlots,
+        confirmedTimeSlots: event.confirmedTimeSlots,
         confirmedSelections,
         host,
         votingStats: {

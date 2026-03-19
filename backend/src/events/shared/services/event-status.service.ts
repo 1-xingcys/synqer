@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { EventType } from '@prisma/client';
+import { EventSlotAxisType, EventType } from '@prisma/client';
+import { ConfirmedTimeSlotData } from '../interfaces/confirmed-time.interface';
 
 // 活動狀態
 export enum EventStatus {
@@ -16,14 +17,6 @@ export enum ParticipantStatus {
   NOT_REGISTERED = 'NOT_REGISTERED', // 還沒註冊（只有 LINE 使用者）
 }
 
-// 確認時段資訊
-export interface ConfirmedSlotInfo {
-  slotId: string;
-  date: Date;
-  startMinute: number;
-  endMinute: number;
-}
-
 /**
  * 活動和參與者狀態計算服務（純邏輯，不存取資料庫）
  */
@@ -36,7 +29,7 @@ export class EventStatusService {
   computeEventStatus(event: {
     eventType?: EventType;
     votingDeadline: Date | null;
-    confirmedTimeSlots?: ConfirmedSlotInfo[];
+    confirmedTimeSlots?: ConfirmedTimeSlotData[];
   }): EventStatus {
     const now = new Date();
     const eventType = event.eventType ?? EventType.ONE_TIME;
@@ -72,15 +65,22 @@ export class EventStatusService {
    * 計算確認時段中最晚的結束時間
    * 使用 setUTCHours 確保在任何伺服器時區都能正確處理時間
    */
-  private getLatestEndTime(slots: ConfirmedSlotInfo[]): Date | null {
+  private getLatestEndTime(slots: ConfirmedTimeSlotData[]): Date | null {
     if (slots.length === 0) return null;
 
     let latestEnd: Date | null = null;
 
     for (const slot of slots) {
-      const slotDate = new Date(slot.date);
-      const endHours = Math.floor(slot.endMinute / 60);
-      const endMins = slot.endMinute % 60;
+      if (
+        slot.slot.axisType !== EventSlotAxisType.DATE ||
+        !slot.slot.axisDate
+      ) {
+        continue;
+      }
+
+      const slotDate = new Date(slot.slot.axisDate);
+      const endHours = Math.floor(slot.slot.endMinute / 60);
+      const endMins = slot.slot.endMinute % 60;
       slotDate.setUTCHours(endHours, endMins, 0, 0);
 
       if (!latestEnd || slotDate > latestEnd) {

@@ -157,38 +157,6 @@ describe('EventMapperService', () => {
     });
   });
 
-  describe('mapConfirmedSlotsForStatus', () => {
-    it('should map confirmed slots for status calculation', () => {
-      const confirmedTimeSlots = [
-        {
-          slotId: 'slot-1',
-          slot: {
-            id: 'slot-1',
-            date: new Date('2024-12-25'),
-            startMinute: 540,
-            endMinute: 600,
-          },
-        },
-      ];
-
-      const result = service.mapConfirmedSlotsForStatus(confirmedTimeSlots);
-
-      expect(result).toEqual([
-        {
-          slotId: 'slot-1',
-          date: new Date('2024-12-25'),
-          startMinute: 540,
-          endMinute: 600,
-        },
-      ]);
-    });
-
-    it('should return undefined for empty or undefined input', () => {
-      expect(service.mapConfirmedSlotsForStatus([])).toBeUndefined();
-      expect(service.mapConfirmedSlotsForStatus(undefined)).toBeUndefined();
-    });
-  });
-
   describe('mapEventToList', () => {
     const mockEvent = {
       id: 'event-123',
@@ -247,7 +215,7 @@ describe('EventMapperService', () => {
       expect(eventStatusService.computeEventStatus).toHaveBeenCalledWith({
         eventType: EventType.ONE_TIME,
         votingDeadline: null,
-        confirmedTimeSlots: undefined,
+        confirmedTimeSlots: [],
       });
     });
 
@@ -257,7 +225,13 @@ describe('EventMapperService', () => {
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
-            slot: { id: 'slot-1', date: new Date(), startMinute: 540, endMinute: 600 },
+            slot: {
+              id: 'slot-1',
+              axisType: 'DATE',
+              axisDate: new Date(),
+              startMinute: 540,
+              endMinute: 600,
+            },
           },
         ],
       };
@@ -390,7 +364,13 @@ describe('EventMapperService', () => {
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
-            slot: { id: 'slot-1', date: new Date(), startMinute: 540, endMinute: 600 },
+            slot: {
+              id: 'slot-1',
+              axisType: 'DATE',
+              axisDate: new Date(),
+              startMinute: 540,
+              endMinute: 600,
+            },
           },
         ],
       };

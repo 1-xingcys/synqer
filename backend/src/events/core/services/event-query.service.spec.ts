@@ -159,7 +159,18 @@ describe('EventQueryService', () => {
         isDeleted: false,
         expectedParticipants: [{ id: 'ep-1', userId, hasVoted: true }],
         votes: [{ userId, slotId: 'slot-1', user: { displayName: 'User 1' } }],
-        slots: [{ id: 'slot-1' }],
+        slots: [
+          {
+            id: 'slot-1',
+            eventId: eventId,
+            axisType: 'DATE',
+            axisDate: new Date('2024-12-25T00:00:00.000Z'),
+            axisWeekday: null,
+            startMinute: 540,
+            endMinute: 570,
+            index: 0,
+          },
+        ],
         lineGroup: null,
       };
 
@@ -175,7 +186,18 @@ describe('EventQueryService', () => {
         isDeleted: false,
         event: { id: eventId },
         lineGroup: null,
-        slots: [{ id: 'slot-1' }],
+        slots: [
+          {
+            id: 'slot-1',
+            eventId: eventId,
+            date: new Date('2024-12-25T00:00:00.000Z'),
+            axisType: 'DATE',
+            axisWeekday: null,
+            startMinute: 540,
+            endMinute: 570,
+            index: 0,
+          },
+        ],
         votes: [{ slotId: 'slot-1', userId: 'user-1' }],
         stagedVote: null,
         participants: [{ userId: 'user-1' }],
@@ -200,7 +222,18 @@ describe('EventQueryService', () => {
         isDeleted: false,
         expectedParticipants: [{ id: 'ep-1', userId, hasVoted: true }],
         votes: [{ userId, slotId: 'slot-1', user: { displayName: 'User 1' } }],
-        slots: [{ id: 'slot-1' }],
+        slots: [
+          {
+            id: 'slot-1',
+            eventId: eventId,
+            axisType: 'DATE',
+            axisDate: new Date('2024-12-25T00:00:00.000Z'),
+            axisWeekday: null,
+            startMinute: 540,
+            endMinute: 570,
+            index: 0,
+          },
+        ],
         lineGroup: null,
       };
 
@@ -265,8 +298,9 @@ describe('EventQueryService', () => {
         slots: [
           {
             id: 'slot-1',
-            date: new Date('2000-01-03T00:00:00.000Z'),
+            eventId: eventId,
             axisType: 'WEEKDAY',
+            axisDate: null,
             axisWeekday: 'MONDAY',
             startMinute: 540,
             endMinute: 570,
@@ -287,6 +321,7 @@ describe('EventQueryService', () => {
       expect(result?.slots).toEqual([
         {
           id: 'slot-1',
+          eventId: eventId,
           date: new Date('2000-01-03T00:00:00.000Z'),
           axisType: 'WEEKDAY',
           axisWeekday: 'MONDAY',
