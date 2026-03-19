@@ -4,22 +4,21 @@ import { useTranslations } from "next-intl";
 import { CheckCircle, Calendar } from "lucide-react";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { AddToCalendarPanel } from "./AddToCalendarPanel";
-import { ConfirmedTimeRange } from "@/types/event";
-import { TimeSlot } from "@/components/eventCommon/timeGrid/types";
+import { ConfirmedSelection, ConfirmedTimeRange } from "@/types/event";
 
 interface ConfirmedViewProps {
   eventTitle: string;
   eventDescription?: string | null;
+  confirmedSelections: ConfirmedSelection[];
   confirmedTimeRanges: ConfirmedTimeRange[];
-  slots?: TimeSlot[];
   supportsAddToCalendar: boolean;
 }
 
 export function ConfirmedView({
   eventTitle,
   eventDescription,
+  confirmedSelections,
   confirmedTimeRanges,
-  slots,
   supportsAddToCalendar,
 }: ConfirmedViewProps) {
   const t = useTranslations("joined");
@@ -46,8 +45,8 @@ export function ConfirmedView({
             {t("confirmed.eventTime")}
           </h4>
           <ConfirmedTimeDisplay
+            selections={confirmedSelections}
             timeRanges={confirmedTimeRanges}
-            slots={slots}
             className="text-green-700 dark:text-green-400"
           />
         </div>

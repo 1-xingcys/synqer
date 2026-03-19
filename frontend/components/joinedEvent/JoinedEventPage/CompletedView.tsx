@@ -3,17 +3,16 @@
 import { useTranslations } from "next-intl";
 import { Check, Calendar } from "lucide-react";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
-import { ConfirmedTimeRange } from "@/types/event";
-import { TimeSlot } from "@/components/eventCommon/timeGrid/types";
+import { ConfirmedSelection, ConfirmedTimeRange } from "@/types/event";
 
 interface CompletedViewProps {
+  confirmedSelections: ConfirmedSelection[];
   confirmedTimeRanges: ConfirmedTimeRange[];
-  slots?: TimeSlot[];
 }
 
 export function CompletedView({
+  confirmedSelections,
   confirmedTimeRanges,
-  slots,
 }: CompletedViewProps) {
   const t = useTranslations("joined");
 
@@ -39,8 +38,8 @@ export function CompletedView({
             {t("confirmed.eventTime")}
           </h4>
           <ConfirmedTimeDisplay
+            selections={confirmedSelections}
             timeRanges={confirmedTimeRanges}
-            slots={slots}
             className="text-zinc-600 dark:text-zinc-400"
           />
         </div>

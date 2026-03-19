@@ -75,16 +75,16 @@ export default function JoinedEventPage() {
           <ConfirmedView
             eventTitle={event.title || tJoined("untitledEvent")}
             eventDescription={event.description}
+            confirmedSelections={event.confirmedSelections}
             confirmedTimeRanges={event.confirmedTimeRanges}
-            slots={eventDetailData.slots}
             supportsAddToCalendar={supportsAddToCalendar(event)}
           />
         )}
 
         {event.status === EventStatus.COMPLETED && (
           <CompletedView
+            confirmedSelections={event.confirmedSelections}
             confirmedTimeRanges={event.confirmedTimeRanges}
-            slots={eventDetailData.slots}
           />
         )}
       </div>

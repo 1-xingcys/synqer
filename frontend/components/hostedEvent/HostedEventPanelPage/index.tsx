@@ -180,8 +180,8 @@ export default function HostedEventPanelPage() {
                     {t("joined.confirmed.eventTime")}
                   </h4>
                   <ConfirmedTimeDisplay
+                    selections={event.confirmedSelections}
                     timeRanges={event.confirmedTimeRanges}
-                    slots={slots}
                     className="text-zinc-600 dark:text-zinc-400"
                   />
                 </div>

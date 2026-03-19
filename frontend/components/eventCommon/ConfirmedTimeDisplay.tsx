@@ -1,13 +1,15 @@
 "use client";
 
-import { ConfirmedTimeRange } from "@/types/event";
+import { ConfirmedSelection, ConfirmedTimeRange } from "@/types/event";
 import { useLocale, useTranslations } from "next-intl";
-import { TimeSlot } from "@/components/eventCommon/timeGrid/types";
-import { formatConfirmedTimeRange } from "./confirmed-time-formatters";
+import {
+  formatConfirmedSelection,
+  formatConfirmedTimeRange,
+} from "./confirmed-time-formatters";
 
 interface ConfirmedTimeDisplayProps {
-  timeRanges: ConfirmedTimeRange[];
-  slots?: TimeSlot[];
+  selections?: ConfirmedSelection[];
+  timeRanges?: ConfirmedTimeRange[];
   /** 預覽模式：只顯示第一個時間範圍和剩餘數量 */
   preview?: boolean;
   /** 自訂 className */
@@ -20,29 +22,30 @@ interface ConfirmedTimeDisplayProps {
  * - 預覽模式：只顯示第一個時間範圍和剩餘數量
  */
 export function ConfirmedTimeDisplay({
+  selections,
   timeRanges,
-  slots,
   preview = false,
   className = "",
 }: ConfirmedTimeDisplayProps) {
   const t = useTranslations("event");
   const locale = useLocale();
-  const slotsById = new Map((slots ?? []).map((slot) => [slot.id, slot]));
+  const resolvedSelections = selections ?? [];
+  const resolvedTimeRanges = timeRanges ?? [];
+  const hasSelections = resolvedSelections.length > 0;
+  const displayCount = hasSelections
+    ? resolvedSelections.length
+    : resolvedTimeRanges.length;
 
-  if (!timeRanges || timeRanges.length === 0) {
+  if (displayCount === 0) {
     return null;
   }
 
   if (preview) {
-    // 預覽模式：顯示第一個時間範圍
-    const firstRange = timeRanges[0];
-    const firstRangeStr = formatConfirmedTimeRange(
-      firstRange,
-      locale,
-      slotsById,
-    );
+    const firstRangeStr = hasSelections
+      ? (formatConfirmedSelection(resolvedSelections[0], locale) ?? "")
+      : formatConfirmedTimeRange(resolvedTimeRanges[0], locale);
 
-    if (timeRanges.length === 1) {
+    if (displayCount === 1) {
       return <span className={className}>{firstRangeStr}</span>;
     }
 
@@ -50,18 +53,27 @@ export function ConfirmedTimeDisplay({
       <span className={className}>
         {firstRangeStr}{" "}
         <span className="text-muted-foreground">
-          {t("confirmedTime.moreRanges", { count: timeRanges.length - 1 })}
+          {t("confirmedTime.moreRanges", { count: displayCount - 1 })}
         </span>
       </span>
     );
   }
 
-  // 完整模式：顯示所有時間範圍
+  const displayItems = hasSelections
+    ? resolvedSelections.map(
+        (selection, index) =>
+          [index, formatConfirmedSelection(selection, locale) ?? ""] as const,
+      )
+    : resolvedTimeRanges.map(
+        (range, index) =>
+          [index, formatConfirmedTimeRange(range, locale)] as const,
+      );
+
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
-      {timeRanges.map((range, index) => (
+      {displayItems.map(([index, label]) => (
         <div key={index} className="text-sm">
-          {formatConfirmedTimeRange(range, locale, slotsById)}
+          {label}
         </div>
       ))}
     </div>
