@@ -44,6 +44,9 @@ interface EventTimeSelectorProps {
   showShareResultButton?: boolean;
   resultTextCopied?: boolean;
   onCopyResultText?: () => void;
+  showShareToLineOption?: boolean;
+  lineShareStatus?: "idle" | "sending" | "success" | "error";
+  onShareToLine?: () => Promise<boolean> | boolean;
 }
 
 // Confirmation Dialog Component
@@ -126,9 +129,12 @@ export function EventTimeSelector({
   showShareResultButton = false,
   resultTextCopied = false,
   onCopyResultText,
+  showShareToLineOption = false,
+  lineShareStatus = "idle",
+  onShareToLine,
 }: EventTimeSelectorProps) {
   const locale = useLocale();
-  const t = useTranslations("hosted");
+  const tHosted = useTranslations("hosted");
   const tCommon = useTranslations("common");
   const tEventInfo = useTranslations("eventInfo");
   const [showCommitConfirm, setShowCommitConfirm] = useState(false);
@@ -186,21 +192,30 @@ export function EventTimeSelector({
     }
   };
 
+  const handleShareToLineClick = async () => {
+    if (!onShareToLine || lineShareStatus === "sending") return;
+
+    const didShare = await onShareToLine();
+    if (didShare) {
+      setIsShareResultModalOpen(false);
+    }
+  };
+
   const isEmpty = selectedRanges.length === 0;
   const isActionPending = isPatchPending || isCommitPending || isDiscardPending;
 
   const statusText = hasStagedChanges
     ? {
-        label: t("eventTimeSelector.statusPendingChanges"),
+        label: tHosted("eventTimeSelector.statusPendingChanges"),
         className: "text-orange-600 dark:text-orange-400 border-none",
       }
     : hasConfirmedTime
       ? {
-          label: t("eventTimeSelector.statusConfirmed"),
+          label: tHosted("eventTimeSelector.statusConfirmed"),
           className: "text-emerald-600 dark:text-emerald-400 border-none",
         }
       : {
-          label: t("eventTimeSelector.statusUnconfirmed"),
+          label: tHosted("eventTimeSelector.statusUnconfirmed"),
           className: "text-orange-600 dark:text-orange-400 border-none",
         };
 
@@ -210,7 +225,7 @@ export function EventTimeSelector({
       <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center justify-between gap-3">
           <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
-            {t("eventTimeSelector.title")}
+            {tHosted("eventTimeSelector.title")}
           </h3>
           <div className="flex items-center gap-2">
             <span
@@ -269,7 +284,7 @@ export function EventTimeSelector({
                     onClick={() => void handleRemoveClick(range.id)}
                     disabled={isActionPending}
                     className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title={t("eventTimeSelector.remove")}
+                    title={tHosted("eventTimeSelector.remove")}
                   >
                     {pendingRemoveId === range.id ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -283,7 +298,7 @@ export function EventTimeSelector({
           </div>
         ) : (
           <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-2">
-            {t("eventTimeSelector.noConfirmedTime")}
+            {tHosted("eventTimeSelector.noConfirmedTime")}
           </p>
         )}
       </div>
@@ -297,7 +312,7 @@ export function EventTimeSelector({
           >
             <span className="inline-flex items-center justify-center gap-2">
               {isDiscardPending && <Loader2 className="w-4 h-4 animate-spin" />}
-              {t("eventTimeSelector.discard")}
+              {tHosted("eventTimeSelector.discard")}
             </span>
           </button>
           <button
@@ -307,8 +322,8 @@ export function EventTimeSelector({
           >
             {isCommitPending && <Loader2 className="w-4 h-4 animate-spin" />}
             {isCommitPending
-              ? t("eventTimeSelector.saving")
-              : t("eventTimeSelector.save")}
+              ? tHosted("eventTimeSelector.saving")
+              : tHosted("eventTimeSelector.save")}
           </button>
         </div>
       )}
@@ -318,13 +333,13 @@ export function EventTimeSelector({
         onClose={() => setShowCommitConfirm(false)}
         onConfirm={() => void handleConfirmCommit()}
         icon={AlertTriangle}
-        title={t("confirmDialog.votingWarning")}
-        description={t("confirmDialog.votingWarningDetail")}
-        cancelText={t("confirmDialog.cancel")}
+        title={tHosted("confirmDialog.votingWarning")}
+        description={tHosted("confirmDialog.votingWarningDetail")}
+        cancelText={tHosted("confirmDialog.cancel")}
         confirmText={
           isCommitPending
-            ? t("confirmDialog.confirming")
-            : t("confirmDialog.confirm")
+            ? tHosted("confirmDialog.confirming")
+            : tHosted("confirmDialog.confirm")
         }
         isConfirmDisabled={isCommitPending}
       />
@@ -388,6 +403,43 @@ export function EventTimeSelector({
                       {tEventInfo("copyResultTextHint")}
                     </span>
                   </button>
+                  {showShareToLineOption && (
+                    <button
+                      onClick={() => void handleShareToLineClick()}
+                      disabled={lineShareStatus === "sending"}
+                      className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                        lineShareStatus === "success"
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300"
+                          : lineShareStatus === "error"
+                            ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-300"
+                            : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/70 dark:text-zinc-200 dark:hover:bg-zinc-700/70"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        {lineShareStatus === "sending" ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : lineShareStatus === "success" ? (
+                          <CheckCheck className="h-4 w-4" />
+                        ) : (
+                          <Share2 className="h-4 w-4" />
+                        )}
+                        <span className="font-medium">
+                          {lineShareStatus === "sending"
+                            ? tEventInfo("sharingToLine")
+                            : lineShareStatus === "success"
+                              ? tEventInfo("sharedToLine")
+                              : lineShareStatus === "error"
+                                ? tEventInfo("shareToLineFailed")
+                                : tEventInfo("shareToLine")}
+                        </span>
+                      </span>
+                      <span className="mt-1 block text-xs text-zinc-500 dark:text-zinc-400">
+                        {lineShareStatus === "error"
+                          ? tEventInfo("shareToLineFailedHint")
+                          : tEventInfo("shareToLineHint")}
+                      </span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

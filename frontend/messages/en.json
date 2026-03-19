@@ -581,6 +581,12 @@
     "copyResultText": "Copy result text",
     "copyResultTextHint": "Copy plain text you can paste into a chat or group",
     "resultTextCopied": "Result text copied",
+    "shareToLine": "Share to LINE",
+    "shareToLineHint": "Share a LINE card and choose the chat or group manually",
+    "sharingToLine": "Sharing to LINE",
+    "sharedToLine": "Shared to LINE",
+    "shareToLineFailed": "Failed to share to LINE",
+    "shareToLineFailedHint": "If Flex sharing fails, it will fall back to text sharing. Try again.",
     "resultText": {
       "title": "[Poll Results]",
       "event": "Event: {eventTitle}",

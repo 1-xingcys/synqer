@@ -1,5 +1,3 @@
-"use client";
-
 export type HostedResultSlot = {
   id: string;
   date: string;
@@ -18,7 +16,6 @@ type MergedConfirmedRange = {
 export type HostedResultVote = {
   slotId: string;
   userId: string;
-  userDisplayName: string;
 };
 
 export type HostedResultExpectedParticipant = {
@@ -28,16 +25,20 @@ export type HostedResultExpectedParticipant = {
   displayName?: string | null;
 };
 
+export type HostedResultSummaryParticipant = {
+  name: string;
+};
+
 export type HostedResultSummaryRange = {
   startDate: string;
   endDate: string;
   startMinute: number;
   endMinute: number;
   availableCount: number;
-  unavailableNames: string[];
+  unavailableParticipants: HostedResultSummaryParticipant[];
 };
 
-type HostedEventResultSummary = {
+export type HostedEventResultSummary = {
   totalExpected: number;
   ranges: HostedResultSummaryRange[];
 };
@@ -95,11 +96,19 @@ export function buildHostedEventResultSummary(opts: {
       const candidateIds = [participant.userId, participant.lineUserId].filter(
         (value): value is string => Boolean(value),
       );
-      return { name, candidateIds, participantIndex: index };
+      return {
+        name,
+        candidateIds,
+        participantIndex: index,
+      };
     },
   );
 
   const expectedNameByParticipantIndex = new Map<number, string>();
+  const expectedParticipantByIndex = new Map<
+    number,
+    HostedResultSummaryParticipant
+  >();
   const expectedIndexById = new Map<string, number>();
 
   normalizedExpectedParticipants.forEach(
@@ -107,6 +116,7 @@ export function buildHostedEventResultSummary(opts: {
       if (!name) return;
 
       expectedNameByParticipantIndex.set(participantIndex, name);
+      expectedParticipantByIndex.set(participantIndex, { name });
       candidateIds.forEach((id) => {
         expectedIndexById.set(id, participantIndex);
       });
@@ -152,15 +162,17 @@ export function buildHostedEventResultSummary(opts: {
     });
 
     const availableIndexes = attendeeIndexes || new Set<number>();
-    const unavailableNames: string[] = [];
+    const unavailableParticipants: HostedResultSummaryParticipant[] = [];
 
-    expectedNameByParticipantIndex.forEach((name, participantIndex) => {
+    expectedParticipantByIndex.forEach((participant, participantIndex) => {
       if (!availableIndexes.has(participantIndex)) {
-        unavailableNames.push(name);
+        unavailableParticipants.push(participant);
       }
     });
 
-    unavailableNames.sort((left, right) => left.localeCompare(right));
+    unavailableParticipants.sort((left, right) =>
+      left.name.localeCompare(right.name),
+    );
 
     return {
       startDate: range.startDate,
@@ -168,7 +180,7 @@ export function buildHostedEventResultSummary(opts: {
       startMinute: range.startMinute,
       endMinute: range.endMinute,
       availableCount: availableIndexes.size,
-      unavailableNames,
+      unavailableParticipants,
     };
   });
 

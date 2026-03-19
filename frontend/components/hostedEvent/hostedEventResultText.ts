@@ -1,15 +1,7 @@
-"use client";
-
-import {
-  buildHostedEventResultSummary,
-  type HostedResultExpectedParticipant,
-  type HostedResultSlot,
-  type HostedResultSummaryRange,
-  type HostedResultVote,
-} from "./resultSummary";
+import { type HostedEventResultSummary } from "./resultSummary";
 import { formatLocalizedDateMinuteRangeLabel } from "@/components/eventCommon/timeRangeFormat";
 
-type HostedResultTextCopy = {
+export type HostedEventResultTextCopy = {
   title: string;
   eventLine: (eventTitle: string) => string;
   confirmedCountLine: (count: number) => string;
@@ -22,7 +14,10 @@ type HostedResultTextCopy = {
   none: string;
 };
 
-function buildRangeLabel(range: HostedResultSummaryRange, locale: string) {
+function buildRangeLabel(
+  range: HostedEventResultSummary["ranges"][number],
+  locale: string,
+) {
   return formatLocalizedDateMinuteRangeLabel(
     {
       startDate: range.startDate,
@@ -34,41 +29,36 @@ function buildRangeLabel(range: HostedResultSummaryRange, locale: string) {
   );
 }
 
-export function buildHostedEventResultText(opts: {
+export function buildHostedEventResultTextFromSummary(opts: {
   eventTitle: string;
-  confirmedSlots: HostedResultSlot[];
-  votes: HostedResultVote[];
-  expectedParticipants: HostedResultExpectedParticipant[];
+  summary: HostedEventResultSummary;
   locale: string;
-  copy: HostedResultTextCopy;
+  copy: HostedEventResultTextCopy;
 }): string {
-  const summary = buildHostedEventResultSummary({
-    confirmedSlots: opts.confirmedSlots,
-    votes: opts.votes,
-    expectedParticipants: opts.expectedParticipants,
-  });
-
   const lines: string[] = [];
   lines.push(opts.copy.title);
   lines.push(opts.copy.eventLine(opts.eventTitle));
-  lines.push(opts.copy.confirmedCountLine(summary.ranges.length));
+  lines.push(opts.copy.confirmedCountLine(opts.summary.ranges.length));
   lines.push("");
 
-  summary.ranges.forEach((range, index) => {
+  opts.summary.ranges.forEach((range, index) => {
+    const unavailableNames = range.unavailableParticipants.map(
+      (participant) => participant.name,
+    );
     const unavailable =
-      range.unavailableNames.length > 0
-        ? range.unavailableNames.join("、")
+      unavailableNames.length > 0
+        ? unavailableNames.join("、")
         : opts.copy.none;
     const percentage =
-      summary.totalExpected > 0
-        ? `${Math.round((range.availableCount / summary.totalExpected) * 1000) / 10}%`
+      opts.summary.totalExpected > 0
+        ? `${Math.round((range.availableCount / opts.summary.totalExpected) * 1000) / 10}%`
         : "0%";
 
     lines.push(`${index + 1}. ${buildRangeLabel(range, opts.locale)}`);
     lines.push(
       opts.copy.availableLine(
         range.availableCount,
-        summary.totalExpected,
+        opts.summary.totalExpected,
         percentage,
       ),
     );

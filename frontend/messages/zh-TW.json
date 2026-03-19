@@ -581,6 +581,12 @@
     "copyResultText": "複製結果文字",
     "copyResultTextHint": "複製可貼到聊天室或群組的純文字內容",
     "resultTextCopied": "結果文字已複製",
+    "shareToLine": "分享到 LINE",
+    "shareToLineHint": "使用 LINE 分享卡片，手動選擇聊天室或群組",
+    "sharingToLine": "正在分享到 LINE",
+    "sharedToLine": "已分享到 LINE",
+    "shareToLineFailed": "分享到 LINE 失敗",
+    "shareToLineFailedHint": "Flex 卡片分享失敗時會自動改用文字分享，再試一次看看",
     "resultText": {
       "title": "【投票結果】",
       "event": "活動：{eventTitle}",

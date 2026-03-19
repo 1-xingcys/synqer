@@ -7,7 +7,6 @@ import { useHostedEventContext } from "@/contexts/HostedEventContext";
 import { EventStatus } from "@/types/event";
 import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
 import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
-import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { EventTimeSelector } from "./EventTimeSelector";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import {
@@ -15,7 +14,8 @@ import {
   useEventTimeConfirmation,
   useParticipantsData,
 } from "./hooks";
-import { buildHostedEventResultText } from "../resultText";
+import { buildHostedEventResultSummary } from "../resultSummary";
+import { useHostedEventResultShare } from "./hooks/useHostedEventResultShare";
 
 export default function HostedEventPanelPage() {
   const params = useParams();
@@ -24,8 +24,6 @@ export default function HostedEventPanelPage() {
   const tEventInfo = useTranslations("eventInfo");
   const locale = useLocale();
   const { data } = useHostedEventContext();
-  const { copied: resultTextCopied, copy: copyResultText } =
-    useCopyToClipboard();
 
   // Participants and votes data
   const { participantsWithAvatars, votesWithAvatars } =
@@ -79,24 +77,23 @@ export default function HostedEventPanelPage() {
     [displayRanges, removeConfirmedTime],
   );
 
-  // Loading and error states are handled by the layout
-  if (!data) {
-    return null;
-  }
-
-  const { event, slots } = data;
-  const isVotingPhase = event.status === EventStatus.VOTING;
-  const isVotingEnded = event.status === EventStatus.VOTING_ENDED;
-  const isConfirmed = event.status === EventStatus.CONFIRMED;
-  const isCompleted = event.status === EventStatus.COMPLETED;
+  const event = data?.event;
+  const slots = data?.slots || [];
+  const isVotingPhase = event?.status === EventStatus.VOTING;
+  const isVotingEnded = event?.status === EventStatus.VOTING_ENDED;
+  const isConfirmed = event?.status === EventStatus.CONFIRMED;
+  const isCompleted = event?.status === EventStatus.COMPLETED;
   const showResultsView = isVotingPhase || isVotingEnded || isConfirmed;
   const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
   const hasDisplayableConfirmedTime = event.confirmedSelections.length > 0;
   const resultText = (() => {
     if (!isConfirmed) return "";
+  const eventTitle = event?.title || t("event.untitled");
+  const confirmedSlots = (() => {
+    if (!data || !isConfirmed || !event) return [];
 
     const confirmedSlotIds = new Set(event.confirmedSlotIds);
-    const confirmedSlots = (data.slots || [])
+    return (data.slots || [])
       .filter((slot) => confirmedSlotIds.has(slot.id))
       .map((slot) => ({
         id: slot.id,
@@ -109,38 +106,51 @@ export default function HostedEventPanelPage() {
           ? a.startMinute - b.startMinute
           : a.axisDate.localeCompare(b.axisDate),
       );
+  })();
+  const resultSummary = (() => {
+    if (!data || !isConfirmed) return null;
 
-    if (confirmedSlots.length === 0) return "";
+    if (confirmedSlots.length === 0) return null;
 
-    return buildHostedEventResultText({
-      eventTitle: event.title || t("event.untitled"),
+    return buildHostedEventResultSummary({
       confirmedSlots,
       votes: data.votes || [],
       expectedParticipants: data.expectedParticipants || [],
-      locale,
-      copy: {
-        title: tEventInfo("resultText.title"),
-        eventLine: (eventTitle) =>
-          tEventInfo("resultText.event", { eventTitle }),
-        confirmedCountLine: (count) =>
-          tEventInfo("resultText.confirmedCount", { count }),
-        availableLine: (availableCount, totalExpected, percentage) =>
-          tEventInfo("resultText.available", {
-            availableCount,
-            totalExpected,
-            percentage,
-          }),
-        unavailableLine: (names) =>
-          tEventInfo("resultText.unavailable", { names }),
-        none: tEventInfo("resultText.none"),
-      },
     });
   })();
+  const canShareResult = Boolean(resultSummary?.ranges.length);
+  const {
+    resultTextCopied,
+    lineShareStatus,
+    canShareResultToLine,
+    handleCopyResultText,
+    handleShareResultToLine,
+  } = useHostedEventResultShare({
+    eventId,
+    eventTitle,
+    resultSummary,
+    locale,
+    copy: {
+      title: tEventInfo("resultText.title"),
+      eventLine: (eventTitle) => tEventInfo("resultText.event", { eventTitle }),
+      confirmedCountLine: (count) =>
+        tEventInfo("resultText.confirmedCount", { count }),
+      availableLine: (availableCount, totalExpected, percentage) =>
+        tEventInfo("resultText.available", {
+          availableCount,
+          totalExpected,
+          percentage,
+        }),
+      unavailableLine: (names) =>
+        tEventInfo("resultText.unavailable", { names }),
+      none: tEventInfo("resultText.none"),
+    },
+  });
 
-  const handleCopyResultText = () => {
-    if (!resultText) return Promise.resolve();
-    return copyResultText(resultText);
-  };
+  // Loading and error states are handled by the layout
+  if (!data || !event) {
+    return null;
+  }
 
   return (
     <div className="space-y-3 sm:space-y-6">
@@ -172,9 +182,12 @@ export default function HostedEventPanelPage() {
             isCommitPending={isCommitPending}
             isDiscardPending={isDiscardPending}
             isVotingPhase={isVotingPhase}
-            showShareResultButton={isConfirmed && resultText.length > 0}
+            showShareResultButton={canShareResult}
             resultTextCopied={resultTextCopied}
             onCopyResultText={() => void handleCopyResultText()}
+            showShareToLineOption={canShareResultToLine}
+            lineShareStatus={lineShareStatus}
+            onShareToLine={handleShareResultToLine}
           />
 
           {/* Results View with HeatMap */}
