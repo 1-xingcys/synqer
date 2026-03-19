@@ -778,7 +778,10 @@ export interface components {
         /** @enum {string} */
         Weekday: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
         ConfirmedTimeRangeDto: {
-            /** Format: date-time */
+            /**
+             * Format: date-time
+             * @description One-time compatibility field. Recurring clients should prefer confirmedSelections.
+             */
             startTime: string;
             /** Format: date-time */
             endTime: string;

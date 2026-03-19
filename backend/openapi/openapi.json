@@ -1375,7 +1375,8 @@
         "properties": {
           "startTime": {
             "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "description": "One-time compatibility field. Recurring clients should prefer confirmedSelections."
           },
           "endTime": {
             "format": "date-time",
