@@ -49,7 +49,13 @@ export class EventRepository {
       // 建立 Event
       const event = await prisma.event.create({
         data: {
-          ...eventData,
+          title: eventData.title,
+          description: eventData.description,
+          type: eventData.type,
+          ownerId: eventData.ownerId,
+          timeZone: eventData.timeZone,
+          votingDeadline: eventData.votingDeadline,
+          lineGroupId: eventData.lineGroupId,
         },
       });
 
@@ -69,7 +75,6 @@ export class EventRepository {
         await prisma.eventTimeSlot.createMany({
           data: slots.map((slot, index) => ({
             eventId: event.id,
-            date: slot.date,
             axisType: EventSlotAxisType.DATE,
             axisDate: slot.date,
             axisWeekday: null,
@@ -138,11 +143,6 @@ export class EventRepository {
           description: eventData.description,
           type: eventData.type,
           ownerId: eventData.ownerId,
-          startDate: eventData.startDate,
-          endDate: eventData.endDate,
-          startMinuteOfDay: eventData.startMinuteOfDay,
-          endMinuteOfDay: eventData.endMinuteOfDay,
-          slotDurationMin: eventData.slotDurationMin,
           timeZone: eventData.timeZone,
           votingDeadline: eventData.votingDeadline,
           lineGroupId: eventData.lineGroupId,
@@ -163,7 +163,6 @@ export class EventRepository {
         await prisma.eventTimeSlot.createMany({
           data: slots.map((slot, index) => ({
             eventId: event.id,
-            date: slot.date,
             axisType: EventSlotAxisType.WEEKDAY,
             axisDate: null,
             axisWeekday: slot.weekday,
@@ -220,7 +219,9 @@ export class EventRepository {
             slot: {
               select: {
                 id: true,
-                date: true,
+                axisType: true,
+                axisDate: true,
+                axisWeekday: true,
                 startMinute: true,
                 endMinute: true,
               },
@@ -276,7 +277,9 @@ export class EventRepository {
             slot: {
               select: {
                 id: true,
-                date: true,
+                axisType: true,
+                axisDate: true,
+                axisWeekday: true,
                 startMinute: true,
                 endMinute: true,
               },
@@ -300,7 +303,17 @@ export class EventRepository {
       where: { id: eventId },
       include: {
         slots: {
-          orderBy: [{ date: 'asc' }, { startMinute: 'asc' }],
+          select: {
+            id: true,
+            eventId: true,
+            axisType: true,
+            axisDate: true,
+            axisWeekday: true,
+            startMinute: true,
+            endMinute: true,
+            index: true,
+          },
+          orderBy: [{ index: 'asc' }],
         },
         votes: {
           include: {
@@ -343,7 +356,9 @@ export class EventRepository {
             slot: {
               select: {
                 id: true,
-                date: true,
+                axisType: true,
+                axisDate: true,
+                axisWeekday: true,
                 startMinute: true,
                 endMinute: true,
               },
@@ -412,7 +427,9 @@ export class EventRepository {
             slot: {
               select: {
                 id: true,
-                date: true,
+                axisType: true,
+                axisDate: true,
+                axisWeekday: true,
                 startMinute: true,
                 endMinute: true,
               },
