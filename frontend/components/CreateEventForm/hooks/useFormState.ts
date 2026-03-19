@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { CreateEventFormData, DEFAULT_EVENT_TYPE } from "../types";
+import {
+  CreateEventFormData,
+  DEFAULT_EVENT_TYPE,
+  DEFAULT_WEEKDAYS,
+} from "../types";
 import { getDefaultStartDateTime } from "./utils";
 
 function getInitialFormData(): CreateEventFormData {
@@ -13,13 +17,19 @@ function getInitialFormData(): CreateEventFormData {
     description: "",
     startDate: defaultDate,
     endDate: defaultDate,
-    weekdays: ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"],
+    weekdays: DEFAULT_WEEKDAYS,
     startTime: defaultTime,
     endTime: "24:00",
     timeZone: "Asia/Taipei",
     votingDeadline: defaultDate,
     votingDeadlineTime: defaultTime,
     votingDeadlineManuallySet: false,
+    oneTimeVotingDeadline: defaultDate,
+    oneTimeVotingDeadlineTime: defaultTime,
+    oneTimeVotingDeadlineManuallySet: false,
+    recurringVotingDeadline: null,
+    recurringVotingDeadlineTime: defaultTime,
+    recurringVotingDeadlineManuallySet: false,
     lineGroupId: null,
     selectedLineUserIds: [],
   };

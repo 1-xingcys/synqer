@@ -5,6 +5,13 @@ export const TITLE_MAX_LENGTH = 50;
 export const DESCRIPTION_MAX_LENGTH = 500;
 
 export const DEFAULT_EVENT_TYPE: EventType = "ONE_TIME";
+export const DEFAULT_WEEKDAYS: Weekday[] = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+];
 
 export interface CreateEventFormData {
   eventType: EventType;
@@ -16,9 +23,21 @@ export interface CreateEventFormData {
   startTime: string;
   endTime: string;
   timeZone: string;
+
+  // Displayed voting deadline fields
   votingDeadline: Date | null;
   votingDeadlineTime: string;
   votingDeadlineManuallySet: boolean;
+
+  // One-time event draft
+  oneTimeVotingDeadline: Date | null;
+  oneTimeVotingDeadlineTime: string;
+  oneTimeVotingDeadlineManuallySet: boolean;
+
+  // Recurring event draft
+  recurringVotingDeadline: Date | null;
+  recurringVotingDeadlineTime: string;
+  recurringVotingDeadlineManuallySet: boolean;
   lineGroupId: string | null;
   selectedLineUserIds: string[];
 }

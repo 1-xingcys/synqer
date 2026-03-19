@@ -3,8 +3,8 @@
 import { useMemo } from "react";
 import {
   CreateEventFormData,
-  DEFAULT_EVENT_TYPE,
   MIN_HOURS_BEFORE_EVENT,
+  DEFAULT_WEEKDAYS,
 } from "../types";
 import {
   parseTimeToMinutes,
@@ -92,12 +92,11 @@ export function useFormValidation(formData: CreateEventFormData) {
     };
 
     return (
-      formData.eventType !== DEFAULT_EVENT_TYPE ||
       formData.title.trim() !== "" ||
       formData.description.trim() !== "" ||
       !isSameDay(formData.startDate, defaultDate) ||
       !isSameDay(formData.endDate, defaultDate) ||
-      formData.weekdays.length > 0 ||
+      formData.weekdays.length !== DEFAULT_WEEKDAYS.length ||
       formData.startTime !== defaultTime ||
       formData.endTime !== "24:00" ||
       formData.votingDeadlineManuallySet ||
@@ -105,7 +104,6 @@ export function useFormValidation(formData: CreateEventFormData) {
       formData.selectedLineUserIds.length > 0
     );
   }, [formData]);
-
   return {
     errors,
     hasUnsavedChanges,

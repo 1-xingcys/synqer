@@ -60,6 +60,9 @@ export function VotingDeadlineSection() {
                     setFormData((prev) => ({
                       ...prev,
                       votingDeadline: null,
+                      votingDeadlineManuallySet: false,
+                      recurringVotingDeadline: null,
+                      recurringVotingDeadlineManuallySet: false,
                     }))
                   }
                 >
