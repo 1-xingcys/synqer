@@ -4,16 +4,6 @@ import { EventType, Weekday } from '@prisma/client';
 import { EventCapabilities } from '../../shared/interfaces/event-contract.interface';
 import { ConfirmedSelectionKind } from '../../shared/interfaces/confirmed-time.interface';
 
-export class ConfirmedTimeRangeDto {
-  @ApiProperty({
-    description:
-      'One-time compatibility field. Recurring clients should prefer confirmedSelections.',
-  })
-  startTime!: Date;
-  endTime!: Date;
-  slotIds!: string[];
-}
-
 export class ConfirmedSelectionDto {
   @ApiProperty({
     enum: Object.values(ConfirmedSelectionKind),
@@ -57,7 +47,6 @@ export class HostedEventListItemDto {
   createdAt!: Date;
   votingDeadline!: Date | null;
   confirmedSlotIds!: string[];
-  confirmedTimeRanges!: ConfirmedTimeRangeDto[];
   confirmedSelections!: ConfirmedSelectionDto[];
   status!: EventStatus;
   capabilities!: EventCapabilitiesDto;

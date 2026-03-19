@@ -3,7 +3,6 @@ import { EventStatus } from '../../shared/services/event-status.service';
 import { EventType, Weekday } from '@prisma/client';
 import {
   ConfirmedSelectionDto,
-  ConfirmedTimeRangeDto,
   EventCapabilitiesDto,
 } from './hosted-event-list-item.dto';
 
@@ -34,7 +33,6 @@ export class EventPublicInfoResponseDto {
   endMinuteOfDay?: number;
   votingDeadline!: Date | null;
   confirmedSlotIds!: string[];
-  confirmedTimeRanges!: ConfirmedTimeRangeDto[];
   confirmedSelections!: ConfirmedSelectionDto[];
   status!: EventStatus;
   capabilities!: EventCapabilitiesDto;

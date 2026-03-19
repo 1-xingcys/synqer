@@ -3,7 +3,6 @@ import { EventStatus } from '../../shared/services/event-status.service';
 import { EventSlotAxisType, EventType, Weekday } from '@prisma/client';
 import {
   ConfirmedSelectionDto,
-  ConfirmedTimeRangeDto,
   EventCapabilitiesDto,
 } from './hosted-event-list-item.dto';
 
@@ -30,7 +29,6 @@ export class EventDetailEventDto {
   ownerId!: string | null;
   votingDeadline!: Date | null;
   confirmedSlotIds!: string[];
-  confirmedTimeRanges!: ConfirmedTimeRangeDto[];
   confirmedSelections!: ConfirmedSelectionDto[];
   status!: EventStatus;
   capabilities!: EventCapabilitiesDto;

@@ -24,7 +24,6 @@ type MappedEventList = {
   createdAt: Date;
   votingDeadline: Date | null;
   confirmedSlotIds: string[];
-  confirmedTimeRanges: ReturnType<ConfirmedTimeService['mergeToTimeRanges']>;
   confirmedSelections: ReturnType<ConfirmedTimeService['mergeToSelections']>;
   status: ReturnType<EventStatusService['computeEventStatus']>;
   capabilities: EventCapabilities;
@@ -164,9 +163,6 @@ export class EventMapperService {
     const schedule = this.eventScheduleService.resolveSchedule(event);
     const confirmedSlotIds =
       event.confirmedTimeSlots?.map((cts) => cts.slotId) || [];
-    const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
-      event.confirmedTimeSlots || [],
-    );
     const confirmedSelections = this.confirmedTimeService.mergeToSelections(
       event.confirmedTimeSlots || [],
     );
@@ -182,7 +178,6 @@ export class EventMapperService {
       createdAt: event.createdAt,
       votingDeadline: event.votingDeadline,
       confirmedSlotIds,
-      confirmedTimeRanges,
       confirmedSelections,
       status: this.eventStatusService.computeEventStatus({
         eventType: event.type,
@@ -220,9 +215,6 @@ export class EventMapperService {
     const schedule = this.eventScheduleService.resolveSchedule(event);
     const confirmedSlotIds =
       event.confirmedTimeSlots?.map((cts) => cts.slotId) || [];
-    const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
-      event.confirmedTimeSlots || [],
-    );
     const confirmedSelections = this.confirmedTimeService.mergeToSelections(
       event.confirmedTimeSlots || [],
     );
@@ -243,7 +235,6 @@ export class EventMapperService {
       ownerId: event.ownerId,
       votingDeadline: event.votingDeadline,
       confirmedSlotIds,
-      confirmedTimeRanges,
       confirmedSelections,
       status: this.eventStatusService.computeEventStatus({
         eventType: event.type,

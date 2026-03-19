@@ -226,7 +226,6 @@ describe('EventMapperService', () => {
         createdAt: new Date('2024-12-01'),
         votingDeadline: null,
         confirmedSlotIds: [],
-        confirmedTimeRanges: [],
         confirmedSelections: [],
         status: 'VOTING',
         capabilities: {
@@ -253,9 +252,6 @@ describe('EventMapperService', () => {
         ],
       };
 
-      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([
-        { startTime: new Date(), endTime: new Date(), slotIds: ['slot-1'] },
-      ]);
       mockConfirmedTimeService.mergeToSelections.mockReturnValue([
         {
           kind: 'ONE_TIME_RANGE',
@@ -297,7 +293,6 @@ describe('EventMapperService', () => {
         confirmedTimeSlots: [],
       };
 
-      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
       mockConfirmedTimeService.mergeToSelections.mockReturnValue([]);
       mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
       mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
@@ -335,7 +330,6 @@ describe('EventMapperService', () => {
     };
 
     it('should map event to detail format', () => {
-      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
       mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
       mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
         supportsCompletion: true,
@@ -360,7 +354,6 @@ describe('EventMapperService', () => {
         ownerId: 'user-123',
         votingDeadline: null,
         confirmedSlotIds: [],
-        confirmedTimeRanges: [],
         confirmedSelections: [],
         status: 'VOTING',
         capabilities: {
@@ -387,7 +380,6 @@ describe('EventMapperService', () => {
         slotIds: ['slot-1'],
       };
 
-      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([mockTimeRange]);
       mockConfirmedTimeService.mergeToSelections.mockReturnValue([
         {
           kind: 'ONE_TIME_RANGE',
@@ -401,7 +393,6 @@ describe('EventMapperService', () => {
       const result = service.mapEventToDetail(eventWithConfirmed);
 
       expect(result.confirmedSlotIds).toEqual(['slot-1']);
-      expect(result.confirmedTimeRanges).toEqual([mockTimeRange]);
       expect(result.confirmedSelections).toEqual([
         {
           kind: 'ONE_TIME_RANGE',
@@ -435,7 +426,6 @@ describe('EventMapperService', () => {
         confirmedTimeSlots: [],
       };
 
-      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
       mockConfirmedTimeService.mergeToSelections.mockReturnValue([
         {
           kind: 'WEEKDAY_RANGE',
@@ -470,7 +460,6 @@ describe('EventMapperService', () => {
         ownerId: 'user-123',
         votingDeadline: null,
         confirmedSlotIds: [],
-        confirmedTimeRanges: [],
         confirmedSelections: [
           {
             kind: 'WEEKDAY_RANGE',
