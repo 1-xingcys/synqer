@@ -32,7 +32,6 @@ export const VoteMode = {
 export type VoteMode = (typeof VoteMode)[keyof typeof VoteMode];
 
 // 合併後的時間範圍（連續時段合併成一個範圍）
-export type ConfirmedTimeRange = components["schemas"]["ConfirmedTimeRangeDto"];
 export type ConfirmedSelection = components["schemas"]["ConfirmedSelectionDto"];
 export type EventCapabilities = components["schemas"]["EventCapabilitiesDto"];
 

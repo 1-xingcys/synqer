@@ -3,20 +3,15 @@
 import { useTranslations } from "next-intl";
 import { Check, Calendar } from "lucide-react";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
-import { ConfirmedSelection, ConfirmedTimeRange } from "@/types/event";
+import { ConfirmedSelection } from "@/types/event";
 
 interface CompletedViewProps {
   confirmedSelections: ConfirmedSelection[];
-  confirmedTimeRanges: ConfirmedTimeRange[];
 }
 
-export function CompletedView({
-  confirmedSelections,
-  confirmedTimeRanges,
-}: CompletedViewProps) {
+export function CompletedView({ confirmedSelections }: CompletedViewProps) {
   const t = useTranslations("joined");
-  const hasDisplayableConfirmedTime =
-    confirmedSelections.length > 0 || confirmedTimeRanges.length > 0;
+  const hasDisplayableConfirmedTime = confirmedSelections.length > 0;
 
   return (
     <div className="p-6 space-y-4">
@@ -41,7 +36,6 @@ export function CompletedView({
           </h4>
           <ConfirmedTimeDisplay
             selections={confirmedSelections}
-            timeRanges={confirmedTimeRanges}
             className="text-zinc-600 dark:text-zinc-400"
           />
         </div>

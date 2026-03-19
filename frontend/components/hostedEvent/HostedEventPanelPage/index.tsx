@@ -85,9 +85,7 @@ export default function HostedEventPanelPage() {
   const isCompleted = event.status === EventStatus.COMPLETED;
   const showResultsView = isVotingPhase || isVotingEnded || isConfirmed;
   const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
-  const hasDisplayableConfirmedTime =
-    event.confirmedSelections.length > 0 ||
-    event.confirmedTimeRanges.length > 0;
+  const hasDisplayableConfirmedTime = event.confirmedSelections.length > 0;
 
   return (
     <div className="space-y-3 sm:space-y-6">
@@ -183,7 +181,6 @@ export default function HostedEventPanelPage() {
                 </h4>
                 <ConfirmedTimeDisplay
                   selections={event.confirmedSelections}
-                  timeRanges={event.confirmedTimeRanges}
                   className="text-zinc-600 dark:text-zinc-400"
                 />
               </div>

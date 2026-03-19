@@ -4,13 +4,26 @@ import { useTranslations } from "next-intl";
 import { CheckCircle, Calendar } from "lucide-react";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { AddToCalendarPanel } from "./AddToCalendarPanel";
-import { ConfirmedSelection, ConfirmedTimeRange } from "@/types/event";
+import { ConfirmedSelection } from "@/types/event";
+
+function isOneTimeConfirmedSelection(
+  selection: ConfirmedSelection,
+): selection is ConfirmedSelection & {
+  kind: "ONE_TIME_RANGE";
+  startTime: string;
+  endTime: string;
+} {
+  return (
+    selection.kind === "ONE_TIME_RANGE" &&
+    typeof selection.startTime === "string" &&
+    typeof selection.endTime === "string"
+  );
+}
 
 interface ConfirmedViewProps {
   eventTitle: string;
   eventDescription?: string | null;
   confirmedSelections: ConfirmedSelection[];
-  confirmedTimeRanges: ConfirmedTimeRange[];
   supportsAddToCalendar: boolean;
 }
 
@@ -18,12 +31,13 @@ export function ConfirmedView({
   eventTitle,
   eventDescription,
   confirmedSelections,
-  confirmedTimeRanges,
   supportsAddToCalendar,
 }: ConfirmedViewProps) {
   const t = useTranslations("joined");
-  const hasDisplayableConfirmedTime =
-    confirmedSelections.length > 0 || confirmedTimeRanges.length > 0;
+  const hasDisplayableConfirmedTime = confirmedSelections.length > 0;
+  const oneTimeConfirmedSelections = confirmedSelections.filter(
+    isOneTimeConfirmedSelection,
+  );
 
   return (
     <div className="p-6 space-y-4">
@@ -48,18 +62,17 @@ export function ConfirmedView({
           </h4>
           <ConfirmedTimeDisplay
             selections={confirmedSelections}
-            timeRanges={confirmedTimeRanges}
             className="text-green-700 dark:text-green-400"
           />
         </div>
       )}
 
       {/* Add to Google Calendar */}
-      {supportsAddToCalendar && confirmedTimeRanges.length > 0 && (
+      {supportsAddToCalendar && oneTimeConfirmedSelections.length > 0 && (
         <AddToCalendarPanel
           eventTitle={eventTitle}
           eventDescription={eventDescription}
-          oneTimeConfirmedTimeRanges={confirmedTimeRanges}
+          oneTimeConfirmedSelections={oneTimeConfirmedSelections}
         />
       )}
     </div>

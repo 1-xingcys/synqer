@@ -1,13 +1,29 @@
-import { ConfirmedSelection, ConfirmedTimeRange } from "@/types/event";
+import { ConfirmedSelection } from "@/types/event";
 import { formatWeekdayLabel } from "@/lib/weekdays";
 import { formatMinutesToTime } from "@/lib/utils";
 
-export function formatDefaultConfirmedTimeRange(
-  range: ConfirmedTimeRange,
+type OneTimeConfirmedSelection = ConfirmedSelection & {
+  kind: "ONE_TIME_RANGE";
+  startTime: string;
+  endTime: string;
+};
+
+function isOneTimeConfirmedSelection(
+  selection: ConfirmedSelection,
+): selection is OneTimeConfirmedSelection {
+  return (
+    selection.kind === "ONE_TIME_RANGE" &&
+    typeof selection.startTime === "string" &&
+    typeof selection.endTime === "string"
+  );
+}
+
+function formatOneTimeConfirmedSelection(
+  selection: OneTimeConfirmedSelection,
   locale: string,
 ): string {
-  const startDate = new Date(range.startTime);
-  const endDate = new Date(range.endTime);
+  const startDate = new Date(selection.startTime);
+  const endDate = new Date(selection.endTime);
 
   const dateFormatter = new Intl.DateTimeFormat("en", {
     month: "short",
@@ -44,19 +60,8 @@ export function formatConfirmedSelection(
   selection: ConfirmedSelection,
   locale: string,
 ): string | null {
-  if (selection.kind === "ONE_TIME_RANGE") {
-    if (!selection.startTime || !selection.endTime) {
-      return null;
-    }
-
-    return formatDefaultConfirmedTimeRange(
-      {
-        startTime: selection.startTime,
-        endTime: selection.endTime,
-        slotIds: selection.slotIds,
-      },
-      locale,
-    );
+  if (isOneTimeConfirmedSelection(selection)) {
+    return formatOneTimeConfirmedSelection(selection, locale);
   }
 
   if (
@@ -70,11 +75,4 @@ export function formatConfirmedSelection(
 
   const weekdayLabel = formatWeekdayLabel(selection.weekday, locale);
   return `${weekdayLabel} ${formatMinutesToTime(selection.startMinute)} - ${formatMinutesToTime(selection.endMinute)}`;
-}
-
-export function formatConfirmedTimeRange(
-  range: ConfirmedTimeRange,
-  locale: string,
-): string {
-  return formatDefaultConfirmedTimeRange(range, locale);
 }

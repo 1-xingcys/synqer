@@ -1,15 +1,11 @@
 "use client";
 
-import { ConfirmedSelection, ConfirmedTimeRange } from "@/types/event";
+import { ConfirmedSelection } from "@/types/event";
 import { useLocale, useTranslations } from "next-intl";
-import {
-  formatConfirmedSelection,
-  formatConfirmedTimeRange,
-} from "./confirmed-time-formatters";
+import { formatConfirmedSelection } from "./confirmed-time-formatters";
 
 interface ConfirmedTimeDisplayProps {
-  selections?: ConfirmedSelection[];
-  timeRanges?: ConfirmedTimeRange[];
+  selections: ConfirmedSelection[];
   /** 預覽模式：只顯示第一個時間範圍和剩餘數量 */
   preview?: boolean;
   /** 自訂 className */
@@ -23,27 +19,19 @@ interface ConfirmedTimeDisplayProps {
  */
 export function ConfirmedTimeDisplay({
   selections,
-  timeRanges,
   preview = false,
   className = "",
 }: ConfirmedTimeDisplayProps) {
   const t = useTranslations("event");
   const locale = useLocale();
-  const resolvedSelections = selections ?? [];
-  const resolvedTimeRanges = timeRanges ?? [];
-  const hasSelections = resolvedSelections.length > 0;
-  const displayCount = hasSelections
-    ? resolvedSelections.length
-    : resolvedTimeRanges.length;
+  const displayCount = selections.length;
 
   if (displayCount === 0) {
     return null;
   }
 
   if (preview) {
-    const firstRangeStr = hasSelections
-      ? (formatConfirmedSelection(resolvedSelections[0], locale) ?? "")
-      : formatConfirmedTimeRange(resolvedTimeRanges[0], locale);
+    const firstRangeStr = formatConfirmedSelection(selections[0], locale) ?? "";
 
     if (displayCount === 1) {
       return <span className={className}>{firstRangeStr}</span>;
@@ -59,15 +47,10 @@ export function ConfirmedTimeDisplay({
     );
   }
 
-  const displayItems = hasSelections
-    ? resolvedSelections.map(
-        (selection, index) =>
-          [index, formatConfirmedSelection(selection, locale) ?? ""] as const,
-      )
-    : resolvedTimeRanges.map(
-        (range, index) =>
-          [index, formatConfirmedTimeRange(range, locale)] as const,
-      );
+  const displayItems = selections.map(
+    (selection, index) =>
+      [index, formatConfirmedSelection(selection, locale) ?? ""] as const,
+  );
 
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
