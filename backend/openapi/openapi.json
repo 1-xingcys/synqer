@@ -1370,6 +1370,47 @@
           "SUNDAY"
         ]
       },
+      "EventScheduleDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Weekday"
+            }
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startMinuteOfDay": {
+            "type": "number"
+          },
+          "endMinuteOfDay": {
+            "type": "number"
+          },
+          "slotDurationMin": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "kind",
+          "startMinuteOfDay",
+          "endMinuteOfDay",
+          "slotDurationMin"
+        ]
+      },
       "ConfirmedSelectionKind": {
         "type": "string",
         "enum": [
@@ -1466,6 +1507,9 @@
             "type": "string",
             "nullable": true
           },
+          "schedule": {
+            "$ref": "#/components/schemas/EventScheduleDto"
+          },
           "startDate": {
             "format": "date-time",
             "type": "string"
@@ -1519,6 +1563,7 @@
           "id",
           "title",
           "description",
+          "schedule",
           "startDate",
           "endDate",
           "createdAt",
@@ -1578,6 +1623,9 @@
           "description": {
             "type": "string",
             "nullable": true
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/EventScheduleDto"
           },
           "startDate": {
             "format": "date-time",
@@ -1643,6 +1691,7 @@
           "id",
           "title",
           "description",
+          "schedule",
           "startDate",
           "endDate",
           "createdAt",
@@ -1761,6 +1810,9 @@
             "type": "string",
             "nullable": true
           },
+          "schedule": {
+            "$ref": "#/components/schemas/EventScheduleDto"
+          },
           "startDate": {
             "format": "date-time",
             "type": "string"
@@ -1824,6 +1876,7 @@
           "id",
           "title",
           "description",
+          "schedule",
           "startDate",
           "endDate",
           "startMinuteOfDay",
@@ -2147,6 +2200,9 @@
             "type": "string",
             "nullable": true
           },
+          "schedule": {
+            "$ref": "#/components/schemas/EventScheduleDto"
+          },
           "startDate": {
             "format": "date-time",
             "type": "string"
@@ -2212,6 +2268,7 @@
           "id",
           "title",
           "description",
+          "schedule",
           "startDate",
           "endDate",
           "createdAt",

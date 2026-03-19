@@ -777,6 +777,17 @@ export interface components {
         EventType: "ONE_TIME" | "RECURRING";
         /** @enum {string} */
         Weekday: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+        EventScheduleDto: {
+            kind: components["schemas"]["EventType"];
+            weekdays?: components["schemas"]["Weekday"][];
+            /** Format: date-time */
+            startDate?: string;
+            /** Format: date-time */
+            endDate?: string;
+            startMinuteOfDay: number;
+            endMinuteOfDay: number;
+            slotDurationMin: number;
+        };
         /** @enum {string} */
         ConfirmedSelectionKind: "ONE_TIME_RANGE" | "WEEKDAY_RANGE";
         ConfirmedSelectionDto: {
@@ -801,6 +812,7 @@ export interface components {
             id: string;
             title: string | null;
             description: string | null;
+            schedule: components["schemas"]["EventScheduleDto"];
             /** Format: date-time */
             startDate: string;
             /** Format: date-time */
@@ -828,6 +840,7 @@ export interface components {
             id: string;
             title: string | null;
             description: string | null;
+            schedule: components["schemas"]["EventScheduleDto"];
             /** Format: date-time */
             startDate: string;
             /** Format: date-time */
@@ -870,6 +883,7 @@ export interface components {
             id: string;
             title: string | null;
             description: string | null;
+            schedule: components["schemas"]["EventScheduleDto"];
             /** Format: date-time */
             startDate: string;
             /** Format: date-time */
@@ -957,6 +971,7 @@ export interface components {
             id: string;
             title: string | null;
             description: string | null;
+            schedule: components["schemas"]["EventScheduleDto"];
             /** Format: date-time */
             startDate: string;
             /** Format: date-time */
