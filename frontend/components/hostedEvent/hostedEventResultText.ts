@@ -4,12 +4,7 @@ import { formatLocalizedDateMinuteRangeLabel } from "@/components/eventCommon/ti
 export type HostedEventResultTextCopy = {
   title: string;
   eventLine: (eventTitle: string) => string;
-  confirmedCountLine: (count: number) => string;
-  availableLine: (
-    availableCount: number,
-    totalExpected: number,
-    percentage: string,
-  ) => string;
+  availableLine: (availableCount: number, totalExpected: number) => string;
   unavailableLine: (names: string) => string;
   none: string;
 };
@@ -38,7 +33,6 @@ export function buildHostedEventResultTextFromSummary(opts: {
   const lines: string[] = [];
   lines.push(opts.copy.title);
   lines.push(opts.copy.eventLine(opts.eventTitle));
-  lines.push(opts.copy.confirmedCountLine(opts.summary.ranges.length));
   lines.push("");
 
   opts.summary.ranges.forEach((range, index) => {
@@ -49,18 +43,10 @@ export function buildHostedEventResultTextFromSummary(opts: {
       unavailableNames.length > 0
         ? unavailableNames.join("、")
         : opts.copy.none;
-    const percentage =
-      opts.summary.totalExpected > 0
-        ? `${Math.round((range.availableCount / opts.summary.totalExpected) * 1000) / 10}%`
-        : "0%";
 
     lines.push(`${index + 1}. ${buildRangeLabel(range, opts.locale)}`);
     lines.push(
-      opts.copy.availableLine(
-        range.availableCount,
-        opts.summary.totalExpected,
-        percentage,
-      ),
+      opts.copy.availableLine(range.availableCount, opts.summary.totalExpected),
     );
     lines.push(opts.copy.unavailableLine(unavailable));
     lines.push("");

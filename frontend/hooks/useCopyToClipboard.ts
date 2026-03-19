@@ -7,7 +7,7 @@ import { useState, useCallback } from "react";
  */
 export function useCopyToClipboard(resetDelay = 2000): {
   copied: boolean;
-  copy: (text: string) => Promise<void>;
+  copy: (text: string) => Promise<boolean>;
 } {
   const [copied, setCopied] = useState(false);
 
@@ -17,8 +17,9 @@ export function useCopyToClipboard(resetDelay = 2000): {
         await navigator.clipboard.writeText(text);
         setCopied(true);
         setTimeout(() => setCopied(false), resetDelay);
+        return true;
       } catch {
-        // Ignore error
+        return false;
       }
     },
     [resetDelay],

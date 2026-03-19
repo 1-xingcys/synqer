@@ -13,15 +13,14 @@ import {
   useEventTimeSelection,
   useEventTimeConfirmation,
   useParticipantsData,
+  useHostedEventResultShare,
 } from "./hooks";
 import { buildHostedEventResultSummary } from "../resultSummary";
-import { useHostedEventResultShare } from "./hooks/useHostedEventResultShare";
 
 export default function HostedEventPanelPage() {
   const params = useParams();
   const eventId = params.eventId as string;
   const t = useTranslations();
-  const tEventInfo = useTranslations("eventInfo");
   const locale = useLocale();
   const { data } = useHostedEventContext();
 
@@ -120,10 +119,12 @@ export default function HostedEventPanelPage() {
   })();
   const canShareResult = Boolean(resultSummary?.ranges.length);
   const {
+    canNativeShareResultText,
+    resultTextShareStatus,
     resultTextCopied,
     lineShareStatus,
     canShareResultToLine,
-    handleCopyResultText,
+    handleShareResultText,
     handleShareResultToLine,
   } = useHostedEventResultShare({
     eventId,
@@ -131,19 +132,16 @@ export default function HostedEventPanelPage() {
     resultSummary,
     locale,
     copy: {
-      title: tEventInfo("resultText.title"),
-      eventLine: (eventTitle) => tEventInfo("resultText.event", { eventTitle }),
-      confirmedCountLine: (count) =>
-        tEventInfo("resultText.confirmedCount", { count }),
-      availableLine: (availableCount, totalExpected, percentage) =>
-        tEventInfo("resultText.available", {
+      title: t("eventInfo.resultText.title"),
+      eventLine: (eventTitle) => t("eventInfo.resultText.event", { eventTitle }),
+      availableLine: (availableCount, totalExpected) =>
+        t("eventInfo.resultText.available", {
           availableCount,
           totalExpected,
-          percentage,
         }),
       unavailableLine: (names) =>
-        tEventInfo("resultText.unavailable", { names }),
-      none: tEventInfo("resultText.none"),
+        t("eventInfo.resultText.unavailable", { names }),
+      none: t("eventInfo.resultText.none"),
     },
   });
 
@@ -183,8 +181,10 @@ export default function HostedEventPanelPage() {
             isDiscardPending={isDiscardPending}
             isVotingPhase={isVotingPhase}
             showShareResultButton={canShareResult}
+            canNativeShareResultText={canNativeShareResultText}
+            resultTextShareStatus={resultTextShareStatus}
             resultTextCopied={resultTextCopied}
-            onCopyResultText={() => void handleCopyResultText()}
+            onShareResultText={handleShareResultText}
             showShareToLineOption={canShareResultToLine}
             lineShareStatus={lineShareStatus}
             onShareToLine={handleShareResultToLine}

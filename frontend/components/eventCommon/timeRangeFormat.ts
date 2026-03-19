@@ -87,7 +87,7 @@ export function formatLocalizedDateMinuteRangeLabel(
   locale: string,
   options: SharedDateFormatOptions = {},
 ) {
-  return `${formatLocalizedDateRange(range.startDate, range.endDate, locale, options)} • ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`;
+  return `${formatLocalizedDateRange(range.startDate, range.endDate, locale, options)}  ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`;
 }
 
 export function formatLocalizedConfirmedDateTimeRangeLabel(

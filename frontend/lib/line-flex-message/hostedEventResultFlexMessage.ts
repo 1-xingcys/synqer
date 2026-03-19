@@ -100,7 +100,7 @@ function buildRangeSection(params: {
       endMinute: params.range.endMinute,
     },
     params.locale,
-  ).replace(" • ", "  ");
+  );
   const unavailableNames = params.range.unavailableParticipants.map(
     (participant) => participant.name,
   );
@@ -345,12 +345,7 @@ export async function shareHostedEventResultFlexMessage(
   }
 
   try {
-    const flexMessage = buildHostedEventResultFlexMessageFromSummary({
-      eventId: info.eventId,
-      eventTitle: info.eventTitle,
-      summary: info.summary,
-      locale: info.locale,
-    });
+    const flexMessage = buildHostedEventResultFlexMessageFromSummary(info);
     const result = await liff.shareTargetPicker([
       flexMessage as Parameters<typeof liff.shareTargetPicker>[0][number],
     ]);
