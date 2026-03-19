@@ -56,8 +56,6 @@ export class HostedEventListItemDto {
   title!: string | null;
   description!: string | null;
   schedule!: EventScheduleDto;
-  startDate!: Date;
-  endDate!: Date;
   @ApiProperty({
     enum: Weekday,
     enumName: 'Weekday',

@@ -27,8 +27,6 @@ type MappedEventList = {
     endMinuteOfDay: number;
     slotDurationMin: number;
   };
-  startDate: Date;
-  endDate: Date;
   weekdays?: Weekday[];
   createdAt: Date;
   votingDeadline: Date | null;
@@ -190,8 +188,6 @@ export class EventMapperService {
         endMinuteOfDay: schedule.endMinuteOfDay,
         slotDurationMin: schedule.slotDurationMin,
       },
-      startDate: schedule.startDate ?? event.createdAt,
-      endDate: schedule.endDate ?? event.createdAt,
       weekdays: schedule.weekdays,
       createdAt: event.createdAt,
       votingDeadline: event.votingDeadline,
@@ -251,8 +247,6 @@ export class EventMapperService {
         endMinuteOfDay: schedule.endMinuteOfDay,
         slotDurationMin: schedule.slotDurationMin,
       },
-      startDate: schedule.startDate ?? event.createdAt,
-      endDate: schedule.endDate ?? event.createdAt,
       weekdays: schedule.weekdays,
       startMinuteOfDay: schedule.startMinuteOfDay,
       endMinuteOfDay: schedule.endMinuteOfDay,

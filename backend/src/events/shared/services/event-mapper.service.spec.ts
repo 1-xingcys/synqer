@@ -232,8 +232,6 @@ describe('EventMapperService', () => {
           endMinuteOfDay: 1080,
           slotDurationMin: 15,
         },
-        startDate: new Date('2024-12-25'),
-        endDate: new Date('2024-12-26'),
         createdAt: new Date('2024-12-01'),
         votingDeadline: null,
         confirmedSlotIds: [],
@@ -314,8 +312,7 @@ describe('EventMapperService', () => {
 
       const result = service.mapEventToList(recurringEvent);
 
-      expect(result.startDate).toEqual(new Date('2024-12-01'));
-      expect(result.endDate).toEqual(new Date('2024-12-01'));
+      expect(result.schedule.kind).toEqual(EventType.RECURRING);
       expect(result.weekdays).toEqual([Weekday.MONDAY, Weekday.WEDNESDAY]);
       expect(result.confirmedSelections).toEqual([]);
     });
@@ -363,8 +360,6 @@ describe('EventMapperService', () => {
           endMinuteOfDay: 1080,
           slotDurationMin: 15,
         },
-        startDate: new Date('2024-12-25'),
-        endDate: new Date('2024-12-26'),
         startMinuteOfDay: 540,
         endMinuteOfDay: 1080,
         slotDurationMin: 15,
@@ -475,8 +470,6 @@ describe('EventMapperService', () => {
           endMinuteOfDay: 720,
           slotDurationMin: 30,
         },
-        startDate: new Date('2024-12-01'),
-        endDate: new Date('2024-12-01'),
         weekdays: [Weekday.TUESDAY, Weekday.THURSDAY],
         startMinuteOfDay: 600,
         endMinuteOfDay: 720,
