@@ -1,6 +1,10 @@
 import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
 import { TimeSlot, Vote, CalendarEvent, GridAxisColumn } from "./types";
 
+function warnInvalidSlot(slot: TimeSlot, reason: string) {
+  console.warn(`[timeGrid] Skip invalid slot ${slot.id}: ${reason}`);
+}
+
 // Map app locale to date-fns locale string
 const getDateLocale = (locale: string): string => {
   const localeMap: Record<string, string> = {
@@ -81,13 +85,14 @@ export const buildAxisColumns = (
   });
 };
 
-export const getSlotAxisKey = (slot: TimeSlot): string => {
+export const getSlotAxisKey = (slot: TimeSlot): string | null => {
   if (slot.axisType === "WEEKDAY" && slot.axisWeekday) {
     return slot.axisWeekday;
   }
 
   if (!slot.axisDate) {
-    throw new Error(`DATE slot ${slot.id} is missing axisDate`);
+    warnInvalidSlot(slot, "missing axisDate");
+    return null;
   }
 
   return slot.axisDate.split("T")[0];
@@ -126,6 +131,9 @@ export const groupSlotsByAxis = (
   return slots.reduce(
     (acc, slot) => {
       const axisKey = getSlotAxisKey(slot);
+      if (!axisKey) {
+        return acc;
+      }
       if (!acc[axisKey]) acc[axisKey] = [];
       acc[axisKey].push(slot);
       return acc;

@@ -27,6 +27,28 @@ interface UseEventTimeSelectionReturn {
   hasStagedChanges: boolean;
 }
 
+function warnInvalidSlot(slotId: string, reason: string) {
+  console.warn(`[eventTimeSelection] Skip invalid slot ${slotId}: ${reason}`);
+}
+
+function getSlotDateKey(slot: EventSlot): string | null {
+  if (slot.axisType === "WEEKDAY") {
+    if (!slot.axisWeekday) {
+      warnInvalidSlot(slot.id, "missing axisWeekday");
+      return null;
+    }
+
+    return slot.axisWeekday;
+  }
+
+  if (!slot.axisDate) {
+    warnInvalidSlot(slot.id, "missing axisDate");
+    return null;
+  }
+
+  return new Date(slot.axisDate).toISOString().split("T")[0];
+}
+
 function sortSlots(slots: EventSlot[]) {
   const weekdayOrder: Weekday[] = [
     "MONDAY",
@@ -54,7 +76,13 @@ function sortSlots(slots: EventSlot[]) {
     }
 
     if (!left.axisDate || !right.axisDate) {
-      throw new Error("DATE slot is missing axisDate");
+      if (!left.axisDate) {
+        warnInvalidSlot(left.id, "missing axisDate during sort");
+      }
+      if (!right.axisDate) {
+        warnInvalidSlot(right.id, "missing axisDate during sort");
+      }
+      return left.startMinute - right.startMinute;
     }
 
     const leftDate = new Date(left.axisDate).getTime();
@@ -80,7 +108,8 @@ function buildRangesFromSlotIds(
   const sortedSlots = sortSlots(
     slotIds
       .map((slotId) => slotsById.get(slotId))
-      .filter((slot): slot is EventSlot => Boolean(slot)),
+      .filter((slot): slot is EventSlot => Boolean(slot))
+      .filter((slot) => getSlotDateKey(slot) !== null),
   );
 
   if (sortedSlots.length === 0) return [];
@@ -90,20 +119,10 @@ function buildRangesFromSlotIds(
 
   sortedSlots.forEach((slot) => {
     const axisType = slot.axisType === "WEEKDAY" ? "WEEKDAY" : "DATE";
-    const dateKey =
-      axisType === "WEEKDAY"
-        ? (slot.axisWeekday ??
-          (() => {
-            throw new Error(`WEEKDAY slot ${slot.id} is missing axisWeekday`);
-          })())
-        : new Date(
-            slot.axisDate ??
-              (() => {
-                throw new Error(`DATE slot ${slot.id} is missing axisDate`);
-              })(),
-          )
-            .toISOString()
-            .split("T")[0];
+    const dateKey = getSlotDateKey(slot);
+    if (!dateKey) {
+      return;
+    }
 
     if (!currentRange) {
       currentRange = {
