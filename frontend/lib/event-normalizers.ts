@@ -26,7 +26,10 @@ type EventLike = {
   slotDurationMin?: number;
 };
 
-export type NormalizedEventLike<T extends EventLike> = Omit<T, "type"> & {
+export type NormalizedEventLike<T extends EventLike> = Omit<
+  T,
+  "type" | "startDate" | "endDate"
+> & {
   type: EventType;
   schedule: EventSchedule;
 };
@@ -55,8 +58,10 @@ function buildSchedule(event: EventLike): EventSchedule {
 export function normalizeEventLike<T extends EventLike>(
   event: T,
 ): NormalizedEventLike<T> {
+  const { startDate: _startDate, endDate: _endDate, type, ...rest } = event;
   return {
-    ...event,
+    ...rest,
+    type,
     schedule: buildSchedule(event),
   };
 }

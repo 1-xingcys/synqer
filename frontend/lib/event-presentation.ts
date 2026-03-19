@@ -9,18 +9,13 @@ import { formatMinutesToTime } from "@/lib/utils";
 import { formatWeekdayLabel } from "@/lib/weekdays";
 
 type EventWithDateRange = EventWithCapabilities & {
-  startDate?: string;
-  endDate?: string;
   type?: EventType;
   weekdays?: Weekday[];
   schedule?: EventSchedule;
 };
 
 export function formatEventCandidateDaySummary(
-  event: Pick<
-    EventWithDateRange,
-    "startDate" | "endDate" | "type" | "weekdays" | "schedule"
-  >,
+  event: Pick<EventWithDateRange, "type" | "weekdays" | "schedule">,
   locale: string,
 ): string {
   const recurringWeekdays =
@@ -43,21 +38,12 @@ export function formatEventCandidateDaySummary(
       .join(", ");
   }
 
-  const startDate =
-    event.schedule?.kind === "ONE_TIME"
-      ? event.schedule.startDate
-      : event.startDate;
-  const endDate =
-    event.schedule?.kind === "ONE_TIME"
-      ? event.schedule.endDate
-      : event.endDate;
-
-  if (!startDate || !endDate) {
+  if (event.schedule?.kind !== "ONE_TIME") {
     return "";
   }
 
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  const start = new Date(event.schedule.startDate);
+  const end = new Date(event.schedule.endDate);
   return [
     `${start.getFullYear()}/${(start.getMonth() + 1).toString().padStart(2, "0")}/${start
       .getDate()
@@ -87,21 +73,12 @@ export function formatEventScheduleSummary(
     return `${weekdayLabels.join(", ")} • ${startTime} ~ ${endTime}`;
   }
 
-  const startDate =
-    event.schedule?.kind === "ONE_TIME"
-      ? event.schedule.startDate
-      : event.startDate;
-  const endDate =
-    event.schedule?.kind === "ONE_TIME"
-      ? event.schedule.endDate
-      : event.endDate;
-
-  if (!startDate || !endDate) {
+  if (event.schedule?.kind !== "ONE_TIME") {
     return "";
   }
 
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  const start = new Date(event.schedule.startDate);
+  const end = new Date(event.schedule.endDate);
   const startLabel = `${start.getMonth() + 1}/${start.getDate()}`;
   const endLabel = `${end.getMonth() + 1}/${end.getDate()}`;
   return startLabel === endLabel ? startLabel : `${startLabel} ~ ${endLabel}`;

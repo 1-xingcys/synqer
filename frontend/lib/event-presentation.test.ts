@@ -1,8 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import {
-  EventWithCapabilities,
-  EventSchedule,
-} from "@/types/event";
+import { EventWithCapabilities, EventSchedule } from "@/types/event";
 import {
   formatAxisKeyLabel,
   formatEventCandidateDaySummary,
@@ -10,8 +7,6 @@ import {
 } from "@/lib/event-presentation";
 
 type EventFixture = EventWithCapabilities & {
-  startDate: string;
-  endDate: string;
   schedule?: EventSchedule;
   type?: import("@/types/event").EventType;
   weekdays?: import("@/types/event").Weekday[];
@@ -20,9 +15,6 @@ type EventFixture = EventWithCapabilities & {
 const recurringEvent: EventFixture = {
   type: "RECURRING",
   weekdays: ["MONDAY", "WEDNESDAY", "FRIDAY"],
-  startDate: "2025-01-15T12:00:00.000Z",
-  endDate: "2025-01-15T12:00:00.000Z",
-  votingDeadline: "2025-01-20T12:00:00.000Z",
   capabilities: {
     supportsCompletion: false,
     supportsCalendarConflict: false,

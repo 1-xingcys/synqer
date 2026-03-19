@@ -62,14 +62,12 @@ export default function EventRow({
         .join(", ");
     }
 
-    const startDate =
-      event.schedule?.kind === "ONE_TIME"
-        ? new Date(event.schedule.startDate)
-        : new Date(event.startDate);
-    const endDate =
-      event.schedule?.kind === "ONE_TIME"
-        ? new Date(event.schedule.endDate)
-        : new Date(event.endDate);
+    if (event.schedule?.kind !== "ONE_TIME") {
+      return "";
+    }
+
+    const startDate = new Date(event.schedule.startDate);
+    const endDate = new Date(event.schedule.endDate);
     const start = format(startDate, "MMM d");
     const end = format(endDate, "MMM d, yyyy");
     const startYear = startDate.getFullYear();
