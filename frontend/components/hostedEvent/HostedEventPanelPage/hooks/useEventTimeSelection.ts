@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { SelectedTimeRange } from "../EventTimeSelector";
 import { EventSlotAxisType, StagedConfirmation, Weekday } from "@/types/event";
+import { CANONICAL_WEEKDAY_ORDER } from "@/lib/weekdays";
 
 interface EventSlot {
   id: string;
@@ -50,16 +51,6 @@ function getSlotDateKey(slot: EventSlot): string | null {
 }
 
 function sortSlots(slots: EventSlot[]) {
-  const weekdayOrder: Weekday[] = [
-    "MONDAY",
-    "TUESDAY",
-    "WEDNESDAY",
-    "THURSDAY",
-    "FRIDAY",
-    "SATURDAY",
-    "SUNDAY",
-  ];
-
   return [...slots].sort((left, right) => {
     if (
       left.axisType === "WEEKDAY" &&
@@ -68,8 +59,8 @@ function sortSlots(slots: EventSlot[]) {
       right.axisWeekday
     ) {
       const weekdayDiff =
-        weekdayOrder.indexOf(left.axisWeekday) -
-        weekdayOrder.indexOf(right.axisWeekday);
+        CANONICAL_WEEKDAY_ORDER.indexOf(left.axisWeekday) -
+        CANONICAL_WEEKDAY_ORDER.indexOf(right.axisWeekday);
       if (weekdayDiff !== 0) return weekdayDiff;
 
       return left.startMinute - right.startMinute;

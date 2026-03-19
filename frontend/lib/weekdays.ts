@@ -1,6 +1,6 @@
 import type { Weekday } from "@/types/event";
 
-const CANONICAL_WEEKDAY_ORDER: Weekday[] = [
+export const CANONICAL_WEEKDAY_ORDER: Weekday[] = [
   "MONDAY",
   "TUESDAY",
   "WEDNESDAY",
