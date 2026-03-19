@@ -2,11 +2,31 @@ import { ApiProperty } from '@nestjs/swagger';
 import { EventStatus } from '../../shared/services/event-status.service';
 import { EventType, Weekday } from '@prisma/client';
 import { EventCapabilities } from '../../shared/interfaces/event-contract.interface';
+import { ConfirmedSelectionKind } from '../../shared/interfaces/confirmed-time.interface';
 
 export class ConfirmedTimeRangeDto {
   startTime!: Date;
   endTime!: Date;
   slotIds!: string[];
+}
+
+export class ConfirmedSelectionDto {
+  @ApiProperty({
+    enum: Object.values(ConfirmedSelectionKind),
+    enumName: 'ConfirmedSelectionKind',
+  })
+  kind!: (typeof ConfirmedSelectionKind)[keyof typeof ConfirmedSelectionKind];
+
+  slotIds!: string[];
+
+  startTime?: Date;
+  endTime?: Date;
+
+  @ApiProperty({ enum: Weekday, enumName: 'Weekday', required: false })
+  weekday?: Weekday;
+
+  startMinute?: number;
+  endMinute?: number;
 }
 
 export class EventCapabilitiesDto implements EventCapabilities {
@@ -34,6 +54,7 @@ export class HostedEventListItemDto {
   votingDeadline!: Date | null;
   confirmedSlotIds!: string[];
   confirmedTimeRanges!: ConfirmedTimeRangeDto[];
+  confirmedSelections!: ConfirmedSelectionDto[];
   status!: EventStatus;
   capabilities!: EventCapabilitiesDto;
   expectedParticipantCount!: number;

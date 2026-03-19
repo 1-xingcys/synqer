@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { EventStatus } from '../../shared/services/event-status.service';
 import { EventType, Weekday } from '@prisma/client';
 import {
+  ConfirmedSelectionDto,
   ConfirmedTimeRangeDto,
   EventCapabilitiesDto,
 } from './hosted-event-list-item.dto';
@@ -34,6 +35,7 @@ export class EventPublicInfoResponseDto {
   votingDeadline!: Date | null;
   confirmedSlotIds!: string[];
   confirmedTimeRanges!: ConfirmedTimeRangeDto[];
+  confirmedSelections!: ConfirmedSelectionDto[];
   status!: EventStatus;
   capabilities!: EventCapabilitiesDto;
   expectedParticipantCount!: number;
