@@ -4,10 +4,6 @@ import { CreateEventDto } from '../dto/create-event.dto';
 import { TimeSlotService } from '../../shared/services/time-slot.service';
 import { EventRepository } from '../repositories/event.repository';
 
-type EventCreationResult = Awaited<
-  ReturnType<EventRepository['createWithSlotsAndParticipants']>
->;
-
 /**
  * 活動創建服務（業務邏輯層）
  */
@@ -59,93 +55,160 @@ export class EventCreationService {
       lineUserId,
     }));
 
-    let result: EventCreationResult;
-
     if (type === EventType.RECURRING) {
-      this.validateRecurringWeekdays(weekdays);
-      if (votingDeadline) {
-        this.validateRecurringVotingDeadline(votingDeadline);
-      }
-
-      const normalizedWeekdays = this.normalizeWeekdays(weekdays!);
-      const legacyDateRange =
-        this.timeSlotService.getRecurringLegacyDateRange(normalizedWeekdays);
-      const slots = this.timeSlotService.generateRecurringTimeSlots(
-        normalizedWeekdays,
-        startMinuteOfDay,
-        endMinuteOfDay,
-        slotDurationMin,
-      );
-
-      result =
-        await this.eventRepository.createRecurringWithSlotsAndParticipants(
-          {
-            title,
-            description,
-            type,
-            ownerId: userId || null,
-            startDate: legacyDateRange.startDate,
-            endDate: legacyDateRange.endDate,
-            startMinuteOfDay,
-            endMinuteOfDay,
-            slotDurationMin,
-            timeZone,
-            votingDeadline: votingDeadlineObj,
-            lineGroupId: lineGroupId || null,
-            weekdays: normalizedWeekdays,
-          },
-          slots,
-          participantData,
-          userId,
-        );
-    } else {
-      const oneTimeDateRange = this.requireOneTimeDateRange(startDate, endDate);
-      if (votingDeadline) {
-        this.validateVotingDeadline(
-          votingDeadline,
-          oneTimeDateRange.startDate,
-          startTime,
-        );
-      }
-
-      // 解析日期
-      const startDateObj = new Date(oneTimeDateRange.startDate);
-      const endDateObj = new Date(oneTimeDateRange.endDate);
-
-      // 生成時間槽
-      const slots = this.timeSlotService.generateTimeSlots(
-        startDateObj,
-        endDateObj,
-        startMinuteOfDay,
-        endMinuteOfDay,
-        slotDurationMin,
-      );
-
-      // 透過 Repository 建立活動，並取得 creator 的 lineUserId
-      result = await this.eventRepository.createWithSlotsAndParticipants(
+      const result = await this.createRecurringEvent(
         {
           title,
           description,
-          type: EventType.ONE_TIME,
-          ownerId: userId || null,
-          startDate: startDateObj,
-          endDate: endDateObj,
+          weekdays,
           startMinuteOfDay,
           endMinuteOfDay,
           slotDurationMin,
           timeZone,
-          votingDeadline: votingDeadlineObj,
-          lineGroupId: lineGroupId || null,
+          votingDeadline,
+          votingDeadlineObj,
+          lineGroupId,
         },
-        slots,
         participantData,
         userId,
       );
+      return { eventId: result.event.id };
     }
 
-    return {
-      eventId: result.event.id,
-    };
+    const result = await this.createOneTimeEvent(
+      {
+        title,
+        description,
+        startDate,
+        endDate,
+        startTime,
+        startMinuteOfDay,
+        endMinuteOfDay,
+        slotDurationMin,
+        timeZone,
+        votingDeadline,
+        votingDeadlineObj,
+        lineGroupId,
+      },
+      participantData,
+      userId,
+    );
+
+    return { eventId: result.event.id };
+  }
+
+  private async createRecurringEvent(
+    input: {
+      title?: string;
+      description?: string;
+      weekdays?: Weekday[];
+      startMinuteOfDay: number;
+      endMinuteOfDay: number;
+      slotDurationMin: number;
+      timeZone: string;
+      votingDeadline?: string;
+      votingDeadlineObj: Date | null;
+      lineGroupId?: string;
+    },
+    participantData: Array<{ lineUserId: string }>,
+    userId?: string,
+  ) {
+    this.validateRecurringWeekdays(input.weekdays);
+    if (input.votingDeadline) {
+      this.validateRecurringVotingDeadline(input.votingDeadline);
+    }
+
+    const normalizedWeekdays = this.normalizeWeekdays(input.weekdays!);
+    const legacyDateRange =
+      this.timeSlotService.getRecurringLegacyDateRange(normalizedWeekdays);
+    const slots = this.timeSlotService.generateRecurringTimeSlots(
+      normalizedWeekdays,
+      input.startMinuteOfDay,
+      input.endMinuteOfDay,
+      input.slotDurationMin,
+    );
+
+    return this.eventRepository.createRecurringWithSlotsAndParticipants(
+      {
+        title: input.title,
+        description: input.description,
+        type: EventType.RECURRING,
+        ownerId: userId || null,
+        startDate: legacyDateRange.startDate,
+        endDate: legacyDateRange.endDate,
+        startMinuteOfDay: input.startMinuteOfDay,
+        endMinuteOfDay: input.endMinuteOfDay,
+        slotDurationMin: input.slotDurationMin,
+        timeZone: input.timeZone,
+        votingDeadline: input.votingDeadlineObj,
+        lineGroupId: input.lineGroupId || null,
+        weekdays: normalizedWeekdays,
+      },
+      slots,
+      participantData,
+      userId,
+    );
+  }
+
+  private async createOneTimeEvent(
+    input: {
+      title?: string;
+      description?: string;
+      startDate?: string;
+      endDate?: string;
+      startTime: string;
+      startMinuteOfDay: number;
+      endMinuteOfDay: number;
+      slotDurationMin: number;
+      timeZone: string;
+      votingDeadline?: string;
+      votingDeadlineObj: Date | null;
+      lineGroupId?: string;
+    },
+    participantData: Array<{ lineUserId: string }>,
+    userId?: string,
+  ) {
+    const oneTimeDateRange = this.requireOneTimeDateRange(
+      input.startDate,
+      input.endDate,
+    );
+    if (input.votingDeadline) {
+      this.validateVotingDeadline(
+        input.votingDeadline,
+        oneTimeDateRange.startDate,
+        input.startTime,
+      );
+    }
+
+    const startDateObj = new Date(oneTimeDateRange.startDate);
+    const endDateObj = new Date(oneTimeDateRange.endDate);
+    const slots = this.timeSlotService.generateTimeSlots(
+      startDateObj,
+      endDateObj,
+      input.startMinuteOfDay,
+      input.endMinuteOfDay,
+      input.slotDurationMin,
+    );
+
+    return this.eventRepository.createWithSlotsAndParticipants(
+      {
+        title: input.title,
+        description: input.description,
+        type: EventType.ONE_TIME,
+        ownerId: userId || null,
+        startDate: startDateObj,
+        endDate: endDateObj,
+        startMinuteOfDay: input.startMinuteOfDay,
+        endMinuteOfDay: input.endMinuteOfDay,
+        slotDurationMin: input.slotDurationMin,
+        timeZone: input.timeZone,
+        votingDeadline: input.votingDeadlineObj,
+        lineGroupId: input.lineGroupId || null,
+      },
+      slots,
+      participantData,
+      userId,
+    );
   }
 
   /**
@@ -239,25 +302,5 @@ export class EventCreationService {
 
     const deduped = [...new Set(weekdays)];
     return weekdayOrder.filter((weekday) => deduped.includes(weekday));
-  }
-
-  /**
-   * 計算預期參與者數量（需與 repository 邏輯一致）
-   */
-  private calculateExpectedParticipantsCount(
-    userId?: string,
-    uniqueLineUserIds?: string[],
-    creatorLineUserId?: string,
-  ): number {
-    let count = userId ? 1 : 0;
-
-    if (uniqueLineUserIds && uniqueLineUserIds.length > 0) {
-      // 如果 creator 的 lineUserId 也在列表中，不重複計算
-      count += creatorLineUserId
-        ? uniqueLineUserIds.filter((id) => id !== creatorLineUserId).length
-        : uniqueLineUserIds.length;
-    }
-
-    return count;
   }
 }
