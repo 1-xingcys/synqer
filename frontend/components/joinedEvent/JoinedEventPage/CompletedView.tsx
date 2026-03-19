@@ -15,6 +15,8 @@ export function CompletedView({
   confirmedTimeRanges,
 }: CompletedViewProps) {
   const t = useTranslations("joined");
+  const hasDisplayableConfirmedTime =
+    confirmedSelections.length > 0 || confirmedTimeRanges.length > 0;
 
   return (
     <div className="p-6 space-y-4">
@@ -31,7 +33,7 @@ export function CompletedView({
       </div>
 
       {/* Confirmed Time Display */}
-      {confirmedTimeRanges.length > 0 && (
+      {hasDisplayableConfirmedTime && (
         <div className="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-lg p-4">
           <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 flex items-center gap-2">
             <Calendar className="w-4 h-4" />

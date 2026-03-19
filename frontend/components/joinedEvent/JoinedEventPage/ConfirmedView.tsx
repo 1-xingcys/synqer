@@ -22,6 +22,8 @@ export function ConfirmedView({
   supportsAddToCalendar,
 }: ConfirmedViewProps) {
   const t = useTranslations("joined");
+  const hasDisplayableConfirmedTime =
+    confirmedSelections.length > 0 || confirmedTimeRanges.length > 0;
 
   return (
     <div className="p-6 space-y-4">
@@ -38,7 +40,7 @@ export function ConfirmedView({
       </div>
 
       {/* Confirmed Time Display */}
-      {confirmedTimeRanges.length > 0 && (
+      {hasDisplayableConfirmedTime && (
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
           <h4 className="text-sm font-medium text-green-800 dark:text-green-300 mb-2 flex items-center gap-2">
             <Calendar className="w-4 h-4" />

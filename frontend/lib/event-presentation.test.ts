@@ -18,6 +18,7 @@ type EventFixture = EventWithCapabilities & {
   votingDeadline?: string | null;
   confirmedTimeRanges?: ConfirmedTimeRange[];
   schedule?: EventSchedule;
+  confirmedSelections?: import("@/types/event").ConfirmedSelection[];
 };
 
 const recurringEvent: EventFixture = {
@@ -63,5 +64,40 @@ describe("event-presentation", () => {
     expect(
       getEventSortTime(recurringEvent, EventStatus.VOTING_ENDED, now),
     ).toBe(Math.abs(new Date("2025-01-15T12:00:00.000Z").getTime() - now));
+  });
+
+  it("prefers confirmed selections over legacy confirmed time ranges for start/end time", () => {
+    const oneTimeConfirmedEvent: EventFixture = {
+      ...recurringEvent,
+      type: "ONE_TIME",
+      confirmedSelections: [
+        {
+          kind: "ONE_TIME_RANGE",
+          startTime: "2025-03-01T09:00:00.000Z",
+          endTime: "2025-03-01T10:00:00.000Z",
+          slotIds: ["slot-1"],
+        },
+      ],
+      confirmedTimeRanges: [
+        {
+          startTime: "2025-03-05T09:00:00.000Z",
+          endTime: "2025-03-05T10:00:00.000Z",
+          slotIds: ["slot-2"],
+        },
+      ],
+    };
+
+    expect(
+      getEventSortTime(
+        oneTimeConfirmedEvent,
+        EventStatus.CONFIRMED,
+        new Date("2025-03-10T00:00:00.000Z").getTime(),
+      ),
+    ).toBe(
+      Math.abs(
+        new Date("2025-03-01T09:00:00.000Z").getTime() -
+          new Date("2025-03-10T00:00:00.000Z").getTime(),
+      ),
+    );
   });
 });

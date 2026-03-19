@@ -1,4 +1,5 @@
 import {
+  ConfirmedSelection,
   EventStatus,
   EventSlotAxisType,
   EventType,
@@ -16,6 +17,7 @@ type EventWithDateRange = EventWithCapabilities & {
   type?: EventType;
   weekdays?: Weekday[];
   votingDeadline?: string | null;
+  confirmedSelections?: ConfirmedSelection[];
   confirmedTimeRanges?: ConfirmedTimeRange[];
   schedule?: EventSchedule;
 };
@@ -76,11 +78,30 @@ export function getEventCandidateDateRange(event: EventWithDateRange) {
 }
 
 export function getEventConfirmedStartTime(event: EventWithDateRange): number {
+  const confirmedSelectionStart =
+    event.confirmedSelections?.find(
+      (selection) => selection.kind === "ONE_TIME_RANGE" && selection.startTime,
+    )?.startTime ?? null;
+
+  if (confirmedSelectionStart) {
+    return new Date(confirmedSelectionStart).getTime();
+  }
+
   const startTime = event.confirmedTimeRanges?.[0]?.startTime;
   return startTime ? new Date(startTime).getTime() : Infinity;
 }
 
 export function getEventConfirmedEndTime(event: EventWithDateRange): number {
+  const confirmedSelectionEnd = [...(event.confirmedSelections ?? [])]
+    .reverse()
+    .find(
+      (selection) => selection.kind === "ONE_TIME_RANGE" && selection.endTime,
+    )?.endTime;
+
+  if (confirmedSelectionEnd) {
+    return new Date(confirmedSelectionEnd).getTime();
+  }
+
   const endTime =
     event.confirmedTimeRanges?.[event.confirmedTimeRanges.length - 1]?.endTime;
   return endTime ? new Date(endTime).getTime() : Infinity;
