@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { Weekday } from '@prisma/client';
 import {
+  ConfirmedSelection,
+  ConfirmedSelectionKind,
   ConfirmedTimeSlotData,
   ConfirmedTimeRange,
 } from '../interfaces/confirmed-time.interface';
@@ -10,6 +13,16 @@ import {
  */
 @Injectable()
 export class ConfirmedTimeService {
+  private static readonly WEEKDAY_ORDER: Weekday[] = [
+    Weekday.MONDAY,
+    Weekday.TUESDAY,
+    Weekday.WEDNESDAY,
+    Weekday.THURSDAY,
+    Weekday.FRIDAY,
+    Weekday.SATURDAY,
+    Weekday.SUNDAY,
+  ];
+
   /**
    * 將確認的時段合併成連續的時間範圍
    * 連續的時段（同一天且時間相連）會被合併
@@ -68,6 +81,87 @@ export class ConfirmedTimeService {
     }
 
     return ranges;
+  }
+
+  mergeToSelections(
+    confirmedTimeSlots: ConfirmedTimeSlotData[],
+  ): ConfirmedSelection[] {
+    if (!confirmedTimeSlots || confirmedTimeSlots.length === 0) {
+      return [];
+    }
+
+    const isRecurring = confirmedTimeSlots.some(
+      (cts) => cts.slot.axisType === 'WEEKDAY' && cts.slot.axisWeekday != null,
+    );
+
+    if (!isRecurring) {
+      return this.mergeToTimeRanges(confirmedTimeSlots).map((range) => ({
+        kind: ConfirmedSelectionKind.ONE_TIME_RANGE,
+        startTime: range.startTime,
+        endTime: range.endTime,
+        slotIds: range.slotIds,
+      }));
+    }
+
+    const sortedSlots = [...confirmedTimeSlots].sort((left, right) => {
+      const leftWeekday = left.slot.axisWeekday;
+      const rightWeekday = right.slot.axisWeekday;
+
+      if (leftWeekday && rightWeekday) {
+        const weekdayDiff =
+          ConfirmedTimeService.WEEKDAY_ORDER.indexOf(leftWeekday) -
+          ConfirmedTimeService.WEEKDAY_ORDER.indexOf(rightWeekday);
+        if (weekdayDiff !== 0) {
+          return weekdayDiff;
+        }
+      }
+
+      if (left.slot.startMinute !== right.slot.startMinute) {
+        return left.slot.startMinute - right.slot.startMinute;
+      }
+
+      return left.slot.endMinute - right.slot.endMinute;
+    });
+
+    const selections: ConfirmedSelection[] = [];
+    let currentSelection: ConfirmedSelection | null = null;
+
+    for (const cts of sortedSlots) {
+      const weekday = cts.slot.axisWeekday;
+
+      if (!weekday) {
+        continue;
+      }
+
+      if (
+        currentSelection &&
+        currentSelection.kind === ConfirmedSelectionKind.WEEKDAY_RANGE &&
+        currentSelection.weekday === weekday &&
+        currentSelection.endMinute === cts.slot.startMinute
+      ) {
+        currentSelection.endMinute = cts.slot.endMinute;
+        currentSelection.slotIds.push(cts.slotId);
+        continue;
+      }
+
+      if (currentSelection) {
+        selections.push(currentSelection);
+      }
+
+      currentSelection = {
+        kind: ConfirmedSelectionKind.WEEKDAY_RANGE,
+        weekday,
+        startMinute: cts.slot.startMinute,
+        endMinute: cts.slot.endMinute,
+        slotIds: [cts.slotId],
+      };
+    }
+
+    if (currentSelection) {
+      selections.push(currentSelection);
+    }
+
+    return selections;
   }
 
   /**

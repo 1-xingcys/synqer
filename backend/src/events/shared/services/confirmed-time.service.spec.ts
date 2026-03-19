@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Weekday } from '@prisma/client';
 import { ConfirmedTimeService } from './confirmed-time.service';
 import {
+  ConfirmedSelectionKind,
   ConfirmedTimeSlotData,
   ConfirmedTimeRange,
 } from '../interfaces/confirmed-time.interface';
@@ -350,6 +352,86 @@ describe('ConfirmedTimeService', () => {
       const result = service.formatTimeRangesSummary(ranges, 3);
 
       expect(result).toBe('12/25 09:00 - 10:00\n12/25 14:00 - 15:00');
+    });
+  });
+
+  describe('mergeToSelections', () => {
+    it('should map one-time slots to one-time selections', () => {
+      const slots: ConfirmedTimeSlotData[] = [
+        {
+          slotId: 'slot-1',
+          slot: {
+            id: 'slot-1',
+            date: new Date('2024-12-25T00:00:00.000Z'),
+            startMinute: 540,
+            endMinute: 570,
+          },
+        },
+      ];
+
+      expect(service.mergeToSelections(slots)).toEqual([
+        {
+          kind: ConfirmedSelectionKind.ONE_TIME_RANGE,
+          startTime: new Date('2024-12-25T09:00:00.000Z'),
+          endTime: new Date('2024-12-25T09:30:00.000Z'),
+          slotIds: ['slot-1'],
+        },
+      ]);
+    });
+
+    it('should merge recurring slots by weekday and contiguous minutes', () => {
+      const slots: ConfirmedTimeSlotData[] = [
+        {
+          slotId: 'slot-2',
+          slot: {
+            id: 'slot-2',
+            date: new Date('2000-01-03T00:00:00.000Z'),
+            axisType: 'WEEKDAY',
+            axisWeekday: Weekday.MONDAY,
+            startMinute: 570,
+            endMinute: 600,
+          },
+        },
+        {
+          slotId: 'slot-1',
+          slot: {
+            id: 'slot-1',
+            date: new Date('2000-01-03T00:00:00.000Z'),
+            axisType: 'WEEKDAY',
+            axisWeekday: Weekday.MONDAY,
+            startMinute: 540,
+            endMinute: 570,
+          },
+        },
+        {
+          slotId: 'slot-3',
+          slot: {
+            id: 'slot-3',
+            date: new Date('2000-01-05T00:00:00.000Z'),
+            axisType: 'WEEKDAY',
+            axisWeekday: Weekday.WEDNESDAY,
+            startMinute: 600,
+            endMinute: 630,
+          },
+        },
+      ];
+
+      expect(service.mergeToSelections(slots)).toEqual([
+        {
+          kind: ConfirmedSelectionKind.WEEKDAY_RANGE,
+          weekday: Weekday.MONDAY,
+          startMinute: 540,
+          endMinute: 600,
+          slotIds: ['slot-1', 'slot-2'],
+        },
+        {
+          kind: ConfirmedSelectionKind.WEEKDAY_RANGE,
+          weekday: Weekday.WEDNESDAY,
+          startMinute: 600,
+          endMinute: 630,
+          slotIds: ['slot-3'],
+        },
+      ]);
     });
   });
 });

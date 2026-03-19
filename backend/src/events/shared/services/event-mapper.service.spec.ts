@@ -18,6 +18,7 @@ describe('EventMapperService', () => {
 
   const mockConfirmedTimeService = {
     mergeToTimeRanges: jest.fn(),
+    mergeToSelections: jest.fn(),
   };
 
   const mockEventCapabilitiesService = {
@@ -44,6 +45,8 @@ describe('EventMapperService', () => {
     eventCapabilitiesService = module.get(EventCapabilitiesService);
 
     jest.clearAllMocks();
+    mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
+    mockConfirmedTimeService.mergeToSelections.mockReturnValue([]);
   });
 
   it('should be defined', () => {
@@ -224,6 +227,7 @@ describe('EventMapperService', () => {
         votingDeadline: null,
         confirmedSlotIds: [],
         confirmedTimeRanges: [],
+        confirmedSelections: [],
         status: 'VOTING',
         capabilities: {
           supportsCompletion: true,
@@ -251,6 +255,14 @@ describe('EventMapperService', () => {
 
       mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([
         { startTime: new Date(), endTime: new Date(), slotIds: ['slot-1'] },
+      ]);
+      mockConfirmedTimeService.mergeToSelections.mockReturnValue([
+        {
+          kind: 'ONE_TIME_RANGE',
+          startTime: new Date(),
+          endTime: new Date(),
+          slotIds: ['slot-1'],
+        },
       ]);
       mockEventStatusService.computeEventStatus.mockReturnValue('CONFIRMED');
       mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
@@ -286,6 +298,7 @@ describe('EventMapperService', () => {
       };
 
       mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
+      mockConfirmedTimeService.mergeToSelections.mockReturnValue([]);
       mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
       mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
         supportsCompletion: false,
@@ -298,6 +311,7 @@ describe('EventMapperService', () => {
       expect(result.startDate).toEqual(new Date('2024-12-01'));
       expect(result.endDate).toEqual(new Date('2024-12-01'));
       expect(result.weekdays).toEqual([Weekday.MONDAY, Weekday.WEDNESDAY]);
+      expect(result.confirmedSelections).toEqual([]);
     });
   });
 
@@ -347,6 +361,7 @@ describe('EventMapperService', () => {
         votingDeadline: null,
         confirmedSlotIds: [],
         confirmedTimeRanges: [],
+        confirmedSelections: [],
         status: 'VOTING',
         capabilities: {
           supportsCompletion: true,
@@ -373,12 +388,28 @@ describe('EventMapperService', () => {
       };
 
       mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([mockTimeRange]);
+      mockConfirmedTimeService.mergeToSelections.mockReturnValue([
+        {
+          kind: 'ONE_TIME_RANGE',
+          startTime: mockTimeRange.startTime,
+          endTime: mockTimeRange.endTime,
+          slotIds: ['slot-1'],
+        },
+      ]);
       mockEventStatusService.computeEventStatus.mockReturnValue('CONFIRMED');
 
       const result = service.mapEventToDetail(eventWithConfirmed);
 
       expect(result.confirmedSlotIds).toEqual(['slot-1']);
       expect(result.confirmedTimeRanges).toEqual([mockTimeRange]);
+      expect(result.confirmedSelections).toEqual([
+        {
+          kind: 'ONE_TIME_RANGE',
+          startTime: mockTimeRange.startTime,
+          endTime: mockTimeRange.endTime,
+          slotIds: ['slot-1'],
+        },
+      ]);
     });
 
     it('should map recurring event detail with weekdays and recurring capabilities', () => {
@@ -405,6 +436,15 @@ describe('EventMapperService', () => {
       };
 
       mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
+      mockConfirmedTimeService.mergeToSelections.mockReturnValue([
+        {
+          kind: 'WEEKDAY_RANGE',
+          weekday: Weekday.TUESDAY,
+          startMinute: 600,
+          endMinute: 720,
+          slotIds: ['slot-1', 'slot-2'],
+        },
+      ]);
       mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
       mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
         supportsCompletion: false,
@@ -431,6 +471,15 @@ describe('EventMapperService', () => {
         votingDeadline: null,
         confirmedSlotIds: [],
         confirmedTimeRanges: [],
+        confirmedSelections: [
+          {
+            kind: 'WEEKDAY_RANGE',
+            weekday: Weekday.TUESDAY,
+            startMinute: 600,
+            endMinute: 720,
+            slotIds: ['slot-1', 'slot-2'],
+          },
+        ],
         status: 'VOTING',
         capabilities: {
           supportsCompletion: false,
