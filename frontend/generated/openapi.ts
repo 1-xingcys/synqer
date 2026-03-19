@@ -897,7 +897,7 @@ export interface components {
             id: string;
             eventId: string;
             /** Format: date-time */
-            date: string;
+            axisDate: string | null;
             startMinute: number;
             endMinute: number;
             index: number;
@@ -1009,10 +1009,7 @@ export interface components {
             id: string;
             title: string | null;
             description: string | null;
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
+            schedule: components["schemas"]["EventScheduleDto"];
         };
         RemoveEventResponseDto: {
             success: boolean;

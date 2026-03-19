@@ -1883,9 +1883,10 @@
           "eventId": {
             "type": "string"
           },
-          "date": {
+          "axisDate": {
             "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "startMinute": {
             "type": "number"
@@ -1901,7 +1902,7 @@
           "axisType",
           "id",
           "eventId",
-          "date",
+          "axisDate",
           "startMinute",
           "endMinute",
           "index"
