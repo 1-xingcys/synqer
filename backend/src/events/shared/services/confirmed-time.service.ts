@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Weekday } from '@prisma/client';
+import { EventSlotAxisType, Weekday } from '@prisma/client';
 import {
   ConfirmedSelection,
   ConfirmedSelectionKind,
@@ -30,7 +30,9 @@ export class ConfirmedTimeService {
     }
 
     const isRecurring = confirmedTimeSlots.some(
-      (cts) => cts.slot.axisType === 'WEEKDAY' && cts.slot.axisWeekday != null,
+      (cts) =>
+        cts.slot.axisType === EventSlotAxisType.WEEKDAY &&
+        cts.slot.axisWeekday != null,
     );
 
     if (!isRecurring) {
@@ -65,7 +67,7 @@ export class ConfirmedTimeService {
     for (const cts of sortedSlots) {
       const weekday = cts.slot.axisWeekday;
 
-      if (!weekday) {
+      if (cts.slot.axisType !== EventSlotAxisType.WEEKDAY || weekday == null) {
         continue;
       }
 
@@ -104,8 +106,8 @@ export class ConfirmedTimeService {
     confirmedTimeSlots: ConfirmedTimeSlotData[],
   ): ConfirmedSelection[] {
     const sortedSlots = [...confirmedTimeSlots].sort((a, b) => {
-      const dateA = new Date(a.slot.date).getTime();
-      const dateB = new Date(b.slot.date).getTime();
+      const dateA = this.requireAxisDate(a).getTime();
+      const dateB = this.requireAxisDate(b).getTime();
       if (dateA !== dateB) return dateA - dateB;
       return a.slot.startMinute - b.slot.startMinute;
     });
@@ -114,7 +116,11 @@ export class ConfirmedTimeService {
     let currentSelection: ConfirmedSelection | null = null;
 
     for (const cts of sortedSlots) {
-      const slotDate = new Date(cts.slot.date);
+      if (cts.slot.axisType !== EventSlotAxisType.DATE) {
+        continue;
+      }
+
+      const slotDate = new Date(this.requireAxisDate(cts));
       const slotStartTime = this.createDateTime(slotDate, cts.slot.startMinute);
       const slotEndTime = this.createDateTime(slotDate, cts.slot.endMinute);
 
@@ -158,5 +164,15 @@ export class ConfirmedTimeService {
     const minutes = minuteOfDay % 60;
     result.setUTCHours(hours, minutes, 0, 0);
     return result;
+  }
+
+  private requireAxisDate(slot: ConfirmedTimeSlotData): Date {
+    if (!slot.slot.axisDate) {
+      throw new Error(
+        `Missing axisDate for DATE slot ${slot.slot.id} in confirmed time merge`,
+      );
+    }
+
+    return slot.slot.axisDate;
   }
 }

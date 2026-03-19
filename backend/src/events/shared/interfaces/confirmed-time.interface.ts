@@ -7,8 +7,8 @@ export interface ConfirmedTimeSlotData {
   slotId: string;
   slot: {
     id: string;
-    date: Date;
-    axisType?: EventSlotAxisType | null;
+    axisType: EventSlotAxisType;
+    axisDate?: Date | null;
     axisWeekday?: Weekday | null;
     startMinute: number;
     endMinute: number;

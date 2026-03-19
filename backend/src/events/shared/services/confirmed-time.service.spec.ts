@@ -27,7 +27,7 @@ describe('ConfirmedTimeService', () => {
     slot: {
       id: slotId,
       axisType: EventSlotAxisType.DATE,
-      date: new Date(date),
+      axisDate: new Date(date),
       axisWeekday: null,
       startMinute,
       endMinute,
@@ -44,7 +44,7 @@ describe('ConfirmedTimeService', () => {
     slot: {
       id: slotId,
       axisType: EventSlotAxisType.WEEKDAY,
-      date: new Date('2000-01-03T00:00:00.000Z'),
+      axisDate: null,
       axisWeekday: weekday,
       startMinute,
       endMinute,
