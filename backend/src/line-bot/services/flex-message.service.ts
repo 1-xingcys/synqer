@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { EventSlotAxisType, EventType } from '@prisma/client';
+import { EventType } from '@prisma/client';
 import { EventStatus } from '../../events/shared/services/event-status.service';
 import {
   ConfirmedSelection,
   ConfirmedSelectionKind,
+  ConfirmedTimeSlotData,
 } from '../../events/shared/interfaces/confirmed-time.interface';
 
 /**
@@ -141,17 +142,6 @@ interface FlexAction {
 }
 
 /**
- * 確認的時段資訊
- */
-export interface ConfirmedSlotInfo {
-  slotId: string;
-  axisType: EventSlotAxisType;
-  axisDate?: Date | null;
-  startMinute: number;
-  endMinute: number;
-}
-
-/**
  * 事件資訊（用於建構 Flex Message）
  */
 export interface EventInfo {
@@ -161,7 +151,7 @@ export interface EventInfo {
   description: string | null;
   status: EventStatus;
   votingDeadline: Date | null;
-  confirmedTimeSlots: ConfirmedSlotInfo[];
+  confirmedTimeSlots: ConfirmedTimeSlotData[];
   confirmedSelections: ConfirmedSelection[];
   host: {
     displayName: string;
