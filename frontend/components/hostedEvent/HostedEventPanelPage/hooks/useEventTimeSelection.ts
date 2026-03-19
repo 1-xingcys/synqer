@@ -49,6 +49,8 @@ function sortSlots(slots: EventSlot[]) {
         weekdayOrder.indexOf(left.axisWeekday) -
         weekdayOrder.indexOf(right.axisWeekday);
       if (weekdayDiff !== 0) return weekdayDiff;
+
+      return left.startMinute - right.startMinute;
     }
 
     if (!left.axisDate || !right.axisDate) {
@@ -89,8 +91,11 @@ function buildRangesFromSlotIds(
   sortedSlots.forEach((slot) => {
     const axisType = slot.axisType === "WEEKDAY" ? "WEEKDAY" : "DATE";
     const dateKey =
-      axisType === "WEEKDAY" && slot.axisWeekday
-        ? slot.axisWeekday
+      axisType === "WEEKDAY"
+        ? (slot.axisWeekday ??
+          (() => {
+            throw new Error(`WEEKDAY slot ${slot.id} is missing axisWeekday`);
+          })())
         : new Date(
             slot.axisDate ??
               (() => {
