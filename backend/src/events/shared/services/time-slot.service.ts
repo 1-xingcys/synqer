@@ -1,4 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { Weekday } from '@prisma/client';
+
+type OneTimeSlot = { date: Date; startMinute: number; endMinute: number };
+type RecurringSlot = {
+  weekday: Weekday;
+  startMinute: number;
+  endMinute: number;
+};
 
 /**
  * 時間槽生成和處理服務（純邏輯，不存取資料庫）
@@ -23,9 +31,8 @@ export class TimeSlotService {
     startMinuteOfDay: number,
     endMinuteOfDay: number,
     slotDurationMin: number,
-  ): Array<{ date: Date; startMinute: number; endMinute: number }> {
-    const slots: Array<{ date: Date; startMinute: number; endMinute: number }> =
-      [];
+  ): OneTimeSlot[] {
+    const slots: OneTimeSlot[] = [];
 
     // 遍歷每一天
     const currentDate = new Date(startDate);
@@ -47,6 +54,34 @@ export class TimeSlotService {
 
       // 移到下一天
       currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return slots;
+  }
+
+  generateRecurringTimeSlots(
+    weekdays: Weekday[],
+    startMinuteOfDay: number,
+    endMinuteOfDay: number,
+    slotDurationMin: number,
+  ): RecurringSlot[] {
+    const slots: RecurringSlot[] = [];
+
+    for (const weekday of weekdays) {
+      let currentMinute = startMinuteOfDay;
+
+      while (currentMinute < endMinuteOfDay) {
+        const nextMinute = Math.min(
+          currentMinute + slotDurationMin,
+          endMinuteOfDay,
+        );
+        slots.push({
+          weekday,
+          startMinute: currentMinute,
+          endMinute: nextMinute,
+        });
+        currentMinute = nextMinute;
+      }
     }
 
     return slots;

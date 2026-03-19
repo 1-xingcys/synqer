@@ -23,14 +23,16 @@ describe("buildCalendarOverlayProjection", () => {
       "2026-01-01": [
         {
           id: "s1",
-          date: "2026-01-01T00:00:00.000Z",
+          axisType: "DATE",
+          axisDate: "2026-01-01T00:00:00.000Z",
           startMinute: 540,
           endMinute: 555,
           index: 0,
         },
         {
           id: "s2",
-          date: "2026-01-01T00:00:00.000Z",
+          axisType: "DATE",
+          axisDate: "2026-01-01T00:00:00.000Z",
           startMinute: 555,
           endMinute: 570,
           index: 1,
@@ -76,21 +78,24 @@ describe("buildCalendarOverlayProjection", () => {
       "2026-01-02": [
         {
           id: "x1",
-          date: "2026-01-02T00:00:00.000Z",
+          axisType: "DATE",
+          axisDate: "2026-01-02T00:00:00.000Z",
           startMinute: 540,
           endMinute: 555,
           index: 0,
         },
         {
           id: "x2",
-          date: "2026-01-02T00:00:00.000Z",
+          axisType: "DATE",
+          axisDate: "2026-01-02T00:00:00.000Z",
           startMinute: 555,
           endMinute: 570,
           index: 1,
         },
         {
           id: "x3",
-          date: "2026-01-02T00:00:00.000Z",
+          axisType: "DATE",
+          axisDate: "2026-01-02T00:00:00.000Z",
           startMinute: 570,
           endMinute: 585,
           index: 2,

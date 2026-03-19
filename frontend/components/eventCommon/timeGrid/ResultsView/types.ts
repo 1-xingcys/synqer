@@ -1,3 +1,4 @@
+import { EventSlotAxisType } from "@/types/event";
 import { TimeSlot, Vote, Participant } from "../types";
 
 export type ResultsAvailabilityMode = "available" | "unavailable";
@@ -5,6 +6,7 @@ export type ResultsAvailabilityMode = "available" | "unavailable";
 export interface SlotRangeInfo {
   startDate: string;
   endDate: string;
+  axisType: EventSlotAxisType;
   startTime: number;
   endTime: number;
   slotIds: string[];

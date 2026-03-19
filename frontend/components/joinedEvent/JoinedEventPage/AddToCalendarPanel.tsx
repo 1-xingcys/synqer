@@ -1,12 +1,19 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { ConfirmedTimeRange } from "@/types/event";
+import { ConfirmedSelection } from "@/types/event";
+
+type OneTimeConfirmedSelection = ConfirmedSelection & {
+  kind: "ONE_TIME_RANGE";
+  startTime: string;
+  endTime: string;
+};
 
 interface AddToCalendarPanelProps {
   eventTitle: string;
   eventDescription?: string | null;
-  confirmedTimeRanges: ConfirmedTimeRange[];
+  // One-time only: recurring events never render this panel.
+  oneTimeConfirmedSelections: OneTimeConfirmedSelection[];
 }
 
 // Google brand colors
@@ -151,27 +158,27 @@ function generateGoogleCalendarUrl(
 export function AddToCalendarPanel({
   eventTitle,
   eventDescription,
-  confirmedTimeRanges,
+  oneTimeConfirmedSelections,
 }: AddToCalendarPanelProps) {
   const t = useTranslations("joined");
 
-  if (confirmedTimeRanges.length === 0) {
+  if (oneTimeConfirmedSelections.length === 0) {
     return null;
   }
 
-  const handleAddToCalendar = (range: ConfirmedTimeRange) => {
+  const handleAddToCalendar = (selection: OneTimeConfirmedSelection) => {
     const url = generateGoogleCalendarUrl(
       eventTitle || t("untitledEvent"),
       eventDescription || undefined,
-      range.startTime,
-      range.endTime,
+      selection.startTime,
+      selection.endTime,
     );
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const formatTimeRange = (range: ConfirmedTimeRange) => {
-    const start = new Date(range.startTime);
-    const end = new Date(range.endTime);
+  const formatTimeRange = (selection: OneTimeConfirmedSelection) => {
+    const start = new Date(selection.startTime);
+    const end = new Date(selection.endTime);
 
     // 後端使用 UTC 時間儲存，前端顯示時也要用 UTC
     const dateFormatter = new Intl.DateTimeFormat("en", {
@@ -221,7 +228,7 @@ export function AddToCalendarPanel({
 
         {/* Time Ranges */}
         <div className="space-y-2">
-          {confirmedTimeRanges.map((range, index) => (
+          {oneTimeConfirmedSelections.map((selection, index) => (
             <div
               key={index}
               className="flex items-center justify-between gap-2 bg-white dark:bg-zinc-900 rounded-lg p-2.5 sm:p-3 border border-gray-100 dark:border-zinc-800"
@@ -241,11 +248,11 @@ export function AddToCalendarPanel({
                   />
                 </svg>
                 <span className="text-sm text-gray-700 dark:text-zinc-300 truncate">
-                  {formatTimeRange(range)}
+                  {formatTimeRange(selection)}
                 </span>
               </div>
               <button
-                onClick={() => handleAddToCalendar(range)}
+                onClick={() => handleAddToCalendar(selection)}
                 className="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-600 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors text-xs font-medium text-gray-700 dark:text-zinc-200 shadow-sm"
               >
                 <GoogleGIcon className="w-3.5 h-3.5" />

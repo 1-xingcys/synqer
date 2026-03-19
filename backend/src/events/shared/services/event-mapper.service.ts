@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventType } from '@prisma/client';
+import { EventType, Weekday } from '@prisma/client';
 import { EventStatusService } from './event-status.service';
 import { ConfirmedTimeService } from './confirmed-time.service';
 import { ConfirmedTimeSlotData } from '../interfaces/confirmed-time.interface';
@@ -10,20 +10,24 @@ import {
   EventScheduleSource,
 } from './event-schedule.service';
 
-// 確認時段的資料結構（重新導出以保持向後兼容）
-export type ConfirmedTimeSlot = ConfirmedTimeSlotData;
-
 type MappedEventList = {
   id: string;
   type: EventType;
   title: string | null;
   description: string | null;
-  startDate: Date;
-  endDate: Date;
+  schedule: {
+    kind: EventType;
+    startDate?: Date;
+    endDate?: Date;
+    weekdays?: Weekday[];
+    startMinuteOfDay: number;
+    endMinuteOfDay: number;
+    slotDurationMin: number;
+  };
   createdAt: Date;
   votingDeadline: Date | null;
   confirmedSlotIds: string[];
-  confirmedTimeRanges: ReturnType<ConfirmedTimeService['mergeToTimeRanges']>;
+  confirmedSelections: ReturnType<ConfirmedTimeService['mergeToSelections']>;
   status: ReturnType<EventStatusService['computeEventStatus']>;
   capabilities: EventCapabilities;
 };
@@ -126,21 +130,6 @@ export class EventMapperService {
   }
 
   /**
-   * 將確認時段轉換為狀態計算所需的格式
-   */
-  mapConfirmedSlotsForStatus(confirmedTimeSlots?: ConfirmedTimeSlot[]) {
-    if (!confirmedTimeSlots || confirmedTimeSlots.length === 0) {
-      return undefined;
-    }
-    return confirmedTimeSlots.map((cts) => ({
-      slotId: cts.slotId,
-      date: cts.slot.date,
-      startMinute: cts.slot.startMinute,
-      endMinute: cts.slot.endMinute,
-    }));
-  }
-
-  /**
    * 映射事件為列表項格式
    */
   mapEventToList(event: {
@@ -148,21 +137,16 @@ export class EventMapperService {
     type: EventType;
     title: string | null;
     description: string | null;
-    startDate?: Date;
-    endDate?: Date;
     createdAt: Date;
     votingDeadline: Date | null;
-    startMinuteOfDay?: number;
-    endMinuteOfDay?: number;
-    slotDurationMin?: number;
     oneTimeSchedule: EventScheduleSource['oneTimeSchedule'];
     recurringSchedule: EventScheduleSource['recurringSchedule'];
-    confirmedTimeSlots?: ConfirmedTimeSlot[];
+    confirmedTimeSlots?: ConfirmedTimeSlotData[];
   }): MappedEventList {
     const schedule = this.eventScheduleService.resolveSchedule(event);
     const confirmedSlotIds =
       event.confirmedTimeSlots?.map((cts) => cts.slotId) || [];
-    const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
+    const confirmedSelections = this.confirmedTimeService.mergeToSelections(
       event.confirmedTimeSlots || [],
     );
 
@@ -171,18 +155,23 @@ export class EventMapperService {
       type: event.type,
       title: event.title,
       description: event.description,
-      startDate: schedule.startDate ?? new Date(0),
-      endDate: schedule.endDate ?? new Date(0),
+      schedule: {
+        kind: schedule.type,
+        startDate: schedule.startDate,
+        endDate: schedule.endDate,
+        weekdays: schedule.weekdays,
+        startMinuteOfDay: schedule.startMinuteOfDay,
+        endMinuteOfDay: schedule.endMinuteOfDay,
+        slotDurationMin: schedule.slotDurationMin,
+      },
       createdAt: event.createdAt,
       votingDeadline: event.votingDeadline,
       confirmedSlotIds,
-      confirmedTimeRanges,
+      confirmedSelections,
       status: this.eventStatusService.computeEventStatus({
         eventType: event.type,
         votingDeadline: event.votingDeadline,
-        confirmedTimeSlots: this.mapConfirmedSlotsForStatus(
-          event.confirmedTimeSlots,
-        ),
+        confirmedTimeSlots: event.confirmedTimeSlots,
       }),
       capabilities: this.eventCapabilitiesService.buildCapabilities(event.type),
     };
@@ -196,23 +185,19 @@ export class EventMapperService {
     type: EventType;
     title: string | null;
     description: string | null;
-    startDate?: Date;
-    endDate?: Date;
-    startMinuteOfDay?: number;
-    endMinuteOfDay?: number;
-    slotDurationMin?: number;
+    createdAt: Date;
     timeZone: string;
     lineGroupId: string | null;
     ownerId: string | null;
     votingDeadline: Date | null;
     oneTimeSchedule: EventScheduleSource['oneTimeSchedule'];
     recurringSchedule: EventScheduleSource['recurringSchedule'];
-    confirmedTimeSlots?: ConfirmedTimeSlot[];
+    confirmedTimeSlots?: ConfirmedTimeSlotData[];
   }) {
     const schedule = this.eventScheduleService.resolveSchedule(event);
     const confirmedSlotIds =
       event.confirmedTimeSlots?.map((cts) => cts.slotId) || [];
-    const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
+    const confirmedSelections = this.confirmedTimeService.mergeToSelections(
       event.confirmedTimeSlots || [],
     );
 
@@ -221,23 +206,25 @@ export class EventMapperService {
       type: event.type,
       title: event.title,
       description: event.description,
-      startDate: schedule.startDate ?? new Date(0),
-      endDate: schedule.endDate ?? new Date(0),
-      startMinuteOfDay: schedule.startMinuteOfDay,
-      endMinuteOfDay: schedule.endMinuteOfDay,
-      slotDurationMin: schedule.slotDurationMin,
+      schedule: {
+        kind: schedule.type,
+        startDate: schedule.startDate,
+        endDate: schedule.endDate,
+        weekdays: schedule.weekdays,
+        startMinuteOfDay: schedule.startMinuteOfDay,
+        endMinuteOfDay: schedule.endMinuteOfDay,
+        slotDurationMin: schedule.slotDurationMin,
+      },
       timeZone: event.timeZone,
       lineGroupId: event.lineGroupId,
       ownerId: event.ownerId,
       votingDeadline: event.votingDeadline,
       confirmedSlotIds,
-      confirmedTimeRanges,
+      confirmedSelections,
       status: this.eventStatusService.computeEventStatus({
         eventType: event.type,
         votingDeadline: event.votingDeadline,
-        confirmedTimeSlots: this.mapConfirmedSlotsForStatus(
-          event.confirmedTimeSlots,
-        ),
+        confirmedTimeSlots: event.confirmedTimeSlots,
       }),
       capabilities: this.eventCapabilitiesService.buildCapabilities(event.type),
     };

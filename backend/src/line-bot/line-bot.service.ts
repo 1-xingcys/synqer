@@ -289,13 +289,16 @@ export class LineBotService implements OnModuleInit {
             slot: {
               select: {
                 id: true,
-                date: true,
+                axisType: true,
+                axisDate: true,
+                axisWeekday: true,
                 startMinute: true,
                 endMinute: true,
               },
             },
           },
         },
+        oneTimeSchedule: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -308,21 +311,14 @@ export class LineBotService implements OnModuleInit {
 
     for (const event of events) {
       // 合併成時間範圍（使用原始資料結構）
-      const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
+      const confirmedSelections = this.confirmedTimeService.mergeToSelections(
         event.confirmedTimeSlots,
       );
 
-      // 建構確認時段資訊（用於 EventInfo 和狀態計算）
-      const confirmedTimeSlots = event.confirmedTimeSlots.map((cts) => ({
-        slotId: cts.slotId,
-        date: cts.slot.date,
-        startMinute: cts.slot.startMinute,
-        endMinute: cts.slot.endMinute,
-      }));
-
       const status = this.eventStatusService.computeEventStatus({
+        eventType: event.type,
         votingDeadline: event.votingDeadline,
-        confirmedTimeSlots,
+        confirmedTimeSlots: event.confirmedTimeSlots,
       });
 
       // 排除已結束的活動
@@ -357,12 +353,13 @@ export class LineBotService implements OnModuleInit {
 
       result.push({
         id: event.id,
+        type: event.type,
         title: event.title,
         description: event.description,
         status,
         votingDeadline: event.votingDeadline,
-        confirmedTimeSlots,
-        confirmedTimeRanges,
+        confirmedTimeSlots: event.confirmedTimeSlots,
+        confirmedSelections,
         host,
         votingStats: {
           totalExpected,
@@ -555,13 +552,16 @@ export class LineBotService implements OnModuleInit {
             slot: {
               select: {
                 id: true,
-                date: true,
+                axisType: true,
+                axisDate: true,
+                axisWeekday: true,
                 startMinute: true,
                 endMinute: true,
               },
             },
           },
         },
+        oneTimeSchedule: true,
       },
     });
 
@@ -617,16 +617,23 @@ export class LineBotService implements OnModuleInit {
       );
     }
 
-    // 建構分享用 Flex Message
-    const flexMsg = this.flexMessage.buildEventShareFlexMessage({
+    // One-time 專用分享訊息。Recurring 不應走這條 date-range 契約。
+    if (!event.oneTimeSchedule) {
+      return {
+        success: false,
+        error: 'Recurring events do not support one-time share notification',
+      };
+    }
+
+    const flexMsg = this.flexMessage.buildOneTimeEventShareFlexMessage({
       eventId: event.id,
       title: event.title,
       hostName: host.displayName,
       hostAvatarUrl: host.pictureUrl,
-      startDate: event.startDate,
-      endDate: event.endDate,
-      startTime: formatTime(event.startMinuteOfDay),
-      endTime: formatTime(event.endMinuteOfDay),
+      startDate: event.oneTimeSchedule.startDate,
+      endDate: event.oneTimeSchedule.endDate,
+      startTime: formatTime(event.oneTimeSchedule.startMinuteOfDay),
+      endTime: formatTime(event.oneTimeSchedule.endMinuteOfDay),
       votingDeadline: event.votingDeadline,
     });
 

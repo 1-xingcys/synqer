@@ -1,33 +1,45 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { Calendar, Clock, Timer } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
 import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
-import { EventStatus } from "@/types/event";
+import { EventSchedule, EventStatus, EventType } from "@/types/event";
+import { formatWeekdayLabel } from "@/lib/weekdays";
 
 interface EventInfoDetailProps {
+  eventType: EventType;
   status: EventStatus;
-  startDate: string;
-  endDate: string;
-  startMinuteOfDay: number;
-  endMinuteOfDay: number;
+  schedule: EventSchedule;
   votingDeadline?: string | null;
   currentUserHasVoted: boolean;
 }
 
 export function EventInfoDetail({
+  eventType,
   status,
-  startDate,
-  endDate,
-  startMinuteOfDay,
-  endMinuteOfDay,
+  schedule,
   votingDeadline,
   currentUserHasVoted,
 }: EventInfoDetailProps) {
   const t = useTranslations();
+  const locale = useLocale();
+  const isRecurring = eventType === "RECURRING";
+  const recurringWeekdays =
+    schedule.kind === "RECURRING" ? schedule.weekdays : undefined;
+  const candidateDayText =
+    isRecurring && recurringWeekdays?.length
+      ? recurringWeekdays
+          .map((weekday) => formatWeekdayLabel(weekday, locale))
+          .join(", ")
+      : schedule.kind === "ONE_TIME"
+        ? [
+            format(new Date(schedule.startDate), "yyyy/MM/dd"),
+            format(new Date(schedule.endDate), "yyyy/MM/dd"),
+          ].join(" ~ ")
+        : "-";
 
   return (
     <>
@@ -57,13 +69,13 @@ export function EventInfoDetail({
           <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1">
             <Calendar className="w-4 h-4" />
             <span className="text-sm font-medium">
-              {t("eventInfo.candidateDates")}
+              {isRecurring
+                ? t("eventInfo.candidateWeekdays")
+                : t("eventInfo.candidateDates")}
             </span>
           </div>
           <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-6">
-            {format(new Date(startDate), "yyyy/MM/dd")}
-            <span className="mx-2 text-zinc-400">~</span>
-            {format(new Date(endDate), "yyyy/MM/dd")}
+            {candidateDayText}
           </p>
         </div>
 
@@ -75,9 +87,9 @@ export function EventInfoDetail({
             </span>
           </div>
           <p className="text-sm sm:text-base text-zinc-900 dark:text-zinc-100 font-mono pl-6">
-            {formatMinutesToTime(startMinuteOfDay)}
+            {formatMinutesToTime(schedule.startMinuteOfDay ?? 0)}
             <span className="mx-2 text-zinc-400">~</span>
-            {formatMinutesToTime(endMinuteOfDay)}
+            {formatMinutesToTime(schedule.endMinuteOfDay ?? 0)}
           </p>
         </div>
       </div>

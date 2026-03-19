@@ -775,12 +775,31 @@ export interface components {
         };
         /** @enum {string} */
         EventType: "ONE_TIME" | "RECURRING";
-        ConfirmedTimeRangeDto: {
+        /** @enum {string} */
+        Weekday: "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+        EventScheduleDto: {
+            kind: components["schemas"]["EventType"];
+            weekdays?: components["schemas"]["Weekday"][];
             /** Format: date-time */
-            startTime: string;
+            startDate?: string;
             /** Format: date-time */
-            endTime: string;
+            endDate?: string;
+            startMinuteOfDay: number;
+            endMinuteOfDay: number;
+            slotDurationMin: number;
+        };
+        /** @enum {string} */
+        ConfirmedSelectionKind: "ONE_TIME_RANGE" | "WEEKDAY_RANGE";
+        ConfirmedSelectionDto: {
+            kind: components["schemas"]["ConfirmedSelectionKind"];
+            weekday?: components["schemas"]["Weekday"];
             slotIds: string[];
+            /** Format: date-time */
+            startTime?: string;
+            /** Format: date-time */
+            endTime?: string;
+            startMinute?: number;
+            endMinute?: number;
         };
         EventCapabilitiesDto: {
             supportsCompletion: boolean;
@@ -792,16 +811,13 @@ export interface components {
             id: string;
             title: string | null;
             description: string | null;
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
+            schedule: components["schemas"]["EventScheduleDto"];
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             votingDeadline: string | null;
             confirmedSlotIds: string[];
-            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
+            confirmedSelections: components["schemas"]["ConfirmedSelectionDto"][];
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
             capabilities: components["schemas"]["EventCapabilitiesDto"];
@@ -818,16 +834,13 @@ export interface components {
             id: string;
             title: string | null;
             description: string | null;
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
+            schedule: components["schemas"]["EventScheduleDto"];
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             votingDeadline: string | null;
             confirmedSlotIds: string[];
-            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
+            confirmedSelections: components["schemas"]["ConfirmedSelectionDto"][];
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
             capabilities: components["schemas"]["EventCapabilitiesDto"];
@@ -837,10 +850,12 @@ export interface components {
             host: components["schemas"]["AttendedEventHostDto"] | null;
         };
         CreateEventDto: {
+            type?: components["schemas"]["EventType"];
+            weekdays?: components["schemas"]["Weekday"][];
             title?: string;
             description?: string;
-            startDate: string;
-            endDate: string;
+            startDate?: string;
+            endDate?: string;
             startTime: string;
             endTime: string;
             slotDurationMin?: number;
@@ -857,20 +872,14 @@ export interface components {
             id: string;
             title: string | null;
             description: string | null;
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
-            startMinuteOfDay: number;
-            endMinuteOfDay: number;
-            slotDurationMin: number;
+            schedule: components["schemas"]["EventScheduleDto"];
             timeZone: string;
             lineGroupId: string | null;
             ownerId: string | null;
             /** Format: date-time */
             votingDeadline: string | null;
             confirmedSlotIds: string[];
-            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
+            confirmedSelections: components["schemas"]["ConfirmedSelectionDto"][];
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
             capabilities: components["schemas"]["EventCapabilitiesDto"];
@@ -880,11 +889,15 @@ export interface components {
             lineGroupId: string;
             groupName: string | null;
         };
+        /** @enum {string} */
+        EventSlotAxisType: "DATE" | "WEEKDAY";
         EventDetailSlotDto: {
+            axisType: components["schemas"]["EventSlotAxisType"];
+            axisWeekday?: components["schemas"]["Weekday"] | null;
             id: string;
             eventId: string;
             /** Format: date-time */
-            date: string;
+            axisDate: string | null;
             startMinute: number;
             endMinute: number;
             index: number;
@@ -939,18 +952,13 @@ export interface components {
             id: string;
             title: string | null;
             description: string | null;
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
+            schedule: components["schemas"]["EventScheduleDto"];
             /** Format: date-time */
             createdAt: string;
-            startMinuteOfDay?: number;
-            endMinuteOfDay?: number;
             /** Format: date-time */
             votingDeadline: string | null;
             confirmedSlotIds: string[];
-            confirmedTimeRanges: components["schemas"]["ConfirmedTimeRangeDto"][];
+            confirmedSelections: components["schemas"]["ConfirmedSelectionDto"][];
             /** @enum {string} */
             status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
             capabilities: components["schemas"]["EventCapabilitiesDto"];
@@ -1001,10 +1009,7 @@ export interface components {
             id: string;
             title: string | null;
             description: string | null;
-            /** Format: date-time */
-            startDate: string;
-            /** Format: date-time */
-            endDate: string;
+            schedule: components["schemas"]["EventScheduleDto"];
         };
         RemoveEventResponseDto: {
             success: boolean;

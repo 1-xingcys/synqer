@@ -529,27 +529,34 @@ describe('GoogleCalendarService', () => {
       const mockEvent = {
         id: 'event-123',
         type: EventType.ONE_TIME,
-        startDate: new Date('2024-01-15T00:00:00.000Z'),
-        endDate: new Date('2024-01-15T00:00:00.000Z'),
         timeZone: 'Asia/Taipei',
-        oneTimeSchedule: null,
+        oneTimeSchedule: {
+          startDate: new Date('2024-01-15T00:00:00.000Z'),
+          endDate: new Date('2024-01-15T00:00:00.000Z'),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 855,
+          slotDurationMin: 15,
+        },
         recurringSchedule: null,
         slots: [
           {
             id: 'slot-1',
-            date: new Date('2024-01-15T00:00:00.000Z'),
+            axisType: 'DATE',
+            axisDate: new Date('2024-01-15T00:00:00.000Z'),
             startMinute: 540, // 09:00
             endMinute: 555, // 09:15
           },
           {
             id: 'slot-2',
-            date: new Date('2024-01-15T00:00:00.000Z'),
+            axisType: 'DATE',
+            axisDate: new Date('2024-01-15T00:00:00.000Z'),
             startMinute: 600, // 10:00
             endMinute: 615, // 10:15
           },
           {
             id: 'slot-3',
-            date: new Date('2024-01-15T00:00:00.000Z'),
+            axisType: 'DATE',
+            axisDate: new Date('2024-01-15T00:00:00.000Z'),
             startMinute: 840, // 14:00
             endMinute: 855, // 14:15
           },

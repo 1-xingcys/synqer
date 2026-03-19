@@ -60,9 +60,13 @@ describe('EventUpdateService', () => {
         type: EventType.ONE_TIME,
         title: 'New Title',
         description: 'Description',
-        startDate: new Date('2024-12-25'),
-        endDate: new Date('2024-12-25'),
-        oneTimeSchedule: null,
+        oneTimeSchedule: {
+          startDate: new Date('2024-12-25'),
+          endDate: new Date('2024-12-25'),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
         recurringSchedule: null,
       };
 
@@ -85,8 +89,15 @@ describe('EventUpdateService', () => {
         id: eventId,
         title: 'New Title',
         description: 'Description',
-        startDate: new Date('2024-12-25'),
-        endDate: new Date('2024-12-25'),
+        schedule: {
+          kind: EventType.ONE_TIME,
+          startDate: new Date('2024-12-25'),
+          endDate: new Date('2024-12-25'),
+          weekdays: undefined,
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
       });
     });
 
@@ -97,9 +108,13 @@ describe('EventUpdateService', () => {
         type: EventType.ONE_TIME,
         title: 'Title',
         description: 'New Description',
-        startDate: new Date(),
-        endDate: new Date(),
-        oneTimeSchedule: null,
+        oneTimeSchedule: {
+          startDate: new Date(),
+          endDate: new Date(),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
         recurringSchedule: null,
       };
 
@@ -127,9 +142,13 @@ describe('EventUpdateService', () => {
         type: EventType.ONE_TIME,
         title: 'Title',
         description: null,
-        startDate: new Date(),
-        endDate: new Date(),
-        oneTimeSchedule: null,
+        oneTimeSchedule: {
+          startDate: new Date(),
+          endDate: new Date(),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
         recurringSchedule: null,
       };
 
@@ -154,9 +173,13 @@ describe('EventUpdateService', () => {
       const mockEvent = {
         id: eventId,
         type: EventType.ONE_TIME,
-        startDate: new Date('2024-12-25'),
-        startMinuteOfDay: 540,
-        oneTimeSchedule: null,
+        oneTimeSchedule: {
+          startDate: new Date('2024-12-25'),
+          endDate: new Date('2024-12-25'),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
         recurringSchedule: null,
       };
       const updatedEvent = {
@@ -164,9 +187,13 @@ describe('EventUpdateService', () => {
         type: EventType.ONE_TIME,
         title: 'Title',
         description: null,
-        startDate: new Date('2024-12-25'),
-        endDate: new Date('2024-12-25'),
-        oneTimeSchedule: null,
+        oneTimeSchedule: {
+          startDate: new Date('2024-12-25'),
+          endDate: new Date('2024-12-25'),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
         recurringSchedule: null,
       };
 
@@ -198,9 +225,13 @@ describe('EventUpdateService', () => {
       const mockEvent = {
         id: eventId,
         type: EventType.ONE_TIME,
-        startDate: new Date('2024-12-25'),
-        startMinuteOfDay: 540,
-        oneTimeSchedule: null,
+        oneTimeSchedule: {
+          startDate: new Date('2024-12-25'),
+          endDate: new Date('2024-12-25'),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
         recurringSchedule: null,
       };
 
@@ -231,9 +262,13 @@ describe('EventUpdateService', () => {
       const mockEvent = {
         id: eventId,
         type: EventType.ONE_TIME,
-        startDate: new Date('2024-12-25'),
-        startMinuteOfDay: 540,
-        oneTimeSchedule: null,
+        oneTimeSchedule: {
+          startDate: new Date('2024-12-25'),
+          endDate: new Date('2024-12-25'),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
         recurringSchedule: null,
       };
 
@@ -259,9 +294,13 @@ describe('EventUpdateService', () => {
         type: EventType.ONE_TIME,
         title: 'New Title',
         description: 'New Description',
-        startDate: new Date(),
-        endDate: new Date(),
-        oneTimeSchedule: null,
+        oneTimeSchedule: {
+          startDate: new Date(),
+          endDate: new Date(),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
         recurringSchedule: null,
       };
 
@@ -292,9 +331,13 @@ describe('EventUpdateService', () => {
         type: EventType.ONE_TIME,
         title: 'New Title',
         description: null,
-        startDate: new Date(),
-        endDate: new Date(),
-        oneTimeSchedule: null,
+        oneTimeSchedule: {
+          startDate: new Date(),
+          endDate: new Date(),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
         recurringSchedule: null,
       };
 

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventType } from '@prisma/client';
+import { EventType, Weekday } from '@prisma/client';
 import { EventRepository } from './event.repository';
 import { PrismaService } from '../../../prisma/prisma.service';
 
@@ -16,6 +16,9 @@ describe('EventRepository', () => {
     },
     eventTimeSlot: {
       createMany: jest.fn(),
+    },
+    recurringEventSchedule: {
+      create: jest.fn(),
     },
     eventExpectedParticipant: {
       createMany: jest.fn(),
@@ -184,6 +187,67 @@ describe('EventRepository', () => {
         orderBy: { createdAt: 'desc' },
       });
       expect(result).toEqual(mockEvents);
+    });
+  });
+
+  describe('createRecurringWithSlotsAndParticipants', () => {
+    it('should create recurring event with weekday slots and participants in transaction', async () => {
+      const eventData = {
+        title: 'Recurring Event',
+        description: 'Recurring Description',
+        type: EventType.RECURRING,
+        ownerId: 'user-123',
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 1080,
+        slotDurationMin: 15,
+        timeZone: 'Asia/Taipei',
+        votingDeadline: null,
+        lineGroupId: null,
+        weekdays: [Weekday.MONDAY, Weekday.FRIDAY],
+      };
+      const slots = [
+        {
+          weekday: Weekday.MONDAY,
+          startMinute: 540,
+          endMinute: 555,
+        },
+      ];
+      const participantData = [{ lineUserId: 'line-1' }];
+
+      const mockEvent = { id: 'event-recurring-123', ...eventData };
+
+      mockPrismaService.$transaction.mockImplementation(async (callback) => {
+        const mockPrisma = {
+          event: {
+            create: jest.fn().mockResolvedValue(mockEvent),
+          },
+          recurringEventSchedule: {
+            create: jest.fn().mockResolvedValue({}),
+          },
+          eventTimeSlot: {
+            createMany: jest.fn().mockResolvedValue({ count: 1 }),
+          },
+          eventExpectedParticipant: {
+            createMany: jest.fn().mockResolvedValue({ count: 1 }),
+          },
+          authIdentity: {
+            findFirst: jest.fn().mockResolvedValue(null),
+          },
+          lineGroupMember: {
+            findMany: jest.fn().mockResolvedValue([]),
+          },
+        };
+        return callback(mockPrisma);
+      });
+
+      const result = await repository.createRecurringWithSlotsAndParticipants(
+        eventData,
+        slots,
+        participantData,
+      );
+
+      expect(prismaService.$transaction).toHaveBeenCalled();
+      expect(result.event).toEqual(mockEvent);
     });
   });
 

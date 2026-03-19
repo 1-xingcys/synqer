@@ -6,10 +6,13 @@ import { useRouter } from "@/i18n/routing";
 import { ApiError, apiFetch, apiFetchJson } from "@/lib/apiClient";
 import { attendedEventsKeys } from "@/hooks/useAttendedEvents";
 import type { operations } from "@/generated/openapi";
+import { normalizeEventPublicInfoResponse } from "@/lib/event-normalizers";
 
 type EventPublicInfoResponse =
   operations["EventCoreController_getEventPublicInfo"]["responses"][200]["content"]["application/json"];
-export type EventPublicInfo = EventPublicInfoResponse;
+export type EventPublicInfo = ReturnType<
+  typeof normalizeEventPublicInfoResponse
+>;
 type ParticipationStatusResponse =
   operations["ParticipationController_checkParticipantStatus"]["responses"][200]["content"]["application/json"];
 type JoinEventResponse =
@@ -33,8 +36,10 @@ const eventJoinKeys = {
     [...eventJoinKeys.all, "participation", eventId] as const,
 };
 
-async function fetchEventPublicInfo(eventId: string): Promise<EventPublicInfo> {
-  return apiFetchJson<EventPublicInfo>(`/events/${eventId}/public`, {
+async function fetchEventPublicInfo(
+  eventId: string,
+): Promise<EventPublicInfoResponse> {
+  return apiFetchJson<EventPublicInfoResponse>(`/events/${eventId}/public`, {
     credentials: "omit",
   });
 }
@@ -83,6 +88,7 @@ export function useEventJoin(eventId: string): UseEventJoinResult {
   const eventQuery = useQuery({
     queryKey: eventJoinKeys.public(eventId),
     queryFn: () => fetchEventPublicInfo(eventId),
+    select: normalizeEventPublicInfoResponse,
     enabled: !!eventId,
   });
 

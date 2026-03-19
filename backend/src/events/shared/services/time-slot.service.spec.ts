@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { Weekday } from '@prisma/client';
 import { TimeSlotService } from './time-slot.service';
 
 describe('TimeSlotService', () => {
@@ -173,6 +174,34 @@ describe('TimeSlotService', () => {
       expect(dates[0]).toBe('2024-12-25');
       expect(dates[1]).toBe('2024-12-26');
       expect(dates[2]).toBe('2024-12-27');
+    });
+  });
+
+  describe('generateRecurringTimeSlots', () => {
+    it('should generate slots for non-consecutive weekdays', () => {
+      const result = service.generateRecurringTimeSlots(
+        [Weekday.MONDAY, Weekday.WEDNESDAY, Weekday.FRIDAY],
+        540,
+        600,
+        30,
+      );
+
+      expect(result).toHaveLength(6);
+      expect(result[0]).toMatchObject({
+        weekday: Weekday.MONDAY,
+        startMinute: 540,
+        endMinute: 570,
+      });
+      expect(result[2]).toMatchObject({
+        weekday: Weekday.WEDNESDAY,
+        startMinute: 540,
+        endMinute: 570,
+      });
+      expect(result[4]).toMatchObject({
+        weekday: Weekday.FRIDAY,
+        startMinute: 540,
+        endMinute: 570,
+      });
     });
   });
 });

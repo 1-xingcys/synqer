@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { GridAxisColumn } from "../types";
-import { formatDateHeader } from "../utils";
+import { formatAxisHeader } from "../utils";
 
 interface DateHeaderProps {
   dates?: string[];
@@ -41,10 +41,7 @@ export function DateHeader({
       </div>
       {/* Date columns */}
       {axisColumns.map((column) => {
-        const { weekday, day, month } = formatDateHeader(
-          column.rawValue,
-          locale,
-        );
+        const { weekday, day, month } = formatAxisHeader(column, locale);
         const isFullySelected = isDayFullySelected?.(column.key) ?? false;
 
         const content = (
@@ -52,18 +49,22 @@ export function DateHeader({
             <div className="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400 font-medium">
               {weekday}
             </div>
-            <div
-              className={`text-sm sm:text-lg font-bold ${
-                isFullySelected
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-900 dark:text-zinc-100"
-              }`}
-            >
-              {day}
-            </div>
-            <div className="text-[10px] sm:text-xs text-gray-400 dark:text-zinc-500">
-              {month}
-            </div>
+            {typeof day === "number" ? (
+              <>
+                <div
+                  className={`text-sm sm:text-lg font-bold ${
+                    isFullySelected
+                      ? "text-blue-600 dark:text-blue-400"
+                      : "text-gray-900 dark:text-zinc-100"
+                  }`}
+                >
+                  {day}
+                </div>
+                <div className="text-[10px] sm:text-xs text-gray-400 dark:text-zinc-500">
+                  {month}
+                </div>
+              </>
+            ) : null}
           </>
         );
 

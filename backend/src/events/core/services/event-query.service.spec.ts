@@ -3,14 +3,12 @@ import { EventQueryService } from './event-query.service';
 import { EventRepository } from '../repositories/event.repository';
 import { EventMapperService } from '../../shared/services/event-mapper.service';
 import { EventStatusService } from '../../shared/services/event-status.service';
-import { EventScheduleService } from '../../shared/services/event-schedule.service';
 
 describe('EventQueryService', () => {
   let service: EventQueryService;
   let eventRepository: jest.Mocked<EventRepository>;
   let eventMapper: jest.Mocked<EventMapperService>;
   let eventStatusService: jest.Mocked<EventStatusService>;
-  let eventScheduleService: jest.Mocked<EventScheduleService>;
 
   const mockEventRepository = {
     findByOwnerId: jest.fn(),
@@ -35,10 +33,6 @@ describe('EventQueryService', () => {
     computeParticipantStatus: jest.fn(),
   };
 
-  const mockEventScheduleService = {
-    resolveSchedule: jest.fn(),
-  };
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -46,7 +40,6 @@ describe('EventQueryService', () => {
         { provide: EventRepository, useValue: mockEventRepository },
         { provide: EventMapperService, useValue: mockEventMapper },
         { provide: EventStatusService, useValue: mockEventStatusService },
-        { provide: EventScheduleService, useValue: mockEventScheduleService },
       ],
     }).compile();
 
@@ -54,7 +47,6 @@ describe('EventQueryService', () => {
     eventRepository = module.get(EventRepository);
     eventMapper = module.get(EventMapperService);
     eventStatusService = module.get(EventStatusService);
-    eventScheduleService = module.get(EventScheduleService);
 
     jest.clearAllMocks();
   });
@@ -167,7 +159,18 @@ describe('EventQueryService', () => {
         isDeleted: false,
         expectedParticipants: [{ id: 'ep-1', userId, hasVoted: true }],
         votes: [{ userId, slotId: 'slot-1', user: { displayName: 'User 1' } }],
-        slots: [{ id: 'slot-1' }],
+        slots: [
+          {
+            id: 'slot-1',
+            eventId: eventId,
+            axisType: 'DATE',
+            axisDate: new Date('2024-12-25T00:00:00.000Z'),
+            axisWeekday: null,
+            startMinute: 540,
+            endMinute: 570,
+            index: 0,
+          },
+        ],
         lineGroup: null,
       };
 
@@ -183,7 +186,18 @@ describe('EventQueryService', () => {
         isDeleted: false,
         event: { id: eventId },
         lineGroup: null,
-        slots: [{ id: 'slot-1' }],
+        slots: [
+          {
+            id: 'slot-1',
+            eventId: eventId,
+            axisType: 'DATE',
+            axisDate: new Date('2024-12-25T00:00:00.000Z'),
+            axisWeekday: null,
+            startMinute: 540,
+            endMinute: 570,
+            index: 0,
+          },
+        ],
         votes: [{ slotId: 'slot-1', userId: 'user-1' }],
         stagedVote: null,
         participants: [{ userId: 'user-1' }],
@@ -208,7 +222,18 @@ describe('EventQueryService', () => {
         isDeleted: false,
         expectedParticipants: [{ id: 'ep-1', userId, hasVoted: true }],
         votes: [{ userId, slotId: 'slot-1', user: { displayName: 'User 1' } }],
-        slots: [{ id: 'slot-1' }],
+        slots: [
+          {
+            id: 'slot-1',
+            eventId: eventId,
+            axisType: 'DATE',
+            axisDate: new Date('2024-12-25T00:00:00.000Z'),
+            axisWeekday: null,
+            startMinute: 540,
+            endMinute: 570,
+            index: 0,
+          },
+        ],
         lineGroup: null,
       };
 
@@ -260,6 +285,51 @@ describe('EventQueryService', () => {
         participants: [],
         expectedParticipants: [],
       });
+    });
+
+    it('should preserve recurring slot axis metadata in detail response', async () => {
+      const eventId = 'event-recurring';
+      const userId = 'user-1';
+      const mockEvent = {
+        id: eventId,
+        isDeleted: false,
+        expectedParticipants: [{ id: 'ep-1', userId, hasVoted: false }],
+        votes: [],
+        slots: [
+          {
+            id: 'slot-1',
+            eventId: eventId,
+            axisType: 'WEEKDAY',
+            axisDate: null,
+            axisWeekday: 'MONDAY',
+            startMinute: 540,
+            endMinute: 570,
+            index: 0,
+          },
+        ],
+        lineGroup: null,
+      };
+
+      mockEventRepository.findOneWithDetails.mockResolvedValue(mockEvent);
+      mockEventRepository.findStagedVoteByEventAndUser.mockResolvedValue(null);
+      mockEventMapper.mapEventToDetail.mockReturnValue({ id: eventId });
+      mockEventMapper.mapVotes.mockReturnValue([]);
+      mockEventMapper.extractParticipants.mockReturnValue([]);
+
+      const result = await service.findOne(eventId, userId);
+
+      expect(result?.slots).toEqual([
+        {
+          id: 'slot-1',
+          eventId: eventId,
+          axisType: 'WEEKDAY',
+          axisDate: null,
+          axisWeekday: 'MONDAY',
+          startMinute: 540,
+          endMinute: 570,
+          index: 0,
+        },
+      ]);
     });
   });
 
@@ -360,13 +430,6 @@ describe('EventQueryService', () => {
         id: eventId,
         status: 'VOTING',
       });
-      mockEventScheduleService.resolveSchedule.mockReturnValue({
-        type: 'ONE_TIME',
-        startMinuteOfDay: 540,
-        endMinuteOfDay: 600,
-        slotDurationMin: 15,
-      });
-
       const result = await service.getEventPublicInfo(eventId);
 
       expect(result).toEqual({
@@ -375,8 +438,6 @@ describe('EventQueryService', () => {
         host: null,
         expectedParticipantCount: 1,
         status: 'VOTING',
-        startMinuteOfDay: 540,
-        endMinuteOfDay: 600,
       });
       expect(mockEventStatusService.computeEventStatus).not.toHaveBeenCalled();
     });
@@ -404,6 +465,33 @@ describe('EventQueryService', () => {
 
       expect(result?.isDeleted).toBe(true);
       expect(result?.expectedParticipantCount).toBe(0);
+    });
+
+    it('should return recurring public info without root minute fields', async () => {
+      const mockEvent = {
+        id: 'event-recurring',
+        type: 'RECURRING',
+        isDeleted: false,
+        votingDeadline: null,
+        expectedParticipants: [{ id: 'ep-1' }, { id: 'ep-2' }],
+        confirmedTimeSlots: [],
+        owner: null,
+      };
+
+      mockEventRepository.findPublicInfo.mockResolvedValue(mockEvent);
+      mockEventMapper.mapEventToList.mockReturnValue({
+        id: 'event-recurring',
+        status: 'VOTING',
+      });
+      const result = await service.getEventPublicInfo('event-recurring');
+
+      expect(result).toEqual({
+        isDeleted: false,
+        id: 'event-recurring',
+        status: 'VOTING',
+        expectedParticipantCount: 2,
+        host: null,
+      });
     });
   });
 });

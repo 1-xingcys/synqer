@@ -1,4 +1,6 @@
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
   IsString,
   IsOptional,
   IsDateString,
@@ -9,13 +11,26 @@ import {
   IsISO8601,
   MaxLength,
   Matches,
+  ValidateIf,
+  IsEnum,
 } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { EventType, Weekday } from '@prisma/client';
 import {
   TITLE_MAX_LENGTH,
   DESCRIPTION_MAX_LENGTH,
 } from '../../../../shared/event-validation.constants';
 
+type CreateEventValidationTarget = {
+  type?: EventType;
+};
+
 export class CreateEventDto {
+  @ApiPropertyOptional({ enum: EventType, enumName: 'EventType' })
+  @IsOptional()
+  @IsEnum(EventType)
+  type?: EventType;
+
   @IsOptional()
   @IsString()
   @MaxLength(TITLE_MAX_LENGTH, {
@@ -30,11 +45,29 @@ export class CreateEventDto {
   })
   description?: string;
 
+  @ValidateIf(
+    (o: CreateEventValidationTarget) =>
+      (o.type ?? EventType.ONE_TIME) === EventType.ONE_TIME,
+  )
   @IsDateString()
-  startDate: string; // "2025-08-12"
+  startDate?: string; // "2025-08-12"
 
+  @ValidateIf(
+    (o: CreateEventValidationTarget) =>
+      (o.type ?? EventType.ONE_TIME) === EventType.ONE_TIME,
+  )
   @IsDateString()
-  endDate: string; // "2025-08-15"
+  endDate?: string; // "2025-08-15"
+
+  @ValidateIf(
+    (o: CreateEventValidationTarget) => o.type === EventType.RECURRING,
+  )
+  @ApiPropertyOptional({ enum: Weekday, enumName: 'Weekday', isArray: true })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(7)
+  @IsEnum(Weekday, { each: true })
+  weekdays?: Weekday[];
 
   @IsString()
   @Matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, {

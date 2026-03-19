@@ -6,6 +6,13 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useLiff } from "@/hooks/useLiff";
 import { cn } from "@/lib/utils";
 import { LineGroupSection } from "./LineGroupSection";
@@ -14,6 +21,7 @@ import { useFormStateContext } from "./CreateEventFormContext";
 import { TITLE_MAX_LENGTH } from "./types";
 import { useTextFields } from "./hooks/useTextFields";
 import { useLineGroupFields } from "./hooks/useLineGroupFields";
+import type { EventType } from "@/types/event";
 
 export function GeneralSection() {
   const t = useTranslations();
@@ -29,6 +37,32 @@ export function GeneralSection() {
 
   const { handleLineGroupChange, handleSelectedMembersChange } =
     useLineGroupFields(setFormData);
+
+  const handleEventTypeChange = (value: EventType) => {
+    setFormData((prev) => {
+      if (value === "ONE_TIME") {
+        return {
+          ...prev,
+          eventType: value,
+          votingDeadline: prev.oneTimeVotingDeadlineManuallySet
+            ? prev.oneTimeVotingDeadline
+            : prev.startDate,
+          votingDeadlineTime: prev.oneTimeVotingDeadlineManuallySet
+            ? prev.oneTimeVotingDeadlineTime
+            : prev.startTime,
+          votingDeadlineManuallySet: prev.oneTimeVotingDeadlineManuallySet,
+        };
+      }
+
+      return {
+        ...prev,
+        eventType: value,
+        votingDeadline: prev.recurringVotingDeadline,
+        votingDeadlineTime: prev.recurringVotingDeadlineTime,
+        votingDeadlineManuallySet: prev.recurringVotingDeadlineManuallySet,
+      };
+    });
+  };
 
   const isOverTitleLimit = titleCharCount >= TITLE_MAX_LENGTH;
 
@@ -109,6 +143,28 @@ export function GeneralSection() {
                 )}
               </p>
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>{t("createEvent.general.eventType")}</Label>
+            <Select
+              value={formData.eventType}
+              onValueChange={(value) =>
+                handleEventTypeChange(value as EventType)
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ONE_TIME">
+                  {t("createEvent.general.eventTypeOptions.oneTime")}
+                </SelectItem>
+                <SelectItem value="RECURRING">
+                  {t("createEvent.general.eventTypeOptions.recurring")}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* LINE Group Selection (only in LIFF) */}

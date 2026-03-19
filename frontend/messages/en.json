@@ -590,6 +590,7 @@
     "noDeadline": "No deadline set",
     "candidateInfo": "Candidate Time Range",
     "candidateDates": "Candidate Dates",
+    "candidateWeekdays": "Candidate Weekdays",
     "candidateTime": "Candidate Time",
     "myVotingStatus": "My Voting Status",
     "participantsStatus": "Participants",
@@ -770,6 +771,11 @@
     "description": "Create a new event to collect participants' available times",
     "general": {
       "title": "General",
+      "eventType": "Event type",
+      "eventTypeOptions": {
+        "oneTime": "Specific dates",
+        "recurring": "Weekly recurring"
+      },
       "host": "Host",
       "eventName": "Event name",
       "eventNamePlaceholder": "e.g., Team dinner time poll",
@@ -819,8 +825,12 @@
     "configuration": {
       "title": "Configuration",
       "description": "Set the candidate dates and time range for the event",
+      "recurringDescription": "Choose the weekdays and time range for this recurring event",
       "startDate": "Start date",
       "endDate": "End date",
+      "weekdays": "Weekdays",
+      "weekdaysHint": "Select at least 1 day and at most 7 days",
+      "weekdaysError": "Select at least one weekday for a recurring event",
       "selectDate": "Select date",
       "startTime": "Start time",
       "endTime": "End time",
@@ -833,6 +843,9 @@
     "votingDeadline": {
       "title": "Voting Deadline",
       "description": "Set a deadline for participants to submit their votes",
+      "recurringDescription": "Optionally set a voting deadline for this recurring event",
+      "optional": "Optional. You can leave this empty.",
+      "clear": "Clear",
       "date": "Deadline date",
       "time": "Deadline time",
       "autoSync": "Auto-synced with event start time",

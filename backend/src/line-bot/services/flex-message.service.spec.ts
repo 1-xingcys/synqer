@@ -4,8 +4,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
+import { EventType } from '@prisma/client';
 import { FlexMessageService, EventInfo } from './flex-message.service';
 import { EventStatus } from '../../events/shared/services/event-status.service';
+import { ConfirmedSelectionKind } from '../../events/shared/interfaces/confirmed-time.interface';
 
 describe('FlexMessageService', () => {
   let service: FlexMessageService;
@@ -36,12 +38,13 @@ describe('FlexMessageService', () => {
   describe('buildEventFlexMessage', () => {
     const baseEvent: EventInfo = {
       id: 'event-1',
+      type: EventType.ONE_TIME,
       title: 'Test Event',
       description: 'Test Description',
       status: EventStatus.VOTING,
       votingDeadline: new Date('2025-12-31T23:59:59Z'),
       confirmedTimeSlots: [],
-      confirmedTimeRanges: [],
+      confirmedSelections: [],
       host: {
         displayName: 'Test Host',
         pictureUrl: 'https://example.com/avatar.jpg',
@@ -142,8 +145,9 @@ describe('FlexMessageService', () => {
             endMinute: 720, // 12:00
           },
         ],
-        confirmedTimeRanges: [
+        confirmedSelections: [
           {
+            kind: ConfirmedSelectionKind.ONE_TIME_RANGE,
             startTime: new Date('2025-12-25T10:00:00Z'),
             endTime: new Date('2025-12-25T12:00:00Z'),
             slotIds: ['slot-1'],
@@ -285,12 +289,13 @@ describe('FlexMessageService', () => {
     it('should handle event without voting deadline', () => {
       const event: EventInfo = {
         id: 'event-1',
+        type: EventType.ONE_TIME,
         title: 'Test Event',
         description: null,
         status: EventStatus.VOTING,
         votingDeadline: null,
         confirmedTimeSlots: [],
-        confirmedTimeRanges: [],
+        confirmedSelections: [],
         host: { displayName: 'Host' },
         votingStats: { totalExpected: 0, totalVoted: 0, votingPercentage: 0 },
       };
@@ -302,12 +307,13 @@ describe('FlexMessageService', () => {
     it('should handle event without description', () => {
       const event: EventInfo = {
         id: 'event-1',
+        type: EventType.ONE_TIME,
         title: 'Test Event',
         description: null,
         status: EventStatus.VOTING,
         votingDeadline: new Date(),
         confirmedTimeSlots: [],
-        confirmedTimeRanges: [],
+        confirmedSelections: [],
         host: { displayName: 'Host' },
         votingStats: { totalExpected: 5, totalVoted: 2, votingPercentage: 40 },
       };
@@ -329,12 +335,13 @@ describe('FlexMessageService', () => {
           testModule.get<FlexMessageService>(FlexMessageService);
         const event: EventInfo = {
           id: 'event-1',
+          type: EventType.ONE_TIME,
           title: 'Test Event',
           description: null,
           status: EventStatus.VOTING,
           votingDeadline: new Date(),
           confirmedTimeSlots: [],
-          confirmedTimeRanges: [],
+          confirmedSelections: [],
           host: { displayName: 'Host' },
         };
 

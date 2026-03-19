@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
@@ -25,6 +26,7 @@ export function VotingDeadlineSection() {
     ValidationError.DeadlineAfterStart,
   );
   const hasDeadlineInPastError = errors.has(ValidationError.DeadlineInPast);
+  const isRecurring = formData.eventType === "RECURRING";
 
   const today = getToday();
 
@@ -44,12 +46,32 @@ export function VotingDeadlineSection() {
             <h2 className="text-base font-semibold text-foreground mb-1">
               {t("createEvent.votingDeadline.title")}
             </h2>
-            <p className="text-xs text-muted-foreground">
-              {t("createEvent.votingDeadline.description")}
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground">
+                {t("createEvent.votingDeadline.description")}
+              </p>
+              {isRecurring && formData.votingDeadline && (
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0"
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      votingDeadline: null,
+                      votingDeadlineManuallySet: false,
+                      recurringVotingDeadline: null,
+                      recurringVotingDeadlineManuallySet: false,
+                    }))
+                  }
+                >
+                  {t("createEvent.votingDeadline.clear")}
+                </Button>
+              )}
+            </div>
           </div>
 
-          {/* Deadline Date & Time */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label>{t("createEvent.votingDeadline.date")}</Label>
@@ -58,7 +80,9 @@ export function VotingDeadlineSection() {
                 onChange={handleVotingDeadlineDateChange}
                 placeholder={t("createEvent.configuration.selectDate")}
                 minDate={today}
-                maxDate={formData.startDate || undefined}
+                maxDate={
+                  isRecurring ? undefined : (formData.startDate ?? undefined)
+                }
               />
             </div>
 
@@ -73,7 +97,7 @@ export function VotingDeadlineSection() {
           </div>
 
           {/* Auto-sync indicator */}
-          {!formData.votingDeadlineManuallySet && (
+          {!isRecurring && !formData.votingDeadlineManuallySet && (
             <p className="text-xs text-primary flex items-center gap-1.5">
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
               {t("createEvent.votingDeadline.autoSync")}
@@ -89,7 +113,7 @@ export function VotingDeadlineSection() {
               </p>
             </div>
           )}
-          {hasDeadlineAfterStartError && (
+          {hasDeadlineAfterStartError && !isRecurring && (
             <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
               <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
               <p className="text-sm text-destructive">

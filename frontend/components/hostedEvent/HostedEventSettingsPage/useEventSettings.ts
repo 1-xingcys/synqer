@@ -59,16 +59,24 @@ export function useEventSettings(eventId: string) {
       return null;
     }
 
-    // 找到最早的時段
-    const sorted = [...eventData.slots].sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
+    const dateSlots = eventData.slots.filter(
+      (slot) => slot.axisType === "DATE" && slot.axisDate,
+    );
+
+    if (dateSlots.length === 0) {
+      return null;
+    }
+
+    // 找到最早的日期型時段
+    const sorted = [...dateSlots].sort((a, b) => {
+      const dateA = new Date(a.axisDate!).getTime();
+      const dateB = new Date(b.axisDate!).getTime();
       if (dateA !== dateB) return dateA - dateB;
       return a.startMinute - b.startMinute;
     });
 
     const earliest = sorted[0];
-    const date = new Date(earliest.date);
+    const date = new Date(earliest.axisDate!);
     const hours = Math.floor(earliest.startMinute / 60);
     const mins = earliest.startMinute % 60;
     const time = `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;

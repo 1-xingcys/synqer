@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
+import { EventType, Weekday } from '@prisma/client';
 import { EventCreationService } from './event-creation.service';
 import { EventRepository } from '../repositories/event.repository';
 import { TimeSlotService } from '../../shared/services/time-slot.service';
@@ -11,11 +12,13 @@ describe('EventCreationService', () => {
 
   const mockEventRepository = {
     createWithSlotsAndParticipants: jest.fn(),
+    createRecurringWithSlotsAndParticipants: jest.fn(),
   };
 
   const mockTimeSlotService = {
     parseTimeToMinutes: jest.fn(),
     generateTimeSlots: jest.fn(),
+    generateRecurringTimeSlots: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -61,6 +64,13 @@ describe('EventCreationService', () => {
         return hours * 60 + minutes;
       });
       mockTimeSlotService.generateTimeSlots.mockReturnValue(mockSlots);
+      mockTimeSlotService.generateRecurringTimeSlots.mockReturnValue([
+        {
+          weekday: Weekday.MONDAY,
+          startMinute: 540,
+          endMinute: 555,
+        },
+      ]);
     });
 
     it('should create an event successfully', async () => {
@@ -232,6 +242,68 @@ describe('EventCreationService', () => {
       expect(result).toEqual({
         eventId: 'event-123',
       });
+    });
+
+    it('should create a recurring event successfully', async () => {
+      const recurringDto = {
+        type: EventType.RECURRING,
+        title: 'Recurring Event',
+        description: 'Recurring Description',
+        weekdays: [Weekday.FRIDAY, Weekday.MONDAY, Weekday.FRIDAY],
+        startTime: '09:00',
+        endTime: '18:00',
+        slotDurationMin: 15,
+        timeZone: 'Asia/Taipei',
+        votingDeadline: '2024-12-24T08:00:00Z',
+      };
+      const mockResult = {
+        event: { id: 'event-recurring-123', title: 'Recurring Event' },
+        creatorLineUserId: undefined,
+      };
+
+      mockEventRepository.createRecurringWithSlotsAndParticipants.mockResolvedValue(
+        mockResult,
+      );
+
+      const result = await service.create(recurringDto, 'user-123');
+
+      expect(
+        timeSlotService.generateRecurringTimeSlots,
+      ).toHaveBeenCalledWith(
+        [Weekday.MONDAY, Weekday.FRIDAY],
+        540,
+        1080,
+        15,
+      );
+      expect(
+        eventRepository.createRecurringWithSlotsAndParticipants,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: EventType.RECURRING,
+          weekdays: [Weekday.MONDAY, Weekday.FRIDAY],
+        }),
+        expect.any(Array),
+        expect.any(Array),
+        'user-123',
+      );
+      expect(result).toEqual({
+        eventId: 'event-recurring-123',
+      });
+    });
+
+    it('should reject recurring events without weekdays', async () => {
+      const recurringDto = {
+        type: EventType.RECURRING,
+        title: 'Recurring Event',
+        startTime: '09:00',
+        endTime: '18:00',
+      };
+
+      await expect(service.create(recurringDto)).rejects.toThrow(
+        new BadRequestException(
+          'Recurring events must include at least one weekday',
+        ),
+      );
     });
   });
 });

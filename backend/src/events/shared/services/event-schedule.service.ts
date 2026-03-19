@@ -19,11 +19,6 @@ export type RecurringScheduleRecord = {
 
 export type EventScheduleSource = {
   type: EventType;
-  startDate?: Date | null;
-  endDate?: Date | null;
-  startMinuteOfDay?: number | null;
-  endMinuteOfDay?: number | null;
-  slotDurationMin?: number | null;
   oneTimeSchedule?: OneTimeScheduleRecord | null;
   recurringSchedule?: RecurringScheduleRecord | null;
 };
@@ -41,17 +36,17 @@ export class EventScheduleService {
       };
     }
 
+    if (!event.oneTimeSchedule) {
+      throw new Error('One-time event is missing oneTimeSchedule');
+    }
+
     return {
       type: EventType.ONE_TIME,
-      startDate:
-        event.oneTimeSchedule?.startDate ?? event.startDate ?? undefined,
-      endDate: event.oneTimeSchedule?.endDate ?? event.endDate ?? undefined,
-      startMinuteOfDay:
-        event.oneTimeSchedule?.startMinuteOfDay ?? event.startMinuteOfDay ?? 0,
-      endMinuteOfDay:
-        event.oneTimeSchedule?.endMinuteOfDay ?? event.endMinuteOfDay ?? 0,
-      slotDurationMin:
-        event.oneTimeSchedule?.slotDurationMin ?? event.slotDurationMin ?? 15,
+      startDate: event.oneTimeSchedule.startDate,
+      endDate: event.oneTimeSchedule.endDate,
+      startMinuteOfDay: event.oneTimeSchedule.startMinuteOfDay,
+      endMinuteOfDay: event.oneTimeSchedule.endMinuteOfDay,
+      slotDurationMin: event.oneTimeSchedule.slotDurationMin,
     };
   }
 

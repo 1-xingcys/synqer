@@ -1358,9 +1358,89 @@
           "RECURRING"
         ]
       },
-      "ConfirmedTimeRangeDto": {
+      "Weekday": {
+        "type": "string",
+        "enum": [
+          "MONDAY",
+          "TUESDAY",
+          "WEDNESDAY",
+          "THURSDAY",
+          "FRIDAY",
+          "SATURDAY",
+          "SUNDAY"
+        ]
+      },
+      "EventScheduleDto": {
         "type": "object",
         "properties": {
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Weekday"
+            }
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "endDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "startMinuteOfDay": {
+            "type": "number"
+          },
+          "endMinuteOfDay": {
+            "type": "number"
+          },
+          "slotDurationMin": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "kind",
+          "startMinuteOfDay",
+          "endMinuteOfDay",
+          "slotDurationMin"
+        ]
+      },
+      "ConfirmedSelectionKind": {
+        "type": "string",
+        "enum": [
+          "ONE_TIME_RANGE",
+          "WEEKDAY_RANGE"
+        ]
+      },
+      "ConfirmedSelectionDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConfirmedSelectionKind"
+              }
+            ]
+          },
+          "weekday": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Weekday"
+              }
+            ]
+          },
+          "slotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "startTime": {
             "format": "date-time",
             "type": "string"
@@ -1369,16 +1449,15 @@
             "format": "date-time",
             "type": "string"
           },
-          "slotIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "startMinute": {
+            "type": "number"
+          },
+          "endMinute": {
+            "type": "number"
           }
         },
         "required": [
-          "startTime",
-          "endTime",
+          "kind",
           "slotIds"
         ]
       },
@@ -1422,13 +1501,8 @@
             "type": "string",
             "nullable": true
           },
-          "startDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "endDate": {
-            "format": "date-time",
-            "type": "string"
+          "schedule": {
+            "$ref": "#/components/schemas/EventScheduleDto"
           },
           "createdAt": {
             "format": "date-time",
@@ -1445,10 +1519,10 @@
               "type": "string"
             }
           },
-          "confirmedTimeRanges": {
+          "confirmedSelections": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
+              "$ref": "#/components/schemas/ConfirmedSelectionDto"
             }
           },
           "status": {
@@ -1475,12 +1549,11 @@
           "id",
           "title",
           "description",
-          "startDate",
-          "endDate",
+          "schedule",
           "createdAt",
           "votingDeadline",
           "confirmedSlotIds",
-          "confirmedTimeRanges",
+          "confirmedSelections",
           "status",
           "capabilities",
           "expectedParticipantCount",
@@ -1529,13 +1602,8 @@
             "type": "string",
             "nullable": true
           },
-          "startDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "endDate": {
-            "format": "date-time",
-            "type": "string"
+          "schedule": {
+            "$ref": "#/components/schemas/EventScheduleDto"
           },
           "createdAt": {
             "format": "date-time",
@@ -1552,10 +1620,10 @@
               "type": "string"
             }
           },
-          "confirmedTimeRanges": {
+          "confirmedSelections": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
+              "$ref": "#/components/schemas/ConfirmedSelectionDto"
             }
           },
           "status": {
@@ -1593,12 +1661,11 @@
           "id",
           "title",
           "description",
-          "startDate",
-          "endDate",
+          "schedule",
           "createdAt",
           "votingDeadline",
           "confirmedSlotIds",
-          "confirmedTimeRanges",
+          "confirmedSelections",
           "status",
           "capabilities",
           "hasVoted",
@@ -1610,6 +1677,21 @@
       "CreateEventDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
+          "weekdays": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 7,
+            "items": {
+              "$ref": "#/components/schemas/Weekday"
+            }
+          },
           "title": {
             "type": "string",
             "maxLength": 50
@@ -1654,8 +1736,6 @@
           }
         },
         "required": [
-          "startDate",
-          "endDate",
           "startTime",
           "endTime"
         ]
@@ -1692,22 +1772,8 @@
             "type": "string",
             "nullable": true
           },
-          "startDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "endDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "startMinuteOfDay": {
-            "type": "number"
-          },
-          "endMinuteOfDay": {
-            "type": "number"
-          },
-          "slotDurationMin": {
-            "type": "number"
+          "schedule": {
+            "$ref": "#/components/schemas/EventScheduleDto"
           },
           "timeZone": {
             "type": "string"
@@ -1731,10 +1797,10 @@
               "type": "string"
             }
           },
-          "confirmedTimeRanges": {
+          "confirmedSelections": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
+              "$ref": "#/components/schemas/ConfirmedSelectionDto"
             }
           },
           "status": {
@@ -1755,17 +1821,13 @@
           "id",
           "title",
           "description",
-          "startDate",
-          "endDate",
-          "startMinuteOfDay",
-          "endMinuteOfDay",
-          "slotDurationMin",
+          "schedule",
           "timeZone",
           "lineGroupId",
           "ownerId",
           "votingDeadline",
           "confirmedSlotIds",
-          "confirmedTimeRanges",
+          "confirmedSelections",
           "status",
           "capabilities"
         ]
@@ -1790,18 +1852,41 @@
           "groupName"
         ]
       },
+      "EventSlotAxisType": {
+        "type": "string",
+        "enum": [
+          "DATE",
+          "WEEKDAY"
+        ]
+      },
       "EventDetailSlotDto": {
         "type": "object",
         "properties": {
+          "axisType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventSlotAxisType"
+              }
+            ]
+          },
+          "axisWeekday": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Weekday"
+              }
+            ]
+          },
           "id": {
             "type": "string"
           },
           "eventId": {
             "type": "string"
           },
-          "date": {
+          "axisDate": {
             "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "startMinute": {
             "type": "number"
@@ -1814,9 +1899,10 @@
           }
         },
         "required": [
+          "axisType",
           "id",
           "eventId",
-          "date",
+          "axisDate",
           "startMinute",
           "endMinute",
           "index"
@@ -2049,23 +2135,12 @@
             "type": "string",
             "nullable": true
           },
-          "startDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "endDate": {
-            "format": "date-time",
-            "type": "string"
+          "schedule": {
+            "$ref": "#/components/schemas/EventScheduleDto"
           },
           "createdAt": {
             "format": "date-time",
             "type": "string"
-          },
-          "startMinuteOfDay": {
-            "type": "number"
-          },
-          "endMinuteOfDay": {
-            "type": "number"
           },
           "votingDeadline": {
             "format": "date-time",
@@ -2078,10 +2153,10 @@
               "type": "string"
             }
           },
-          "confirmedTimeRanges": {
+          "confirmedSelections": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ConfirmedTimeRangeDto"
+              "$ref": "#/components/schemas/ConfirmedSelectionDto"
             }
           },
           "status": {
@@ -2114,12 +2189,11 @@
           "id",
           "title",
           "description",
-          "startDate",
-          "endDate",
+          "schedule",
           "createdAt",
           "votingDeadline",
           "confirmedSlotIds",
-          "confirmedTimeRanges",
+          "confirmedSelections",
           "status",
           "capabilities",
           "expectedParticipantCount"
@@ -2305,21 +2379,15 @@
             "type": "string",
             "nullable": true
           },
-          "startDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "endDate": {
-            "format": "date-time",
-            "type": "string"
+          "schedule": {
+            "$ref": "#/components/schemas/EventScheduleDto"
           }
         },
         "required": [
           "id",
           "title",
           "description",
-          "startDate",
-          "endDate"
+          "schedule"
         ]
       },
       "RemoveEventResponseDto": {

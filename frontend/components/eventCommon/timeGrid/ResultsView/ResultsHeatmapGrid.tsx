@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useLocale } from "next-intl";
 import { ResultsAvailabilityMode, SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
@@ -14,6 +14,7 @@ import {
 } from "@/components/eventCommon/timeGrid/ui";
 import { formatMinutesToTime } from "@/lib/utils";
 import { Z_INDEX } from "@/lib/zIndex";
+import { formatAxisKeyLabel } from "@/lib/event-presentation";
 import {
   useResponsiveGrid,
   usePaginatedDates,
@@ -90,6 +91,10 @@ export function ResultsHeatmapGrid({
   const { slotsByDate, dates, columns, timeSlots } = useSlotGridModel({
     slots,
   });
+  const columnsByKey = useMemo(
+    () => new Map(columns.map((column) => [column.key, column])),
+    [columns],
+  );
 
   // Merged rows for granularity (using shared hook)
   const { mergedTimeRows } = useMergedTimeRowsModel({ timeSlots, granularity });
@@ -202,16 +207,15 @@ export function ResultsHeatmapGrid({
 
   // Format date for modal
   const formatDateForModal = useCallback(
-    (dateStr: string) => {
-      const date = new Date(dateStr);
-      const dateLocale = locale === "zh-TW" ? "zh-TW" : "en-US";
-      return date.toLocaleDateString(dateLocale, {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      });
+    (axisKey: string) => {
+      const column = columnsByKey.get(axisKey);
+      return formatAxisKeyLabel(
+        axisKey,
+        column?.kind === "weekday" ? "WEEKDAY" : "DATE",
+        locale,
+      );
     },
-    [locale],
+    [columnsByKey, locale],
   );
 
   // Show modal with selection data
@@ -240,6 +244,10 @@ export function ResultsHeatmapGrid({
         rangeInfo: {
           startDate: range.startDate,
           endDate: range.endDate,
+          axisType:
+            columnsByKey.get(range.startDate)?.kind === "weekday"
+              ? "WEEKDAY"
+              : "DATE",
           startTime: range.startTime,
           endTime: range.endTime,
           slotIds,
@@ -251,6 +259,7 @@ export function ResultsHeatmapGrid({
       getUnavailableParticipantsForRange,
       getSlotIdsFromRange,
       formatDateForModal,
+      columnsByKey,
     ],
   );
 

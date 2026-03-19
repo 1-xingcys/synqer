@@ -75,9 +75,7 @@ describe('LineBotService', () => {
   };
 
   const mockConfirmedTimeService = {
-    mergeToTimeRanges: jest.fn().mockReturnValue([]),
-    formatTimeRange: jest.fn(),
-    formatTimeRangesSummary: jest.fn(),
+    mergeToSelections: jest.fn().mockReturnValue([]),
   };
 
   beforeEach(async () => {

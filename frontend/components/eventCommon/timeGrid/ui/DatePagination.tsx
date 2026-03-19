@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState, useRef, useEffect } from "react";
-import { format } from "date-fns";
+import { useLocale } from "next-intl";
 import { GridAxisColumn } from "../types";
+import { formatAxisPageRange } from "../utils";
 
 interface DatePaginationProps {
   dates?: string[];
@@ -19,25 +20,13 @@ export function DatePagination({
   datesPerPage,
   onPageChange,
 }: DatePaginationProps) {
+  const locale = useLocale();
   const axisColumns =
     columns ??
     dates.map((dateKey) => ({ key: dateKey, kind: "date", rawValue: dateKey }));
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const totalPages = Math.ceil(axisColumns.length / datesPerPage);
-
-  // Get date range for current page
-  const { startDate, endDate } = useMemo(() => {
-    const startIdx = currentPage * datesPerPage;
-    const endIdx = Math.min(
-      startIdx + datesPerPage - 1,
-      axisColumns.length - 1,
-    );
-    return {
-      startDate: axisColumns[startIdx]?.rawValue,
-      endDate: axisColumns[endIdx]?.rawValue,
-    };
-  }, [axisColumns, currentPage, datesPerPage]);
 
   // Get all page ranges for dropdown
   const pageRanges = useMemo(() => {
@@ -74,12 +63,6 @@ export function DatePagination({
   }, [isDropdownOpen]);
 
   if (totalPages <= 0) return null;
-
-  // Format: YYYY/MM/DD
-  const formatPageDate = (dateStr?: string) => {
-    if (!dateStr) return "";
-    return format(new Date(dateStr), "yyyy/M/d");
-  };
 
   const handlePageSelect = (pageIdx: number) => {
     onPageChange(pageIdx);
@@ -122,7 +105,16 @@ export function DatePagination({
             }`}
           >
             <span className="font-medium">
-              {formatPageDate(startDate)} ~ {formatPageDate(endDate)}
+              {formatAxisPageRange(
+                axisColumns[currentPage * datesPerPage],
+                axisColumns[
+                  Math.min(
+                    currentPage * datesPerPage + datesPerPage - 1,
+                    axisColumns.length - 1,
+                  )
+                ],
+                locale,
+              )}
             </span>
             <svg
               className={`w-3 h-3 text-zinc-400 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`}
@@ -142,38 +134,45 @@ export function DatePagination({
           {/* Dropdown menu */}
           {isDropdownOpen && (
             <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 z-50 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-700 py-0.5 max-h-[240px] overflow-y-auto">
-              {pageRanges.map(
-                ({ pageIdx, startDate: pStart, endDate: pEnd }) => (
-                  <button
-                    key={pageIdx}
-                    onClick={() => handlePageSelect(pageIdx)}
-                    className={`w-full px-3 py-1.5 text-xs sm:text-sm text-left transition-colors flex items-center justify-between gap-2 whitespace-nowrap ${
-                      pageIdx === currentPage
-                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                        : "hover:bg-zinc-50 dark:hover:bg-zinc-700/50 text-zinc-600 dark:text-zinc-300"
-                    }`}
-                  >
-                    <span>
-                      {formatPageDate(pStart)} ~ {formatPageDate(pEnd)}
-                    </span>
-                    {pageIdx === currentPage && (
-                      <svg
-                        className="w-3.5 h-3.5 text-blue-500 shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
+              {pageRanges.map(({ pageIdx }) => (
+                <button
+                  key={pageIdx}
+                  onClick={() => handlePageSelect(pageIdx)}
+                  className={`w-full px-3 py-1.5 text-xs sm:text-sm text-left transition-colors flex items-center justify-between gap-2 whitespace-nowrap ${
+                    pageIdx === currentPage
+                      ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                      : "hover:bg-zinc-50 dark:hover:bg-zinc-700/50 text-zinc-600 dark:text-zinc-300"
+                  }`}
+                >
+                  <span>
+                    {formatAxisPageRange(
+                      axisColumns[pageIdx * datesPerPage],
+                      axisColumns[
+                        Math.min(
+                          pageIdx * datesPerPage + datesPerPage - 1,
+                          axisColumns.length - 1,
+                        )
+                      ],
+                      locale,
                     )}
-                  </button>
-                ),
-              )}
+                  </span>
+                  {pageIdx === currentPage && (
+                    <svg
+                      className="w-3.5 h-3.5 text-blue-500 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  )}
+                </button>
+              ))}
             </div>
           )}
         </div>

@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventType } from '@prisma/client';
+import { EventType, Weekday } from '@prisma/client';
 import { EventMapperService } from './event-mapper.service';
 import { EventStatusService } from './event-status.service';
 import { ConfirmedTimeService } from './confirmed-time.service';
@@ -17,7 +17,7 @@ describe('EventMapperService', () => {
   };
 
   const mockConfirmedTimeService = {
-    mergeToTimeRanges: jest.fn(),
+    mergeToSelections: jest.fn(),
   };
 
   const mockEventCapabilitiesService = {
@@ -44,6 +44,7 @@ describe('EventMapperService', () => {
     eventCapabilitiesService = module.get(EventCapabilitiesService);
 
     jest.clearAllMocks();
+    mockConfirmedTimeService.mergeToSelections.mockReturnValue([]);
   });
 
   it('should be defined', () => {
@@ -156,54 +157,27 @@ describe('EventMapperService', () => {
     });
   });
 
-  describe('mapConfirmedSlotsForStatus', () => {
-    it('should map confirmed slots for status calculation', () => {
-      const confirmedTimeSlots = [
-        {
-          slotId: 'slot-1',
-          slot: {
-            id: 'slot-1',
-            date: new Date('2024-12-25'),
-            startMinute: 540,
-            endMinute: 600,
-          },
-        },
-      ];
-
-      const result = service.mapConfirmedSlotsForStatus(confirmedTimeSlots);
-
-      expect(result).toEqual([
-        {
-          slotId: 'slot-1',
-          date: new Date('2024-12-25'),
-          startMinute: 540,
-          endMinute: 600,
-        },
-      ]);
-    });
-
-    it('should return undefined for empty or undefined input', () => {
-      expect(service.mapConfirmedSlotsForStatus([])).toBeUndefined();
-      expect(service.mapConfirmedSlotsForStatus(undefined)).toBeUndefined();
-    });
-  });
-
   describe('mapEventToList', () => {
     const mockEvent = {
       id: 'event-123',
       type: EventType.ONE_TIME,
       title: 'Test Event',
       description: 'Description',
-      startDate: new Date('2024-12-25'),
-      endDate: new Date('2024-12-26'),
       createdAt: new Date('2024-12-01'),
+      oneTimeSchedule: {
+        startDate: new Date('2024-12-25'),
+        endDate: new Date('2024-12-26'),
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 1080,
+        slotDurationMin: 15,
+      },
+      recurringSchedule: null,
       votingDeadline: null,
       expectedParticipants: [{ id: 'ep-1' }],
       confirmedTimeSlots: [],
     };
 
     it('should map event to list format with status', () => {
-      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
       mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
       mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
         supportsCompletion: true,
@@ -218,12 +192,19 @@ describe('EventMapperService', () => {
         type: EventType.ONE_TIME,
         title: 'Test Event',
         description: 'Description',
-        startDate: new Date('2024-12-25'),
-        endDate: new Date('2024-12-26'),
+        schedule: {
+          kind: EventType.ONE_TIME,
+          startDate: new Date('2024-12-25'),
+          endDate: new Date('2024-12-26'),
+          weekdays: undefined,
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 1080,
+          slotDurationMin: 15,
+        },
         createdAt: new Date('2024-12-01'),
         votingDeadline: null,
         confirmedSlotIds: [],
-        confirmedTimeRanges: [],
+        confirmedSelections: [],
         status: 'VOTING',
         capabilities: {
           supportsCompletion: true,
@@ -234,7 +215,7 @@ describe('EventMapperService', () => {
       expect(eventStatusService.computeEventStatus).toHaveBeenCalledWith({
         eventType: EventType.ONE_TIME,
         votingDeadline: null,
-        confirmedTimeSlots: undefined,
+        confirmedTimeSlots: [],
       });
     });
 
@@ -244,13 +225,24 @@ describe('EventMapperService', () => {
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
-            slot: { id: 'slot-1', date: new Date(), startMinute: 540, endMinute: 600 },
+            slot: {
+              id: 'slot-1',
+              axisType: 'DATE',
+              axisDate: new Date(),
+              startMinute: 540,
+              endMinute: 600,
+            },
           },
         ],
       };
 
-      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([
-        { startTime: new Date(), endTime: new Date(), slotIds: ['slot-1'] },
+      mockConfirmedTimeService.mergeToSelections.mockReturnValue([
+        {
+          kind: 'ONE_TIME_RANGE',
+          startTime: new Date(),
+          endTime: new Date(),
+          slotIds: ['slot-1'],
+        },
       ]);
       mockEventStatusService.computeEventStatus.mockReturnValue('CONFIRMED');
       mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
@@ -264,6 +256,45 @@ describe('EventMapperService', () => {
       expect(result.confirmedSlotIds).toEqual(['slot-1']);
       expect(result.status).toBe('CONFIRMED');
     });
+
+    it('should expose recurring schedule metadata', () => {
+      const recurringEvent = {
+        id: 'event-recurring-123',
+        type: EventType.RECURRING,
+        title: 'Recurring Event',
+        description: 'Recurring Description',
+        createdAt: new Date('2024-12-01'),
+        votingDeadline: null,
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 1080,
+        slotDurationMin: 15,
+        recurringSchedule: {
+          weekdays: [Weekday.MONDAY, Weekday.WEDNESDAY],
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 1080,
+          slotDurationMin: 15,
+        },
+        oneTimeSchedule: null,
+        confirmedTimeSlots: [],
+      };
+
+      mockConfirmedTimeService.mergeToSelections.mockReturnValue([]);
+      mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
+      mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
+        supportsCompletion: false,
+        supportsCalendarConflict: false,
+        supportsAddToCalendar: false,
+      });
+
+      const result = service.mapEventToList(recurringEvent);
+
+      expect(result.schedule.kind).toEqual(EventType.RECURRING);
+      expect(result.schedule.weekdays).toEqual([
+        Weekday.MONDAY,
+        Weekday.WEDNESDAY,
+      ]);
+      expect(result.confirmedSelections).toEqual([]);
+    });
   });
 
   describe('mapEventToDetail', () => {
@@ -272,11 +303,15 @@ describe('EventMapperService', () => {
       type: EventType.ONE_TIME,
       title: 'Test Event',
       description: 'Description',
-      startDate: new Date('2024-12-25'),
-      endDate: new Date('2024-12-26'),
-      startMinuteOfDay: 540,
-      endMinuteOfDay: 1080,
-      slotDurationMin: 15,
+      createdAt: new Date('2024-12-01'),
+      oneTimeSchedule: {
+        startDate: new Date('2024-12-25'),
+        endDate: new Date('2024-12-26'),
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 1080,
+        slotDurationMin: 15,
+      },
+      recurringSchedule: null,
       timeZone: 'Asia/Taipei',
       lineGroupId: 'group-1',
       ownerId: 'user-123',
@@ -285,7 +320,6 @@ describe('EventMapperService', () => {
     };
 
     it('should map event to detail format', () => {
-      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([]);
       mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
       mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
         supportsCompletion: true,
@@ -300,17 +334,21 @@ describe('EventMapperService', () => {
         type: EventType.ONE_TIME,
         title: 'Test Event',
         description: 'Description',
-        startDate: new Date('2024-12-25'),
-        endDate: new Date('2024-12-26'),
-        startMinuteOfDay: 540,
-        endMinuteOfDay: 1080,
-        slotDurationMin: 15,
+        schedule: {
+          kind: EventType.ONE_TIME,
+          startDate: new Date('2024-12-25'),
+          endDate: new Date('2024-12-26'),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 1080,
+          slotDurationMin: 15,
+          weekdays: undefined,
+        },
         timeZone: 'Asia/Taipei',
         lineGroupId: 'group-1',
         ownerId: 'user-123',
         votingDeadline: null,
         confirmedSlotIds: [],
-        confirmedTimeRanges: [],
+        confirmedSelections: [],
         status: 'VOTING',
         capabilities: {
           supportsCompletion: true,
@@ -326,7 +364,13 @@ describe('EventMapperService', () => {
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
-            slot: { id: 'slot-1', date: new Date(), startMinute: 540, endMinute: 600 },
+            slot: {
+              id: 'slot-1',
+              axisType: 'DATE',
+              axisDate: new Date(),
+              startMinute: 540,
+              endMinute: 600,
+            },
           },
         ],
       };
@@ -336,13 +380,106 @@ describe('EventMapperService', () => {
         slotIds: ['slot-1'],
       };
 
-      mockConfirmedTimeService.mergeToTimeRanges.mockReturnValue([mockTimeRange]);
+      mockConfirmedTimeService.mergeToSelections.mockReturnValue([
+        {
+          kind: 'ONE_TIME_RANGE',
+          startTime: mockTimeRange.startTime,
+          endTime: mockTimeRange.endTime,
+          slotIds: ['slot-1'],
+        },
+      ]);
       mockEventStatusService.computeEventStatus.mockReturnValue('CONFIRMED');
 
       const result = service.mapEventToDetail(eventWithConfirmed);
 
       expect(result.confirmedSlotIds).toEqual(['slot-1']);
-      expect(result.confirmedTimeRanges).toEqual([mockTimeRange]);
+      expect(result.confirmedSelections).toEqual([
+        {
+          kind: 'ONE_TIME_RANGE',
+          startTime: mockTimeRange.startTime,
+          endTime: mockTimeRange.endTime,
+          slotIds: ['slot-1'],
+        },
+      ]);
+    });
+
+    it('should map recurring event detail with weekdays and recurring capabilities', () => {
+      const recurringEvent = {
+        id: 'event-recurring-123',
+        type: EventType.RECURRING,
+        title: 'Recurring Event',
+        description: 'Recurring Description',
+        createdAt: new Date('2024-12-01'),
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 1080,
+        slotDurationMin: 15,
+        timeZone: 'Asia/Taipei',
+        lineGroupId: null,
+        ownerId: 'user-123',
+        votingDeadline: null,
+        recurringSchedule: {
+          weekdays: [Weekday.TUESDAY, Weekday.THURSDAY],
+          startMinuteOfDay: 600,
+          endMinuteOfDay: 720,
+          slotDurationMin: 30,
+        },
+        oneTimeSchedule: null,
+        confirmedTimeSlots: [],
+      };
+
+      mockConfirmedTimeService.mergeToSelections.mockReturnValue([
+        {
+          kind: 'WEEKDAY_RANGE',
+          weekday: Weekday.TUESDAY,
+          startMinute: 600,
+          endMinute: 720,
+          slotIds: ['slot-1', 'slot-2'],
+        },
+      ]);
+      mockEventStatusService.computeEventStatus.mockReturnValue('VOTING');
+      mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
+        supportsCompletion: false,
+        supportsCalendarConflict: false,
+        supportsAddToCalendar: false,
+      });
+
+      const result = service.mapEventToDetail(recurringEvent);
+
+      expect(result).toEqual({
+        id: 'event-recurring-123',
+        type: EventType.RECURRING,
+        title: 'Recurring Event',
+        description: 'Recurring Description',
+        schedule: {
+          kind: EventType.RECURRING,
+          weekdays: [Weekday.TUESDAY, Weekday.THURSDAY],
+          startMinuteOfDay: 600,
+          endMinuteOfDay: 720,
+          slotDurationMin: 30,
+          startDate: undefined,
+          endDate: undefined,
+        },
+        timeZone: 'Asia/Taipei',
+        lineGroupId: null,
+        ownerId: 'user-123',
+        votingDeadline: null,
+        confirmedSlotIds: [],
+        confirmedSelections: [
+          {
+            kind: 'WEEKDAY_RANGE',
+            weekday: Weekday.TUESDAY,
+            startMinute: 600,
+            endMinute: 720,
+            slotIds: ['slot-1', 'slot-2'],
+          },
+        ],
+        status: 'VOTING',
+        capabilities: {
+          supportsCompletion: false,
+          supportsCalendarConflict: false,
+          supportsAddToCalendar: false,
+        },
+      });
     });
   });
 });

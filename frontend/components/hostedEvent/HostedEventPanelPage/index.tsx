@@ -85,6 +85,7 @@ export default function HostedEventPanelPage() {
   const isCompleted = event.status === EventStatus.COMPLETED;
   const showResultsView = isVotingPhase || isVotingEnded || isConfirmed;
   const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
+  const hasDisplayableConfirmedTime = event.confirmedSelections.length > 0;
 
   return (
     <div className="space-y-3 sm:space-y-6">
@@ -160,31 +161,30 @@ export default function HostedEventPanelPage() {
             </div>
 
             {/* Confirmed Time Display */}
-            {event.confirmedTimeRanges &&
-              event.confirmedTimeRanges.length > 0 && (
-                <div className="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    {t("joined.confirmed.eventTime")}
-                  </h4>
-                  <ConfirmedTimeDisplay
-                    timeRanges={event.confirmedTimeRanges}
-                    className="text-zinc-600 dark:text-zinc-400"
-                  />
-                </div>
-              )}
+            {hasDisplayableConfirmedTime && (
+              <div className="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2 flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  {t("joined.confirmed.eventTime")}
+                </h4>
+                <ConfirmedTimeDisplay
+                  selections={event.confirmedSelections}
+                  className="text-zinc-600 dark:text-zinc-400"
+                />
+              </div>
+            )}
           </div>
         </div>
       )}

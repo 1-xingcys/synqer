@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { EventStatus } from '../../shared/services/event-status.service';
-import { EventType } from '@prisma/client';
+import { EventSlotAxisType, EventType, Weekday } from '@prisma/client';
 import {
-  ConfirmedTimeRangeDto,
+  ConfirmedSelectionDto,
   EventCapabilitiesDto,
+  EventScheduleDto,
 } from './hosted-event-list-item.dto';
 
 export class EventDetailEventDto {
@@ -12,17 +13,13 @@ export class EventDetailEventDto {
   type!: EventType;
   title!: string | null;
   description!: string | null;
-  startDate!: Date;
-  endDate!: Date;
-  startMinuteOfDay!: number;
-  endMinuteOfDay!: number;
-  slotDurationMin!: number;
+  schedule!: EventScheduleDto;
   timeZone!: string;
   lineGroupId!: string | null;
   ownerId!: string | null;
   votingDeadline!: Date | null;
   confirmedSlotIds!: string[];
-  confirmedTimeRanges!: ConfirmedTimeRangeDto[];
+  confirmedSelections!: ConfirmedSelectionDto[];
   status!: EventStatus;
   capabilities!: EventCapabilitiesDto;
 }
@@ -36,7 +33,11 @@ export class EventDetailLineGroupDto {
 export class EventDetailSlotDto {
   id!: string;
   eventId!: string;
-  date!: Date;
+  @ApiProperty({ enum: EventSlotAxisType, enumName: 'EventSlotAxisType' })
+  axisType!: EventSlotAxisType;
+  axisDate!: Date | null;
+  @ApiProperty({ enum: Weekday, enumName: 'Weekday', required: false })
+  axisWeekday!: Weekday | null;
   startMinute!: number;
   endMinute!: number;
   index!: number;

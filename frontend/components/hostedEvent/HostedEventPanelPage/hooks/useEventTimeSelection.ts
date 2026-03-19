@@ -2,11 +2,14 @@
 
 import { useMemo } from "react";
 import { SelectedTimeRange } from "../EventTimeSelector";
-import { StagedConfirmation } from "@/types/event";
+import { EventSlotAxisType, StagedConfirmation, Weekday } from "@/types/event";
+import { CANONICAL_WEEKDAY_ORDER } from "@/lib/weekdays";
 
 interface EventSlot {
   id: string;
-  date: string | Date;
+  axisType: EventSlotAxisType;
+  axisDate?: string | Date | null;
+  axisWeekday?: Weekday | null;
   startMinute: number;
   endMinute: number;
 }
@@ -25,10 +28,56 @@ interface UseEventTimeSelectionReturn {
   hasStagedChanges: boolean;
 }
 
+function warnInvalidSlot(slotId: string, reason: string) {
+  console.warn(`[eventTimeSelection] Skip invalid slot ${slotId}: ${reason}`);
+}
+
+function getSlotDateKey(slot: EventSlot): string | null {
+  if (slot.axisType === "WEEKDAY") {
+    if (!slot.axisWeekday) {
+      warnInvalidSlot(slot.id, "missing axisWeekday");
+      return null;
+    }
+
+    return slot.axisWeekday;
+  }
+
+  if (!slot.axisDate) {
+    warnInvalidSlot(slot.id, "missing axisDate");
+    return null;
+  }
+
+  return new Date(slot.axisDate).toISOString().split("T")[0];
+}
+
 function sortSlots(slots: EventSlot[]) {
   return [...slots].sort((left, right) => {
-    const leftDate = new Date(left.date).getTime();
-    const rightDate = new Date(right.date).getTime();
+    if (
+      left.axisType === "WEEKDAY" &&
+      right.axisType === "WEEKDAY" &&
+      left.axisWeekday &&
+      right.axisWeekday
+    ) {
+      const weekdayDiff =
+        CANONICAL_WEEKDAY_ORDER.indexOf(left.axisWeekday) -
+        CANONICAL_WEEKDAY_ORDER.indexOf(right.axisWeekday);
+      if (weekdayDiff !== 0) return weekdayDiff;
+
+      return left.startMinute - right.startMinute;
+    }
+
+    if (!left.axisDate || !right.axisDate) {
+      if (!left.axisDate) {
+        warnInvalidSlot(left.id, "missing axisDate during sort");
+      }
+      if (!right.axisDate) {
+        warnInvalidSlot(right.id, "missing axisDate during sort");
+      }
+      return left.startMinute - right.startMinute;
+    }
+
+    const leftDate = new Date(left.axisDate).getTime();
+    const rightDate = new Date(right.axisDate).getTime();
     if (leftDate !== rightDate) return leftDate - rightDate;
     return left.startMinute - right.startMinute;
   });
@@ -50,7 +99,8 @@ function buildRangesFromSlotIds(
   const sortedSlots = sortSlots(
     slotIds
       .map((slotId) => slotsById.get(slotId))
-      .filter((slot): slot is EventSlot => Boolean(slot)),
+      .filter((slot): slot is EventSlot => Boolean(slot))
+      .filter((slot) => getSlotDateKey(slot) !== null),
   );
 
   if (sortedSlots.length === 0) return [];
@@ -59,14 +109,18 @@ function buildRangesFromSlotIds(
   let currentRange: SelectedTimeRange | null = null;
 
   sortedSlots.forEach((slot) => {
-    const slotDate = new Date(slot.date);
-    const dateKey = slotDate.toISOString().split("T")[0];
+    const axisType = slot.axisType === "WEEKDAY" ? "WEEKDAY" : "DATE";
+    const dateKey = getSlotDateKey(slot);
+    if (!dateKey) {
+      return;
+    }
 
     if (!currentRange) {
       currentRange = {
         id: `${options.idPrefix}-${slot.id}`,
         startDate: dateKey,
         endDate: dateKey,
+        axisType,
         startTime: slot.startMinute,
         endTime: slot.endMinute,
         slotIds: [slot.id],
@@ -77,7 +131,8 @@ function buildRangesFromSlotIds(
       return;
     }
 
-    const isSameDate = currentRange.endDate === dateKey;
+    const isSameDate =
+      currentRange.axisType === axisType && currentRange.endDate === dateKey;
     const isContiguous =
       isSameDate && currentRange.endTime === slot.startMinute;
 
@@ -92,6 +147,7 @@ function buildRangesFromSlotIds(
       id: `${options.idPrefix}-${slot.id}`,
       startDate: dateKey,
       endDate: dateKey,
+      axisType,
       startTime: slot.startMinute,
       endTime: slot.endMinute,
       slotIds: [slot.id],

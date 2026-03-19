@@ -172,7 +172,9 @@ describe('ConfirmationRepository', () => {
             slotId: 'slot-1',
             slot: {
               id: 'slot-1',
-              date: new Date(),
+              axisType: 'DATE',
+              axisDate: new Date(),
+              axisWeekday: null,
               startMinute: 540,
               endMinute: 600,
             },
@@ -192,7 +194,9 @@ describe('ConfirmationRepository', () => {
               slot: {
                 select: {
                   id: true,
-                  date: true,
+                  axisType: true,
+                  axisDate: true,
+                  axisWeekday: true,
                   startMinute: true,
                   endMinute: true,
                 },

@@ -2,8 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { EventStatus } from '../../shared/services/event-status.service';
 import { EventType } from '@prisma/client';
 import {
-  ConfirmedTimeRangeDto,
+  ConfirmedSelectionDto,
   EventCapabilitiesDto,
+  EventScheduleDto,
 } from './hosted-event-list-item.dto';
 
 export class AttendedEventHostDto {
@@ -18,12 +19,11 @@ export class AttendedEventListItemDto {
   type!: EventType;
   title!: string | null;
   description!: string | null;
-  startDate!: Date;
-  endDate!: Date;
+  schedule!: EventScheduleDto;
   createdAt!: Date;
   votingDeadline!: Date | null;
   confirmedSlotIds!: string[];
-  confirmedTimeRanges!: ConfirmedTimeRangeDto[];
+  confirmedSelections!: ConfirmedSelectionDto[];
   status!: EventStatus;
   capabilities!: EventCapabilitiesDto;
   hasVoted!: boolean;

@@ -40,11 +40,9 @@ export default function JoinedEventPage() {
         <div className="lg:col-span-2 space-y-5">
           <div className="bg-white dark:bg-zinc-900 rounded-2xl py-4 px-5 sm:py-5 sm:px-6 border border-zinc-200 dark:border-zinc-800 shadow-sm">
             <EventInfoDetail
+              eventType={event.type}
               status={event.status}
-              startDate={event.startDate}
-              endDate={event.endDate}
-              startMinuteOfDay={event.startMinuteOfDay}
-              endMinuteOfDay={event.endMinuteOfDay}
+              schedule={event.schedule}
               votingDeadline={event.votingDeadline}
               currentUserHasVoted={currentUserHasVoted}
             />
@@ -72,23 +70,21 @@ export default function JoinedEventPage() {
           <ConfirmedView
             eventTitle={event.title || tJoined("untitledEvent")}
             eventDescription={event.description}
-            confirmedTimeRanges={event.confirmedTimeRanges}
+            confirmedSelections={event.confirmedSelections}
             supportsAddToCalendar={supportsAddToCalendar(event)}
           />
         )}
 
         {event.status === EventStatus.COMPLETED && (
-          <CompletedView confirmedTimeRanges={event.confirmedTimeRanges} />
+          <CompletedView confirmedSelections={event.confirmedSelections} />
         )}
       </div>
 
       <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 sm:p-6">
         <EventInfoDetail
+          eventType={event.type}
           status={event.status}
-          startDate={event.startDate}
-          endDate={event.endDate}
-          startMinuteOfDay={event.startMinuteOfDay}
-          endMinuteOfDay={event.endMinuteOfDay}
+          schedule={event.schedule}
           votingDeadline={event.votingDeadline}
           currentUserHasVoted={currentUserHasVoted}
         />

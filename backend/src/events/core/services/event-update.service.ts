@@ -56,8 +56,15 @@ export class EventUpdateService {
       id: updatedEvent.id,
       title: updatedEvent.title,
       description: updatedEvent.description,
-      startDate: schedule.startDate ?? updatedEvent.startDate,
-      endDate: schedule.endDate ?? updatedEvent.endDate,
+      schedule: {
+        kind: schedule.type,
+        startDate: schedule.startDate,
+        endDate: schedule.endDate,
+        weekdays: schedule.weekdays,
+        startMinuteOfDay: schedule.startMinuteOfDay,
+        endMinuteOfDay: schedule.endMinuteOfDay,
+        slotDurationMin: schedule.slotDurationMin,
+      },
     };
   }
 

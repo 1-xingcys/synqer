@@ -42,8 +42,10 @@ export function useFormActions({
       setLoading(true);
 
       try {
+        const isRecurring = formData.eventType === "RECURRING";
+
         // Defensive null check for required fields
-        if (!formData.startDate || !formData.endDate) {
+        if (!isRecurring && (!formData.startDate || !formData.endDate)) {
           console.error("Missing required date fields");
           return;
         }
@@ -58,10 +60,21 @@ export function useFormActions({
         }
 
         const payload: CreateEventRequest = {
+          type: formData.eventType,
           title: formData.title,
           description: formData.description || undefined,
-          startDate: formatDate(formData.startDate),
-          endDate: formatDate(formData.endDate),
+          startDate:
+            !isRecurring && formData.startDate
+              ? formatDate(formData.startDate)
+              : undefined,
+          endDate:
+            !isRecurring && formData.endDate
+              ? formatDate(formData.endDate)
+              : undefined,
+          weekdays:
+            isRecurring && formData.weekdays.length > 0
+              ? formData.weekdays
+              : undefined,
           startTime: formData.startTime,
           endTime: formData.endTime,
           slotDurationMin: 15,
