@@ -9,12 +9,10 @@ import {
 type EventFixture = EventWithCapabilities & {
   schedule?: EventSchedule;
   type?: import("@/types/event").EventType;
-  weekdays?: import("@/types/event").Weekday[];
 };
 
 const recurringEvent: EventFixture = {
   type: "RECURRING",
-  weekdays: ["MONDAY", "WEDNESDAY", "FRIDAY"],
   capabilities: {
     supportsCompletion: false,
     supportsCalendarConflict: false,

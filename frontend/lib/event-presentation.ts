@@ -3,27 +3,24 @@ import {
   EventType,
   EventWithCapabilities,
   EventSchedule,
-  Weekday,
 } from "@/types/event";
 import { formatMinutesToTime } from "@/lib/utils";
 import { formatWeekdayLabel } from "@/lib/weekdays";
 
 type EventWithDateRange = EventWithCapabilities & {
   type?: EventType;
-  weekdays?: Weekday[];
   schedule?: EventSchedule;
 };
 
 export function formatEventCandidateDaySummary(
-  event: Pick<EventWithDateRange, "type" | "weekdays" | "schedule">,
+  event: Pick<EventWithDateRange, "type" | "schedule">,
   locale: string,
 ): string {
   const recurringWeekdays =
     event.type === "RECURRING"
-      ? (event.weekdays ??
-        (event.schedule?.kind === "RECURRING"
-          ? event.schedule.weekdays
-          : undefined))
+      ? event.schedule?.kind === "RECURRING"
+        ? event.schedule.weekdays
+        : undefined
       : undefined;
 
   if (recurringWeekdays?.length) {

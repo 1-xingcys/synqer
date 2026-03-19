@@ -46,17 +46,17 @@ export interface OneTimeEventSchedule {
   kind: "ONE_TIME";
   startDate: string;
   endDate: string;
-  startMinuteOfDay?: number;
-  endMinuteOfDay?: number;
-  slotDurationMin?: number;
+  startMinuteOfDay: number;
+  endMinuteOfDay: number;
+  slotDurationMin: number;
 }
 
 export interface RecurringEventSchedule {
   kind: "RECURRING";
-  weekdays?: Weekday[];
-  startMinuteOfDay?: number;
-  endMinuteOfDay?: number;
-  slotDurationMin?: number;
+  weekdays: Weekday[];
+  startMinuteOfDay: number;
+  endMinuteOfDay: number;
+  slotDurationMin: number;
 }
 
 export type EventSchedule = OneTimeEventSchedule | RecurringEventSchedule;

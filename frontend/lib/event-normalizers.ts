@@ -20,7 +20,6 @@ type EventPublicInfoResponse =
 type EventLike = {
   type: EventType;
   capabilities: EventCapabilities;
-  weekdays?: Weekday[];
   schedule: {
     kind: EventType;
     startDate?: string;
@@ -30,9 +29,6 @@ type EventLike = {
     endMinuteOfDay?: number;
     slotDurationMin?: number;
   };
-  startMinuteOfDay?: number;
-  endMinuteOfDay?: number;
-  slotDurationMin?: number;
 };
 
 export type NormalizedEventLike<T extends EventLike> = Omit<
@@ -43,25 +39,74 @@ export type NormalizedEventLike<T extends EventLike> = Omit<
   schedule: EventSchedule;
 };
 
+function requireField<T>(
+  value: T | null | undefined,
+  fieldName: string,
+  eventType: EventType,
+): T {
+  if (value === null || value === undefined) {
+    throw new Error(
+      `Missing required schedule field "${fieldName}" for ${eventType} event`,
+    );
+  }
+
+  return value;
+}
+
 function buildSchedule(event: EventLike): EventSchedule {
   if (event.schedule.kind === "RECURRING") {
     return {
       kind: "RECURRING",
-      weekdays: event.schedule.weekdays ?? event.weekdays,
-      startMinuteOfDay:
-        event.schedule.startMinuteOfDay ?? event.startMinuteOfDay,
-      endMinuteOfDay: event.schedule.endMinuteOfDay ?? event.endMinuteOfDay,
-      slotDurationMin: event.schedule.slotDurationMin ?? event.slotDurationMin,
+      weekdays: requireField(
+        event.schedule.weekdays,
+        "weekdays",
+        event.schedule.kind,
+      ),
+      startMinuteOfDay: requireField(
+        event.schedule.startMinuteOfDay,
+        "startMinuteOfDay",
+        event.schedule.kind,
+      ),
+      endMinuteOfDay: requireField(
+        event.schedule.endMinuteOfDay,
+        "endMinuteOfDay",
+        event.schedule.kind,
+      ),
+      slotDurationMin: requireField(
+        event.schedule.slotDurationMin,
+        "slotDurationMin",
+        event.schedule.kind,
+      ),
     };
   }
 
   return {
     kind: "ONE_TIME",
-    startDate: event.schedule.startDate ?? "",
-    endDate: event.schedule.endDate ?? "",
-    startMinuteOfDay: event.schedule.startMinuteOfDay ?? event.startMinuteOfDay,
-    endMinuteOfDay: event.schedule.endMinuteOfDay ?? event.endMinuteOfDay,
-    slotDurationMin: event.schedule.slotDurationMin ?? event.slotDurationMin,
+    startDate: requireField(
+      event.schedule.startDate,
+      "startDate",
+      event.schedule.kind,
+    ),
+    endDate: requireField(
+      event.schedule.endDate,
+      "endDate",
+      event.schedule.kind,
+    ),
+    startMinuteOfDay: requireField(
+      event.schedule.startMinuteOfDay,
+      "startMinuteOfDay",
+      event.schedule.kind,
+    ),
+    endMinuteOfDay: requireField(
+      event.schedule.endMinuteOfDay,
+      "endMinuteOfDay",
+      event.schedule.kind,
+    ),
+    slotDurationMin: requireField(
+      event.schedule.slotDurationMin,
+      "slotDurationMin",
+      event.schedule.kind,
+    ),
   };
 }
 
