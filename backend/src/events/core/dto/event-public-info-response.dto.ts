@@ -21,16 +21,7 @@ export class EventPublicInfoResponseDto {
   title!: string | null;
   description!: string | null;
   schedule!: EventScheduleDto;
-  @ApiProperty({
-    enum: Weekday,
-    enumName: 'Weekday',
-    isArray: true,
-    required: false,
-  })
-  weekdays?: Weekday[];
   createdAt!: Date;
-  startMinuteOfDay?: number;
-  endMinuteOfDay?: number;
   votingDeadline!: Date | null;
   confirmedSlotIds!: string[];
   confirmedSelections!: ConfirmedSelectionDto[];

@@ -14,16 +14,6 @@ export class EventDetailEventDto {
   title!: string | null;
   description!: string | null;
   schedule!: EventScheduleDto;
-  @ApiProperty({
-    enum: Weekday,
-    enumName: 'Weekday',
-    isArray: true,
-    required: false,
-  })
-  weekdays?: Weekday[];
-  startMinuteOfDay!: number;
-  endMinuteOfDay!: number;
-  slotDurationMin!: number;
   timeZone!: string;
   lineGroupId!: string | null;
   ownerId!: string | null;
