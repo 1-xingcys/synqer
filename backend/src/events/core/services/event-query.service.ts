@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { EventRepository } from '../repositories/event.repository';
 import { EventMapperService } from '../../shared/services/event-mapper.service';
 import { EventStatusService } from '../../shared/services/event-status.service';
-import { EventScheduleService } from '../../shared/services/event-schedule.service';
 
 /**
  * 活動查詢服務（業務邏輯層）
@@ -13,7 +12,6 @@ export class EventQueryService {
     private eventRepository: EventRepository,
     private eventMapper: EventMapperService,
     private eventStatusService: EventStatusService,
-    private eventScheduleService: EventScheduleService,
   ) {}
 
   /**
@@ -231,15 +229,11 @@ export class EventQueryService {
         }
       : null;
 
-    const schedule = this.eventScheduleService.resolveSchedule(event);
-
     return {
       isDeleted: false,
       ...this.eventMapper.mapEventToList(event),
       expectedParticipantCount: event.expectedParticipants.length,
       host,
-      startMinuteOfDay: schedule.startMinuteOfDay,
-      endMinuteOfDay: schedule.endMinuteOfDay,
     };
   }
 

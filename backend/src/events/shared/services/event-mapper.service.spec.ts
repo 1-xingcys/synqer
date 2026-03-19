@@ -197,12 +197,15 @@ describe('EventMapperService', () => {
       type: EventType.ONE_TIME,
       title: 'Test Event',
       description: 'Description',
-      startDate: new Date('2024-12-25'),
-      endDate: new Date('2024-12-26'),
       createdAt: new Date('2024-12-01'),
-      startMinuteOfDay: 540,
-      endMinuteOfDay: 1080,
-      slotDurationMin: 15,
+      oneTimeSchedule: {
+        startDate: new Date('2024-12-25'),
+        endDate: new Date('2024-12-26'),
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 1080,
+        slotDurationMin: 15,
+      },
+      recurringSchedule: null,
       votingDeadline: null,
       expectedParticipants: [{ id: 'ep-1' }],
       confirmedTimeSlots: [],
@@ -228,6 +231,7 @@ describe('EventMapperService', () => {
           kind: EventType.ONE_TIME,
           startDate: new Date('2024-12-25'),
           endDate: new Date('2024-12-26'),
+          weekdays: undefined,
           startMinuteOfDay: 540,
           endMinuteOfDay: 1080,
           slotDurationMin: 15,
@@ -282,7 +286,7 @@ describe('EventMapperService', () => {
       expect(result.status).toBe('CONFIRMED');
     });
 
-    it('should use createdAt fallback and expose weekdays for recurring events', () => {
+    it('should expose recurring schedule metadata', () => {
       const recurringEvent = {
         id: 'event-recurring-123',
         type: EventType.RECURRING,
@@ -299,6 +303,7 @@ describe('EventMapperService', () => {
           endMinuteOfDay: 1080,
           slotDurationMin: 15,
         },
+        oneTimeSchedule: null,
         confirmedTimeSlots: [],
       };
 
@@ -313,7 +318,10 @@ describe('EventMapperService', () => {
       const result = service.mapEventToList(recurringEvent);
 
       expect(result.schedule.kind).toEqual(EventType.RECURRING);
-      expect(result.weekdays).toEqual([Weekday.MONDAY, Weekday.WEDNESDAY]);
+      expect(result.schedule.weekdays).toEqual([
+        Weekday.MONDAY,
+        Weekday.WEDNESDAY,
+      ]);
       expect(result.confirmedSelections).toEqual([]);
     });
   });
@@ -324,12 +332,15 @@ describe('EventMapperService', () => {
       type: EventType.ONE_TIME,
       title: 'Test Event',
       description: 'Description',
-      startDate: new Date('2024-12-25'),
-      endDate: new Date('2024-12-26'),
       createdAt: new Date('2024-12-01'),
-      startMinuteOfDay: 540,
-      endMinuteOfDay: 1080,
-      slotDurationMin: 15,
+      oneTimeSchedule: {
+        startDate: new Date('2024-12-25'),
+        endDate: new Date('2024-12-26'),
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 1080,
+        slotDurationMin: 15,
+      },
+      recurringSchedule: null,
       timeZone: 'Asia/Taipei',
       lineGroupId: 'group-1',
       ownerId: 'user-123',
@@ -359,10 +370,8 @@ describe('EventMapperService', () => {
           startMinuteOfDay: 540,
           endMinuteOfDay: 1080,
           slotDurationMin: 15,
+          weekdays: undefined,
         },
-        startMinuteOfDay: 540,
-        endMinuteOfDay: 1080,
-        slotDurationMin: 15,
         timeZone: 'Asia/Taipei',
         lineGroupId: 'group-1',
         ownerId: 'user-123',
@@ -437,6 +446,7 @@ describe('EventMapperService', () => {
           endMinuteOfDay: 720,
           slotDurationMin: 30,
         },
+        oneTimeSchedule: null,
         confirmedTimeSlots: [],
       };
 
@@ -469,11 +479,9 @@ describe('EventMapperService', () => {
           startMinuteOfDay: 600,
           endMinuteOfDay: 720,
           slotDurationMin: 30,
+          startDate: undefined,
+          endDate: undefined,
         },
-        weekdays: [Weekday.TUESDAY, Weekday.THURSDAY],
-        startMinuteOfDay: 600,
-        endMinuteOfDay: 720,
-        slotDurationMin: 30,
         timeZone: 'Asia/Taipei',
         lineGroupId: null,
         ownerId: 'user-123',

@@ -27,7 +27,6 @@ type MappedEventList = {
     endMinuteOfDay: number;
     slotDurationMin: number;
   };
-  weekdays?: Weekday[];
   createdAt: Date;
   votingDeadline: Date | null;
   confirmedSlotIds: string[];
@@ -156,13 +155,8 @@ export class EventMapperService {
     type: EventType;
     title: string | null;
     description: string | null;
-    startDate?: Date;
-    endDate?: Date;
     createdAt: Date;
     votingDeadline: Date | null;
-    startMinuteOfDay?: number;
-    endMinuteOfDay?: number;
-    slotDurationMin?: number;
     oneTimeSchedule: EventScheduleSource['oneTimeSchedule'];
     recurringSchedule: EventScheduleSource['recurringSchedule'];
     confirmedTimeSlots?: ConfirmedTimeSlot[];
@@ -188,7 +182,6 @@ export class EventMapperService {
         endMinuteOfDay: schedule.endMinuteOfDay,
         slotDurationMin: schedule.slotDurationMin,
       },
-      weekdays: schedule.weekdays,
       createdAt: event.createdAt,
       votingDeadline: event.votingDeadline,
       confirmedSlotIds,
@@ -212,12 +205,7 @@ export class EventMapperService {
     type: EventType;
     title: string | null;
     description: string | null;
-    startDate?: Date;
-    endDate?: Date;
     createdAt: Date;
-    startMinuteOfDay?: number;
-    endMinuteOfDay?: number;
-    slotDurationMin?: number;
     timeZone: string;
     lineGroupId: string | null;
     ownerId: string | null;
@@ -247,10 +235,6 @@ export class EventMapperService {
         endMinuteOfDay: schedule.endMinuteOfDay,
         slotDurationMin: schedule.slotDurationMin,
       },
-      weekdays: schedule.weekdays,
-      startMinuteOfDay: schedule.startMinuteOfDay,
-      endMinuteOfDay: schedule.endMinuteOfDay,
-      slotDurationMin: schedule.slotDurationMin,
       timeZone: event.timeZone,
       lineGroupId: event.lineGroupId,
       ownerId: event.ownerId,

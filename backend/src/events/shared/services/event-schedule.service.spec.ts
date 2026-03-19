@@ -9,14 +9,9 @@ describe('EventScheduleService', () => {
   });
 
   describe('resolveSchedule', () => {
-    it('should prefer oneTimeSchedule over legacy root fields', () => {
+    it('should resolve one-time schedules from oneTimeSchedule only', () => {
       const result = service.resolveSchedule({
         type: EventType.ONE_TIME,
-        startDate: new Date('2024-01-01T00:00:00.000Z'),
-        endDate: new Date('2024-01-02T00:00:00.000Z'),
-        startMinuteOfDay: 300,
-        endMinuteOfDay: 360,
-        slotDurationMin: 30,
         oneTimeSchedule: {
           startDate: new Date('2024-02-01T00:00:00.000Z'),
           endDate: new Date('2024-02-02T00:00:00.000Z'),
@@ -35,6 +30,16 @@ describe('EventScheduleService', () => {
         endMinuteOfDay: 600,
         slotDurationMin: 15,
       });
+    });
+
+    it('should throw when one-time schedule data is missing', () => {
+      expect(() =>
+        service.resolveSchedule({
+          type: EventType.ONE_TIME,
+          oneTimeSchedule: null,
+          recurringSchedule: null,
+        }),
+      ).toThrow('One-time event is missing oneTimeSchedule');
     });
 
     it('should resolve recurring schedules', () => {
