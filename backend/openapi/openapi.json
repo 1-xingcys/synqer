@@ -1490,12 +1490,6 @@
               }
             ]
           },
-          "weekdays": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Weekday"
-            }
-          },
           "id": {
             "type": "string"
           },
@@ -1596,12 +1590,6 @@
                 "$ref": "#/components/schemas/EventType"
               }
             ]
-          },
-          "weekdays": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Weekday"
-            }
           },
           "id": {
             "type": "string"
@@ -1773,12 +1761,6 @@
               }
             ]
           },
-          "weekdays": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Weekday"
-            }
-          },
           "id": {
             "type": "string"
           },
@@ -1792,15 +1774,6 @@
           },
           "schedule": {
             "$ref": "#/components/schemas/EventScheduleDto"
-          },
-          "startMinuteOfDay": {
-            "type": "number"
-          },
-          "endMinuteOfDay": {
-            "type": "number"
-          },
-          "slotDurationMin": {
-            "type": "number"
           },
           "timeZone": {
             "type": "string"
@@ -1849,9 +1822,6 @@
           "title",
           "description",
           "schedule",
-          "startMinuteOfDay",
-          "endMinuteOfDay",
-          "slotDurationMin",
           "timeZone",
           "lineGroupId",
           "ownerId",
@@ -2150,12 +2120,6 @@
               }
             ]
           },
-          "weekdays": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Weekday"
-            }
-          },
           "isDeleted": {
             "type": "boolean"
           },
@@ -2176,12 +2140,6 @@
           "createdAt": {
             "format": "date-time",
             "type": "string"
-          },
-          "startMinuteOfDay": {
-            "type": "number"
-          },
-          "endMinuteOfDay": {
-            "type": "number"
           },
           "votingDeadline": {
             "format": "date-time",
@@ -2420,21 +2378,15 @@
             "type": "string",
             "nullable": true
           },
-          "startDate": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "endDate": {
-            "format": "date-time",
-            "type": "string"
+          "schedule": {
+            "$ref": "#/components/schemas/EventScheduleDto"
           }
         },
         "required": [
           "id",
           "title",
           "description",
-          "startDate",
-          "endDate"
+          "schedule"
         ]
       },
       "RemoveEventResponseDto": {

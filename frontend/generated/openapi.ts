@@ -808,7 +808,6 @@ export interface components {
         };
         HostedEventListItemDto: {
             type: components["schemas"]["EventType"];
-            weekdays?: components["schemas"]["Weekday"][];
             id: string;
             title: string | null;
             description: string | null;
@@ -832,7 +831,6 @@ export interface components {
         };
         AttendedEventListItemDto: {
             type: components["schemas"]["EventType"];
-            weekdays?: components["schemas"]["Weekday"][];
             id: string;
             title: string | null;
             description: string | null;
@@ -871,14 +869,10 @@ export interface components {
         };
         EventDetailEventDto: {
             type: components["schemas"]["EventType"];
-            weekdays?: components["schemas"]["Weekday"][];
             id: string;
             title: string | null;
             description: string | null;
             schedule: components["schemas"]["EventScheduleDto"];
-            startMinuteOfDay: number;
-            endMinuteOfDay: number;
-            slotDurationMin: number;
             timeZone: string;
             lineGroupId: string | null;
             ownerId: string | null;
@@ -954,7 +948,6 @@ export interface components {
         };
         EventPublicInfoResponseDto: {
             type: components["schemas"]["EventType"];
-            weekdays?: components["schemas"]["Weekday"][];
             isDeleted: boolean;
             id: string;
             title: string | null;
@@ -962,8 +955,6 @@ export interface components {
             schedule: components["schemas"]["EventScheduleDto"];
             /** Format: date-time */
             createdAt: string;
-            startMinuteOfDay?: number;
-            endMinuteOfDay?: number;
             /** Format: date-time */
             votingDeadline: string | null;
             confirmedSlotIds: string[];
