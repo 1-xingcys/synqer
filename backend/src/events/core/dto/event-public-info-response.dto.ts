@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { EventStatus } from '../../shared/services/event-status.service';
-import { EventType, Weekday } from '@prisma/client';
+import { EventType } from '@prisma/client';
 import {
   ConfirmedSelectionDto,
   EventCapabilitiesDto,
