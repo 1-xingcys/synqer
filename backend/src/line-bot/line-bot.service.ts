@@ -308,7 +308,7 @@ export class LineBotService implements OnModuleInit {
 
     for (const event of events) {
       // 合併成時間範圍（使用原始資料結構）
-      const confirmedTimeRanges = this.confirmedTimeService.mergeToTimeRanges(
+      const confirmedSelections = this.confirmedTimeService.mergeToSelections(
         event.confirmedTimeSlots,
       );
 
@@ -364,7 +364,7 @@ export class LineBotService implements OnModuleInit {
         status,
         votingDeadline: event.votingDeadline,
         confirmedTimeSlots,
-        confirmedTimeRanges,
+        confirmedSelections,
         host,
         votingStats: {
           totalExpected,

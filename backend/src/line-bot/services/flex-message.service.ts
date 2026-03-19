@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { EventType } from '@prisma/client';
 import { EventStatus } from '../../events/shared/services/event-status.service';
+import {
+  ConfirmedSelection,
+  ConfirmedSelectionKind,
+} from '../../events/shared/interfaces/confirmed-time.interface';
 
 /**
  * LINE Flex Message 類型定義
@@ -147,15 +151,6 @@ export interface ConfirmedSlotInfo {
 }
 
 /**
- * 合併後的時間範圍
- */
-export interface ConfirmedTimeRange {
-  startTime: Date;
-  endTime: Date;
-  slotIds: string[];
-}
-
-/**
  * 事件資訊（用於建構 Flex Message）
  */
 export interface EventInfo {
@@ -166,8 +161,7 @@ export interface EventInfo {
   status: EventStatus;
   votingDeadline: Date | null;
   confirmedTimeSlots: ConfirmedSlotInfo[];
-  // One-time compatibility field. Recurring should use dedicated summary text instead.
-  confirmedTimeRanges: ConfirmedTimeRange[];
+  confirmedSelections: ConfirmedSelection[];
   host: {
     displayName: string;
     pictureUrl?: string | null;
@@ -460,16 +454,9 @@ export class FlexMessageService {
         };
 
       case EventStatus.CONFIRMED:
-        if (event.type === EventType.RECURRING) {
-          return {
-            label: '活動時間',
-            value: '每週固定時段已確認',
-          };
-        }
-        if (event.confirmedTimeRanges.length > 0) {
-          // 使用合併後的時間範圍來顯示
-          const timeStr = this.formatConfirmedTimeRanges(
-            event.confirmedTimeRanges,
+        if (event.confirmedSelections.length > 0) {
+          const timeStr = this.formatConfirmedSelections(
+            event.confirmedSelections,
           );
           return {
             label: '活動時間',
@@ -568,22 +555,40 @@ export class FlexMessageService {
    * 如果只有一個範圍，顯示完整時間
    * 如果有多個範圍，顯示第一個 + 其他 n 個時段
    */
-  private formatConfirmedTimeRanges(ranges: ConfirmedTimeRange[]): string {
-    if (ranges.length === 0) {
+  private formatConfirmedSelections(selections: ConfirmedSelection[]): string {
+    if (selections.length === 0) {
       return '時間已確定';
     }
 
-    const firstRange = ranges[0];
-    const firstRangeStr = this.formatDateTimeRange(
-      firstRange.startTime,
-      firstRange.endTime,
-    );
+    const firstSelection = selections[0];
+    const firstSelectionStr = this.formatConfirmedSelection(firstSelection);
 
-    if (ranges.length === 1) {
-      return firstRangeStr;
+    if (selections.length === 1) {
+      return firstSelectionStr;
     }
 
-    return `${firstRangeStr}\n(+${ranges.length - 1} 個時段)`;
+    return `${firstSelectionStr}\n(+${selections.length - 1} 個時段)`;
+  }
+
+  private formatConfirmedSelection(selection: ConfirmedSelection): string {
+    if (
+      selection.kind === ConfirmedSelectionKind.ONE_TIME_RANGE &&
+      selection.startTime &&
+      selection.endTime
+    ) {
+      return this.formatDateTimeRange(selection.startTime, selection.endTime);
+    }
+
+    if (
+      selection.kind === ConfirmedSelectionKind.WEEKDAY_RANGE &&
+      selection.weekday &&
+      typeof selection.startMinute === 'number' &&
+      typeof selection.endMinute === 'number'
+    ) {
+      return `${selection.weekday} ${this.formatMinuteOfDay(selection.startMinute)} ~ ${this.formatMinuteOfDay(selection.endMinute)}`;
+    }
+
+    return '時間已確定';
   }
 
   /**
@@ -788,6 +793,14 @@ export class FlexMessageService {
       return `${startMonth}/${startDay} ${info.startTime} ~ ${info.endTime}`;
     }
     return `${startMonth}/${startDay} ~ ${endMonth}/${endDay} ${info.startTime} ~ ${info.endTime}`;
+  }
+
+  private formatMinuteOfDay(minuteOfDay: number): string {
+    const hours = Math.floor(minuteOfDay / 60)
+      .toString()
+      .padStart(2, '0');
+    const minutes = (minuteOfDay % 60).toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
   }
 
   /**
