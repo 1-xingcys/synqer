@@ -12,7 +12,8 @@
     "back": "Back",
     "showDetails": "Show details",
     "hideDetails": "Hide details",
-    "votingProgress": "Progress"
+    "votingProgress": "Progress",
+    "close": "Close"
   },
   "landing": {
     "gotoDashboard": "Go to Dashboard",

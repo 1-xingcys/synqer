@@ -1,4 +1,4 @@
-import { formatLocalizedDateMinuteRangeLabel } from "@/components/eventCommon/timeRangeFormat";
+import { formatLocalizedAxisMinuteRangeLabel } from "@/components/eventCommon/timeRangeFormat";
 import { type HostedEventResultSummary } from "@/components/hostedEvent/resultSummary";
 import { getLiff, getLiffId } from "@/lib/liff";
 import { ShareResult } from "./shareEventFlexMessage";
@@ -92,8 +92,9 @@ function buildRangeSection(params: {
   locale: string;
   copy: HostedEventResultFlexCopy;
 }) {
-  const slotLabel = formatLocalizedDateMinuteRangeLabel(
+  const slotLabel = formatLocalizedAxisMinuteRangeLabel(
     {
+      axisType: params.range.axisType,
       startDate: params.range.startDate,
       endDate: params.range.endDate,
       startMinute: params.range.startMinute,

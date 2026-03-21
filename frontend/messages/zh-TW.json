@@ -12,7 +12,8 @@
     "back": "返回",
     "showDetails": "顯示詳情",
     "hideDetails": "隱藏詳情",
-    "votingProgress": "投票進度"
+    "votingProgress": "投票進度",
+    "close": "關閉"
   },
   "landing": {
     "gotoDashboard": "前往控制台",

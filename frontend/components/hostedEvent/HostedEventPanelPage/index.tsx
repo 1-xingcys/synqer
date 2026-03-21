@@ -84,9 +84,6 @@ export default function HostedEventPanelPage() {
   const isCompleted = event?.status === EventStatus.COMPLETED;
   const showResultsView = isVotingPhase || isVotingEnded || isConfirmed;
   const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
-  const hasDisplayableConfirmedTime = event.confirmedSelections.length > 0;
-  const resultText = (() => {
-    if (!isConfirmed) return "";
   const eventTitle = event?.title || t("event.untitled");
   const confirmedSlots = (() => {
     if (!data || !isConfirmed || !event) return [];
@@ -96,14 +93,17 @@ export default function HostedEventPanelPage() {
       .filter((slot) => confirmedSlotIds.has(slot.id))
       .map((slot) => ({
         id: slot.id,
+        axisType: slot.axisType,
         axisDate: slot.axisDate,
+        axisWeekday: slot.axisWeekday,
         startMinute: slot.startMinute,
         endMinute: slot.endMinute,
       }))
-      .sort((a, b) =>
-        a.axisDate === b.axisDate
-          ? a.startMinute - b.startMinute
-          : a.axisDate.localeCompare(b.axisDate),
+      .sort(
+        (a, b) =>
+          (a.axisDate ?? a.axisWeekday ?? "").localeCompare(
+            b.axisDate ?? b.axisWeekday ?? "",
+          ) || a.startMinute - b.startMinute,
       );
   })();
   const resultSummary = (() => {
@@ -133,7 +133,8 @@ export default function HostedEventPanelPage() {
     locale,
     copy: {
       title: t("eventInfo.resultText.title"),
-      eventLine: (eventTitle) => t("eventInfo.resultText.event", { eventTitle }),
+      eventLine: (eventTitle) =>
+        t("eventInfo.resultText.event", { eventTitle }),
       availableLine: (availableCount, totalExpected) =>
         t("eventInfo.resultText.available", {
           availableCount,
@@ -149,6 +150,8 @@ export default function HostedEventPanelPage() {
   if (!data || !event) {
     return null;
   }
+
+  const hasDisplayableConfirmedTime = event.confirmedSelections.length > 0;
 
   return (
     <div className="space-y-3 sm:space-y-6">

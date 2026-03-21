@@ -1,6 +1,8 @@
 "use client";
 
+import { formatAxisKeyLabel } from "@/lib/event-presentation";
 import { formatMinutesToTime } from "@/lib/utils";
+import { type EventSlotAxisType } from "@/types/event";
 
 function getDateLocale(locale: string) {
   return locale === "zh-TW" ? "zh-TW" : "en-US";
@@ -88,6 +90,28 @@ export function formatLocalizedDateMinuteRangeLabel(
   options: SharedDateFormatOptions = {},
 ) {
   return `${formatLocalizedDateRange(range.startDate, range.endDate, locale, options)}  ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`;
+}
+
+export function formatLocalizedAxisMinuteRangeLabel(
+  range: {
+    axisType: EventSlotAxisType;
+    startDate: string;
+    endDate: string;
+    startMinute: number;
+    endMinute: number;
+  },
+  locale: string,
+) {
+  const startLabel = formatAxisKeyLabel(
+    range.startDate,
+    range.axisType,
+    locale,
+  );
+  const endLabel = formatAxisKeyLabel(range.endDate, range.axisType, locale);
+  const axisLabel =
+    startLabel === endLabel ? startLabel : `${startLabel} - ${endLabel}`;
+
+  return `${axisLabel}  ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`;
 }
 
 export function formatLocalizedConfirmedDateTimeRangeLabel(
