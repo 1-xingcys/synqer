@@ -18,6 +18,13 @@ interface EventResultShareModalProps {
   onShareToLine: () => Promise<boolean> | boolean;
 }
 
+type ShareActionViewState = {
+  icon: React.ReactNode;
+  title: string;
+  hint: string;
+  className: string;
+};
+
 export function EventResultShareModal({
   isOpen,
   onClose,
@@ -73,6 +80,102 @@ export function EventResultShareModal({
     }
   };
 
+  const defaultButtonClassName =
+    "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/70 dark:text-zinc-200 dark:hover:bg-zinc-700/70";
+  const successButtonClassName =
+    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300";
+  const errorButtonClassName =
+    "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-300";
+
+  const resultTextAction: ShareActionViewState = (() => {
+    if (!canNativeShareResultText) {
+      return {
+        icon: resultTextCopied ? (
+          <CheckCheck className="h-4 w-4" />
+        ) : (
+          <Copy className="h-4 w-4" />
+        ),
+        title: resultTextCopied
+          ? tEventInfo("resultTextCopied")
+          : tEventInfo("copyResultText"),
+        hint: tEventInfo("copyResultTextHint"),
+        className: resultTextCopied
+          ? successButtonClassName
+          : defaultButtonClassName,
+      };
+    }
+
+    if (resultTextShareStatus === "sending") {
+      return {
+        icon: <Loader2 className="h-4 w-4 animate-spin" />,
+        title: tEventInfo("sharingResultText"),
+        hint: tEventInfo("shareResultTextHint"),
+        className: defaultButtonClassName,
+      };
+    }
+
+    if (resultTextShareStatus === "success") {
+      return {
+        icon: <CheckCheck className="h-4 w-4" />,
+        title: tEventInfo("resultTextShared"),
+        hint: tEventInfo("shareResultTextHint"),
+        className: successButtonClassName,
+      };
+    }
+
+    if (resultTextShareStatus === "error") {
+      return {
+        icon: <Share2 className="h-4 w-4" />,
+        title: tEventInfo("shareResultTextFailed"),
+        hint: tEventInfo("shareResultTextFailedHint"),
+        className: errorButtonClassName,
+      };
+    }
+
+    return {
+      icon: <Share2 className="h-4 w-4" />,
+      title: tEventInfo("shareResultText"),
+      hint: tEventInfo("shareResultTextHint"),
+      className: defaultButtonClassName,
+    };
+  })();
+
+  const lineShareAction: ShareActionViewState = (() => {
+    if (lineShareStatus === "sending") {
+      return {
+        icon: <Loader2 className="h-4 w-4 animate-spin" />,
+        title: tEventInfo("sharingToLine"),
+        hint: tEventInfo("shareToLineHint"),
+        className: defaultButtonClassName,
+      };
+    }
+
+    if (lineShareStatus === "success") {
+      return {
+        icon: <CheckCheck className="h-4 w-4" />,
+        title: tEventInfo("sharedToLine"),
+        hint: tEventInfo("shareToLineHint"),
+        className: successButtonClassName,
+      };
+    }
+
+    if (lineShareStatus === "error") {
+      return {
+        icon: <Share2 className="h-4 w-4" />,
+        title: tEventInfo("shareToLineFailed"),
+        hint: tEventInfo("shareToLineFailedHint"),
+        className: errorButtonClassName,
+      };
+    }
+
+    return {
+      icon: <Share2 className="h-4 w-4" />,
+      title: tEventInfo("shareToLine"),
+      hint: tEventInfo("shareToLineHint"),
+      className: defaultButtonClassName,
+    };
+  })();
+
   return createPortal(
     <>
       <div
@@ -105,52 +208,14 @@ export function EventResultShareModal({
             <button
               onClick={() => void handleShareResultTextClick()}
               disabled={resultTextShareStatus === "sending"}
-              className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
-                canNativeShareResultText
-                  ? resultTextShareStatus === "success"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300"
-                    : resultTextShareStatus === "error"
-                      ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-300"
-                      : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/70 dark:text-zinc-200 dark:hover:bg-zinc-700/70"
-                  : resultTextCopied
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300"
-                    : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/70 dark:text-zinc-200 dark:hover:bg-zinc-700/70"
-              }`}
+              className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${resultTextAction.className}`}
             >
               <span className="flex items-center gap-2">
-                {canNativeShareResultText ? (
-                  resultTextShareStatus === "sending" ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : resultTextShareStatus === "success" ? (
-                    <CheckCheck className="h-4 w-4" />
-                  ) : (
-                    <Share2 className="h-4 w-4" />
-                  )
-                ) : resultTextCopied ? (
-                  <CheckCheck className="h-4 w-4" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-                <span className="font-medium">
-                  {canNativeShareResultText
-                    ? resultTextShareStatus === "sending"
-                      ? tEventInfo("sharingResultText")
-                      : resultTextShareStatus === "success"
-                        ? tEventInfo("resultTextShared")
-                        : resultTextShareStatus === "error"
-                          ? tEventInfo("shareResultTextFailed")
-                          : tEventInfo("shareResultText")
-                    : resultTextCopied
-                      ? tEventInfo("resultTextCopied")
-                      : tEventInfo("copyResultText")}
-                </span>
+                {resultTextAction.icon}
+                <span className="font-medium">{resultTextAction.title}</span>
               </span>
               <span className="mt-1 block text-xs text-zinc-500 dark:text-zinc-400">
-                {canNativeShareResultText
-                  ? resultTextShareStatus === "error"
-                    ? tEventInfo("shareResultTextFailedHint")
-                    : tEventInfo("shareResultTextHint")
-                  : tEventInfo("copyResultTextHint")}
+                {resultTextAction.hint}
               </span>
             </button>
 
@@ -158,36 +223,14 @@ export function EventResultShareModal({
               <button
                 onClick={() => void handleShareToLineClick()}
                 disabled={lineShareStatus === "sending"}
-                className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
-                  lineShareStatus === "success"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300"
-                    : lineShareStatus === "error"
-                      ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-300"
-                      : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/70 dark:text-zinc-200 dark:hover:bg-zinc-700/70"
-                }`}
+                className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${lineShareAction.className}`}
               >
                 <span className="flex items-center gap-2">
-                  {lineShareStatus === "sending" ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : lineShareStatus === "success" ? (
-                    <CheckCheck className="h-4 w-4" />
-                  ) : (
-                    <Share2 className="h-4 w-4" />
-                  )}
-                  <span className="font-medium">
-                    {lineShareStatus === "sending"
-                      ? tEventInfo("sharingToLine")
-                      : lineShareStatus === "success"
-                        ? tEventInfo("sharedToLine")
-                        : lineShareStatus === "error"
-                          ? tEventInfo("shareToLineFailed")
-                          : tEventInfo("shareToLine")}
-                  </span>
+                  {lineShareAction.icon}
+                  <span className="font-medium">{lineShareAction.title}</span>
                 </span>
                 <span className="mt-1 block text-xs text-zinc-500 dark:text-zinc-400">
-                  {lineShareStatus === "error"
-                    ? tEventInfo("shareToLineFailedHint")
-                    : tEventInfo("shareToLineHint")}
+                  {lineShareAction.hint}
                 </span>
               </button>
             )}

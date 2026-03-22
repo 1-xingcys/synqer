@@ -14,6 +14,7 @@ import {
   useEventTimeSelection,
   useEventTimeConfirmation,
   useParticipantsData,
+  useConfirmedHostedResultSlots,
 } from "./hooks";
 
 export default function HostedEventPanelPage() {
@@ -83,27 +84,11 @@ export default function HostedEventPanelPage() {
   const showResultsView = isVotingPhase || isVotingEnded || isConfirmed;
   const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
   const eventTitle = event?.title || t("event.untitled");
-  const confirmedSlots = (() => {
-    if (!data || !isConfirmed || !event) return [];
-
-    const confirmedSlotIds = new Set(event.confirmedSlotIds);
-    return (data.slots || [])
-      .filter((slot) => confirmedSlotIds.has(slot.id))
-      .map((slot) => ({
-        id: slot.id,
-        axisType: slot.axisType,
-        axisDate: slot.axisDate,
-        axisWeekday: slot.axisWeekday,
-        startMinute: slot.startMinute,
-        endMinute: slot.endMinute,
-      }))
-      .sort(
-        (a, b) =>
-          (a.axisDate ?? a.axisWeekday ?? "").localeCompare(
-            b.axisDate ?? b.axisWeekday ?? "",
-          ) || a.startMinute - b.startMinute,
-      );
-  })();
+  const confirmedSlots = useConfirmedHostedResultSlots({
+    slots: data?.slots ?? [],
+    confirmedSlotIds: event?.confirmedSlotIds,
+    enabled: isConfirmed,
+  });
 
   // Loading and error states are handled by the layout
   if (!data || !event) {
