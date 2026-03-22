@@ -1,11 +1,20 @@
-import { ConfirmedSelection } from "@/types/event";
-import { formatWeekdayLabel } from "@/lib/weekdays";
-import { formatMinutesToTime } from "@/lib/utils";
+import type { ConfirmedSelection } from "@/types/event";
+import {
+  formatLocalizedConfirmedAxisTimeRangeLabel,
+  formatLocalizedConfirmedDateTimeRangeLabel,
+} from "./timeRangeFormat";
 
 type OneTimeConfirmedSelection = ConfirmedSelection & {
   kind: "ONE_TIME_RANGE";
   startTime: string;
   endTime: string;
+};
+
+type WeekdayConfirmedSelection = ConfirmedSelection & {
+  kind: "WEEKDAY_RANGE";
+  weekday: NonNullable<ConfirmedSelection["weekday"]>;
+  startMinute: number;
+  endMinute: number;
 };
 
 function isOneTimeConfirmedSelection(
@@ -18,42 +27,45 @@ function isOneTimeConfirmedSelection(
   );
 }
 
+function isWeekdayConfirmedSelection(
+  selection: ConfirmedSelection,
+): selection is WeekdayConfirmedSelection {
+  return (
+    selection.kind === "WEEKDAY_RANGE" &&
+    Boolean(selection.weekday) &&
+    typeof selection.startMinute === "number" &&
+    typeof selection.endMinute === "number"
+  );
+}
+
 function formatOneTimeConfirmedSelection(
   selection: OneTimeConfirmedSelection,
   locale: string,
-): string {
-  const startDate = new Date(selection.startTime);
-  const endDate = new Date(selection.endTime);
+) {
+  return formatLocalizedConfirmedDateTimeRangeLabel(
+    {
+      startTime: selection.startTime,
+      endTime: selection.endTime,
+    },
+    locale,
+    { timeZone: "UTC" },
+  );
+}
 
-  const dateFormatter = new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    weekday: "short",
-    timeZone: "UTC",
-  });
-
-  const timeFormatter = new Intl.DateTimeFormat(locale, {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZone: "UTC",
-  });
-
-  const startDateStr = dateFormatter.format(startDate);
-  const startTimeStr = timeFormatter.format(startDate);
-  const endTimeStr = timeFormatter.format(endDate);
-
-  const isSameDay =
-    startDate.getFullYear() === endDate.getFullYear() &&
-    startDate.getMonth() === endDate.getMonth() &&
-    startDate.getDate() === endDate.getDate();
-
-  if (isSameDay) {
-    return `${startDateStr} ${startTimeStr} - ${endTimeStr}`;
-  }
-
-  const endDateStr = dateFormatter.format(endDate);
-  return `${startDateStr} ${startTimeStr} - ${endDateStr} ${endTimeStr}`;
+function formatWeekdayConfirmedSelection(
+  selection: WeekdayConfirmedSelection,
+  locale: string,
+) {
+  return formatLocalizedConfirmedAxisTimeRangeLabel(
+    {
+      axisType: "WEEKDAY",
+      startDate: selection.weekday,
+      endDate: selection.weekday,
+      startMinute: selection.startMinute,
+      endMinute: selection.endMinute,
+    },
+    locale,
+  );
 }
 
 export function formatConfirmedSelection(
@@ -64,15 +76,9 @@ export function formatConfirmedSelection(
     return formatOneTimeConfirmedSelection(selection, locale);
   }
 
-  if (
-    selection.kind !== "WEEKDAY_RANGE" ||
-    !selection.weekday ||
-    typeof selection.startMinute !== "number" ||
-    typeof selection.endMinute !== "number"
-  ) {
+  if (!isWeekdayConfirmedSelection(selection)) {
     return null;
   }
 
-  const weekdayLabel = formatWeekdayLabel(selection.weekday, locale);
-  return `${weekdayLabel} ${formatMinutesToTime(selection.startMinute)} - ${formatMinutesToTime(selection.endMinute)}`;
+  return formatWeekdayConfirmedSelection(selection, locale);
 }

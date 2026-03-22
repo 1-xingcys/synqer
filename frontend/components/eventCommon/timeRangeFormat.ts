@@ -2,20 +2,21 @@
 
 import { formatAxisKeyLabel } from "@/lib/event-presentation";
 import { formatMinutesToTime } from "@/lib/utils";
-import { type EventSlotAxisType } from "@/types/event";
+import { formatWeekdayLabel } from "@/lib/weekdays";
+import { type EventSlotAxisType, type Weekday } from "@/types/event";
 
 function getDateLocale(locale: string) {
   return locale === "zh-TW" ? "zh-TW" : "en-US";
 }
 
-type SharedDateFormatOptions = {
+export type LocalizedTimeRangeFormatOptions = {
   timeZone?: string;
   weekdayStyle?: "narrow" | "short";
 };
 
 function parseDateInput(
   dateInput: string | Date,
-  options: SharedDateFormatOptions = {},
+  options: LocalizedTimeRangeFormatOptions = {},
 ) {
   if (dateInput instanceof Date) {
     return dateInput;
@@ -33,7 +34,7 @@ function parseDateInput(
 function formatLocalizedDateFromDate(
   date: Date,
   locale: string,
-  options: SharedDateFormatOptions = {},
+  options: LocalizedTimeRangeFormatOptions = {},
 ) {
   const dateLocale = getDateLocale(locale);
   const dateText = new Intl.DateTimeFormat(dateLocale, {
@@ -51,10 +52,24 @@ function formatLocalizedDateFromDate(
     : `${dateText} (${weekdayText})`;
 }
 
+function formatLocalizedWeekdayLabel(
+  weekday: Weekday,
+  locale: string,
+  options: LocalizedTimeRangeFormatOptions = {},
+) {
+  const weekdayText = formatWeekdayLabel(
+    weekday,
+    locale,
+    options.weekdayStyle ?? (locale === "zh-TW" ? "narrow" : "short"),
+  );
+
+  return locale === "zh-TW" ? `（${weekdayText}）` : `(${weekdayText})`;
+}
+
 function formatLocalizedDate(
   dateString: string,
   locale: string,
-  options: SharedDateFormatOptions = {},
+  options: LocalizedTimeRangeFormatOptions = {},
 ) {
   const date = parseDateInput(dateString, options);
 
@@ -65,7 +80,7 @@ export function formatLocalizedDateRange(
   startDate: string,
   endDate: string,
   locale: string,
-  options: SharedDateFormatOptions = {},
+  options: LocalizedTimeRangeFormatOptions = {},
 ) {
   const startDateLabel = formatLocalizedDate(startDate, locale, options);
   if (startDate === endDate) {
@@ -79,6 +94,10 @@ function formatMinuteTimeRange(startMinute: number, endMinute: number) {
   return `${formatMinutesToTime(startMinute)} - ${formatMinutesToTime(endMinute)}`;
 }
 
+function normalizeRangeLabelSpacing(label: string) {
+  return label.replace(/\s{2,}/g, " ");
+}
+
 export function formatLocalizedDateMinuteRangeLabel(
   range: {
     startDate: string;
@@ -87,9 +106,11 @@ export function formatLocalizedDateMinuteRangeLabel(
     endMinute: number;
   },
   locale: string,
-  options: SharedDateFormatOptions = {},
+  options: LocalizedTimeRangeFormatOptions = {},
 ) {
-  return `${formatLocalizedDateRange(range.startDate, range.endDate, locale, options)}  ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`;
+  return normalizeRangeLabelSpacing(
+    `${formatLocalizedDateRange(range.startDate, range.endDate, locale, options)}  ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`,
+  );
 }
 
 export function formatLocalizedAxisMinuteRangeLabel(
@@ -111,7 +132,9 @@ export function formatLocalizedAxisMinuteRangeLabel(
   const axisLabel =
     startLabel === endLabel ? startLabel : `${startLabel} - ${endLabel}`;
 
-  return `${axisLabel}  ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`;
+  return normalizeRangeLabelSpacing(
+    `${axisLabel}  ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`,
+  );
 }
 
 export function formatLocalizedConfirmedDateTimeRangeLabel(
@@ -120,7 +143,7 @@ export function formatLocalizedConfirmedDateTimeRangeLabel(
     endTime: string;
   },
   locale: string,
-  options: SharedDateFormatOptions = {},
+  options: LocalizedTimeRangeFormatOptions = {},
 ) {
   const startDate = new Date(range.startTime);
   const endDate = new Date(range.endTime);
@@ -143,8 +166,65 @@ export function formatLocalizedConfirmedDateTimeRangeLabel(
   const isSameDay = startDateLabel === endDateLabel;
 
   if (isSameDay) {
-    return `${startDateLabel}  ${timeLabel}`;
+    return normalizeRangeLabelSpacing(`${startDateLabel}  ${timeLabel}`);
   }
 
-  return `${startDateLabel} - ${endDateLabel}  ${timeLabel}`;
+  return normalizeRangeLabelSpacing(
+    `${startDateLabel} - ${endDateLabel}  ${timeLabel}`,
+  );
+}
+
+export function formatLocalizedConfirmedWeekdayTimeRangeLabel(
+  range: {
+    weekday: Weekday;
+    startMinute: number;
+    endMinute: number;
+  },
+  locale: string,
+  options: LocalizedTimeRangeFormatOptions = {},
+) {
+  const weekdayLabel = formatLocalizedWeekdayLabel(
+    range.weekday,
+    locale,
+    options,
+  );
+
+  return normalizeRangeLabelSpacing(
+    `${weekdayLabel}  ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`,
+  );
+}
+
+export function formatLocalizedConfirmedAxisTimeRangeLabel(
+  range: {
+    axisType: EventSlotAxisType;
+    startDate: string;
+    endDate: string;
+    startMinute: number;
+    endMinute: number;
+  },
+  locale: string,
+  options: LocalizedTimeRangeFormatOptions = {},
+) {
+  if (range.axisType === "WEEKDAY" && range.startDate === range.endDate) {
+    return formatLocalizedConfirmedWeekdayTimeRangeLabel(
+      {
+        weekday: range.startDate as Weekday,
+        startMinute: range.startMinute,
+        endMinute: range.endMinute,
+      },
+      locale,
+      options,
+    );
+  }
+
+  return formatLocalizedDateMinuteRangeLabel(
+    {
+      startDate: range.startDate,
+      endDate: range.endDate,
+      startMinute: range.startMinute,
+      endMinute: range.endMinute,
+    },
+    locale,
+    options,
+  );
 }

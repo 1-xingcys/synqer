@@ -1,5 +1,5 @@
 import { type HostedEventResultSummary } from "./resultSummary";
-import { formatLocalizedAxisMinuteRangeLabel } from "@/components/eventCommon/timeRangeFormat";
+import { formatLocalizedConfirmedAxisTimeRangeLabel } from "@/components/eventCommon/timeRangeFormat";
 
 export type HostedEventResultTextCopy = {
   title: string;
@@ -13,7 +13,7 @@ function buildRangeLabel(
   range: HostedEventResultSummary["ranges"][number],
   locale: string,
 ) {
-  return formatLocalizedAxisMinuteRangeLabel(
+  return formatLocalizedConfirmedAxisTimeRangeLabel(
     {
       axisType: range.axisType,
       startDate: range.startDate,

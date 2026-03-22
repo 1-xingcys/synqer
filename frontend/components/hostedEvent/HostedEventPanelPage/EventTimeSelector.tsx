@@ -2,12 +2,10 @@
 
 import { type ReactNode, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { formatMinutesToTime } from "@/lib/utils";
-import { formatAxisKeyLabel } from "@/lib/event-presentation";
-import type { EventSlotAxisType } from "@/types/event";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Z_INDEX } from "@/lib/zIndex";
+import { formatLocalizedConfirmedAxisTimeRangeLabel } from "@/components/eventCommon/timeRangeFormat";
 import type { SelectedTimeRange } from "./types";
 
 interface EventTimeSelectorProps {
@@ -108,17 +106,6 @@ export function EventTimeSelector({
   const [showCommitConfirm, setShowCommitConfirm] = useState(false);
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
-  const formatDateRange = (
-    startDate: string,
-    endDate: string,
-    axisType: EventSlotAxisType,
-  ) => {
-    if (startDate === endDate) {
-      return formatAxisKeyLabel(startDate, axisType, locale);
-    }
-    return `${formatAxisKeyLabel(startDate, axisType, locale)} - ${formatAxisKeyLabel(endDate, axisType, locale)}`;
-  };
-
   const handleCommitClick = () => {
     if (isVotingPhase) {
       setShowCommitConfirm(true);
@@ -195,18 +182,17 @@ export function EventTimeSelector({
                 }`}
               >
                 <div className="flex items-center gap-2 text-sm flex-wrap min-w-0">
-                  {/* Date and time */}
                   <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {formatDateRange(
-                      range.startDate,
-                      range.endDate,
-                      range.axisType,
+                    {formatLocalizedConfirmedAxisTimeRangeLabel(
+                      {
+                        axisType: range.axisType,
+                        startDate: range.startDate,
+                        endDate: range.endDate,
+                        startMinute: range.startTime,
+                        endMinute: range.endTime,
+                      },
+                      locale,
                     )}
-                  </span>
-                  <span className="text-zinc-400">•</span>
-                  <span className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
-                    {formatMinutesToTime(range.startTime)} -{" "}
-                    {formatMinutesToTime(range.endTime)}
                   </span>
                 </div>
 
