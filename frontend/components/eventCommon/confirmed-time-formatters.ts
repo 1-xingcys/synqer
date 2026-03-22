@@ -1,15 +1,17 @@
 import type { ConfirmedSelection } from "@/types/event";
 import {
-  formatLocalizedConfirmedAxisTimeRangeLabel,
-  formatLocalizedConfirmedDateTimeRangeLabel,
+  formatLocalizedDateTimeRangeLabel,
+  formatLocalizedRangeLabel,
 } from "./timeRangeFormat";
 
+// Narrow a confirmed selection to the one-time shape used by one-off events.
 type OneTimeConfirmedSelection = ConfirmedSelection & {
   kind: "ONE_TIME_RANGE";
   startTime: string;
   endTime: string;
 };
 
+// Narrow a confirmed selection to the weekday-based shape used by recurring events.
 type WeekdayConfirmedSelection = ConfirmedSelection & {
   kind: "WEEKDAY_RANGE";
   weekday: NonNullable<ConfirmedSelection["weekday"]>;
@@ -17,6 +19,7 @@ type WeekdayConfirmedSelection = ConfirmedSelection & {
   endMinute: number;
 };
 
+// Validate that a confirmed selection has the required one-time fields.
 function isOneTimeConfirmedSelection(
   selection: ConfirmedSelection,
 ): selection is OneTimeConfirmedSelection {
@@ -27,6 +30,7 @@ function isOneTimeConfirmedSelection(
   );
 }
 
+// Validate that a confirmed selection has the required weekday-range fields.
 function isWeekdayConfirmedSelection(
   selection: ConfirmedSelection,
 ): selection is WeekdayConfirmedSelection {
@@ -38,11 +42,12 @@ function isWeekdayConfirmedSelection(
   );
 }
 
+// Adapt a one-time confirmed selection to the canonical datetime formatter.
 function formatOneTimeConfirmedSelection(
   selection: OneTimeConfirmedSelection,
   locale: string,
 ) {
-  return formatLocalizedConfirmedDateTimeRangeLabel(
+  return formatLocalizedDateTimeRangeLabel(
     {
       startTime: selection.startTime,
       endTime: selection.endTime,
@@ -52,11 +57,12 @@ function formatOneTimeConfirmedSelection(
   );
 }
 
+// Adapt a recurring confirmed selection to the canonical range formatter.
 function formatWeekdayConfirmedSelection(
   selection: WeekdayConfirmedSelection,
   locale: string,
 ) {
-  return formatLocalizedConfirmedAxisTimeRangeLabel(
+  return formatLocalizedRangeLabel(
     {
       axisType: "WEEKDAY",
       startDate: selection.weekday,
@@ -68,6 +74,7 @@ function formatWeekdayConfirmedSelection(
   );
 }
 
+// Format any supported confirmed selection into the product's display label.
 export function formatConfirmedSelection(
   selection: ConfirmedSelection,
   locale: string,

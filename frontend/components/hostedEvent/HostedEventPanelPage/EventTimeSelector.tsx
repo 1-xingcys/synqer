@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Z_INDEX } from "@/lib/zIndex";
-import { formatLocalizedConfirmedAxisTimeRangeLabel } from "@/components/eventCommon/timeRangeFormat";
+import { formatLocalizedRangeLabel } from "@/components/eventCommon/timeRangeFormat";
 import type { SelectedTimeRange } from "./types";
 
 interface EventTimeSelectorProps {
@@ -183,7 +183,7 @@ export function EventTimeSelector({
               >
                 <div className="flex items-center gap-2 text-sm flex-wrap min-w-0">
                   <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {formatLocalizedConfirmedAxisTimeRangeLabel(
+                    {formatLocalizedRangeLabel(
                       {
                         axisType: range.axisType,
                         startDate: range.startDate,
