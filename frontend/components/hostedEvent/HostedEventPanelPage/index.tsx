@@ -1,27 +1,25 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
 import { EventStatus } from "@/types/event";
 import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
 import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
 import { EventTimeSelector } from "./EventTimeSelector";
+import { EventResultShareButton } from "./EventResultShareButton";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import {
   useEventTimeSelection,
   useEventTimeConfirmation,
   useParticipantsData,
-  useHostedEventResultShare,
 } from "./hooks";
-import { buildHostedEventResultSummary } from "../resultSummary";
 
 export default function HostedEventPanelPage() {
   const params = useParams();
   const eventId = params.eventId as string;
   const t = useTranslations();
-  const locale = useLocale();
   const { data } = useHostedEventContext();
 
   // Participants and votes data
@@ -106,45 +104,6 @@ export default function HostedEventPanelPage() {
           ) || a.startMinute - b.startMinute,
       );
   })();
-  const resultSummary = (() => {
-    if (!data || !isConfirmed) return null;
-
-    if (confirmedSlots.length === 0) return null;
-
-    return buildHostedEventResultSummary({
-      confirmedSlots,
-      votes: data.votes || [],
-      expectedParticipants: data.expectedParticipants || [],
-    });
-  })();
-  const canShareResult = Boolean(resultSummary?.ranges.length);
-  const {
-    canNativeShareResultText,
-    resultTextShareStatus,
-    resultTextCopied,
-    lineShareStatus,
-    canShareResultToLine,
-    handleShareResultText,
-    handleShareResultToLine,
-  } = useHostedEventResultShare({
-    eventId,
-    eventTitle,
-    resultSummary,
-    locale,
-    copy: {
-      title: t("eventInfo.resultText.title"),
-      eventLine: (eventTitle) =>
-        t("eventInfo.resultText.event", { eventTitle }),
-      availableLine: (availableCount, totalExpected) =>
-        t("eventInfo.resultText.available", {
-          availableCount,
-          totalExpected,
-        }),
-      unavailableLine: (names) =>
-        t("eventInfo.resultText.unavailable", { names }),
-      none: t("eventInfo.resultText.none"),
-    },
-  });
 
   // Loading and error states are handled by the layout
   if (!data || !event) {
@@ -183,14 +142,15 @@ export default function HostedEventPanelPage() {
             isCommitPending={isCommitPending}
             isDiscardPending={isDiscardPending}
             isVotingPhase={isVotingPhase}
-            showShareResultButton={canShareResult}
-            canNativeShareResultText={canNativeShareResultText}
-            resultTextShareStatus={resultTextShareStatus}
-            resultTextCopied={resultTextCopied}
-            onShareResultText={handleShareResultText}
-            showShareToLineOption={canShareResultToLine}
-            lineShareStatus={lineShareStatus}
-            onShareToLine={handleShareResultToLine}
+            headerAction={
+              <EventResultShareButton
+                eventId={eventId}
+                eventTitle={eventTitle}
+                confirmedSlots={confirmedSlots}
+                votes={data.votes || []}
+                expectedParticipants={data.expectedParticipants || []}
+              />
+            }
           />
 
           {/* Results View with HeatMap */}

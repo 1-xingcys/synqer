@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { SelectedTimeRange } from "../EventTimeSelector";
 import { EventSlotAxisType, StagedConfirmation, Weekday } from "@/types/event";
 import { CANONICAL_WEEKDAY_ORDER } from "@/lib/weekdays";
+import type { SelectedTimeRange } from "../types";
 
 interface EventSlot {
   id: string;

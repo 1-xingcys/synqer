@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useLiff } from "@/hooks/useLiff";
 import {
   buildHostedEventResultTextFromSummary,
   type HostedEventResultTextCopy,
 } from "@/components/hostedEvent/hostedEventResultText";
-import { type HostedEventResultSummary } from "@/components/hostedEvent/resultSummary";
+import {
+  buildHostedEventResultSummary,
+  type HostedResultExpectedParticipant,
+  type HostedResultSlot,
+  type HostedResultVote,
+} from "@/components/hostedEvent/resultSummary";
 import {
   canShareHostedEventResultText,
   shareHostedEventResultText,
@@ -38,8 +43,10 @@ type ResultTextShareStatus =
 export function useHostedEventResultShare(opts: {
   eventId: string;
   eventTitle: string;
-  resultSummary: HostedEventResultSummary | null;
   locale: string;
+  confirmedSlots: HostedResultSlot[];
+  votes: HostedResultVote[];
+  expectedParticipants: HostedResultExpectedParticipant[];
   copy: HostedEventResultTextCopy;
 }) {
   const { copied: resultTextCopied, copy: copyResultText } =
@@ -53,17 +60,29 @@ export function useHostedEventResultShare(opts: {
     LineShareStatus.Idle,
   );
 
+  const resultSummary = useMemo(() => {
+    if (opts.confirmedSlots.length === 0) {
+      return null;
+    }
+
+    return buildHostedEventResultSummary({
+      confirmedSlots: opts.confirmedSlots,
+      votes: opts.votes,
+      expectedParticipants: opts.expectedParticipants,
+    });
+  }, [opts.confirmedSlots, opts.expectedParticipants, opts.votes]);
+
+  const canShareResult = Boolean(resultSummary?.ranges.length);
+
   const canShareResultToLine =
-    Boolean(opts.resultSummary?.ranges.length) &&
-    isInLiffClient &&
-    isLiffInitialized;
+    canShareResult && isInLiffClient && isLiffInitialized;
 
   const buildResultText = () => {
-    if (!opts.resultSummary) return "";
+    if (!resultSummary) return "";
 
     return buildHostedEventResultTextFromSummary({
       eventTitle: opts.eventTitle,
-      summary: opts.resultSummary,
+      summary: resultSummary,
       locale: opts.locale,
       copy: opts.copy,
     });
@@ -103,7 +122,7 @@ export function useHostedEventResultShare(opts: {
   };
 
   const handleShareResultToLine = async () => {
-    if (!opts.resultSummary || !canShareResultToLine) {
+    if (!resultSummary || !canShareResultToLine) {
       return false;
     }
 
@@ -112,7 +131,7 @@ export function useHostedEventResultShare(opts: {
     const result = await shareHostedEventResultFlexMessage({
       eventId: opts.eventId,
       eventTitle: opts.eventTitle,
-      summary: opts.resultSummary,
+      summary: resultSummary,
       locale: opts.locale,
     });
 
@@ -131,6 +150,7 @@ export function useHostedEventResultShare(opts: {
   };
 
   return {
+    canShareResult,
     canNativeShareResultText,
     resultTextShareStatus,
     resultTextCopied,
