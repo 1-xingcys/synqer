@@ -1,7 +1,7 @@
 "use client";
 
 import { formatMinutesToTime } from "@/lib/utils";
-import { formatWeekdayLabel } from "@/lib/weekdays";
+import { formatWeekdayLabel, formatWeekdayLabelFromDate } from "@/lib/weekdays";
 import { type EventSlotAxisType, type Weekday } from "@/types/event";
 
 export type LocalizedTimeRangeFormatOptions = {
@@ -54,10 +54,11 @@ function formatLocalizedDateLabelFromDate(
     day: "numeric",
     timeZone: options.timeZone,
   }).format(date);
-  const weekdayText = new Intl.DateTimeFormat(dateLocale, {
-    weekday: options.weekdayStyle ?? (locale === "zh-TW" ? "narrow" : "short"),
-    timeZone: options.timeZone,
-  }).format(date);
+  const weekdayText = formatWeekdayLabelFromDate(
+    date,
+    dateLocale,
+    options.weekdayStyle ?? (locale === "zh-TW" ? "narrow" : "short"),
+  );
 
   return locale === "zh-TW"
     ? `${dateText}（${weekdayText}）`
