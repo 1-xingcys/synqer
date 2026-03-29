@@ -17,7 +17,6 @@ interface EventSlot {
 interface UseConfirmedHostedResultSlotsOptions {
   slots: EventSlot[];
   confirmedSlotIds?: string[];
-  enabled?: boolean;
 }
 
 function normalizeAxisDate(axisDate?: string | Date | null): string | null {
@@ -61,10 +60,9 @@ function sortHostedResultSlots(
 export function useConfirmedHostedResultSlots({
   slots,
   confirmedSlotIds,
-  enabled = true,
 }: UseConfirmedHostedResultSlotsOptions): HostedResultSlot[] {
   return useMemo(() => {
-    if (!enabled || !confirmedSlotIds?.length) {
+    if (!confirmedSlotIds?.length) {
       return [];
     }
 
@@ -81,5 +79,5 @@ export function useConfirmedHostedResultSlots({
         endMinute: slot.endMinute,
       }))
       .sort(sortHostedResultSlots);
-  }, [confirmedSlotIds, enabled, slots]);
+  }, [confirmedSlotIds, slots]);
 }

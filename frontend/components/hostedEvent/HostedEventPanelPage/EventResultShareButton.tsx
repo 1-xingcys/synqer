@@ -5,16 +5,29 @@ import { useLocale, useTranslations } from "next-intl";
 import { Share2 } from "lucide-react";
 import {
   type HostedResultExpectedParticipant,
-  type HostedResultSlot,
   type HostedResultVote,
 } from "@/components/hostedEvent/resultSummary";
-import { useHostedEventResultShare } from "./hooks";
+import { type EventSlotAxisType, type Weekday } from "@/types/event";
+import {
+  useConfirmedHostedResultSlots,
+  useHostedEventResultShare,
+} from "./hooks";
 import { EventResultShareModal } from "./EventResultShareModal";
+
+interface EventSlot {
+  id: string;
+  axisType: EventSlotAxisType;
+  axisDate?: string | Date | null;
+  axisWeekday?: Weekday | null;
+  startMinute: number;
+  endMinute: number;
+}
 
 interface EventResultShareButtonProps {
   eventId: string;
   eventTitle: string;
-  confirmedSlots: HostedResultSlot[];
+  slots: EventSlot[];
+  confirmedSlotIds?: string[];
   votes: HostedResultVote[];
   expectedParticipants: HostedResultExpectedParticipant[];
 }
@@ -22,7 +35,8 @@ interface EventResultShareButtonProps {
 export function EventResultShareButton({
   eventId,
   eventTitle,
-  confirmedSlots,
+  slots,
+  confirmedSlotIds,
   votes,
   expectedParticipants,
 }: EventResultShareButtonProps) {
@@ -30,6 +44,10 @@ export function EventResultShareButton({
   const t = useTranslations();
   const tEventInfo = useTranslations("eventInfo");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const confirmedSlots = useConfirmedHostedResultSlots({
+    slots,
+    confirmedSlotIds,
+  });
 
   const {
     canShareResult,

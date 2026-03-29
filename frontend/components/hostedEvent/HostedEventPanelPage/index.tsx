@@ -14,7 +14,6 @@ import {
   useEventTimeSelection,
   useEventTimeConfirmation,
   useParticipantsData,
-  useConfirmedHostedResultSlots,
 } from "./hooks";
 
 export default function HostedEventPanelPage() {
@@ -84,11 +83,6 @@ export default function HostedEventPanelPage() {
   const showResultsView = isVotingPhase || isVotingEnded || isConfirmed;
   const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
   const eventTitle = event?.title || t("event.untitled");
-  const confirmedSlots = useConfirmedHostedResultSlots({
-    slots: data?.slots ?? [],
-    confirmedSlotIds: event?.confirmedSlotIds,
-    enabled: isConfirmed,
-  });
 
   // Loading and error states are handled by the layout
   if (!data || !event) {
@@ -131,7 +125,8 @@ export default function HostedEventPanelPage() {
               <EventResultShareButton
                 eventId={eventId}
                 eventTitle={eventTitle}
-                confirmedSlots={confirmedSlots}
+                slots={data.slots || []}
+                confirmedSlotIds={event.confirmedSlotIds}
                 votes={data.votes || []}
                 expectedParticipants={data.expectedParticipants || []}
               />
