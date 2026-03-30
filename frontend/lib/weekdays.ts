@@ -64,13 +64,33 @@ export function getOrderedWeekdays(locale: string): Weekday[] {
   ];
 }
 
-export function formatWeekdayLabel(
-  weekday: Weekday,
+function formatWeekdayTextFromDate(
+  date: Date,
   locale: string,
   formatOption: "narrow" | "short" | "long" = "short",
 ): string {
   return new Intl.DateTimeFormat(locale, {
     weekday: formatOption,
     timeZone: "UTC",
-  }).format(WEEKDAY_REFERENCE_DATE[weekday]);
+  }).format(date);
+}
+
+export function formatWeekdayLabel(
+  weekday: Weekday,
+  locale: string,
+  formatOption: "narrow" | "short" | "long" = "short",
+): string {
+  return formatWeekdayTextFromDate(
+    WEEKDAY_REFERENCE_DATE[weekday],
+    locale,
+    formatOption,
+  );
+}
+
+export function formatWeekdayLabelFromDate(
+  date: Date,
+  locale: string,
+  formatOption: "narrow" | "short" | "long" = "short",
+): string {
+  return formatWeekdayTextFromDate(date, locale, formatOption);
 }

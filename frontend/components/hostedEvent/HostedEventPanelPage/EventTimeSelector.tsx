@@ -1,26 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { formatMinutesToTime } from "@/lib/utils";
-import { formatAxisKeyLabel } from "@/lib/event-presentation";
-import type { EventSlotAxisType } from "@/types/event";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Z_INDEX } from "@/lib/zIndex";
-
-export interface SelectedTimeRange {
-  id: string;
-  startDate: string;
-  endDate: string;
-  axisType: EventSlotAxisType;
-  startTime: number;
-  endTime: number;
-  slotIds: string[];
-  isConfirmed?: boolean;
-  isStaged?: boolean;
-  isToBeRemoved?: boolean;
-}
+import { formatLocalizedRangeLabel } from "@/components/eventCommon/timeRangeFormat";
+import type { SelectedTimeRange } from "./types";
 
 interface EventTimeSelectorProps {
   selectedRanges: SelectedTimeRange[];
@@ -33,6 +19,7 @@ interface EventTimeSelectorProps {
   isCommitPending: boolean;
   isDiscardPending: boolean;
   isVotingPhase: boolean;
+  headerAction?: ReactNode;
 }
 
 // Confirmation Dialog Component
@@ -112,22 +99,12 @@ export function EventTimeSelector({
   isCommitPending,
   isDiscardPending,
   isVotingPhase,
+  headerAction,
 }: EventTimeSelectorProps) {
   const locale = useLocale();
-  const t = useTranslations("hosted");
+  const tHosted = useTranslations("hosted");
   const [showCommitConfirm, setShowCommitConfirm] = useState(false);
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
-
-  const formatDateRange = (
-    startDate: string,
-    endDate: string,
-    axisType: EventSlotAxisType,
-  ) => {
-    if (startDate === endDate) {
-      return formatAxisKeyLabel(startDate, axisType, locale);
-    }
-    return `${formatAxisKeyLabel(startDate, axisType, locale)} - ${formatAxisKeyLabel(endDate, axisType, locale)}`;
-  };
 
   const handleCommitClick = () => {
     if (isVotingPhase) {
@@ -156,16 +133,16 @@ export function EventTimeSelector({
 
   const statusText = hasStagedChanges
     ? {
-        label: t("eventTimeSelector.statusPendingChanges"),
+        label: tHosted("eventTimeSelector.statusPendingChanges"),
         className: "text-orange-600 dark:text-orange-400 border-none",
       }
     : hasConfirmedTime
       ? {
-          label: t("eventTimeSelector.statusConfirmed"),
+          label: tHosted("eventTimeSelector.statusConfirmed"),
           className: "text-emerald-600 dark:text-emerald-400 border-none",
         }
       : {
-          label: t("eventTimeSelector.statusUnconfirmed"),
+          label: tHosted("eventTimeSelector.statusUnconfirmed"),
           className: "text-orange-600 dark:text-orange-400 border-none",
         };
 
@@ -175,13 +152,16 @@ export function EventTimeSelector({
       <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center justify-between gap-3">
           <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
-            {t("eventTimeSelector.title")}
+            {tHosted("eventTimeSelector.title")}
           </h3>
-          <span
-            className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${statusText.className}`}
-          >
-            {statusText.label}
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${statusText.className}`}
+            >
+              {statusText.label}
+            </span>
+            {headerAction}
+          </div>
         </div>
       </div>
 
@@ -202,18 +182,17 @@ export function EventTimeSelector({
                 }`}
               >
                 <div className="flex items-center gap-2 text-sm flex-wrap min-w-0">
-                  {/* Date and time */}
                   <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {formatDateRange(
-                      range.startDate,
-                      range.endDate,
-                      range.axisType,
+                    {formatLocalizedRangeLabel(
+                      {
+                        axisType: range.axisType,
+                        startDate: range.startDate,
+                        endDate: range.endDate,
+                        startMinute: range.startTime,
+                        endMinute: range.endTime,
+                      },
+                      locale,
                     )}
-                  </span>
-                  <span className="text-zinc-400">•</span>
-                  <span className="font-mono text-xs text-zinc-600 dark:text-zinc-400">
-                    {formatMinutesToTime(range.startTime)} -{" "}
-                    {formatMinutesToTime(range.endTime)}
                   </span>
                 </div>
 
@@ -222,7 +201,7 @@ export function EventTimeSelector({
                     onClick={() => void handleRemoveClick(range.id)}
                     disabled={isActionPending}
                     className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title={t("eventTimeSelector.remove")}
+                    title={tHosted("eventTimeSelector.remove")}
                   >
                     {pendingRemoveId === range.id ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -236,7 +215,7 @@ export function EventTimeSelector({
           </div>
         ) : (
           <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-2">
-            {t("eventTimeSelector.noConfirmedTime")}
+            {tHosted("eventTimeSelector.noConfirmedTime")}
           </p>
         )}
       </div>
@@ -250,7 +229,7 @@ export function EventTimeSelector({
           >
             <span className="inline-flex items-center justify-center gap-2">
               {isDiscardPending && <Loader2 className="w-4 h-4 animate-spin" />}
-              {t("eventTimeSelector.discard")}
+              {tHosted("eventTimeSelector.discard")}
             </span>
           </button>
           <button
@@ -260,8 +239,8 @@ export function EventTimeSelector({
           >
             {isCommitPending && <Loader2 className="w-4 h-4 animate-spin" />}
             {isCommitPending
-              ? t("eventTimeSelector.saving")
-              : t("eventTimeSelector.save")}
+              ? tHosted("eventTimeSelector.saving")
+              : tHosted("eventTimeSelector.save")}
           </button>
         </div>
       )}
@@ -271,13 +250,13 @@ export function EventTimeSelector({
         onClose={() => setShowCommitConfirm(false)}
         onConfirm={() => void handleConfirmCommit()}
         icon={AlertTriangle}
-        title={t("confirmDialog.votingWarning")}
-        description={t("confirmDialog.votingWarningDetail")}
-        cancelText={t("confirmDialog.cancel")}
+        title={tHosted("confirmDialog.votingWarning")}
+        description={tHosted("confirmDialog.votingWarningDetail")}
+        cancelText={tHosted("confirmDialog.cancel")}
         confirmText={
           isCommitPending
-            ? t("confirmDialog.confirming")
-            : t("confirmDialog.confirm")
+            ? tHosted("confirmDialog.confirming")
+            : tHosted("confirmDialog.confirm")
         }
         isConfirmDisabled={isCommitPending}
       />

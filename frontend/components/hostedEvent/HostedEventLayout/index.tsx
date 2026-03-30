@@ -49,6 +49,10 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
     },
   ];
 
+  const isConfirmedOrCompleted =
+    data?.event.status === EventStatus.CONFIRMED ||
+    data?.event.status === EventStatus.COMPLETED;
+
   if (isLoading) {
     return <LoadingState viewport="section" />;
   }
@@ -94,9 +98,6 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
   }
 
   const { event, votingStats } = data;
-  const isConfirmedOrCompleted =
-    event.status === EventStatus.CONFIRMED ||
-    event.status === EventStatus.COMPLETED;
 
   return (
     <div className="py-4 sm:py-8 flex flex-col">

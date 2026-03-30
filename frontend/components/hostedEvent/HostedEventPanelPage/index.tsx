@@ -8,6 +8,7 @@ import { EventStatus } from "@/types/event";
 import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
 import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
 import { EventTimeSelector } from "./EventTimeSelector";
+import { EventResultShareButton } from "./EventResultShareButton";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import {
   useEventTimeSelection,
@@ -73,18 +74,21 @@ export default function HostedEventPanelPage() {
     [displayRanges, removeConfirmedTime],
   );
 
+  const event = data?.event;
+  const slots = data?.slots || [];
+  const isVotingPhase = event?.status === EventStatus.VOTING;
+  const isVotingEnded = event?.status === EventStatus.VOTING_ENDED;
+  const isConfirmed = event?.status === EventStatus.CONFIRMED;
+  const isCompleted = event?.status === EventStatus.COMPLETED;
+  const showResultsView = isVotingPhase || isVotingEnded || isConfirmed;
+  const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
+  const eventTitle = event?.title || t("event.untitled");
+
   // Loading and error states are handled by the layout
-  if (!data) {
+  if (!data || !event) {
     return null;
   }
 
-  const { event, slots } = data;
-  const isVotingPhase = event.status === EventStatus.VOTING;
-  const isVotingEnded = event.status === EventStatus.VOTING_ENDED;
-  const isConfirmed = event.status === EventStatus.CONFIRMED;
-  const isCompleted = event.status === EventStatus.COMPLETED;
-  const showResultsView = isVotingPhase || isVotingEnded || isConfirmed;
-  const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
   const hasDisplayableConfirmedTime = event.confirmedSelections.length > 0;
 
   return (
@@ -117,6 +121,16 @@ export default function HostedEventPanelPage() {
             isCommitPending={isCommitPending}
             isDiscardPending={isDiscardPending}
             isVotingPhase={isVotingPhase}
+            headerAction={
+              <EventResultShareButton
+                eventId={eventId}
+                eventTitle={eventTitle}
+                slots={data.slots || []}
+                confirmedSlotIds={event.confirmedSlotIds}
+                votes={data.votes || []}
+                expectedParticipants={data.expectedParticipants || []}
+              />
+            }
           />
 
           {/* Results View with HeatMap */}

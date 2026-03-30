@@ -13,7 +13,7 @@ describe("confirmed-time-formatters", () => {
       "en-US",
     );
 
-    expect(result).toBe("Mon, Apr 21 10:00 - 11:00");
+    expect(result).toBe("4/21 (Mon) 10:00 - 11:00");
   });
 
   it("formats recurring confirmed selections with weekday and time", () => {
@@ -28,6 +28,6 @@ describe("confirmed-time-formatters", () => {
       "en-US",
     );
 
-    expect(result).toBe("Mon 10:00 - 12:00");
+    expect(result).toBe("(Mon) 10:00 - 12:00");
   });
 });

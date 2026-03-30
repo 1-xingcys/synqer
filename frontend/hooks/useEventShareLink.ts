@@ -20,12 +20,12 @@ export function useEventShareLink(eventId: string): {
   }, [eventId]);
 
   const copyLink = useCallback(
-    (e?: React.MouseEvent) => {
+    async (e?: React.MouseEvent) => {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
-      return copy(shareUrl);
+      await copy(shareUrl);
     },
     [copy, shareUrl],
   );
