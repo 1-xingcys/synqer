@@ -1,4 +1,13 @@
-import type { EventSlotAxisType } from "@/types/event";
+import type { EventSlotAxisType, Weekday } from "@/types/event";
+
+export interface EventSlot {
+  id: string;
+  axisType: EventSlotAxisType;
+  axisDate?: string | Date | null;
+  axisWeekday?: Weekday | null;
+  startMinute: number;
+  endMinute: number;
+}
 
 export interface SelectedTimeRange {
   id: string;

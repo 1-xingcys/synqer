@@ -7,21 +7,12 @@ import {
   type HostedResultExpectedParticipant,
   type HostedResultVote,
 } from "@/components/hostedEvent/resultSummary";
-import { type EventSlotAxisType, type Weekday } from "@/types/event";
 import {
   useConfirmedHostedResultSlots,
   useHostedEventResultShare,
 } from "./hooks";
 import { EventResultShareModal } from "./EventResultShareModal";
-
-interface EventSlot {
-  id: string;
-  axisType: EventSlotAxisType;
-  axisDate?: string | Date | null;
-  axisWeekday?: Weekday | null;
-  startMinute: number;
-  endMinute: number;
-}
+import type { EventSlot } from "./types";
 
 interface EventResultShareButtonProps {
   eventId: string;

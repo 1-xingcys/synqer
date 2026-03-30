@@ -3,16 +3,7 @@
 import { useMemo } from "react";
 import type { HostedResultSlot } from "@/components/hostedEvent/resultSummary";
 import { CANONICAL_WEEKDAY_ORDER } from "@/lib/weekdays";
-import { type EventSlotAxisType, type Weekday } from "@/types/event";
-
-interface EventSlot {
-  id: string;
-  axisType: EventSlotAxisType;
-  axisDate?: string | Date | null;
-  axisWeekday?: Weekday | null;
-  startMinute: number;
-  endMinute: number;
-}
+import type { EventSlot } from "../types";
 
 interface UseConfirmedHostedResultSlotsOptions {
   slots: EventSlot[];
