@@ -32,11 +32,6 @@ function getLocalizedDateLocale(locale: string) {
   return locale === "zh-TW" ? "zh-TW" : "en-US";
 }
 
-// Collapse double spaces that come from composing optional label fragments.
-function normalizeRangeLabelSpacing(label: string) {
-  return label.replace(/\s{2,}/g, " ");
-}
-
 // Format a minute-based range such as 1020-1140 into "17:00 - 19:00".
 function formatMinuteTimeRange(startMinute: number, endMinute: number) {
   return `${formatMinutesToTime(startMinute)} - ${formatMinutesToTime(endMinute)}`;
@@ -130,9 +125,7 @@ function formatLocalizedDateMinuteRangeLabel(
   locale: string,
   options: LocalizedTimeRangeFormatOptions = {},
 ) {
-  return normalizeRangeLabelSpacing(
-    `${formatLocalizedDateRange(range.startDate, range.endDate, locale, options)}  ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`,
-  );
+  return `${formatLocalizedDateRange(range.startDate, range.endDate, locale, options)} ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`;
 }
 
 // Format a recurring weekday slot range such as "(Mon) 10:00 - 12:00".
@@ -151,9 +144,7 @@ function formatLocalizedWeekdayTimeRangeLabel(
     options,
   );
 
-  return normalizeRangeLabelSpacing(
-    `${weekdayLabel}  ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`,
-  );
+  return `${weekdayLabel} ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`;
 }
 
 // Format a concrete datetime range, including both dates when it crosses days.
@@ -181,12 +172,10 @@ export function formatLocalizedDateTimeRangeLabel(
   const isSameDay = startDateLabel === endDateLabel;
 
   if (isSameDay) {
-    return normalizeRangeLabelSpacing(`${startDateLabel}  ${timeLabel}`);
+    return `${startDateLabel} ${timeLabel}`;
   }
 
-  return normalizeRangeLabelSpacing(
-    `${startDateLabel} - ${endDateLabel}  ${timeLabel}`,
-  );
+  return `${startDateLabel} - ${endDateLabel} ${timeLabel}`;
 }
 
 // Dispatch axis-based ranges to the matching shape-specific formatter.
