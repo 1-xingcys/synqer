@@ -16,6 +16,7 @@ export enum ValidationError {
   TitleRequired = "TitleRequired",
   StartTimeAfterEndTime = "StartTimeAfterEndTime",
   StartTimeTooSoon = "StartTimeTooSoon",
+  DeadlineRequired = "DeadlineRequired",
   DeadlineAfterStart = "DeadlineAfterStart",
   DeadlineInPast = "DeadlineInPast",
   WeekdaysRequired = "WeekdaysRequired",
@@ -58,7 +59,11 @@ export function useFormValidation(formData: CreateEventFormData) {
       }
     }
 
-    if (formData.votingDeadline) {
+    if (formData.votingDeadlineEnabled && !formData.votingDeadline) {
+      errorSet.add(ValidationError.DeadlineRequired);
+    }
+
+    if (formData.votingDeadlineEnabled && formData.votingDeadline) {
       const deadlineDateTime = combineDateAndTime(
         formData.votingDeadline,
         formData.votingDeadlineTime,
@@ -99,7 +104,7 @@ export function useFormValidation(formData: CreateEventFormData) {
       formData.weekdays.length !== DEFAULT_WEEKDAYS.length ||
       formData.startTime !== defaultTime ||
       formData.endTime !== "24:00" ||
-      formData.votingDeadlineManuallySet ||
+      formData.votingDeadlineEnabled ||
       formData.lineGroupId !== null ||
       formData.selectedLineUserIds.length > 0
     );

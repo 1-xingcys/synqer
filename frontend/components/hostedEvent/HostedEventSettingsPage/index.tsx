@@ -20,11 +20,14 @@ export default function HostedEventSettingsPage() {
     formData,
     earliestSlot,
     isDeadlineValid,
+    hasDeadlineRequiredError,
+    updateDeadlineEnabled,
     updateDeadlineDate,
     updateDeadlineTime,
     isLoading,
     saving,
     saveSuccess,
+    saveError,
     deleting,
     showDeleteConfirm,
     handleSave,
@@ -63,11 +66,14 @@ export default function HostedEventSettingsPage() {
         {/* Section Content */}
         <div className="p-4 bg-white dark:bg-zinc-900">
           <VotingDeadlinePicker
+            deadlineEnabled={formData.deadlineEnabled}
             deadlineDate={formData.deadlineDate}
             deadlineTime={formData.deadlineTime}
             maxDate={earliestSlot?.date}
             maxTime={earliestSlot?.time}
             hasError={!isDeadlineValid}
+            hasRequiredError={hasDeadlineRequiredError}
+            onEnabledChange={updateDeadlineEnabled}
             onDateChange={updateDeadlineDate}
             onTimeChange={updateDeadlineTime}
             disabled={isVotingDisabled}
@@ -76,6 +82,9 @@ export default function HostedEventSettingsPage() {
           {/* Save Button */}
           {!isVotingDisabled && (
             <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+              {saveError && (
+                <span className="text-sm text-destructive">{saveError}</span>
+              )}
               {saveSuccess && (
                 <span className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
                   <Check className="w-4 h-4" />

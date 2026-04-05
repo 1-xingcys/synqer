@@ -870,11 +870,11 @@
       "title": "Voting Deadline",
       "description": "Set a deadline for participants to submit their votes",
       "recurringDescription": "Optionally set a voting deadline for this recurring event",
-      "optional": "Optional. You can leave this empty.",
-      "clear": "Clear",
+      "enable": "Set voting deadline",
       "date": "Deadline date",
       "time": "Deadline time",
       "autoSync": "Auto-synced with event start time",
+      "errorRequired": "Please select a deadline date first",
       "errorInPast": "Voting deadline cannot be in the past",
       "errorAfterStart": "Voting deadline must be before or at the event start time"
     },

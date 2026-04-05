@@ -3,11 +3,13 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { AlertCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
 
 interface VotingDeadlinePickerProps {
+  deadlineEnabled: boolean;
   /** 投票截止日期 */
   deadlineDate: Date | null;
   /** 投票截止時間 (HH:MM 格式) */
@@ -18,8 +20,10 @@ interface VotingDeadlinePickerProps {
   maxTime?: string;
   /** 是否有錯誤 */
   hasError?: boolean;
+  hasRequiredError?: boolean;
   /** 自訂錯誤訊息 */
   errorMessage?: string;
+  onEnabledChange: (enabled: boolean) => void;
   /** 日期變更回調 */
   onDateChange: (date: Date | null) => void;
   /** 時間變更回調 */
@@ -33,12 +37,15 @@ interface VotingDeadlinePickerProps {
  * 可用於建立活動和編輯活動設定
  */
 export function VotingDeadlinePicker({
+  deadlineEnabled,
   deadlineDate,
   deadlineTime,
   maxDate,
   maxTime,
   hasError = false,
+  hasRequiredError = false,
   errorMessage,
+  onEnabledChange,
   onDateChange,
   onTimeChange,
   disabled = false,
@@ -67,44 +74,72 @@ export function VotingDeadlinePicker({
     return deadlineMinutes > maxMinutes;
   }, [deadlineDate, deadlineTime, maxDate, maxTime]);
 
-  const showError = hasError || isOverMaxTime;
+  const showError =
+    deadlineEnabled && (hasRequiredError || hasError || isOverMaxTime);
 
   return (
     <div className={`space-y-4 ${disabled ? "pointer-events-none" : ""}`}>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            {t("createEvent.votingDeadline.date")}
-          </Label>
-          <DatePicker
-            value={deadlineDate}
-            onChange={onDateChange}
-            placeholder={t("createEvent.configuration.selectDate")}
-            maxDate={maxDate || undefined}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="hosted-enable-voting-deadline"
+            checked={deadlineEnabled}
+            onCheckedChange={(checked) => onEnabledChange(checked === true)}
             disabled={disabled}
           />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            {t("createEvent.votingDeadline.time")}
+          <Label
+            htmlFor="hosted-enable-voting-deadline"
+            className="text-sm font-medium cursor-pointer text-zinc-700 dark:text-zinc-300"
+          >
+            {t("createEvent.votingDeadline.enable")}
           </Label>
-          <TimePicker
-            value={deadlineTime}
-            onChange={onTimeChange}
-            type="start"
-            hasError={showError}
-            disabled={disabled}
-          />
         </div>
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          {deadlineEnabled
+            ? t("createEvent.votingDeadline.description")
+            : t("hosted.deadline.notSet")}
+        </p>
       </div>
+
+      {deadlineEnabled ? (
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {t("createEvent.votingDeadline.date")}
+            </Label>
+            <DatePicker
+              value={deadlineDate}
+              onChange={onDateChange}
+              placeholder={t("createEvent.configuration.selectDate")}
+              maxDate={maxDate || undefined}
+              disabled={disabled}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              {t("createEvent.votingDeadline.time")}
+            </Label>
+            <TimePicker
+              value={deadlineTime}
+              onChange={onTimeChange}
+              type="start"
+              hasError={showError}
+              disabled={disabled}
+            />
+          </div>
+        </div>
+      ) : null}
 
       {/* Error message */}
       {showError && !disabled && (
         <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
           <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
           <p className="text-sm text-destructive">
-            {errorMessage || t("createEvent.votingDeadline.error")}
+            {hasRequiredError
+              ? t("createEvent.votingDeadline.errorRequired")
+              : (errorMessage ??
+                t("createEvent.votingDeadline.errorAfterStart"))}
           </p>
         </div>
       )}

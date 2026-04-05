@@ -1003,7 +1003,7 @@ export interface components {
             title?: string;
             description?: string;
             timeZone?: string;
-            votingDeadline?: string;
+            votingDeadline?: string | null;
         };
         UpdateEventResponseDto: {
             id: string;

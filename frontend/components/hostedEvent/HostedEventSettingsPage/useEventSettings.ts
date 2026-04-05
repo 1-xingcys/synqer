@@ -7,6 +7,7 @@ import { hostedEventsKeys } from "@/hooks/useHostedEvents";
 import type { operations } from "@/generated/openapi";
 
 export interface VotingDeadlineFormData {
+  deadlineEnabled: boolean;
   deadlineDate: Date | null;
   deadlineTime: string;
 }
@@ -24,16 +25,18 @@ export function useEventSettings(eventId: string) {
   const { data: eventData, isLoading, refetch } = useHostedEventContext();
 
   const [formData, setFormData] = useState<VotingDeadlineFormData>({
+    deadlineEnabled: false,
     deadlineDate: null,
     deadlineTime: "00:00",
   });
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const updateVotingDeadline = useCallback(
-    async (votingDeadline?: string) => {
+    async (votingDeadline?: string | null) => {
       const payload: UpdateEventRequest = { votingDeadline };
 
       await apiFetchJson<UpdateEventResponse>(`/events/${eventId}`, {
@@ -96,18 +99,41 @@ export function useEventSettings(eventId: string) {
         const time = `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
 
         setFormData({
+          deadlineEnabled: true,
           deadlineDate: deadline,
           deadlineTime: time,
         });
-      } else if (earliestSlot) {
-        // 如果沒有設定 deadline，使用最早時段作為預設
+      } else {
         setFormData({
-          deadlineDate: earliestSlot.date,
-          deadlineTime: earliestSlot.time,
+          deadlineEnabled: false,
+          deadlineDate: earliestSlot?.date ?? null,
+          deadlineTime: earliestSlot?.time ?? "00:00",
         });
       }
     }
   }, [eventData, earliestSlot]);
+
+  const updateDeadlineEnabled = useCallback(
+    (enabled: boolean) => {
+      setFormData((prev) => {
+        if (!enabled) {
+          return {
+            ...prev,
+            deadlineEnabled: false,
+            deadlineDate: null,
+          };
+        }
+
+        return {
+          ...prev,
+          deadlineEnabled: true,
+          deadlineDate: prev.deadlineDate ?? earliestSlot?.date ?? null,
+          deadlineTime: prev.deadlineTime || earliestSlot?.time || "00:00",
+        };
+      });
+    },
+    [earliestSlot],
+  );
 
   const updateDeadlineDate = useCallback((date: Date | null) => {
     setFormData((prev) => ({ ...prev, deadlineDate: date }));
@@ -119,7 +145,9 @@ export function useEventSettings(eventId: string) {
 
   // 檢查 deadline 是否有效（不晚於最早時段）
   const isDeadlineValid = useMemo(() => {
-    if (!formData.deadlineDate || !earliestSlot) return true;
+    if (!formData.deadlineEnabled) return true;
+    if (!formData.deadlineDate) return false;
+    if (!earliestSlot) return true;
 
     const deadlineDateTime = new Date(formData.deadlineDate);
     const [hours, mins] = formData.deadlineTime.split(":").map(Number);
@@ -130,17 +158,23 @@ export function useEventSettings(eventId: string) {
     earliestDateTime.setHours(eHours, eMins, 0, 0);
 
     return deadlineDateTime <= earliestDateTime;
-  }, [formData, earliestSlot]);
+  }, [earliestSlot, formData]);
+
+  const hasDeadlineRequiredError =
+    formData.deadlineEnabled && formData.deadlineDate === null;
 
   const handleSave = useCallback(async () => {
     if (!isDeadlineValid) return;
 
     try {
       setSaving(true);
+      setSaveError(null);
 
       // 組合日期和時間
-      let votingDeadline: string | undefined;
-      if (formData.deadlineDate) {
+      let votingDeadline: string | null | undefined;
+      if (!formData.deadlineEnabled) {
+        votingDeadline = null;
+      } else if (formData.deadlineDate) {
         const deadline = new Date(formData.deadlineDate);
         const [hours, mins] = formData.deadlineTime.split(":").map(Number);
         deadline.setHours(hours, mins, 0, 0);
@@ -153,7 +187,9 @@ export function useEventSettings(eventId: string) {
       setTimeout(() => setSaveSuccess(false), 3000);
       void refetch();
     } catch (error) {
-      console.error("Failed to save settings:", error);
+      setSaveError(
+        error instanceof Error ? error.message : "Failed to save settings",
+      );
     } finally {
       setSaving(false);
     }
@@ -181,11 +217,14 @@ export function useEventSettings(eventId: string) {
     formData,
     earliestSlot,
     isDeadlineValid,
+    hasDeadlineRequiredError,
+    updateDeadlineEnabled,
     updateDeadlineDate,
     updateDeadlineTime,
     isLoading,
     saving,
     saveSuccess,
+    saveError,
     deleting,
     showDeleteConfirm,
     handleSave,

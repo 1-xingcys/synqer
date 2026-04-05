@@ -870,11 +870,11 @@
       "title": "Voting Deadline",
       "description": "設定活動的投票截止時間",
       "recurringDescription": "可選填 recurring 活動的投票截止時間",
-      "optional": "選填，不設定也可以直接建立活動",
-      "clear": "清除",
+      "enable": "設定截止時間",
       "date": "截止日期",
       "time": "截止時間",
       "autoSync": "自動與活動開始時間同步",
+      "errorRequired": "請先選擇投票截止日期",
       "errorInPast": "投票截止時間不能早於目前時間",
       "errorAfterStart": "投票截止時間必須在活動開始時間之前"
     },

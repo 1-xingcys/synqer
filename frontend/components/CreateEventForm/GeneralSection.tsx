@@ -40,26 +40,22 @@ export function GeneralSection() {
 
   const handleEventTypeChange = (value: EventType) => {
     setFormData((prev) => {
-      if (value === "ONE_TIME") {
+      if (
+        value === "ONE_TIME" &&
+        prev.votingDeadlineEnabled &&
+        !prev.votingDeadlineManuallySet
+      ) {
         return {
           ...prev,
           eventType: value,
-          votingDeadline: prev.oneTimeVotingDeadlineManuallySet
-            ? prev.oneTimeVotingDeadline
-            : prev.startDate,
-          votingDeadlineTime: prev.oneTimeVotingDeadlineManuallySet
-            ? prev.oneTimeVotingDeadlineTime
-            : prev.startTime,
-          votingDeadlineManuallySet: prev.oneTimeVotingDeadlineManuallySet,
+          votingDeadline: prev.startDate,
+          votingDeadlineTime: prev.startTime,
         };
       }
 
       return {
         ...prev,
         eventType: value,
-        votingDeadline: prev.recurringVotingDeadline,
-        votingDeadlineTime: prev.recurringVotingDeadlineTime,
-        votingDeadlineManuallySet: prev.recurringVotingDeadlineManuallySet,
       };
     });
   };
