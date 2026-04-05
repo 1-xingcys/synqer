@@ -103,7 +103,6 @@ export function useHostedEventResultShare(opts: {
     setResultTextShareStatus(ResultTextShareStatus.Sending);
 
     const result = await shareHostedEventResultText({
-      title: opts.eventTitle,
       text: resultText,
     });
 
