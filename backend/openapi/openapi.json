@@ -2361,7 +2361,9 @@
             "type": "string"
           },
           "votingDeadline": {
-            "type": "string"
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },

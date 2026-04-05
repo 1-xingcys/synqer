@@ -27,7 +27,7 @@ export class EventUpdateService {
     await this.eventAuthorizationService.verifyOwner(eventId, userId);
 
     // 驗證 votingDeadline
-    if (updateDto.votingDeadline !== undefined) {
+    if (typeof updateDto.votingDeadline === 'string') {
       await this.validateVotingDeadline(eventId, updateDto.votingDeadline);
     }
 
@@ -46,7 +46,10 @@ export class EventUpdateService {
     }
 
     if (updateDto.votingDeadline !== undefined) {
-      updateData.votingDeadline = new Date(updateDto.votingDeadline);
+      updateData.votingDeadline =
+        updateDto.votingDeadline === null
+          ? null
+          : new Date(updateDto.votingDeadline);
     }
 
     const updatedEvent = await this.eventRepository.update(eventId, updateData);

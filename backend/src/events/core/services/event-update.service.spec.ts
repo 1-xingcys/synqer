@@ -122,8 +122,8 @@ describe('EventUpdateService', () => {
       mockEventRepository.update.mockResolvedValue(updatedEvent);
       mockEventScheduleService.resolveSchedule.mockReturnValue({
         type: EventType.ONE_TIME,
-        startDate: updatedEvent.startDate,
-        endDate: updatedEvent.endDate,
+        startDate: updatedEvent.oneTimeSchedule.startDate,
+        endDate: updatedEvent.oneTimeSchedule.endDate,
         startMinuteOfDay: 540,
         endMinuteOfDay: 600,
         slotDurationMin: 15,
@@ -156,8 +156,8 @@ describe('EventUpdateService', () => {
       mockEventRepository.update.mockResolvedValue(updatedEvent);
       mockEventScheduleService.resolveSchedule.mockReturnValue({
         type: EventType.ONE_TIME,
-        startDate: updatedEvent.startDate,
-        endDate: updatedEvent.endDate,
+        startDate: updatedEvent.oneTimeSchedule.startDate,
+        endDate: updatedEvent.oneTimeSchedule.endDate,
         startMinuteOfDay: 540,
         endMinuteOfDay: 600,
         slotDurationMin: 15,
@@ -205,8 +205,8 @@ describe('EventUpdateService', () => {
       );
       mockEventScheduleService.resolveSchedule.mockReturnValue({
         type: EventType.ONE_TIME,
-        startDate: updatedEvent.startDate,
-        endDate: updatedEvent.endDate,
+        startDate: updatedEvent.oneTimeSchedule.startDate,
+        endDate: updatedEvent.oneTimeSchedule.endDate,
         startMinuteOfDay: 540,
         endMinuteOfDay: 600,
         slotDurationMin: 15,
@@ -217,6 +217,42 @@ describe('EventUpdateService', () => {
       expect(eventRepository.findOneBasic).toHaveBeenCalledWith(eventId);
       expect(eventRepository.update).toHaveBeenCalledWith(eventId, {
         votingDeadline: new Date('2024-12-24T08:00:00Z'),
+      });
+    });
+
+    it('should clear votingDeadline when set to null', async () => {
+      const updateDto = { votingDeadline: null };
+      const updatedEvent = {
+        id: eventId,
+        type: EventType.ONE_TIME,
+        title: 'Title',
+        description: null,
+        oneTimeSchedule: {
+          startDate: new Date('2024-12-25'),
+          endDate: new Date('2024-12-25'),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
+        recurringSchedule: null,
+      };
+
+      mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
+      mockEventRepository.update.mockResolvedValue(updatedEvent);
+      mockEventScheduleService.resolveSchedule.mockReturnValue({
+        type: EventType.ONE_TIME,
+        startDate: updatedEvent.oneTimeSchedule.startDate,
+        endDate: updatedEvent.oneTimeSchedule.endDate,
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 600,
+        slotDurationMin: 15,
+      });
+
+      await service.update(eventId, userId, updateDto);
+
+      expect(eventRepository.findOneBasic).not.toHaveBeenCalled();
+      expect(eventRepository.update).toHaveBeenCalledWith(eventId, {
+        votingDeadline: null,
       });
     });
 
@@ -308,8 +344,8 @@ describe('EventUpdateService', () => {
       mockEventRepository.update.mockResolvedValue(updatedEvent);
       mockEventScheduleService.resolveSchedule.mockReturnValue({
         type: EventType.ONE_TIME,
-        startDate: updatedEvent.startDate,
-        endDate: updatedEvent.endDate,
+        startDate: updatedEvent.oneTimeSchedule.startDate,
+        endDate: updatedEvent.oneTimeSchedule.endDate,
         startMinuteOfDay: 540,
         endMinuteOfDay: 600,
         slotDurationMin: 15,
@@ -345,8 +381,8 @@ describe('EventUpdateService', () => {
       mockEventRepository.update.mockResolvedValue(updatedEvent);
       mockEventScheduleService.resolveSchedule.mockReturnValue({
         type: EventType.ONE_TIME,
-        startDate: updatedEvent.startDate,
-        endDate: updatedEvent.endDate,
+        startDate: updatedEvent.oneTimeSchedule.startDate,
+        endDate: updatedEvent.oneTimeSchedule.endDate,
         startMinuteOfDay: 540,
         endMinuteOfDay: 600,
         slotDurationMin: 15,
