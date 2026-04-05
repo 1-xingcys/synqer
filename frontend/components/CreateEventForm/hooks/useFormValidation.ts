@@ -2,6 +2,10 @@
 
 import { useMemo } from "react";
 import {
+  validateVotingDeadline,
+  VOTING_DEADLINE_ERROR,
+} from "@/lib/votingDeadline";
+import {
   CreateEventFormData,
   MIN_HOURS_BEFORE_EVENT,
   DEFAULT_WEEKDAYS,
@@ -59,30 +63,27 @@ export function useFormValidation(formData: CreateEventFormData) {
       }
     }
 
-    if (formData.votingDeadlineEnabled && !formData.votingDeadline) {
+    const deadlineError = validateVotingDeadline({
+      enabled: formData.votingDeadlineEnabled,
+      date: formData.votingDeadline,
+      time: formData.votingDeadlineTime,
+      minDateTime: new Date(),
+      maxDateTime:
+        !isRecurring && formData.startDate
+          ? combineDateAndTime(formData.startDate, formData.startTime)
+          : null,
+    });
+
+    if (deadlineError === VOTING_DEADLINE_ERROR.REQUIRED) {
       errorSet.add(ValidationError.DeadlineRequired);
     }
 
-    if (formData.votingDeadlineEnabled && formData.votingDeadline) {
-      const deadlineDateTime = combineDateAndTime(
-        formData.votingDeadline,
-        formData.votingDeadlineTime,
-      );
+    if (deadlineError === VOTING_DEADLINE_ERROR.IN_PAST) {
+      errorSet.add(ValidationError.DeadlineInPast);
+    }
 
-      if (deadlineDateTime < new Date()) {
-        errorSet.add(ValidationError.DeadlineInPast);
-      }
-
-      if (!isRecurring && formData.startDate) {
-        const startDateTime = combineDateAndTime(
-          formData.startDate,
-          formData.startTime,
-        );
-
-        if (deadlineDateTime > startDateTime) {
-          errorSet.add(ValidationError.DeadlineAfterStart);
-        }
-      }
+    if (deadlineError === VOTING_DEADLINE_ERROR.AFTER_MAX) {
+      errorSet.add(ValidationError.DeadlineAfterStart);
     }
 
     return errorSet;

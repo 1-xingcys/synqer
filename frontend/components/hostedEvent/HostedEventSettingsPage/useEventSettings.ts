@@ -2,6 +2,12 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
+import {
+  combineVotingDeadline,
+  validateVotingDeadline,
+  VOTING_DEADLINE_ERROR,
+  type VotingDeadlineError,
+} from "@/lib/votingDeadline";
 import { apiFetchJson } from "@/lib/apiClient";
 import { hostedEventsKeys } from "@/hooks/useHostedEvents";
 import type { operations } from "@/generated/openapi";
@@ -143,28 +149,26 @@ export function useEventSettings(eventId: string) {
     setFormData((prev) => ({ ...prev, deadlineTime: time }));
   }, []);
 
-  // 檢查 deadline 是否有效（不晚於最早時段）
-  const isDeadlineValid = useMemo(() => {
-    if (!formData.deadlineEnabled) return true;
-    if (!formData.deadlineDate) return false;
-    if (!earliestSlot) return true;
-
-    const deadlineDateTime = new Date(formData.deadlineDate);
-    const [hours, mins] = formData.deadlineTime.split(":").map(Number);
-    deadlineDateTime.setHours(hours, mins, 0, 0);
-
-    const earliestDateTime = new Date(earliestSlot.date);
-    const [eHours, eMins] = earliestSlot.time.split(":").map(Number);
-    earliestDateTime.setHours(eHours, eMins, 0, 0);
-
-    return deadlineDateTime <= earliestDateTime;
+  // Reuse the same validation engine as the create page, but with
+  // hosted-settings-specific bounds: now ~ earliest available slot.
+  const deadlineError = useMemo<VotingDeadlineError | null>(() => {
+    return validateVotingDeadline({
+      enabled: formData.deadlineEnabled,
+      date: formData.deadlineDate,
+      time: formData.deadlineTime,
+      minDateTime: new Date(),
+      maxDateTime: earliestSlot
+        ? combineVotingDeadline(earliestSlot.date, earliestSlot.time)
+        : null,
+    });
   }, [earliestSlot, formData]);
 
+  const isDeadlineValid = deadlineError === null;
   const hasDeadlineRequiredError =
-    formData.deadlineEnabled && formData.deadlineDate === null;
+    deadlineError === VOTING_DEADLINE_ERROR.REQUIRED;
 
   const handleSave = useCallback(async () => {
-    if (!isDeadlineValid) return;
+    if (deadlineError !== null) return;
 
     try {
       setSaving(true);
@@ -175,10 +179,10 @@ export function useEventSettings(eventId: string) {
       if (!formData.deadlineEnabled) {
         votingDeadline = null;
       } else if (formData.deadlineDate) {
-        const deadline = new Date(formData.deadlineDate);
-        const [hours, mins] = formData.deadlineTime.split(":").map(Number);
-        deadline.setHours(hours, mins, 0, 0);
-        votingDeadline = deadline.toISOString();
+        votingDeadline = combineVotingDeadline(
+          formData.deadlineDate,
+          formData.deadlineTime,
+        ).toISOString();
       }
 
       await updateVotingDeadline(votingDeadline);
@@ -193,7 +197,7 @@ export function useEventSettings(eventId: string) {
     } finally {
       setSaving(false);
     }
-  }, [formData, isDeadlineValid, refetch, updateVotingDeadline]);
+  }, [deadlineError, formData, refetch, updateVotingDeadline]);
 
   const handleDelete = useCallback(async () => {
     try {
@@ -216,6 +220,7 @@ export function useEventSettings(eventId: string) {
     eventData,
     formData,
     earliestSlot,
+    deadlineError,
     isDeadlineValid,
     hasDeadlineRequiredError,
     updateDeadlineEnabled,

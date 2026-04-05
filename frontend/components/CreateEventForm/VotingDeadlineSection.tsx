@@ -1,11 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { AlertCircle } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { DatePicker } from "@/components/eventCommon/DatePicker";
-import { TimePicker } from "@/components/eventCommon/TimePicker";
+import { VotingDeadlineFields } from "@/components/eventCommon/VotingDeadlineFields";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
 import { ValidationError } from "./hooks/useFormValidation";
@@ -33,6 +29,18 @@ export function VotingDeadlineSection() {
   const isRecurring = formData.eventType === "RECURRING";
 
   const today = getToday();
+  // Map shared validation results into create-page-specific copy and helper UI.
+  const errorMessage = hasDeadlineRequiredError
+    ? t("createEvent.votingDeadline.errorRequired")
+    : hasDeadlineInPastError
+      ? t("createEvent.votingDeadline.errorInPast")
+      : hasDeadlineAfterStartError && !isRecurring
+        ? t("createEvent.votingDeadline.errorAfterStart")
+        : null;
+  const helperText =
+    !isRecurring && !formData.votingDeadlineManuallySet
+      ? t("createEvent.votingDeadline.autoSync")
+      : null;
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">
@@ -50,91 +58,33 @@ export function VotingDeadlineSection() {
             <h2 className="text-base font-semibold text-foreground mb-1">
               {t("createEvent.votingDeadline.title")}
             </h2>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="enable-voting-deadline"
-                  checked={formData.votingDeadlineEnabled}
-                  onCheckedChange={(checked) =>
-                    handleVotingDeadlineEnabledChange(checked === true)
-                  }
-                />
-                <Label
-                  htmlFor="enable-voting-deadline"
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  {t("createEvent.votingDeadline.enable")}
-                </Label>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {isRecurring
-                  ? t("createEvent.votingDeadline.recurringDescription")
-                  : t("createEvent.votingDeadline.description")}
-              </p>
-            </div>
           </div>
 
-          {formData.votingDeadlineEnabled ? (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label>{t("createEvent.votingDeadline.date")}</Label>
-                  <DatePicker
-                    value={formData.votingDeadline}
-                    onChange={handleVotingDeadlineDateChange}
-                    placeholder={t("createEvent.configuration.selectDate")}
-                    minDate={today}
-                    maxDate={
-                      isRecurring
-                        ? undefined
-                        : (formData.startDate ?? undefined)
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label>{t("createEvent.votingDeadline.time")}</Label>
-                  <TimePicker
-                    value={formData.votingDeadlineTime}
-                    onChange={handleVotingDeadlineTimeChange}
-                    type="start"
-                  />
-                </div>
-              </div>
-
-              {!isRecurring && !formData.votingDeadlineManuallySet && (
-                <p className="text-xs text-primary flex items-center gap-1.5">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
-                  {t("createEvent.votingDeadline.autoSync")}
-                </p>
-              )}
-
-              {hasDeadlineRequiredError && (
-                <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-                  <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-                  <p className="text-sm text-destructive">
-                    {t("createEvent.votingDeadline.errorRequired")}
-                  </p>
-                </div>
-              )}
-              {hasDeadlineInPastError && (
-                <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-                  <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-                  <p className="text-sm text-destructive">
-                    {t("createEvent.votingDeadline.errorInPast")}
-                  </p>
-                </div>
-              )}
-              {hasDeadlineAfterStartError && !isRecurring && (
-                <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-                  <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-                  <p className="text-sm text-destructive">
-                    {t("createEvent.votingDeadline.errorAfterStart")}
-                  </p>
-                </div>
-              )}
-            </>
-          ) : null}
+          <VotingDeadlineFields
+            checkboxId="enable-voting-deadline"
+            enabled={formData.votingDeadlineEnabled}
+            date={formData.votingDeadline}
+            time={formData.votingDeadlineTime}
+            enableLabel={t("createEvent.votingDeadline.enable")}
+            description={
+              isRecurring
+                ? t("createEvent.votingDeadline.recurringDescription")
+                : t("createEvent.votingDeadline.description")
+            }
+            dateLabel={t("createEvent.votingDeadline.date")}
+            timeLabel={t("createEvent.votingDeadline.time")}
+            datePlaceholder={t("createEvent.configuration.selectDate")}
+            minDate={today}
+            maxDate={
+              isRecurring ? undefined : (formData.startDate ?? undefined)
+            }
+            errorMessage={errorMessage}
+            helperText={helperText}
+            descriptionClassName="text-xs text-muted-foreground"
+            onEnabledChange={handleVotingDeadlineEnabledChange}
+            onDateChange={handleVotingDeadlineDateChange}
+            onTimeChange={handleVotingDeadlineTimeChange}
+          />
         </div>
       </div>
     </div>

@@ -429,6 +429,7 @@
       "deleteEvent": "Delete Event",
       "deleteWarning": "This action cannot be undone. All votes and data will be permanently deleted.",
       "confirmDelete": "Are you sure you want to delete this event?",
+      "deadlineBeforeFirstSlot": "Voting deadline must be before or at the first event slot",
       "votingEndedDescription": "Voting has ended, voting deadline cannot be modified"
     }
   },

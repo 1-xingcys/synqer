@@ -2,16 +2,14 @@
 // Date/Time Utilities (shared across hooks and components)
 // =============================================================================
 
+import { combineVotingDeadline } from "@/lib/votingDeadline";
 import { formatMinutesToTime } from "@/lib/utils";
 
 /**
  * Combine date and time into a single Date object
  */
 export function combineDateAndTime(date: Date, time: string): Date {
-  const [hours, minutes] = time.split(":").map(Number);
-  const result = new Date(date);
-  result.setHours(hours, minutes, 0, 0);
-  return result;
+  return combineVotingDeadline(date, time);
 }
 
 /**

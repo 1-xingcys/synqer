@@ -3,9 +3,10 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
+import { VotingDeadlineFields } from "@/components/eventCommon/VotingDeadlineFields";
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/loading-state";
-import { VotingDeadlinePicker } from "./VotingDeadlinePicker";
+import { VOTING_DEADLINE_ERROR } from "@/lib/votingDeadline";
 import { useEventSettings } from "./useEventSettings";
 import { DangerZone } from "./DangerZone";
 import { EventStatus } from "@/types/event";
@@ -19,6 +20,7 @@ export default function HostedEventSettingsPage() {
     eventData,
     formData,
     earliestSlot,
+    deadlineError,
     isDeadlineValid,
     hasDeadlineRequiredError,
     updateDeadlineEnabled,
@@ -65,18 +67,37 @@ export default function HostedEventSettingsPage() {
 
         {/* Section Content */}
         <div className="p-4 bg-white dark:bg-zinc-900">
-          <VotingDeadlinePicker
-            deadlineEnabled={formData.deadlineEnabled}
-            deadlineDate={formData.deadlineDate}
-            deadlineTime={formData.deadlineTime}
+          <VotingDeadlineFields
+            checkboxId="hosted-enable-voting-deadline"
+            enabled={formData.deadlineEnabled}
+            date={formData.deadlineDate}
+            time={formData.deadlineTime}
+            enableLabel={t("createEvent.votingDeadline.enable")}
+            description={
+              formData.deadlineEnabled
+                ? t("createEvent.votingDeadline.description")
+                : t("hosted.deadline.notSet")
+            }
+            dateLabel={t("createEvent.votingDeadline.date")}
+            timeLabel={t("createEvent.votingDeadline.time")}
+            datePlaceholder={t("createEvent.configuration.selectDate")}
             maxDate={earliestSlot?.date}
-            maxTime={earliestSlot?.time}
-            hasError={!isDeadlineValid}
-            hasRequiredError={hasDeadlineRequiredError}
+            errorMessage={
+              hasDeadlineRequiredError
+                ? t("createEvent.votingDeadline.errorRequired")
+                : deadlineError === VOTING_DEADLINE_ERROR.IN_PAST
+                  ? t("createEvent.votingDeadline.errorInPast")
+                  : deadlineError === VOTING_DEADLINE_ERROR.AFTER_MAX
+                    ? t("hosted.settingsPage.deadlineBeforeFirstSlot")
+                    : undefined
+            }
+            enableLabelClassName="text-sm font-medium cursor-pointer text-zinc-700 dark:text-zinc-300"
+            descriptionClassName="text-sm text-zinc-600 dark:text-zinc-400"
+            fieldLabelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
+            disabled={isVotingDisabled}
             onEnabledChange={updateDeadlineEnabled}
             onDateChange={updateDeadlineDate}
             onTimeChange={updateDeadlineTime}
-            disabled={isVotingDisabled}
           />
 
           {/* Save Button */}

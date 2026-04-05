@@ -2,11 +2,11 @@
 
 import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
+import { combineVotingDeadline } from "@/lib/votingDeadline";
 import { useLiff } from "@/hooks/useLiff";
 import { apiFetchJson } from "@/lib/apiClient";
 import type { operations } from "@/generated/openapi";
 import { CreateEventFormData } from "../types";
-import { combineDateAndTime } from "./utils";
 
 interface UseFormActionsProps {
   formData: CreateEventFormData;
@@ -52,7 +52,7 @@ export function useFormActions({
 
         let votingDeadlineISO: string | undefined;
         if (formData.votingDeadlineEnabled && formData.votingDeadline) {
-          const deadlineDateTime = combineDateAndTime(
+          const deadlineDateTime = combineVotingDeadline(
             formData.votingDeadline,
             formData.votingDeadlineTime,
           );
