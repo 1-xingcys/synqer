@@ -16,7 +16,6 @@ export function canShareHostedEventResultText() {
 }
 
 export async function shareHostedEventResultText(opts: {
-  title: string;
   text: string;
 }): Promise<TextShareResult> {
   if (!canShareHostedEventResultText()) {
@@ -25,7 +24,6 @@ export async function shareHostedEventResultText(opts: {
 
   try {
     await navigator.share({
-      title: opts.title,
       text: opts.text,
     });
     return TextShareResult.Success;
