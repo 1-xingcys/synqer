@@ -105,6 +105,25 @@ export function useFormValidation(
       first.length === second.length &&
       first.every((value, index) => value === second[index]);
 
+    const isSameVotingDeadlineState = (
+      current: CreateEventFormData,
+      initial: CreateEventFormData,
+    ) => {
+      if (current.votingDeadlineEnabled !== initial.votingDeadlineEnabled) {
+        return false;
+      }
+
+      if (!current.votingDeadlineEnabled) {
+        return true;
+      }
+
+      return (
+        isSameDay(current.votingDeadline, initial.votingDeadline) &&
+        current.votingDeadlineTime === initial.votingDeadlineTime &&
+        current.votingDeadlineManuallySet === initial.votingDeadlineManuallySet
+      );
+    };
+
     return (
       formData.eventType !== initialFormData.eventType ||
       formData.title !== initialFormData.title ||
@@ -115,12 +134,7 @@ export function useFormValidation(
       formData.startTime !== initialFormData.startTime ||
       formData.endTime !== initialFormData.endTime ||
       formData.timeZone !== initialFormData.timeZone ||
-      formData.votingDeadlineEnabled !==
-        initialFormData.votingDeadlineEnabled ||
-      !isSameDay(formData.votingDeadline, initialFormData.votingDeadline) ||
-      formData.votingDeadlineTime !== initialFormData.votingDeadlineTime ||
-      formData.votingDeadlineManuallySet !==
-        initialFormData.votingDeadlineManuallySet ||
+      !isSameVotingDeadlineState(formData, initialFormData) ||
       formData.lineGroupId !== initialFormData.lineGroupId ||
       !isSameStringArray(
         formData.selectedLineUserIds,

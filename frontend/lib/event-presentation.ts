@@ -1,4 +1,9 @@
 import {
+  differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+} from "date-fns";
+import {
   EventSlotAxisType,
   EventType,
   EventWithCapabilities,
@@ -11,6 +16,45 @@ type EventWithDateRange = EventWithCapabilities & {
   type?: EventType;
   schedule?: EventSchedule;
 };
+
+export interface VotingDeadlineCountdownState {
+  deadlineDate: Date | null;
+  isExpired: boolean;
+  days: number;
+  hours: number;
+  minutes: number;
+  totalHours: number;
+  isUrgent: boolean;
+  isVeryCritical: boolean;
+}
+
+export function getVotingDeadlineCountdownState(
+  votingDeadline: string | null | undefined,
+  now: Date,
+  isInactive = false,
+): VotingDeadlineCountdownState {
+  const deadlineDate = votingDeadline ? new Date(votingDeadline) : null;
+  const isExpired = deadlineDate ? deadlineDate <= now : false;
+  const days = deadlineDate ? differenceInDays(deadlineDate, now) : 0;
+  const hours = deadlineDate ? differenceInHours(deadlineDate, now) % 24 : 0;
+  const minutes = deadlineDate
+    ? differenceInMinutes(deadlineDate, now) % 60
+    : 0;
+  const totalHours = deadlineDate ? differenceInHours(deadlineDate, now) : 0;
+  const isUrgent = !isInactive && totalHours <= 24 && totalHours > 0;
+  const isVeryCritical = !isInactive && totalHours <= 6 && totalHours > 0;
+
+  return {
+    deadlineDate,
+    isExpired,
+    days,
+    hours,
+    minutes,
+    totalHours,
+    isUrgent,
+    isVeryCritical,
+  };
+}
 
 export function formatEventCandidateDaySummary(
   event: Pick<EventWithDateRange, "type" | "schedule">,
