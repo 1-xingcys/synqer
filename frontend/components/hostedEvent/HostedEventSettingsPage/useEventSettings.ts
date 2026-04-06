@@ -12,6 +12,7 @@ import { apiFetchJson } from "@/lib/apiClient";
 import { hostedEventsKeys } from "@/hooks/useHostedEvents";
 import { formatMinutesToTime } from "@/lib/utils";
 import type { operations } from "@/generated/openapi";
+import { EventStatus } from "@/types/event";
 
 export interface VotingDeadlineFormData {
   deadlineEnabled: boolean;
@@ -226,6 +227,33 @@ export function useEventSettings(eventId: string) {
     return !areVotingDeadlineFormsEqual(formData, savedFormData);
   }, [formData, savedFormData]);
 
+  const isDeadlineLocked = useMemo(() => {
+    if (!eventData?.event) {
+      return false;
+    }
+
+    if (
+      eventData.event.status === EventStatus.CONFIRMED ||
+      eventData.event.status === EventStatus.COMPLETED
+    ) {
+      return true;
+    }
+
+    if (eventData.event.schedule.kind !== "ONE_TIME") {
+      return false;
+    }
+
+    const eventStart = new Date(eventData.event.schedule.startDate);
+    eventStart.setHours(
+      Math.floor(eventData.event.schedule.startMinuteOfDay / 60),
+      eventData.event.schedule.startMinuteOfDay % 60,
+      0,
+      0,
+    );
+
+    return new Date() >= eventStart;
+  }, [eventData?.event]);
+
   // Reuse the same validation engine as the create page, but with
   // hosted-settings-specific bounds: now ~ earliest available slot.
   const deadlineError = useMemo<VotingDeadlineError | null>(() => {
@@ -245,7 +273,7 @@ export function useEventSettings(eventId: string) {
     deadlineError === VOTING_DEADLINE_ERROR.REQUIRED;
 
   const handleSave = useCallback(async () => {
-    if (deadlineError !== null || !isDirty) return;
+    if (isDeadlineLocked || deadlineError !== null || !isDirty) return;
 
     try {
       setSaving(true);
@@ -274,7 +302,14 @@ export function useEventSettings(eventId: string) {
     } finally {
       setSaving(false);
     }
-  }, [deadlineError, formData, isDirty, refetch, updateVotingDeadline]);
+  }, [
+    deadlineError,
+    formData,
+    isDeadlineLocked,
+    isDirty,
+    refetch,
+    updateVotingDeadline,
+  ]);
 
   const resetForm = useCallback(() => {
     if (!savedFormDataRef.current) return;
@@ -305,6 +340,7 @@ export function useEventSettings(eventId: string) {
     eventData,
     formData,
     isDirty,
+    isDeadlineLocked,
     earliestSlot,
     deadlineError,
     isDeadlineValid,

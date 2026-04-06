@@ -9,7 +9,6 @@ import { LoadingState } from "@/components/ui/loading-state";
 import { VOTING_DEADLINE_ERROR } from "@/lib/votingDeadline";
 import { useEventSettings } from "./useEventSettings";
 import { DangerZone } from "./DangerZone";
-import { EventStatus } from "@/types/event";
 
 export default function HostedEventSettingsPage() {
   const params = useParams();
@@ -20,6 +19,7 @@ export default function HostedEventSettingsPage() {
     eventData,
     formData,
     isDirty,
+    isDeadlineLocked,
     earliestSlot,
     deadlineError,
     isDeadlineValid,
@@ -43,17 +43,11 @@ export default function HostedEventSettingsPage() {
     return <LoadingState label={t("common.loading")} viewport="section" />;
   }
 
-  // Check if voting is no longer allowed (vote ended, confirmed, complete)
-  const isVotingDisabled =
-    eventData?.event.status === EventStatus.VOTING_ENDED ||
-    eventData?.event.status === EventStatus.CONFIRMED ||
-    eventData?.event.status === EventStatus.COMPLETED;
-
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Voting Deadline Section */}
       <div
-        className={`border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden ${isVotingDisabled ? "opacity-60" : ""}`}
+        className={`border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden ${isDeadlineLocked ? "opacity-60" : ""}`}
       >
         {/* Section Header */}
         <div className="px-4 py-3 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-700">
@@ -61,8 +55,8 @@ export default function HostedEventSettingsPage() {
             {t("createEvent.votingDeadline.title")}
           </h2>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-            {isVotingDisabled
-              ? t("hosted.settingsPage.votingEndedDescription")
+            {isDeadlineLocked
+              ? t("hosted.settingsPage.deadlineLockedDescription")
               : t("createEvent.votingDeadline.description")}
           </p>
         </div>
@@ -96,14 +90,14 @@ export default function HostedEventSettingsPage() {
             enableLabelClassName="text-sm font-medium cursor-pointer text-zinc-700 dark:text-zinc-300"
             descriptionClassName="text-sm text-zinc-600 dark:text-zinc-400"
             fieldLabelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
-            disabled={isVotingDisabled}
+            disabled={isDeadlineLocked}
             onEnabledChange={updateDeadlineEnabled}
             onDateChange={updateDeadlineDate}
             onTimeChange={updateDeadlineTime}
           />
 
           {/* Save Button */}
-          {!isVotingDisabled && (
+          {!isDeadlineLocked && (
             <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-700">
               {saveError && (
                 <span className="text-sm text-destructive">{saveError}</span>
