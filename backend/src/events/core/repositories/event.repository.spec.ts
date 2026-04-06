@@ -380,6 +380,9 @@ describe('EventRepository', () => {
       expect(prismaService.event.findUnique).toHaveBeenCalledWith({
         where: { id: eventId },
         include: {
+          confirmedTimeSlots: {
+            select: { id: true },
+          },
           oneTimeSchedule: true,
           recurringSchedule: true,
         },

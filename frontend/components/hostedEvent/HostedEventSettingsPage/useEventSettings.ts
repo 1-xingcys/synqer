@@ -10,6 +10,7 @@ import {
 } from "@/lib/votingDeadline";
 import { apiFetchJson } from "@/lib/apiClient";
 import { hostedEventsKeys } from "@/hooks/useHostedEvents";
+import { getOneTimeEventStartInstant } from "@/lib/eventSchedule";
 import { formatMinutesToTime } from "@/lib/utils";
 import type { operations } from "@/generated/openapi";
 import { EventStatus } from "@/types/event";
@@ -243,13 +244,7 @@ export function useEventSettings(eventId: string) {
       return false;
     }
 
-    const eventStart = new Date(eventData.event.schedule.startDate);
-    eventStart.setHours(
-      Math.floor(eventData.event.schedule.startMinuteOfDay / 60),
-      eventData.event.schedule.startMinuteOfDay % 60,
-      0,
-      0,
-    );
+    const eventStart = getOneTimeEventStartInstant(eventData.event.schedule);
 
     return new Date() >= eventStart;
   }, [eventData?.event]);
