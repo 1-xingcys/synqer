@@ -45,6 +45,7 @@ export class UpdateEventDto {
     format: 'date-time',
     nullable: true,
   })
+  @IsOptional()
   @ValidateIf((_, value: string | null | undefined) => value !== null)
   @IsISO8601()
   votingDeadline?: string | null;

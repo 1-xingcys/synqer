@@ -2,16 +2,19 @@
 
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { useMinuteNow } from "@/hooks/useMinuteNow";
 import { useFormStateContext } from "./CreateEventFormContext";
+import { useFormValidation } from "./hooks/useFormValidation";
 
 export function FormActions() {
   const t = useTranslations();
 
   const {
-    state: { loading },
-    validation: { errors },
+    state: { formData, loading },
     actions: { handleCancel },
   } = useFormStateContext();
+  const now = useMinuteNow();
+  const { errors } = useFormValidation(formData, now);
 
   return (
     <>

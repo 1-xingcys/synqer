@@ -2,9 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { VotingDeadlineFields } from "@/components/eventCommon/VotingDeadlineFields";
+import { useMinuteNow } from "@/hooks/useMinuteNow";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
-import { ValidationError } from "./hooks/useFormValidation";
+import { useFormValidation, ValidationError } from "./hooks/useFormValidation";
 import { getToday } from "./hooks/utils";
 
 export function VotingDeadlineSection() {
@@ -12,8 +13,9 @@ export function VotingDeadlineSection() {
 
   const {
     state: { formData, setFormData },
-    validation: { errors },
   } = useFormStateContext();
+  const now = useMinuteNow();
+  const { errors } = useFormValidation(formData, now);
 
   const {
     handleVotingDeadlineEnabledChange,

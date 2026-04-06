@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { useMinuteNow } from "@/hooks/useMinuteNow";
 import {
   validateVotingDeadline,
   VOTING_DEADLINE_ERROR,
@@ -27,12 +26,11 @@ export enum ValidationError {
   WeekdaysRequired = "WeekdaysRequired",
 }
 
-export function useFormValidation(formData: CreateEventFormData) {
-  const now = useMinuteNow();
-
+export function useFormValidation(formData: CreateEventFormData, now?: Date) {
   const errors = useMemo(() => {
     const errorSet = new Set<ValidationError>();
     const isRecurring = formData.eventType === "RECURRING";
+    const currentTime = now ?? new Date();
 
     if (!formData.title.trim()) {
       errorSet.add(ValidationError.TitleRequired);
@@ -53,7 +51,7 @@ export function useFormValidation(formData: CreateEventFormData) {
         formData.startDate,
         formData.startTime,
       );
-      const minStartTime = new Date(now);
+      const minStartTime = new Date(currentTime);
       minStartTime.setHours(
         minStartTime.getHours() + MIN_HOURS_BEFORE_EVENT,
         minStartTime.getMinutes(),
@@ -70,7 +68,7 @@ export function useFormValidation(formData: CreateEventFormData) {
       enabled: formData.votingDeadlineEnabled,
       date: formData.votingDeadline,
       time: formData.votingDeadlineTime,
-      minDateTime: now,
+      minDateTime: currentTime,
       maxDateTime:
         !isRecurring && formData.startDate
           ? combineDateAndTime(formData.startDate, formData.startTime)

@@ -11,7 +11,7 @@ import { useFormActions } from "./hooks/useFormActions";
 
 function useCreateEventFormContextValue() {
   const formState = useFormState();
-  const { errors, hasUnsavedChanges } = useFormValidation(formState.formData);
+  const { hasUnsavedChanges } = useFormValidation(formState.formData);
   const formActions = useFormActions({
     formData: formState.formData,
     hasUnsavedChanges,
@@ -27,10 +27,6 @@ function useCreateEventFormContextValue() {
       setLoading: formState.setLoading,
       showCancelConfirm: formState.showCancelConfirm,
       setShowCancelConfirm: formState.setShowCancelConfirm,
-    },
-    validation: {
-      errors,
-      hasUnsavedChanges,
     },
     actions: {
       handleSubmit: formActions.handleSubmit,
