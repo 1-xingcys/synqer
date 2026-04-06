@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
 import {
   differenceInDays,
   differenceInHours,
@@ -9,6 +8,7 @@ import {
   isPast,
   format,
 } from "date-fns";
+import { useMinuteNow } from "@/hooks/useMinuteNow";
 
 interface DeadlineCountdownProps {
   votingDeadline?: string | null;
@@ -21,15 +21,7 @@ export function DeadlineCountdown({
   isInactive = false,
 }: DeadlineCountdownProps) {
   const t = useTranslations("hosted");
-  const [, setTick] = useState(0);
-
-  // Update every minute
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTick((t) => t + 1);
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
+  const now = useMinuteNow();
 
   if (!votingDeadline) {
     return (
@@ -47,7 +39,6 @@ export function DeadlineCountdown({
   }
 
   const deadlineDate = new Date(votingDeadline);
-  const now = new Date();
   const isExpired = isPast(deadlineDate);
 
   const days = differenceInDays(deadlineDate, now);

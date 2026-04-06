@@ -10,6 +10,7 @@ import {
 } from "@/lib/votingDeadline";
 import { apiFetchJson } from "@/lib/apiClient";
 import { hostedEventsKeys } from "@/hooks/useHostedEvents";
+import { useMinuteNow } from "@/hooks/useMinuteNow";
 import { getOneTimeEventStartInstant } from "@/lib/eventSchedule";
 import { formatMinutesToTime } from "@/lib/utils";
 import type { operations } from "@/generated/openapi";
@@ -107,6 +108,7 @@ export function useEventSettings(eventId: string) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: eventData, isLoading, refetch } = useHostedEventContext();
+  const now = useMinuteNow();
 
   const [formData, setFormData] =
     useState<VotingDeadlineFormData>(EMPTY_FORM_DATA);
@@ -246,8 +248,8 @@ export function useEventSettings(eventId: string) {
 
     const eventStart = getOneTimeEventStartInstant(eventData.event.schedule);
 
-    return new Date() >= eventStart;
-  }, [eventData?.event]);
+    return now >= eventStart;
+  }, [eventData?.event, now]);
 
   // Reuse the same validation engine as the create page, but with
   // hosted-settings-specific bounds: now ~ earliest available slot.
@@ -256,12 +258,12 @@ export function useEventSettings(eventId: string) {
       enabled: formData.deadlineEnabled,
       date: formData.deadlineDate,
       time: formData.deadlineTime,
-      minDateTime: new Date(),
+      minDateTime: now,
       maxDateTime: earliestSlot
         ? combineVotingDeadline(earliestSlot.date, earliestSlot.time)
         : null,
     });
-  }, [earliestSlot, formData]);
+  }, [earliestSlot, formData, now]);
 
   const isDeadlineValid = deadlineError === null;
   const hasDeadlineRequiredError =
