@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { useFormState } from "./hooks/useFormState";
 import { useFormValidation } from "./hooks/useFormValidation";
 import { useFormActions } from "./hooks/useFormActions";
@@ -11,10 +11,16 @@ import { useFormActions } from "./hooks/useFormActions";
 
 function useCreateEventFormContextValue() {
   const formState = useFormState();
-  const { hasUnsavedChanges } = useFormValidation(formState.formData);
+  const [validationRevision, setValidationRevision] = useState(0);
+  const { errors, hasUnsavedChanges } = useFormValidation(
+    formState.formData,
+    formState.initialFormData,
+    validationRevision,
+  );
   const formActions = useFormActions({
     formData: formState.formData,
     hasUnsavedChanges,
+    refreshValidation: () => setValidationRevision((previous) => previous + 1),
     setLoading: formState.setLoading,
     setShowCancelConfirm: formState.setShowCancelConfirm,
   });
@@ -27,6 +33,10 @@ function useCreateEventFormContextValue() {
       setLoading: formState.setLoading,
       showCancelConfirm: formState.showCancelConfirm,
       setShowCancelConfirm: formState.setShowCancelConfirm,
+    },
+    validation: {
+      errors,
+      hasUnsavedChanges,
     },
     actions: {
       handleSubmit: formActions.handleSubmit,

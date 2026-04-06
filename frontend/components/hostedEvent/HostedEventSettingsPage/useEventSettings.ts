@@ -10,11 +10,10 @@ import {
 } from "@/lib/votingDeadline";
 import { apiFetchJson } from "@/lib/apiClient";
 import { hostedEventsKeys } from "@/hooks/useHostedEvents";
-import { useMinuteNow } from "@/hooks/useMinuteNow";
 import { getOneTimeEventStartInstant } from "@/lib/eventSchedule";
 import { formatMinutesToTime } from "@/lib/utils";
 import type { operations } from "@/generated/openapi";
-import { EventStatus } from "@/types/event";
+import { EventStatus, type EventSchedule } from "@/types/event";
 
 export interface VotingDeadlineFormData {
   deadlineEnabled: boolean;
@@ -104,11 +103,60 @@ type UpdateEventResponse =
 type RemoveEventResponse =
   operations["EventCoreController_remove"]["responses"][200]["content"]["application/json"];
 
+type DeadlineLockableEvent = {
+  status: EventStatus;
+  schedule: EventSchedule;
+};
+
+type EarliestSlot = {
+  date: Date;
+  time: string;
+};
+
+function isVotingDeadlineLocked(
+  event: DeadlineLockableEvent | null | undefined,
+  now: Date = new Date(),
+) {
+  if (!event) {
+    return false;
+  }
+
+  if (
+    event.status === EventStatus.CONFIRMED ||
+    event.status === EventStatus.COMPLETED
+  ) {
+    return true;
+  }
+
+  if (event.schedule.kind !== "ONE_TIME") {
+    return false;
+  }
+
+  const eventStart = getOneTimeEventStartInstant(event.schedule);
+
+  return now >= eventStart;
+}
+
+function getHostedDeadlineError(
+  formData: VotingDeadlineFormData,
+  earliestSlot: EarliestSlot | null,
+  now: Date = new Date(),
+): VotingDeadlineError | null {
+  return validateVotingDeadline({
+    enabled: formData.deadlineEnabled,
+    date: formData.deadlineDate,
+    time: formData.deadlineTime,
+    minDateTime: now,
+    maxDateTime: earliestSlot
+      ? combineVotingDeadline(earliestSlot.date, earliestSlot.time)
+      : null,
+  });
+}
+
 export function useEventSettings(eventId: string) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: eventData, isLoading, refetch } = useHostedEventContext();
-  const now = useMinuteNow();
 
   const [formData, setFormData] =
     useState<VotingDeadlineFormData>(EMPTY_FORM_DATA);
@@ -119,6 +167,9 @@ export function useEventSettings(eventId: string) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  // Force a fresh "now" validation after the user clicks save, without
+  // keeping a timer running while the form sits idle.
+  const [validationRevision, setValidationRevision] = useState(0);
 
   const updateVotingDeadline = useCallback(
     async (votingDeadline?: string | null) => {
@@ -237,46 +288,39 @@ export function useEventSettings(eventId: string) {
   }, [formData, savedFormData]);
 
   const isDeadlineLocked = useMemo(() => {
-    if (!eventData?.event) {
-      return false;
-    }
-
-    if (
-      eventData.event.status === EventStatus.CONFIRMED ||
-      eventData.event.status === EventStatus.COMPLETED
-    ) {
-      return true;
-    }
-
-    if (eventData.event.schedule.kind !== "ONE_TIME") {
-      return false;
-    }
-
-    const eventStart = getOneTimeEventStartInstant(eventData.event.schedule);
-
-    return now >= eventStart;
-  }, [eventData?.event, now]);
+    void validationRevision;
+    return isVotingDeadlineLocked(eventData?.event);
+  }, [eventData?.event, validationRevision]);
 
   // Reuse the same validation engine as the create page, but with
   // hosted-settings-specific bounds: now ~ earliest available slot.
   const deadlineError = useMemo<VotingDeadlineError | null>(() => {
-    return validateVotingDeadline({
-      enabled: formData.deadlineEnabled,
-      date: formData.deadlineDate,
-      time: formData.deadlineTime,
-      minDateTime: now,
-      maxDateTime: earliestSlot
-        ? combineVotingDeadline(earliestSlot.date, earliestSlot.time)
-        : null,
-    });
-  }, [earliestSlot, formData, now]);
+    void validationRevision;
+    return getHostedDeadlineError(formData, earliestSlot);
+  }, [earliestSlot, formData, validationRevision]);
 
   const isDeadlineValid = deadlineError === null;
   const hasDeadlineRequiredError =
     deadlineError === VOTING_DEADLINE_ERROR.REQUIRED;
 
   const handleSave = useCallback(async () => {
-    if (isDeadlineLocked || deadlineError !== null || !isDirty) return;
+    if (!isDirty) return;
+
+    const latestNow = new Date();
+    const latestIsDeadlineLocked = isVotingDeadlineLocked(
+      eventData?.event,
+      latestNow,
+    );
+    const latestDeadlineError = getHostedDeadlineError(
+      formData,
+      earliestSlot,
+      latestNow,
+    );
+
+    if (latestIsDeadlineLocked || latestDeadlineError !== null) {
+      setValidationRevision((previous) => previous + 1);
+      return;
+    }
 
     try {
       setSaving(true);
@@ -306,9 +350,9 @@ export function useEventSettings(eventId: string) {
       setSaving(false);
     }
   }, [
-    deadlineError,
+    earliestSlot,
+    eventData?.event,
     formData,
-    isDeadlineLocked,
     isDirty,
     refetch,
     updateVotingDeadline,

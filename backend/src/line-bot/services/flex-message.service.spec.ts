@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventType } from '@prisma/client';
+import { EventSlotAxisType, EventType } from '@prisma/client';
 import { FlexMessageService, EventInfo } from './flex-message.service';
 import { EventStatus } from '../../events/shared/services/event-status.service';
 import { ConfirmedSelectionKind } from '../../events/shared/interfaces/confirmed-time.interface';
@@ -140,9 +140,14 @@ describe('FlexMessageService', () => {
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
-            date: new Date('2025-12-25'),
-            startMinute: 600, // 10:00
-            endMinute: 720, // 12:00
+            slot: {
+              id: 'slot-1',
+              axisType: EventSlotAxisType.DATE,
+              axisDate: new Date('2025-12-25'),
+              axisWeekday: null,
+              startMinute: 600, // 10:00
+              endMinute: 720, // 12:00
+            },
           },
         ],
         confirmedSelections: [

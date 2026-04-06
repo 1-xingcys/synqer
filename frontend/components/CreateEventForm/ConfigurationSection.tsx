@@ -7,10 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
-import { useMinuteNow } from "@/hooks/useMinuteNow";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
-import { useFormValidation, ValidationError } from "./hooks/useFormValidation";
+import { ValidationError } from "./hooks/useFormValidation";
 import { getToday } from "./hooks/utils";
 import { cn } from "@/lib/utils";
 import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
@@ -21,9 +20,8 @@ export function ConfigurationSection() {
 
   const {
     state: { formData, setFormData },
+    validation: { errors },
   } = useFormStateContext();
-  const now = useMinuteNow();
-  const { errors } = useFormValidation(formData, now);
 
   const {
     handleStartDateChange,

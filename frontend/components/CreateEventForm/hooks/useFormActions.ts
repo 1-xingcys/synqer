@@ -7,10 +7,12 @@ import { useLiff } from "@/hooks/useLiff";
 import { apiFetchJson } from "@/lib/apiClient";
 import type { operations } from "@/generated/openapi";
 import { CreateEventFormData } from "../types";
+import { getCreateEventValidationErrors } from "./useFormValidation";
 
 interface UseFormActionsProps {
   formData: CreateEventFormData;
   hasUnsavedChanges: boolean;
+  refreshValidation: () => void;
   setLoading: (loading: boolean) => void;
   setShowCancelConfirm: (show: boolean) => void;
 }
@@ -23,6 +25,7 @@ type CreateEventResponse =
 export function useFormActions({
   formData,
   hasUnsavedChanges,
+  refreshValidation,
   setLoading,
   setShowCancelConfirm,
 }: UseFormActionsProps) {
@@ -39,6 +42,13 @@ export function useFormActions({
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      const latestErrors = getCreateEventValidationErrors(formData, new Date());
+
+      if (latestErrors.size > 0) {
+        refreshValidation();
+        return;
+      }
+
       setLoading(true);
 
       try {
@@ -101,7 +111,7 @@ export function useFormActions({
         setLoading(false);
       }
     },
-    [formData, router, setLoading],
+    [formData, refreshValidation, router, setLoading],
   );
 
   const handleCancel = useCallback(() => {
