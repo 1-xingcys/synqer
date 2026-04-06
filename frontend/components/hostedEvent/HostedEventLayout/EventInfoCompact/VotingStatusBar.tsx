@@ -5,10 +5,10 @@ import {
   differenceInDays,
   differenceInHours,
   differenceInMinutes,
-  isPast,
   format,
 } from "date-fns";
 import { Clock, AlertTriangle, Users } from "lucide-react";
+import { useMinuteNow } from "@/hooks/useMinuteNow";
 
 interface VotingStatusBarProps {
   votingDeadline?: string | null;
@@ -30,11 +30,11 @@ export function VotingStatusBar({
   isInactive = false,
 }: VotingStatusBarProps) {
   const t = useTranslations();
+  const now = useMinuteNow();
 
   // Calculate deadline countdown
   const deadlineDate = votingDeadline ? new Date(votingDeadline) : null;
-  const now = new Date();
-  const isExpired = deadlineDate ? isPast(deadlineDate) : false;
+  const isExpired = deadlineDate ? deadlineDate <= now : false;
 
   const days = deadlineDate ? differenceInDays(deadlineDate, now) : 0;
   const hours = deadlineDate ? differenceInHours(deadlineDate, now) % 24 : 0;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useMinuteNow } from "@/hooks/useMinuteNow";
 import {
   validateVotingDeadline,
   VOTING_DEADLINE_ERROR,
@@ -27,6 +28,8 @@ export enum ValidationError {
 }
 
 export function useFormValidation(formData: CreateEventFormData) {
+  const now = useMinuteNow();
+
   const errors = useMemo(() => {
     const errorSet = new Set<ValidationError>();
     const isRecurring = formData.eventType === "RECURRING";
@@ -50,7 +53,7 @@ export function useFormValidation(formData: CreateEventFormData) {
         formData.startDate,
         formData.startTime,
       );
-      const minStartTime = new Date();
+      const minStartTime = new Date(now);
       minStartTime.setHours(
         minStartTime.getHours() + MIN_HOURS_BEFORE_EVENT,
         minStartTime.getMinutes(),
@@ -67,7 +70,7 @@ export function useFormValidation(formData: CreateEventFormData) {
       enabled: formData.votingDeadlineEnabled,
       date: formData.votingDeadline,
       time: formData.votingDeadlineTime,
-      minDateTime: new Date(),
+      minDateTime: now,
       maxDateTime:
         !isRecurring && formData.startDate
           ? combineDateAndTime(formData.startDate, formData.startTime)
@@ -87,7 +90,7 @@ export function useFormValidation(formData: CreateEventFormData) {
     }
 
     return errorSet;
-  }, [formData]);
+  }, [formData, now]);
 
   const hasUnsavedChanges = useMemo(() => {
     const { date: defaultDate, time: defaultTime } = getDefaultStartDateTime();

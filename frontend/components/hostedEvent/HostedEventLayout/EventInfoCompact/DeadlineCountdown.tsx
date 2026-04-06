@@ -5,7 +5,6 @@ import {
   differenceInDays,
   differenceInHours,
   differenceInMinutes,
-  isPast,
   format,
 } from "date-fns";
 import { useMinuteNow } from "@/hooks/useMinuteNow";
@@ -39,7 +38,7 @@ export function DeadlineCountdown({
   }
 
   const deadlineDate = new Date(votingDeadline);
-  const isExpired = isPast(deadlineDate);
+  const isExpired = deadlineDate <= now;
 
   const days = differenceInDays(deadlineDate, now);
   const hours = differenceInHours(deadlineDate, now) % 24;
