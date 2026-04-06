@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
@@ -119,7 +119,6 @@ export function useEventSettings(eventId: string) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const savedFormDataRef = useRef<VotingDeadlineFormData | null>(null);
 
   const updateVotingDeadline = useCallback(
     async (votingDeadline?: string | null) => {
@@ -178,22 +177,29 @@ export function useEventSettings(eventId: string) {
         eventData.event.votingDeadline,
         earliestSlot,
       );
-      const previousSavedFormData = savedFormDataRef.current;
-
       setFormData((prev) => {
         const hasUnsavedChanges =
-          previousSavedFormData !== null &&
-          !areVotingDeadlineFormsEqual(prev, previousSavedFormData);
+          savedFormData !== null &&
+          !areVotingDeadlineFormsEqual(prev, savedFormData);
 
-        return hasUnsavedChanges
+        const isAlreadySynced = areVotingDeadlineFormsEqual(
+          prev,
+          nextSavedFormData,
+        );
+
+        return hasUnsavedChanges || isAlreadySynced
           ? prev
           : cloneVotingDeadlineFormData(nextSavedFormData);
       });
 
-      setSavedFormData(cloneVotingDeadlineFormData(nextSavedFormData));
-      savedFormDataRef.current = cloneVotingDeadlineFormData(nextSavedFormData);
+      if (
+        savedFormData === null ||
+        !areVotingDeadlineFormsEqual(savedFormData, nextSavedFormData)
+      ) {
+        setSavedFormData(cloneVotingDeadlineFormData(nextSavedFormData));
+      }
     }
-  }, [eventData, earliestSlot]);
+  }, [eventData, earliestSlot, savedFormData]);
 
   const updateDeadlineEnabled = useCallback(
     (enabled: boolean) => {
@@ -309,12 +315,12 @@ export function useEventSettings(eventId: string) {
   ]);
 
   const resetForm = useCallback(() => {
-    if (!savedFormDataRef.current) return;
+    if (!savedFormData) return;
 
     setSaveError(null);
     setSaveSuccess(false);
-    setFormData(cloneVotingDeadlineFormData(savedFormDataRef.current));
-  }, []);
+    setFormData(cloneVotingDeadlineFormData(savedFormData));
+  }, [savedFormData]);
 
   const handleDelete = useCallback(async () => {
     try {
