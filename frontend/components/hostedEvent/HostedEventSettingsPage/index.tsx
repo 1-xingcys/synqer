@@ -19,6 +19,7 @@ export default function HostedEventSettingsPage() {
   const {
     eventData,
     formData,
+    isDirty,
     earliestSlot,
     deadlineError,
     isDeadlineValid,
@@ -33,6 +34,7 @@ export default function HostedEventSettingsPage() {
     deleting,
     showDeleteConfirm,
     handleSave,
+    resetForm,
     handleDelete,
     toggleDeleteConfirm,
   } = useEventSettings(eventId);
@@ -113,9 +115,15 @@ export default function HostedEventSettingsPage() {
                 </span>
               )}
 
+              {isDirty && (
+                <Button variant="outline" onClick={resetForm} disabled={saving}>
+                  {t("hosted.settingsPage.discard")}
+                </Button>
+              )}
+
               <Button
                 onClick={() => void handleSave()}
-                disabled={saving || !isDeadlineValid}
+                disabled={saving || !isDeadlineValid || !isDirty}
               >
                 {saving ? t("common.saving") : t("common.save")}
               </Button>

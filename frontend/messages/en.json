@@ -424,6 +424,7 @@
       "timeRange": "Time Range",
       "slotDuration": "Time Slot Duration",
       "saveChanges": "Save Changes",
+      "discard": "Discard Changes",
       "saved": "Changes saved!",
       "dangerZone": "Danger Zone",
       "deleteEvent": "Delete Event",

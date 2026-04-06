@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useHostedEventContext } from "@/contexts/HostedEventContext";
@@ -10,12 +10,88 @@ import {
 } from "@/lib/votingDeadline";
 import { apiFetchJson } from "@/lib/apiClient";
 import { hostedEventsKeys } from "@/hooks/useHostedEvents";
+import { formatMinutesToTime } from "@/lib/utils";
 import type { operations } from "@/generated/openapi";
 
 export interface VotingDeadlineFormData {
   deadlineEnabled: boolean;
   deadlineDate: Date | null;
   deadlineTime: string;
+}
+
+const EMPTY_FORM_DATA: VotingDeadlineFormData = {
+  deadlineEnabled: false,
+  deadlineDate: null,
+  deadlineTime: "00:00",
+};
+
+function normalizeDateOnly(date: Date): Date {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+}
+
+function cloneVotingDeadlineFormData(
+  formData: VotingDeadlineFormData,
+): VotingDeadlineFormData {
+  return {
+    ...formData,
+    deadlineDate: formData.deadlineDate
+      ? new Date(formData.deadlineDate)
+      : null,
+  };
+}
+
+function areSameCalendarDay(left: Date | null, right: Date | null): boolean {
+  if (!left || !right) return left === right;
+
+  return (
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate()
+  );
+}
+
+function areVotingDeadlineFormsEqual(
+  left: VotingDeadlineFormData,
+  right: VotingDeadlineFormData,
+): boolean {
+  if (left.deadlineEnabled !== right.deadlineEnabled) {
+    return false;
+  }
+
+  if (!left.deadlineEnabled) {
+    return true;
+  }
+
+  return (
+    left.deadlineTime === right.deadlineTime &&
+    areSameCalendarDay(left.deadlineDate, right.deadlineDate)
+  );
+}
+
+function buildVotingDeadlineFormData(
+  votingDeadline?: string | null,
+  earliestSlot?: { date: Date; time: string } | null,
+): VotingDeadlineFormData {
+  if (votingDeadline) {
+    const deadline = new Date(votingDeadline);
+    const time = formatMinutesToTime(
+      deadline.getHours() * 60 + deadline.getMinutes(),
+    );
+
+    return {
+      deadlineEnabled: true,
+      deadlineDate: normalizeDateOnly(deadline),
+      deadlineTime: time,
+    };
+  }
+
+  return {
+    deadlineEnabled: false,
+    deadlineDate: earliestSlot ? normalizeDateOnly(earliestSlot.date) : null,
+    deadlineTime: earliestSlot?.time ?? "00:00",
+  };
 }
 
 type UpdateEventRequest =
@@ -30,16 +106,16 @@ export function useEventSettings(eventId: string) {
   const queryClient = useQueryClient();
   const { data: eventData, isLoading, refetch } = useHostedEventContext();
 
-  const [formData, setFormData] = useState<VotingDeadlineFormData>({
-    deadlineEnabled: false,
-    deadlineDate: null,
-    deadlineTime: "00:00",
-  });
+  const [formData, setFormData] =
+    useState<VotingDeadlineFormData>(EMPTY_FORM_DATA);
+  const [savedFormData, setSavedFormData] =
+    useState<VotingDeadlineFormData | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const savedFormDataRef = useRef<VotingDeadlineFormData | null>(null);
 
   const updateVotingDeadline = useCallback(
     async (votingDeadline?: string | null) => {
@@ -86,36 +162,32 @@ export function useEventSettings(eventId: string) {
 
     const earliest = sorted[0];
     const date = new Date(earliest.axisDate!);
-    const hours = Math.floor(earliest.startMinute / 60);
-    const mins = earliest.startMinute % 60;
-    const time = `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+    const time = formatMinutesToTime(earliest.startMinute);
 
     return { date, time };
   }, [eventData?.slots]);
 
-  // Initialize form data from event
+  // Initialize local form data from server, but do not overwrite unsaved edits.
   useEffect(() => {
     if (eventData?.event) {
-      const event = eventData.event;
+      const nextSavedFormData = buildVotingDeadlineFormData(
+        eventData.event.votingDeadline,
+        earliestSlot,
+      );
+      const previousSavedFormData = savedFormDataRef.current;
 
-      if (event.votingDeadline) {
-        const deadline = new Date(event.votingDeadline);
-        const hours = deadline.getHours();
-        const mins = deadline.getMinutes();
-        const time = `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+      setFormData((prev) => {
+        const hasUnsavedChanges =
+          previousSavedFormData !== null &&
+          !areVotingDeadlineFormsEqual(prev, previousSavedFormData);
 
-        setFormData({
-          deadlineEnabled: true,
-          deadlineDate: deadline,
-          deadlineTime: time,
-        });
-      } else {
-        setFormData({
-          deadlineEnabled: false,
-          deadlineDate: earliestSlot?.date ?? null,
-          deadlineTime: earliestSlot?.time ?? "00:00",
-        });
-      }
+        return hasUnsavedChanges
+          ? prev
+          : cloneVotingDeadlineFormData(nextSavedFormData);
+      });
+
+      setSavedFormData(cloneVotingDeadlineFormData(nextSavedFormData));
+      savedFormDataRef.current = cloneVotingDeadlineFormData(nextSavedFormData);
     }
   }, [eventData, earliestSlot]);
 
@@ -149,6 +221,11 @@ export function useEventSettings(eventId: string) {
     setFormData((prev) => ({ ...prev, deadlineTime: time }));
   }, []);
 
+  const isDirty = useMemo(() => {
+    if (!savedFormData) return false;
+    return !areVotingDeadlineFormsEqual(formData, savedFormData);
+  }, [formData, savedFormData]);
+
   // Reuse the same validation engine as the create page, but with
   // hosted-settings-specific bounds: now ~ earliest available slot.
   const deadlineError = useMemo<VotingDeadlineError | null>(() => {
@@ -168,7 +245,7 @@ export function useEventSettings(eventId: string) {
     deadlineError === VOTING_DEADLINE_ERROR.REQUIRED;
 
   const handleSave = useCallback(async () => {
-    if (deadlineError !== null) return;
+    if (deadlineError !== null || !isDirty) return;
 
     try {
       setSaving(true);
@@ -189,7 +266,7 @@ export function useEventSettings(eventId: string) {
 
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
-      void refetch();
+      await refetch();
     } catch (error) {
       setSaveError(
         error instanceof Error ? error.message : "Failed to save settings",
@@ -197,7 +274,15 @@ export function useEventSettings(eventId: string) {
     } finally {
       setSaving(false);
     }
-  }, [deadlineError, formData, refetch, updateVotingDeadline]);
+  }, [deadlineError, formData, isDirty, refetch, updateVotingDeadline]);
+
+  const resetForm = useCallback(() => {
+    if (!savedFormDataRef.current) return;
+
+    setSaveError(null);
+    setSaveSuccess(false);
+    setFormData(cloneVotingDeadlineFormData(savedFormDataRef.current));
+  }, []);
 
   const handleDelete = useCallback(async () => {
     try {
@@ -219,6 +304,7 @@ export function useEventSettings(eventId: string) {
   return {
     eventData,
     formData,
+    isDirty,
     earliestSlot,
     deadlineError,
     isDeadlineValid,
@@ -233,6 +319,7 @@ export function useEventSettings(eventId: string) {
     deleting,
     showDeleteConfirm,
     handleSave,
+    resetForm,
     handleDelete,
     toggleDeleteConfirm,
   };

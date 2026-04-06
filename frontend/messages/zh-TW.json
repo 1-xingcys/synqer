@@ -424,6 +424,7 @@
       "timeRange": "時間範圍",
       "slotDuration": "時間間隔",
       "saveChanges": "儲存變更",
+      "discard": "捨棄變更",
       "saved": "變更已儲存！",
       "dangerZone": "Danger Zone",
       "deleteEvent": "刪除活動",
