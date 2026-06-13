@@ -18,13 +18,13 @@ import { EventStatus, type EventSchedule } from "@/types/event";
 export interface VotingDeadlineFormData {
   deadlineEnabled: boolean;
   deadlineDate: Date | null;
-  deadlineTime: string;
+  deadlineTime: string | null;
 }
 
 const EMPTY_FORM_DATA: VotingDeadlineFormData = {
   deadlineEnabled: false,
   deadlineDate: null,
-  deadlineTime: "00:00",
+  deadlineTime: null,
 };
 
 function normalizeDateOnly(date: Date): Date {
@@ -74,7 +74,6 @@ function areVotingDeadlineFormsEqual(
 
 function buildVotingDeadlineFormData(
   votingDeadline?: string | null,
-  earliestSlot?: { date: Date; time: string } | null,
 ): VotingDeadlineFormData {
   if (votingDeadline) {
     const deadline = new Date(votingDeadline);
@@ -89,11 +88,7 @@ function buildVotingDeadlineFormData(
     };
   }
 
-  return {
-    deadlineEnabled: false,
-    deadlineDate: earliestSlot ? normalizeDateOnly(earliestSlot.date) : null,
-    deadlineTime: earliestSlot?.time ?? "00:00",
-  };
+  return { ...EMPTY_FORM_DATA };
 }
 
 type UpdateEventRequest =
@@ -226,7 +221,6 @@ export function useEventSettings(eventId: string) {
     if (eventData?.event) {
       const nextSavedFormData = buildVotingDeadlineFormData(
         eventData.event.votingDeadline,
-        earliestSlot,
       );
       setFormData((prev) => {
         const hasUnsavedChanges =
@@ -250,29 +244,25 @@ export function useEventSettings(eventId: string) {
         setSavedFormData(cloneVotingDeadlineFormData(nextSavedFormData));
       }
     }
-  }, [eventData, earliestSlot, savedFormData]);
+  }, [eventData, savedFormData]);
 
-  const updateDeadlineEnabled = useCallback(
-    (enabled: boolean) => {
-      setFormData((prev) => {
-        if (!enabled) {
-          return {
-            ...prev,
-            deadlineEnabled: false,
-            deadlineDate: null,
-          };
-        }
-
+  const updateDeadlineEnabled = useCallback((enabled: boolean) => {
+    setFormData((prev) => {
+      if (enabled) {
         return {
           ...prev,
           deadlineEnabled: true,
-          deadlineDate: prev.deadlineDate ?? earliestSlot?.date ?? null,
-          deadlineTime: prev.deadlineTime || earliestSlot?.time || "00:00",
         };
-      });
-    },
-    [earliestSlot],
-  );
+      }
+
+      return {
+        ...prev,
+        deadlineEnabled: false,
+        deadlineDate: null,
+        deadlineTime: null,
+      };
+    });
+  }, []);
 
   const updateDeadlineDate = useCallback((date: Date | null) => {
     setFormData((prev) => ({ ...prev, deadlineDate: date }));
@@ -330,7 +320,7 @@ export function useEventSettings(eventId: string) {
       let votingDeadline: string | null | undefined;
       if (!formData.deadlineEnabled) {
         votingDeadline = null;
-      } else if (formData.deadlineDate) {
+      } else if (formData.deadlineDate && formData.deadlineTime) {
         votingDeadline = combineVotingDeadline(
           formData.deadlineDate,
           formData.deadlineTime,
