@@ -23,8 +23,7 @@ function getInitialFormData(): CreateEventFormData {
     timeZone: "Asia/Taipei",
     votingDeadlineEnabled: false,
     votingDeadline: null,
-    votingDeadlineTime: defaultTime,
-    votingDeadlineManuallySet: false,
+    votingDeadlineTime: null,
     lineGroupId: null,
     selectedLineUserIds: [],
   };

@@ -27,8 +27,7 @@ export interface CreateEventFormData {
   // Voting deadline fields
   votingDeadlineEnabled: boolean;
   votingDeadline: Date | null;
-  votingDeadlineTime: string;
-  votingDeadlineManuallySet: boolean;
+  votingDeadlineTime: string | null;
   lineGroupId: string | null;
   selectedLineUserIds: string[];
 }

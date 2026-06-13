@@ -11,13 +11,13 @@ interface VotingDeadlineFieldsProps {
   enabled: boolean;
   /** 投票截止日期 */
   date: Date | null;
-  /** 投票截止時間 (HH:MM 格式) */
-  time: string;
+  /** 投票截止時間 (HH:MM 格式)，未選擇時為 null */
+  time: string | null;
   enableLabel: string;
-  description: string;
   dateLabel: string;
   timeLabel: string;
   datePlaceholder: string;
+  timePlaceholder?: string;
   /** 可選的最早日期 */
   minDate?: Date;
   /** 最晚可選的日期（通常是活動開始日或最早時段日期） */
@@ -29,7 +29,6 @@ interface VotingDeadlineFieldsProps {
   /** 額外提示文字，例如自動同步說明 */
   helperText?: string | null;
   enableLabelClassName?: string;
-  descriptionClassName?: string;
   fieldLabelClassName?: string;
   helperTextClassName?: string;
   onEnabledChange: (enabled: boolean) => void;
@@ -50,17 +49,16 @@ export function VotingDeadlineFields({
   date,
   time,
   enableLabel,
-  description,
   dateLabel,
   timeLabel,
   datePlaceholder,
+  timePlaceholder,
   minDate,
   maxDate,
   disabled = false,
   errorMessage = null,
   helperText = null,
   enableLabelClassName = "text-sm font-medium cursor-pointer",
-  descriptionClassName = "text-sm text-muted-foreground",
   fieldLabelClassName,
   helperTextClassName = "text-xs text-primary flex items-center gap-1.5",
   onEnabledChange,
@@ -83,7 +81,6 @@ export function VotingDeadlineFields({
             {enableLabel}
           </Label>
         </div>
-        <p className={descriptionClassName}>{description}</p>
       </div>
 
       {enabled ? (
@@ -109,6 +106,7 @@ export function VotingDeadlineFields({
                 type="start"
                 hasError={showError}
                 disabled={disabled}
+                placeholder={timePlaceholder}
               />
             </div>
           </div>

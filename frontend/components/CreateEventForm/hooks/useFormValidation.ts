@@ -119,8 +119,7 @@ export function useFormValidation(
 
       return (
         isSameDay(current.votingDeadline, initial.votingDeadline) &&
-        current.votingDeadlineTime === initial.votingDeadlineTime &&
-        current.votingDeadlineManuallySet === initial.votingDeadlineManuallySet
+        current.votingDeadlineTime === initial.votingDeadlineTime
       );
     };
 

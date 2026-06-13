@@ -69,11 +69,6 @@ export default function HostedEventSettingsPage() {
             date={formData.deadlineDate}
             time={formData.deadlineTime}
             enableLabel={t("createEvent.votingDeadline.enable")}
-            description={
-              formData.deadlineEnabled
-                ? t("createEvent.votingDeadline.description")
-                : t("hosted.deadline.notSet")
-            }
             dateLabel={t("createEvent.votingDeadline.date")}
             timeLabel={t("createEvent.votingDeadline.time")}
             datePlaceholder={t("createEvent.configuration.selectDate")}
@@ -88,7 +83,6 @@ export default function HostedEventSettingsPage() {
                     : undefined
             }
             enableLabelClassName="text-sm font-medium cursor-pointer text-zinc-700 dark:text-zinc-300"
-            descriptionClassName="text-sm text-zinc-600 dark:text-zinc-400"
             fieldLabelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
             disabled={isDeadlineLocked}
             onEnabledChange={updateDeadlineEnabled}

@@ -37,10 +37,6 @@ export function VotingDeadlineSection() {
       : hasDeadlineAfterStartError && !isRecurring
         ? t("createEvent.votingDeadline.errorAfterStart")
         : null;
-  const helperText =
-    !isRecurring && !formData.votingDeadlineManuallySet
-      ? t("createEvent.votingDeadline.autoSync")
-      : null;
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">
@@ -58,6 +54,11 @@ export function VotingDeadlineSection() {
             <h2 className="text-base font-semibold text-foreground mb-1">
               {t("createEvent.votingDeadline.title")}
             </h2>
+            <p className="text-xs text-muted-foreground">
+              {isRecurring
+                ? t("createEvent.votingDeadline.recurringDescription")
+                : t("createEvent.votingDeadline.description")}
+            </p>
           </div>
 
           <VotingDeadlineFields
@@ -66,21 +67,15 @@ export function VotingDeadlineSection() {
             date={formData.votingDeadline}
             time={formData.votingDeadlineTime}
             enableLabel={t("createEvent.votingDeadline.enable")}
-            description={
-              isRecurring
-                ? t("createEvent.votingDeadline.recurringDescription")
-                : t("createEvent.votingDeadline.description")
-            }
             dateLabel={t("createEvent.votingDeadline.date")}
             timeLabel={t("createEvent.votingDeadline.time")}
             datePlaceholder={t("createEvent.configuration.selectDate")}
+            timePlaceholder={t("createEvent.configuration.selectTime")}
             minDate={today}
             maxDate={
               isRecurring ? undefined : (formData.startDate ?? undefined)
             }
             errorMessage={errorMessage}
-            helperText={helperText}
-            descriptionClassName="text-xs text-muted-foreground"
             onEnabledChange={handleVotingDeadlineEnabledChange}
             onDateChange={handleVotingDeadlineDateChange}
             onTimeChange={handleVotingDeadlineTimeChange}

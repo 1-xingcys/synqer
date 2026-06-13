@@ -14,16 +14,7 @@ export function useDateTimeFields(
             ...prev,
             votingDeadlineEnabled: false,
             votingDeadline: null,
-            votingDeadlineManuallySet: false,
-          };
-        }
-
-        if (prev.eventType === "ONE_TIME" && !prev.votingDeadlineManuallySet) {
-          return {
-            ...prev,
-            votingDeadlineEnabled: true,
-            votingDeadline: prev.startDate,
-            votingDeadlineTime: prev.startTime,
+            votingDeadlineTime: null,
           };
         }
 
@@ -50,11 +41,6 @@ export function useDateTimeFields(
           newData.endDate = date;
         }
 
-        if (prev.eventType === "ONE_TIME" && !prev.votingDeadlineManuallySet) {
-          newData.votingDeadline = date;
-          newData.votingDeadlineTime = prev.startTime;
-        }
-
         return newData;
       });
     },
@@ -65,25 +51,13 @@ export function useDateTimeFields(
     (date: Date | null) => {
       setFormData((prev) => {
         const newData = { ...prev, endDate: date };
-        let nextStartDate = prev.startDate;
 
         if (date && prev.startDate && prev.startDate > date) {
-          nextStartDate = date;
           newData.startDate = date;
         }
 
         if (date && !prev.startDate) {
-          nextStartDate = date;
           newData.startDate = date;
-        }
-
-        if (
-          prev.eventType === "ONE_TIME" &&
-          !prev.votingDeadlineManuallySet &&
-          nextStartDate !== prev.startDate
-        ) {
-          newData.votingDeadline = nextStartDate;
-          newData.votingDeadlineTime = prev.startTime;
         }
 
         return newData;
@@ -94,15 +68,10 @@ export function useDateTimeFields(
 
   const handleStartTimeChange = useCallback(
     (value: string) => {
-      setFormData((prev) => {
-        const newData = { ...prev, startTime: value };
-
-        if (prev.eventType === "ONE_TIME" && !prev.votingDeadlineManuallySet) {
-          newData.votingDeadlineTime = value;
-        }
-
-        return newData;
-      });
+      setFormData((prev) => ({
+        ...prev,
+        startTime: value,
+      }));
     },
     [setFormData],
   );
@@ -119,29 +88,20 @@ export function useDateTimeFields(
 
   const handleVotingDeadlineDateChange = useCallback(
     (date: Date | null) => {
-      setFormData((prev) => {
-        return {
-          ...prev,
-          votingDeadline: date,
-          votingDeadlineManuallySet: date !== null,
-        };
-      });
+      setFormData((prev) => ({
+        ...prev,
+        votingDeadline: date,
+      }));
     },
     [setFormData],
   );
 
   const handleVotingDeadlineTimeChange = useCallback(
     (value: string) => {
-      setFormData((prev) => {
-        return {
-          ...prev,
-          votingDeadlineTime: value,
-          votingDeadlineManuallySet:
-            prev.eventType === "ONE_TIME"
-              ? true
-              : prev.votingDeadlineManuallySet,
-        };
-      });
+      setFormData((prev) => ({
+        ...prev,
+        votingDeadlineTime: value,
+      }));
     },
     [setFormData],
   );

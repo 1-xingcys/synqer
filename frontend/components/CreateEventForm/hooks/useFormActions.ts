@@ -61,7 +61,11 @@ export function useFormActions({
         }
 
         let votingDeadlineISO: string | undefined;
-        if (formData.votingDeadlineEnabled && formData.votingDeadline) {
+        if (
+          formData.votingDeadlineEnabled &&
+          formData.votingDeadline &&
+          formData.votingDeadlineTime
+        ) {
           const deadlineDateTime = combineVotingDeadline(
             formData.votingDeadline,
             formData.votingDeadlineTime,

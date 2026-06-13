@@ -860,6 +860,7 @@
       "weekdaysHint": "Select at least 1 day and at most 7 days",
       "weekdaysError": "Select at least one weekday for a recurring event",
       "selectDate": "Select date",
+      "selectTime": "Select time",
       "startTime": "Start time",
       "endTime": "End time",
       "slotDuration": "Time slot duration",
