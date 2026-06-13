@@ -2349,6 +2349,11 @@
       "UpdateEventDto": {
         "type": "object",
         "properties": {
+          "votingDeadline": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
           "title": {
             "type": "string",
             "maxLength": 50
@@ -2359,11 +2364,6 @@
           },
           "timeZone": {
             "type": "string"
-          },
-          "votingDeadline": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
           }
         }
       },
