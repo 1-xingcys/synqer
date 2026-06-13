@@ -6,6 +6,7 @@ export interface EventShareInfo {
   hostName: string;
   hostAvatarUrl?: string;
   votingDeadline?: string; // ISO string
+  timeZone?: string;
 }
 
 export const ShareResult = {
@@ -21,7 +22,6 @@ interface EventShareCopy {
   deadlinePrefix: string;
   instructionText: string;
   voteButtonLabel: string;
-  weekdays: string[];
   openingParenthesis: string;
   closingParenthesis: string;
 }
@@ -39,7 +39,6 @@ function getEventShareCopy(localePrefix: string): EventShareCopy {
       deadlinePrefix: "截止：",
       instructionText: "請前往投票頁面中投票。",
       voteButtonLabel: "立即投票",
-      weekdays: ["日", "一", "二", "三", "四", "五", "六"],
       openingParenthesis: "（",
       closingParenthesis: "）",
     };
@@ -51,24 +50,40 @@ function getEventShareCopy(localePrefix: string): EventShareCopy {
     deadlinePrefix: "Deadline: ",
     instructionText: "Please open the voting page to vote.",
     voteButtonLabel: "Vote Now",
-    weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
     openingParenthesis: "(",
     closingParenthesis: ")",
   };
 }
 
+function getDateLocale(localePrefix: string) {
+  return localePrefix === "/zh-TW" ? "zh-TW" : "en-US";
+}
+
 function formatDeadline(
   votingDeadline: string | undefined,
   copy: EventShareCopy,
+  localePrefix: string,
+  timeZone?: string,
 ): string | null {
   if (!votingDeadline) return null;
   const d = new Date(votingDeadline);
-  const month = d.getMonth() + 1;
-  const day = d.getDate();
-  const weekday = copy.weekdays[d.getDay()];
-  const hours = d.getHours().toString().padStart(2, "0");
-  const minutes = d.getMinutes().toString().padStart(2, "0");
-  return `${copy.deadlinePrefix}${month}/${day}${copy.openingParenthesis}${weekday}${copy.closingParenthesis}${hours}:${minutes}`;
+  const locale = getDateLocale(localePrefix);
+  const monthDay = new Intl.DateTimeFormat(locale, {
+    month: "numeric",
+    day: "numeric",
+    timeZone,
+  }).format(d);
+  const weekday = new Intl.DateTimeFormat(locale, {
+    weekday: localePrefix === "/zh-TW" ? "narrow" : "short",
+    timeZone,
+  }).format(d);
+  const time = new Intl.DateTimeFormat(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone,
+  }).format(d);
+  return `${copy.deadlinePrefix}${monthDay}${copy.openingParenthesis}${weekday}${copy.closingParenthesis}${time}`;
 }
 
 function buildEventVoteUrl(eventId: string, localePrefix: string): string {
@@ -88,7 +103,12 @@ function buildEventShareFlexMessage(info: EventShareInfo) {
   const localePrefix = getLocalePrefix(pathname);
   const copy = getEventShareCopy(localePrefix);
   const title = info.title || copy.untitledEvent;
-  const deadline = formatDeadline(info.votingDeadline, copy);
+  const deadline = formatDeadline(
+    info.votingDeadline,
+    copy,
+    localePrefix,
+    info.timeZone,
+  );
   const voteUrl = buildEventVoteUrl(info.eventId, localePrefix);
 
   const bodyContents: Array<Record<string, unknown>> = [

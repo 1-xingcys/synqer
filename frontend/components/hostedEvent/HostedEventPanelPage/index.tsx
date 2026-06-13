@@ -112,6 +112,7 @@ export default function HostedEventPanelPage() {
           {/* Hide when voting is in progress and there is nothing to show yet */}
           <EventTimeSelector
             selectedRanges={displayRanges}
+            timeZone={event.timeZone}
             onRemove={handleRemoveConfirmedTime}
             hasConfirmedTime={hasCommittedConfirmation}
             hasStagedChanges={hasStagedChanges}
@@ -125,6 +126,7 @@ export default function HostedEventPanelPage() {
               <EventResultShareButton
                 eventId={eventId}
                 eventTitle={eventTitle}
+                eventTimeZone={event.timeZone}
                 slots={data.slots || []}
                 confirmedSlotIds={event.confirmedSlotIds}
                 votes={data.votes || []}

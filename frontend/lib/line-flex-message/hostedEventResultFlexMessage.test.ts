@@ -14,6 +14,7 @@ describe("hostedEventResultFlexMessage", () => {
     const message = buildHostedEventResultFlexMessageFromSummary({
       eventId: "event-1",
       eventTitle: "Team Sync",
+      timeZone: "UTC",
       locale: "en-US",
       summary: {
         totalExpected: 3,

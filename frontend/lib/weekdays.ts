@@ -68,10 +68,11 @@ function formatWeekdayTextFromDate(
   date: Date,
   locale: string,
   formatOption: "narrow" | "short" | "long" = "short",
+  timeZone?: string,
 ): string {
   return new Intl.DateTimeFormat(locale, {
     weekday: formatOption,
-    timeZone: "UTC",
+    timeZone,
   }).format(date);
 }
 
@@ -80,10 +81,14 @@ export function formatWeekdayLabel(
   locale: string,
   formatOption: "narrow" | "short" | "long" = "short",
 ): string {
+  // Weekday enums such as MONDAY/SATURDAY are semantic labels rather than
+  // wall-clock instants, so keep them pinned to UTC to avoid locale/environment
+  // time zones shifting the intended weekday.
   return formatWeekdayTextFromDate(
     WEEKDAY_REFERENCE_DATE[weekday],
     locale,
     formatOption,
+    "UTC",
   );
 }
 
@@ -91,6 +96,9 @@ export function formatWeekdayLabelFromDate(
   date: Date,
   locale: string,
   formatOption: "narrow" | "short" | "long" = "short",
+  timeZone?: string,
 ): string {
-  return formatWeekdayTextFromDate(date, locale, formatOption);
+  // Concrete dates should follow the caller's time zone so the weekday stays
+  // aligned with the formatted month/day shown beside it.
+  return formatWeekdayTextFromDate(date, locale, formatOption, timeZone);
 }

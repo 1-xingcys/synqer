@@ -75,4 +75,21 @@ describe("timeGrid utils", () => {
       "Mon ~ Wed",
     );
   });
+
+  it("formats date columns as stable calendar days", () => {
+    const dateColumn = {
+      key: "2026-06-13",
+      kind: "date" as const,
+      rawValue: "2026-06-13",
+    };
+
+    expect(formatAxisHeader(dateColumn, "en-US")).toEqual({
+      weekday: "Sat",
+      day: 13,
+      month: "Jun",
+    });
+    expect(formatAxisPageRange(dateColumn, dateColumn, "en-US")).toBe(
+      "2026/6/13",
+    );
+  });
 });
