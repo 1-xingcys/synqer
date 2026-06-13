@@ -24,6 +24,7 @@ describe('EventStatusService', () => {
   describe('computeEventStatus', () => {
     it('should return VOTING when no deadline and no confirmed slots', () => {
       const result = service.computeEventStatus({
+        eventType: EventType.ONE_TIME,
         votingDeadline: null,
         confirmedTimeSlots: [],
       });
@@ -36,6 +37,7 @@ describe('EventStatusService', () => {
       futureDate.setDate(futureDate.getDate() + 7);
 
       const result = service.computeEventStatus({
+        eventType: EventType.ONE_TIME,
         votingDeadline: futureDate,
         confirmedTimeSlots: [],
       });
@@ -48,6 +50,7 @@ describe('EventStatusService', () => {
       pastDate.setDate(pastDate.getDate() - 1);
 
       const result = service.computeEventStatus({
+        eventType: EventType.ONE_TIME,
         votingDeadline: pastDate,
         confirmedTimeSlots: [],
       });
@@ -60,6 +63,7 @@ describe('EventStatusService', () => {
       futureDate.setDate(futureDate.getDate() + 7);
 
       const result = service.computeEventStatus({
+        eventType: EventType.ONE_TIME,
         votingDeadline: null,
         confirmedTimeSlots: [
           {
@@ -84,6 +88,7 @@ describe('EventStatusService', () => {
       pastDate.setDate(pastDate.getDate() - 7);
 
       const result = service.computeEventStatus({
+        eventType: EventType.ONE_TIME,
         votingDeadline: null,
         confirmedTimeSlots: [
           {
@@ -135,6 +140,7 @@ describe('EventStatusService', () => {
       futureDate.setDate(futureDate.getDate() + 7);
 
       const result = service.computeEventStatus({
+        eventType: EventType.ONE_TIME,
         votingDeadline: null,
         confirmedTimeSlots: [
           {
@@ -170,6 +176,7 @@ describe('EventStatusService', () => {
       const pastDate = new Date('2020-01-01T00:00:00.000Z');
 
       const result = service.computeEventStatus({
+        eventType: EventType.ONE_TIME,
         votingDeadline: null,
         confirmedTimeSlots: [
           {

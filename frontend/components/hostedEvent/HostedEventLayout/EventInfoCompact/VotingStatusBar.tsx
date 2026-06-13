@@ -1,14 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import {
-  differenceInDays,
-  differenceInHours,
-  differenceInMinutes,
-  isPast,
-  format,
-} from "date-fns";
+import { format } from "date-fns";
 import { Clock, AlertTriangle, Users } from "lucide-react";
+import { useMinuteNow } from "@/hooks/useMinuteNow";
+import { getVotingDeadlineCountdownState } from "@/lib/event-presentation";
 
 interface VotingStatusBarProps {
   votingDeadline?: string | null;
@@ -30,22 +26,17 @@ export function VotingStatusBar({
   isInactive = false,
 }: VotingStatusBarProps) {
   const t = useTranslations();
+  const now = useMinuteNow();
 
-  // Calculate deadline countdown
-  const deadlineDate = votingDeadline ? new Date(votingDeadline) : null;
-  const now = new Date();
-  const isExpired = deadlineDate ? isPast(deadlineDate) : false;
-
-  const days = deadlineDate ? differenceInDays(deadlineDate, now) : 0;
-  const hours = deadlineDate ? differenceInHours(deadlineDate, now) % 24 : 0;
-  const minutes = deadlineDate
-    ? differenceInMinutes(deadlineDate, now) % 60
-    : 0;
-
-  // Determine urgency level (only when active and not expired)
-  const totalHours = deadlineDate ? differenceInHours(deadlineDate, now) : 0;
-  const isUrgent = !isInactive && totalHours <= 24 && totalHours > 0;
-  const isVeryCritical = !isInactive && totalHours <= 6 && totalHours > 0;
+  const {
+    deadlineDate,
+    isExpired,
+    days,
+    hours,
+    minutes,
+    isUrgent,
+    isVeryCritical,
+  } = getVotingDeadlineCountdownState(votingDeadline, now, isInactive);
 
   const getTimeColor = () => {
     if (isInactive || isExpired || !deadlineDate)

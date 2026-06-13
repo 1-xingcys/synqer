@@ -14,6 +14,17 @@ const getDateLocale = (locale: string): string => {
   return localeMap[locale] || locale;
 };
 
+function parseAxisCalendarDate(rawValue: string): Date {
+  if (rawValue.includes("T")) {
+    return new Date(rawValue);
+  }
+
+  // Date-only axis keys represent a calendar day, not a UTC instant. Parse
+  // them into local wall-clock time so headers stay on the same day across
+  // environments with negative UTC offsets.
+  return new Date(`${rawValue}T12:00:00`);
+}
+
 export const formatAxisHeader = (
   column: GridAxisColumn,
   locale: string = "en",
@@ -24,7 +35,7 @@ export const formatAxisHeader = (
     };
   }
 
-  const date = new Date(column.rawValue);
+  const date = parseAxisCalendarDate(column.rawValue);
   const dateLocale = getDateLocale(locale);
   const weekday = date.toLocaleDateString(dateLocale, { weekday: "short" });
   const day = date.getDate();
@@ -57,7 +68,7 @@ export const formatAxisPageRange = (
 };
 
 const formatDatePageValue = (dateStr: string): string => {
-  const date = new Date(dateStr);
+  const date = parseAxisCalendarDate(dateStr);
   return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
 };
 

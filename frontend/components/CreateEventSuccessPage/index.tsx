@@ -57,6 +57,7 @@ export default function CreateEventSuccessPage() {
   const eventTitle = eventData?.title;
   const lineGroupId = eventData?.lineGroupId;
   const votingDeadline = eventData?.votingDeadline;
+  const eventTimeZone = eventData?.timeZone;
 
   // 分享到 LINE（使用 shareTargetPicker）
   const handleShareToLine = async () => {
@@ -71,6 +72,7 @@ export default function CreateEventSuccessPage() {
         hostName: user?.displayName || "未知",
         hostAvatarUrl: user?.avatarUrl || undefined,
         votingDeadline: votingDeadline || undefined,
+        timeZone: eventTimeZone || undefined,
       };
 
       const result = await shareEventFlexMessage(shareInfo);

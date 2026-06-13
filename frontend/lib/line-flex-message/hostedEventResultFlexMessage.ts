@@ -6,6 +6,7 @@ import { ShareResult } from "./shareEventFlexMessage";
 type HostedEventResultFlexMessageInfo = {
   eventId: string;
   eventTitle: string;
+  timeZone: string;
   summary: HostedEventResultSummary;
   locale: string;
 };
@@ -90,6 +91,7 @@ function buildRangeSection(params: {
   range: HostedEventResultSummary["ranges"][number];
   totalExpected: number;
   locale: string;
+  timeZone: string;
   copy: HostedEventResultFlexCopy;
 }) {
   const slotLabel = formatLocalizedRangeLabel(
@@ -101,6 +103,7 @@ function buildRangeSection(params: {
       endMinute: params.range.endMinute,
     },
     params.locale,
+    { timeZone: params.timeZone },
   );
   const unavailableNames = params.range.unavailableParticipants.map(
     (participant) => participant.name,
@@ -273,6 +276,7 @@ export function buildHostedEventResultFlexMessageFromSummary(
       range,
       totalExpected: info.summary.totalExpected,
       locale: info.locale,
+      timeZone: info.timeZone,
       copy,
     }),
   );

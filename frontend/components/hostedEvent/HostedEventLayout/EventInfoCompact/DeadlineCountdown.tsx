@@ -1,14 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import {
-  differenceInDays,
-  differenceInHours,
-  differenceInMinutes,
-  isPast,
-  format,
-} from "date-fns";
+import { format } from "date-fns";
+import { useMinuteNow } from "@/hooks/useMinuteNow";
+import { getVotingDeadlineCountdownState } from "@/lib/event-presentation";
 
 interface DeadlineCountdownProps {
   votingDeadline?: string | null;
@@ -21,15 +16,7 @@ export function DeadlineCountdown({
   isInactive = false,
 }: DeadlineCountdownProps) {
   const t = useTranslations("hosted");
-  const [, setTick] = useState(0);
-
-  // Update every minute
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTick((t) => t + 1);
-    }, 60000);
-    return () => clearInterval(interval);
-  }, []);
+  const now = useMinuteNow();
 
   if (!votingDeadline) {
     return (
@@ -46,18 +33,14 @@ export function DeadlineCountdown({
     );
   }
 
-  const deadlineDate = new Date(votingDeadline);
-  const now = new Date();
-  const isExpired = isPast(deadlineDate);
-
-  const days = differenceInDays(deadlineDate, now);
-  const hours = differenceInHours(deadlineDate, now) % 24;
-  const minutes = differenceInMinutes(deadlineDate, now) % 60;
-
-  // Determine urgency level (disabled when inactive)
-  const totalHours = differenceInHours(deadlineDate, now);
-  const isUrgent = !isInactive && totalHours <= 24 && totalHours > 0;
-  const isVeryCritical = !isInactive && totalHours <= 6 && totalHours > 0;
+  const countdown = getVotingDeadlineCountdownState(
+    votingDeadline,
+    now,
+    isInactive,
+  );
+  const deadlineDate = countdown.deadlineDate!;
+  const { isExpired, days, hours, minutes, isUrgent, isVeryCritical } =
+    countdown;
 
   const getStatusColor = () => {
     if (isInactive || isExpired) return "text-zinc-500 dark:text-zinc-400";

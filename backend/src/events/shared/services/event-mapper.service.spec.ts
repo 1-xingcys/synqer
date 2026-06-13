@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventType, Weekday } from '@prisma/client';
+import { EventSlotAxisType, EventType, Weekday } from '@prisma/client';
 import { EventMapperService } from './event-mapper.service';
 import { EventStatusService } from './event-status.service';
 import { ConfirmedTimeService } from './confirmed-time.service';
@@ -227,8 +227,9 @@ describe('EventMapperService', () => {
             slotId: 'slot-1',
             slot: {
               id: 'slot-1',
-              axisType: 'DATE',
+              axisType: EventSlotAxisType.DATE,
               axisDate: new Date(),
+              axisWeekday: null,
               startMinute: 540,
               endMinute: 600,
             },
@@ -366,8 +367,9 @@ describe('EventMapperService', () => {
             slotId: 'slot-1',
             slot: {
               id: 'slot-1',
-              axisType: 'DATE',
+              axisType: EventSlotAxisType.DATE,
               axisDate: new Date(),
+              axisWeekday: null,
               startMinute: 540,
               endMinute: 600,
             },

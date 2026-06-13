@@ -17,6 +17,7 @@ import type { EventSlot } from "./types";
 interface EventResultShareButtonProps {
   eventId: string;
   eventTitle: string;
+  eventTimeZone: string;
   slots: EventSlot[];
   confirmedSlotIds?: string[];
   votes: HostedResultVote[];
@@ -26,6 +27,7 @@ interface EventResultShareButtonProps {
 export function EventResultShareButton({
   eventId,
   eventTitle,
+  eventTimeZone,
   slots,
   confirmedSlotIds,
   votes,
@@ -52,6 +54,7 @@ export function EventResultShareButton({
   } = useHostedEventResultShare({
     eventId,
     eventTitle,
+    eventTimeZone,
     locale,
     confirmedSlots,
     votes,

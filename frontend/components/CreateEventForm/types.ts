@@ -24,20 +24,10 @@ export interface CreateEventFormData {
   endTime: string;
   timeZone: string;
 
-  // Displayed voting deadline fields
+  // Voting deadline fields
+  votingDeadlineEnabled: boolean;
   votingDeadline: Date | null;
-  votingDeadlineTime: string;
-  votingDeadlineManuallySet: boolean;
-
-  // One-time event draft
-  oneTimeVotingDeadline: Date | null;
-  oneTimeVotingDeadlineTime: string;
-  oneTimeVotingDeadlineManuallySet: boolean;
-
-  // Recurring event draft
-  recurringVotingDeadline: Date | null;
-  recurringVotingDeadlineTime: string;
-  recurringVotingDeadlineManuallySet: boolean;
+  votingDeadlineTime: string | null;
   lineGroupId: string | null;
   selectedLineUserIds: string[];
 }

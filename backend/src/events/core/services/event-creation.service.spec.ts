@@ -92,6 +92,26 @@ describe('EventCreationService', () => {
       });
     });
 
+    it('should persist null votingDeadline when deadline is not set', async () => {
+      const mockResult = {
+        event: { id: 'event-123', title: 'Test Event', lineGroupId: null },
+        creatorLineUserId: undefined,
+      };
+
+      mockEventRepository.createWithSlotsAndParticipants.mockResolvedValue(mockResult);
+
+      await service.create(validDto, 'user-123');
+
+      expect(eventRepository.createWithSlotsAndParticipants).toHaveBeenCalledWith(
+        expect.objectContaining({
+          votingDeadline: null,
+        }),
+        expect.any(Array),
+        expect.any(Array),
+        'user-123',
+      );
+    });
+
     it('should create an event without user ID', async () => {
       const mockResult = {
         event: { id: 'event-456', title: 'Test Event', lineGroupId: null },

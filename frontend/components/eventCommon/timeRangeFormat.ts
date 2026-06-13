@@ -44,6 +44,8 @@ function formatLocalizedDateLabelFromDate(
   options: LocalizedTimeRangeFormatOptions = {},
 ) {
   const dateLocale = getLocalizedDateLocale(locale);
+  // Use one shared time zone for both the numeric date and weekday text so
+  // labels like "6/13 (Sat)" cannot disagree internally.
   const dateText = new Intl.DateTimeFormat(dateLocale, {
     month: "numeric",
     day: "numeric",
@@ -53,6 +55,7 @@ function formatLocalizedDateLabelFromDate(
     date,
     dateLocale,
     options.weekdayStyle ?? (locale === "zh-TW" ? "narrow" : "short"),
+    options.timeZone,
   );
 
   return locale === "zh-TW"

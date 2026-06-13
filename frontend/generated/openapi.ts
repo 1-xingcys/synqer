@@ -1000,10 +1000,11 @@ export interface components {
             votingStats: components["schemas"]["HostedEventVotingStatsDto"];
         };
         UpdateEventDto: {
+            /** Format: date-time */
+            votingDeadline?: string | null;
             title?: string;
             description?: string;
             timeZone?: string;
-            votingDeadline?: string;
         };
         UpdateEventResponseDto: {
             id: string;

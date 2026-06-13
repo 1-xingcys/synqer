@@ -446,6 +446,9 @@ export class EventRepository {
     return this.prisma.event.findUnique({
       where: { id: eventId },
       include: {
+        confirmedTimeSlots: {
+          select: { id: true },
+        },
         oneTimeSchedule: true,
         recurringSchedule: true,
       },

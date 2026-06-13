@@ -21,12 +21,14 @@ import { Clock, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TimePickerProps {
-  value: string;
+  value: string | null;
   onChange: (value: string) => void;
   type?: "start" | "end";
   disabled?: boolean;
   className?: string;
   hasError?: boolean;
+  /** 當 value 為空時顯示的提示文字 */
+  placeholder?: string;
 }
 
 // Hook to detect mobile device
@@ -57,6 +59,7 @@ export function TimePicker({
   disabled = false,
   className,
   hasError = false,
+  placeholder = "HH:MM",
 }: TimePickerProps) {
   const isMobile = useIsMobile();
 
@@ -69,6 +72,7 @@ export function TimePicker({
         disabled={disabled}
         className={className}
         hasError={hasError}
+        placeholder={placeholder}
       />
     );
   }
@@ -81,6 +85,7 @@ export function TimePicker({
       disabled={disabled}
       className={className}
       hasError={hasError}
+      placeholder={placeholder}
     />
   );
 }
@@ -93,6 +98,7 @@ function DesktopTimePicker({
   disabled,
   className,
   hasError,
+  placeholder = "HH:MM",
 }: TimePickerProps) {
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -100,8 +106,8 @@ function DesktopTimePicker({
   const [inputError, setInputError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Display value: use editValue when editing, otherwise use prop value
-  const inputValue = isEditing ? editValue : value;
+  // Display value: use editValue when editing, otherwise use prop value (empty when null)
+  const inputValue = isEditing ? editValue : (value ?? "");
 
   // Generate all valid time options
   const timeOptions = useMemo(() => {
@@ -197,7 +203,7 @@ function DesktopTimePicker({
   // Handle input focus
   const handleInputFocus = () => {
     setIsEditing(true);
-    setEditValue(value);
+    setEditValue(value ?? "");
   };
 
   // Handle input blur - validate and apply
@@ -244,7 +250,7 @@ function DesktopTimePicker({
       handleInputBlur();
       setOpen(false);
     } else if (e.key === "Escape") {
-      setEditValue(value);
+      setEditValue(value ?? "");
       setIsEditing(false);
       setInputError(null);
       setOpen(false);
@@ -264,7 +270,7 @@ function DesktopTimePicker({
               onKeyDown={handleKeyDown}
               onFocus={handleInputFocus}
               disabled={disabled}
-              placeholder="HH:MM"
+              placeholder={placeholder}
               className={cn(
                 "pr-16",
                 (hasError || inputError) && "border-destructive",
@@ -323,6 +329,7 @@ function MobileTimePicker({
   disabled,
   className,
   hasError,
+  placeholder = "HH:MM",
 }: TimePickerProps) {
   const [open, setOpen] = useState(false);
   const pickerContainerRef = useRef<HTMLDivElement>(null);
@@ -331,9 +338,9 @@ function MobileTimePicker({
     minute: string;
   } | null>(null);
 
-  // Parse current value from prop
+  // Parse current value from prop, falling back to a default for the wheel when empty
   const propValue = useMemo(() => {
-    const [h, m] = value.split(":");
+    const [h, m] = (value ?? "00:00").split(":");
     return { hour: h, minute: m };
   }, [value]);
 
@@ -447,7 +454,7 @@ function MobileTimePicker({
   };
 
   // Format display value - always use prop value for display
-  const displayValue = value;
+  const displayValue = value ?? placeholder;
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
@@ -457,6 +464,7 @@ function MobileTimePicker({
           disabled={disabled}
           className={cn(
             "w-full justify-start text-left font-normal",
+            value == null && "text-muted-foreground",
             hasError && "border-destructive",
             className,
           )}

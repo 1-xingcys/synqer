@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsISO8601, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsISO8601,
+  MaxLength,
+  ValidateIf,
+} from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   TITLE_MAX_LENGTH,
   DESCRIPTION_MAX_LENGTH,
@@ -33,7 +40,13 @@ export class UpdateEventDto {
   timeZone?: string;
 
   // 投票截止時間（ISO 8601 格式）
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    nullable: true,
+  })
   @IsOptional()
+  @ValidateIf((_, value: string | null | undefined) => value !== null)
   @IsISO8601()
-  votingDeadline?: string;
+  votingDeadline?: string | null;
 }

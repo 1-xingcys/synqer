@@ -424,12 +424,14 @@
       "timeRange": "Time Range",
       "slotDuration": "Time Slot Duration",
       "saveChanges": "Save Changes",
+      "discard": "Discard Changes",
       "saved": "Changes saved!",
       "dangerZone": "Danger Zone",
       "deleteEvent": "Delete Event",
       "deleteWarning": "This action cannot be undone. All votes and data will be permanently deleted.",
       "confirmDelete": "Are you sure you want to delete this event?",
-      "votingEndedDescription": "Voting has ended, voting deadline cannot be modified"
+      "deadlineBeforeFirstSlot": "Voting deadline must be before or at the first event slot",
+      "deadlineLockedDescription": "Voting deadline cannot be modified after the event starts or the event time is confirmed"
     }
   },
   "eventJoin": {
@@ -858,6 +860,7 @@
       "weekdaysHint": "Select at least 1 day and at most 7 days",
       "weekdaysError": "Select at least one weekday for a recurring event",
       "selectDate": "Select date",
+      "selectTime": "Select time",
       "startTime": "Start time",
       "endTime": "End time",
       "slotDuration": "Time slot duration",
@@ -870,11 +873,11 @@
       "title": "Voting Deadline",
       "description": "Set a deadline for participants to submit their votes",
       "recurringDescription": "Optionally set a voting deadline for this recurring event",
-      "optional": "Optional. You can leave this empty.",
-      "clear": "Clear",
+      "enable": "Set voting deadline",
       "date": "Deadline date",
       "time": "Deadline time",
       "autoSync": "Auto-synced with event start time",
+      "errorRequired": "Please select a deadline date first",
       "errorInPast": "Voting deadline cannot be in the past",
       "errorAfterStart": "Voting deadline must be before or at the event start time"
     },

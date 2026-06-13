@@ -39,29 +39,10 @@ export function GeneralSection() {
     useLineGroupFields(setFormData);
 
   const handleEventTypeChange = (value: EventType) => {
-    setFormData((prev) => {
-      if (value === "ONE_TIME") {
-        return {
-          ...prev,
-          eventType: value,
-          votingDeadline: prev.oneTimeVotingDeadlineManuallySet
-            ? prev.oneTimeVotingDeadline
-            : prev.startDate,
-          votingDeadlineTime: prev.oneTimeVotingDeadlineManuallySet
-            ? prev.oneTimeVotingDeadlineTime
-            : prev.startTime,
-          votingDeadlineManuallySet: prev.oneTimeVotingDeadlineManuallySet,
-        };
-      }
-
-      return {
-        ...prev,
-        eventType: value,
-        votingDeadline: prev.recurringVotingDeadline,
-        votingDeadlineTime: prev.recurringVotingDeadlineTime,
-        votingDeadlineManuallySet: prev.recurringVotingDeadlineManuallySet,
-      };
-    });
+    setFormData((prev) => ({
+      ...prev,
+      eventType: value,
+    }));
   };
 
   const isOverTitleLimit = titleCharCount >= TITLE_MAX_LENGTH;
