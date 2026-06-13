@@ -10,7 +10,7 @@ export type VotingDeadlineError =
 interface ValidateVotingDeadlineInput {
   enabled: boolean;
   date: Date | null;
-  time: string;
+  time: string | null;
   minDateTime?: Date | null;
   maxDateTime?: Date | null;
 }
@@ -40,7 +40,7 @@ export function validateVotingDeadline({
     return null;
   }
 
-  if (!date) {
+  if (!date || !time) {
     return VOTING_DEADLINE_ERROR.REQUIRED;
   }
 

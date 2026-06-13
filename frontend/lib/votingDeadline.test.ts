@@ -25,6 +25,16 @@ describe("votingDeadline", () => {
     ).toBe(VOTING_DEADLINE_ERROR.REQUIRED);
   });
 
+  it("returns required when enabled without a time", () => {
+    expect(
+      validateVotingDeadline({
+        enabled: true,
+        date: new Date("2026-04-10T00:00:00"),
+        time: null,
+      }),
+    ).toBe(VOTING_DEADLINE_ERROR.REQUIRED);
+  });
+
   it("returns in_past when deadline is earlier than the minimum", () => {
     expect(
       validateVotingDeadline({
