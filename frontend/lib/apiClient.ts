@@ -41,6 +41,24 @@ async function parseErrorPayload(response: Response): Promise<unknown> {
   return response.text().catch(() => undefined);
 }
 
+/** Extract message from a parsed error payload. */
+function extractErrorMessage(payload: unknown, status: number): string {
+  if (typeof payload === "string" && payload.trim().length > 0) {
+    return payload;
+  }
+  if (typeof payload === "object" && payload !== null && "message" in payload) {
+    const { message } = payload as { message: unknown };
+    if (typeof message === "string" && message.length > 0) {
+      return message;
+    }
+    // NestJS ValidationPipe return message: string[]
+    if (Array.isArray(message) && message.length > 0) {
+      return message.join(", ");
+    }
+  }
+  return `Request failed with status ${status}`;
+}
+
 /**
  * Low-level fetch wrapper:
  * - resolves API base URL
@@ -62,15 +80,7 @@ export async function apiFetchJson<T>(path: string, init?: RequestInit) {
 
   if (!response.ok) {
     const payload = await parseErrorPayload(response);
-    const message =
-      typeof payload === "object" &&
-      payload !== null &&
-      "message" in payload &&
-      typeof payload.message === "string"
-        ? payload.message
-        : typeof payload === "string" && payload.trim().length > 0
-          ? payload
-          : `Request failed with status ${response.status}`;
+    const message = extractErrorMessage(payload, response.status);
     throw new ApiError(message, response.status, payload);
   }
 
