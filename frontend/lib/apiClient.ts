@@ -24,7 +24,8 @@ function getApiBaseUrl(): string {
 }
 
 /**
- * Build final request URL from relative path or passthrough absolute URL.
+ * Build the full API URL from a resource path.
+ * `path` must start with "/" (e.g. "/events/123").
  */
 function toApiUrl(path: string): string {
   return `${getApiBaseUrl()}${path}`;
@@ -72,17 +73,37 @@ export async function apiFetch(path: string, init?: RequestInit) {
 }
 
 /**
+ * Throw ApiError on non-2xx responses, deriving the message from the
+ * server payload when available.
+ */
+async function throwIfNotOk(response: Response): Promise<void> {
+  if (response.ok) {
+    return;
+  }
+  const payload = await parseErrorPayload(response);
+  const message = extractErrorMessage(payload, response.status);
+  throw new ApiError(message, response.status, payload);
+}
+
+/**
  * Fetch JSON data and throw ApiError on non-2xx responses.
  * Error message is derived from server payload when available.
  */
 export async function apiFetchJson<T>(path: string, init?: RequestInit) {
   const response = await apiFetch(path, init);
-
-  if (!response.ok) {
-    const payload = await parseErrorPayload(response);
-    const message = extractErrorMessage(payload, response.status);
-    throw new ApiError(message, response.status, payload);
-  }
-
+  await throwIfNotOk(response);
   return response.json() as Promise<T>;
+}
+
+/**
+ * Fetch an endpoint whose response body is empty or irrelevant.
+ * Throws ApiError on non-2xx responses; the body is never read, so this
+ * is safe for 204 No Content and other empty responses.
+ */
+export async function apiFetchVoid(
+  path: string,
+  init?: RequestInit,
+): Promise<void> {
+  const response = await apiFetch(path, init);
+  await throwIfNotOk(response);
 }
