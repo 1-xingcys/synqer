@@ -27,12 +27,7 @@ function getApiBaseUrl(): string {
  * Build final request URL from relative path or passthrough absolute URL.
  */
 function toApiUrl(path: string): string {
-  if (path.startsWith("http://") || path.startsWith("https://")) {
-    return path;
-  }
-
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${getApiBaseUrl()}${normalizedPath}`;
+  return `${getApiBaseUrl()}${path}`;
 }
 
 /**
