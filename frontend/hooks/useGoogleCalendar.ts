@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
+import { useCallback } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/apiClient";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API;
@@ -23,69 +24,65 @@ interface ConnectionStatus {
   connectedAt?: string;
 }
 
-export function useGoogleCalendar() {
-  const [status, setStatus] = useState<ConnectionStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const googleCalendarKeys = {
+  status: ["googleCalendar", "status"] as const,
+};
 
-  // 取得連結狀態
-  const fetchStatus = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await apiFetch("/google-calendar/status");
+// 取得連結狀態：401 視為「未登入 / 未連結」而非錯誤
+async function fetchStatus(): Promise<ConnectionStatus> {
+  const res = await apiFetch("/google-calendar/status");
 
-      if (!res.ok) {
-        if (res.status === 401) {
-          // 未登入
-          setStatus({ connected: false });
-          return;
-        }
-        throw new Error("Failed to fetch status");
-      }
-
-      const data: ConnectionStatus = (await res.json()) as ConnectionStatus;
-      setStatus(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-      setStatus({ connected: false });
-    } finally {
-      setLoading(false);
+  if (!res.ok) {
+    if (res.status === 401) {
+      return { connected: false };
     }
-  }, []);
+    throw new Error("Failed to fetch status");
+  }
 
-  // 初始化時取得狀態
-  useEffect(() => {
-    void fetchStatus();
-  }, [fetchStatus]);
+  return (await res.json()) as ConnectionStatus;
+}
 
-  // 開始連結流程
+export function useGoogleCalendar() {
+  const queryClient = useQueryClient();
+
+  const statusQuery = useQuery({
+    queryKey: googleCalendarKeys.status,
+    queryFn: fetchStatus,
+  });
+
+  const disconnectMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiFetch("/google-calendar/disconnect", {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to disconnect");
+      }
+    },
+    onSuccess: () => {
+      queryClient.setQueryData<ConnectionStatus>(googleCalendarKeys.status, {
+        connected: false,
+      });
+    },
+  });
+
+  // 開始連結流程（瀏覽器導向 OAuth，非資料層請求）
   const connect = useCallback((redirectPath?: string) => {
     const currentPath = redirectPath || window.location.pathname;
     window.location.href = `${API_BASE_URL}/google-calendar/connect?redirect=${encodeURIComponent(currentPath)}`;
   }, []);
 
-  // 斷開連結
+  // 斷開連結：錯誤已記錄在 disconnectMutation.error 並由 error 欄位露出，
+  // 故吞掉 rejection，避免呼叫端（void disconnectCalendar()）產生未處理的 promise rejection。
   const disconnect = useCallback(async () => {
     try {
-      setLoading(true);
-      const res = await apiFetch("/google-calendar/disconnect", {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to disconnect");
-      }
-
-      setStatus({ connected: false });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-      throw err;
-    } finally {
-      setLoading(false);
+      await disconnectMutation.mutateAsync();
+    } catch {
+      // 錯誤已透過回傳的 error 呈現
     }
-  }, []);
+  }, [disconnectMutation]);
 
-  // 取得活動的衝突時段
+  // 取得活動的衝突時段：400/401 代表未連結或 token 過期，回 null
   const getConflictingSlots = useCallback(
     async (eventId: string): Promise<ConflictingSlots | null> => {
       try {
@@ -95,7 +92,6 @@ export function useGoogleCalendar() {
 
         if (!res.ok) {
           if (res.status === 400 || res.status === 401) {
-            // Calendar 未連結或 token 過期
             return null;
           }
           throw new Error("Failed to fetch conflicts");
@@ -110,14 +106,25 @@ export function useGoogleCalendar() {
     [],
   );
 
+  const refetchStatus = useCallback(async () => {
+    await statusQuery.refetch();
+  }, [statusQuery]);
+
+  const error =
+    statusQuery.error instanceof Error
+      ? statusQuery.error.message
+      : disconnectMutation.error instanceof Error
+        ? disconnectMutation.error.message
+        : null;
+
   return {
-    status,
-    loading,
+    status: statusQuery.data ?? null,
+    loading: statusQuery.isLoading || disconnectMutation.isPending,
     error,
     connect,
     disconnect,
     getConflictingSlots,
-    refetchStatus: fetchStatus,
+    refetchStatus,
   };
 }
 
