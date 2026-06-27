@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { apiFetchJson } from "@/lib/apiClient";
 
 export interface SearchedUser {
   id: string;
@@ -19,22 +20,10 @@ export function useUserSearch() {
     }
 
     try {
-      if (!process.env.NEXT_PUBLIC_API) {
-        throw new Error("NEXT_PUBLIC_API is not set");
-      }
       setLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/users/search?q=${encodeURIComponent(query)}`,
-        {
-          credentials: "include",
-        },
+      const data = await apiFetchJson<SearchedUser[]>(
+        `/users/search?q=${encodeURIComponent(query)}`,
       );
-
-      if (!response.ok) {
-        throw new Error("Failed to search users");
-      }
-
-      const data = (await response.json()) as SearchedUser[];
       setResults(data);
       setError(null);
     } catch (err) {
