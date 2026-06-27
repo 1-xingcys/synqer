@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { apiFetch } from "@/lib/apiClient";
 import type { LiffLoginRequest, LiffLoginResponse, User } from "@/types/auth";
 import {
   getLiffAccessToken,
@@ -19,14 +20,8 @@ export function useAuth() {
 
   const fetchUser = useCallback(async () => {
     try {
-      if (!process.env.NEXT_PUBLIC_API) {
-        throw new Error("NEXT_PUBLIC_API is not set");
-      }
-
       log("Fetching /auth/me...");
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API}/auth/me`, {
-        credentials: "include",
-      });
+      const response = await apiFetch("/auth/me");
       log("/auth/me response", { status: response.status });
 
       if (response.ok) {
@@ -85,15 +80,11 @@ export function useAuth() {
           if (accessToken) {
             const payload: LiffLoginRequest = { accessToken };
             log("Calling /auth/liff/login...");
-            const loginResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API}/auth/liff/login`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify(payload),
-              },
-            );
+            const loginResponse = await apiFetch("/auth/liff/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
             log("/auth/liff/login response", { status: loginResponse.status });
 
             if (loginResponse.ok) {
@@ -134,19 +125,16 @@ export function useAuth() {
 
   useEffect(() => {
     log("useAuth initialize start");
+    // fetchUser 的 setUser/setLoading 都在 await 之後；此處的同步 setState 來自
+    // debugLog 更新外部 log store。待 useAuth 遷移到 react-query 後可移除此 disable。
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchUser();
     log("useAuth initialized end");
   }, [fetchUser]);
 
   const logout = async () => {
     try {
-      if (!process.env.NEXT_PUBLIC_API) {
-        throw new Error("NEXT_PUBLIC_API is not set");
-      }
-      await fetch(`${process.env.NEXT_PUBLIC_API}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      await apiFetch("/auth/logout", { method: "POST" });
       setUser(null);
       window.location.reload();
     } catch {
