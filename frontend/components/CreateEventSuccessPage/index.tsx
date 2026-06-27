@@ -22,6 +22,7 @@ import {
   Copy,
   Calendar,
 } from "lucide-react";
+import { apiFetchVoid } from "@/lib/apiClient";
 import { ActionButton, ActionButtonVariant } from "./ActionButton";
 import { LoadingState } from "@/components/ui/loading-state";
 import { Spinner } from "@/components/ui/spinner";
@@ -96,22 +97,10 @@ export default function CreateEventSuccessPage() {
     setSendStatus(SendStatus.Sending);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API}/line-bot/events/${eventId}/notify-group`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      if (response.ok) {
-        setSendStatus(SendStatus.Success);
-      } else {
-        setSendStatus(SendStatus.Error);
-      }
+      await apiFetchVoid(`/line-bot/events/${eventId}/notify-group`, {
+        method: "POST",
+      });
+      setSendStatus(SendStatus.Success);
     } catch {
       setSendStatus(SendStatus.Error);
     }

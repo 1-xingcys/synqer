@@ -2,12 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  patchStagedVotesApi,
-  commitStagedVotesApi,
-  eventDetailKeys,
-  EventDetailData,
-} from "@/hooks/useEventDetail";
+import { eventDetailKeys, EventDetailData } from "@/hooks/useEventDetail";
+import { patchStagedVotesApi, commitStagedVotesApi } from "./votingApi";
 import {
   ShareResult,
   shareVoteCommitFlexMessage,

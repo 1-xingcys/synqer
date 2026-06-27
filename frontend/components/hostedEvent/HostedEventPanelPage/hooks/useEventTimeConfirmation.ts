@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiFetchJson, apiFetchVoid } from "@/lib/apiClient";
 import type { operations } from "@/generated/openapi";
 import {
   hostedEventKeys,
@@ -29,12 +30,8 @@ interface UseEventTimeConfirmationReturn {
 
 type UpdateStagedConfirmationRequest =
   operations["ConfirmationController_updateStagedConfirmation"]["requestBody"]["content"]["application/json"];
-type UpdateStagedConfirmationResponse =
-  operations["ConfirmationController_updateStagedConfirmation"]["responses"][200]["content"]["application/json"];
 type CommitStagedConfirmationResponse =
   operations["ConfirmationController_commitStagedConfirmation"]["responses"][200]["content"]["application/json"];
-type DiscardStagedConfirmationResponse =
-  operations["ConfirmationController_discardStagedConfirmation"]["responses"][200]["content"]["application/json"];
 
 function orderByAllSlotIds(
   slotIds: Set<string>,
@@ -52,65 +49,36 @@ async function patchStagedConfirmationApi(
   eventId: string,
   addSlotIds: string[],
   removeSlotIds: string[],
-): Promise<UpdateStagedConfirmationResponse> {
+): Promise<void> {
   const payload: UpdateStagedConfirmationRequest = {
     addSlotIds,
     removeSlotIds,
   };
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation/staged`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(payload),
+  await apiFetchVoid(`/events/${eventId}/confirmation/staged`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to update staged confirmation");
-  }
-
-  return response.json() as Promise<UpdateStagedConfirmationResponse>;
+    body: JSON.stringify(payload),
+  });
 }
 
 async function commitStagedConfirmationApi(
   eventId: string,
 ): Promise<CommitStagedConfirmationResponse> {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation/commit`,
+  return apiFetchJson<CommitStagedConfirmationResponse>(
+    `/events/${eventId}/confirmation/commit`,
     {
       method: "POST",
-      credentials: "include",
     },
   );
-
-  if (!response.ok) {
-    throw new Error("Failed to commit staged confirmation");
-  }
-
-  return response.json() as Promise<CommitStagedConfirmationResponse>;
 }
 
-async function discardStagedConfirmationApi(
-  eventId: string,
-): Promise<DiscardStagedConfirmationResponse> {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API}/events/${eventId}/confirmation/staged`,
-    {
-      method: "DELETE",
-      credentials: "include",
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to discard staged confirmation");
-  }
-
-  return response.json() as Promise<DiscardStagedConfirmationResponse>;
+async function discardStagedConfirmationApi(eventId: string): Promise<void> {
+  await apiFetchVoid(`/events/${eventId}/confirmation/staged`, {
+    method: "DELETE",
+  });
 }
 
 export function useEventTimeConfirmation({
