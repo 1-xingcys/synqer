@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { apiFetch } from "@/lib/apiClient";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API;
 
@@ -31,9 +32,7 @@ export function useGoogleCalendar() {
   const fetchStatus = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/google-calendar/status`, {
-        credentials: "include",
-      });
+      const res = await apiFetch("/google-calendar/status");
 
       if (!res.ok) {
         if (res.status === 401) {
@@ -69,9 +68,8 @@ export function useGoogleCalendar() {
   const disconnect = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/google-calendar/disconnect`, {
+      const res = await apiFetch("/google-calendar/disconnect", {
         method: "DELETE",
-        credentials: "include",
       });
 
       if (!res.ok) {
@@ -91,11 +89,8 @@ export function useGoogleCalendar() {
   const getConflictingSlots = useCallback(
     async (eventId: string): Promise<ConflictingSlots | null> => {
       try {
-        const res = await fetch(
-          `${API_BASE_URL}/google-calendar/events/${eventId}/conflicts`,
-          {
-            credentials: "include",
-          },
+        const res = await apiFetch(
+          `/google-calendar/events/${eventId}/conflicts`,
         );
 
         if (!res.ok) {
