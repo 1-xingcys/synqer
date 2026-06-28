@@ -3,6 +3,9 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import session from 'express-session';
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
+import { requireEnv } from './config/env.util';
+import { PrismaService } from './prisma/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -28,11 +31,16 @@ async function bootstrap() {
   app.set('trust proxy', 1);
 
   // Configure session
+  const prisma = app.get(PrismaService);
   const isProduction = process.env.NODE_ENV === 'production';
   app.use(
     session({
+      store: new PrismaSessionStore(prisma, {
+        checkPeriod: 2 * 60 * 1000, // prune expired sessions every 2 minutes
+        dbRecordIdIsSessionId: true,
+      }),
       name: 'synqer.sid',
-      secret: process.env.SESSION_SECRET as string,
+      secret: requireEnv('SESSION_SECRET'),
       resave: false,
       saveUninitialized: false,
       cookie: {
