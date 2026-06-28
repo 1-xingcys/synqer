@@ -300,3 +300,11 @@ model EventStagedConfirmation {
 
   @@index([eventId])
 }
+
+// express-session persistence (see @quixo3/prisma-session-store)
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+}
