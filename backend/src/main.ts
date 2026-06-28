@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import session from 'express-session';
+import { requireEnv } from './config/env.util';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -32,7 +33,7 @@ async function bootstrap() {
   app.use(
     session({
       name: 'synqer.sid',
-      secret: process.env.SESSION_SECRET as string,
+      secret: requireEnv('SESSION_SECRET'),
       resave: false,
       saveUninitialized: false,
       cookie: {
