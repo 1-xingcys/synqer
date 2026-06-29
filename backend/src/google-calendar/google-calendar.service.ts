@@ -254,7 +254,16 @@ export class GoogleCalendarService {
       Date.now() + 5 * 60 * 1000;
 
     if (!isExpired) {
-      return this.tokenCipher.decrypt(connection.accessToken);
+      try {
+        return this.tokenCipher.decrypt(connection.accessToken);
+      } catch {
+        // Decrypt can fail if the encryption key was rotated or the stored
+        // ciphertext is corrupted. Treat it as a reconnect-required state
+        // rather than leaking a raw 500.
+        throw new UnauthorizedException(
+          'Stored access token could not be decrypted. Please reconnect Google Calendar.',
+        );
+      }
     }
 
     // Refresh the token
