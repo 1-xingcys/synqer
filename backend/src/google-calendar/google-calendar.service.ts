@@ -19,6 +19,7 @@ import {
 } from './google-api.types';
 import { EventCapabilitiesService } from '../events/shared/services/event-capabilities.service';
 import { EventScheduleService } from '../events/shared/services/event-schedule.service';
+import { TokenCipherService } from './services/token-cipher.service';
 
 @Injectable()
 export class GoogleCalendarService {
@@ -36,6 +37,7 @@ export class GoogleCalendarService {
     private prisma: PrismaService,
     private eventCapabilitiesService: EventCapabilitiesService,
     private eventScheduleService: EventScheduleService,
+    private tokenCipher: TokenCipherService,
   ) {}
 
   // PKCE helpers
@@ -151,6 +153,12 @@ export class GoogleCalendarService {
     // Calculate token expiry time
     const tokenExpiresAt = new Date(Date.now() + expires_in * 1000);
 
+    // 加密 token 後再儲存
+    const encryptedAccessToken = this.tokenCipher.encrypt(access_token);
+    const encryptedRefreshToken = refresh_token
+      ? this.tokenCipher.encrypt(refresh_token)
+      : undefined;
+
     // Upsert Google Calendar connection
 
     await this.prisma.googleCalendarConnection.upsert({
@@ -159,16 +167,16 @@ export class GoogleCalendarService {
         userId,
         googleAccountId,
         googleEmail,
-        accessToken: access_token,
-        refreshToken: refresh_token,
+        accessToken: encryptedAccessToken,
+        refreshToken: encryptedRefreshToken,
         tokenExpiresAt,
         scope,
       },
       update: {
         googleAccountId,
         googleEmail,
-        accessToken: access_token,
-        refreshToken: refresh_token || undefined, // 保留舊的 refresh_token 如果沒有新的
+        accessToken: encryptedAccessToken,
+        refreshToken: encryptedRefreshToken, // 保留舊的 refresh_token 如果沒有新的
         tokenExpiresAt,
         scope,
       },
@@ -212,8 +220,9 @@ export class GoogleCalendarService {
 
     // Optionally revoke the token
     try {
+      const accessToken = this.tokenCipher.decrypt(connection.accessToken);
       await axios.post(
-        `https://oauth2.googleapis.com/revoke?token=${connection.accessToken}`,
+        `https://oauth2.googleapis.com/revoke?token=${accessToken}`,
       );
     } catch {
       // Ignore revoke errors
@@ -245,7 +254,7 @@ export class GoogleCalendarService {
       Date.now() + 5 * 60 * 1000;
 
     if (!isExpired) {
-      return connection.accessToken;
+      return this.tokenCipher.decrypt(connection.accessToken);
     }
 
     // Refresh the token
@@ -263,7 +272,7 @@ export class GoogleCalendarService {
           client_id: process.env.GOOGLE_CLIENT_ID,
           client_secret: process.env.GOOGLE_CLIENT_SECRET,
 
-          refresh_token: connection.refreshToken,
+          refresh_token: this.tokenCipher.decrypt(connection.refreshToken),
           grant_type: 'refresh_token',
         },
       );
@@ -276,7 +285,7 @@ export class GoogleCalendarService {
       await this.prisma.googleCalendarConnection.update({
         where: { userId },
         data: {
-          accessToken: access_token,
+          accessToken: this.tokenCipher.encrypt(access_token),
           tokenExpiresAt,
         },
       });

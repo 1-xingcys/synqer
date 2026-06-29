@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import axios from 'axios';
 import { EventCapabilitiesService } from '../events/shared/services/event-capabilities.service';
 import { EventScheduleService } from '../events/shared/services/event-schedule.service';
+import { TokenCipherService } from './services/token-cipher.service';
 
 // Mock axios
 jest.mock('axios');
@@ -44,6 +45,14 @@ describe('GoogleCalendarService', () => {
     getCalendarRange: jest.fn(),
   };
 
+  // Identity cipher: keeps token-flow assertions readable while the real
+  // encryption is covered by token-cipher.service.spec.ts.
+  const mockTokenCipher = {
+    encrypt: jest.fn((value: string) => value),
+    decrypt: jest.fn((value: string) => value),
+    isEncrypted: jest.fn((value: string) => value.startsWith('v1:')),
+  };
+
   // Use fake timers to prevent setTimeout from keeping Jest open
   beforeAll(() => {
     jest.useFakeTimers();
@@ -73,6 +82,10 @@ describe('GoogleCalendarService', () => {
         {
           provide: EventScheduleService,
           useValue: mockEventScheduleService,
+        },
+        {
+          provide: TokenCipherService,
+          useValue: mockTokenCipher,
         },
       ],
     }).compile();
