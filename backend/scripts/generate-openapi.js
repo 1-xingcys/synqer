@@ -1,5 +1,15 @@
 const fs = require('fs');
 const path = require('path');
+
+// Booting AppModule instantiates every provider, including TokenCipherService,
+// whose constructor fail-fasts when TOKEN_ENCRYPTION_KEY is unset. Generating
+// the API contract never performs real encryption, so supply a throwaway
+// 32-byte key when none is provided (e.g. in CI, which has no .env). This keeps
+// the runtime fail-fast intact while letting build-time spec generation run.
+if (!process.env.TOKEN_ENCRYPTION_KEY) {
+  process.env.TOKEN_ENCRYPTION_KEY = Buffer.alloc(32).toString('base64');
+}
+
 const { NestFactory } = require('@nestjs/core');
 const { SwaggerModule, DocumentBuilder } = require('@nestjs/swagger');
 const { AppModule } = require('../dist/src/app.module');
