@@ -7,13 +7,18 @@ import {
   UseGuards,
   Param,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import type { Response } from 'express';
 import { GoogleCalendarService } from './google-calendar.service';
 import { SessionAuthGuard, CurrentUser } from '../auth';
+import { EnvVars } from '../config/env.validation';
 
 @Controller('google-calendar')
 export class GoogleCalendarController {
-  constructor(private readonly googleCalendarService: GoogleCalendarService) {}
+  constructor(
+    private readonly googleCalendarService: GoogleCalendarService,
+    private readonly config: ConfigService<EnvVars, true>,
+  ) {}
 
   /**
    * 取得 Google Calendar 連結狀態
@@ -58,12 +63,12 @@ export class GoogleCalendarController {
       );
 
       // Redirect to frontend with success message
-      const frontendUrl = process.env.WEB_ORIGIN;
+      const frontendUrl = this.config.get('WEB_ORIGIN', { infer: true });
       const redirectUrl = result.redirect || '/settings';
       res.redirect(`${frontendUrl}${redirectUrl}?calendar_connected=true`);
     } catch {
       // Redirect to frontend with error message
-      const frontendUrl = process.env.WEB_ORIGIN;
+      const frontendUrl = this.config.get('WEB_ORIGIN', { infer: true });
       res.redirect(`${frontendUrl}/settings?calendar_error=true`);
     }
   }

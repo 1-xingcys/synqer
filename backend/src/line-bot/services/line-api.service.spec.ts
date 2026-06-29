@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { LineApiService, LineMessage } from './line-api.service';
 import axios from 'axios';
 import * as crypto from 'crypto';
@@ -20,7 +21,13 @@ describe('LineApiService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LineApiService],
+      providers: [
+        LineApiService,
+        {
+          provide: ConfigService,
+          useValue: { get: (key: string) => process.env[key] },
+        },
+      ],
     }).compile();
 
     service = module.get<LineApiService>(LineApiService);

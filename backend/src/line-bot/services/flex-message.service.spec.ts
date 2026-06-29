@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { EventSlotAxisType, EventType } from '@prisma/client';
 import { FlexMessageService, EventInfo } from './flex-message.service';
 import { EventStatus } from '../../events/shared/services/event-status.service';
@@ -21,7 +22,13 @@ describe('FlexMessageService', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [FlexMessageService],
+      providers: [
+        FlexMessageService,
+        {
+          provide: ConfigService,
+          useValue: { get: (key: string) => process.env[key] },
+        },
+      ],
     }).compile();
 
     service = module.get<FlexMessageService>(FlexMessageService);
@@ -331,7 +338,13 @@ describe('FlexMessageService', () => {
       process.env.LINE_LIFF_URL = '';
 
       const module = Test.createTestingModule({
-        providers: [FlexMessageService],
+        providers: [
+          FlexMessageService,
+          {
+            provide: ConfigService,
+            useValue: { get: (key: string) => process.env[key] },
+          },
+        ],
       });
 
       // 重新建立 service

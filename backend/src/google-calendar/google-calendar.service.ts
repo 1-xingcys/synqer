@@ -3,8 +3,10 @@ import {
   UnauthorizedException,
   BadRequestException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { EventSlotAxisType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EnvVars } from '../config/env.validation';
 import * as crypto from 'crypto';
 import axios from 'axios';
 import * as jwt from 'jsonwebtoken';
@@ -38,6 +40,7 @@ export class GoogleCalendarService {
     private eventCapabilitiesService: EventCapabilitiesService,
     private eventScheduleService: EventScheduleService,
     private tokenCipher: TokenCipherService,
+    private config: ConfigService<EnvVars, true>,
   ) {}
 
   // PKCE helpers
@@ -81,8 +84,10 @@ export class GoogleCalendarService {
     this.storePKCE(state, { codeVerifier, codeChallenge, redirect });
 
     const params = new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID!,
-      redirect_uri: process.env.GOOGLE_CALENDAR_REDIRECT_URI!,
+      client_id: this.config.get('GOOGLE_CLIENT_ID', { infer: true }),
+      redirect_uri: this.config.get('GOOGLE_CALENDAR_REDIRECT_URI', {
+        infer: true,
+      }),
       response_type: 'code',
       scope: this.CALENDAR_SCOPES,
       state,
@@ -113,9 +118,11 @@ export class GoogleCalendarService {
       'https://oauth2.googleapis.com/token',
       {
         code,
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: process.env.GOOGLE_CALENDAR_REDIRECT_URI,
+        client_id: this.config.get('GOOGLE_CLIENT_ID', { infer: true }),
+        client_secret: this.config.get('GOOGLE_CLIENT_SECRET', { infer: true }),
+        redirect_uri: this.config.get('GOOGLE_CALENDAR_REDIRECT_URI', {
+          infer: true,
+        }),
         grant_type: 'authorization_code',
         code_verifier: pkceData.codeVerifier,
       },
@@ -137,7 +144,7 @@ export class GoogleCalendarService {
     const payload = decoded.payload as GoogleIdTokenPayload;
 
     // Verify claims
-    if (payload.aud !== process.env.GOOGLE_CLIENT_ID) {
+    if (payload.aud !== this.config.get('GOOGLE_CLIENT_ID', { infer: true })) {
       throw new UnauthorizedException('Invalid audience');
     }
     if (
@@ -278,8 +285,10 @@ export class GoogleCalendarService {
       const tokenResponse = await axios.post<GoogleTokenResponse>(
         'https://oauth2.googleapis.com/token',
         {
-          client_id: process.env.GOOGLE_CLIENT_ID,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET,
+          client_id: this.config.get('GOOGLE_CLIENT_ID', { infer: true }),
+          client_secret: this.config.get('GOOGLE_CLIENT_SECRET', {
+            infer: true,
+          }),
 
           refresh_token: this.tokenCipher.decrypt(connection.refreshToken),
           grant_type: 'refresh_token',

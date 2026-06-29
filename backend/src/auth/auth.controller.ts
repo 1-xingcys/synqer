@@ -15,6 +15,7 @@ import {
   BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import type { SessionData } from 'express-session';
 import { AuthService } from './auth.service';
@@ -26,12 +27,14 @@ import {
   LiffLoginDto,
   LogoutResponseDto,
 } from './dto/auth.dto';
+import { EnvVars } from '../config/env.validation';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
+    private config: ConfigService<EnvVars, true>,
   ) {}
 
   // Google OAuth routes
@@ -69,14 +72,15 @@ export class AuthController {
       });
 
       // Redirect to frontend
-      const redirectUrl = redirect
-        ? `${process.env.WEB_ORIGIN}${redirect}`
-        : process.env.WEB_ORIGIN;
+      const webOrigin = this.config.get('WEB_ORIGIN', { infer: true });
+      const redirectUrl = redirect ? `${webOrigin}${redirect}` : webOrigin;
 
       return { url: redirectUrl };
     } catch (error) {
       console.error('Google OAuth error:', error);
-      return { url: `${process.env.WEB_ORIGIN}?error=auth_failed` };
+      return {
+        url: `${this.config.get('WEB_ORIGIN', { infer: true })}?error=auth_failed`,
+      };
     }
   }
 
@@ -115,14 +119,15 @@ export class AuthController {
       });
 
       // Redirect to frontend
-      const redirectUrl = redirect
-        ? `${process.env.WEB_ORIGIN}${redirect}`
-        : process.env.WEB_ORIGIN;
+      const webOrigin = this.config.get('WEB_ORIGIN', { infer: true });
+      const redirectUrl = redirect ? `${webOrigin}${redirect}` : webOrigin;
 
       return { url: redirectUrl };
     } catch (error) {
       console.error('LINE OAuth error:', error);
-      return { url: `${process.env.WEB_ORIGIN}?error=auth_failed` };
+      return {
+        url: `${this.config.get('WEB_ORIGIN', { infer: true })}?error=auth_failed`,
+      };
     }
   }
 
@@ -220,7 +225,8 @@ export class AuthController {
     });
 
     // Clear the session cookie with the same domain as it was set
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction =
+      this.config.get('NODE_ENV', { infer: true }) === 'production';
     res.clearCookie('synqer.sid', {
       httpOnly: true,
       secure: isProduction,

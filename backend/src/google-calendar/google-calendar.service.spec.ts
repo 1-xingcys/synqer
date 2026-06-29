@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { EventType } from '@prisma/client';
 import { GoogleCalendarService } from './google-calendar.service';
@@ -90,6 +91,10 @@ describe('GoogleCalendarService', () => {
         {
           provide: TokenCipherService,
           useValue: mockTokenCipher,
+        },
+        {
+          provide: ConfigService,
+          useValue: { get: (key: string) => process.env[key] },
         },
       ],
     }).compile();

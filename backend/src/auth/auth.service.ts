@@ -1,9 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 import axios from 'axios';
 import { TokenVerificationService } from './services/token-verification.service';
+import { EnvVars } from '../config/env.validation';
 
 interface PKCEData {
   codeVerifier: string;
@@ -19,6 +21,7 @@ export class AuthService {
     private usersService: UsersService,
     private prisma: PrismaService,
     private tokenVerificationService: TokenVerificationService,
+    private config: ConfigService<EnvVars, true>,
   ) {}
 
   // PKCE helpers
@@ -59,8 +62,8 @@ export class AuthService {
     this.storePKCE(state, { codeVerifier, codeChallenge, redirect });
 
     const params = new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID!,
-      redirect_uri: process.env.GOOGLE_REDIRECT_URI!,
+      client_id: this.config.get('GOOGLE_CLIENT_ID', { infer: true }),
+      redirect_uri: this.config.get('GOOGLE_REDIRECT_URI', { infer: true }),
       response_type: 'code',
       scope: 'openid email profile',
       state,
@@ -82,9 +85,9 @@ export class AuthService {
       'https://oauth2.googleapis.com/token',
       {
         code,
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+        client_id: this.config.get('GOOGLE_CLIENT_ID', { infer: true }),
+        client_secret: this.config.get('GOOGLE_CLIENT_SECRET', { infer: true }),
+        redirect_uri: this.config.get('GOOGLE_REDIRECT_URI', { infer: true }),
         grant_type: 'authorization_code',
         code_verifier: pkceData.codeVerifier,
       },
@@ -94,7 +97,7 @@ export class AuthService {
 
     const payload = await this.tokenVerificationService.verifyIdToken({
       token: id_token,
-      audience: process.env.GOOGLE_CLIENT_ID!,
+      audience: this.config.get('GOOGLE_CLIENT_ID', { infer: true }),
       issuers: ['https://accounts.google.com', 'accounts.google.com'],
       jwksUrl: 'https://www.googleapis.com/oauth2/v3/certs',
     });
@@ -124,8 +127,8 @@ export class AuthService {
 
     const params = new URLSearchParams({
       response_type: 'code',
-      client_id: process.env.LINE_LOGIN_CHANNEL_ID!,
-      redirect_uri: process.env.LINE_LOGIN_REDIRECT_URI!,
+      client_id: this.config.get('LINE_LOGIN_CHANNEL_ID', { infer: true }),
+      redirect_uri: this.config.get('LINE_LOGIN_REDIRECT_URI', { infer: true }),
       state,
       scope: 'openid email profile',
       code_challenge: codeChallenge,
@@ -147,9 +150,13 @@ export class AuthService {
       new URLSearchParams({
         grant_type: 'authorization_code',
         code,
-        redirect_uri: process.env.LINE_LOGIN_REDIRECT_URI!,
-        client_id: process.env.LINE_LOGIN_CHANNEL_ID!,
-        client_secret: process.env.LINE_LOGIN_CHANNEL_SECRET!,
+        redirect_uri: this.config.get('LINE_LOGIN_REDIRECT_URI', {
+          infer: true,
+        }),
+        client_id: this.config.get('LINE_LOGIN_CHANNEL_ID', { infer: true }),
+        client_secret: this.config.get('LINE_LOGIN_CHANNEL_SECRET', {
+          infer: true,
+        }),
         code_verifier: pkceData.codeVerifier,
       }),
       {
@@ -163,7 +170,7 @@ export class AuthService {
 
     const payload = await this.tokenVerificationService.verifyLineIdToken(
       id_token,
-      process.env.LINE_LOGIN_CHANNEL_ID!,
+      this.config.get('LINE_LOGIN_CHANNEL_ID', { infer: true }),
     );
 
     // Extract user info
@@ -224,7 +231,9 @@ export class AuthService {
 
     // 驗證 client_id 是否為我們的 LIFF App 所屬的 Channel
     // LIFF 使用的是 LINE Login Channel
-    if (client_id !== process.env.LINE_LOGIN_CHANNEL_ID) {
+    if (
+      client_id !== this.config.get('LINE_LOGIN_CHANNEL_ID', { infer: true })
+    ) {
       throw new UnauthorizedException('Invalid LIFF access token');
     }
 

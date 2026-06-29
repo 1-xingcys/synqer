@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   LineApiService,
@@ -20,6 +21,7 @@ import {
   MemberJoinedEvent,
   MemberLeftEvent,
 } from './dto/webhook-event.dto';
+import { EnvVars } from '../config/env.validation';
 
 /**
  * LINE Bot 主服務
@@ -37,11 +39,12 @@ export class LineBotService implements OnModuleInit {
     private flexMessage: FlexMessageService,
     private eventStatusService: EventStatusService,
     private confirmedTimeService: ConfirmedTimeService,
+    private config: ConfigService<EnvVars, true>,
   ) {}
 
   async onModuleInit() {
     // 檢查環境變數是否已設定
-    if (!process.env.LINE_CHANNEL_ACCESS_TOKEN) {
+    if (!this.config.get('LINE_CHANNEL_ACCESS_TOKEN', { infer: true })) {
       this.logger.warn(
         'LINE_CHANNEL_ACCESS_TOKEN not set, skipping bot initialization',
       );
@@ -611,7 +614,7 @@ export class LineBotService implements OnModuleInit {
     };
 
     // 檢查 LIFF URL 是否已設定
-    if (!process.env.LINE_LIFF_URL) {
+    if (!this.config.get('LINE_LIFF_URL', { infer: true })) {
       this.logger.warn(
         'LINE_LIFF_URL is not configured, Flex Message buttons may not work correctly',
       );

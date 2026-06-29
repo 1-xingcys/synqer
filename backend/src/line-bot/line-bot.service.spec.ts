@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { LineBotService } from './line-bot.service';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -88,6 +89,10 @@ describe('LineBotService', () => {
         { provide: FlexMessageService, useValue: mockFlexMessageService },
         { provide: EventStatusService, useValue: mockEventStatusService },
         { provide: ConfirmedTimeService, useValue: mockConfirmedTimeService },
+        {
+          provide: ConfigService,
+          useValue: { get: (key: string) => process.env[key] },
+        },
       ],
     }).compile();
 

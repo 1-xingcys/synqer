@@ -1,6 +1,29 @@
 import * as Joi from 'joi';
 
 /**
+ * 驗證後的環境變數型別。搭配 `ConfigService<EnvVars, true>` 注入，即可獲得
+ * key 名稱檢查與非空的回傳型別（因為已於啟動時驗證過）。
+ */
+export interface EnvVars {
+  NODE_ENV: 'development' | 'production' | 'test';
+  PORT: number;
+  DATABASE_URL: string;
+  SESSION_SECRET: string;
+  WEB_ORIGIN: string;
+  TOKEN_ENCRYPTION_KEY: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  GOOGLE_REDIRECT_URI: string;
+  GOOGLE_CALENDAR_REDIRECT_URI: string;
+  LINE_LOGIN_CHANNEL_ID: string;
+  LINE_LOGIN_CHANNEL_SECRET: string;
+  LINE_LOGIN_REDIRECT_URI: string;
+  LINE_LIFF_URL: string;
+  LINE_BOT_CHANNEL_SECRET: string;
+  LINE_CHANNEL_ACCESS_TOKEN: string;
+}
+
+/**
  * 集中定義所有 Runtime 必要的環境變數，並在應用啟動時一次驗證。
  *
  * 設計重點：

@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { EventType } from '@prisma/client';
 import { EventStatus } from '../../events/shared/services/event-status.service';
+import { EnvVars } from '../../config/env.validation';
 import {
   ConfirmedSelection,
   ConfirmedSelectionKind,
@@ -172,9 +174,8 @@ export interface EventInfo {
 export class FlexMessageService {
   private readonly liffUrl: string;
 
-  constructor() {
-    // LIFF URL，如果沒有設置則使用 WEB_ORIGIN
-    this.liffUrl = process.env.LINE_LIFF_URL || '';
+  constructor(config: ConfigService<EnvVars, true>) {
+    this.liffUrl = config.get('LINE_LIFF_URL', { infer: true });
   }
 
   /**
