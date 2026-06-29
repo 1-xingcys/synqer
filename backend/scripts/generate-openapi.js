@@ -1,11 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-// Booting AppModule instantiates every provider, including TokenCipherService,
-// whose constructor fail-fasts when TOKEN_ENCRYPTION_KEY is unset. Generating
-// the API contract never performs real encryption, so supply a throwaway
-// 32-byte key when none is provided (e.g. in CI, which has no .env). This keeps
-// the runtime fail-fast intact while letting build-time spec generation run.
+// Booting AppModule instantiates every provider and runs env validation, both
+// of which fail-fast on missing secrets. Generating the API contract never
+// touches real config, so skip env validation and stub the one provider that
+// fail-fasts at construction time (TokenCipherService). This keeps the runtime
+// fail-fast intact while letting build-time spec generation run without a .env
+// (e.g. in CI).
+process.env.SKIP_ENV_VALIDATION = 'true';
 if (!process.env.TOKEN_ENCRYPTION_KEY) {
   process.env.TOKEN_ENCRYPTION_KEY = Buffer.alloc(32).toString('base64');
 }
