@@ -1,5 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import session from 'express-session';
@@ -54,7 +55,8 @@ async function bootstrap() {
     }),
   );
 
-  const port = 8080;
+  // PORT 由 env schema 驗證並帶預設值（8080）；Cloud Run 會注入此變數
+  const port = app.get(ConfigService).getOrThrow<number>('PORT');
   const host = '0.0.0.0'; // 监听所有网络接口，确保 Docker 容器可以接收外部请求
   await app.listen(port, host);
   console.log(`Application is running on: http://${host}:${port}`);
