@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prepare": "husky",
     "reset-rich-menu": "ts-node scripts/reset-rich-menu.ts",
-    "backfill:event-phase1": "ts-node scripts/backfill-event-phase1.ts",
+    "backfill:encrypt-google-tokens": "ts-node scripts/backfill-encrypt-google-tokens.ts",
     "openapi:generate": "npm run build && node scripts/generate-openapi.js"
   },
   "dependencies": {

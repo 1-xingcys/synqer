@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import axios from 'axios';
 import { EventCapabilitiesService } from '../events/shared/services/event-capabilities.service';
 import { EventScheduleService } from '../events/shared/services/event-schedule.service';
+import { TokenCipherService } from './services/token-cipher.service';
 
 // Mock axios
 jest.mock('axios');
@@ -44,6 +45,18 @@ describe('GoogleCalendarService', () => {
     getCalendarRange: jest.fn(),
   };
 
+  // Marker cipher: prefixes encrypted values so tests can prove that what
+  // reaches Prisma is the encrypted form (never plaintext). The real
+  // encryption is covered by token-cipher.service.spec.ts.
+  const ENC_PREFIX = 'v1:enc:';
+  const mockTokenCipher = {
+    encrypt: jest.fn((value: string) => `${ENC_PREFIX}${value}`),
+    decrypt: jest.fn((value: string) =>
+      value.startsWith(ENC_PREFIX) ? value.slice(ENC_PREFIX.length) : value,
+    ),
+    isEncrypted: jest.fn((value: string) => value.startsWith('v1:')),
+  };
+
   // Use fake timers to prevent setTimeout from keeping Jest open
   beforeAll(() => {
     jest.useFakeTimers();
@@ -73,6 +86,10 @@ describe('GoogleCalendarService', () => {
         {
           provide: EventScheduleService,
           useValue: mockEventScheduleService,
+        },
+        {
+          provide: TokenCipherService,
+          useValue: mockTokenCipher,
         },
       ],
     }).compile();
@@ -267,9 +284,18 @@ describe('GoogleCalendarService', () => {
         googleEmail: 'test@gmail.com',
         redirect: '/redirect-path',
       });
-      expect(
-        mockPrismaService.googleCalendarConnection.upsert,
-      ).toHaveBeenCalled();
+
+      // Tokens must be encrypted before they reach the database — assert that
+      // the values passed to Prisma are the encrypted form, never plaintext.
+      expect(mockTokenCipher.encrypt).toHaveBeenCalledWith('test-access-token');
+      expect(mockTokenCipher.encrypt).toHaveBeenCalledWith('test-refresh-token');
+
+      const upsertArg =
+        mockPrismaService.googleCalendarConnection.upsert.mock.calls[0][0];
+      expect(upsertArg.create.accessToken).toBe('v1:enc:test-access-token');
+      expect(upsertArg.create.refreshToken).toBe('v1:enc:test-refresh-token');
+      expect(upsertArg.update.accessToken).toBe('v1:enc:test-access-token');
+      expect(upsertArg.create.accessToken).not.toBe('test-access-token');
     });
 
     it('should throw BadRequestException when no id_token received', async () => {
@@ -458,9 +484,33 @@ describe('GoogleCalendarService', () => {
           refresh_token: 'test-refresh-token',
         }),
       );
-      expect(
-        mockPrismaService.googleCalendarConnection.update,
-      ).toHaveBeenCalled();
+      // The refreshed access token must be stored encrypted, not plaintext.
+      const updateArg =
+        mockPrismaService.googleCalendarConnection.update.mock.calls[0][0];
+      expect(updateArg.data.accessToken).toBe('v1:enc:new-access-token');
+    });
+
+    it('should throw UnauthorizedException when stored access token cannot be decrypted', async () => {
+      const mockConnection = {
+        accessToken: 'v1:corrupted-or-wrong-key',
+        tokenExpiresAt: new Date(Date.now() + 3600 * 1000), // Not expired
+        refreshToken: 'test-refresh-token',
+      };
+      mockPrismaService.googleCalendarConnection.findUnique.mockResolvedValue(
+        mockConnection,
+      );
+      // Simulate a decrypt failure (e.g. key rotation or ciphertext corruption).
+      mockTokenCipher.decrypt.mockImplementationOnce(() => {
+        throw new Error('Unsupported state or unable to authenticate data');
+      });
+
+      await expect(
+        service.getCalendarEvents(
+          'user-123',
+          new Date('2024-01-01'),
+          new Date('2024-01-31'),
+        ),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException when no refresh token available', async () => {
