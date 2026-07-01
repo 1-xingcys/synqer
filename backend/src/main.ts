@@ -5,7 +5,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import session from 'express-session';
 import { PrismaSessionStore } from '@quixo3/prisma-session-store';
-import { requireEnv } from './config/env.util';
 import { EnvVars } from './config/env.validation';
 import { PrismaService } from './prisma/prisma.service';
 
@@ -45,7 +44,7 @@ async function bootstrap() {
         dbRecordIdIsSessionId: true,
       }),
       name: 'synqer.sid',
-      secret: requireEnv('SESSION_SECRET'),
+      secret: config.get('SESSION_SECRET', { infer: true }),
       resave: false,
       saveUninitialized: false,
       cookie: {
