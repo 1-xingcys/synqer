@@ -92,7 +92,7 @@ npx prisma generate
 npx prisma migrate dev --name init
 ```
 
-This will create a SQLite database at `backend/dev.db` with the following schema:
+This will create the tables in your PostgreSQL database (`DATABASE_URL`) with the following schema:
 
 - `User`: Stores user information (id, displayName, primaryEmail, timestamps)
 - `AuthIdentity`: Stores OAuth provider information linked to users
