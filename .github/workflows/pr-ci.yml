@@ -63,7 +63,7 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npm run lint
+        run: npm run lint:ci
 
       - name: Unit test
         run: npm test
@@ -89,7 +89,7 @@ jobs:
         run: npx prisma generate
 
       - name: Lint
-        run: npm run lint
+        run: npm run lint:ci
 
       - name: Guard against direct process.env access
         run: |
