@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
 import axios from 'axios';
 import { AuthService } from './auth.service';
@@ -52,6 +53,10 @@ describe('AuthService', () => {
         {
           provide: TokenVerificationService,
           useValue: mockTokenVerificationService,
+        },
+        {
+          provide: ConfigService,
+          useValue: { get: (key: string) => process.env[key] },
         },
       ],
     }).compile();

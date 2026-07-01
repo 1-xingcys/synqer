@@ -1,45 +1,28 @@
 import * as crypto from 'crypto';
+import { ConfigService } from '@nestjs/config';
 import { TokenCipherService } from './token-cipher.service';
+import { EnvVars } from '../../config/env.validation';
+
+/**
+ * 以指定金鑰建立一個回傳固定 TOKEN_ENCRYPTION_KEY 的 ConfigService stub。
+ * 金鑰的存在性與長度驗證由 env.validation schema 負責（見 env.validation.spec.ts），
+ * 這裡只需提供一把有效金鑰來測試加解密行為。
+ */
+function cipherWithKey(key: string): TokenCipherService {
+  const config = {
+    get: () => key,
+  } as unknown as ConfigService<EnvVars, true>;
+  return new TokenCipherService(config);
+}
 
 describe('TokenCipherService', () => {
   const validKey = crypto.randomBytes(32).toString('base64');
-  let originalKey: string | undefined;
-
-  beforeAll(() => {
-    originalKey = process.env.TOKEN_ENCRYPTION_KEY;
-  });
-
-  afterAll(() => {
-    process.env.TOKEN_ENCRYPTION_KEY = originalKey;
-  });
-
-  beforeEach(() => {
-    process.env.TOKEN_ENCRYPTION_KEY = validKey;
-  });
-
-  describe('constructor key validation', () => {
-    it('throws when the key is missing', () => {
-      delete process.env.TOKEN_ENCRYPTION_KEY;
-      expect(() => new TokenCipherService()).toThrow(/TOKEN_ENCRYPTION_KEY/);
-    });
-
-    it('throws when the key is not 32 bytes', () => {
-      process.env.TOKEN_ENCRYPTION_KEY = crypto
-        .randomBytes(16)
-        .toString('base64');
-      expect(() => new TokenCipherService()).toThrow(/32 bytes/);
-    });
-
-    it('accepts a valid 32-byte base64 key', () => {
-      expect(() => new TokenCipherService()).not.toThrow();
-    });
-  });
 
   describe('encrypt / decrypt round-trip', () => {
     let service: TokenCipherService;
 
     beforeEach(() => {
-      service = new TokenCipherService();
+      service = cipherWithKey(validKey);
     });
 
     it('decrypts back to the original plaintext', () => {
@@ -75,7 +58,7 @@ describe('TokenCipherService', () => {
     let service: TokenCipherService;
 
     beforeEach(() => {
-      service = new TokenCipherService();
+      service = cipherWithKey(validKey);
     });
 
     it('returns unprefixed legacy values unchanged', () => {
@@ -87,7 +70,7 @@ describe('TokenCipherService', () => {
 
   describe('tamper detection', () => {
     it('throws when the ciphertext has been modified', () => {
-      const service = new TokenCipherService();
+      const service = cipherWithKey(validKey);
       const encrypted = service.encrypt('secret');
       const [version, iv, tag, ct] = encrypted.split(':');
 
@@ -104,13 +87,11 @@ describe('TokenCipherService', () => {
     });
 
     it('throws when decrypted with a different key', () => {
-      const service = new TokenCipherService();
+      const service = cipherWithKey(validKey);
       const encrypted = service.encrypt('secret');
 
-      process.env.TOKEN_ENCRYPTION_KEY = crypto
-        .randomBytes(32)
-        .toString('base64');
-      const otherService = new TokenCipherService();
+      const otherKey = crypto.randomBytes(32).toString('base64');
+      const otherService = cipherWithKey(otherKey);
 
       expect(() => otherService.decrypt(encrypted)).toThrow();
     });

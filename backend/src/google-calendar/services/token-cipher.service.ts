@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
+import { EnvVars } from '../../config/env.validation';
 
 /**
  * 對敏感欄位（如 Google OAuth token）做欄位層級加密。
@@ -9,37 +11,20 @@ import * as crypto from 'crypto';
  *   - `v1` 版本前綴讓未來能輪替金鑰/演算法，
  *     也讓 decrypt 能分辨「尚未加密的舊明文」與「密文」。
  *
- * 金鑰來自環境變數 `TOKEN_ENCRYPTION_KEY`（base64 編碼的 32 bytes）。
- * 啟動時即驗證，缺少或長度錯誤會直接拋錯（fail-fast）。
+ * 金鑰來自環境變數 `TOKEN_ENCRYPTION_KEY`（base64 編碼的 32 bytes）
  */
 @Injectable()
 export class TokenCipherService {
   private static readonly VERSION = 'v1';
   private static readonly ALGORITHM = 'aes-256-gcm';
   private static readonly IV_LENGTH = 12; // GCM 建議的 nonce 長度
-  private static readonly KEY_LENGTH = 32; // AES-256
 
   private readonly logger = new Logger(TokenCipherService.name);
   private readonly key: Buffer;
 
-  constructor() {
-    const rawKey = process.env.TOKEN_ENCRYPTION_KEY;
-    if (!rawKey) {
-      throw new Error(
-        'TOKEN_ENCRYPTION_KEY is not set. Generate one with: ' +
-          "node -e \"console.log(require('crypto').randomBytes(32).toString('base64'))\"",
-      );
-    }
-
-    const key = Buffer.from(rawKey, 'base64');
-    if (key.length !== TokenCipherService.KEY_LENGTH) {
-      throw new Error(
-        `TOKEN_ENCRYPTION_KEY must decode to ${TokenCipherService.KEY_LENGTH} bytes ` +
-          `(got ${key.length}). Provide a base64-encoded 256-bit key.`,
-      );
-    }
-
-    this.key = key;
+  constructor(config: ConfigService<EnvVars, true>) {
+    const rawKey = config.get('TOKEN_ENCRYPTION_KEY', { infer: true });
+    this.key = Buffer.from(rawKey, 'base64');
   }
 
   /**

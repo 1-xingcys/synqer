@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
+import { EnvVars } from '../../config/env.validation';
 
 /**
  * LINE Rich Menu 服務
@@ -11,6 +13,8 @@ import axios from 'axios';
 export class RichMenuService {
   private readonly logger = new Logger(RichMenuService.name);
   private readonly baseUrl = 'https://api.line.me/v2';
+
+  constructor(private readonly config: ConfigService<EnvVars, true>) {}
 
   /**
    * 取得目前的預設 Rich Menu ID
@@ -139,7 +143,9 @@ export class RichMenuService {
 
   private getAuthHeaders() {
     return {
-      Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
+      Authorization: `Bearer ${this.config.get('LINE_CHANNEL_ACCESS_TOKEN', {
+        infer: true,
+      })}`,
     };
   }
 }

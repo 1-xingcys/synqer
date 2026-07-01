@@ -11,6 +11,7 @@
  */
 
 import * as dotenv from 'dotenv';
+import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import { TokenCipherService } from '../src/google-calendar/services/token-cipher.service';
 
@@ -18,7 +19,10 @@ dotenv.config();
 
 async function main() {
   const prisma = new PrismaClient();
-  const cipher = new TokenCipherService(); // 缺少/無效金鑰時會在此直接拋錯
+  // 獨立腳本不啟動整個 Nest AppModule（避免觸發 LineBotService 等的
+  // onModuleInit 副作用）。改用輕量 ConfigService，其 get() 會回退讀取
+  // dotenv 載入的 process.env，讓 TokenCipherService 仍統一從 config 取金鑰。
+  const cipher = new TokenCipherService(new ConfigService());
 
   let scanned = 0;
   let updated = 0;

@@ -50,26 +50,34 @@ npm install
 The `.env` file in `backend/` is already configured with your credentials:
 
 ```env
-DATABASE_URL="file:./dev.db"
+DATABASE_URL=postgresql://user:password@localhost:5432/synqer
+
+# Server
+NODE_ENV=development
+PORT=8080
+WEB_ORIGIN=http://localhost:3000
 
 # Google OAuth
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:4000/auth/google/callback
+GOOGLE_REDIRECT_URI=http://localhost:8080/api/auth/google/callback
+GOOGLE_CALENDAR_REDIRECT_URI=http://localhost:8080/api/google-calendar/callback
 
 # LINE Login (OAuth 登入專用)
 LINE_LOGIN_CHANNEL_ID=your_line_login_channel_id
 LINE_LOGIN_CHANNEL_SECRET=your_line_login_channel_secret
-LINE_LOGIN_REDIRECT_URI=http://localhost:4000/auth/line/callback
+LINE_LOGIN_REDIRECT_URI=http://localhost:8080/api/auth/line/callback
+LINE_LIFF_URL=https://liff.line.me/your_liff_id
 
 # LINE Bot (Messaging API 專用)
-LINE_BOT_CHANNEL_ID=your_line_bot_channel_id
 LINE_BOT_CHANNEL_SECRET=your_line_bot_channel_secret
 LINE_CHANNEL_ACCESS_TOKEN=your_channel_access_token
 
+# Session
 SESSION_SECRET=dev-secret-change-in-production
-WEB_ORIGIN=http://localhost:3000
-API_PORT=4000
+
+# Token encryption (base64-encoded 32-byte key for stored Google OAuth tokens)
+TOKEN_ENCRYPTION_KEY=your_base64_32_byte_key
 ```
 
 **Important**: In production, generate a secure `SESSION_SECRET` and never commit credentials to version control.
@@ -84,7 +92,7 @@ npx prisma generate
 npx prisma migrate dev --name init
 ```
 
-This will create a SQLite database at `backend/dev.db` with the following schema:
+This will create the tables in your PostgreSQL database (`DATABASE_URL`) with the following schema:
 
 - `User`: Stores user information (id, displayName, primaryEmail, timestamps)
 - `AuthIdentity`: Stores OAuth provider information linked to users

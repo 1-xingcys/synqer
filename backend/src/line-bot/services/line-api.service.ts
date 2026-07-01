@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import * as crypto from 'crypto';
 import { FlexMessage } from './flex-message.service';
+import { EnvVars } from '../../config/env.validation';
 
 export interface LineProfile {
   userId: string;
@@ -53,11 +55,15 @@ export class LineApiService {
   private readonly logger = new Logger(LineApiService.name);
   private readonly baseUrl = 'https://api.line.me/v2';
 
+  constructor(private readonly config: ConfigService<EnvVars, true>) {}
+
   /**
    * 驗證 LINE Webhook 簽章
    */
   verifySignature(body: string, signature: string): boolean {
-    const channelSecret = process.env.LINE_BOT_CHANNEL_SECRET!;
+    const channelSecret = this.config.get('LINE_BOT_CHANNEL_SECRET', {
+      infer: true,
+    });
     const hash = crypto
       .createHmac('sha256', channelSecret)
       .update(body)
@@ -169,7 +175,9 @@ export class LineApiService {
 
   private getAuthHeaders() {
     return {
-      Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
+      Authorization: `Bearer ${this.config.get('LINE_CHANNEL_ACCESS_TOKEN', {
+        infer: true,
+      })}`,
     };
   }
 }

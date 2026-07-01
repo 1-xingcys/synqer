@@ -91,5 +91,17 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Guard against direct process.env access
+        run: |
+          matches=$(grep -rn "process\.env" src --include="*.ts" \
+            | grep -v "\.spec\.ts" \
+            | grep -v "src/config/env.validation.ts" || true)
+          if [ -n "$matches" ]; then
+            echo "Direct process.env access found outside the config layer:"
+            echo "$matches"
+            echo "Read env via the typed ConfigService instead (see src/config/env.validation.ts)."
+            exit 1
+          fi
+
       - name: Unit test
         run: npm test -- --passWithNoTests
