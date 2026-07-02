@@ -206,6 +206,64 @@ describe('EventStatusService', () => {
 
       expect(result).toBe(EventStatus.COMPLETED);
     });
+
+    it('marks a slot COMPLETED once its Asia/Taipei wall-clock end has passed, before the same UTC instant', () => {
+      // Slot ends at wall-clock 10:00 on 2025-06-01 (stored as ...T10:00:00Z).
+      // Real now = 03:00Z is 11:00 in Asia/Taipei, i.e. already past the end,
+      // even though the raw UTC instant (03:00Z) is still before 10:00Z.
+      const now = new Date('2025-06-01T03:00:00.000Z');
+
+      const result = service.computeEventStatus(
+        {
+          eventType: EventType.ONE_TIME,
+          votingDeadline: null,
+          confirmedTimeSlots: [
+            {
+              slotId: 'slot-1',
+              slot: {
+                id: 'slot-1',
+                axisType: EventSlotAxisType.DATE,
+                axisDate: new Date('2025-06-01T00:00:00.000Z'),
+                axisWeekday: null,
+                startMinute: 540, // 09:00
+                endMinute: 600, // 10:00
+              },
+            },
+          ],
+        },
+        now,
+      );
+
+      expect(result).toBe(EventStatus.COMPLETED);
+    });
+
+    it('keeps a slot CONFIRMED while its Asia/Taipei wall-clock end is still ahead', () => {
+      // Real now = 01:00Z is 09:00 in Asia/Taipei, before the 10:00 wall-clock end.
+      const now = new Date('2025-06-01T01:00:00.000Z');
+
+      const result = service.computeEventStatus(
+        {
+          eventType: EventType.ONE_TIME,
+          votingDeadline: null,
+          confirmedTimeSlots: [
+            {
+              slotId: 'slot-1',
+              slot: {
+                id: 'slot-1',
+                axisType: EventSlotAxisType.DATE,
+                axisDate: new Date('2025-06-01T00:00:00.000Z'),
+                axisWeekday: null,
+                startMinute: 540, // 09:00
+                endMinute: 600, // 10:00
+              },
+            },
+          ],
+        },
+        now,
+      );
+
+      expect(result).toBe(EventStatus.CONFIRMED);
+    });
   });
 
   describe('computeParticipantStatus', () => {

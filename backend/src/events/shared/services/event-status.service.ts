@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EventSlotAxisType, EventType } from '@prisma/client';
 import { ConfirmedTimeSlotData } from '../interfaces/confirmed-time.interface';
+import { appWallClockNow } from '../../../common/time';
 
 // 活動狀態
 export enum EventStatus {
@@ -26,12 +27,17 @@ export class EventStatusService {
    * 根據活動資訊計算活動狀態
    * @param event 活動資訊，包含 confirmedTimeSlots（已確認的時段）
    */
-  computeEventStatus(event: {
-    eventType: EventType;
-    votingDeadline: Date | null;
-    confirmedTimeSlots?: ConfirmedTimeSlotData[];
-  }): EventStatus {
-    const now = new Date();
+  computeEventStatus(
+    event: {
+      eventType: EventType;
+      votingDeadline: Date | null;
+      confirmedTimeSlots?: ConfirmedTimeSlotData[];
+    },
+    now: Date = new Date(),
+  ): EventStatus {
+    // Slot end times are wall-clock encoded as UTC, so `now` must be projected
+    // into the same space before comparing (see appWallClockNow).
+    const wallClockNow = appWallClockNow(now);
     const hasConfirmedSlots =
       event.confirmedTimeSlots && event.confirmedTimeSlots.length > 0;
 
@@ -43,13 +49,14 @@ export class EventStatusService {
 
       // 找出最晚的時段結束時間
       const latestEndTime = this.getLatestEndTime(event.confirmedTimeSlots!);
-      if (latestEndTime && now > latestEndTime) {
+      if (latestEndTime && wallClockNow > latestEndTime) {
         return EventStatus.COMPLETED;
       }
       return EventStatus.CONFIRMED;
     }
 
-    // 如果沒有確認的活動時段，檢查投票截止時間
+    // 如果沒有確認的活動時段，檢查投票截止時間。
+    // votingDeadline 目前仍是真實 instant，因此用真實 now 比較（Phase 2 併同前端切換）。
     if (event.votingDeadline) {
       if (now > event.votingDeadline) {
         return EventStatus.VOTING_ENDED;
