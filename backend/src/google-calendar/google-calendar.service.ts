@@ -342,12 +342,15 @@ export class GoogleCalendarService {
         .filter((event) => event.status !== 'cancelled')
         .map((event) => {
           const isAllDay = !event.start.dateTime;
-          const startTime = isAllDay
-            ? new Date(event.start.date + 'T00:00:00')
-            : new Date(event.start.dateTime!);
-          const endTime = isAllDay
-            ? new Date(event.end.date + 'T23:59:59')
-            : new Date(event.end.dateTime!);
+          let startTime: Date, endTime: Date;
+          if (isAllDay) {
+            startTime = new Date(event.start.date + 'T00:00:00');
+            endTime = new Date(event.end.date + 'T23:59:59'); // event.end.date is exclusive for all-day events
+            endTime.setDate(endTime.getDate() - 1);
+          } else {
+            startTime = new Date(event.start.dateTime!);
+            endTime = new Date(event.end.dateTime!);
+          }
 
           return {
             id: event.id,

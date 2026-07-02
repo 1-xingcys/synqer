@@ -439,11 +439,65 @@ describe('GoogleCalendarService', () => {
         description: 'Team meeting',
         isAllDay: false,
       });
+      expect(result[0].startTime).toEqual(
+        new Date('2024-01-15T10:00:00+08:00'),
+      );
+      expect(result[0].endTime).toEqual(new Date('2024-01-15T11:00:00+08:00'));
       expect(result[1]).toMatchObject({
         id: 'event-2',
         summary: 'Holiday',
         isAllDay: true,
       });
+      // end.date is exclusive, so a single-day all-day event ('2024-01-20'
+      // to '2024-01-21') must resolve to 2024-01-20, not 2024-01-21.
+      expect(result[1].startTime).toEqual(new Date('2024-01-20T00:00:00'));
+      expect(result[1].endTime).toEqual(new Date('2024-01-20T23:59:59'));
+    });
+
+    it('should resolve the exclusive end date correctly for multi-day and boundary-crossing all-day events', async () => {
+      const mockConnection = {
+        accessToken: 'test-access-token',
+        tokenExpiresAt: new Date(Date.now() + 3600 * 1000), // Not expired
+        refreshToken: 'test-refresh-token',
+      };
+      mockPrismaService.googleCalendarConnection.findUnique.mockResolvedValue(
+        mockConnection,
+      );
+
+      mockedAxios.get.mockResolvedValue({
+        data: {
+          items: [
+            {
+              // Spans 2024-01-20 through 2024-01-22 (end date is exclusive).
+              id: 'multi-day',
+              summary: 'Conference',
+              start: { date: '2024-01-20' },
+              end: { date: '2024-01-23' },
+              status: 'confirmed',
+            },
+            {
+              // Crosses a leap-year month boundary: ends on 2024-02-29.
+              id: 'leap-year-boundary',
+              summary: 'Leap Day Event',
+              start: { date: '2024-02-29' },
+              end: { date: '2024-03-01' },
+              status: 'confirmed',
+            },
+          ],
+        },
+      });
+
+      const result = await service.getCalendarEvents(
+        'user-123',
+        new Date('2024-01-01'),
+        new Date('2024-03-31'),
+      );
+
+      expect(result[0].startTime).toEqual(new Date('2024-01-20T00:00:00'));
+      expect(result[0].endTime).toEqual(new Date('2024-01-22T23:59:59'));
+
+      expect(result[1].startTime).toEqual(new Date('2024-02-29T00:00:00'));
+      expect(result[1].endTime).toEqual(new Date('2024-02-29T23:59:59'));
     });
 
     it('should refresh token when expired', async () => {
