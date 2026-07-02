@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { EventSlotAxisType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { EnvVars } from '../config/env.validation';
+import { DEFAULT_TIME_ZONE } from '../common/time';
 import * as crypto from 'crypto';
 import axios from 'axios';
 import * as jwt from 'jsonwebtoken';
@@ -324,7 +325,7 @@ export class GoogleCalendarService {
     userId: string,
     timeMin: Date,
     timeMax: Date,
-    timeZone = 'Asia/Taipei',
+    timeZone = DEFAULT_TIME_ZONE,
   ): Promise<CalendarEventDto[]> {
     const accessToken = await this.getValidAccessToken(userId);
 

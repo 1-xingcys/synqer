@@ -128,7 +128,10 @@ model Event {
   type        EventType @default(ONE_TIME)
   ownerId     String? // 活動擁有者
   owner       User?   @relation("OwnedEvents", fields: [ownerId], references: [id], onDelete: SetNull)
-  timeZone        String @default("Asia/Taipei") // 預留：未來可自動轉換時區
+  // Legacy field. Event times use "wall-clock encoded as UTC" (see common/time.ts),
+  // so this is currently only consumed by the Google Calendar integration.
+  // Keep the default in sync with DEFAULT_TIME_ZONE.
+  timeZone        String @default("Asia/Taipei")
 
   // 投票截止時間
   votingDeadline DateTime?
