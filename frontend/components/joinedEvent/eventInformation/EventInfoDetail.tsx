@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
-import { Calendar, Clock, Timer } from "lucide-react";
+import { Calendar, Clock, Globe, Timer } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
 import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
@@ -13,6 +13,7 @@ interface EventInfoDetailProps {
   eventType: EventType;
   status: EventStatus;
   schedule: EventSchedule;
+  timeZone: string;
   votingDeadline?: string | null;
   currentUserHasVoted: boolean;
 }
@@ -40,6 +41,7 @@ export function EventInfoDetail({
   eventType,
   status,
   schedule,
+  timeZone,
   votingDeadline,
   currentUserHasVoted,
 }: EventInfoDetailProps) {
@@ -109,6 +111,18 @@ export function EventInfoDetail({
             {formatMinutesToTime(schedule.startMinuteOfDay ?? 0)}
             <span className="mx-2 text-zinc-400">~</span>
             {formatMinutesToTime(schedule.endMinuteOfDay ?? 0)}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1">
+            <Globe className="w-4 h-4" />
+            <span className="text-sm font-medium">
+              {t("eventInfo.timeZone")}
+            </span>
+          </div>
+          <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-6">
+            {timeZone}
           </p>
         </div>
       </div>
