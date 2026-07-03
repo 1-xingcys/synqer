@@ -27,7 +27,7 @@ describe("votingDeadline", () => {
     expect(
       validateVotingDeadline({
         enabled: true,
-        date: new Date("2026-04-10T00:00:00Z"),
+        date: new Date(2026, 3, 10),
         time: null,
       }),
     ).toBe(VOTING_DEADLINE_ERROR.REQUIRED);
@@ -40,7 +40,7 @@ describe("votingDeadline", () => {
     expect(
       validateVotingDeadline({
         enabled: true,
-        date: new Date("2026-04-10T00:00:00Z"),
+        date: new Date(2026, 3, 10),
         time: "09:00",
         minDateTime: new Date("2026-04-10T10:00:00Z"),
       }),
@@ -51,7 +51,7 @@ describe("votingDeadline", () => {
     expect(
       validateVotingDeadline({
         enabled: true,
-        date: new Date("2026-04-10T00:00:00Z"),
+        date: new Date(2026, 3, 10),
         time: "11:00",
         maxDateTime: new Date("2026-04-10T10:00:00Z"),
       }),
@@ -62,7 +62,7 @@ describe("votingDeadline", () => {
     expect(
       validateVotingDeadline({
         enabled: true,
-        date: new Date("2026-04-10T00:00:00Z"),
+        date: new Date(2026, 3, 10),
         time: "09:00",
         minDateTime: new Date("2026-04-10T08:00:00Z"),
         maxDateTime: new Date("2026-04-10T10:00:00Z"),
