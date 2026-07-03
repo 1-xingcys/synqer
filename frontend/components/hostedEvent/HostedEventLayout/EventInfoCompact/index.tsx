@@ -14,6 +14,7 @@ import { formatEventScheduleSummary } from "@/lib/event-presentation";
 
 interface VotingStatusProps {
   votingDeadline?: string | null;
+  timeZone: string;
   votingPercentage: number;
   totalVoted: number;
   totalExpected: number;
@@ -115,6 +116,7 @@ export function EventInfoCompact({
       {votingStatus && (
         <VotingStatusBar
           votingDeadline={votingStatus.votingDeadline}
+          timeZone={votingStatus.timeZone}
           votingPercentage={votingStatus.votingPercentage}
           totalVoted={votingStatus.totalVoted}
           totalExpected={votingStatus.totalExpected}
@@ -130,6 +132,7 @@ export function EventInfoCompact({
         <div className="flex-1 min-w-[200px]">
           <DeadlineCountdown
             votingDeadline={votingStatus.votingDeadline}
+            timeZone={votingStatus.timeZone}
             isInactive={votingStatus.isInactive}
           />
         </div>

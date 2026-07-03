@@ -17,6 +17,25 @@ interface EventInfoDetailProps {
   currentUserHasVoted: boolean;
 }
 
+function formatVotingDeadlineWallClock(votingDeadline: string): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date(votingDeadline));
+
+  const map: Record<string, string> = {};
+  for (const part of parts) {
+    if (part.type !== "literal") map[part.type] = part.value;
+  }
+
+  return `${map.year}/${map.month}/${map.day} ${map.hour}:${map.minute}`;
+}
+
 export function EventInfoDetail({
   eventType,
   status,
@@ -105,7 +124,7 @@ export function EventInfoDetail({
           </div>
           <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-6">
             {votingDeadline
-              ? format(new Date(votingDeadline), "yyyy/MM/dd HH:mm")
+              ? formatVotingDeadlineWallClock(votingDeadline)
               : t("eventInfo.noDeadline")}
           </p>
         </div>

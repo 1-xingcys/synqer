@@ -7,12 +7,14 @@ import { getVotingDeadlineCountdownState } from "@/lib/event-presentation";
 
 interface DeadlineCountdownProps {
   votingDeadline?: string | null;
+  timeZone: string;
   /** 是否為非活躍狀態（confirmed/completed），倒數顯示灰色 */
   isInactive?: boolean;
 }
 
 export function DeadlineCountdown({
   votingDeadline,
+  timeZone,
   isInactive = false,
 }: DeadlineCountdownProps) {
   const t = useTranslations("hosted");
@@ -36,6 +38,7 @@ export function DeadlineCountdown({
   const countdown = getVotingDeadlineCountdownState(
     votingDeadline,
     now,
+    timeZone,
     isInactive,
   );
   const deadlineDate = countdown.deadlineDate!;

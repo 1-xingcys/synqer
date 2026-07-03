@@ -8,6 +8,7 @@ import { getVotingDeadlineCountdownState } from "@/lib/event-presentation";
 
 interface VotingStatusBarProps {
   votingDeadline?: string | null;
+  timeZone: string;
   votingPercentage: number;
   totalVoted: number;
   totalExpected: number;
@@ -20,6 +21,7 @@ interface VotingStatusBarProps {
  */
 export function VotingStatusBar({
   votingDeadline,
+  timeZone,
   votingPercentage,
   totalVoted,
   totalExpected,
@@ -36,7 +38,12 @@ export function VotingStatusBar({
     minutes,
     isUrgent,
     isVeryCritical,
-  } = getVotingDeadlineCountdownState(votingDeadline, now, isInactive);
+  } = getVotingDeadlineCountdownState(
+    votingDeadline,
+    now,
+    timeZone,
+    isInactive,
+  );
 
   const getTimeColor = () => {
     if (isInactive || isExpired || !deadlineDate)

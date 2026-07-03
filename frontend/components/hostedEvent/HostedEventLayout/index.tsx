@@ -113,6 +113,7 @@ function HostedEventLayoutContent({ children }: HostedEventLayoutProps) {
           eventId={eventId}
           votingStatus={{
             votingDeadline: event.votingDeadline,
+            timeZone: event.timeZone,
             votingPercentage: votingStats.votingPercentage,
             totalVoted: votingStats.totalVoted,
             totalExpected: votingStats.totalExpected,
