@@ -21,6 +21,7 @@ export default function VotingGrid({
   eventId,
   currentUserId,
   eventTitle,
+  timeZone,
   capabilities,
 }: VotingGridProps) {
   const tJoined = useTranslations("joined");
@@ -35,6 +36,7 @@ export default function VotingGrid({
     eventId,
     currentUserId,
     eventTitle,
+    timeZone,
     capabilities,
   });
 

@@ -27,6 +27,7 @@ interface UseVotingGridControllerProps {
   eventId: VotingGridProps["eventId"];
   currentUserId: VotingGridProps["currentUserId"];
   eventTitle: VotingGridProps["eventTitle"];
+  timeZone: VotingGridProps["timeZone"];
   capabilities: EventCapabilities;
 }
 
@@ -110,6 +111,7 @@ export function useVotingGridController({
   eventId,
   currentUserId,
   eventTitle,
+  timeZone,
   capabilities,
 }: UseVotingGridControllerProps): UseVotingGridControllerResult {
   const [granularity, setGranularity] = useState<TimeGranularity>(30);
@@ -204,6 +206,7 @@ export function useVotingGridController({
   } = useCalendarConflictSyncApi({
     eventId,
     slots,
+    timeZone,
     enabled: capabilities.supportsCalendarConflict,
   });
 

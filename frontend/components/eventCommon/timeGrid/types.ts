@@ -67,6 +67,7 @@ export interface VotingGridProps {
   currentUserId: string;
   eventId: string;
   eventTitle: string;
+  timeZone: string;
   capabilities: EventCapabilities;
 }
 

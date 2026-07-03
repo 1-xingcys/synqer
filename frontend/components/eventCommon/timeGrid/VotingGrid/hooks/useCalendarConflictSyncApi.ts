@@ -8,6 +8,7 @@ import { mapCalendarEventsToSlots } from "../../utils";
 interface UseCalendarConflictSyncApiProps {
   eventId?: string;
   slots: TimeSlot[];
+  timeZone: string;
   enabled: boolean;
 }
 
@@ -36,6 +37,7 @@ interface UseCalendarConflictSyncApiReturn {
 export function useCalendarConflictSyncApi({
   eventId,
   slots,
+  timeZone,
   enabled,
 }: UseCalendarConflictSyncApiProps): UseCalendarConflictSyncApiReturn {
   const {
@@ -53,8 +55,8 @@ export function useCalendarConflictSyncApi({
 
   // Map calendar events to slots
   const calendarEventsForSlot = useMemo(
-    () => mapCalendarEventsToSlots(calendarEvents, slots),
-    [calendarEvents, slots],
+    () => mapCalendarEventsToSlots(calendarEvents, slots, timeZone),
+    [calendarEvents, slots, timeZone],
   );
 
   // Load calendar conflicts
