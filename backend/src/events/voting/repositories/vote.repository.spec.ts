@@ -51,6 +51,7 @@ describe('VoteRepository', () => {
       const mockEvent = {
         votingDeadline: new Date(),
         isDeleted: false,
+        timeZone: 'Asia/Taipei',
       };
 
       mockPrismaService.event.findUnique.mockResolvedValue(mockEvent);
@@ -62,6 +63,7 @@ describe('VoteRepository', () => {
         select: {
           votingDeadline: true,
           isDeleted: true,
+          timeZone: true,
         },
       });
       expect(result).toEqual(mockEvent);

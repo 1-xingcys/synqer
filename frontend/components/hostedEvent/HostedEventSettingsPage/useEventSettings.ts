@@ -28,12 +28,6 @@ const EMPTY_FORM_DATA: VotingDeadlineFormData = {
   deadlineTime: null,
 };
 
-function normalizeDateOnly(date: Date): Date {
-  const normalized = new Date(date);
-  normalized.setHours(0, 0, 0, 0);
-  return normalized;
-}
-
 function cloneVotingDeadlineFormData(
   formData: VotingDeadlineFormData,
 ): VotingDeadlineFormData {
@@ -73,18 +67,29 @@ function areVotingDeadlineFormsEqual(
   );
 }
 
-function buildVotingDeadlineFormData(
+export function buildVotingDeadlineFormData(
   votingDeadline?: string | null,
 ): VotingDeadlineFormData {
   if (votingDeadline) {
+    // votingDeadline is stored naive: UTC fields carry the wall-clock digits
+    // for the event's time zone. Read those digits via getUTC* — local
+    // getters would apply the runner's local offset and shift the day/time.
     const deadline = new Date(votingDeadline);
     const time = formatMinutesToTime(
-      deadline.getHours() * 60 + deadline.getMinutes(),
+      deadline.getUTCHours() * 60 + deadline.getUTCMinutes(),
+    );
+    // Build a local-midnight Date whose local Y/M/D match the naive UTC
+    // digits, matching the date-picker contract used elsewhere (see
+    // combineVotingDeadline in lib/votingDeadline.ts).
+    const deadlineDate = new Date(
+      deadline.getUTCFullYear(),
+      deadline.getUTCMonth(),
+      deadline.getUTCDate(),
     );
 
     return {
       deadlineEnabled: true,
-      deadlineDate: normalizeDateOnly(deadline),
+      deadlineDate,
       deadlineTime: time,
     };
   }

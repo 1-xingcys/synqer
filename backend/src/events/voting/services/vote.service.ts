@@ -11,6 +11,7 @@ import {
   UpdateStagedVoteDto,
 } from '../dto/vote-event.dto';
 import { TimeSlotRepository } from '../../shared/repositories/time-slot.repository';
+import { zonedWallClockToInstant } from '../../../common/time';
 
 /**
  * 投票服務（業務邏輯層）
@@ -28,9 +29,14 @@ export class VoteService {
    * 1. available: 投自己「可以」的時間，未選擇的時段視為不行
    * 2. unavailable: 投自己「不行」的時間，未選擇的時段視為可以
    */
-  async vote(eventId: string, userId: string, voteDto: VoteEventDto) {
+  async vote(
+    eventId: string,
+    userId: string,
+    voteDto: VoteEventDto,
+    now: Date = new Date(),
+  ) {
     const { selectedSlotIds, voteMode = VoteMode.AVAILABLE } = voteDto;
-    const allSlotIds = await this.validateEventAndGetAllSlotIds(eventId);
+    const allSlotIds = await this.validateEventAndGetAllSlotIds(eventId, now);
     await this.validateParticipantAndGetVoteStatus(eventId, userId);
 
     // 去重並驗證 selectedSlotIds 都屬於該活動
@@ -71,9 +77,10 @@ export class VoteService {
     eventId: string,
     userId: string,
     updateVoteDto: UpdateVoteDto,
+    now: Date = new Date(),
   ) {
     const { addSlotIds = [], removeSlotIds = [] } = updateVoteDto;
-    const allSlotIds = await this.validateEventAndGetAllSlotIds(eventId);
+    const allSlotIds = await this.validateEventAndGetAllSlotIds(eventId, now);
     await this.validateParticipantAndGetVoteStatus(eventId, userId);
 
     if (addSlotIds.length === 0 && removeSlotIds.length === 0) {
@@ -240,15 +247,25 @@ export class VoteService {
   /**
    * 驗證活動可投票並回傳所有 slot IDs
    */
-  private async validateEventAndGetAllSlotIds(eventId: string) {
+  private async validateEventAndGetAllSlotIds(
+    eventId: string,
+    now: Date = new Date(),
+  ) {
     const event = await this.voteRepository.findEventVotingInfo(eventId);
 
     if (!event || event.isDeleted) {
       throw new BadRequestException('活動不存在');
     }
 
-    if (event.votingDeadline && new Date() > event.votingDeadline) {
-      throw new BadRequestException('投票已截止');
+    if (event.votingDeadline) {
+      // votingDeadline 以 naive 牆上數字儲存；解析成真實 instant 再與真實 now 比較。
+      const deadlineInstant = zonedWallClockToInstant(
+        event.votingDeadline,
+        event.timeZone,
+      );
+      if (now > deadlineInstant) {
+        throw new BadRequestException('投票已截止');
+      }
     }
 
     return this.timeSlotRepository.findIdsByEventId(eventId);

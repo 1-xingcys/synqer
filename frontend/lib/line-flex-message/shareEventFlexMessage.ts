@@ -63,25 +63,27 @@ function formatDeadline(
   votingDeadline: string | undefined,
   copy: EventShareCopy,
   localePrefix: string,
-  timeZone?: string,
 ): string | null {
   if (!votingDeadline) return null;
+  // votingDeadline is stored naive: UTC fields carry the wall-clock digits
+  // for the event's time zone. Read those digits back as UTC — formatting
+  // through the event's real zone here would double-apply the offset.
   const d = new Date(votingDeadline);
   const locale = getDateLocale(localePrefix);
   const monthDay = new Intl.DateTimeFormat(locale, {
     month: "numeric",
     day: "numeric",
-    timeZone,
+    timeZone: "UTC",
   }).format(d);
   const weekday = new Intl.DateTimeFormat(locale, {
     weekday: localePrefix === "/zh-TW" ? "narrow" : "short",
-    timeZone,
+    timeZone: "UTC",
   }).format(d);
   const time = new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-    timeZone,
+    timeZone: "UTC",
   }).format(d);
   return `${copy.deadlinePrefix}${monthDay}${copy.openingParenthesis}${weekday}${copy.closingParenthesis}${time}`;
 }
@@ -97,18 +99,13 @@ function buildEventVoteUrl(eventId: string, localePrefix: string): string {
   return new URL(`https://liff.line.me/${liffId}${votePath}`).toString();
 }
 
-function buildEventShareFlexMessage(info: EventShareInfo) {
+export function buildEventShareFlexMessage(info: EventShareInfo) {
   const pathname =
     typeof window !== "undefined" ? window.location.pathname : "";
   const localePrefix = getLocalePrefix(pathname);
   const copy = getEventShareCopy(localePrefix);
   const title = info.title || copy.untitledEvent;
-  const deadline = formatDeadline(
-    info.votingDeadline,
-    copy,
-    localePrefix,
-    info.timeZone,
-  );
+  const deadline = formatDeadline(info.votingDeadline, copy, localePrefix);
   const voteUrl = buildEventVoteUrl(info.eventId, localePrefix);
 
   const bodyContents: Array<Record<string, unknown>> = [

@@ -163,11 +163,38 @@ describe('VoteService', () => {
       mockVoteRepository.findEventVotingInfo.mockResolvedValue({
         votingDeadline: pastDeadline,
         isDeleted: false,
+        timeZone: 'Asia/Taipei',
       });
 
       await expect(
         service.vote(eventId, userId, { selectedSlotIds: [] }),
       ).rejects.toThrow(new BadRequestException('投票已截止'));
+    });
+
+    it('should resolve naive votingDeadline via event.timeZone before comparing to now (hour-scale skew)', async () => {
+      // votingDeadline is stored naive: UTC fields carry the wall-clock digits
+      // for event.timeZone. Wall-clock digits "08:00" in Asia/Taipei (UTC+8)
+      // resolve to real instant 2024-12-24T00:00:00Z. System clock below sits
+      // between the real deadline instant and the raw naive digits, so a
+      // naive-vs-real comparison (the bug) says "not yet expired" while the
+      // correctly resolved comparison says "expired". Uses fake timers so the
+      // ambient `new Date()` default is exercised, not an injected override.
+      jest.useFakeTimers().setSystemTime(new Date('2024-12-24T04:00:00Z'));
+      try {
+        const naiveDeadline = new Date('2024-12-24T08:00:00Z');
+
+        mockVoteRepository.findEventVotingInfo.mockResolvedValue({
+          votingDeadline: naiveDeadline,
+          isDeleted: false,
+          timeZone: 'Asia/Taipei',
+        });
+
+        await expect(
+          service.vote(eventId, userId, { selectedSlotIds: [] }),
+        ).rejects.toThrow(new BadRequestException('投票已截止'));
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('should throw BadRequestException for invalid slot IDs', async () => {
@@ -235,6 +262,7 @@ describe('VoteService', () => {
       mockVoteRepository.findEventVotingInfo.mockResolvedValue({
         votingDeadline: futureDeadline,
         isDeleted: false,
+        timeZone: 'Asia/Taipei',
       });
       mockTimeSlotRepository.findIdsByEventId.mockResolvedValue(['slot-1']);
       mockVoteRepository.submitVoteInTransaction.mockResolvedValue({
@@ -413,11 +441,32 @@ describe('VoteService', () => {
       mockVoteRepository.findEventVotingInfo.mockResolvedValue({
         votingDeadline: pastDeadline,
         isDeleted: false,
+        timeZone: 'Asia/Taipei',
       });
 
       await expect(
         service.updateVotes(eventId, userId, { addSlotIds: ['slot-1'] }),
       ).rejects.toThrow(new BadRequestException('投票已截止'));
+    });
+
+    it('should resolve naive votingDeadline via event.timeZone before comparing to now (hour-scale skew)', async () => {
+      // Same discriminating scenario as VoteService#vote — see comment there.
+      jest.useFakeTimers().setSystemTime(new Date('2024-12-24T04:00:00Z'));
+      try {
+        const naiveDeadline = new Date('2024-12-24T08:00:00Z');
+
+        mockVoteRepository.findEventVotingInfo.mockResolvedValue({
+          votingDeadline: naiveDeadline,
+          isDeleted: false,
+          timeZone: 'Asia/Taipei',
+        });
+
+        await expect(
+          service.updateVotes(eventId, userId, { addSlotIds: ['slot-1'] }),
+        ).rejects.toThrow(new BadRequestException('投票已截止'));
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('should throw BadRequestException for invalid slot IDs', async () => {

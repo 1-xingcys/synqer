@@ -182,6 +182,7 @@ describe('EventUpdateService', () => {
       const mockEvent = {
         id: eventId,
         type: EventType.ONE_TIME,
+        timeZone: 'Asia/Taipei',
         confirmedTimeSlots: [],
         oneTimeSchedule: {
           startDate: new Date('2024-12-25'),
@@ -543,6 +544,43 @@ describe('EventUpdateService', () => {
       const mockEvent = {
         id: eventId,
         type: EventType.ONE_TIME,
+        confirmedTimeSlots: [],
+        oneTimeSchedule: {
+          startDate: new Date('2024-12-25'),
+          endDate: new Date('2024-12-25'),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
+        recurringSchedule: null,
+      };
+
+      mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
+      mockEventRepository.findOneBasic.mockResolvedValue(mockEvent);
+      mockEventScheduleService.getEventStartInstant.mockReturnValue(
+        new Date('2024-12-25T09:00:00.000Z'),
+      );
+
+      await expect(service.update(eventId, userId, updateDto)).rejects.toThrow(
+        new BadRequestException('Voting deadline cannot be in the past'),
+      );
+    });
+
+    it('should resolve naive votingDeadline via event.timeZone before rejecting as in the past (hour-scale skew)', async () => {
+      // votingDeadline is submitted naive: UTC fields carry the wall-clock
+      // digits for the event's time zone. Wall-clock digits "08:00" in
+      // Asia/Taipei (UTC+8) resolve to real instant 2024-12-24T00:00:00Z.
+      // System clock (set below) sits between the real deadline instant and
+      // the raw naive digits, so a naive-vs-real comparison (the bug) says
+      // "still in the future" while the correctly resolved comparison says
+      // "in the past".
+      jest.setSystemTime(new Date('2024-12-24T04:00:00.000Z'));
+
+      const updateDto = { votingDeadline: '2024-12-24T08:00:00Z' };
+      const mockEvent = {
+        id: eventId,
+        type: EventType.ONE_TIME,
+        timeZone: 'Asia/Taipei',
         confirmedTimeSlots: [],
         oneTimeSchedule: {
           startDate: new Date('2024-12-25'),
