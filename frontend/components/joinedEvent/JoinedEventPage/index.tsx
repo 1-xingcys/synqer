@@ -72,6 +72,7 @@ export default function JoinedEventPage() {
             eventDescription={event.description}
             confirmedSelections={event.confirmedSelections}
             supportsAddToCalendar={supportsAddToCalendar(event)}
+            timeZone={event.timeZone}
           />
         )}
 

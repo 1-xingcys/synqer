@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { ConfirmedSelection } from "@/types/event";
+import { generateGoogleCalendarUrl } from "./google-calendar-url";
 
 type OneTimeConfirmedSelection = ConfirmedSelection & {
   kind: "ONE_TIME_RANGE";
@@ -14,6 +15,7 @@ interface AddToCalendarPanelProps {
   eventDescription?: string | null;
   // One-time only: recurring events never render this panel.
   oneTimeConfirmedSelections: OneTimeConfirmedSelection[];
+  timeZone: string;
 }
 
 // Google brand colors
@@ -108,57 +110,11 @@ function GoogleGIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-/**
- * Format date for Google Calendar URL
- * Format: YYYYMMDDTHHMMSS (不帶時區後綴)
- *
- * 後端儲存的時間概念：startMinute=540 代表「當天 09:00」
- * 後端用 setUTCHours 儲存，所以 date string 是 "2025-12-31T09:00:00Z"
- * 但這個 09:00 實際上是「使用者想要的時間」，不是真正的 UTC
- *
- * Google Calendar URL 如果不帶 Z 後綴，會當作使用者 Calendar 的時區
- * 所以我們直接用 UTC 的數值（09:00）但不加 Z，讓 Google 用使用者的時區解讀
- */
-function formatGoogleCalendarDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  // 用 UTC 方法取得數值（這些數值代表使用者想要的時間）
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  const hours = String(date.getUTCHours()).padStart(2, "0");
-  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
-  const seconds = String(date.getUTCSeconds()).padStart(2, "0");
-  // 不加 Z 後綴，讓 Google Calendar 用使用者的 Calendar 時區解讀
-  return `${year}${month}${day}T${hours}${minutes}${seconds}`;
-}
-
-/**
- * Generate Google Calendar URL for adding an event
- */
-function generateGoogleCalendarUrl(
-  title: string,
-  description: string | undefined,
-  startTime: string,
-  endTime: string,
-): string {
-  const baseUrl = "https://calendar.google.com/calendar/render";
-  const params = new URLSearchParams({
-    action: "TEMPLATE",
-    text: title,
-    dates: `${formatGoogleCalendarDate(startTime)}/${formatGoogleCalendarDate(endTime)}`,
-  });
-
-  if (description) {
-    params.set("details", description);
-  }
-
-  return `${baseUrl}?${params.toString()}`;
-}
-
 export function AddToCalendarPanel({
   eventTitle,
   eventDescription,
   oneTimeConfirmedSelections,
+  timeZone,
 }: AddToCalendarPanelProps) {
   const t = useTranslations("joined");
 
@@ -172,6 +128,7 @@ export function AddToCalendarPanel({
       eventDescription || undefined,
       selection.startTime,
       selection.endTime,
+      timeZone,
     );
     window.open(url, "_blank", "noopener,noreferrer");
   };
