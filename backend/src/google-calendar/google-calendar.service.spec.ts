@@ -638,7 +638,7 @@ describe('GoogleCalendarService', () => {
       const mockEvent = {
         id: 'event-123',
         type: EventType.ONE_TIME,
-        timeZone: 'UTC',
+        timeZone: 'Asia/Taipei', // UTC+8
         oneTimeSchedule: {
           startDate: new Date('2024-01-15T00:00:00.000Z'),
           endDate: new Date('2024-01-15T00:00:00.000Z'),
@@ -691,15 +691,25 @@ describe('GoogleCalendarService', () => {
         mockConnection,
       );
 
-      // Calendar event that conflicts with slot-2 (10:00-10:15)
+      // Slot wall-clock times are in Asia/Taipei (UTC+8), so they resolve to
+      // real instants 8h earlier than their naive UTC-labeled value:
+      //   slot-1: 09:00-09:15 Taipei -> 01:00:00Z-01:15:00Z
+      //   slot-2: 10:00-10:15 Taipei -> 02:00:00Z-02:15:00Z
+      //   slot-3: 14:00-14:15 Taipei -> 06:00:00Z-06:15:00Z
+      // This calendar event's real instants (01:45Z-02:30Z) overlap only
+      // slot-2's resolved instant (02:00Z-02:15Z). If the code instead
+      // compared the slot's naive wall-clock value directly (09:30:00Z as
+      // if it were already UTC) against this event, there would be no
+      // overlap at all (09:30-10:30 vs 01:45-02:30) and the test would
+      // fail, proving the -8h zone resolution is what makes it pass.
       mockedAxios.get.mockResolvedValue({
         data: {
           items: [
             {
               id: 'cal-event-1',
               summary: 'Meeting',
-              start: { dateTime: '2024-01-15T09:30:00.000Z' }, // UTC 09:30
-              end: { dateTime: '2024-01-15T10:30:00.000Z' }, // UTC 10:30
+              start: { dateTime: '2024-01-15T01:45:00.000Z' }, // real instant
+              end: { dateTime: '2024-01-15T02:30:00.000Z' }, // real instant
               status: 'confirmed',
             },
           ],
@@ -710,9 +720,9 @@ describe('GoogleCalendarService', () => {
 
       expect(result.calendarEvents).toHaveLength(1);
       expect(result.conflictingSlotIds).toContain('slot-2');
-      // slot-1 (09:00-09:15) should not conflict with meeting (09:30-10:30)
+      // slot-1 (09:00-09:15 Taipei -> 01:00Z-01:15Z) ends before the meeting starts (01:45Z)
       expect(result.conflictingSlotIds).not.toContain('slot-1');
-      // slot-3 (14:00-14:15) should not conflict
+      // slot-3 (14:00-14:15 Taipei -> 06:00Z-06:15Z) starts well after the meeting ends (02:30Z)
       expect(result.conflictingSlotIds).not.toContain('slot-3');
     });
 
