@@ -7,6 +7,7 @@ import {
   DEFAULT_WEEKDAYS,
 } from "../types";
 import { getDefaultStartDateTime } from "./utils";
+import { resolveDefaultTimeZone } from "@/lib/time";
 
 function getInitialFormData(): CreateEventFormData {
   const { date: defaultDate, time: defaultTime } = getDefaultStartDateTime();
@@ -20,7 +21,7 @@ function getInitialFormData(): CreateEventFormData {
     weekdays: [...DEFAULT_WEEKDAYS],
     startTime: defaultTime,
     endTime: "24:00",
-    timeZone: "Asia/Taipei",
+    timeZone: resolveDefaultTimeZone(),
     votingDeadlineEnabled: false,
     votingDeadline: null,
     votingDeadlineTime: null,

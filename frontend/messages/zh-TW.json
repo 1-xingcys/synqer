@@ -863,6 +863,7 @@
       "selectTime": "選擇時間",
       "startTime": "開始時間",
       "endTime": "結束時間",
+      "timeZone": "時區",
       "slotDuration": "時間間隔",
       "minutes": "分鐘",
       "slotDurationDescription": "每個時段的持續時間",

@@ -863,6 +863,7 @@
       "selectTime": "Select time",
       "startTime": "Start time",
       "endTime": "End time",
+      "timeZone": "Time zone",
       "slotDuration": "Time slot duration",
       "minutes": "minutes",
       "slotDurationDescription": "Duration of each time slot",
