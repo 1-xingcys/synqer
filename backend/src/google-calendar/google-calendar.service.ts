@@ -22,6 +22,7 @@ import {
 import { EventCapabilitiesService } from '../events/shared/services/event-capabilities.service';
 import { EventScheduleService } from '../events/shared/services/event-schedule.service';
 import { TokenCipherService } from './services/token-cipher.service';
+import { zonedWallClockToInstant } from '../common/time';
 
 @Injectable()
 export class GoogleCalendarService {
@@ -434,16 +435,17 @@ export class GoogleCalendarService {
         continue;
       }
 
-      // Convert slot time to actual datetime
-      // 使用 setUTCHours 確保在任何伺服器時區都能正確處理時間
-      const slotDate = new Date(slot.axisDate);
-      const slotStart = new Date(slotDate);
-      slotStart.setUTCHours(0, 0, 0, 0);
-      slotStart.setUTCMinutes(slot.startMinute);
+      // Convert slot wall-clock to a real instant using the event's time zone,
+      // so it can be compared against calendar events (which are real instants).
+      const wallStart = new Date(slot.axisDate);
+      wallStart.setUTCHours(0, 0, 0, 0);
+      wallStart.setUTCMinutes(slot.startMinute);
+      const slotStart = zonedWallClockToInstant(wallStart, event.timeZone);
 
-      const slotEnd = new Date(slotDate);
-      slotEnd.setUTCHours(0, 0, 0, 0);
-      slotEnd.setUTCMinutes(slot.endMinute);
+      const wallEnd = new Date(slot.axisDate);
+      wallEnd.setUTCHours(0, 0, 0, 0);
+      wallEnd.setUTCMinutes(slot.endMinute);
+      const slotEnd = zonedWallClockToInstant(wallEnd, event.timeZone);
 
       // Check if any calendar event conflicts with this slot
       for (const calEvent of calendarEvents) {

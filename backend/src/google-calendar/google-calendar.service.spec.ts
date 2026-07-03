@@ -638,7 +638,7 @@ describe('GoogleCalendarService', () => {
       const mockEvent = {
         id: 'event-123',
         type: EventType.ONE_TIME,
-        timeZone: 'Asia/Taipei',
+        timeZone: 'UTC',
         oneTimeSchedule: {
           startDate: new Date('2024-01-15T00:00:00.000Z'),
           endDate: new Date('2024-01-15T00:00:00.000Z'),
