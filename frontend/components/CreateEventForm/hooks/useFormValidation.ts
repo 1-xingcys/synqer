@@ -5,6 +5,7 @@ import {
   validateVotingDeadline,
   VOTING_DEADLINE_ERROR,
 } from "@/lib/votingDeadline";
+import { instantToZonedWallClock } from "@/lib/time";
 import { CreateEventFormData, MIN_HOURS_BEFORE_EVENT } from "../types";
 import { parseTimeToMinutes, combineDateAndTime } from "./utils";
 
@@ -25,6 +26,10 @@ export function getCreateEventValidationErrors(
   const errorSet = new Set<ValidationError>();
   const isRecurring = formData.eventType === "RECURRING";
   const currentTime = now;
+  // Combined date-times (startDate/startTime, votingDeadline) are naive
+  // wall-clock values (UTC fields carry the digits). Project "now" into the
+  // same naive wall-clock space for the form's time zone before comparing.
+  const wallNow = instantToZonedWallClock(currentTime, formData.timeZone);
 
   if (!formData.title.trim()) {
     errorSet.add(ValidationError.TitleRequired);
@@ -45,10 +50,10 @@ export function getCreateEventValidationErrors(
       formData.startDate,
       formData.startTime,
     );
-    const minStartTime = new Date(currentTime);
-    minStartTime.setHours(
-      minStartTime.getHours() + MIN_HOURS_BEFORE_EVENT,
-      minStartTime.getMinutes(),
+    const minStartTime = new Date(wallNow);
+    minStartTime.setUTCHours(
+      minStartTime.getUTCHours() + MIN_HOURS_BEFORE_EVENT,
+      minStartTime.getUTCMinutes(),
       0,
       0,
     );
@@ -62,7 +67,7 @@ export function getCreateEventValidationErrors(
     enabled: formData.votingDeadlineEnabled,
     date: formData.votingDeadline,
     time: formData.votingDeadlineTime,
-    minDateTime: currentTime,
+    minDateTime: wallNow,
     maxDateTime:
       !isRecurring && formData.startDate
         ? combineDateAndTime(formData.startDate, formData.startTime)

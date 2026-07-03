@@ -12,6 +12,7 @@ import { apiFetchJson } from "@/lib/apiClient";
 import { hostedEventsKeys } from "@/hooks/useHostedEvents";
 import { getOneTimeEventStartInstant } from "@/lib/eventSchedule";
 import { formatMinutesToTime } from "@/lib/utils";
+import { instantToZonedWallClock } from "@/lib/time";
 import type { operations } from "@/generated/openapi";
 import { EventStatus, type EventSchedule } from "@/types/event";
 
@@ -101,6 +102,7 @@ type RemoveEventResponse =
 type DeadlineLockableEvent = {
   status: EventStatus;
   schedule: EventSchedule;
+  timeZone: string;
 };
 
 type EarliestSlot = {
@@ -127,21 +129,30 @@ function isVotingDeadlineLocked(
     return false;
   }
 
+  // getOneTimeEventStartInstant returns a naive wall-clock Date (UTC fields
+  // carry the digits); project "now" into the event's time zone before
+  // comparing so both sides are in the same space.
   const eventStart = getOneTimeEventStartInstant(event.schedule);
+  const wallNow = instantToZonedWallClock(now, event.timeZone);
 
-  return now >= eventStart;
+  return wallNow >= eventStart;
 }
 
 function getHostedDeadlineError(
   formData: VotingDeadlineFormData,
   earliestSlot: EarliestSlot | null,
+  timeZone: string,
   now: Date = new Date(),
 ): VotingDeadlineError | null {
+  // combineVotingDeadline (maxDateTime) is naive; project "now" into the
+  // same naive wall-clock space via the event's time zone before comparing.
+  const wallNow = instantToZonedWallClock(now, timeZone);
+
   return validateVotingDeadline({
     enabled: formData.deadlineEnabled,
     date: formData.deadlineDate,
     time: formData.deadlineTime,
-    minDateTime: now,
+    minDateTime: wallNow,
     maxDateTime: earliestSlot
       ? combineVotingDeadline(earliestSlot.date, earliestSlot.time)
       : null,
@@ -286,8 +297,13 @@ export function useEventSettings(eventId: string) {
   // hosted-settings-specific bounds: now ~ earliest available slot.
   const deadlineError = useMemo<VotingDeadlineError | null>(() => {
     void validationRevision;
-    return getHostedDeadlineError(formData, earliestSlot);
-  }, [earliestSlot, formData, validationRevision]);
+    if (!eventData?.event) return null;
+    return getHostedDeadlineError(
+      formData,
+      earliestSlot,
+      eventData.event.timeZone,
+    );
+  }, [earliestSlot, eventData?.event, formData, validationRevision]);
 
   const isDeadlineValid = deadlineError === null;
   const hasDeadlineRequiredError =
@@ -301,11 +317,14 @@ export function useEventSettings(eventId: string) {
       eventData?.event,
       latestNow,
     );
-    const latestDeadlineError = getHostedDeadlineError(
-      formData,
-      earliestSlot,
-      latestNow,
-    );
+    const latestDeadlineError = eventData?.event
+      ? getHostedDeadlineError(
+          formData,
+          earliestSlot,
+          eventData.event.timeZone,
+          latestNow,
+        )
+      : null;
 
     if (latestIsDeadlineLocked || latestDeadlineError !== null) {
       setValidationRevision((previous) => previous + 1);
