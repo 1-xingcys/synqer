@@ -321,6 +321,7 @@ export class LineBotService implements OnModuleInit {
       const status = this.eventStatusService.computeEventStatus({
         eventType: event.type,
         votingDeadline: event.votingDeadline,
+        timeZone: event.timeZone,
         confirmedTimeSlots: event.confirmedTimeSlots,
       });
 

@@ -66,6 +66,7 @@ export class ConfirmationService {
       status: this.eventStatusService.computeEventStatus({
         eventType: updatedEvent.type,
         votingDeadline: updatedEvent.votingDeadline,
+        timeZone: updatedEvent.timeZone,
         confirmedTimeSlots: updatedEvent.confirmedTimeSlots,
       }),
     };
@@ -187,6 +188,7 @@ export class ConfirmationService {
       status: this.eventStatusService.computeEventStatus({
         eventType: updatedEvent.type,
         votingDeadline: updatedEvent.votingDeadline,
+        timeZone: updatedEvent.timeZone,
         confirmedTimeSlots: updatedEvent.confirmedTimeSlots,
       }),
     };
@@ -213,6 +215,7 @@ export class ConfirmationService {
       status: this.eventStatusService.computeEventStatus({
         eventType: updatedEvent.type,
         votingDeadline: updatedEvent.votingDeadline,
+        timeZone: updatedEvent.timeZone,
         confirmedTimeSlots: [],
       }),
     };

@@ -188,6 +188,8 @@ describe('ConfirmationService', () => {
     it('should cancel confirmed time successfully', async () => {
       const mockUpdatedEvent = {
         id: eventId,
+        type: 'ONE_TIME',
+        timeZone: 'Asia/Taipei',
         votingDeadline: new Date('2024-12-31'),
       };
 
@@ -201,7 +203,9 @@ describe('ConfirmationService', () => {
       expect(eventAuthorizationService.verifyOwner).toHaveBeenCalledWith(eventId, userId);
       expect(confirmationRepository.deleteAllConfirmedSlots).toHaveBeenCalledWith(eventId);
       expect(eventStatusService.computeEventStatus).toHaveBeenCalledWith({
+        eventType: mockUpdatedEvent.type,
         votingDeadline: mockUpdatedEvent.votingDeadline,
+        timeZone: mockUpdatedEvent.timeZone,
         confirmedTimeSlots: [],
       });
       expect(result).toEqual({

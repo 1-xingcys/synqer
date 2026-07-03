@@ -26,6 +26,7 @@ describe('EventStatusService', () => {
       const result = service.computeEventStatus({
         eventType: EventType.ONE_TIME,
         votingDeadline: null,
+        timeZone: 'Asia/Taipei',
         confirmedTimeSlots: [],
       });
 
@@ -39,6 +40,7 @@ describe('EventStatusService', () => {
       const result = service.computeEventStatus({
         eventType: EventType.ONE_TIME,
         votingDeadline: futureDate,
+        timeZone: 'Asia/Taipei',
         confirmedTimeSlots: [],
       });
 
@@ -52,6 +54,7 @@ describe('EventStatusService', () => {
       const result = service.computeEventStatus({
         eventType: EventType.ONE_TIME,
         votingDeadline: pastDate,
+        timeZone: 'Asia/Taipei',
         confirmedTimeSlots: [],
       });
 
@@ -65,6 +68,7 @@ describe('EventStatusService', () => {
       const result = service.computeEventStatus({
         eventType: EventType.ONE_TIME,
         votingDeadline: null,
+        timeZone: 'Asia/Taipei',
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
@@ -90,6 +94,7 @@ describe('EventStatusService', () => {
       const result = service.computeEventStatus({
         eventType: EventType.ONE_TIME,
         votingDeadline: null,
+        timeZone: 'Asia/Taipei',
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
@@ -114,6 +119,7 @@ describe('EventStatusService', () => {
       const result = service.computeEventStatus({
         eventType: EventType.RECURRING,
         votingDeadline: null,
+        timeZone: 'Asia/Taipei',
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
@@ -142,6 +148,7 @@ describe('EventStatusService', () => {
       const result = service.computeEventStatus({
         eventType: EventType.ONE_TIME,
         votingDeadline: null,
+        timeZone: 'Asia/Taipei',
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
@@ -178,6 +185,7 @@ describe('EventStatusService', () => {
       const result = service.computeEventStatus({
         eventType: EventType.ONE_TIME,
         votingDeadline: null,
+        timeZone: 'Asia/Taipei',
         confirmedTimeSlots: [
           {
             slotId: 'slot-1',
@@ -205,6 +213,57 @@ describe('EventStatusService', () => {
       });
 
       expect(result).toBe(EventStatus.COMPLETED);
+    });
+
+    it('uses event.timeZone to decide COMPLETED (Asia/Taipei)', () => {
+      // 牆上 2026-07-13 10:00 結束 = 真實 02:00Z。
+      const slotDate = new Date('2026-07-13T00:00:00.000Z');
+      const base = {
+        eventType: EventType.ONE_TIME,
+        votingDeadline: null,
+        timeZone: 'Asia/Taipei',
+        confirmedTimeSlots: [
+          {
+            slotId: 'slot-1',
+            slot: {
+              id: 'slot-1',
+              axisType: EventSlotAxisType.DATE,
+              axisDate: slotDate,
+              axisWeekday: null,
+              startMinute: 540, // 09:00
+              endMinute: 600, // 10:00 -> 真實 02:00Z
+            },
+          },
+        ],
+      };
+
+      // 真實 01:59Z（牆上 09:59）-> 仍 CONFIRMED
+      expect(
+        service.computeEventStatus(base, new Date('2026-07-13T01:59:00.000Z')),
+      ).toBe(EventStatus.CONFIRMED);
+
+      // 真實 02:01Z（牆上 10:01）-> COMPLETED
+      expect(
+        service.computeEventStatus(base, new Date('2026-07-13T02:01:00.000Z')),
+      ).toBe(EventStatus.COMPLETED);
+    });
+
+    it('uses event.timeZone to decide VOTING_ENDED for naive votingDeadline', () => {
+      // 牆上 deadline 2026-07-13 18:00 = 真實 10:00Z
+      const base = {
+        eventType: EventType.ONE_TIME,
+        votingDeadline: new Date('2026-07-13T18:00:00.000Z'), // naive 牆上數字
+        timeZone: 'Asia/Taipei',
+        confirmedTimeSlots: [],
+      };
+
+      expect(
+        service.computeEventStatus(base, new Date('2026-07-13T09:59:00.000Z')),
+      ).toBe(EventStatus.VOTING);
+
+      expect(
+        service.computeEventStatus(base, new Date('2026-07-13T10:01:00.000Z')),
+      ).toBe(EventStatus.VOTING_ENDED);
     });
   });
 

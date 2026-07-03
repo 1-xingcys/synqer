@@ -216,6 +216,7 @@ export class EventQueryService {
         status: this.eventStatusService.computeEventStatus({
           eventType: event.type,
           votingDeadline: event.votingDeadline,
+          timeZone: event.timeZone,
           confirmedTimeSlots: [],
         }),
       };
