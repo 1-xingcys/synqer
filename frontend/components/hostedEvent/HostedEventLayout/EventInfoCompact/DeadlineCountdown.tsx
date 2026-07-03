@@ -1,9 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { format } from "date-fns";
 import { useMinuteNow } from "@/hooks/useMinuteNow";
-import { getVotingDeadlineCountdownState } from "@/lib/event-presentation";
+import {
+  formatVotingDeadlineShort,
+  getVotingDeadlineCountdownState,
+} from "@/lib/event-presentation";
 
 interface DeadlineCountdownProps {
   votingDeadline?: string | null;
@@ -62,7 +64,7 @@ export function DeadlineCountdown({
           {t("deadline.title")}
         </h2>
         <span className="text-zinc-500 dark:text-zinc-400 text-xs">
-          {format(deadlineDate, "M/d HH:mm")}
+          {formatVotingDeadlineShort(deadlineDate, timeZone)}
         </span>
       </div>
 

@@ -60,6 +60,23 @@ export function getVotingDeadlineCountdownState(
   };
 }
 
+/** Format a real-instant deadline as "M/d HH:mm" in the given IANA time zone. */
+export function formatVotingDeadlineShort(
+  deadlineDate: Date,
+  timeZone: string,
+): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(deadlineDate);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("month")}/${get("day")} ${get("hour")}:${get("minute")}`;
+}
+
 export function formatEventCandidateDaySummary(
   event: Pick<EventWithDateRange, "type" | "schedule">,
   locale: string,

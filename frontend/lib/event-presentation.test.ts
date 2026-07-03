@@ -4,6 +4,7 @@ import {
   formatAxisKeyLabel,
   formatEventCandidateDaySummary,
   formatEventScheduleSummary,
+  formatVotingDeadlineShort,
   getVotingDeadlineCountdownState,
 } from "@/lib/event-presentation";
 
@@ -134,5 +135,18 @@ describe("event-presentation", () => {
         "Asia/Taipei",
       ).isExpired,
     ).toBe(true);
+  });
+
+  it("formats the voting deadline in the event's time zone, not the host's", () => {
+    // Fixed real instant: 2026-07-13T09:00:00.000Z.
+    const instant = new Date("2026-07-13T09:00:00.000Z");
+
+    // Asia/Tokyo is UTC+9 -> 18:00 local on 7/13.
+    expect(formatVotingDeadlineShort(instant, "Asia/Tokyo")).toBe("7/13 18:00");
+
+    // America/New_York is UTC-4 in July (EDT) -> 05:00 local on 7/13.
+    expect(formatVotingDeadlineShort(instant, "America/New_York")).toBe(
+      "7/13 05:00",
+    );
   });
 });

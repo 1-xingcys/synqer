@@ -1,10 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { format } from "date-fns";
 import { Clock, AlertTriangle, Users } from "lucide-react";
 import { useMinuteNow } from "@/hooks/useMinuteNow";
-import { getVotingDeadlineCountdownState } from "@/lib/event-presentation";
+import {
+  formatVotingDeadlineShort,
+  getVotingDeadlineCountdownState,
+} from "@/lib/event-presentation";
 
 interface VotingStatusBarProps {
   votingDeadline?: string | null;
@@ -118,7 +120,7 @@ export function VotingStatusBar({
             </span>
             {deadlineDate && (
               <span className="text-[10px] text-zinc-400 dark:text-zinc-500 ml-1">
-                ({format(deadlineDate, "M/d HH:mm")})
+                ({formatVotingDeadlineShort(deadlineDate, timeZone)})
               </span>
             )}
           </div>
