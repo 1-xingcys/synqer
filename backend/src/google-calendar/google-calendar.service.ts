@@ -15,6 +15,7 @@ import {
   GoogleTokenResponse,
   GoogleIdTokenPayload,
   GoogleCalendarEventsResponse,
+  GoogleCalendarCalenderResponse,
   CalendarEventDto,
   CalendarConnectionStatus,
   CalendarConflictResult,
@@ -325,37 +326,52 @@ export class GoogleCalendarService {
     userId: string,
     timeMin: Date,
     timeMax: Date,
-    timeZone = 'Asia/Taipei',
   ): Promise<CalendarEventDto[]> {
     const accessToken = await this.getValidAccessToken(userId);
 
     const params = new URLSearchParams({
       timeMin: timeMin.toISOString(),
       timeMax: timeMax.toISOString(),
-      timeZone,
       singleEvents: 'true', // 展開重複事件
       orderBy: 'startTime',
       maxResults: '250',
     });
 
     try {
-      const response = await axios.get<GoogleCalendarEventsResponse>(
-        `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
+      const [eventResponse, calendarResponse] = await Promise.all([
+        axios.get<GoogleCalendarEventsResponse>(
+          `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
           },
-        },
-      );
+        ),
+        axios.get<GoogleCalendarCalenderResponse>(
+          `https://www.googleapis.com/calendar/v3/calendars/primary`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        ),
+      ]);
+      const calendarTimeZone = calendarResponse.data.timeZone;
 
-      return response.data.items
+      return eventResponse.data.items
         .filter((event) => event.status !== 'cancelled')
         .map((event) => {
           const isAllDay = !event.start.dateTime;
           let startTime: Date, endTime: Date;
           if (isAllDay) {
-            startTime = new Date(event.start.date + 'T00:00:00');
-            endTime = new Date(event.end.date + 'T23:59:59'); // event.end.date is exclusive for all-day events
+            startTime = zonedWallClockToInstant(
+              new Date(event.start.date + 'T00:00:00Z'),
+              calendarTimeZone,
+            );
+            endTime = zonedWallClockToInstant(
+              new Date(event.end.date + 'T23:59:59Z'),
+              calendarTimeZone,
+            );
             endTime.setDate(endTime.getDate() - 1);
           } else {
             startTime = new Date(event.start.dateTime!);
@@ -424,7 +440,6 @@ export class GoogleCalendarService {
       userId,
       calendarRange.timeMin,
       calendarRange.timeMax,
-      event.timeZone,
     );
 
     // Find conflicting slots

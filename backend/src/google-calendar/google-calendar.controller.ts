@@ -12,7 +12,6 @@ import type { Response } from 'express';
 import { GoogleCalendarService } from './google-calendar.service';
 import { SessionAuthGuard, CurrentUser } from '../auth';
 import { EnvVars } from '../config/env.validation';
-import { DEFAULT_TIME_ZONE } from '../common/time';
 
 @Controller('google-calendar')
 export class GoogleCalendarController {
@@ -106,14 +105,12 @@ export class GoogleCalendarController {
   async getEvents(
     @Query('timeMin') timeMin: string,
     @Query('timeMax') timeMax: string,
-    @Query('timeZone') timeZone: string,
     @CurrentUser() userId: string,
   ) {
     return this.googleCalendarService.getCalendarEvents(
       userId,
       new Date(timeMin),
       new Date(timeMax),
-      timeZone || DEFAULT_TIME_ZONE,
     );
   }
 }
