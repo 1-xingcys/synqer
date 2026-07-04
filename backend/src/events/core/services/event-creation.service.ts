@@ -3,6 +3,7 @@ import { EventType, Weekday } from '@prisma/client';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { TimeSlotService } from '../../shared/services/time-slot.service';
 import { EventRepository } from '../repositories/event.repository';
+import { DEFAULT_TIME_ZONE } from '../../../common/time';
 
 /**
  * 活動創建服務（業務邏輯層）
@@ -28,7 +29,7 @@ export class EventCreationService {
       startTime,
       endTime,
       slotDurationMin = 15,
-      timeZone = 'Asia/Taipei',
+      timeZone = DEFAULT_TIME_ZONE,
       votingDeadline,
       lineGroupId,
       expectedLineUserIds,

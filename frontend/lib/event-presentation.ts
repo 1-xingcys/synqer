@@ -11,6 +11,7 @@ import {
 } from "@/types/event";
 import { formatMinutesToTime } from "@/lib/utils";
 import { formatWeekdayLabel } from "@/lib/weekdays";
+import { zonedWallClockToInstant } from "@/lib/time";
 
 type EventWithDateRange = EventWithCapabilities & {
   type?: EventType;
@@ -31,9 +32,12 @@ export interface VotingDeadlineCountdownState {
 export function getVotingDeadlineCountdownState(
   votingDeadline: string | null | undefined,
   now: Date,
+  timeZone: string,
   isInactive = false,
 ): VotingDeadlineCountdownState {
-  const deadlineDate = votingDeadline ? new Date(votingDeadline) : null;
+  const deadlineDate = votingDeadline
+    ? zonedWallClockToInstant(new Date(votingDeadline), timeZone)
+    : null;
   const isExpired = deadlineDate ? deadlineDate <= now : false;
   const days = deadlineDate ? differenceInDays(deadlineDate, now) : 0;
   const hours = deadlineDate ? differenceInHours(deadlineDate, now) % 24 : 0;
@@ -54,6 +58,23 @@ export function getVotingDeadlineCountdownState(
     isUrgent,
     isVeryCritical,
   };
+}
+
+/** Format a real-instant deadline as "M/d HH:mm" in the given IANA time zone. */
+export function formatVotingDeadlineShort(
+  deadlineDate: Date,
+  timeZone: string,
+): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(deadlineDate);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("month")}/${get("day")} ${get("hour")}:${get("minute")}`;
 }
 
 export function formatEventCandidateDaySummary(

@@ -1,18 +1,22 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { format } from "date-fns";
 import { useMinuteNow } from "@/hooks/useMinuteNow";
-import { getVotingDeadlineCountdownState } from "@/lib/event-presentation";
+import {
+  formatVotingDeadlineShort,
+  getVotingDeadlineCountdownState,
+} from "@/lib/event-presentation";
 
 interface DeadlineCountdownProps {
   votingDeadline?: string | null;
+  timeZone: string;
   /** 是否為非活躍狀態（confirmed/completed），倒數顯示灰色 */
   isInactive?: boolean;
 }
 
 export function DeadlineCountdown({
   votingDeadline,
+  timeZone,
   isInactive = false,
 }: DeadlineCountdownProps) {
   const t = useTranslations("hosted");
@@ -36,6 +40,7 @@ export function DeadlineCountdown({
   const countdown = getVotingDeadlineCountdownState(
     votingDeadline,
     now,
+    timeZone,
     isInactive,
   );
   const deadlineDate = countdown.deadlineDate!;
@@ -59,7 +64,7 @@ export function DeadlineCountdown({
           {t("deadline.title")}
         </h2>
         <span className="text-zinc-500 dark:text-zinc-400 text-xs">
-          {format(deadlineDate, "M/d HH:mm")}
+          {formatVotingDeadlineShort(deadlineDate, timeZone)}
         </span>
       </div>
 

@@ -43,6 +43,7 @@ export default function JoinedEventPage() {
               eventType={event.type}
               status={event.status}
               schedule={event.schedule}
+              timeZone={event.timeZone}
               votingDeadline={event.votingDeadline}
               currentUserHasVoted={currentUserHasVoted}
             />
@@ -72,6 +73,7 @@ export default function JoinedEventPage() {
             eventDescription={event.description}
             confirmedSelections={event.confirmedSelections}
             supportsAddToCalendar={supportsAddToCalendar(event)}
+            timeZone={event.timeZone}
           />
         )}
 
@@ -85,6 +87,7 @@ export default function JoinedEventPage() {
           eventType={event.type}
           status={event.status}
           schedule={event.schedule}
+          timeZone={event.timeZone}
           votingDeadline={event.votingDeadline}
           currentUserHasVoted={currentUserHasVoted}
         />

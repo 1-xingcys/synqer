@@ -16,18 +16,34 @@ interface ValidateVotingDeadlineInput {
 }
 
 /**
- * Combine a calendar date and HH:mm string into a single local Date object.
+ * Combine a calendar date and HH:mm string into a naive wall-clock Date,
+ * encoding the picked day + time into the UTC fields. The event's time zone
+ * (event.timeZone) resolves this to a real instant when needed.
  */
 export function combineVotingDeadline(date: Date, time: string): Date {
   const [hours, minutes] = time.split(":").map(Number);
-  const result = new Date(date);
-  result.setHours(hours, minutes, 0, 0);
-  return result;
+  return new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      hours,
+      minutes,
+      0,
+      0,
+    ),
+  );
 }
 
 /**
  * Shared deadline validation for both create and hosted settings pages.
  * The caller supplies the page-specific lower/upper bounds.
+ *
+ * `deadlineDateTime` (from `combineVotingDeadline`) is a naive wall-clock
+ * Date. `minDateTime`/`maxDateTime` must be supplied in the SAME naive
+ * wall-clock space (e.g. project a real "now" instant via
+ * `instantToZonedWallClock(now, timeZone)` before passing it in) — comparing
+ * a naive value against a real instant will skew results by the zone offset.
  */
 export function validateVotingDeadline({
   enabled,

@@ -25,6 +25,7 @@ interface ConfirmedViewProps {
   eventDescription?: string | null;
   confirmedSelections: ConfirmedSelection[];
   supportsAddToCalendar: boolean;
+  timeZone: string;
 }
 
 export function ConfirmedView({
@@ -32,6 +33,7 @@ export function ConfirmedView({
   eventDescription,
   confirmedSelections,
   supportsAddToCalendar,
+  timeZone,
 }: ConfirmedViewProps) {
   const t = useTranslations("joined");
   const hasDisplayableConfirmedTime = confirmedSelections.length > 0;
@@ -73,6 +75,7 @@ export function ConfirmedView({
           eventTitle={eventTitle}
           eventDescription={eventDescription}
           oneTimeConfirmedSelections={oneTimeConfirmedSelections}
+          timeZone={timeZone}
         />
       )}
     </div>

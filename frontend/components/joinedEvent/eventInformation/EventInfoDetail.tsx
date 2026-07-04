@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
-import { Calendar, Clock, Timer } from "lucide-react";
+import { Calendar, Clock, Globe, Timer } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/utils";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
 import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
@@ -13,14 +13,35 @@ interface EventInfoDetailProps {
   eventType: EventType;
   status: EventStatus;
   schedule: EventSchedule;
+  timeZone: string;
   votingDeadline?: string | null;
   currentUserHasVoted: boolean;
+}
+
+function formatVotingDeadlineWallClock(votingDeadline: string): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date(votingDeadline));
+
+  const map: Record<string, string> = {};
+  for (const part of parts) {
+    if (part.type !== "literal") map[part.type] = part.value;
+  }
+
+  return `${map.year}/${map.month}/${map.day} ${map.hour}:${map.minute}`;
 }
 
 export function EventInfoDetail({
   eventType,
   status,
   schedule,
+  timeZone,
   votingDeadline,
   currentUserHasVoted,
 }: EventInfoDetailProps) {
@@ -92,6 +113,18 @@ export function EventInfoDetail({
             {formatMinutesToTime(schedule.endMinuteOfDay ?? 0)}
           </p>
         </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1">
+            <Globe className="w-4 h-4" />
+            <span className="text-sm font-medium">
+              {t("eventInfo.timeZone")}
+            </span>
+          </div>
+          <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-6">
+            {timeZone}
+          </p>
+        </div>
       </div>
 
       {/* Voting Deadline Section */}
@@ -105,7 +138,7 @@ export function EventInfoDetail({
           </div>
           <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-6">
             {votingDeadline
-              ? format(new Date(votingDeadline), "yyyy/MM/dd HH:mm")
+              ? formatVotingDeadlineWallClock(votingDeadline)
               : t("eventInfo.noDeadline")}
           </p>
         </div>

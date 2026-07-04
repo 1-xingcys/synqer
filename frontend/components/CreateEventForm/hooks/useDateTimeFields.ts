@@ -86,6 +86,16 @@ export function useDateTimeFields(
     [setFormData],
   );
 
+  const handleTimeZoneChange = useCallback(
+    (value: string) => {
+      setFormData((prev) => ({
+        ...prev,
+        timeZone: value,
+      }));
+    },
+    [setFormData],
+  );
+
   const handleVotingDeadlineDateChange = useCallback(
     (date: Date | null) => {
       setFormData((prev) => ({
@@ -111,6 +121,7 @@ export function useDateTimeFields(
     handleEndDateChange,
     handleStartTimeChange,
     handleEndTimeChange,
+    handleTimeZoneChange,
     handleVotingDeadlineEnabledChange,
     handleVotingDeadlineDateChange,
     handleVotingDeadlineTimeChange,

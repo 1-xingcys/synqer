@@ -71,6 +71,14 @@ export interface GoogleCalendarEventsResponse {
 }
 
 /**
+ * Google Calendar Calendar API 回應
+ * @see https://developers.google.com/calendar/api/v3/reference/calendars/get
+ */
+export interface GoogleCalendarCalenderResponse {
+  timeZone: string;
+}
+
+/**
  * 格式化後的 Calendar 事件（應用程式內部使用）
  */
 export interface CalendarEventDto {

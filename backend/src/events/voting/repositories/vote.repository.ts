@@ -18,6 +18,7 @@ export class VoteRepository {
       select: {
         votingDeadline: true,
         isDeleted: true,
+        timeZone: true,
       },
     });
   }

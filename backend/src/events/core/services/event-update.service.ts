@@ -4,6 +4,7 @@ import { UpdateEventDto } from '../dto/update-event.dto';
 import { EventRepository } from '../repositories/event.repository';
 import { EventAuthorizationService } from '../../shared/services/event-authorization.service';
 import { EventScheduleService } from '../../shared/services/event-schedule.service';
+import { zonedWallClockToInstant } from '../../../common/time';
 
 type VotingDeadlineEditableEvent = NonNullable<
   Awaited<ReturnType<EventRepository['findOneBasic']>>
@@ -133,7 +134,10 @@ export class EventUpdateService {
       throw new BadRequestException('Invalid voting deadline');
     }
 
-    if (deadline < new Date()) {
+    // deadline 是 naive 牆上數字（UTC 欄位承載 event.timeZone 的牆上時間）；
+    // 解析成真實 instant 再與真實 now 比較，避免時區偏移造成誤判。
+    const deadlineInstant = zonedWallClockToInstant(deadline, event.timeZone);
+    if (deadlineInstant < new Date()) {
       throw new BadRequestException('Voting deadline cannot be in the past');
     }
 

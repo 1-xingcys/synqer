@@ -105,14 +105,12 @@ export class GoogleCalendarController {
   async getEvents(
     @Query('timeMin') timeMin: string,
     @Query('timeMax') timeMax: string,
-    @Query('timeZone') timeZone: string,
     @CurrentUser() userId: string,
   ) {
     return this.googleCalendarService.getCalendarEvents(
       userId,
       new Date(timeMin),
       new Date(timeMax),
-      timeZone || 'Asia/Taipei',
     );
   }
 }

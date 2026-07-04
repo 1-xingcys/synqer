@@ -1,4 +1,5 @@
 import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
+import { zonedWallClockToInstant } from "@/lib/time";
 import { TimeSlot, Vote, CalendarEvent, GridAxisColumn } from "./types";
 
 function warnInvalidSlot(slot: TimeSlot, reason: string) {
@@ -188,6 +189,7 @@ export const createSlotGrid = (
 export const mapCalendarEventsToSlots = (
   calendarEvents: CalendarEvent[],
   slots: TimeSlot[],
+  timeZone: string,
 ): Map<string, CalendarEvent[]> => {
   if (!calendarEvents.length || !slots.length)
     return new Map<string, CalendarEvent[]>();
@@ -199,14 +201,20 @@ export const mapCalendarEventsToSlots = (
       continue;
     }
 
-    const slotDate = new Date(slot.axisDate);
-    const slotStart = new Date(slotDate);
-    slotStart.setHours(0, 0, 0, 0);
-    slotStart.setMinutes(slot.startMinute);
+    // Convert the slot's wall-clock (carried in UTC fields) to a real instant
+    // using the event's time zone, mirroring the backend conflict check so the
+    // overlay lines up with the highlighted conflict slots. Using the browser's
+    // local zone here would skew the mapping whenever it differs from the event
+    // time zone (e.g. a Tokyo event viewed from a Taipei browser).
+    const wallStart = new Date(slot.axisDate);
+    wallStart.setUTCHours(0, 0, 0, 0);
+    wallStart.setUTCMinutes(slot.startMinute);
+    const slotStart = zonedWallClockToInstant(wallStart, timeZone);
 
-    const slotEnd = new Date(slotDate);
-    slotEnd.setHours(0, 0, 0, 0);
-    slotEnd.setMinutes(slot.endMinute);
+    const wallEnd = new Date(slot.axisDate);
+    wallEnd.setUTCHours(0, 0, 0, 0);
+    wallEnd.setUTCMinutes(slot.endMinute);
+    const slotEnd = zonedWallClockToInstant(wallEnd, timeZone);
 
     const overlappingEvents: CalendarEvent[] = [];
 

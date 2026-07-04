@@ -5,6 +5,13 @@ import { useLocale } from "next-intl";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
 import { useFormStateContext } from "./CreateEventFormContext";
@@ -28,11 +35,26 @@ export function ConfigurationSection() {
     handleEndDateChange,
     handleStartTimeChange,
     handleEndTimeChange,
+    handleTimeZoneChange,
   } = useDateTimeFields(setFormData);
 
   const today = getToday();
   const orderedWeekdays = getOrderedWeekdays(locale);
   const isRecurring = formData.eventType === "RECURRING";
+
+  const supportedTimeZones =
+    typeof Intl.supportedValuesOf === "function"
+      ? Intl.supportedValuesOf("timeZone")
+      : [
+          "Asia/Taipei",
+          "Asia/Tokyo",
+          "Asia/Shanghai",
+          "America/New_York",
+          "Europe/London",
+        ];
+  const timeZoneOptions = supportedTimeZones.includes(formData.timeZone)
+    ? supportedTimeZones
+    : [formData.timeZone, ...supportedTimeZones];
 
   const hasTimeError = errors.has(ValidationError.StartTimeAfterEndTime);
   const hasStartTimeTooSoonError = errors.has(ValidationError.StartTimeTooSoon);
@@ -143,6 +165,26 @@ export function ConfigurationSection() {
                 hasError={hasTimeError}
               />
             </div>
+          </div>
+
+          {/* Time Zone */}
+          <div className="space-y-1.5">
+            <Label>{t("createEvent.configuration.timeZone")}</Label>
+            <Select
+              value={formData.timeZone}
+              onValueChange={handleTimeZoneChange}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {timeZoneOptions.map((tz) => (
+                  <SelectItem key={tz} value={tz}>
+                    {tz}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Time Error Message */}

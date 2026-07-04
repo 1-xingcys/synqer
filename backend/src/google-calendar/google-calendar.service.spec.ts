@@ -13,6 +13,23 @@ import { TokenCipherService } from './services/token-cipher.service';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
+/**
+ * getCalendarEvents fetches the events list AND the primary calendar (for its
+ * time zone) in parallel. Route each GET by URL so all-day events resolve
+ * against a real calendar time zone instead of the undefined-fallback path.
+ */
+function mockCalendarApi(
+  items: unknown[],
+  calendarTimeZone = 'Asia/Taipei',
+): void {
+  mockedAxios.get.mockImplementation((url: string) => {
+    if (url.includes('/events')) {
+      return Promise.resolve({ data: { items } });
+    }
+    return Promise.resolve({ data: { timeZone: calendarTimeZone } });
+  });
+}
+
 // Mock jsonwebtoken
 jest.mock('jsonwebtoken', () => ({
   decode: jest.fn(),
@@ -402,34 +419,30 @@ describe('GoogleCalendarService', () => {
         mockConnection,
       );
 
-      mockedAxios.get.mockResolvedValue({
-        data: {
-          items: [
-            {
-              id: 'event-1',
-              summary: 'Meeting',
-              description: 'Team meeting',
-              start: { dateTime: '2024-01-15T10:00:00+08:00' },
-              end: { dateTime: '2024-01-15T11:00:00+08:00' },
-              status: 'confirmed',
-            },
-            {
-              id: 'event-2',
-              summary: 'Holiday',
-              start: { date: '2024-01-20' },
-              end: { date: '2024-01-21' },
-              status: 'confirmed',
-            },
-            {
-              id: 'event-3',
-              summary: 'Cancelled Event',
-              start: { dateTime: '2024-01-25T14:00:00+08:00' },
-              end: { dateTime: '2024-01-25T15:00:00+08:00' },
-              status: 'cancelled',
-            },
-          ],
+      mockCalendarApi([
+        {
+          id: 'event-1',
+          summary: 'Meeting',
+          description: 'Team meeting',
+          start: { dateTime: '2024-01-15T10:00:00+08:00' },
+          end: { dateTime: '2024-01-15T11:00:00+08:00' },
+          status: 'confirmed',
         },
-      });
+        {
+          id: 'event-2',
+          summary: 'Holiday',
+          start: { date: '2024-01-20' },
+          end: { date: '2024-01-21' },
+          status: 'confirmed',
+        },
+        {
+          id: 'event-3',
+          summary: 'Cancelled Event',
+          start: { dateTime: '2024-01-25T14:00:00+08:00' },
+          end: { dateTime: '2024-01-25T15:00:00+08:00' },
+          status: 'cancelled',
+        },
+      ]);
 
       const result = await service.getCalendarEvents(
         'user-123',
@@ -453,10 +466,12 @@ describe('GoogleCalendarService', () => {
         summary: 'Holiday',
         isAllDay: true,
       });
-      // end.date is exclusive, so a single-day all-day event ('2024-01-20'
-      // to '2024-01-21') must resolve to 2024-01-20, not 2024-01-21.
-      expect(result[1].startTime).toEqual(new Date('2024-01-20T00:00:00'));
-      expect(result[1].endTime).toEqual(new Date('2024-01-20T23:59:59'));
+      // All-day events carry no time zone; they resolve against the primary
+      // calendar's time zone (Asia/Taipei, UTC+8), independent of the server's
+      // local zone. end.date is exclusive, so the single day '2024-01-20' spans
+      // Taipei 2024-01-20 00:00:00 -> 23:59:59 = 2024-01-19T16:00Z -> 15:59:59Z.
+      expect(result[1].startTime).toEqual(new Date('2024-01-19T16:00:00Z'));
+      expect(result[1].endTime).toEqual(new Date('2024-01-20T15:59:59Z'));
     });
 
     it('should resolve the exclusive end date correctly for multi-day and boundary-crossing all-day events', async () => {
@@ -469,28 +484,24 @@ describe('GoogleCalendarService', () => {
         mockConnection,
       );
 
-      mockedAxios.get.mockResolvedValue({
-        data: {
-          items: [
-            {
-              // Spans 2024-01-20 through 2024-01-22 (end date is exclusive).
-              id: 'multi-day',
-              summary: 'Conference',
-              start: { date: '2024-01-20' },
-              end: { date: '2024-01-23' },
-              status: 'confirmed',
-            },
-            {
-              // Crosses a leap-year month boundary: ends on 2024-02-29.
-              id: 'leap-year-boundary',
-              summary: 'Leap Day Event',
-              start: { date: '2024-02-29' },
-              end: { date: '2024-03-01' },
-              status: 'confirmed',
-            },
-          ],
+      mockCalendarApi([
+        {
+          // Spans 2024-01-20 through 2024-01-22 (end date is exclusive).
+          id: 'multi-day',
+          summary: 'Conference',
+          start: { date: '2024-01-20' },
+          end: { date: '2024-01-23' },
+          status: 'confirmed',
         },
-      });
+        {
+          // Crosses a leap-year month boundary: ends on 2024-02-29.
+          id: 'leap-year-boundary',
+          summary: 'Leap Day Event',
+          start: { date: '2024-02-29' },
+          end: { date: '2024-03-01' },
+          status: 'confirmed',
+        },
+      ]);
 
       const result = await service.getCalendarEvents(
         'user-123',
@@ -498,11 +509,14 @@ describe('GoogleCalendarService', () => {
         new Date('2024-03-31'),
       );
 
-      expect(result[0].startTime).toEqual(new Date('2024-01-20T00:00:00'));
-      expect(result[0].endTime).toEqual(new Date('2024-01-22T23:59:59'));
+      // Resolved against Asia/Taipei (UTC+8): each day's 00:00->23:59:59 wall
+      // clock is 8h ahead of UTC, and the exclusive end date maps to the last
+      // included day.
+      expect(result[0].startTime).toEqual(new Date('2024-01-19T16:00:00Z'));
+      expect(result[0].endTime).toEqual(new Date('2024-01-22T15:59:59Z'));
 
-      expect(result[1].startTime).toEqual(new Date('2024-02-29T00:00:00'));
-      expect(result[1].endTime).toEqual(new Date('2024-02-29T23:59:59'));
+      expect(result[1].startTime).toEqual(new Date('2024-02-28T16:00:00Z'));
+      expect(result[1].endTime).toEqual(new Date('2024-02-29T15:59:59Z'));
     });
 
     it('should refresh token when expired', async () => {
@@ -638,7 +652,7 @@ describe('GoogleCalendarService', () => {
       const mockEvent = {
         id: 'event-123',
         type: EventType.ONE_TIME,
-        timeZone: 'Asia/Taipei',
+        timeZone: 'Asia/Taipei', // UTC+8
         oneTimeSchedule: {
           startDate: new Date('2024-01-15T00:00:00.000Z'),
           endDate: new Date('2024-01-15T00:00:00.000Z'),
@@ -691,15 +705,25 @@ describe('GoogleCalendarService', () => {
         mockConnection,
       );
 
-      // Calendar event that conflicts with slot-2 (10:00-10:15)
+      // Slot wall-clock times are in Asia/Taipei (UTC+8), so they resolve to
+      // real instants 8h earlier than their naive UTC-labeled value:
+      //   slot-1: 09:00-09:15 Taipei -> 01:00:00Z-01:15:00Z
+      //   slot-2: 10:00-10:15 Taipei -> 02:00:00Z-02:15:00Z
+      //   slot-3: 14:00-14:15 Taipei -> 06:00:00Z-06:15:00Z
+      // This calendar event's real instants (01:45Z-02:30Z) overlap only
+      // slot-2's resolved instant (02:00Z-02:15Z). If the code instead
+      // compared the slot's naive wall-clock value directly (09:30:00Z as
+      // if it were already UTC) against this event, there would be no
+      // overlap at all (09:30-10:30 vs 01:45-02:30) and the test would
+      // fail, proving the -8h zone resolution is what makes it pass.
       mockedAxios.get.mockResolvedValue({
         data: {
           items: [
             {
               id: 'cal-event-1',
               summary: 'Meeting',
-              start: { dateTime: '2024-01-15T09:30:00.000Z' }, // UTC 09:30
-              end: { dateTime: '2024-01-15T10:30:00.000Z' }, // UTC 10:30
+              start: { dateTime: '2024-01-15T01:45:00.000Z' }, // real instant
+              end: { dateTime: '2024-01-15T02:30:00.000Z' }, // real instant
               status: 'confirmed',
             },
           ],
@@ -710,10 +734,88 @@ describe('GoogleCalendarService', () => {
 
       expect(result.calendarEvents).toHaveLength(1);
       expect(result.conflictingSlotIds).toContain('slot-2');
-      // slot-1 (09:00-09:15) should not conflict with meeting (09:30-10:30)
+      // slot-1 (09:00-09:15 Taipei -> 01:00Z-01:15Z) ends before the meeting starts (01:45Z)
       expect(result.conflictingSlotIds).not.toContain('slot-1');
-      // slot-3 (14:00-14:15) should not conflict
+      // slot-3 (14:00-14:15 Taipei -> 06:00Z-06:15Z) starts well after the meeting ends (02:30Z)
       expect(result.conflictingSlotIds).not.toContain('slot-3');
+    });
+
+    it('resolves all-day calendar events in the calendar time zone, not the event time zone', async () => {
+      // Event grid is in Asia/Tokyo (UTC+9); the user's calendar is in
+      // Asia/Taipei (UTC+8). An all-day calendar event carries no time zone, so
+      // it must be resolved against the CALENDAR's zone (Taipei), not the
+      // event's zone (Tokyo). Otherwise the busy day would be off by one hour
+      // and mis-flag the wrong slots.
+      const mockEvent = {
+        id: 'event-123',
+        type: EventType.ONE_TIME,
+        timeZone: 'Asia/Tokyo', // UTC+9
+        oneTimeSchedule: {
+          startDate: new Date('2024-01-15T00:00:00.000Z'),
+          endDate: new Date('2024-01-15T00:00:00.000Z'),
+          startMinuteOfDay: 0,
+          endMinuteOfDay: 1440,
+          slotDurationMin: 30,
+        },
+        recurringSchedule: null,
+        slots: [
+          {
+            // Tokyo 2024-01-15 00:00-00:30 -> 2024-01-14T15:00Z-15:30Z.
+            // Taipei's Jan 15 only starts at 2024-01-14T16:00Z, so this slot is
+            // still free. It WOULD be flagged if the all-day event were wrongly
+            // resolved in the event's Tokyo zone (start 2024-01-14T15:00Z).
+            id: 'slot-early',
+            axisType: 'DATE',
+            axisDate: new Date('2024-01-15T00:00:00.000Z'),
+            startMinute: 0,
+            endMinute: 30,
+          },
+          {
+            // Tokyo 2024-01-15 12:00-12:30 -> 2024-01-15T03:00Z-03:30Z, well
+            // inside the Taipei all-day span.
+            id: 'slot-midday',
+            axisType: 'DATE',
+            axisDate: new Date('2024-01-15T00:00:00.000Z'),
+            startMinute: 720,
+            endMinute: 750,
+          },
+        ],
+      };
+      mockPrismaService.event.findUnique.mockResolvedValue(mockEvent);
+      mockEventCapabilitiesService.buildCapabilities.mockReturnValue({
+        supportsCompletion: true,
+        supportsCalendarConflict: true,
+        supportsAddToCalendar: true,
+      });
+      mockEventScheduleService.getCalendarRange.mockReturnValue({
+        timeMin: new Date('2024-01-14T00:00:00.000Z'),
+        timeMax: new Date('2024-01-16T00:00:00.000Z'),
+      });
+      mockPrismaService.googleCalendarConnection.findUnique.mockResolvedValue({
+        accessToken: 'test-access-token',
+        tokenExpiresAt: new Date(Date.now() + 3600 * 1000),
+        refreshToken: 'test-refresh-token',
+      });
+
+      // All-day event for the whole of 2024-01-15 (end.date is exclusive).
+      // Resolved in Asia/Taipei: 2024-01-14T16:00Z -> 2024-01-15T15:59:59Z.
+      mockCalendarApi(
+        [
+          {
+            id: 'cal-all-day',
+            summary: 'Public Holiday',
+            start: { date: '2024-01-15' },
+            end: { date: '2024-01-16' },
+            status: 'confirmed',
+          },
+        ],
+        'Asia/Taipei',
+      );
+
+      const result = await service.getConflictingSlots('user-123', 'event-123');
+
+      expect(result.conflictingSlotIds).toContain('slot-midday');
+      expect(result.conflictingSlotIds).not.toContain('slot-early');
     });
 
     it('should reject calendar conflict checks for recurring events', async () => {

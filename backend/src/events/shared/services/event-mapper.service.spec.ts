@@ -164,6 +164,7 @@ describe('EventMapperService', () => {
       title: 'Test Event',
       description: 'Description',
       createdAt: new Date('2024-12-01'),
+      timeZone: 'Asia/Taipei',
       oneTimeSchedule: {
         startDate: new Date('2024-12-25'),
         endDate: new Date('2024-12-26'),
@@ -215,6 +216,7 @@ describe('EventMapperService', () => {
       expect(eventStatusService.computeEventStatus).toHaveBeenCalledWith({
         eventType: EventType.ONE_TIME,
         votingDeadline: null,
+        timeZone: 'Asia/Taipei',
         confirmedTimeSlots: [],
       });
     });
@@ -265,6 +267,7 @@ describe('EventMapperService', () => {
         title: 'Recurring Event',
         description: 'Recurring Description',
         createdAt: new Date('2024-12-01'),
+        timeZone: 'Asia/Taipei',
         votingDeadline: null,
         startMinuteOfDay: 540,
         endMinuteOfDay: 1080,

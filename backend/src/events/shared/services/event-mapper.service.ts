@@ -138,6 +138,7 @@ export class EventMapperService {
     title: string | null;
     description: string | null;
     createdAt: Date;
+    timeZone: string;
     votingDeadline: Date | null;
     oneTimeSchedule: EventScheduleSource['oneTimeSchedule'];
     recurringSchedule: EventScheduleSource['recurringSchedule'];
@@ -171,6 +172,7 @@ export class EventMapperService {
       status: this.eventStatusService.computeEventStatus({
         eventType: event.type,
         votingDeadline: event.votingDeadline,
+        timeZone: event.timeZone,
         confirmedTimeSlots: event.confirmedTimeSlots,
       }),
       capabilities: this.eventCapabilitiesService.buildCapabilities(event.type),
@@ -224,6 +226,7 @@ export class EventMapperService {
       status: this.eventStatusService.computeEventStatus({
         eventType: event.type,
         votingDeadline: event.votingDeadline,
+        timeZone: event.timeZone,
         confirmedTimeSlots: event.confirmedTimeSlots,
       }),
       capabilities: this.eventCapabilitiesService.buildCapabilities(event.type),

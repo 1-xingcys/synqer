@@ -15,6 +15,7 @@ import {
   GoogleTokenResponse,
   GoogleIdTokenPayload,
   GoogleCalendarEventsResponse,
+  GoogleCalendarCalenderResponse,
   CalendarEventDto,
   CalendarConnectionStatus,
   CalendarConflictResult,
@@ -22,6 +23,7 @@ import {
 import { EventCapabilitiesService } from '../events/shared/services/event-capabilities.service';
 import { EventScheduleService } from '../events/shared/services/event-schedule.service';
 import { TokenCipherService } from './services/token-cipher.service';
+import { zonedWallClockToInstant } from '../common/time';
 
 @Injectable()
 export class GoogleCalendarService {
@@ -324,37 +326,52 @@ export class GoogleCalendarService {
     userId: string,
     timeMin: Date,
     timeMax: Date,
-    timeZone = 'Asia/Taipei',
   ): Promise<CalendarEventDto[]> {
     const accessToken = await this.getValidAccessToken(userId);
 
     const params = new URLSearchParams({
       timeMin: timeMin.toISOString(),
       timeMax: timeMax.toISOString(),
-      timeZone,
       singleEvents: 'true', // 展開重複事件
       orderBy: 'startTime',
       maxResults: '250',
     });
 
     try {
-      const response = await axios.get<GoogleCalendarEventsResponse>(
-        `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
+      const [eventResponse, calendarResponse] = await Promise.all([
+        axios.get<GoogleCalendarEventsResponse>(
+          `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
           },
-        },
-      );
+        ),
+        axios.get<GoogleCalendarCalenderResponse>(
+          `https://www.googleapis.com/calendar/v3/calendars/primary`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        ),
+      ]);
+      const calendarTimeZone = calendarResponse.data.timeZone;
 
-      return response.data.items
+      return eventResponse.data.items
         .filter((event) => event.status !== 'cancelled')
         .map((event) => {
           const isAllDay = !event.start.dateTime;
           let startTime: Date, endTime: Date;
           if (isAllDay) {
-            startTime = new Date(event.start.date + 'T00:00:00');
-            endTime = new Date(event.end.date + 'T23:59:59'); // event.end.date is exclusive for all-day events
+            startTime = zonedWallClockToInstant(
+              new Date(event.start.date + 'T00:00:00Z'),
+              calendarTimeZone,
+            );
+            endTime = zonedWallClockToInstant(
+              new Date(event.end.date + 'T23:59:59Z'),
+              calendarTimeZone,
+            );
             endTime.setDate(endTime.getDate() - 1);
           } else {
             startTime = new Date(event.start.dateTime!);
@@ -423,7 +440,6 @@ export class GoogleCalendarService {
       userId,
       calendarRange.timeMin,
       calendarRange.timeMax,
-      event.timeZone,
     );
 
     // Find conflicting slots
@@ -434,16 +450,17 @@ export class GoogleCalendarService {
         continue;
       }
 
-      // Convert slot time to actual datetime
-      // 使用 setUTCHours 確保在任何伺服器時區都能正確處理時間
-      const slotDate = new Date(slot.axisDate);
-      const slotStart = new Date(slotDate);
-      slotStart.setUTCHours(0, 0, 0, 0);
-      slotStart.setUTCMinutes(slot.startMinute);
+      // Convert slot wall-clock to a real instant using the event's time zone,
+      // so it can be compared against calendar events (which are real instants).
+      const wallStart = new Date(slot.axisDate);
+      wallStart.setUTCHours(0, 0, 0, 0);
+      wallStart.setUTCMinutes(slot.startMinute);
+      const slotStart = zonedWallClockToInstant(wallStart, event.timeZone);
 
-      const slotEnd = new Date(slotDate);
-      slotEnd.setUTCHours(0, 0, 0, 0);
-      slotEnd.setUTCMinutes(slot.endMinute);
+      const wallEnd = new Date(slot.axisDate);
+      wallEnd.setUTCHours(0, 0, 0, 0);
+      wallEnd.setUTCMinutes(slot.endMinute);
+      const slotEnd = zonedWallClockToInstant(wallEnd, event.timeZone);
 
       // Check if any calendar event conflicts with this slot
       for (const calEvent of calendarEvents) {
