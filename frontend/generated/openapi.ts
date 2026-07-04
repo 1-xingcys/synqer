@@ -2046,7 +2046,6 @@ export interface operations {
             query: {
                 timeMin: string;
                 timeMax: string;
-                timeZone: string;
             };
             header?: never;
             path?: never;
