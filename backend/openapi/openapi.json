@@ -277,6 +277,31 @@
         ]
       }
     },
+    "/events/mine": {
+      "get": {
+        "operationId": "EventCoreController_findMyInvolvedEvents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MyEventListItemDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "GET /events/mine\n取得當前使用者「有份」的所有活動（主辦 ∪ 參與），統一清單。",
+        "tags": [
+          "EventCore"
+        ]
+      }
+    },
     "/events": {
       "post": {
         "operationId": "EventCoreController_create",
@@ -1664,6 +1689,103 @@
           "expectedParticipantCount",
           "votedCount",
           "host"
+        ]
+      },
+      "MyEventListItemDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventType"
+              }
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/EventScheduleDto"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "votingDeadline": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "confirmedSlotIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confirmedSelections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfirmedSelectionDto"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VOTING",
+              "VOTING_ENDED",
+              "CONFIRMED",
+              "COMPLETED"
+            ]
+          },
+          "capabilities": {
+            "$ref": "#/components/schemas/EventCapabilitiesDto"
+          },
+          "expectedParticipantCount": {
+            "type": "number"
+          },
+          "votedCount": {
+            "type": "number"
+          },
+          "hasVoted": {
+            "type": "boolean"
+          },
+          "host": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AttendedEventHostDto"
+              }
+            ]
+          },
+          "isHost": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "title",
+          "description",
+          "schedule",
+          "createdAt",
+          "votingDeadline",
+          "confirmedSlotIds",
+          "confirmedSelections",
+          "status",
+          "capabilities",
+          "expectedParticipantCount",
+          "votedCount",
+          "hasVoted",
+          "host",
+          "isHost"
         ]
       },
       "CreateEventDto": {
