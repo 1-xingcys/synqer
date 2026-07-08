@@ -29,6 +29,16 @@ export function eventDetailPath(eventId: string, tab?: DetailTab): string {
     : `${UNIFIED_EVENT_BASE}/${eventId}`;
 }
 
+/** 舊 overview 連結（/joined, /hosted）導向統一清單。 */
+export function legacyOverviewRedirect(status?: OverviewStatus): string {
+  return status ? eventOverviewPath(status) : DEFAULT_OVERVIEW_PATH;
+}
+
+/** 舊 detail 連結（/joined, /hosted, /events）導向統一活動頁。 */
+export function legacyDetailRedirect(eventId: string, tab?: DetailTab): string {
+  return eventDetailPath(eventId, tab);
+}
+
 /** 把 OverviewStatus 對應回 EventStatus 常數，供清單過濾。 */
 export function eventStatusForOverview(status: OverviewStatus): EventStatus {
   switch (status) {

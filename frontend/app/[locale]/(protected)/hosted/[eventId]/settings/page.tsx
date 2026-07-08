@@ -1,3 +1,11 @@
-import HostedEventSettingsPage from "@/components/hostedEvent/HostedEventSettingsPage";
+import { redirect } from "@/i18n/routing";
+import { legacyDetailRedirect } from "@/lib/eventRoutes";
 
-export default HostedEventSettingsPage;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ locale: string; eventId: string }>;
+}) {
+  const { locale, eventId } = await params;
+  redirect({ href: legacyDetailRedirect(eventId, "settings"), locale });
+}

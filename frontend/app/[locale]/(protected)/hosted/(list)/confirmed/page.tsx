@@ -1,6 +1,11 @@
-import { HostedCategoryPageContent } from "@/components/HostedEventsOverview";
-import { EventStatus } from "@/types/event";
+import { redirect } from "@/i18n/routing";
+import { legacyOverviewRedirect } from "@/lib/eventRoutes";
 
-export default function HostedConfirmedEventsPage() {
-  return <HostedCategoryPageContent category={EventStatus.CONFIRMED} />;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect({ href: legacyOverviewRedirect("confirmed"), locale });
 }

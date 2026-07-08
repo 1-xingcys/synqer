@@ -1,11 +1,11 @@
-"use client";
+import { redirect } from "@/i18n/routing";
+import { legacyDetailRedirect } from "@/lib/eventRoutes";
 
-import { useParams } from "next/navigation";
-import JoinedEventResultsPage from "@/components/joinedEvent/JoinedEventResultsPage";
-
-export default function JoinedEventResultsPageRoute() {
-  const params = useParams();
-  const eventId = params.eventId as string;
-
-  return <JoinedEventResultsPage eventId={eventId} />;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ locale: string; eventId: string }>;
+}) {
+  const { locale, eventId } = await params;
+  redirect({ href: legacyDetailRedirect(eventId, "results"), locale });
 }

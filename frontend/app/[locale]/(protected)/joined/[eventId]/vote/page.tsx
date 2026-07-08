@@ -1,5 +1,11 @@
-import JoinedEventVotePage from "@/components/joinedEvent/JoinedEventVotePage";
+import { redirect } from "@/i18n/routing";
+import { legacyDetailRedirect } from "@/lib/eventRoutes";
 
-export default function Page() {
-  return <JoinedEventVotePage />;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ locale: string; eventId: string }>;
+}) {
+  const { locale, eventId } = await params;
+  redirect({ href: legacyDetailRedirect(eventId, "vote"), locale });
 }
