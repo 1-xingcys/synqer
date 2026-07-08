@@ -10,9 +10,11 @@ import {
 } from "react";
 import { useRouter, usePathname, Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+import { Clock, CheckCheck, CalendarCheck, Lock } from "lucide-react";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Z_INDEX } from "@/lib/zIndex";
+import { eventOverviewPath, type OverviewStatus } from "@/lib/eventRoutes";
 
 /**
  * Sidebar 通用元件
@@ -194,7 +196,34 @@ export function SidebarItem({
  * ProtectedSidebarContent
  * 自動設置受保護頁面的 Sidebar 內容
  */
-type SidebarView = "hosted-events" | "joined-events";
+type SidebarView = OverviewStatus;
+
+const OVERVIEW_ITEMS: ReadonlyArray<{
+  status: OverviewStatus;
+  labelKey: string;
+  icon: ReactNode;
+}> = [
+  {
+    status: "voting",
+    labelKey: "dashboard.voting",
+    icon: <Clock className="w-4 h-4" />,
+  },
+  {
+    status: "voting-ended",
+    labelKey: "dashboard.votingEnded",
+    icon: <Lock className="w-4 h-4" />,
+  },
+  {
+    status: "confirmed",
+    labelKey: "dashboard.confirmed",
+    icon: <CalendarCheck className="w-4 h-4" />,
+  },
+  {
+    status: "completed",
+    labelKey: "dashboard.completed",
+    icon: <CheckCheck className="w-4 h-4" />,
+  },
+];
 
 function ProtectedSidebarContent() {
   const { isOpen, close, setContent, setTitle } = useSidebar();
@@ -204,14 +233,12 @@ function ProtectedSidebarContent() {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const isCollapsed = !isOpen;
 
-  // 判斷當前視圖
-  const currentView = useMemo<SidebarView>(() => {
-    // Check if we're on the hosted events pages
-    if (pathname?.startsWith("/hosted")) return "hosted-events";
-    // Check if we're on the joined events pages
-    if (pathname?.startsWith("/joined")) return "joined-events";
-    // Default to joined-events (main page after login)
-    return "joined-events";
+  // 判斷當前視圖：依 /e/<status> 清單路徑高亮對應入口
+  const currentView = useMemo<SidebarView | null>(() => {
+    const match = OVERVIEW_ITEMS.find(
+      (item) => pathname === eventOverviewPath(item.status),
+    );
+    return match?.status ?? null;
   }, [pathname]);
 
   // 設置 Sidebar 內容 - 所有頁面都顯示相同的 Dashboard sidebar
@@ -223,48 +250,12 @@ function ProtectedSidebarContent() {
       label: string;
       icon: ReactNode;
       href: string;
-    }> = [
-      {
-        id: "joined-events",
-        label: t("dashboard.joinedEvents"),
-        href: "/joined",
-        icon: (
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-            />
-          </svg>
-        ),
-      },
-      {
-        id: "hosted-events",
-        label: t("dashboard.hostedEvents"),
-        href: "/hosted",
-        icon: (
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
-        ),
-      },
-    ];
+    }> = OVERVIEW_ITEMS.map((item) => ({
+      id: item.status,
+      label: t(item.labelKey),
+      icon: item.icon,
+      href: eventOverviewPath(item.status),
+    }));
 
     setContent(
       <>
