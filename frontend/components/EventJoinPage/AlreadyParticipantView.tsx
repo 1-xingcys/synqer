@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { eventDetailPath } from "@/lib/eventRoutes";
 
 interface AlreadyParticipantViewProps {
   eventId: string;
@@ -31,7 +32,7 @@ export function AlreadyParticipantView({
           </p>
 
           <Link
-            href={`/joined/${eventId}`}
+            href={eventDetailPath(eventId)}
             className="mt-6 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium"
           >
             {t("eventJoin.goToVote")}

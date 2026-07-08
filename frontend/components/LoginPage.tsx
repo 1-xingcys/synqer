@@ -3,13 +3,14 @@
 import { useTranslations } from "next-intl";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 
 interface LoginPageProps {
   redirectPath?: string;
 }
 
 export default function LoginPage({
-  redirectPath = "/joined",
+  redirectPath = DEFAULT_OVERVIEW_PATH,
 }: LoginPageProps) {
   const t = useTranslations();
   const API_BASE = process.env.NEXT_PUBLIC_API;

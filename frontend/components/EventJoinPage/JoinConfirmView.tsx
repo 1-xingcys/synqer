@@ -8,6 +8,7 @@ import { CalendarDays, Clock3, UserPlus, User, Hourglass } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 import { formatEventCandidateDaySummary } from "@/lib/event-presentation";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 import { EventPublicInfo } from "./useEventJoin";
 
 interface JoinConfirmViewProps {
@@ -123,7 +124,7 @@ export function JoinConfirmView({
         <div className="text-sm sm:text-base bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm p-4 sm:p-5">
           <div className="flex gap-3">
             <Link
-              href="/joined"
+              href={DEFAULT_OVERVIEW_PATH}
               className="flex-1 inline-flex items-center justify-center px-4 py-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors font-medium"
             >
               {t("eventJoin.cancel")}

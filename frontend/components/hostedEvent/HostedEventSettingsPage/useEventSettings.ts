@@ -9,6 +9,7 @@ import {
   type VotingDeadlineError,
 } from "@/lib/votingDeadline";
 import { apiFetchJson } from "@/lib/apiClient";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 import { hostedEventsKeys } from "@/hooks/useHostedEvents";
 import { getOneTimeEventStartInstant } from "@/lib/eventSchedule";
 import { formatMinutesToTime } from "@/lib/utils";
@@ -386,7 +387,7 @@ export function useEventSettings(eventId: string) {
       await deleteEvent();
       await queryClient.invalidateQueries({ queryKey: hostedEventsKeys.all });
 
-      router.push("/hosted");
+      router.push(DEFAULT_OVERVIEW_PATH);
     } catch (error) {
       console.error("Failed to delete event:", error);
       setDeleting(false);

@@ -15,7 +15,20 @@ import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { EventStatus } from "@/types/event";
 import { Z_INDEX } from "@/lib/zIndex";
-import { eventDetailPath, eventOverviewPath } from "@/lib/eventRoutes";
+import {
+  eventDetailPath,
+  eventOverviewPath,
+  overviewStatusForEventStatus,
+  type OverviewStatus,
+} from "@/lib/eventRoutes";
+
+/** overview 分類 → 側邊欄分類文案 key，供返回鍵顯示對應分類名稱。 */
+const OVERVIEW_LABEL_KEY: Record<OverviewStatus, string> = {
+  voting: "dashboard.voting",
+  "voting-ended": "dashboard.votingEnded",
+  confirmed: "dashboard.confirmed",
+  completed: "dashboard.completed",
+};
 
 export function UnifiedEventDetailContent({
   children,
@@ -64,6 +77,13 @@ export function UnifiedEventDetailContent({
   const { event } = data;
   const isVoting = event.status === EventStatus.VOTING;
 
+  // 返回鍵導向該活動所屬的分類 overview，並顯示對應分類文案。
+  const overviewStatus = overviewStatusForEventStatus(event.status);
+  const backHref = eventOverviewPath(overviewStatus);
+  const backLabel = t("unifiedEvents.backToOverview", {
+    category: t(OVERVIEW_LABEL_KEY[overviewStatus]),
+  });
+
   const tabs = [
     {
       id: "overview",
@@ -107,10 +127,7 @@ export function UnifiedEventDetailContent({
 
   return (
     <div className="py-4 sm:py-8 flex flex-col">
-      <BackButton
-        href={eventOverviewPath("voting")}
-        label={t("joined.backToJoined")} // TODO: 改成返回活動清單，之後不會有清單不會以加入的活動為分類
-      />
+      <BackButton href={backHref} label={backLabel} />
       <div className="mt-5">
         <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
           {event.title}

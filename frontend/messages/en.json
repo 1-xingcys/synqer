@@ -92,12 +92,37 @@
     "noEventsDescription": "Create your first event to get started",
     "hostedEvents": "Hosted Events",
     "joinedEvents": "Joined Events",
+    "voting": "Voting",
+    "votingEnded": "Voting Ended",
+    "confirmed": "Confirmed",
+    "completed": "Completed",
     "menu": "Menu",
     "createdAt": "Created at",
     "participants": "{count} participants",
     "viewEvent": "View Event",
     "loadingEvents": "Loading events...",
     "errorLoadingEvents": "Failed to load events"
+  },
+  "unifiedEvents": {
+    "backToOverview": "Back to {category}",
+    "overview": {
+      "voting": {
+        "title": "Voting",
+        "description": "Events waiting for votes"
+      },
+      "voting-ended": {
+        "title": "Voting Ended",
+        "description": "Events where voting has closed, awaiting the host's decision"
+      },
+      "confirmed": {
+        "title": "Confirmed",
+        "description": "Upcoming events with a confirmed time"
+      },
+      "completed": {
+        "title": "Completed",
+        "description": "Events that have already ended"
+      }
+    }
   },
   "joined": {
     "title": "Joined Events",
@@ -431,7 +456,13 @@
       "deleteWarning": "This action cannot be undone. All votes and data will be permanently deleted.",
       "confirmDelete": "Are you sure you want to delete this event?",
       "deadlineBeforeFirstSlot": "Voting deadline must be before or at the first event slot",
-      "deadlineLockedDescription": "Voting deadline cannot be modified after the event starts or the event time is confirmed"
+      "deadlineLockedDescription": "Voting deadline cannot be modified after the event starts or the event time is confirmed",
+      "inviteLink": {
+        "title": "Invite Link",
+        "description": "Share this link to invite others to the event",
+        "copy": "Copy",
+        "copied": "Copied!"
+      }
     }
   },
   "eventJoin": {

@@ -6,6 +6,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import Logo from "@/components/Logo";
 import UserMenu from "./UserMenu";
 import SettingsMenu from "./SettingsMenu";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 
 /**
  * PublicHeader 元件
@@ -41,7 +42,7 @@ export default function PublicHeader() {
               <>
                 {!isLoginPage && (
                   <button
-                    onClick={() => router.push("/joined")}
+                    onClick={() => router.push(DEFAULT_OVERVIEW_PATH)}
                     className="px-4 py-2 lg:px-5 lg:py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     {t("startUsing")}

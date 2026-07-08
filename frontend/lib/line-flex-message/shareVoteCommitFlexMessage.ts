@@ -1,4 +1,5 @@
 import { getLiff } from "@/lib/liff";
+import { eventDetailPath } from "@/lib/eventRoutes";
 import { ShareResult } from "./shareEventFlexMessage";
 
 export interface VoteCommitShareInfo {
@@ -41,7 +42,7 @@ function getVoteShareCopy(localePrefix: string): VoteShareCopy {
 }
 
 function buildVoteResultsUrl(info: VoteCommitShareInfo): string {
-  const resultsPath = `/joined/${info.eventId}/results`;
+  const resultsPath = eventDetailPath(info.eventId, "results");
   const liffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
 
   if (!liffId && typeof window === "undefined") {

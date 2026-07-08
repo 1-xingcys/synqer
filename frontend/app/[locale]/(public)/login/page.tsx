@@ -6,24 +6,25 @@ import { useSearchParams } from "next/navigation";
 import LoginPage from "@/components/LoginPage";
 import { LoadingState } from "@/components/ui/loading-state";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 
 /**
  * 驗證 redirect 路徑，防止 open redirect 攻擊
  */
 const validateRedirectPath = (redirect: string | null): string => {
-  if (!redirect) return "/joined";
+  if (!redirect) return DEFAULT_OVERVIEW_PATH;
 
   // 只允許以 / 開頭的相對路徑
   if (redirect.startsWith("/")) {
     // 防止 protocol-relative URLs 如 //evil.com
     if (redirect.startsWith("//")) {
-      return "/joined";
+      return DEFAULT_OVERVIEW_PATH;
     }
     return redirect;
   }
 
   // 拒絕其他模式（絕對 URLs、javascript:、data: 等）
-  return "/joined";
+  return DEFAULT_OVERVIEW_PATH;
 };
 
 export default function Login() {

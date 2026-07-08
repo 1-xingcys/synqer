@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Clock, BarChart3 } from "lucide-react";
+import { eventDetailPath } from "@/lib/eventRoutes";
 
 interface VotingEndedViewProps {
   eventId: string;
@@ -23,7 +24,7 @@ export function VotingEndedView({ eventId }: VotingEndedViewProps) {
         {t("votingEnded.description")}
       </p>
       <Link
-        href={`/joined/${eventId}/results`}
+        href={eventDetailPath(eventId, "results")}
         className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
       >
         <BarChart3 className="w-4 h-4" />

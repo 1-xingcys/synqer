@@ -105,7 +105,7 @@ describe('FlexMessageService', () => {
         const button = footer.contents[0];
         expect(button.action.label).toBe('前往投票');
         expect(button.action.uri).toBe(
-          'https://liff.line.me/test-liff-id/joined/event-1/vote',
+          'https://liff.line.me/test-liff-id/e/event-1/vote',
         );
       });
     });
@@ -124,7 +124,7 @@ describe('FlexMessageService', () => {
         const button = footer.contents[0];
         expect(button.action.label).toBe('投票結果');
         expect(button.action.uri).toBe(
-          'https://liff.line.me/test-liff-id/joined/event-1/results',
+          'https://liff.line.me/test-liff-id/e/event-1/results',
         );
       });
 
@@ -175,7 +175,7 @@ describe('FlexMessageService', () => {
         const button = footer.contents[0];
         expect(button.action.label).toBe('查看活動');
         expect(button.action.uri).toBe(
-          'https://liff.line.me/test-liff-id/joined/event-1',
+          'https://liff.line.me/test-liff-id/e/event-1',
         );
       });
 
@@ -365,7 +365,7 @@ describe('FlexMessageService', () => {
 
         const result = newService.buildEventFlexMessage(event);
         const footer = (result.contents as any).footer;
-        expect(footer.contents[0].action.uri).toBe('/joined/event-1/vote');
+        expect(footer.contents[0].action.uri).toBe('/e/event-1/vote');
       });
     });
   });

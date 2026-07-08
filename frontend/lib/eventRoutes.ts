@@ -17,6 +17,12 @@ export function eventOverviewPath(status: OverviewStatus): string {
   return `${UNIFIED_EVENT_BASE}/${status}`;
 }
 
+/**
+ * 登入 / 建立活動 / 返回清單的預設落點（最活躍的清單）。
+ * 單一真相，避免各處散落 "/e/voting" 字面值。
+ */
+export const DEFAULT_OVERVIEW_PATH = eventOverviewPath("voting");
+
 export function eventDetailPath(eventId: string, tab?: DetailTab): string {
   return tab
     ? `${UNIFIED_EVENT_BASE}/${eventId}/${tab}`
@@ -34,5 +40,21 @@ export function eventStatusForOverview(status: OverviewStatus): EventStatus {
       return EventStatus.CONFIRMED;
     case "completed":
       return EventStatus.COMPLETED;
+  }
+}
+
+export function overviewStatusForEventStatus(
+  status: EventStatus,
+): OverviewStatus {
+  switch (status) {
+    case EventStatus.VOTING_ENDED:
+      return "voting-ended";
+    case EventStatus.CONFIRMED:
+      return "confirmed";
+    case EventStatus.COMPLETED:
+      return "completed";
+    case EventStatus.VOTING:
+    default:
+      return "voting";
   }
 }

@@ -92,12 +92,37 @@
     "noEventsDescription": "建立您的第一個活動來開始",
     "hostedEvents": "主辦的活動",
     "joinedEvents": "加入的活動",
+    "voting": "投票中",
+    "votingEnded": "投票結束",
+    "confirmed": "已確認",
+    "completed": "已完成",
     "menu": "選單",
     "createdAt": "建立於",
     "participants": "{count} 位參與者",
     "viewEvent": "查看活動",
     "loadingEvents": "載入活動中...",
     "errorLoadingEvents": "載入活動失敗"
+  },
+  "unifiedEvents": {
+    "backToOverview": "返回{category}",
+    "overview": {
+      "voting": {
+        "title": "投票中的活動",
+        "description": ""
+      },
+      "voting-ended": {
+        "title": "投票結束的活動",
+        "description": "投票已截止、等待主辦者決定時間"
+      },
+      "confirmed": {
+        "title": "時間已定的活動",
+        "description": "已確認活動時間、即將舉行"
+      },
+      "completed": {
+        "title": "已結束的活動",
+        "description": ""
+      }
+    }
   },
   "joined": {
     "title": "加入的活動",
@@ -431,7 +456,13 @@
       "deleteWarning": "此操作無法復原。所有投票和資料將被永久刪除。",
       "confirmDelete": "您確定要刪除此活動嗎？",
       "deadlineBeforeFirstSlot": "投票截止時間必須在活動最早時段之前",
-      "deadlineLockedDescription": "活動已開始或已確認時間，無法修改投票截止時間"
+      "deadlineLockedDescription": "活動已開始或已確認時間，無法修改投票截止時間",
+      "inviteLink": {
+        "title": "邀請連結",
+        "description": "分享此連結，邀請他人加入活動",
+        "copy": "複製",
+        "copied": "已複製！"
+      }
     }
   },
   "eventJoin": {

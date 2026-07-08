@@ -9,6 +9,7 @@ import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
 import { LoadingState } from "@/components/ui/loading-state";
 import { useRouter } from "@/i18n/routing";
 import { EventStatus } from "@/types/event";
+import { DEFAULT_OVERVIEW_PATH, eventDetailPath } from "@/lib/eventRoutes";
 
 interface EventJoinPageProps {
   eventId: string;
@@ -35,8 +36,8 @@ export default function EventJoinPage({ eventId }: EventJoinPageProps) {
     ) {
       const redirectPath =
         eventInfo.status === EventStatus.VOTING
-          ? `/joined/${eventId}/vote`
-          : `/joined/${eventId}`;
+          ? eventDetailPath(eventId, "vote")
+          : eventDetailPath(eventId);
       router.replace(redirectPath);
     }
   }, [eventId, eventInfo, loading, participationStatus?.isParticipant, router]);
@@ -54,7 +55,7 @@ export default function EventJoinPage({ eventId }: EventJoinPageProps) {
   if (eventInfo?.isDeleted) {
     return (
       <DeletedEventView
-        backHref="/joined"
+        backHref={DEFAULT_OVERVIEW_PATH}
         backLabel={t("joined.backToJoined")}
         translationPrefix="eventJoin"
         showDashboardButton
