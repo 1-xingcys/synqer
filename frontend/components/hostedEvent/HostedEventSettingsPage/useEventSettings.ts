@@ -10,7 +10,7 @@ import {
 } from "@/lib/votingDeadline";
 import { apiFetchJson } from "@/lib/apiClient";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
-import { hostedEventsKeys } from "@/hooks/useHostedEvents";
+import { myEventsKeys } from "@/hooks/useMyEvents";
 import { getOneTimeEventStartInstant } from "@/lib/eventSchedule";
 import { formatMinutesToTime } from "@/lib/utils";
 import { instantToZonedWallClock } from "@/lib/time";
@@ -385,7 +385,7 @@ export function useEventSettings(eventId: string) {
     try {
       setDeleting(true);
       await deleteEvent();
-      await queryClient.invalidateQueries({ queryKey: hostedEventsKeys.all });
+      await queryClient.invalidateQueries({ queryKey: myEventsKeys.all });
 
       router.push(DEFAULT_OVERVIEW_PATH);
     } catch (error) {
