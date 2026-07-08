@@ -16,6 +16,8 @@ type HostedEventDetailResponse =
   operations["EventCoreController_findOneHosted"]["responses"][200]["content"]["application/json"];
 type EventPublicInfoResponse =
   operations["EventCoreController_getEventPublicInfo"]["responses"][200]["content"]["application/json"];
+type MyEventsResponse =
+  operations["EventCoreController_findMyInvolvedEvents"]["responses"][200]["content"]["application/json"];
 
 type EventLike = {
   type: EventType;
@@ -128,6 +130,10 @@ export function normalizeHostedEventsResponse(response: HostedEventsResponse) {
 export function normalizeAttendedEventsResponse(
   response: AttendedEventsResponse,
 ) {
+  return response.map((event) => normalizeEventLike(event));
+}
+
+export function normalizeMyEventsResponse(response: MyEventsResponse) {
   return response.map((event) => normalizeEventLike(event));
 }
 
