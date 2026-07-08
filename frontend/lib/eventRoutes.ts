@@ -42,3 +42,19 @@ export function eventStatusForOverview(status: OverviewStatus): EventStatus {
       return EventStatus.COMPLETED;
   }
 }
+
+export function overviewStatusForEventStatus(
+  status: EventStatus,
+): OverviewStatus {
+  switch (status) {
+    case EventStatus.VOTING_ENDED:
+      return "voting-ended";
+    case EventStatus.CONFIRMED:
+      return "confirmed";
+    case EventStatus.COMPLETED:
+      return "completed";
+    case EventStatus.VOTING:
+    default:
+      return "voting";
+  }
+}
