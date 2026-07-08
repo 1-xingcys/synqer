@@ -17,6 +17,12 @@ export function eventOverviewPath(status: OverviewStatus): string {
   return `${UNIFIED_EVENT_BASE}/${status}`;
 }
 
+/**
+ * 登入 / 建立活動 / 返回清單的預設落點（最活躍的清單）。
+ * 單一真相，避免各處散落 "/e/voting" 字面值。
+ */
+export const DEFAULT_OVERVIEW_PATH = eventOverviewPath("voting");
+
 export function eventDetailPath(eventId: string, tab?: DetailTab): string {
   return tab
     ? `${UNIFIED_EVENT_BASE}/${eventId}/${tab}`

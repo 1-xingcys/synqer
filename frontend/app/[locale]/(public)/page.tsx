@@ -7,6 +7,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LoadingState } from "@/components/ui/loading-state";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 import Image from "next/image";
 
 // Floating calendar/schedule icon component with animation
@@ -245,7 +246,7 @@ export default function LandingPage() {
 
   const handleGetStarted = useCallback(() => {
     if (user) {
-      router.push("/joined");
+      router.push(DEFAULT_OVERVIEW_PATH);
     } else {
       router.push("/login");
     }

@@ -5,6 +5,7 @@ import { useRouter } from "@/i18n/routing";
 import { combineVotingDeadline } from "@/lib/votingDeadline";
 import { useLiff } from "@/hooks/useLiff";
 import { apiFetchJson } from "@/lib/apiClient";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 import type { operations } from "@/generated/openapi";
 import { CreateEventFormData } from "../types";
 import { getCreateEventValidationErrors } from "./useFormValidation";
@@ -131,7 +132,7 @@ export function useFormActions({
       return;
     }
 
-    router.push("/joined");
+    router.push(DEFAULT_OVERVIEW_PATH);
   }, [closeWindow, hasUnsavedChanges, isInLiff, router, setShowCancelConfirm]);
 
   const confirmCancel = useCallback(async () => {
@@ -145,7 +146,7 @@ export function useFormActions({
       return;
     }
 
-    router.push("/joined");
+    router.push(DEFAULT_OVERVIEW_PATH);
   }, [closeWindow, isInLiff, router, setShowCancelConfirm]);
 
   const cancelConfirmCancel = useCallback(() => {

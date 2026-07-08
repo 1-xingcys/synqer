@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 
 interface ErrorViewProps {
   error?: string | null;
@@ -35,7 +36,7 @@ export function ErrorView({ error }: ErrorViewProps) {
           {error || t("eventJoin.eventNotFoundDescription")}
         </p>
         <Link
-          href="/joined"
+          href={DEFAULT_OVERVIEW_PATH}
           className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
         >
           {t("event.backToDashboard")}

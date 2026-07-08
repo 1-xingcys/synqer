@@ -8,20 +8,13 @@ import { useLiff } from "@/hooks/useLiff";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { DEFAULT_OVERVIEW_PATH, eventDetailPath } from "@/lib/eventRoutes";
 import {
   shareEventFlexMessage,
   type EventShareInfo,
   ShareResult,
 } from "@/lib/line-flex-message";
-import {
-  Settings,
-  Vote,
-  Send,
-  Share2,
-  Check,
-  Copy,
-  Calendar,
-} from "lucide-react";
+import { Vote, Send, Share2, Check, Copy, Calendar } from "lucide-react";
 import { apiFetchVoid } from "@/lib/apiClient";
 import { ActionButton, ActionButtonVariant } from "./ActionButton";
 import { LoadingState } from "@/components/ui/loading-state";
@@ -50,7 +43,7 @@ export default function CreateEventSuccessPage() {
 
   useEffect(() => {
     if (error) {
-      router.replace("/joined");
+      router.replace(DEFAULT_OVERVIEW_PATH);
     }
   }, [error, router]);
 
@@ -248,16 +241,7 @@ export default function CreateEventSuccessPage() {
             icon={<Vote className="w-5 h-5" />}
             title={t("goToVote")}
             description={t("goToVoteDescription")}
-            onClick={() => router.push(`/joined/${eventId}/vote`)}
-            showArrow={true}
-          />
-
-          {/* 前往管理頁面 */}
-          <ActionButton
-            icon={<Settings className="w-5 h-5" />}
-            title={t("goToManage")}
-            description={t("goToManageDescription")}
-            onClick={() => router.push(`/hosted/${eventId}`)}
+            onClick={() => router.push(eventDetailPath(eventId, "vote"))}
             showArrow={true}
           />
         </div>

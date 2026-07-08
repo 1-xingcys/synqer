@@ -16,14 +16,16 @@ import {
   Clock,
   Copy,
   CheckCheck,
-  Calendar,
+  CalendarCheck,
   Users,
   Vote,
+  Lock,
 } from "lucide-react";
 import { format } from "date-fns";
 import { EventRowData, HostedEventRowData, EventRowMode } from "./types";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { formatWeekdayLabel } from "@/lib/weekdays";
+import { eventDetailPath } from "@/lib/eventRoutes";
 
 interface EventRowProps {
   event: EventRowData | HostedEventRowData;
@@ -42,12 +44,11 @@ export default function EventRow({
   const { copied, copyLink: handleCopyLink } = useEventShareLink(event.id);
 
   const isJoined = mode === EventRowMode.JOINED;
-  const isJoinedVoting = event.status === EventStatus.VOTING;
-  const linkHref = isJoined
-    ? isJoinedVoting
-      ? `/joined/${event.id}/vote`
-      : `/joined/${event.id}`
-    : `/hosted/${event.id}`;
+  // 統一 detail 路由（role-aware）：投票中直接開投票分頁，其餘進活動主頁。
+  const linkHref =
+    event.status === EventStatus.VOTING
+      ? eventDetailPath(event.id, "vote")
+      : eventDetailPath(event.id);
 
   // Check if hasVoted exists (for joined events)
   const hasVoted = "hasVoted" in event ? event.hasVoted : false;
@@ -144,10 +145,10 @@ export default function EventRow({
 
     // For other variants, show event status icon
     if (variant === EventStatus.VOTING_ENDED) {
-      return <Clock className="w-4 h-4 text-zinc-400" />;
+      return <Lock className="w-4 h-4 text-zinc-400" />;
     }
     if (variant === EventStatus.CONFIRMED) {
-      return <Calendar className="w-4 h-4 text-blue-500" />;
+      return <CalendarCheck className="w-4 h-4 text-blue-500" />;
     }
     if (variant === EventStatus.COMPLETED) {
       return <CheckCheck className="w-4 h-4 text-emerald-500" />;

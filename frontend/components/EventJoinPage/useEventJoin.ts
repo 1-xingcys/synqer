@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/routing";
 import { ApiError, apiFetch, apiFetchJson } from "@/lib/apiClient";
 import { attendedEventsKeys } from "@/hooks/useAttendedEvents";
+import { eventDetailPath } from "@/lib/eventRoutes";
 import type { operations } from "@/generated/openapi";
 import { normalizeEventPublicInfoResponse } from "@/lib/event-normalizers";
 
@@ -102,7 +103,7 @@ export function useEventJoin(eventId: string): UseEventJoinResult {
     mutationFn: () => joinEvent(eventId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: attendedEventsKeys.all });
-      router.push(`/joined/${eventId}/vote`);
+      router.push(eventDetailPath(eventId, "vote"));
     },
     onError: (error) => {
       setJoinError(

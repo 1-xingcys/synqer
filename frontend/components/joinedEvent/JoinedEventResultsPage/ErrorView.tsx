@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 
 interface ErrorViewProps {
   error?: string | null;
@@ -34,7 +35,7 @@ export function ErrorView({ error }: ErrorViewProps) {
           {error || t("notFound")}
         </p>
         <button
-          onClick={() => router.push("/joined")}
+          onClick={() => router.push(DEFAULT_OVERVIEW_PATH)}
           className="mt-4 px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
         >
           {tJoined("backToJoined")}
