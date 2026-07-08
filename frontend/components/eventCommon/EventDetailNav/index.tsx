@@ -39,7 +39,7 @@ export function EventDetailNav({ tabs }: EventDetailNavProps) {
             key={tab.id}
             href={tab.href}
             className={`
-                inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors
+                inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap
                 ${
                   activeTab === tab.id
                     ? "border-blue-500 text-blue-600 dark:text-blue-400"
