@@ -1,8 +1,9 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LoadingState } from "@/components/ui/loading-state";
-import { useHostedEventContext } from "@/contexts/HostedEventContext";
+import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { EventStatus } from "@/types/event";
 import {
   ReadOnlyParticipants,
@@ -12,7 +13,10 @@ import {
 
 export default function HostedEventParticipantsPage() {
   const t = useTranslations();
-  const { data: eventData, isLoading: eventLoading } = useHostedEventContext();
+  const params = useParams();
+  const eventId = params.eventId as string;
+  const { data: eventData, isLoading: eventLoading } =
+    useHostedEventDetail(eventId);
 
   if (eventLoading) {
     return <LoadingState label={t("common.loading")} viewport="section" />;

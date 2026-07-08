@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
-import { useHostedEventContext } from "@/contexts/HostedEventContext";
+import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { EventStatus } from "@/types/event";
 import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
 import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
@@ -20,7 +20,7 @@ export default function HostedEventPanelPage() {
   const params = useParams();
   const eventId = params.eventId as string;
   const t = useTranslations();
-  const { data } = useHostedEventContext();
+  const { data } = useHostedEventDetail(eventId);
 
   // Participants and votes data
   const { participantsWithAvatars, votesWithAvatars } =

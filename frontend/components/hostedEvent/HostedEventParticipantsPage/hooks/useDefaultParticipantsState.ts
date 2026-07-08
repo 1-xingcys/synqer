@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useHostedEventContext } from "@/contexts/HostedEventContext";
+import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { useUserSearch, type SearchedUser } from "@/hooks/useUserSearch";
 import { SelectedParticipant } from "../types";
 import { updateEventParticipants } from "./participantsApi";
@@ -11,7 +11,7 @@ export function useDefaultParticipantsState(eventId: string) {
     data: eventData,
     isLoading: eventLoading,
     refetch,
-  } = useHostedEventContext();
+  } = useHostedEventDetail(eventId);
 
   const {
     results: searchResults,

@@ -1,11 +1,15 @@
 "use client";
 
 import { useMemo, useCallback } from "react";
-import { useHostedEventContext } from "@/contexts/HostedEventContext";
+import { useParams } from "next/navigation";
+import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { SelectedParticipant } from "../types";
 
 export function useReadOnlyParticipantsState() {
-  const { data: eventData, isLoading: eventLoading } = useHostedEventContext();
+  const params = useParams();
+  const eventId = params.eventId as string;
+  const { data: eventData, isLoading: eventLoading } =
+    useHostedEventDetail(eventId);
 
   // Derive selected participants from event data (no useState needed for read-only)
   const selectedParticipants = useMemo<SelectedParticipant[]>(() => {

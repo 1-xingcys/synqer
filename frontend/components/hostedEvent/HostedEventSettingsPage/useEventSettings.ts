@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { useHostedEventContext } from "@/contexts/HostedEventContext";
+import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import {
   combineVotingDeadline,
   validateVotingDeadline,
@@ -168,7 +168,7 @@ function getHostedDeadlineError(
 export function useEventSettings(eventId: string) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: eventData, isLoading, refetch } = useHostedEventContext();
+  const { data: eventData, isLoading, refetch } = useHostedEventDetail(eventId);
 
   const [formData, setFormData] =
     useState<VotingDeadlineFormData>(EMPTY_FORM_DATA);

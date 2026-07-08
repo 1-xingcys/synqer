@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
+import { useEventDetail } from "@/hooks/useEventDetail";
 import { EventStatus, supportsAddToCalendar } from "@/types/event";
 import { EventInfoDetail } from "@/components/joinedEvent/eventInformation/EventInfoDetail";
 import { EventInfoParticipants } from "@/components/joinedEvent/eventInformation/EventInfoParticipants";
@@ -16,7 +16,7 @@ export default function JoinedEventPage() {
   const eventId = params.eventId as string;
   const tJoined = useTranslations("joined");
   const { user } = useAuthContext();
-  const { data: eventDetailData } = useJoinedEventContext();
+  const { data: eventDetailData } = useEventDetail(eventId);
 
   // Loading and error states are handled by the layout
   if (!eventDetailData) {

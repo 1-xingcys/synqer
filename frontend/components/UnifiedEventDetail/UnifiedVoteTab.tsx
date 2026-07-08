@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
+import { useEventDetail } from "@/hooks/useEventDetail";
 import { EventStatus } from "@/types/event";
 import VotingGrid from "@/components/eventCommon/timeGrid/VotingGrid";
 import { VotingInstruction } from "@/components/joinedEvent/JoinedEventPage/StatusDescription";
@@ -13,7 +13,7 @@ export default function UnifiedVoteTab() {
   const eventId = params.eventId as string;
   const tJoined = useTranslations("joined");
   const { user } = useAuthContext();
-  const { data } = useJoinedEventContext();
+  const { data } = useEventDetail(eventId);
 
   if (!data || !user) return null;
   if (data.event.status !== EventStatus.VOTING) return null;
