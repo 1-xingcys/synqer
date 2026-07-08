@@ -14,7 +14,12 @@ import { Clock, CheckCheck, CalendarCheck, Lock } from "lucide-react";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Z_INDEX } from "@/lib/zIndex";
-import { eventOverviewPath, type OverviewStatus } from "@/lib/eventRoutes";
+import {
+  eventOverviewPath,
+  overviewStatusForEventStatus,
+  type OverviewStatus,
+} from "@/lib/eventRoutes";
+import { useMyEvents } from "@/hooks/useMyEvents";
 
 /**
  * Sidebar 通用元件
@@ -232,14 +237,28 @@ function ProtectedSidebarContent() {
   const t = useTranslations();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const isCollapsed = !isOpen;
+  // 與 overview 共用同一份清單快取，供 detail 頁反推所屬分類。
+  const { events } = useMyEvents();
 
-  // 判斷當前視圖：依 /e/<status> 清單路徑高亮對應入口
+  // 判斷當前視圖：
+  // 1. 清單頁 /e/<status> → 精確命中該分類
+  // 2. detail 頁 /e/<eventId>[/tab] → 依該活動狀態高亮所屬分類
+  // TODO: 未來暫用路由 /e/<eventId> 更改時此處需更新
   const currentView = useMemo<SidebarView | null>(() => {
-    const match = OVERVIEW_ITEMS.find(
+    const overviewMatch = OVERVIEW_ITEMS.find(
       (item) => pathname === eventOverviewPath(item.status),
     );
-    return match?.status ?? null;
-  }, [pathname]);
+    if (overviewMatch) return overviewMatch.status;
+
+    const segments = (pathname || "").split("/").filter(Boolean);
+    if (segments[0] === "e" && segments[1]) {
+      const detailEvent = events.find((e) => e.id === segments[1]);
+      if (detailEvent) {
+        return overviewStatusForEventStatus(detailEvent.status);
+      }
+    }
+    return null;
+  }, [pathname, events]);
 
   // 設置 Sidebar 內容 - 所有頁面都顯示相同的 Dashboard sidebar
   useEffect(() => {
