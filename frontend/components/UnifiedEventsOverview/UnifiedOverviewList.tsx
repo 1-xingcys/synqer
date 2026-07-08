@@ -3,11 +3,6 @@
 import { useTranslations } from "next-intl";
 import { useMyEvents } from "@/hooks/useMyEvents";
 import { EventListWithPagination } from "@/components/eventCommon/eventsOverview";
-import { EventRowMode } from "@/components/eventCommon/eventsOverview/types";
-import type {
-  EventRowData,
-  HostedEventRowData,
-} from "@/components/eventCommon/eventsOverview/types";
 import { LoadingState } from "@/components/ui/loading-state";
 import { eventStatusForOverview, type OverviewStatus } from "@/lib/eventRoutes";
 
@@ -44,9 +39,8 @@ export default function UnifiedOverviewList({
         </div>
       ) : (
         <EventListWithPagination
-          events={filtered as (EventRowData | HostedEventRowData)[]}
+          events={filtered}
           category={category}
-          mode={EventRowMode.JOINED}
           translationNamespace={TRANSLATION_NS}
         />
       )}
