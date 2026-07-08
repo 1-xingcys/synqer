@@ -494,4 +494,67 @@ describe('EventQueryService', () => {
       });
     });
   });
+
+  describe('findMyInvolvedEvents', () => {
+    it('unions hosted and participated events, dedupes, and marks isHost', async () => {
+      const ownerId = 'user-1';
+      const hostedEvent = {
+        id: 'evt-hosted',
+        ownerId,
+        expectedParticipants: [{ id: 'ep-1', userId: ownerId, hasVoted: true }],
+      };
+      const participatedEvent = {
+        id: 'evt-joined',
+        ownerId: 'user-2',
+        owner: { id: 'user-2', displayName: 'Owner Two', avatarUrl: null },
+        expectedParticipants: [{ id: 'ep-2', userId: ownerId, hasVoted: false }],
+      };
+
+      (eventRepository.findByOwnerId as jest.Mock).mockResolvedValue([
+        hostedEvent,
+      ]);
+      (eventRepository.findByParticipantUserId as jest.Mock).mockResolvedValue([
+        participatedEvent,
+      ]);
+      (eventMapper.mapEventToList as jest.Mock).mockImplementation((e) => ({
+        id: e.id,
+      }));
+
+      const result = await service.findMyInvolvedEvents(ownerId);
+
+      const byId = Object.fromEntries(result.map((r) => [r.id, r]));
+      expect(result).toHaveLength(2);
+      expect(byId['evt-hosted'].isHost).toBe(true);
+      expect(byId['evt-hosted'].hasVoted).toBe(true);
+      expect(byId['evt-joined'].isHost).toBe(false);
+      expect(byId['evt-joined'].hasVoted).toBe(false);
+      expect(byId['evt-joined'].host).toEqual({
+        id: 'user-2',
+        displayName: 'Owner Two',
+        avatarUrl: null,
+      });
+    });
+
+    it('dedupes when host is also a participant (single entry, isHost true)', async () => {
+      const ownerId = 'user-1';
+      const evt = {
+        id: 'evt-both',
+        ownerId,
+        owner: { id: ownerId, displayName: 'Me', avatarUrl: null },
+        expectedParticipants: [{ id: 'ep-1', userId: ownerId, hasVoted: true }],
+      };
+      (eventRepository.findByOwnerId as jest.Mock).mockResolvedValue([evt]);
+      (eventRepository.findByParticipantUserId as jest.Mock).mockResolvedValue([
+        evt,
+      ]);
+      (eventMapper.mapEventToList as jest.Mock).mockImplementation((e) => ({
+        id: e.id,
+      }));
+
+      const result = await service.findMyInvolvedEvents(ownerId);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].isHost).toBe(true);
+    });
+  });
 });

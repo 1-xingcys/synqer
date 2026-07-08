@@ -21,6 +21,7 @@ import { UpdateEventResponseDto } from './dto/update-event-response.dto';
 import { RemoveEventResponseDto } from './dto/remove-event-response.dto';
 import { AttendedEventListItemDto } from './dto/attended-event-list-item.dto';
 import { HostedEventListItemDto } from './dto/hosted-event-list-item.dto';
+import { MyEventListItemDto } from './dto/my-event-list-item.dto';
 import { EventDetailResponseDto } from './dto/event-detail-response.dto';
 import { HostedEventDetailResponseDto } from './dto/hosted-event-detail-response.dto';
 import { EventPublicInfoResponseDto } from './dto/event-public-info-response.dto';
@@ -56,6 +57,18 @@ export class EventCoreController {
     @CurrentUser() userId: string,
   ): Promise<AttendedEventListItemDto[]> {
     return await this.eventQueryService.findAttendedEvents(userId);
+  }
+
+  /**
+   * GET /events/mine
+   * 取得當前使用者「有份」的所有活動（主辦 ∪ 參與），統一清單。
+   */
+  @Get('mine')
+  @UseGuards(SessionAuthGuard)
+  async findMyInvolvedEvents(
+    @CurrentUser() userId: string,
+  ): Promise<MyEventListItemDto[]> {
+    return await this.eventQueryService.findMyInvolvedEvents(userId);
   }
 
   /**

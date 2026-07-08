@@ -192,6 +192,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/events/mine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /events/mine
+         *     取得當前使用者「有份」的所有活動（主辦 ∪ 參與），統一清單。
+         */
+        get: operations["EventCoreController_findMyInvolvedEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/events": {
         parameters: {
             query?: never;
@@ -849,6 +869,27 @@ export interface components {
             votedCount: number;
             host: components["schemas"]["AttendedEventHostDto"] | null;
         };
+        MyEventListItemDto: {
+            type: components["schemas"]["EventType"];
+            id: string;
+            title: string | null;
+            description: string | null;
+            schedule: components["schemas"]["EventScheduleDto"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            votingDeadline: string | null;
+            confirmedSlotIds: string[];
+            confirmedSelections: components["schemas"]["ConfirmedSelectionDto"][];
+            /** @enum {string} */
+            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
+            capabilities: components["schemas"]["EventCapabilitiesDto"];
+            expectedParticipantCount: number;
+            votedCount: number;
+            hasVoted: boolean;
+            host: components["schemas"]["AttendedEventHostDto"] | null;
+            isHost: boolean;
+        };
         CreateEventDto: {
             type?: components["schemas"]["EventType"];
             weekdays?: components["schemas"]["Weekday"][];
@@ -1362,6 +1403,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AttendedEventListItemDto"][];
+                };
+            };
+        };
+    };
+    EventCoreController_findMyInvolvedEvents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyEventListItemDto"][];
                 };
             };
         };
