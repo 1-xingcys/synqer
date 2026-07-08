@@ -53,6 +53,13 @@ export default function EventRow({
   // Check if hasVoted exists (for joined events)
   const hasVoted = "hasVoted" in event ? event.hasVoted : false;
 
+  // 是否顯示邀請連結複製按鈕：統一清單以每列 isHost 判定；
+  // 舊清單（無 isHost 欄位）維持原本以 hosted mode 判定。
+  const canCopyInviteLink =
+    "isHost" in event
+      ? Boolean((event as { isHost?: boolean }).isHost)
+      : !isJoined;
+
   const formatDateRange = () => {
     if (
       event.schedule?.kind === "RECURRING" &&
@@ -172,8 +179,8 @@ export default function EventRow({
           <span className="font-medium text-zinc-900 dark:text-zinc-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
             {event.title || t("untitled")}
           </span>
-          {/* Copy Link Button - only show for hosted mode */}
-          {!isJoined && (
+          {/* Copy Link Button - only show for the host of the event */}
+          {canCopyInviteLink && (
             <div className="flex items-center gap-1 shrink-0">
               <Button
                 variant="ghost"
@@ -242,8 +249,8 @@ export default function EventRow({
               <span className="font-medium text-zinc-900 dark:text-zinc-100 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 {event.title || t("untitled")}
               </span>
-              {/* Copy Link Button - only show for hosted mode */}
-              {!isJoined && (
+              {/* Copy Link Button - only show for the host of the event */}
+              {canCopyInviteLink && (
                 <div className="flex items-center gap-1 shrink-0">
                   <Button
                     variant="ghost"
