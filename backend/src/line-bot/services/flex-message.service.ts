@@ -471,19 +471,19 @@ export class FlexMessageService {
 
     switch (event.status) {
       case EventStatus.VOTING:
-        uri = `${this.liffUrl}/joined/${event.id}/vote`;
+        uri = `${this.liffUrl}/e/${event.id}/vote`;
         label = '前往投票';
         break;
       case EventStatus.VOTING_ENDED:
-        uri = `${this.liffUrl}/joined/${event.id}/results`;
+        uri = `${this.liffUrl}/e/${event.id}/results`;
         label = '投票結果';
         break;
       case EventStatus.CONFIRMED:
-        uri = `${this.liffUrl}/joined/${event.id}`;
+        uri = `${this.liffUrl}/e/${event.id}`;
         label = '查看活動';
         break;
       default:
-        uri = `${this.liffUrl}/joined/${event.id}`;
+        uri = `${this.liffUrl}/e/${event.id}`;
         label = '查看活動';
     }
 
