@@ -548,6 +548,8 @@
     "showingEvents": "顯示 {start}-{end}，共 {total} 個活動",
     "voted": "已投票",
     "notVoted": "未投票",
+    "allVoted": "全部已投票",
+    "votingInProgress": "投票進行中",
     "untitled": "未命名活動",
     "unknownHost": "未知",
     "copyLink": "複製活動連結",

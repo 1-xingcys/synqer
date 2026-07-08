@@ -548,6 +548,8 @@
     "showingEvents": "Showing {start}-{end} of {total} events",
     "voted": "Voted",
     "notVoted": "Not voted",
+    "allVoted": "All voted",
+    "votingInProgress": "Voting in progress",
     "untitled": "Untitled Event",
     "unknownHost": "Unknown",
     "copyLink": "Copy event link",
