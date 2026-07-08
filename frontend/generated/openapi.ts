@@ -152,46 +152,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/events/my": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /events/my
-         *     取得當前使用者建立的所有活動
-         */
-        get: operations["EventCoreController_findMyEvents"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/events/attended": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * GET /events/attended
-         *     取得當前使用者參與的所有活動（有投票紀錄的活動）
-         */
-        get: operations["EventCoreController_findAttendedEvents"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/events/mine": {
         parameters: {
             query?: never;
@@ -826,48 +786,10 @@ export interface components {
             supportsCalendarConflict: boolean;
             supportsAddToCalendar: boolean;
         };
-        HostedEventListItemDto: {
-            type: components["schemas"]["EventType"];
-            id: string;
-            title: string | null;
-            description: string | null;
-            schedule: components["schemas"]["EventScheduleDto"];
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            votingDeadline: string | null;
-            confirmedSlotIds: string[];
-            confirmedSelections: components["schemas"]["ConfirmedSelectionDto"][];
-            /** @enum {string} */
-            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
-            capabilities: components["schemas"]["EventCapabilitiesDto"];
-            expectedParticipantCount: number;
-            votedCount: number;
-        };
         AttendedEventHostDto: {
             id: string;
             displayName: string | null;
             avatarUrl: string | null;
-        };
-        AttendedEventListItemDto: {
-            type: components["schemas"]["EventType"];
-            id: string;
-            title: string | null;
-            description: string | null;
-            schedule: components["schemas"]["EventScheduleDto"];
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            votingDeadline: string | null;
-            confirmedSlotIds: string[];
-            confirmedSelections: components["schemas"]["ConfirmedSelectionDto"][];
-            /** @enum {string} */
-            status: "VOTING" | "VOTING_ENDED" | "CONFIRMED" | "COMPLETED";
-            capabilities: components["schemas"]["EventCapabilitiesDto"];
-            hasVoted: boolean;
-            expectedParticipantCount: number;
-            votedCount: number;
-            host: components["schemas"]["AttendedEventHostDto"] | null;
         };
         MyEventListItemDto: {
             type: components["schemas"]["EventType"];
@@ -1366,44 +1288,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    EventCoreController_findMyEvents: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HostedEventListItemDto"][];
-                };
-            };
-        };
-    };
-    EventCoreController_findAttendedEvents: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AttendedEventListItemDto"][];
-                };
             };
         };
     };

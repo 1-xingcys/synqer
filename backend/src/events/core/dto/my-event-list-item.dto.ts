@@ -5,8 +5,8 @@ import {
   ConfirmedSelectionDto,
   EventCapabilitiesDto,
   EventScheduleDto,
-} from './hosted-event-list-item.dto';
-import { AttendedEventHostDto } from './attended-event-list-item.dto';
+  AttendedEventHostDto,
+} from './event-shared.dto';
 
 /**
  * 統一活動清單項目：主辦 ∪ 參與，以 isHost 區分角色。

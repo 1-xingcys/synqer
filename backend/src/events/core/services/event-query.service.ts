@@ -15,60 +15,6 @@ export class EventQueryService {
   ) {}
 
   /**
-   * 查詢用戶創建的活動
-   */
-  async findUserEvents(userId: string) {
-    const events = await this.eventRepository.findByOwnerId(userId);
-
-    return events.map((event) => {
-      const expectedParticipantCount = event.expectedParticipants.length;
-      const votedCount = event.expectedParticipants.filter(
-        (ep) => ep.hasVoted,
-      ).length;
-
-      return {
-        ...this.eventMapper.mapEventToList(event),
-        expectedParticipantCount,
-        votedCount,
-      };
-    });
-  }
-
-  /**
-   * 查詢用戶參與的活動
-   */
-  async findAttendedEvents(userId: string) {
-    const events = await this.eventRepository.findByParticipantUserId(userId);
-
-    return events.map((event) => {
-      const expectedParticipantCount = event.expectedParticipants.length;
-      const votedCount = event.expectedParticipants.filter(
-        (ep) => ep.hasVoted,
-      ).length;
-      const currentUserParticipant = event.expectedParticipants.find(
-        (ep) => ep.userId === userId,
-      );
-
-      // 檢查當前用戶是否已投票（且未被移除）
-      const hasVoted = Boolean(currentUserParticipant?.hasVoted);
-
-      return {
-        ...this.eventMapper.mapEventToList(event),
-        hasVoted,
-        expectedParticipantCount,
-        votedCount,
-        host: event.owner
-          ? {
-              id: event.owner.id,
-              displayName: event.owner.displayName,
-              avatarUrl: event.owner.avatarUrl,
-            }
-          : null,
-      };
-    });
-  }
-
-  /**
    * 查詢用戶「有份」的所有活動（主辦 ∪ 參與），以 isHost 標記角色。
    */
   async findMyInvolvedEvents(userId: string) {

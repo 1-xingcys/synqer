@@ -1,4 +1,4 @@
-import { EventScheduleDto } from './hosted-event-list-item.dto';
+import { EventScheduleDto } from './event-shared.dto';
 
 export class UpdateEventResponseDto {
   id!: string;
