@@ -69,6 +69,55 @@ export class EventQueryService {
   }
 
   /**
+   * 查詢用戶「有份」的所有活動（主辦 ∪ 參與），以 isHost 標記角色。
+   */
+  async findMyInvolvedEvents(userId: string) {
+    const [hosted, participated] = await Promise.all([
+      this.eventRepository.findByOwnerId(userId),
+      this.eventRepository.findByParticipantUserId(userId),
+    ]);
+
+    type InvolvedEvent =
+      | (typeof hosted)[number]
+      | (typeof participated)[number];
+    const byId = new Map<string, InvolvedEvent>();
+    for (const event of participated) {
+      byId.set(event.id, event);
+    }
+    for (const event of hosted) {
+      if (!byId.has(event.id)) {
+        byId.set(event.id, event);
+      }
+    }
+
+    return Array.from(byId.values()).map((event) => {
+      const expectedParticipantCount = event.expectedParticipants.length;
+      const votedCount = event.expectedParticipants.filter(
+        (ep) => ep.hasVoted,
+      ).length;
+      const currentUserParticipant = event.expectedParticipants.find(
+        (ep) => ep.userId === userId,
+      );
+      const owner = 'owner' in event ? event.owner : null;
+
+      return {
+        ...this.eventMapper.mapEventToList(event),
+        expectedParticipantCount,
+        votedCount,
+        hasVoted: Boolean(currentUserParticipant?.hasVoted),
+        isHost: event.ownerId === userId,
+        host: owner
+          ? {
+              id: owner.id,
+              displayName: owner.displayName,
+              avatarUrl: owner.avatarUrl,
+            }
+          : null,
+      };
+    });
+  }
+
+  /**
    * 查詢單個活動詳情
    */
   async findOne(eventId: string, userId: string) {
