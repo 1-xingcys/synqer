@@ -22,43 +22,35 @@ import {
   Lock,
 } from "lucide-react";
 import { format } from "date-fns";
-import { EventRowData, HostedEventRowData, EventRowMode } from "./types";
+import { EventRowData } from "./types";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { formatWeekdayLabel } from "@/lib/weekdays";
 import { eventDetailPath } from "@/lib/eventRoutes";
 
 interface EventRowProps {
-  event: EventRowData | HostedEventRowData;
+  event: EventRowData;
   variant: EventStatus;
-  mode?: EventRowMode;
   translationNamespace?: string;
 }
 
 export default function EventRow({
   event,
   variant,
-  mode = EventRowMode.JOINED,
   translationNamespace = "joinedEvents",
 }: EventRowProps) {
   const t = useTranslations(translationNamespace);
   const { copied, copyLink: handleCopyLink } = useEventShareLink(event.id);
 
-  const isJoined = mode === EventRowMode.JOINED;
   // 統一 detail 路由（role-aware）：投票中直接開投票分頁，其餘進活動主頁。
   const linkHref =
     event.status === EventStatus.VOTING
       ? eventDetailPath(event.id, "vote")
       : eventDetailPath(event.id);
 
-  // Check if hasVoted exists (for joined events)
-  const hasVoted = "hasVoted" in event ? event.hasVoted : false;
+  const hasVoted = event.hasVoted;
 
-  // 是否顯示邀請連結複製按鈕：統一清單以每列 isHost 判定；
-  // 舊清單（無 isHost 欄位）維持原本以 hosted mode 判定。
-  const canCopyInviteLink =
-    "isHost" in event
-      ? Boolean((event as { isHost?: boolean }).isHost)
-      : !isJoined;
+  // 邀請連結複製按鈕：統一清單以每列 isHost 判定。
+  const canCopyInviteLink = Boolean(event.isHost);
 
   const formatDateRange = () => {
     if (
@@ -89,12 +81,13 @@ export default function EventRow({
 
   const votedCount = event.votedCount ?? 0;
   const expectedCount = event.expectedParticipantCount;
-  const host = "host" in event ? event.host : null;
+  const host = event.host;
+  const isHost = Boolean(event.isHost);
 
-  // Render the status icon based on mode and variant
+  // Render the status icon based on the viewer's role and variant
   const renderStatusIcon = () => {
-    if (isJoined && variant === EventStatus.VOTING) {
-      // For joined voting events, show personal vote status
+    if (!isHost && variant === EventStatus.VOTING) {
+      // For events the viewer joined, show personal vote status
       return (
         <TooltipProvider>
           <Tooltip>
@@ -121,8 +114,8 @@ export default function EventRow({
       );
     }
 
-    if (!isJoined && variant === EventStatus.VOTING) {
-      // For hosted voting events, show voting progress indicator
+    if (isHost && variant === EventStatus.VOTING) {
+      // For events the viewer hosts, show voting progress indicator
       const allVoted = votedCount >= expectedCount && expectedCount > 0;
       return (
         <TooltipProvider>
@@ -203,8 +196,8 @@ export default function EventRow({
           )}
         </div>
 
-        {/* Host - only show for joined mode */}
-        {isJoined && host && (
+        {/* Host - only show when the viewer is not the host */}
+        {!isHost && host && (
           <div className="flex items-center gap-2 shrink-0 min-w-[120px]">
             <Avatar className="w-5 h-5">
               {host.avatarUrl ? (
@@ -275,8 +268,8 @@ export default function EventRow({
 
             {/* Info Row */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-              {/* Host - only show for joined mode */}
-              {isJoined && host && (
+              {/* Host - only show when the viewer is not the host */}
+              {!isHost && host && (
                 <div className="flex items-center gap-1">
                   <Avatar className="w-4 h-4">
                     {host.avatarUrl ? (

@@ -1,10 +1,3 @@
-import type { AttendedEventApiItem } from "@/hooks/useAttendedEvents";
-import type { HostedEventApiItem } from "@/hooks/useHostedEvents";
+import type { MyEventItem } from "@/hooks/useMyEvents";
 
-export type EventRowData = AttendedEventApiItem;
-export type HostedEventRowData = HostedEventApiItem;
-
-export enum EventRowMode {
-  JOINED = "joined",
-  HOSTED = "hosted",
-}
+export type EventRowData = MyEventItem;

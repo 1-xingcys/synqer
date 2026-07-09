@@ -19,8 +19,6 @@ import { CreateEventResponseDto } from './dto/create-event-response.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { UpdateEventResponseDto } from './dto/update-event-response.dto';
 import { RemoveEventResponseDto } from './dto/remove-event-response.dto';
-import { AttendedEventListItemDto } from './dto/attended-event-list-item.dto';
-import { HostedEventListItemDto } from './dto/hosted-event-list-item.dto';
 import { MyEventListItemDto } from './dto/my-event-list-item.dto';
 import { EventDetailResponseDto } from './dto/event-detail-response.dto';
 import { HostedEventDetailResponseDto } from './dto/hosted-event-detail-response.dto';
@@ -34,30 +32,6 @@ export class EventCoreController {
     private readonly eventQueryService: EventQueryService,
     private readonly eventUpdateService: EventUpdateService,
   ) {}
-
-  /**
-   * GET /events/my
-   * 取得當前使用者建立的所有活動
-   */
-  @Get('my')
-  @UseGuards(SessionAuthGuard)
-  async findMyEvents(
-    @CurrentUser() userId: string,
-  ): Promise<HostedEventListItemDto[]> {
-    return await this.eventQueryService.findUserEvents(userId);
-  }
-
-  /**
-   * GET /events/attended
-   * 取得當前使用者參與的所有活動（有投票紀錄的活動）
-   */
-  @Get('attended')
-  @UseGuards(SessionAuthGuard)
-  async findAttendedEvents(
-    @CurrentUser() userId: string,
-  ): Promise<AttendedEventListItemDto[]> {
-    return await this.eventQueryService.findAttendedEvents(userId);
-  }
 
   /**
    * GET /events/mine

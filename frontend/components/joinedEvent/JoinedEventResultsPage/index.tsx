@@ -15,7 +15,7 @@ export default function JoinedEventResultsPage({
 }: JoinedEventResultsPageProps) {
   const tEvent = useTranslations("event");
   const { data, isLoading, error, participantsWithAvatars, votesWithAvatars } =
-    useJoinedEventResults();
+    useJoinedEventResults(eventId);
 
   if (isLoading) {
     return (

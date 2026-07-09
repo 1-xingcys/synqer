@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/routing";
 import { ApiError, apiFetch, apiFetchJson } from "@/lib/apiClient";
-import { attendedEventsKeys } from "@/hooks/useAttendedEvents";
+import { myEventsKeys } from "@/hooks/useMyEvents";
 import { eventDetailPath } from "@/lib/eventRoutes";
 import type { operations } from "@/generated/openapi";
 import { normalizeEventPublicInfoResponse } from "@/lib/event-normalizers";
@@ -102,7 +102,7 @@ export function useEventJoin(eventId: string): UseEventJoinResult {
   const joinMutation = useMutation({
     mutationFn: () => joinEvent(eventId),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: attendedEventsKeys.all });
+      await queryClient.invalidateQueries({ queryKey: myEventsKeys.all });
       router.push(eventDetailPath(eventId, "vote"));
     },
     onError: (error) => {

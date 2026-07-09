@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { EventDetailData } from "@/hooks/useEventDetail";
-import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
+import { EventDetailData, useEventDetail } from "@/hooks/useEventDetail";
 
 export interface ParticipantWithAvatar {
   userId: string;
@@ -25,8 +24,10 @@ export interface UseJoinedEventResultsResult {
   votesWithAvatars: VoteWithAvatar[];
 }
 
-export function useJoinedEventResults(): UseJoinedEventResultsResult {
-  const { data: eventDetailData, isLoading, error } = useJoinedEventContext();
+export function useJoinedEventResults(
+  eventId: string,
+): UseJoinedEventResultsResult {
+  const { data: eventDetailData, isLoading, error } = useEventDetail(eventId);
 
   // Transform participants to include avatar info
   const participantsWithAvatars = useMemo(() => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useHostedEventContext } from "@/contexts/HostedEventContext";
+import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import {
   useLineGroupMembers,
   type LineGroupMember,
@@ -14,7 +14,7 @@ export function useLineGroupParticipantsState(eventId: string) {
     data: eventData,
     isLoading: eventLoading,
     refetch,
-  } = useHostedEventContext();
+  } = useHostedEventDetail(eventId);
 
   const lineGroupId = eventData?.event.lineGroupId || null;
 

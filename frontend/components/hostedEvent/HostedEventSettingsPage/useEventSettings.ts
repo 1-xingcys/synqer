@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { useHostedEventContext } from "@/contexts/HostedEventContext";
+import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import {
   combineVotingDeadline,
   validateVotingDeadline,
@@ -10,7 +10,7 @@ import {
 } from "@/lib/votingDeadline";
 import { apiFetchJson } from "@/lib/apiClient";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
-import { hostedEventsKeys } from "@/hooks/useHostedEvents";
+import { myEventsKeys } from "@/hooks/useMyEvents";
 import { getOneTimeEventStartInstant } from "@/lib/eventSchedule";
 import { formatMinutesToTime } from "@/lib/utils";
 import { instantToZonedWallClock } from "@/lib/time";
@@ -168,7 +168,7 @@ function getHostedDeadlineError(
 export function useEventSettings(eventId: string) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: eventData, isLoading, refetch } = useHostedEventContext();
+  const { data: eventData, isLoading, refetch } = useHostedEventDetail(eventId);
 
   const [formData, setFormData] =
     useState<VotingDeadlineFormData>(EMPTY_FORM_DATA);
@@ -385,7 +385,7 @@ export function useEventSettings(eventId: string) {
     try {
       setDeleting(true);
       await deleteEvent();
-      await queryClient.invalidateQueries({ queryKey: hostedEventsKeys.all });
+      await queryClient.invalidateQueries({ queryKey: myEventsKeys.all });
 
       router.push(DEFAULT_OVERVIEW_PATH);
     } catch (error) {

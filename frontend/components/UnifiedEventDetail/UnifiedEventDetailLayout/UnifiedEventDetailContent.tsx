@@ -11,7 +11,7 @@ import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
 import { LoadingState } from "@/components/ui/loading-state";
 import EventJoinPage from "@/components/EventJoinPage";
-import { useJoinedEventContext } from "@/contexts/JoinedEventContext";
+import { useEventDetail } from "@/hooks/useEventDetail";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { EventStatus } from "@/types/event";
 import { Z_INDEX } from "@/lib/zIndex";
@@ -40,7 +40,7 @@ export function UnifiedEventDetailContent({
   const params = useParams();
   const t = useTranslations();
   const eventId = params.eventId as string;
-  const { data, isLoading } = useJoinedEventContext();
+  const { data, isLoading } = useEventDetail(eventId);
   const { user, loading: authLoading } = useAuthContext();
 
   if (isLoading || authLoading) {

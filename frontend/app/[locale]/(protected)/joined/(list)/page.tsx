@@ -1,5 +1,11 @@
-import { OverviewContent } from "@/components/JoinedEventsOverview";
+import { redirect } from "@/i18n/routing";
+import { legacyOverviewRedirect } from "@/lib/eventRoutes";
 
-export default function JoinedEventsPage() {
-  return <OverviewContent />;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect({ href: legacyOverviewRedirect(), locale });
 }

@@ -5,7 +5,7 @@ import {
   ConfirmedSelectionDto,
   EventCapabilitiesDto,
   EventScheduleDto,
-} from './hosted-event-list-item.dto';
+} from './event-shared.dto';
 
 export class EventPublicHostDto {
   id!: string;

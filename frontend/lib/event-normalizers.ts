@@ -6,10 +6,6 @@ import {
   Weekday,
 } from "@/types/event";
 
-type HostedEventsResponse =
-  operations["EventCoreController_findMyEvents"]["responses"][200]["content"]["application/json"];
-type AttendedEventsResponse =
-  operations["EventCoreController_findAttendedEvents"]["responses"][200]["content"]["application/json"];
 type EventDetailResponse =
   operations["EventCoreController_findOne"]["responses"][200]["content"]["application/json"];
 type HostedEventDetailResponse =
@@ -121,16 +117,6 @@ export function normalizeEventLike<T extends EventLike>(
     type,
     schedule: buildSchedule(event),
   };
-}
-
-export function normalizeHostedEventsResponse(response: HostedEventsResponse) {
-  return response.map((event) => normalizeEventLike(event));
-}
-
-export function normalizeAttendedEventsResponse(
-  response: AttendedEventsResponse,
-) {
-  return response.map((event) => normalizeEventLike(event));
 }
 
 export function normalizeMyEventsResponse(response: MyEventsResponse) {

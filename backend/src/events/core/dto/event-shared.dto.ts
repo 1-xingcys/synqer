@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { EventStatus } from '../../shared/services/event-status.service';
 import { EventType, Weekday } from '@prisma/client';
 import { EventCapabilities } from '../../shared/interfaces/event-contract.interface';
 import { ConfirmedSelectionKind } from '../../shared/interfaces/confirmed-time.interface';
@@ -49,19 +48,8 @@ export class EventScheduleDto {
   slotDurationMin!: number;
 }
 
-export class HostedEventListItemDto {
+export class AttendedEventHostDto {
   id!: string;
-  @ApiProperty({ enum: EventType, enumName: 'EventType' })
-  type!: EventType;
-  title!: string | null;
-  description!: string | null;
-  schedule!: EventScheduleDto;
-  createdAt!: Date;
-  votingDeadline!: Date | null;
-  confirmedSlotIds!: string[];
-  confirmedSelections!: ConfirmedSelectionDto[];
-  status!: EventStatus;
-  capabilities!: EventCapabilitiesDto;
-  expectedParticipantCount!: number;
-  votedCount!: number;
+  displayName!: string | null;
+  avatarUrl!: string | null;
 }
