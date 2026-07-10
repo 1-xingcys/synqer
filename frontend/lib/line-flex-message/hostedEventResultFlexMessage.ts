@@ -1,6 +1,7 @@
 import { formatLocalizedRangeLabel } from "@/components/eventCommon/timeRangeFormat";
 import { type HostedEventResultSummary } from "@/components/hostedEvent/resultSummary";
 import { getLiff, getLiffId } from "@/lib/liff";
+import { eventDetailPath } from "@/lib/eventRoutes";
 import { ShareResult } from "./shareEventFlexMessage";
 
 type HostedEventResultFlexMessageInfo = {
@@ -47,19 +48,19 @@ function getLocalePrefix(locale: string) {
   return locale === "zh-TW" ? "/zh-TW" : "/en";
 }
 
-function buildJoinedEventUrl(eventId: string, locale: string): string {
-  const joinedPath = `${getLocalePrefix(locale)}/joined/${eventId}`;
+function buildEventResultUrl(eventId: string, locale: string): string {
+  const resultPath = `${getLocalePrefix(locale)}${eventDetailPath(eventId, "results")}`;
   const liffId = getLiffId();
 
   if (!liffId && typeof window !== "undefined") {
-    return `${window.location.origin}${joinedPath}`;
+    return `${window.location.origin}${resultPath}`;
   }
 
   if (!liffId) {
-    return joinedPath;
+    return resultPath;
   }
 
-  return new URL(`https://liff.line.me/${liffId}${joinedPath}`).toString();
+  return new URL(`https://liff.line.me/${liffId}${resultPath}`).toString();
 }
 
 function getAttendanceTextColor(availableCount: number, totalExpected: number) {
@@ -207,7 +208,7 @@ function buildRangeSection(params: {
 function buildFlexBubble(params: {
   title: string;
   viewResultsLabel: string;
-  joinedEventUrl: string;
+  eventResultUrl: string;
   bodyContents: Array<Record<string, unknown>>;
 }) {
   return {
@@ -231,7 +232,7 @@ function buildFlexBubble(params: {
           action: {
             type: "uri",
             label: params.viewResultsLabel,
-            uri: params.joinedEventUrl,
+            uri: params.eventResultUrl,
           },
           color: "#2563EB",
         },
@@ -251,7 +252,7 @@ export function buildHostedEventResultFlexMessageFromSummary(
 ) {
   const copy = getHostedEventResultFlexCopy(info.locale);
   const title = info.eventTitle || copy.untitledEvent;
-  const joinedEventUrl = buildJoinedEventUrl(info.eventId, info.locale);
+  const eventResultUrl = buildEventResultUrl(info.eventId, info.locale);
   const baseBodyContents: Array<Record<string, unknown>> = [
     {
       type: "text",
@@ -286,7 +287,7 @@ export function buildHostedEventResultFlexMessageFromSummary(
     const candidateBubble = buildFlexBubble({
       title,
       viewResultsLabel: copy.viewResultsLabel,
-      joinedEventUrl,
+      eventResultUrl,
       bodyContents: [...baseBodyContents, ...visibleRangeSections, section],
     });
     const candidateMessage = {
@@ -315,7 +316,7 @@ export function buildHostedEventResultFlexMessageFromSummary(
     const candidateBubble = buildFlexBubble({
       title,
       viewResultsLabel: copy.viewResultsLabel,
-      joinedEventUrl,
+      eventResultUrl,
       bodyContents: [...bodyContents, hiddenResultsText],
     });
     const candidateMessage = {
@@ -335,7 +336,7 @@ export function buildHostedEventResultFlexMessageFromSummary(
     contents: buildFlexBubble({
       title,
       viewResultsLabel: copy.viewResultsLabel,
-      joinedEventUrl,
+      eventResultUrl,
       bodyContents,
     }),
   };
