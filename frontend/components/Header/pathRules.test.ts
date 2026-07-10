@@ -14,12 +14,13 @@ describe("Header path rules", () => {
     expect(isEventDetailPagePath("/joined/event-123/results")).toBe(true);
   });
 
-  it("returns true for unified (/e) detail routes", () => {
-    expect(isEventDetailPagePath("/e/event-123")).toBe(true);
-    expect(isEventDetailPagePath("/e/event-123/vote")).toBe(true);
-    expect(isEventDetailPagePath("/e/event-123/results")).toBe(true);
-    expect(isEventDetailPagePath("/e/event-123/participants")).toBe(true);
-    expect(isEventDetailPagePath("/e/event-123/settings")).toBe(true);
+  it("returns true for unified (/events) detail routes", () => {
+    expect(isEventDetailPagePath("/events/event-123")).toBe(true);
+    expect(isEventDetailPagePath("/events/event-123/overview")).toBe(true);
+    expect(isEventDetailPagePath("/events/event-123/vote")).toBe(true);
+    expect(isEventDetailPagePath("/events/event-123/results")).toBe(true);
+    expect(isEventDetailPagePath("/events/event-123/participants")).toBe(true);
+    expect(isEventDetailPagePath("/events/event-123/settings")).toBe(true);
   });
 
   it("returns false for hosted, joined, and unified overview/list routes", () => {
@@ -30,9 +31,9 @@ describe("Header path rules", () => {
     expect(isEventDetailPagePath("/joined/info")).toBe(false);
     expect(isEventDetailPagePath("/joined/voting-ended")).toBe(false);
     expect(isEventDetailPagePath("/joined/info/event-123")).toBe(false);
-    expect(isEventDetailPagePath("/e/voting")).toBe(false);
-    expect(isEventDetailPagePath("/e/voting-ended")).toBe(false);
-    expect(isEventDetailPagePath("/e/confirmed")).toBe(false);
-    expect(isEventDetailPagePath("/e/completed")).toBe(false);
+    expect(isEventDetailPagePath("/events/voting")).toBe(false);
+    expect(isEventDetailPagePath("/events/voting-ended")).toBe(false);
+    expect(isEventDetailPagePath("/events/confirmed")).toBe(false);
+    expect(isEventDetailPagePath("/events/completed")).toBe(false);
   });
 });
