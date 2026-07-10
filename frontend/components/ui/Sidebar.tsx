@@ -241,9 +241,8 @@ function ProtectedSidebarContent() {
   const { events } = useMyEvents();
 
   // 判斷當前視圖：
-  // 1. 清單頁 /e/<status> → 精確命中該分類
-  // 2. detail 頁 /e/<eventId>[/tab] → 依該活動狀態高亮所屬分類
-  // TODO: 未來暫用路由 /e/<eventId> 更改時此處需更新
+  // 1. 清單頁 /events/<status> → 精確命中該分類
+  // 2. detail 頁 /events/<eventId>[/tab] → 依該活動狀態高亮所屬分類
   const currentView = useMemo<SidebarView | null>(() => {
     const overviewMatch = OVERVIEW_ITEMS.find(
       (item) => pathname === eventOverviewPath(item.status),
@@ -251,7 +250,7 @@ function ProtectedSidebarContent() {
     if (overviewMatch) return overviewMatch.status;
 
     const segments = (pathname || "").split("/").filter(Boolean);
-    if (segments[0] === "e" && segments[1]) {
+    if (segments[0] === "events" && segments[1]) {
       const detailEvent = events.find((e) => e.id === segments[1]);
       if (detailEvent) {
         return overviewStatusForEventStatus(detailEvent.status);
