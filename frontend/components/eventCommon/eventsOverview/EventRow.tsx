@@ -196,8 +196,8 @@ export default function EventRow({
           )}
         </div>
 
-        {/* Host - only show when the viewer is not the host */}
-        {!isHost && host && (
+        {/* Host */}
+        {host && (
           <div className="flex items-center gap-2 shrink-0 min-w-[120px]">
             <Avatar className="w-5 h-5">
               {host.avatarUrl ? (
@@ -268,8 +268,8 @@ export default function EventRow({
 
             {/* Info Row */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-              {/* Host - only show when the viewer is not the host */}
-              {!isHost && host && (
+              {/* Host - always show the event creator */}
+              {host && (
                 <div className="flex items-center gap-1">
                   <Avatar className="w-4 h-4">
                     {host.avatarUrl ? (
