@@ -17,9 +17,9 @@ import {
   Copy,
   CheckCheck,
   CalendarCheck,
+  ClockFading,
   Users,
   Vote,
-  Lock,
 } from "lucide-react";
 import { format } from "date-fns";
 import { EventRowData } from "./types";
@@ -145,7 +145,9 @@ export default function EventRow({
 
     // For other variants, show event status icon
     if (variant === EventStatus.VOTING_ENDED) {
-      return <Lock className="w-4 h-4 text-zinc-400" />;
+      return (
+        <ClockFading className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+      );
     }
     if (variant === EventStatus.CONFIRMED) {
       return <CalendarCheck className="w-4 h-4 text-blue-500" />;
