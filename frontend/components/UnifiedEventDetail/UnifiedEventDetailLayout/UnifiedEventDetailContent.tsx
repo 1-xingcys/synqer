@@ -15,6 +15,7 @@ import { useEventDetail } from "@/hooks/useEventDetail";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { EventStatus } from "@/types/event";
 import { Z_INDEX } from "@/lib/zIndex";
+import { Crown } from "lucide-react";
 import {
   eventDetailPath,
   eventOverviewPath,
@@ -128,10 +129,21 @@ export function UnifiedEventDetailContent({
   return (
     <div className="py-4 sm:py-8 flex flex-col">
       <BackButton href={backHref} label={backLabel} />
-      <div className="mt-5">
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-          {event.title}
-        </h1>
+      <div className="mt-5 space-y-2">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+            {event.title}
+          </h1>
+          {isHost && (
+            <div
+              className="p-1.5 flex items-center gap-2 text-amber-600 dark:text-amber-400"
+              title={t("hosted.participantsPage.host")}
+            >
+              <span>{t("eventInfo.youAreHost")}</span>
+              <Crown className="w-4 h-4" />
+            </div>
+          )}
+        </div>
       </div>
       <div
         className={`sticky overflow-x-auto top-0 ${Z_INDEX.NAV_STICKY} mt-5 bg-white/100 dark:bg-zinc-900/100 backdrop-blur supports-[backdrop-filter]:bg-white/100 dark:supports-[backdrop-filter]:bg-zinc-900/100`}

@@ -657,7 +657,8 @@
     "myVotingStatus": "我的投票狀態",
     "participantsStatus": "參與者",
     "you": "你",
-    "details": "其他資訊"
+    "details": "其他資訊",
+    "youAreHost": "Host"
   },
   "participantStatus": {
     "voted": "已投票",
