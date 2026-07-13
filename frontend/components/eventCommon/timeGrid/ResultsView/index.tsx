@@ -14,6 +14,7 @@ import { ResultsHeatmapGrid } from "./ResultsHeatmapGrid";
 import { useFilteredVotes } from "./hooks/useFilteredVotes";
 import { TimeGranularity } from "../types";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { eventDetailPath } from "@/lib/eventRoutes";
 import { Z_INDEX } from "@/lib/zIndex";
 
 export type { ResultsViewProps, SlotRangeInfo };
@@ -143,9 +144,11 @@ export default function ResultsView({
   // Share link with filter state (for results page)
   const { copied: linkCopied, copy } = useCopyToClipboard();
 
-  // Build shareable link: joined/[eventId]/results?selected=...
+  // Build shareable link: events/[eventId]/results?selected=...
   const getShareableLink = useCallback((): string => {
-    const url = new URL(`${window.location.origin}/joined/${eventId}/results`);
+    const url = new URL(
+      `${window.location.origin}${eventDetailPath(eventId, "results")}`,
+    );
     url.searchParams.set(
       SELECTED_PARAM,
       serializeSelectionParam(selectedParticipants),

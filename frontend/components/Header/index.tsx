@@ -50,7 +50,6 @@ export default function Header({
     pathname?.startsWith("/events") ||
     pathname?.startsWith("/hosted") ||
     pathname?.startsWith("/joined") ||
-    pathname?.startsWith("/e/") ||
     pathname?.startsWith("/new");
 
   // 決定使用哪個 Header

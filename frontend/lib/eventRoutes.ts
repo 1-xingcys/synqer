@@ -1,9 +1,9 @@
 import { EventStatus } from "@/types/event";
 
 /**
- * 統一活動頁的路由基底（佔位命名，日後改名只需改這裡 + 資料夾名）。
+ * 統一活動頁的路由基底
  */
-export const UNIFIED_EVENT_BASE = "/e";
+export const UNIFIED_EVENT_BASE = "/events";
 
 export type OverviewStatus =
   | "voting"
@@ -19,14 +19,14 @@ export function eventOverviewPath(status: OverviewStatus): string {
 
 /**
  * 登入 / 建立活動 / 返回清單的預設落點（最活躍的清單）。
- * 單一真相，避免各處散落 "/e/voting" 字面值。
+ * 單一真相，避免各處散落 "/events/voting" 字面值。
  */
 export const DEFAULT_OVERVIEW_PATH = eventOverviewPath("voting");
 
 export function eventDetailPath(eventId: string, tab?: DetailTab): string {
   return tab
     ? `${UNIFIED_EVENT_BASE}/${eventId}/${tab}`
-    : `${UNIFIED_EVENT_BASE}/${eventId}`;
+    : `${UNIFIED_EVENT_BASE}/${eventId}/overview`;
 }
 
 /** 舊 overview 連結（/joined, /hosted）導向統一清單。 */
