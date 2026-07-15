@@ -16,6 +16,7 @@ import { TimeGranularity } from "../types";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { eventDetailPath } from "@/lib/eventRoutes";
 import { Z_INDEX } from "@/lib/zIndex";
+import { Text } from "@/components/ui/text";
 
 export type { ResultsViewProps, SlotRangeInfo };
 
@@ -183,9 +184,9 @@ export default function ResultsView({
     <div className="space-y-4 sm:space-y-6">
       {/* Tip */}
       {!canAddToEventTime && (
-        <p className="text-xs text-gray-500 dark:text-zinc-400 text-center">
+        <Text variant="hint" align="center">
           {t("results.clickToSeeWho")}
-        </p>
+        </Text>
       )}
       <div
         className={`relative flex flex-col ${Z_INDEX.GRID_BASE} bg-white dark:bg-zinc-900 rounded-lg border border-gray-200 dark:border-zinc-800 p-3 sm:p-5 mt-3 sm:mt-4`}
@@ -223,9 +224,9 @@ export default function ResultsView({
             <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-2">
               {t("results.noParticipantsSelected")}
             </h3>
-            <p className="text-sm text-gray-500 dark:text-zinc-400 max-w-sm mx-auto">
+            <Text variant="hint" align="center" className="max-w-sm mx-auto">
               {t("results.selectParticipantsHint")}
-            </p>
+            </Text>
           </div>
         ) : (
           <ResultsHeatmapGrid

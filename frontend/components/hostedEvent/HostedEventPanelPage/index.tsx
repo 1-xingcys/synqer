@@ -11,6 +11,7 @@ import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
 import { EventTimeSelector } from "./EventTimeSelector";
 import { EventResultShareButton } from "./EventResultShareButton";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
+import { Text } from "@/components/ui/text";
 import {
   useEventTimeSelection,
   useEventTimeConfirmation,
@@ -110,9 +111,9 @@ export default function HostedEventPanelPage() {
       {/* Event Time Selector & Results Section */}
       {showResultsView && (
         <>
-          <p className="text-sm text-zinc-400 dark:text-zinc-500 text-center py-2">
+          <Text variant="hint" align="center" className="py-2">
             {t("hosted.eventTimeSelector.emptyHint")}
-          </p>
+          </Text>
           {/* Event Time Selector - Show confirmed times */}
           {/* Hide when voting is in progress and there is nothing to show yet */}
           <EventTimeSelector
