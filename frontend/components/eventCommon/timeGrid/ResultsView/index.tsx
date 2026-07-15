@@ -42,6 +42,7 @@ export default function ResultsView({
   votes,
   participants,
   eventId,
+  tip,
   canAddToEventTime = false,
   isVotingPhase = false,
   onAddToEventTime,
@@ -183,9 +184,9 @@ export default function ResultsView({
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Tip */}
-      {!canAddToEventTime && (
+      {tip && (
         <Text variant="hint" align="center">
-          {t("results.clickToSeeWho")}
+          {tip}
         </Text>
       )}
       <div

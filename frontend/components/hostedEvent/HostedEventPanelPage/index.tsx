@@ -11,7 +11,6 @@ import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
 import { EventTimeSelector } from "./EventTimeSelector";
 import { EventResultShareButton } from "./EventResultShareButton";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
-import { Text } from "@/components/ui/text";
 import {
   useEventTimeSelection,
   useEventTimeConfirmation,
@@ -111,9 +110,6 @@ export default function HostedEventPanelPage() {
       {/* Event Time Selector & Results Section */}
       {showResultsView && (
         <>
-          <Text variant="hint" align="center" className="py-2">
-            {t("hosted.eventTimeSelector.emptyHint")}
-          </Text>
           {/* Event Time Selector - Show confirmed times */}
           {/* Hide when voting is in progress and there is nothing to show yet */}
           <EventTimeSelector
@@ -148,6 +144,7 @@ export default function HostedEventPanelPage() {
             votes={votesWithAvatars}
             participants={participantsWithAvatars}
             eventId={eventId}
+            tip={t("hosted.eventTimeSelector.emptyHint")}
             canAddToEventTime={true}
             isVotingPhase={isVotingPhase}
             onAddToEventTime={handleAddToEventTime}

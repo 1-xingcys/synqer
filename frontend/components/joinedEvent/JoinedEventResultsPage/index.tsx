@@ -14,6 +14,7 @@ export default function JoinedEventResultsPage({
   eventId,
 }: JoinedEventResultsPageProps) {
   const tEvent = useTranslations("event");
+  const tJoined = useTranslations("joined");
   const { data, isLoading, error, participantsWithAvatars, votesWithAvatars } =
     useJoinedEventResults(eventId);
 
@@ -39,6 +40,7 @@ export default function JoinedEventResultsPage({
         votes={votesWithAvatars}
         participants={participantsWithAvatars}
         eventId={eventId}
+        tip={tJoined("results.clickToSeeWho")}
       />
     </div>
   );
