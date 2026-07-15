@@ -136,7 +136,7 @@ export function EventTimeSelector({
   const statusText = hasStagedChanges
     ? {
         label: tHosted("eventTimeSelector.statusPendingChanges"),
-        className: "text-orange-600 dark:text-orange-400 border-none",
+        className: "text-amber-600 dark:text-amber-400 border-none",
       }
     : hasConfirmedTime
       ? {
@@ -145,7 +145,7 @@ export function EventTimeSelector({
         }
       : {
           label: tHosted("eventTimeSelector.statusUnconfirmed"),
-          className: "text-orange-600 dark:text-orange-400 border-none",
+          className: "text-amber-600 dark:text-amber-400 border-none",
         };
   if (isEmpty) {
     return null;
