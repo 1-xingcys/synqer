@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useRouter, usePathname, Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { Clock, CheckCheck, CalendarCheck, Lock } from "lucide-react";
+import { Clock, CheckCheck, CalendarCheck, ClockFading } from "lucide-react";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Z_INDEX } from "@/lib/zIndex";
@@ -216,7 +216,7 @@ const OVERVIEW_ITEMS: ReadonlyArray<{
   {
     status: "voting-ended",
     labelKey: "dashboard.votingEnded",
-    icon: <Lock className="w-4 h-4" />,
+    icon: <ClockFading className="w-4 h-4" />,
   },
   {
     status: "confirmed",

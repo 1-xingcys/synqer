@@ -17,9 +17,9 @@ import {
   Copy,
   CheckCheck,
   CalendarCheck,
+  ClockFading,
   Users,
   Vote,
-  Lock,
 } from "lucide-react";
 import { format } from "date-fns";
 import { EventRowData } from "./types";
@@ -145,7 +145,9 @@ export default function EventRow({
 
     // For other variants, show event status icon
     if (variant === EventStatus.VOTING_ENDED) {
-      return <Lock className="w-4 h-4 text-zinc-400" />;
+      return (
+        <ClockFading className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+      );
     }
     if (variant === EventStatus.CONFIRMED) {
       return <CalendarCheck className="w-4 h-4 text-blue-500" />;
@@ -196,8 +198,8 @@ export default function EventRow({
           )}
         </div>
 
-        {/* Host - only show when the viewer is not the host */}
-        {!isHost && host && (
+        {/* Host */}
+        {host && (
           <div className="flex items-center gap-2 shrink-0 min-w-[120px]">
             <Avatar className="w-5 h-5">
               {host.avatarUrl ? (
@@ -268,8 +270,8 @@ export default function EventRow({
 
             {/* Info Row */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-              {/* Host - only show when the viewer is not the host */}
-              {!isHost && host && (
+              {/* Host - always show the event creator */}
+              {host && (
                 <div className="flex items-center gap-1">
                   <Avatar className="w-4 h-4">
                     {host.avatarUrl ? (

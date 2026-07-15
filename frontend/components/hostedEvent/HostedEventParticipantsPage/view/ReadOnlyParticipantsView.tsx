@@ -82,7 +82,7 @@ export function ReadOnlyParticipantsView({
                   {/* Host icon */}
                   {isHost(participant.userId) && (
                     <div
-                      className="p-1.5 text-amber-500"
+                      className="p-1.5 text-amber-600 dark:text-amber-400"
                       title={t("hosted.participantsPage.host")}
                     >
                       <Crown className="w-4 h-4" />

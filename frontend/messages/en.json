@@ -657,7 +657,8 @@
     "myVotingStatus": "My Voting Status",
     "participantsStatus": "Participants",
     "you": "You",
-    "details": "Details"
+    "details": "Details",
+    "youAreHost": "Host"
   },
   "participantStatus": {
     "voted": "Voted",

@@ -95,7 +95,7 @@
     "voting": "投票中",
     "votingEnded": "投票結束",
     "confirmed": "已確認",
-    "completed": "已完成",
+    "completed": "已結束",
     "menu": "選單",
     "createdAt": "建立於",
     "participants": "{count} 位參與者",
@@ -115,7 +115,7 @@
         "description": "投票已截止、等待主辦者決定時間"
       },
       "confirmed": {
-        "title": "時間已定的活動",
+        "title": "已確認的活動",
         "description": "已確認活動時間、即將舉行"
       },
       "completed": {
@@ -523,13 +523,13 @@
       "overview": "總覽",
       "voting": "投票中",
       "votingEnded": "投票結束",
-      "confirmed": "時間已定",
+      "confirmed": "已確認",
       "completed": "活動結束"
     },
     "sections": {
       "voting": "投票中的活動",
       "votingEnded": "投票結束",
-      "confirmed": "時間已定的活動",
+      "confirmed": "已確認的活動",
       "completed": "已結束的活動"
     },
     "empty": {
@@ -539,7 +539,7 @@
       "votingDescription": "等待您投票的活動會顯示在這裡",
       "votingEnded": "沒有投票結束的活動",
       "votingEndedDescription": "投票已結束的活動會顯示在這裡",
-      "confirmed": "沒有時間已定的活動",
+      "confirmed": "沒有已確認的活動",
       "confirmedDescription": "已確認時間的活動會顯示在這裡",
       "completed": "沒有已結束的活動",
       "completedDescription": "過去的活動會顯示在這裡"
@@ -564,13 +564,13 @@
       "overview": "總覽",
       "voting": "投票中",
       "votingEnded": "投票結束",
-      "confirmed": "時間已定",
+      "confirmed": "已確認",
       "completed": "活動結束"
     },
     "sections": {
       "voting": "投票中的活動",
       "votingEnded": "投票結束",
-      "confirmed": "時間已定的活動",
+      "confirmed": "已確認的活動",
       "completed": "已結束的活動"
     },
     "empty": {
@@ -580,7 +580,7 @@
       "votingDescription": "正在投票的活動會顯示在這裡",
       "votingEnded": "沒有投票結束的活動",
       "votingEndedDescription": "投票已結束的活動會顯示在這裡",
-      "confirmed": "沒有時間已定的活動",
+      "confirmed": "沒有已確認的活動",
       "confirmedDescription": "已確認時間的活動會顯示在這裡",
       "completed": "沒有已結束的活動",
       "completedDescription": "過去的活動會顯示在這裡"
@@ -596,7 +596,7 @@
   "eventStatus": {
     "voting": "投票中",
     "votingEnded": "投票結束",
-    "confirmed": "時間已定",
+    "confirmed": "已確認",
     "completed": "已結束"
   },
   "eventInfo": {
@@ -657,7 +657,8 @@
     "myVotingStatus": "我的投票狀態",
     "participantsStatus": "參與者",
     "you": "你",
-    "details": "其他資訊"
+    "details": "其他資訊",
+    "youAreHost": "Host"
   },
   "participantStatus": {
     "voted": "已投票",
