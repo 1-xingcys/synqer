@@ -361,11 +361,6 @@
       "urgent": "Urgent",
       "endingSoon": "Ending Soon"
     },
-    "statusInfo": {
-      "voting_ended": "Voting has ended. Please decide the event time.",
-      "confirmed": "Event time has been confirmed.",
-      "completed": "This event has been completed."
-    },
     "eventTimeSelector": {
       "title": "Event Time",
       "statusConfirmed": "Confirmed",

@@ -361,11 +361,6 @@
       "urgent": "緊急",
       "endingSoon": "即將截止"
     },
-    "statusInfo": {
-      "voting_ended": "投票已結束，請決定活動時間。",
-      "confirmed": "活動時間已確認。",
-      "completed": "此活動已結束。"
-    },
     "eventTimeSelector": {
       "title": "活動時間",
       "statusConfirmed": "已確認",
