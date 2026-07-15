@@ -136,6 +136,7 @@ export default function HostedEventPanelPage() {
                 confirmedSlotIds={event.confirmedSlotIds}
                 votes={data.votes || []}
                 expectedParticipants={data.expectedParticipants || []}
+                hasStagedChanges={hasStagedChanges}
               />
             }
           />

@@ -22,6 +22,7 @@ interface EventResultShareButtonProps {
   confirmedSlotIds?: string[];
   votes: HostedResultVote[];
   expectedParticipants: HostedResultExpectedParticipant[];
+  hasStagedChanges: boolean;
 }
 
 export function EventResultShareButton({
@@ -32,6 +33,7 @@ export function EventResultShareButton({
   confirmedSlotIds,
   votes,
   expectedParticipants,
+  hasStagedChanges,
 }: EventResultShareButtonProps) {
   const locale = useLocale();
   const t = useTranslations();
@@ -74,7 +76,7 @@ export function EventResultShareButton({
     },
   });
 
-  if (!canShareResult) {
+  if (hasStagedChanges || !canShareResult) {
     return null;
   }
 
