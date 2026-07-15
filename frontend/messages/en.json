@@ -286,7 +286,6 @@
     },
     "confirmed": {
       "title": "Event Time Confirmed",
-      "description": "The host has confirmed the event time.",
       "eventTime": "Event Time"
     },
     "untitledEvent": "Untitled Event",

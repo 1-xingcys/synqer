@@ -1,7 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Vote, Clock, CheckCircle, CircleCheck, Calendar } from "lucide-react";
+import {
+  Vote,
+  Clock,
+  CircleCheck,
+  CalendarCheck,
+  Calendar,
+} from "lucide-react";
 import { EventStatus } from "@/types/event";
 
 type EmptyStateCategory = EventStatus | "all";
@@ -25,7 +31,7 @@ export default function EmptyState({
         return <Clock className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />;
       case EventStatus.CONFIRMED:
         return (
-          <CheckCircle className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
+          <CalendarCheck className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />
         );
       case EventStatus.COMPLETED:
         return (

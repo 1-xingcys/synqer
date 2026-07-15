@@ -286,7 +286,6 @@
     },
     "confirmed": {
       "title": "活動時間已確認",
-      "description": "主辦者已確認活動時間。",
       "eventTime": "活動時間"
     },
     "untitledEvent": "未命名活動",
