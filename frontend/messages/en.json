@@ -127,6 +127,7 @@
   "joined": {
     "title": "Joined Events",
     "description": "Events you're participating in",
+    "votingInstruction": "Vote for your available times before the deadline",
     "pageHint": {
       "voting": {
         "title": "Vote Your Availability",
@@ -600,12 +601,6 @@
   },
   "eventInfo": {
     "deadline": "Deadline",
-    "statusDesc": {
-      "voting": "Vote for your available times before the deadline",
-      "votingEnded": "Voting has ended, waiting for host to confirm time",
-      "confirmed": "Event time has been confirmed",
-      "completed": "This event has ended"
-    },
     "hostedEventHint": "You are the host of this event",
     "goToEvent": "Go To Vote Page",
     "goToManagementPage": "Management page",
