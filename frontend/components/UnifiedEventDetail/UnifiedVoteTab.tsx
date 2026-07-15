@@ -29,7 +29,9 @@ export default function UnifiedVoteTab() {
   return (
     <div className="space-y-4 sm:space-y-6">
       <Text variant="hint" align="center">
-        {tJoined("votingInstruction")}
+        {data.event.votingDeadline
+          ? tJoined("votingInstructionDeadline")
+          : tJoined("votingInstruction")}
       </Text>
       <VotingGrid
         slots={data.slots}

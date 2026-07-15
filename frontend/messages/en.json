@@ -127,7 +127,8 @@
   "joined": {
     "title": "Joined Events",
     "description": "Events you're participating in",
-    "votingInstruction": "Vote for your available times before the deadline",
+    "votingInstructionDeadline": "Vote for your available times before the deadline",
+    "votingInstruction": "Vote for your available times",
     "pageHint": {
       "voting": {
         "title": "Vote Your Availability",
