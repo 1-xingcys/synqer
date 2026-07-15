@@ -298,8 +298,7 @@
       "hint": "將在新分頁中開啟 Google 日曆"
     },
     "completed": {
-      "title": "活動已結束",
-      "description": "此活動已結束。"
+      "title": "活動已結束"
     },
     "viewResults": "查看結果"
   },

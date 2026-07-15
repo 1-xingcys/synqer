@@ -22,9 +22,6 @@ export function CompletedView({ confirmedSelections }: CompletedViewProps) {
         <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
           {t("completed.title")}
         </h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          {t("completed.description")}
-        </p>
       </div>
 
       {/* Confirmed Time Display */}

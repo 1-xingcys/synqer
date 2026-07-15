@@ -298,8 +298,7 @@
       "hint": "Opens Google Calendar in a new tab"
     },
     "completed": {
-      "title": "Event Completed",
-      "description": "This event has ended."
+      "title": "Event Completed"
     },
     "viewResults": "View Results"
   },
