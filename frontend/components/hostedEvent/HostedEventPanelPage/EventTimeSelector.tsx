@@ -147,6 +147,9 @@ export function EventTimeSelector({
           label: tHosted("eventTimeSelector.statusUnconfirmed"),
           className: "text-orange-600 dark:text-orange-400 border-none",
         };
+  if (isEmpty) {
+    return null;
+  }
 
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
@@ -170,57 +173,51 @@ export function EventTimeSelector({
       {/* Content */}
       <div className="p-4">
         {/* Time ranges list */}
-        {!isEmpty ? (
-          <div className="space-y-2">
-            {selectedRanges.map((range) => (
-              <div
-                key={range.id}
-                className={`flex items-center justify-between rounded-lg px-3 py-2.5 border ${
-                  range.isToBeRemoved
-                    ? "border-dashed bg-rose-100 dark:bg-rose-900/15 border-rose-300 dark:border-rose-800"
-                    : range.isStaged
-                      ? "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
-                      : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
-                }`}
-              >
-                <div className="flex items-center gap-2 text-sm flex-wrap min-w-0">
-                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {formatLocalizedRangeLabel(
-                      {
-                        axisType: range.axisType,
-                        startDate: range.startDate,
-                        endDate: range.endDate,
-                        startMinute: range.startTime,
-                        endMinute: range.endTime,
-                      },
-                      locale,
-                      { timeZone },
-                    )}
-                  </span>
-                </div>
-
-                {!range.isToBeRemoved && (
-                  <button
-                    onClick={() => void handleRemoveClick(range.id)}
-                    disabled={isActionPending}
-                    className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title={tHosted("eventTimeSelector.remove")}
-                  >
-                    {pendingRemoveId === range.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <X className="w-4 h-4" />
-                    )}
-                  </button>
-                )}
+        <div className="space-y-2">
+          {selectedRanges.map((range) => (
+            <div
+              key={range.id}
+              className={`flex items-center justify-between rounded-lg px-3 py-2.5 border ${
+                range.isToBeRemoved
+                  ? "border-dashed bg-rose-100 dark:bg-rose-900/15 border-rose-300 dark:border-rose-800"
+                  : range.isStaged
+                    ? "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
+                    : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+              }`}
+            >
+              <div className="flex items-center gap-2 text-sm flex-wrap min-w-0">
+                <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                  {formatLocalizedRangeLabel(
+                    {
+                      axisType: range.axisType,
+                      startDate: range.startDate,
+                      endDate: range.endDate,
+                      startMinute: range.startTime,
+                      endMinute: range.endTime,
+                    },
+                    locale,
+                    { timeZone },
+                  )}
+                </span>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center py-2">
-            {tHosted("eventTimeSelector.noConfirmedTime")}
-          </p>
-        )}
+
+              {!range.isToBeRemoved && (
+                <button
+                  onClick={() => void handleRemoveClick(range.id)}
+                  disabled={isActionPending}
+                  className="ml-2 p-1 rounded text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={tHosted("eventTimeSelector.remove")}
+                >
+                  {pendingRemoveId === range.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <X className="w-4 h-4" />
+                  )}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {hasStagedChanges && (

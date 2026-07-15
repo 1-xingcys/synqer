@@ -372,7 +372,6 @@
       "statusUnconfirmed": "Event time not confirmed yet",
       "statusPendingChanges": "Unsubmitted Changes",
       "emptyHint": "Click or drag to select time slots from the results below to confirm the event time",
-      "noConfirmedTime": "No confirmed event time",
       "reset": "Reset",
       "remove": "Remove",
       "cancel": "Cancel",
