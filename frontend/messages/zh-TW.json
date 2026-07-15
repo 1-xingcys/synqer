@@ -408,7 +408,7 @@
     },
     "participantsPage": {
       "title": "管理參與者",
-      "description": "搜尋已註冊的使用者並新增為參與者",
+      "description": "您可以在此新增或刪除參與者",
       "descriptionLineGroup": "從 LINE 群組中新增參與者",
       "searchUsers": "搜尋使用者",
       "lineGroups": "LINE 群組",

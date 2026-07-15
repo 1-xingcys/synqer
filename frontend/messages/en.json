@@ -408,7 +408,7 @@
     },
     "participantsPage": {
       "title": "Manage Participants",
-      "description": "Search and add registered users as participants",
+      "description": "Add or remove participants here",
       "descriptionLineGroup": "Add participants from LINE group",
       "searchUsers": "Search Users",
       "lineGroups": "LINE Groups",
