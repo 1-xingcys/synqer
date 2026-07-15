@@ -20,12 +20,22 @@ import {
   ClockFading,
   Users,
   Vote,
+  type LucideIcon,
 } from "lucide-react";
 import { format } from "date-fns";
 import { EventRowData } from "./types";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { formatWeekdayLabel } from "@/lib/weekdays";
 import { eventDetailPath } from "@/lib/eventRoutes";
+import { eventStatusColor } from "@/components/eventCommon/eventStatusStyles";
+
+// Icon glyph per event status. Color comes from the shared eventStatusColor map
+// so EventRow icons stay in sync with EventStatusText.
+const statusIcon: Partial<Record<EventStatus, LucideIcon>> = {
+  [EventStatus.VOTING_ENDED]: ClockFading,
+  [EventStatus.CONFIRMED]: CalendarCheck,
+  [EventStatus.COMPLETED]: CheckCheck,
+};
 
 interface EventRowProps {
   event: EventRowData;
@@ -144,18 +154,10 @@ export default function EventRow({
     }
 
     // For other variants, show event status icon
-    if (variant === EventStatus.VOTING_ENDED) {
-      return (
-        <ClockFading className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-      );
-    }
-    if (variant === EventStatus.CONFIRMED) {
-      return <CalendarCheck className="w-4 h-4 text-blue-500" />;
-    }
-    if (variant === EventStatus.COMPLETED) {
-      return <CheckCheck className="w-4 h-4 text-emerald-500" />;
-    }
-    return null;
+    const Icon = statusIcon[variant];
+    return Icon ? (
+      <Icon className={`w-4 h-4 ${eventStatusColor[variant]}`} />
+    ) : null;
   };
 
   return (
