@@ -8,14 +8,14 @@ import {
   DEFAULT_START_TIME,
   DEFAULT_WEEKDAYS,
 } from "../types";
-import { getTodayInTimeZone } from "./utils";
+import { getTodayInTimeZone, withSyncedVotingDeadline } from "./utils";
 import { resolveDefaultTimeZone } from "@/lib/time";
 
 function getInitialFormData(): CreateEventFormData {
   const timeZone = resolveDefaultTimeZone();
   const today = getTodayInTimeZone(timeZone);
 
-  return {
+  return withSyncedVotingDeadline({
     eventType: DEFAULT_EVENT_TYPE,
     title: "",
     description: "",
@@ -28,9 +28,10 @@ function getInitialFormData(): CreateEventFormData {
     votingDeadlineEnabled: false,
     votingDeadline: null,
     votingDeadlineTime: null,
+    votingDeadlineTouched: false,
     lineGroupId: null,
     selectedLineUserIds: [],
-  };
+  });
 }
 
 function cloneFormData(formData: CreateEventFormData): CreateEventFormData {

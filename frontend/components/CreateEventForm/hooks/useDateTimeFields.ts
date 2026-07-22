@@ -2,27 +2,27 @@
 
 import { useCallback } from "react";
 import { CreateEventFormData } from "../types";
+import { withSyncedVotingDeadline } from "./utils";
+import type { EventType } from "@/types/event";
 
 export function useDateTimeFields(
   setFormData: React.Dispatch<React.SetStateAction<CreateEventFormData>>,
 ) {
+  const handleEventTypeChange = useCallback(
+    (eventType: EventType) => {
+      // One-time and recurring events propose different deadlines, so the
+      // proposal has to be recomputed when the type flips.
+      setFormData((prev) => withSyncedVotingDeadline({ ...prev, eventType }));
+    },
+    [setFormData],
+  );
+
   const handleVotingDeadlineEnabledChange = useCallback(
     (enabled: boolean) => {
-      setFormData((prev) => {
-        if (!enabled) {
-          return {
-            ...prev,
-            votingDeadlineEnabled: false,
-            votingDeadline: null,
-            votingDeadlineTime: null,
-          };
-        }
-
-        return {
-          ...prev,
-          votingDeadlineEnabled: true,
-        };
-      });
+      // Keep the picked/proposed values while disabled — the payload ignores
+      // them (see useFormActions) and re-ticking the box would otherwise drop
+      // the host back onto two empty fields and a validation error.
+      setFormData((prev) => ({ ...prev, votingDeadlineEnabled: enabled }));
     },
     [setFormData],
   );
@@ -41,7 +41,7 @@ export function useDateTimeFields(
           newData.endDate = date;
         }
 
-        return newData;
+        return withSyncedVotingDeadline(newData);
       });
     },
     [setFormData],
@@ -68,39 +68,38 @@ export function useDateTimeFields(
 
   const handleStartTimeChange = useCallback(
     (value: string) => {
-      setFormData((prev) => ({
-        ...prev,
-        startTime: value,
-      }));
+      setFormData((prev) =>
+        withSyncedVotingDeadline({ ...prev, startTime: value }),
+      );
     },
     [setFormData],
   );
 
   const handleEndTimeChange = useCallback(
     (value: string) => {
-      setFormData((prev) => ({
-        ...prev,
-        endTime: value,
-      }));
+      setFormData((prev) =>
+        withSyncedVotingDeadline({ ...prev, endTime: value }),
+      );
     },
     [setFormData],
   );
 
   const handleTimeZoneChange = useCallback(
     (value: string) => {
-      setFormData((prev) => ({
-        ...prev,
-        timeZone: value,
-      }));
+      setFormData((prev) =>
+        withSyncedVotingDeadline({ ...prev, timeZone: value }),
+      );
     },
     [setFormData],
   );
 
+  // Editing either deadline field by hand stops it from tracking the schedule.
   const handleVotingDeadlineDateChange = useCallback(
     (date: Date | null) => {
       setFormData((prev) => ({
         ...prev,
         votingDeadline: date,
+        votingDeadlineTouched: true,
       }));
     },
     [setFormData],
@@ -111,12 +110,14 @@ export function useDateTimeFields(
       setFormData((prev) => ({
         ...prev,
         votingDeadlineTime: value,
+        votingDeadlineTouched: true,
       }));
     },
     [setFormData],
   );
 
   return {
+    handleEventTypeChange,
     handleStartDateChange,
     handleEndDateChange,
     handleStartTimeChange,

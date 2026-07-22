@@ -31,6 +31,11 @@ export interface CreateEventFormData {
   votingDeadlineEnabled: boolean;
   votingDeadline: Date | null;
   votingDeadlineTime: string | null;
+  /**
+   * Set once the host edits the deadline by hand, which stops it from
+   * tracking the event schedule. Not part of the unsaved-changes comparison.
+   */
+  votingDeadlineTouched: boolean;
   lineGroupId: string | null;
   selectedLineUserIds: string[];
 }

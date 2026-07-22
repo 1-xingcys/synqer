@@ -21,6 +21,7 @@ function buildFormData(
     votingDeadlineEnabled: true,
     votingDeadline: new Date(2026, 6, 13), // local 2026-07-13
     votingDeadlineTime: "18:00",
+    votingDeadlineTouched: false,
     lineGroupId: null,
     selectedLineUserIds: [],
     ...overrides,
