@@ -206,15 +206,44 @@ describe('EventCreationService', () => {
       );
     });
 
-    it('should validate votingDeadline when provided', async () => {
+    it('should accept a votingDeadline after the event start time', async () => {
+      // The deadline value is deliberately unconstrained so hosts can keep
+      // voting open past the event start.
       const dtoWithDeadline = {
         ...validDto,
         votingDeadline: '2024-12-26T10:00:00Z', // after event start
       };
+      const mockResult = {
+        event: { id: 'event-123', title: 'Test Event', lineGroupId: null },
+        creatorLineUserId: undefined,
+      };
 
-      await expect(service.create(dtoWithDeadline)).rejects.toThrow(
-        new BadRequestException('Voting deadline must be before or at the event start time'),
-      );
+      mockEventRepository.createWithSlotsAndParticipants.mockResolvedValue(mockResult);
+
+      const result = await service.create(dtoWithDeadline, 'user-123');
+
+      expect(result.eventId).toBe('event-123');
+      expect(
+        mockEventRepository.createWithSlotsAndParticipants.mock.calls[0][0]
+          .votingDeadline,
+      ).toEqual(new Date('2024-12-26T10:00:00Z'));
+    });
+
+    it('should accept a votingDeadline in the past', async () => {
+      const dtoWithPastDeadline = {
+        ...validDto,
+        votingDeadline: '2020-01-01T00:00:00Z',
+      };
+      const mockResult = {
+        event: { id: 'event-123', title: 'Test Event', lineGroupId: null },
+        creatorLineUserId: undefined,
+      };
+
+      mockEventRepository.createWithSlotsAndParticipants.mockResolvedValue(mockResult);
+
+      const result = await service.create(dtoWithPastDeadline, 'user-123');
+
+      expect(result.eventId).toBe('event-123');
     });
 
     it('should accept valid votingDeadline', async () => {

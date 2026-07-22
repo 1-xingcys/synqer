@@ -41,6 +41,9 @@ export class EventCreationService {
       : [];
 
     this.validateTimes(startTime, endTime);
+    if (votingDeadline) {
+      this.validateVotingDeadline(votingDeadline);
+    }
 
     // 解析時間為分鐘數
     const startMinuteOfDay = this.timeSlotService.parseTimeToMinutes(startTime);
@@ -66,7 +69,6 @@ export class EventCreationService {
           endMinuteOfDay,
           slotDurationMin,
           timeZone,
-          votingDeadline,
           votingDeadlineObj,
           lineGroupId,
         },
@@ -82,12 +84,10 @@ export class EventCreationService {
         description,
         startDate,
         endDate,
-        startTime,
         startMinuteOfDay,
         endMinuteOfDay,
         slotDurationMin,
         timeZone,
-        votingDeadline,
         votingDeadlineObj,
         lineGroupId,
       },
@@ -107,7 +107,6 @@ export class EventCreationService {
       endMinuteOfDay: number;
       slotDurationMin: number;
       timeZone: string;
-      votingDeadline?: string;
       votingDeadlineObj: Date | null;
       lineGroupId?: string;
     },
@@ -115,9 +114,6 @@ export class EventCreationService {
     userId?: string,
   ) {
     this.validateRecurringWeekdays(input.weekdays);
-    if (input.votingDeadline) {
-      this.validateRecurringVotingDeadline(input.votingDeadline);
-    }
 
     const normalizedWeekdays = this.normalizeWeekdays(input.weekdays!);
     const slots = this.timeSlotService.generateRecurringTimeSlots(
@@ -153,12 +149,10 @@ export class EventCreationService {
       description?: string;
       startDate?: string;
       endDate?: string;
-      startTime: string;
       startMinuteOfDay: number;
       endMinuteOfDay: number;
       slotDurationMin: number;
       timeZone: string;
-      votingDeadline?: string;
       votingDeadlineObj: Date | null;
       lineGroupId?: string;
     },
@@ -169,13 +163,6 @@ export class EventCreationService {
       input.startDate,
       input.endDate,
     );
-    if (input.votingDeadline) {
-      this.validateVotingDeadline(
-        input.votingDeadline,
-        oneTimeDateRange.startDate,
-        input.startTime,
-      );
-    }
 
     const startDateObj = new Date(oneTimeDateRange.startDate);
     const endDateObj = new Date(oneTimeDateRange.endDate);
@@ -255,31 +242,12 @@ export class EventCreationService {
   }
 
   /**
-   * 驗證投票截止時間：deadline <= eventStart
+   * 驗證投票截止時間：只檢查格式。
+   *
+   * 截止時間的「數值」不設限 —— 主辦人可以刻意設在過去，或設在活動時間之後，
+   * 以便更彈性地開關投票。
    */
-  private validateVotingDeadline(
-    votingDeadline: string,
-    startDate: string,
-    startTime: string,
-  ) {
-    const deadline = new Date(votingDeadline);
-    if (isNaN(deadline.getTime())) {
-      throw new BadRequestException('Invalid voting deadline');
-    }
-
-    // Combine start date and time
-    const [hours, minutes] = startTime.split(':').map(Number);
-    const eventStart = new Date(startDate);
-    eventStart.setUTCHours(hours, minutes, 0, 0);
-
-    if (deadline > eventStart) {
-      throw new BadRequestException(
-        'Voting deadline must be before or at the event start time',
-      );
-    }
-  }
-
-  private validateRecurringVotingDeadline(votingDeadline: string) {
+  private validateVotingDeadline(votingDeadline: string) {
     const deadline = new Date(votingDeadline);
     if (isNaN(deadline.getTime())) {
       throw new BadRequestException('Invalid voting deadline');
