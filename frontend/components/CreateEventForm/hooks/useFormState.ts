@@ -4,24 +4,27 @@ import { useState } from "react";
 import {
   CreateEventFormData,
   DEFAULT_EVENT_TYPE,
+  DEFAULT_END_TIME,
+  DEFAULT_START_TIME,
   DEFAULT_WEEKDAYS,
 } from "../types";
-import { getDefaultStartDateTime } from "./utils";
+import { getTodayInTimeZone } from "./utils";
 import { resolveDefaultTimeZone } from "@/lib/time";
 
 function getInitialFormData(): CreateEventFormData {
-  const { date: defaultDate, time: defaultTime } = getDefaultStartDateTime();
+  const timeZone = resolveDefaultTimeZone();
+  const today = getTodayInTimeZone(timeZone);
 
   return {
     eventType: DEFAULT_EVENT_TYPE,
     title: "",
     description: "",
-    startDate: defaultDate,
-    endDate: defaultDate,
+    startDate: today,
+    endDate: new Date(today),
     weekdays: [...DEFAULT_WEEKDAYS],
-    startTime: defaultTime,
-    endTime: "24:00",
-    timeZone: resolveDefaultTimeZone(),
+    startTime: DEFAULT_START_TIME,
+    endTime: DEFAULT_END_TIME,
+    timeZone,
     votingDeadlineEnabled: false,
     votingDeadline: null,
     votingDeadlineTime: null,
