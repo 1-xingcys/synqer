@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { VotingDeadlineFields } from "@/components/eventCommon/VotingDeadlineFields";
+import { VotingDeadlineFields } from "./VotingDeadlineFields";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
 import { ValidationError } from "./hooks/useFormValidation";
@@ -50,7 +50,6 @@ export function VotingDeadlineSection() {
           </div>
 
           <VotingDeadlineFields
-            checkboxId="enable-voting-deadline"
             enabled={formData.votingDeadlineEnabled}
             date={formData.votingDeadline}
             time={formData.votingDeadlineTime}

@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check, Copy } from "lucide-react";
-import { VotingDeadlineFields } from "@/components/eventCommon/VotingDeadlineFields";
+import { VotingDeadlineFields } from "./VotingDeadlineFields";
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/loading-state";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
@@ -99,7 +99,6 @@ export default function HostedEventSettingsPage() {
         {/* Section Content */}
         <div className="p-4 bg-white dark:bg-zinc-900">
           <VotingDeadlineFields
-            checkboxId="hosted-enable-voting-deadline"
             enabled={formData.deadlineEnabled}
             date={formData.deadlineDate}
             time={formData.deadlineTime}
@@ -112,8 +111,6 @@ export default function HostedEventSettingsPage() {
                 ? t("createEvent.votingDeadline.errorRequired")
                 : undefined
             }
-            enableLabelClassName="text-sm font-medium cursor-pointer text-zinc-700 dark:text-zinc-300"
-            fieldLabelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
             disabled={isDeadlineLocked}
             onEnabledChange={updateDeadlineEnabled}
             onDateChange={updateDeadlineDate}
