@@ -14,8 +14,6 @@ export enum ValidationError {
   StartTimeAfterEndTime = "StartTimeAfterEndTime",
   StartTimeTooSoon = "StartTimeTooSoon",
   DeadlineRequired = "DeadlineRequired",
-  DeadlineAfterStart = "DeadlineAfterStart",
-  DeadlineInPast = "DeadlineInPast",
   WeekdaysRequired = "WeekdaysRequired",
 }
 
@@ -67,23 +65,10 @@ export function getCreateEventValidationErrors(
     enabled: formData.votingDeadlineEnabled,
     date: formData.votingDeadline,
     time: formData.votingDeadlineTime,
-    minDateTime: wallNow,
-    maxDateTime:
-      !isRecurring && formData.startDate
-        ? combineDateAndTime(formData.startDate, formData.startTime)
-        : null,
   });
 
   if (deadlineError === VOTING_DEADLINE_ERROR.REQUIRED) {
     errorSet.add(ValidationError.DeadlineRequired);
-  }
-
-  if (deadlineError === VOTING_DEADLINE_ERROR.IN_PAST) {
-    errorSet.add(ValidationError.DeadlineInPast);
-  }
-
-  if (deadlineError === VOTING_DEADLINE_ERROR.AFTER_MAX) {
-    errorSet.add(ValidationError.DeadlineAfterStart);
   }
 
   return errorSet;

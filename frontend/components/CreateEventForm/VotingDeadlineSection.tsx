@@ -5,7 +5,6 @@ import { VotingDeadlineFields } from "@/components/eventCommon/VotingDeadlineFie
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
 import { ValidationError } from "./hooks/useFormValidation";
-import { getToday } from "./hooks/utils";
 
 export function VotingDeadlineSection() {
   const t = useTranslations();
@@ -22,21 +21,13 @@ export function VotingDeadlineSection() {
   } = useDateTimeFields(setFormData);
 
   const hasDeadlineRequiredError = errors.has(ValidationError.DeadlineRequired);
-  const hasDeadlineAfterStartError = errors.has(
-    ValidationError.DeadlineAfterStart,
-  );
-  const hasDeadlineInPastError = errors.has(ValidationError.DeadlineInPast);
   const isRecurring = formData.eventType === "RECURRING";
 
-  const today = getToday();
-  // Map shared validation results into create-page-specific copy and helper UI.
+  // The deadline value itself is unconstrained — hosts may set it in the past
+  // or beyond the event start — so the only copy left is the required prompt.
   const errorMessage = hasDeadlineRequiredError
     ? t("createEvent.votingDeadline.errorRequired")
-    : hasDeadlineInPastError
-      ? t("createEvent.votingDeadline.errorInPast")
-      : hasDeadlineAfterStartError && !isRecurring
-        ? t("createEvent.votingDeadline.errorAfterStart")
-        : null;
+    : null;
 
   return (
     <div className="rounded-lg py-6 lg:px-6 bg-white dark:bg-zinc-900 relative">
@@ -71,10 +62,6 @@ export function VotingDeadlineSection() {
             timeLabel={t("createEvent.votingDeadline.time")}
             datePlaceholder={t("createEvent.configuration.selectDate")}
             timePlaceholder={t("createEvent.configuration.selectTime")}
-            minDate={today}
-            maxDate={
-              isRecurring ? undefined : (formData.startDate ?? undefined)
-            }
             errorMessage={errorMessage}
             onEnabledChange={handleVotingDeadlineEnabledChange}
             onDateChange={handleVotingDeadlineDateChange}
