@@ -890,7 +890,7 @@
       "minutes": "minutes",
       "slotDurationDescription": "Duration of each time slot",
       "timeError": "Start time must be earlier than end time",
-      "startTimeTooSoonError": "Event start time must be at least 1 hour from now to allow enough voting time"
+      "startDateInPastError": "Event start date cannot be earlier than today"
     },
     "votingDeadline": {
       "title": "Voting Deadline",

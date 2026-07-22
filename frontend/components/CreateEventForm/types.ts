@@ -1,6 +1,5 @@
 import type { EventType, Weekday } from "@/types/event";
 
-export const MIN_HOURS_BEFORE_EVENT = 1;
 export const TITLE_MAX_LENGTH = 50;
 export const DESCRIPTION_MAX_LENGTH = 500;
 
