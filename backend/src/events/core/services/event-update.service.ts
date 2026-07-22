@@ -4,7 +4,6 @@ import { UpdateEventDto } from '../dto/update-event.dto';
 import { EventRepository } from '../repositories/event.repository';
 import { EventAuthorizationService } from '../../shared/services/event-authorization.service';
 import { EventScheduleService } from '../../shared/services/event-schedule.service';
-import { zonedWallClockToInstant } from '../../../common/time';
 
 type VotingDeadlineEditableEvent = NonNullable<
   Awaited<ReturnType<EventRepository['findOneBasic']>>
@@ -36,7 +35,7 @@ export class EventUpdateService {
       this.assertVotingDeadlineIsEditable(event);
 
       if (typeof updateDto.votingDeadline === 'string') {
-        this.validateVotingDeadline(event, updateDto.votingDeadline);
+        this.validateVotingDeadline(updateDto.votingDeadline);
       }
     }
 
@@ -123,30 +122,15 @@ export class EventUpdateService {
   }
 
   /**
-   * 驗證投票截止時間必須是未來時間，且不得晚於活動開始時間
+   * 驗證投票截止時間：只檢查格式。
+   *
+   * 截止時間的「數值」不設限 —— 主辦人可以刻意設在過去（立即關閉投票），
+   * 或設在活動時間之後。是否還能編輯由 assertVotingDeadlineIsEditable 決定。
    */
-  private validateVotingDeadline(
-    event: VotingDeadlineEditableEvent,
-    votingDeadline: string,
-  ) {
+  private validateVotingDeadline(votingDeadline: string) {
     const deadline = new Date(votingDeadline);
     if (isNaN(deadline.getTime())) {
       throw new BadRequestException('Invalid voting deadline');
-    }
-
-    // deadline 是 naive 牆上數字（UTC 欄位承載 event.timeZone 的牆上時間）；
-    // 解析成真實 instant 再與真實 now 比較，避免時區偏移造成誤判。
-    const deadlineInstant = zonedWallClockToInstant(deadline, event.timeZone);
-    if (deadlineInstant < new Date()) {
-      throw new BadRequestException('Voting deadline cannot be in the past');
-    }
-
-    const eventStart = this.eventScheduleService.getEventStartInstant(event);
-
-    if (eventStart && deadline > eventStart) {
-      throw new BadRequestException(
-        'Voting deadline must be before or at the event start time',
-      );
     }
   }
 }
