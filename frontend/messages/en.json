@@ -895,7 +895,6 @@
     "votingDeadline": {
       "title": "Voting Deadline",
       "description": "Set a deadline for participants to submit their votes",
-      "recurringDescription": "Optionally set a voting deadline for this recurring event",
       "enable": "Set voting deadline",
       "date": "Deadline date",
       "time": "Deadline time",

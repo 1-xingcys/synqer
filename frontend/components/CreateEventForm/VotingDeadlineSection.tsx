@@ -21,7 +21,6 @@ export function VotingDeadlineSection() {
   } = useDateTimeFields(setFormData);
 
   const hasDeadlineRequiredError = errors.has(ValidationError.DeadlineRequired);
-  const isRecurring = formData.eventType === "RECURRING";
 
   // The deadline value itself is unconstrained — hosts may set it in the past
   // or beyond the event start — so the only copy left is the required prompt.
@@ -46,9 +45,7 @@ export function VotingDeadlineSection() {
               {t("createEvent.votingDeadline.title")}
             </h2>
             <p className="text-xs text-muted-foreground">
-              {isRecurring
-                ? t("createEvent.votingDeadline.recurringDescription")
-                : t("createEvent.votingDeadline.description")}
+              {t("createEvent.votingDeadline.description")}
             </p>
           </div>
 
