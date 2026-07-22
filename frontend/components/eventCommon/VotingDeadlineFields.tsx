@@ -26,11 +26,8 @@ interface VotingDeadlineFieldsProps {
   disabled?: boolean;
   /** 由上層驗證邏輯提供的錯誤訊息 */
   errorMessage?: string | null;
-  /** 額外提示文字，例如自動同步說明 */
-  helperText?: string | null;
   enableLabelClassName?: string;
   fieldLabelClassName?: string;
-  helperTextClassName?: string;
   onEnabledChange: (enabled: boolean) => void;
   /** 日期變更回調 */
   onDateChange: (date: Date | null) => void;
@@ -57,10 +54,8 @@ export function VotingDeadlineFields({
   maxDate,
   disabled = false,
   errorMessage = null,
-  helperText = null,
   enableLabelClassName = "text-sm font-medium cursor-pointer",
   fieldLabelClassName,
-  helperTextClassName = "text-xs text-primary flex items-center gap-1.5",
   onEnabledChange,
   onDateChange,
   onTimeChange,
@@ -110,13 +105,6 @@ export function VotingDeadlineFields({
               />
             </div>
           </div>
-
-          {helperText ? (
-            <p className={helperTextClassName}>
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-current" />
-              {helperText}
-            </p>
-          ) : null}
 
           {showError ? (
             <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">

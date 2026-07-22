@@ -899,7 +899,6 @@
       "enable": "Set voting deadline",
       "date": "Deadline date",
       "time": "Deadline time",
-      "autoSync": "Auto-synced with event start time",
       "errorRequired": "Please select a deadline date first"
     },
     "cancel": "Cancel",

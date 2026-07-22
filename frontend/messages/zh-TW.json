@@ -899,7 +899,6 @@
       "enable": "設定截止時間",
       "date": "截止日期",
       "time": "截止時間",
-      "autoSync": "自動與活動開始時間同步",
       "errorRequired": "請先選擇投票截止日期"
     },
     "cancel": "取消",
