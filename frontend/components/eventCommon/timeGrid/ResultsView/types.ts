@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { EventSlotAxisType } from "@/types/event";
 import { TimeSlot, Vote, Participant } from "../types";
 
@@ -18,6 +19,9 @@ export interface ResultsViewProps {
   participants: Participant[];
   // Event ID for share link
   eventId: string;
+  // Caller-provided hint shown above the grid. Kept as a prop so this shared
+  // component stays decoupled from feature-specific (hosted/joined) copy.
+  tip?: ReactNode;
   // Host-only props for adding time ranges to event time
   canAddToEventTime?: boolean;
   isVotingPhase?: boolean;

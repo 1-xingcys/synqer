@@ -127,6 +127,8 @@
   "joined": {
     "title": "Joined Events",
     "description": "Events you're participating in",
+    "votingInstructionDeadline": "Vote for your available times before the deadline",
+    "votingInstruction": "Vote for your available times",
     "pageHint": {
       "voting": {
         "title": "Vote Your Availability",
@@ -284,7 +286,6 @@
     },
     "confirmed": {
       "title": "Event Time Confirmed",
-      "description": "The host has confirmed the event time.",
       "eventTime": "Event Time"
     },
     "untitledEvent": "Untitled Event",
@@ -297,8 +298,7 @@
       "hint": "Opens Google Calendar in a new tab"
     },
     "completed": {
-      "title": "Event Completed",
-      "description": "This event has ended."
+      "title": "Event Completed"
     },
     "viewResults": "View Results"
   },
@@ -361,18 +361,12 @@
       "urgent": "Urgent",
       "endingSoon": "Ending Soon"
     },
-    "statusInfo": {
-      "voting_ended": "Voting has ended. Please decide the event time.",
-      "confirmed": "Event time has been confirmed.",
-      "completed": "This event has been completed."
-    },
     "eventTimeSelector": {
       "title": "Event Time",
       "statusConfirmed": "Confirmed",
       "statusUnconfirmed": "Event time not confirmed yet",
       "statusPendingChanges": "Unsubmitted Changes",
       "emptyHint": "Click or drag to select time slots from the results below to confirm the event time",
-      "noConfirmedTime": "No confirmed event time",
       "reset": "Reset",
       "remove": "Remove",
       "cancel": "Cancel",
@@ -407,7 +401,7 @@
     },
     "participantsPage": {
       "title": "Manage Participants",
-      "description": "Search and add registered users as participants",
+      "description": "Add or remove participants here",
       "descriptionLineGroup": "Add participants from LINE group",
       "searchUsers": "Search Users",
       "lineGroups": "LINE Groups",
@@ -601,12 +595,6 @@
   },
   "eventInfo": {
     "deadline": "Deadline",
-    "statusDesc": {
-      "voting": "Vote for your available times before the deadline",
-      "votingEnded": "Voting has ended, waiting for host to confirm time",
-      "confirmed": "Event time has been confirmed",
-      "completed": "This event has ended"
-    },
     "hostedEventHint": "You are the host of this event",
     "goToEvent": "Go To Vote Page",
     "goToManagementPage": "Management page",

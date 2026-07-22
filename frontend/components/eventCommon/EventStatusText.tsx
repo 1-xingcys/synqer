@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { EventStatus } from "@/types/event";
+import { eventStatusColor } from "./eventStatusStyles";
 
 interface EventStatusTextProps {
   status: EventStatus;
@@ -22,19 +23,19 @@ export function EventStatusText({ status, size = "md" }: EventStatusTextProps) {
   > = {
     [EventStatus.VOTING]: {
       label: t("eventStatus.voting"),
-      className: "text-blue-600 dark:text-blue-400",
+      className: eventStatusColor[EventStatus.VOTING],
     },
     [EventStatus.VOTING_ENDED]: {
       label: t("eventStatus.votingEnded"),
-      className: "text-amber-600 dark:text-amber-400",
+      className: eventStatusColor[EventStatus.VOTING_ENDED],
     },
     [EventStatus.CONFIRMED]: {
       label: t("eventStatus.confirmed"),
-      className: "text-green-600 dark:text-green-400",
+      className: eventStatusColor[EventStatus.CONFIRMED],
     },
     [EventStatus.COMPLETED]: {
       label: t("eventStatus.completed"),
-      className: "text-zinc-500 dark:text-zinc-400",
+      className: eventStatusColor[EventStatus.COMPLETED],
     },
   };
 

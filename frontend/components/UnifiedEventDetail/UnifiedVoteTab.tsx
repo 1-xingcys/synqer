@@ -6,7 +6,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { EventStatus } from "@/types/event";
 import VotingGrid from "@/components/eventCommon/timeGrid/VotingGrid";
-import { VotingInstruction } from "@/components/joinedEvent/JoinedEventPage/StatusDescription";
+import { Text } from "@/components/ui/text";
 
 export default function UnifiedVoteTab() {
   const params = useParams();
@@ -28,7 +28,11 @@ export default function UnifiedVoteTab() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <VotingInstruction />
+      <Text variant="hint" align="center">
+        {data.event.votingDeadline
+          ? tJoined("votingInstructionDeadline")
+          : tJoined("votingInstruction")}
+      </Text>
       <VotingGrid
         slots={data.slots}
         votes={data.votes}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { CheckCircle, Calendar } from "lucide-react";
+import { CalendarCheck, Calendar } from "lucide-react";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { AddToCalendarPanel } from "./AddToCalendarPanel";
 import { ConfirmedSelection } from "@/types/event";
@@ -45,14 +45,11 @@ export function ConfirmedView({
     <div className="p-6 space-y-4">
       <div className="text-center">
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-          <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+          <CalendarCheck className="w-8 h-8 text-green-600 dark:text-green-400" />
         </div>
         <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
           {t("confirmed.title")}
         </h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          {t("confirmed.description")}
-        </p>
       </div>
 
       {/* Confirmed Time Display */}

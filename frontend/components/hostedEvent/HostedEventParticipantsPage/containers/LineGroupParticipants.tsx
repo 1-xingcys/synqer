@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LoadingState } from "@/components/ui/loading-state";
+import { Text } from "@/components/ui/text";
 import { useLineGroupParticipantsState } from "../hooks";
 import { LineGroupParticipantsView } from "../view";
 
@@ -36,9 +37,9 @@ export function LineGroupParticipants() {
     <div className="space-y-4 sm:space-y-6 max-w-xl mx-auto">
       {/* Header */}
       <div>
-        <p className="text-sm text-center text-zinc-500 dark:text-zinc-400 mt-1">
+        <Text variant="hint" align="center">
           {t("hosted.participantsPage.descriptionLineGroup")}
-        </p>
+        </Text>
       </div>
 
       <LineGroupParticipantsView

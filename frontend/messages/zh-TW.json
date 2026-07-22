@@ -127,6 +127,8 @@
   "joined": {
     "title": "加入的活動",
     "description": "您正在參與的活動",
+    "votingInstructionDeadline": "在截止時間前投票選擇你可以的時間",
+    "votingInstruction": "投票選擇你可以的時間",
     "pageHint": {
       "voting": {
         "title": "投票選擇時間",
@@ -284,7 +286,6 @@
     },
     "confirmed": {
       "title": "活動時間已確認",
-      "description": "主辦者已確認活動時間。",
       "eventTime": "活動時間"
     },
     "untitledEvent": "未命名活動",
@@ -297,8 +298,7 @@
       "hint": "將在新分頁中開啟 Google 日曆"
     },
     "completed": {
-      "title": "活動已結束",
-      "description": "此活動已結束。"
+      "title": "活動已結束"
     },
     "viewResults": "查看結果"
   },
@@ -361,18 +361,12 @@
       "urgent": "緊急",
       "endingSoon": "即將截止"
     },
-    "statusInfo": {
-      "voting_ended": "投票已結束，請決定活動時間。",
-      "confirmed": "活動時間已確認。",
-      "completed": "此活動已結束。"
-    },
     "eventTimeSelector": {
       "title": "活動時間",
       "statusConfirmed": "已確認",
       "statusUnconfirmed": "尚未確認活動時間",
       "statusPendingChanges": "有未提交的變更",
       "emptyHint": "從下方投票結果中點選或拖曳選擇活動時段",
-      "noConfirmedTime": "沒有活動時間",
       "reset": "重新選擇",
       "remove": "移除",
       "cancel": "取消",
@@ -407,7 +401,7 @@
     },
     "participantsPage": {
       "title": "管理參與者",
-      "description": "搜尋已註冊的使用者並新增為參與者",
+      "description": "您可以在此新增或刪除參與者",
       "descriptionLineGroup": "從 LINE 群組中新增參與者",
       "searchUsers": "搜尋使用者",
       "lineGroups": "LINE 群組",
@@ -601,12 +595,6 @@
   },
   "eventInfo": {
     "deadline": "截止時間",
-    "statusDesc": {
-      "voting": "在截止時間前投票選擇你可以的時間",
-      "votingEnded": "投票已結束，等待主辦者確認時間",
-      "confirmed": "活動時間已確認",
-      "completed": "此活動已結束"
-    },
     "hostedEventHint": "你是這個活動的主辦者",
     "goToEvent": "投票頁面",
     "goToManagementPage": "管理頁面",
