@@ -21,39 +21,105 @@ function buildFormData(
     votingDeadlineEnabled: true,
     votingDeadline: new Date(2026, 6, 13), // local 2026-07-13
     votingDeadlineTime: "18:00",
+    votingDeadlineTouched: false,
     lineGroupId: null,
     selectedLineUserIds: [],
     ...overrides,
   };
 }
 
-describe("getCreateEventValidationErrors - voting deadline in-past check under a non-browser time zone", () => {
-  it("does not flag the deadline as in the past when 'now' has not yet reached the deadline in the event's time zone", () => {
-    // Event time zone is America/New_York (EDT, UTC-4 in July), which is
-    // NOT the test runner's local/browser time zone (Asia/Taipei).
-    // Voting deadline: naive wall-clock 2026-07-13T18:00 (America/New_York).
-    //
-    // "now" is the real instant 2026-07-13T21:30:00Z.
-    //   - Projected into America/New_York wall-clock: 2026-07-13T17:30
-    //     (still 30 minutes before the 18:00 deadline) -> should NOT be in_past.
-    //   - If "now" were compared directly (raw instant) against the naive
-    //     deadline Date (…T18:00:00.000Z), 21:30Z > 18:00Z would WRONGLY
-    //     flag the deadline as already passed.
-    const now = new Date("2026-07-13T21:30:00.000Z");
+describe("getCreateEventValidationErrors - voting deadline", () => {
+  it("accepts a deadline that has already passed", () => {
+    // Deadline 2026-07-13 18:00 (event time zone); "now" is a day later.
+    const now = new Date("2026-07-14T22:30:00.000Z");
 
     const errors = getCreateEventValidationErrors(buildFormData(), now);
 
-    expect(errors.has(ValidationError.DeadlineInPast)).toBe(false);
+    expect(errors.size).toBe(0);
   });
 
-  it("does flag the deadline as in the past once 'now' passes it in the event's time zone", () => {
-    // Same deadline/time zone as above, but "now" has advanced past the
-    // 18:00 America/New_York wall-clock deadline (18:30 wall-clock, i.e.
-    // 2026-07-13T22:30:00Z in EDT).
-    const now = new Date("2026-07-13T22:30:00.000Z");
+  it("accepts a deadline later than the event start time", () => {
+    const now = new Date("2026-07-13T12:00:00.000Z");
+
+    const errors = getCreateEventValidationErrors(
+      buildFormData({
+        // Event starts 2026-07-20 09:00; deadline lands well after that.
+        votingDeadline: new Date(2026, 6, 25),
+        votingDeadlineTime: "23:00",
+      }),
+      now,
+    );
+
+    expect(errors.size).toBe(0);
+  });
+
+  it("still requires both fields once the deadline is enabled", () => {
+    const now = new Date("2026-07-13T12:00:00.000Z");
+
+    const errors = getCreateEventValidationErrors(
+      buildFormData({ votingDeadlineTime: null }),
+      now,
+    );
+
+    expect(errors.has(ValidationError.DeadlineRequired)).toBe(true);
+  });
+});
+
+describe("getCreateEventValidationErrors - start date", () => {
+  it("accepts today as the start date even when the start time has passed", () => {
+    // "now" is 2026-07-20T16:00Z = 12:00 in America/New_York (EDT), so the
+    // event's 09:00 start slot is already three hours gone. The voting window
+    // may still legitimately span the whole day.
+    const now = new Date("2026-07-20T16:00:00.000Z");
 
     const errors = getCreateEventValidationErrors(buildFormData(), now);
 
-    expect(errors.has(ValidationError.DeadlineInPast)).toBe(true);
+    expect(errors.has(ValidationError.StartDateInPast)).toBe(false);
+  });
+
+  it("rejects a start date before today", () => {
+    const now = new Date("2026-07-20T16:00:00.000Z");
+
+    const errors = getCreateEventValidationErrors(
+      buildFormData({
+        startDate: new Date(2026, 6, 19), // local 2026-07-19
+        endDate: new Date(2026, 6, 19),
+      }),
+      now,
+    );
+
+    expect(errors.has(ValidationError.StartDateInPast)).toBe(true);
+  });
+
+  it("resolves 'today' in the event's time zone, not the browser's", () => {
+    // 2026-07-16T02:00Z is still 2026-07-15 22:00 in America/New_York, so a
+    // 2026-07-15 start date is today there and must be accepted — even though
+    // UTC (and any runner east of it) has already rolled over to 07-16.
+    const now = new Date("2026-07-16T02:00:00.000Z");
+
+    const errors = getCreateEventValidationErrors(
+      buildFormData({
+        startDate: new Date(2026, 6, 15),
+        endDate: new Date(2026, 6, 15),
+      }),
+      now,
+    );
+
+    expect(errors.has(ValidationError.StartDateInPast)).toBe(false);
+  });
+
+  it("does not apply the start date rule to recurring events", () => {
+    const now = new Date("2026-07-20T16:00:00.000Z");
+
+    const errors = getCreateEventValidationErrors(
+      buildFormData({
+        eventType: "RECURRING",
+        startDate: new Date(2020, 0, 1),
+        endDate: new Date(2020, 0, 1),
+      }),
+      now,
+    );
+
+    expect(errors.has(ValidationError.StartDateInPast)).toBe(false);
   });
 });

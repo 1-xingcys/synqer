@@ -449,7 +449,6 @@
       "deleteEvent": "刪除活動",
       "deleteWarning": "此操作無法復原。所有投票和資料將被永久刪除。",
       "confirmDelete": "您確定要刪除此活動嗎？",
-      "deadlineBeforeFirstSlot": "投票截止時間必須在活動最早時段之前",
       "deadlineLockedDescription": "活動已開始或已確認時間，無法修改投票截止時間",
       "inviteLink": {
         "title": "邀請連結",
@@ -891,19 +890,15 @@
       "minutes": "分鐘",
       "slotDurationDescription": "每個時段的持續時間",
       "timeError": "開始時間必須早於結束時間",
-      "startTimeTooSoonError": "活動開始時間必須至少在 1 小時後，以確保有足夠的投票時間"
+      "startDateInPastError": "活動開始日期不能早於今天"
     },
     "votingDeadline": {
       "title": "Voting Deadline",
       "description": "設定活動的投票截止時間",
-      "recurringDescription": "可選填 recurring 活動的投票截止時間",
       "enable": "設定截止時間",
       "date": "截止日期",
       "time": "截止時間",
-      "autoSync": "自動與活動開始時間同步",
-      "errorRequired": "請先選擇投票截止日期",
-      "errorInPast": "投票截止時間不能早於目前時間",
-      "errorAfterStart": "投票截止時間必須在活動開始時間之前"
+      "errorRequired": "請先選擇投票截止日期"
     },
     "cancel": "取消",
     "create": "建立活動",

@@ -1,7 +1,5 @@
 export const VOTING_DEADLINE_ERROR = {
   REQUIRED: "required",
-  IN_PAST: "in_past",
-  AFTER_MAX: "after_max",
 } as const;
 
 export type VotingDeadlineError =
@@ -11,8 +9,6 @@ interface ValidateVotingDeadlineInput {
   enabled: boolean;
   date: Date | null;
   time: string | null;
-  minDateTime?: Date | null;
-  maxDateTime?: Date | null;
 }
 
 /**
@@ -37,20 +33,15 @@ export function combineVotingDeadline(date: Date, time: string): Date {
 
 /**
  * Shared deadline validation for both create and hosted settings pages.
- * The caller supplies the page-specific lower/upper bounds.
  *
- * `deadlineDateTime` (from `combineVotingDeadline`) is a naive wall-clock
- * Date. `minDateTime`/`maxDateTime` must be supplied in the SAME naive
- * wall-clock space (e.g. project a real "now" instant via
- * `instantToZonedWallClock(now, timeZone)` before passing it in) — comparing
- * a naive value against a real instant will skew results by the zone offset.
+ * The deadline VALUE is intentionally unconstrained: hosts may set it in the
+ * past or past the event start to close/extend voting as they see fit. The
+ * only requirement is that enabling the deadline means picking both fields.
  */
 export function validateVotingDeadline({
   enabled,
   date,
   time,
-  minDateTime,
-  maxDateTime,
 }: ValidateVotingDeadlineInput): VotingDeadlineError | null {
   if (!enabled) {
     return null;
@@ -58,16 +49,6 @@ export function validateVotingDeadline({
 
   if (!date || !time) {
     return VOTING_DEADLINE_ERROR.REQUIRED;
-  }
-
-  const deadlineDateTime = combineVotingDeadline(date, time);
-
-  if (minDateTime && deadlineDateTime < minDateTime) {
-    return VOTING_DEADLINE_ERROR.IN_PAST;
-  }
-
-  if (maxDateTime && deadlineDateTime > maxDateTime) {
-    return VOTING_DEADLINE_ERROR.AFTER_MAX;
   }
 
   return null;

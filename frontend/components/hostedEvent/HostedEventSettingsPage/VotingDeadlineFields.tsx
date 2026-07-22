@@ -6,8 +6,10 @@ import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
 
+const CHECKBOX_ID = "hosted-enable-voting-deadline";
+const LABEL_CLASS_NAME = "text-sm font-medium text-zinc-700 dark:text-zinc-300";
+
 interface VotingDeadlineFieldsProps {
-  checkboxId: string;
   enabled: boolean;
   /** 投票截止日期 */
   date: Date | null;
@@ -17,20 +19,10 @@ interface VotingDeadlineFieldsProps {
   dateLabel: string;
   timeLabel: string;
   datePlaceholder: string;
-  timePlaceholder?: string;
-  /** 可選的最早日期 */
-  minDate?: Date;
-  /** 最晚可選的日期（通常是活動開始日或最早時段日期） */
-  maxDate?: Date;
-  /** 是否禁用 */
+  /** 活動已確認時段或已開始後鎖定整組欄位 */
   disabled?: boolean;
   /** 由上層驗證邏輯提供的錯誤訊息 */
   errorMessage?: string | null;
-  /** 額外提示文字，例如自動同步說明 */
-  helperText?: string | null;
-  enableLabelClassName?: string;
-  fieldLabelClassName?: string;
-  helperTextClassName?: string;
   onEnabledChange: (enabled: boolean) => void;
   /** 日期變更回調 */
   onDateChange: (date: Date | null) => void;
@@ -39,12 +31,14 @@ interface VotingDeadlineFieldsProps {
 }
 
 /**
- * 共用的投票截止時間欄位元件。
+ * 主辦設定頁專用的投票截止時間欄位。
  * 只負責顯示 checkbox、日期/時間欄位與錯誤訊息，
- * 實際的驗證規則與頁面行為由上層 hook/component 決定。
+ * 是否可編輯與驗證規則由 useEventSettings 決定。
+ *
+ * 建立活動頁有自己的一份（CreateEventForm/VotingDeadlineFields），
+ * 兩邊的樣式可以各自調整，不互相牽動。
  */
 export function VotingDeadlineFields({
-  checkboxId,
   enabled,
   date,
   time,
@@ -52,15 +46,8 @@ export function VotingDeadlineFields({
   dateLabel,
   timeLabel,
   datePlaceholder,
-  timePlaceholder,
-  minDate,
-  maxDate,
   disabled = false,
   errorMessage = null,
-  helperText = null,
-  enableLabelClassName = "text-sm font-medium cursor-pointer",
-  fieldLabelClassName,
-  helperTextClassName = "text-xs text-primary flex items-center gap-1.5",
   onEnabledChange,
   onDateChange,
   onTimeChange,
@@ -72,12 +59,15 @@ export function VotingDeadlineFields({
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Checkbox
-            id={checkboxId}
+            id={CHECKBOX_ID}
             checked={enabled}
             onCheckedChange={(checked) => onEnabledChange(checked === true)}
             disabled={disabled}
           />
-          <Label htmlFor={checkboxId} className={enableLabelClassName}>
+          <Label
+            htmlFor={CHECKBOX_ID}
+            className={`${LABEL_CLASS_NAME} cursor-pointer`}
+          >
             {enableLabel}
           </Label>
         </div>
@@ -87,36 +77,26 @@ export function VotingDeadlineFields({
         <>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className={fieldLabelClassName}>{dateLabel}</Label>
+              <Label className={LABEL_CLASS_NAME}>{dateLabel}</Label>
               <DatePicker
                 value={date}
                 onChange={onDateChange}
                 placeholder={datePlaceholder}
-                minDate={minDate}
-                maxDate={maxDate}
                 disabled={disabled}
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label className={fieldLabelClassName}>{timeLabel}</Label>
+              <Label className={LABEL_CLASS_NAME}>{timeLabel}</Label>
               <TimePicker
                 value={time}
                 onChange={onTimeChange}
                 type="start"
                 hasError={showError}
                 disabled={disabled}
-                placeholder={timePlaceholder}
               />
             </div>
           </div>
-
-          {helperText ? (
-            <p className={helperTextClassName}>
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-current" />
-              {helperText}
-            </p>
-          ) : null}
 
           {showError ? (
             <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">

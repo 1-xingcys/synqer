@@ -5,17 +5,14 @@ import {
   validateVotingDeadline,
   VOTING_DEADLINE_ERROR,
 } from "@/lib/votingDeadline";
-import { instantToZonedWallClock } from "@/lib/time";
-import { CreateEventFormData, MIN_HOURS_BEFORE_EVENT } from "../types";
-import { parseTimeToMinutes, combineDateAndTime } from "./utils";
+import { CreateEventFormData } from "../types";
+import { parseTimeToMinutes, getTodayInTimeZone } from "./utils";
 
 export enum ValidationError {
   TitleRequired = "TitleRequired",
   StartTimeAfterEndTime = "StartTimeAfterEndTime",
-  StartTimeTooSoon = "StartTimeTooSoon",
+  StartDateInPast = "StartDateInPast",
   DeadlineRequired = "DeadlineRequired",
-  DeadlineAfterStart = "DeadlineAfterStart",
-  DeadlineInPast = "DeadlineInPast",
   WeekdaysRequired = "WeekdaysRequired",
 }
 
@@ -25,11 +22,6 @@ export function getCreateEventValidationErrors(
 ) {
   const errorSet = new Set<ValidationError>();
   const isRecurring = formData.eventType === "RECURRING";
-  const currentTime = now;
-  // Combined date-times (startDate/startTime, votingDeadline) are naive
-  // wall-clock values (UTC fields carry the digits). Project "now" into the
-  // same naive wall-clock space for the form's time zone before comparing.
-  const wallNow = instantToZonedWallClock(currentTime, formData.timeZone);
 
   if (!formData.title.trim()) {
     errorSet.add(ValidationError.TitleRequired);
@@ -45,21 +37,19 @@ export function getCreateEventValidationErrors(
     errorSet.add(ValidationError.StartTimeAfterEndTime);
   }
 
+  // Only the calendar day matters: a voting window may legitimately start
+  // earlier today than "now" (e.g. creating a 09:00-18:00 window at noon),
+  // so the time of day is never compared against the clock.
   if (!isRecurring && formData.startDate) {
-    const eventStartDateTime = combineDateAndTime(
-      formData.startDate,
-      formData.startTime,
-    );
-    const minStartTime = new Date(wallNow);
-    minStartTime.setUTCHours(
-      minStartTime.getUTCHours() + MIN_HOURS_BEFORE_EVENT,
-      minStartTime.getUTCMinutes(),
-      0,
-      0,
+    const todayInZone = getTodayInTimeZone(formData.timeZone, now);
+    const startDay = new Date(
+      formData.startDate.getFullYear(),
+      formData.startDate.getMonth(),
+      formData.startDate.getDate(),
     );
 
-    if (eventStartDateTime < minStartTime) {
-      errorSet.add(ValidationError.StartTimeTooSoon);
+    if (startDay < todayInZone) {
+      errorSet.add(ValidationError.StartDateInPast);
     }
   }
 
@@ -67,23 +57,10 @@ export function getCreateEventValidationErrors(
     enabled: formData.votingDeadlineEnabled,
     date: formData.votingDeadline,
     time: formData.votingDeadlineTime,
-    minDateTime: wallNow,
-    maxDateTime:
-      !isRecurring && formData.startDate
-        ? combineDateAndTime(formData.startDate, formData.startTime)
-        : null,
   });
 
   if (deadlineError === VOTING_DEADLINE_ERROR.REQUIRED) {
     errorSet.add(ValidationError.DeadlineRequired);
-  }
-
-  if (deadlineError === VOTING_DEADLINE_ERROR.IN_PAST) {
-    errorSet.add(ValidationError.DeadlineInPast);
-  }
-
-  if (deadlineError === VOTING_DEADLINE_ERROR.AFTER_MAX) {
-    errorSet.add(ValidationError.DeadlineAfterStart);
   }
 
   return errorSet;

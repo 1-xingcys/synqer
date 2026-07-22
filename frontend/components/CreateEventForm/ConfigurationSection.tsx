@@ -17,7 +17,7 @@ import { TimePicker } from "@/components/eventCommon/TimePicker";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
 import { ValidationError } from "./hooks/useFormValidation";
-import { getToday } from "./hooks/utils";
+import { getTodayInTimeZone } from "./hooks/utils";
 import { cn } from "@/lib/utils";
 import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
 
@@ -38,7 +38,9 @@ export function ConfigurationSection() {
     handleTimeZoneChange,
   } = useDateTimeFields(setFormData);
 
-  const today = getToday();
+  // Same source as the form validation, so the picker never offers a day the
+  // validator rejects (or hides one it would accept) in a foreign time zone.
+  const today = getTodayInTimeZone(formData.timeZone);
   const orderedWeekdays = getOrderedWeekdays(locale);
   const isRecurring = formData.eventType === "RECURRING";
 
@@ -57,7 +59,7 @@ export function ConfigurationSection() {
     : [formData.timeZone, ...supportedTimeZones];
 
   const hasTimeError = errors.has(ValidationError.StartTimeAfterEndTime);
-  const hasStartTimeTooSoonError = errors.has(ValidationError.StartTimeTooSoon);
+  const hasStartDateInPastError = errors.has(ValidationError.StartDateInPast);
   const hasWeekdayError = errors.has(ValidationError.WeekdaysRequired);
 
   const toggleWeekday = (weekday: (typeof orderedWeekdays)[number]) => {
@@ -197,12 +199,12 @@ export function ConfigurationSection() {
             </div>
           )}
 
-          {/* Start Time Too Soon Error */}
-          {hasStartTimeTooSoonError && !isRecurring && (
+          {/* Start Date In Past Error */}
+          {hasStartDateInPastError && !isRecurring && (
             <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
               <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
               <p className="text-sm text-destructive">
-                {t("createEvent.configuration.startTimeTooSoonError")}
+                {t("createEvent.configuration.startDateInPastError")}
               </p>
             </div>
           )}

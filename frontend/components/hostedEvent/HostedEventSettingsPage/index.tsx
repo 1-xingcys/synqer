@@ -3,10 +3,9 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check, Copy } from "lucide-react";
-import { VotingDeadlineFields } from "@/components/eventCommon/VotingDeadlineFields";
+import { VotingDeadlineFields } from "./VotingDeadlineFields";
 import { Button } from "@/components/ui/button";
 import { LoadingState } from "@/components/ui/loading-state";
-import { VOTING_DEADLINE_ERROR } from "@/lib/votingDeadline";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { useEventSettings } from "./useEventSettings";
 import { DangerZone } from "./DangerZone";
@@ -21,8 +20,6 @@ export default function HostedEventSettingsPage() {
     formData,
     isDirty,
     isDeadlineLocked,
-    earliestSlot,
-    deadlineError,
     isDeadlineValid,
     hasDeadlineRequiredError,
     updateDeadlineEnabled,
@@ -42,7 +39,7 @@ export default function HostedEventSettingsPage() {
 
   const { shareUrl, copied: linkCopied, copyLink } = useEventShareLink(eventId);
 
-  if (isLoading && (!eventData || !earliestSlot || !formData)) {
+  if (isLoading && (!eventData || !formData)) {
     return <LoadingState label={t("common.loading")} viewport="section" />;
   }
 
@@ -102,7 +99,6 @@ export default function HostedEventSettingsPage() {
         {/* Section Content */}
         <div className="p-4 bg-white dark:bg-zinc-900">
           <VotingDeadlineFields
-            checkboxId="hosted-enable-voting-deadline"
             enabled={formData.deadlineEnabled}
             date={formData.deadlineDate}
             time={formData.deadlineTime}
@@ -110,18 +106,11 @@ export default function HostedEventSettingsPage() {
             dateLabel={t("createEvent.votingDeadline.date")}
             timeLabel={t("createEvent.votingDeadline.time")}
             datePlaceholder={t("createEvent.configuration.selectDate")}
-            maxDate={earliestSlot?.date}
             errorMessage={
               hasDeadlineRequiredError
                 ? t("createEvent.votingDeadline.errorRequired")
-                : deadlineError === VOTING_DEADLINE_ERROR.IN_PAST
-                  ? t("createEvent.votingDeadline.errorInPast")
-                  : deadlineError === VOTING_DEADLINE_ERROR.AFTER_MAX
-                    ? t("hosted.settingsPage.deadlineBeforeFirstSlot")
-                    : undefined
+                : undefined
             }
-            enableLabelClassName="text-sm font-medium cursor-pointer text-zinc-700 dark:text-zinc-300"
-            fieldLabelClassName="text-sm font-medium text-zinc-700 dark:text-zinc-300"
             disabled={isDeadlineLocked}
             onEnabledChange={updateDeadlineEnabled}
             onDateChange={updateDeadlineDate}

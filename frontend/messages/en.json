@@ -449,7 +449,6 @@
       "deleteEvent": "Delete Event",
       "deleteWarning": "This action cannot be undone. All votes and data will be permanently deleted.",
       "confirmDelete": "Are you sure you want to delete this event?",
-      "deadlineBeforeFirstSlot": "Voting deadline must be before or at the first event slot",
       "deadlineLockedDescription": "Voting deadline cannot be modified after the event starts or the event time is confirmed",
       "inviteLink": {
         "title": "Invite Link",
@@ -891,19 +890,15 @@
       "minutes": "minutes",
       "slotDurationDescription": "Duration of each time slot",
       "timeError": "Start time must be earlier than end time",
-      "startTimeTooSoonError": "Event start time must be at least 1 hour from now to allow enough voting time"
+      "startDateInPastError": "Event start date cannot be earlier than today"
     },
     "votingDeadline": {
       "title": "Voting Deadline",
       "description": "Set a deadline for participants to submit their votes",
-      "recurringDescription": "Optionally set a voting deadline for this recurring event",
       "enable": "Set voting deadline",
       "date": "Deadline date",
       "time": "Deadline time",
-      "autoSync": "Auto-synced with event start time",
-      "errorRequired": "Please select a deadline date first",
-      "errorInPast": "Voting deadline cannot be in the past",
-      "errorAfterStart": "Voting deadline must be before or at the event start time"
+      "errorRequired": "Please select a deadline date first"
     },
     "cancel": "Cancel",
     "create": "Create event",

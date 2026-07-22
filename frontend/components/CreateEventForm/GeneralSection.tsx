@@ -21,6 +21,7 @@ import { useFormStateContext } from "./CreateEventFormContext";
 import { TITLE_MAX_LENGTH } from "./types";
 import { useTextFields } from "./hooks/useTextFields";
 import { useLineGroupFields } from "./hooks/useLineGroupFields";
+import { useDateTimeFields } from "./hooks/useDateTimeFields";
 import type { EventType } from "@/types/event";
 
 export function GeneralSection() {
@@ -38,12 +39,7 @@ export function GeneralSection() {
   const { handleLineGroupChange, handleSelectedMembersChange } =
     useLineGroupFields(setFormData);
 
-  const handleEventTypeChange = (value: EventType) => {
-    setFormData((prev) => ({
-      ...prev,
-      eventType: value,
-    }));
-  };
+  const { handleEventTypeChange } = useDateTimeFields(setFormData);
 
   const isOverTitleLimit = titleCharCount >= TITLE_MAX_LENGTH;
 

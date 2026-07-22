@@ -33,39 +33,25 @@ describe("votingDeadline", () => {
     ).toBe(VOTING_DEADLINE_ERROR.REQUIRED);
   });
 
-  it("returns in_past when deadline is earlier than the minimum", () => {
-    // minDateTime/maxDateTime must be supplied in the same naive
-    // wall-clock space (UTC fields carry the digits) as the combined
-    // deadline; see validateVotingDeadline's doc comment.
+  it("accepts a deadline far in the past", () => {
+    // Hosts may deliberately set a past deadline (e.g. to close voting
+    // immediately), so the deadline value itself is unconstrained.
     expect(
       validateVotingDeadline({
         enabled: true,
-        date: new Date(2026, 3, 10),
+        date: new Date(2020, 0, 1),
         time: "09:00",
-        minDateTime: new Date("2026-04-10T10:00:00Z"),
       }),
-    ).toBe(VOTING_DEADLINE_ERROR.IN_PAST);
+    ).toBeNull();
   });
 
-  it("returns after_max when deadline is later than the maximum", () => {
+  it("accepts a deadline that collides with the event schedule", () => {
+    // A deadline later than the event start is allowed on purpose.
     expect(
       validateVotingDeadline({
         enabled: true,
-        date: new Date(2026, 3, 10),
-        time: "11:00",
-        maxDateTime: new Date("2026-04-10T10:00:00Z"),
-      }),
-    ).toBe(VOTING_DEADLINE_ERROR.AFTER_MAX);
-  });
-
-  it("returns null when deadline is valid", () => {
-    expect(
-      validateVotingDeadline({
-        enabled: true,
-        date: new Date(2026, 3, 10),
-        time: "09:00",
-        minDateTime: new Date("2026-04-10T08:00:00Z"),
-        maxDateTime: new Date("2026-04-10T10:00:00Z"),
+        date: new Date(2099, 11, 31),
+        time: "23:45",
       }),
     ).toBeNull();
   });

@@ -111,11 +111,6 @@ type DeadlineLockableEvent = {
   timeZone: string;
 };
 
-type EarliestSlot = {
-  date: Date;
-  time: string;
-};
-
 function isVotingDeadlineLocked(
   event: DeadlineLockableEvent | null | undefined,
   now: Date = new Date(),
@@ -146,22 +141,12 @@ function isVotingDeadlineLocked(
 
 function getHostedDeadlineError(
   formData: VotingDeadlineFormData,
-  earliestSlot: EarliestSlot | null,
-  timeZone: string,
-  now: Date = new Date(),
 ): VotingDeadlineError | null {
-  // combineVotingDeadline (maxDateTime) is naive; project "now" into the
-  // same naive wall-clock space via the event's time zone before comparing.
-  const wallNow = instantToZonedWallClock(now, timeZone);
-
+  // The deadline value is unconstrained here too; only completeness matters.
   return validateVotingDeadline({
     enabled: formData.deadlineEnabled,
     date: formData.deadlineDate,
     time: formData.deadlineTime,
-    minDateTime: wallNow,
-    maxDateTime: earliestSlot
-      ? combineVotingDeadline(earliestSlot.date, earliestSlot.time)
-      : null,
   });
 }
 
@@ -203,35 +188,6 @@ export function useEventSettings(eventId: string) {
       method: "DELETE",
     });
   }, [eventId]);
-
-  // 計算活動最早的時段日期和時間（作為 deadline 的上限）
-  const earliestSlot = useMemo(() => {
-    if (!eventData?.slots || eventData.slots.length === 0) {
-      return null;
-    }
-
-    const dateSlots = eventData.slots.filter(
-      (slot) => slot.axisType === "DATE" && slot.axisDate,
-    );
-
-    if (dateSlots.length === 0) {
-      return null;
-    }
-
-    // 找到最早的日期型時段
-    const sorted = [...dateSlots].sort((a, b) => {
-      const dateA = new Date(a.axisDate!).getTime();
-      const dateB = new Date(b.axisDate!).getTime();
-      if (dateA !== dateB) return dateA - dateB;
-      return a.startMinute - b.startMinute;
-    });
-
-    const earliest = sorted[0];
-    const date = new Date(earliest.axisDate!);
-    const time = formatMinutesToTime(earliest.startMinute);
-
-    return { date, time };
-  }, [eventData?.slots]);
 
   // Initialize local form data from server, but do not overwrite unsaved edits.
   useEffect(() => {
@@ -299,17 +255,11 @@ export function useEventSettings(eventId: string) {
     return isVotingDeadlineLocked(eventData?.event);
   }, [eventData?.event, validationRevision]);
 
-  // Reuse the same validation engine as the create page, but with
-  // hosted-settings-specific bounds: now ~ earliest available slot.
+  // Reuse the same validation engine as the create page.
   const deadlineError = useMemo<VotingDeadlineError | null>(() => {
-    void validationRevision;
     if (!eventData?.event) return null;
-    return getHostedDeadlineError(
-      formData,
-      earliestSlot,
-      eventData.event.timeZone,
-    );
-  }, [earliestSlot, eventData?.event, formData, validationRevision]);
+    return getHostedDeadlineError(formData);
+  }, [eventData?.event, formData]);
 
   const isDeadlineValid = deadlineError === null;
   const hasDeadlineRequiredError =
@@ -318,21 +268,14 @@ export function useEventSettings(eventId: string) {
   const handleSave = useCallback(async () => {
     if (!isDirty) return;
 
-    const latestNow = new Date();
+    // Re-check the lock against a fresh clock: the event may have started
+    // while the form sat idle. The deadline value itself needs no re-check.
     const latestIsDeadlineLocked = isVotingDeadlineLocked(
       eventData?.event,
-      latestNow,
+      new Date(),
     );
-    const latestDeadlineError = eventData?.event
-      ? getHostedDeadlineError(
-          formData,
-          earliestSlot,
-          eventData.event.timeZone,
-          latestNow,
-        )
-      : null;
 
-    if (latestIsDeadlineLocked || latestDeadlineError !== null) {
+    if (latestIsDeadlineLocked || deadlineError !== null) {
       setValidationRevision((previous) => previous + 1);
       return;
     }
@@ -365,7 +308,7 @@ export function useEventSettings(eventId: string) {
       setSaving(false);
     }
   }, [
-    earliestSlot,
+    deadlineError,
     eventData?.event,
     formData,
     isDirty,
@@ -403,7 +346,6 @@ export function useEventSettings(eventId: string) {
     formData,
     isDirty,
     isDeadlineLocked,
-    earliestSlot,
     deadlineError,
     isDeadlineValid,
     hasDeadlineRequiredError,
