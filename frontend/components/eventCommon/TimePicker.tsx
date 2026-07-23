@@ -29,6 +29,7 @@ interface TimePickerProps {
   hasError?: boolean;
   /** 當 value 為空時顯示的提示文字 */
   placeholder?: string;
+  ariaLabel?: string;
 }
 
 // Hook to detect mobile device
@@ -60,6 +61,7 @@ export function TimePicker({
   className,
   hasError = false,
   placeholder = "HH:MM",
+  ariaLabel,
 }: TimePickerProps) {
   const isMobile = useIsMobile();
 
@@ -73,6 +75,7 @@ export function TimePicker({
         className={className}
         hasError={hasError}
         placeholder={placeholder}
+        ariaLabel={ariaLabel}
       />
     );
   }
@@ -86,6 +89,7 @@ export function TimePicker({
       className={className}
       hasError={hasError}
       placeholder={placeholder}
+      ariaLabel={ariaLabel}
     />
   );
 }
@@ -99,6 +103,7 @@ function DesktopTimePicker({
   className,
   hasError,
   placeholder = "HH:MM",
+  ariaLabel,
 }: TimePickerProps) {
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -271,6 +276,7 @@ function DesktopTimePicker({
               onFocus={handleInputFocus}
               disabled={disabled}
               placeholder={placeholder}
+              aria-label={ariaLabel}
               className={cn(
                 "pr-16",
                 (hasError || inputError) && "border-destructive",
@@ -330,6 +336,7 @@ function MobileTimePicker({
   className,
   hasError,
   placeholder = "HH:MM",
+  ariaLabel,
 }: TimePickerProps) {
   const [open, setOpen] = useState(false);
   const pickerContainerRef = useRef<HTMLDivElement>(null);
@@ -462,6 +469,7 @@ function MobileTimePicker({
         <Button
           variant="outline"
           disabled={disabled}
+          aria-label={ariaLabel}
           className={cn(
             "w-full justify-start text-left font-normal",
             value == null && "text-muted-foreground",

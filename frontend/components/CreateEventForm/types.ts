@@ -3,6 +3,9 @@ import type { EventType, Weekday } from "@/types/event";
 export const TITLE_MAX_LENGTH = 50;
 export const DESCRIPTION_MAX_LENGTH = 500;
 
+/** LINE group binding is temporarily disabled; flip to true to restore it. */
+export const LINE_GROUP_BINDING_ENABLED: boolean = false;
+
 /** Default voting window: a plain 09:00-17:00 working day. */
 export const DEFAULT_START_TIME = "09:00";
 export const DEFAULT_END_TIME = "17:00";
