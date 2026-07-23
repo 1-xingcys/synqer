@@ -20,6 +20,7 @@ interface DatePickerProps {
   maxDate?: Date;
   disabled?: boolean;
   className?: string;
+  ariaLabel?: string;
 }
 
 export function DatePicker({
@@ -30,6 +31,7 @@ export function DatePicker({
   maxDate,
   disabled = false,
   className,
+  ariaLabel,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -39,6 +41,7 @@ export function DatePicker({
         <Button
           variant="outline"
           disabled={disabled}
+          aria-label={ariaLabel}
           className={cn(
             "w-full justify-start text-left font-normal",
             !value && "text-muted-foreground",

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -96,85 +96,101 @@ export function ConfigurationSection() {
             <h2 className="text-base font-semibold text-foreground mb-1">
               {t("createEvent.configuration.title")}
             </h2>
-            <p className="text-xs text-muted-foreground">
-              {isRecurring
-                ? t("createEvent.configuration.recurringDescription")
-                : t("createEvent.configuration.description")}
-            </p>
           </div>
 
-          {!isRecurring ? (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label>{t("createEvent.configuration.startDate")}</Label>
-                <DatePicker
-                  value={formData.startDate}
-                  onChange={handleStartDateChange}
-                  placeholder={t("createEvent.configuration.selectDate")}
-                  minDate={today}
-                />
+          <div className="space-y-2">
+            {!isRecurring ? (
+              <div className="space-y-2">
+                <Label>{t("createEvent.configuration.candidateDates")}</Label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <DatePicker
+                      value={formData.startDate}
+                      onChange={handleStartDateChange}
+                      placeholder={t("createEvent.configuration.selectDate")}
+                      minDate={today}
+                      ariaLabel={t(
+                        "createEvent.configuration.candidateDatesStartAria",
+                      )}
+                    />
+                  </div>
+                  <ArrowRight
+                    className="w-4 h-4 shrink-0 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <DatePicker
+                      value={formData.endDate}
+                      onChange={handleEndDateChange}
+                      placeholder={t("createEvent.configuration.selectDate")}
+                      minDate={formData.startDate || today}
+                      ariaLabel={t(
+                        "createEvent.configuration.candidateDatesEndAria",
+                      )}
+                    />
+                  </div>
+                </div>
               </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>{t("createEvent.configuration.weekdays")}</Label>
+                <div className="grid grid-cols-7 gap-1 sm:grid-cols-7">
+                  {orderedWeekdays.map((weekday) => {
+                    const isSelected = formData.weekdays.includes(weekday);
 
-              <div className="space-y-1.5">
-                <Label>{t("createEvent.configuration.endDate")}</Label>
-                <DatePicker
-                  value={formData.endDate}
-                  onChange={handleEndDateChange}
-                  placeholder={t("createEvent.configuration.selectDate")}
-                  minDate={formData.startDate || today}
-                />
+                    return (
+                      <Button
+                        key={weekday}
+                        type="button"
+                        variant={isSelected ? "default" : "outline"}
+                        className={cn(
+                          "h-8",
+                          !isSelected && "text-muted-foreground",
+                        )}
+                        onClick={() => toggleWeekday(weekday)}
+                      >
+                        {formatWeekdayLabel(
+                          weekday,
+                          locale,
+                          locale.startsWith("zh") ? "narrow" : "short",
+                        )}
+                      </Button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ) : (
+            )}
+
             <div className="space-y-2">
-              <Label>{t("createEvent.configuration.weekdays")}</Label>
-              <div className="grid grid-cols-7 gap-1 sm:grid-cols-7">
-                {orderedWeekdays.map((weekday) => {
-                  const isSelected = formData.weekdays.includes(weekday);
-
-                  return (
-                    <Button
-                      key={weekday}
-                      type="button"
-                      variant={isSelected ? "default" : "outline"}
-                      className={cn(
-                        "h-8",
-                        !isSelected && "text-muted-foreground",
-                      )}
-                      onClick={() => toggleWeekday(weekday)}
-                    >
-                      {formatWeekdayLabel(
-                        weekday,
-                        locale,
-                        locale.startsWith("zh") ? "narrow" : "short",
-                      )}
-                    </Button>
-                  );
-                })}
+              <Label>{t("createEvent.configuration.dailyTimeWindow")}</Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <TimePicker
+                    value={formData.startTime}
+                    onChange={handleStartTimeChange}
+                    type="start"
+                    hasError={hasTimeError}
+                    ariaLabel={t(
+                      "createEvent.configuration.dailyTimeWindowStartAria",
+                    )}
+                  />
+                </div>
+                <ArrowRight
+                  className="w-4 h-4 shrink-0 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <div className="flex-1 min-w-0">
+                  <TimePicker
+                    value={formData.endTime}
+                    onChange={handleEndTimeChange}
+                    type="end"
+                    hasError={hasTimeError}
+                    ariaLabel={t(
+                      "createEvent.configuration.dailyTimeWindowEndAria",
+                    )}
+                  />
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* Start Time & End Time */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label>{t("createEvent.configuration.startTime")}</Label>
-              <TimePicker
-                value={formData.startTime}
-                onChange={handleStartTimeChange}
-                type="start"
-                hasError={hasTimeError}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label>{t("createEvent.configuration.endTime")}</Label>
-              <TimePicker
-                value={formData.endTime}
-                onChange={handleEndTimeChange}
-                type="end"
-                hasError={hasTimeError}
-              />
             </div>
           </div>
 
