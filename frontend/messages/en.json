@@ -828,11 +828,11 @@
       },
       "host": "Host",
       "eventName": "Event name",
-      "eventNamePlaceholder": "e.g., Team dinner time poll",
       "description": "Description",
       "descriptionPlaceholder": "Optional. Describe the purpose and content of this event",
       "characters": "characters",
-      "charLimitReached": "(limit reached)"
+      "charLimitReached": "(limit reached)",
+      "eventNamePlaceholder": "Please enter the event name"
     },
     "lineGroup": {
       "selectGroup": "Bind LINE Group",

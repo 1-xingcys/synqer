@@ -826,13 +826,13 @@
         "oneTime": "特定日期",
         "recurring": "每週固定"
       },
-      "host": "Host",
-      "eventName": "Event name",
-      "eventNamePlaceholder": "例如：團隊聚餐時間投票",
+      "host": "主辦人",
+      "eventName": "活動名稱",
       "description": "Description",
       "descriptionPlaceholder": "選填，描述這個活動的目的和內容",
       "characters": "字元",
-      "charLimitReached": "（已達上限）"
+      "charLimitReached": "（已達上限）",
+      "eventNamePlaceholder": "請輸入活動名稱"
     },
     "lineGroup": {
       "selectGroup": "綁定 LINE 群組",

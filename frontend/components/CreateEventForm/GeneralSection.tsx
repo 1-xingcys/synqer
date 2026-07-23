@@ -65,10 +65,7 @@ export function GeneralSection() {
           <div className="flex flex-col md:flex-row gap-4">
             {/* Host - Fixed width */}
             <div className="w-full md:w-48 shrink-0 space-y-1.5">
-              <Label>
-                {t("createEvent.general.host")}{" "}
-                <span className="text-destructive">*</span>
-              </Label>
+              <Label>{t("createEvent.general.host")}</Label>
               <div className="flex items-center gap-2 px-3 h-9 border border-input rounded-md bg-muted/50">
                 <Avatar className="h-5 w-5">
                   <AvatarImage
@@ -90,8 +87,7 @@ export function GeneralSection() {
             {/* Event Name - Takes remaining space */}
             <div className="flex-1 space-y-1.5">
               <Label htmlFor="title">
-                {t("createEvent.general.eventName")}{" "}
-                <span className="text-destructive">*</span>
+                {t("createEvent.general.eventName")}
               </Label>
               <Input
                 id="title"
@@ -99,6 +95,7 @@ export function GeneralSection() {
                 onChange={(e) => updateTitle(e.target.value)}
                 placeholder={t("createEvent.general.eventNamePlaceholder")}
                 className={cn(
+                  "placeholder:text-sm md:placeholder:text-xs",
                   isOverTitleLimit &&
                     "border-destructive focus-visible:ring-destructive/20",
                 )}
