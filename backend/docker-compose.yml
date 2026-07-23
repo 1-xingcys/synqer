@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: synqer-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: synqer
+      POSTGRES_PASSWORD: synqer
+      POSTGRES_DB: synqer_dev
+    ports:
+      - '5435:5432'
+    volumes:
+      - synqer-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U synqer -d synqer_dev']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  synqer-pgdata:
