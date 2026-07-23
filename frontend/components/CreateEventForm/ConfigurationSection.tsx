@@ -17,6 +17,7 @@ import { TimePicker } from "@/components/eventCommon/TimePicker";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
 import { ValidationError } from "./hooks/useFormValidation";
+import { VotingDeadlineFields } from "./VotingDeadlineFields";
 import { getTodayInTimeZone } from "./hooks/utils";
 import { cn } from "@/lib/utils";
 import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
@@ -36,6 +37,9 @@ export function ConfigurationSection() {
     handleStartTimeChange,
     handleEndTimeChange,
     handleTimeZoneChange,
+    handleVotingDeadlineEnabledChange,
+    handleVotingDeadlineDateChange,
+    handleVotingDeadlineTimeChange,
   } = useDateTimeFields(setFormData);
 
   // Same source as the form validation, so the picker never offers a day the
@@ -61,6 +65,11 @@ export function ConfigurationSection() {
   const hasTimeError = errors.has(ValidationError.StartTimeAfterEndTime);
   const hasStartDateInPastError = errors.has(ValidationError.StartDateInPast);
   const hasWeekdayError = errors.has(ValidationError.WeekdaysRequired);
+  const VotingDeadlineErrorMessage = errors.has(
+    ValidationError.DeadlineRequired,
+  )
+    ? t("createEvent.votingDeadline.errorRequired")
+    : null;
 
   const toggleWeekday = (weekday: (typeof orderedWeekdays)[number]) => {
     setFormData((prev) => ({
@@ -188,6 +197,22 @@ export function ConfigurationSection() {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Voting Deadline */}
+          <VotingDeadlineFields
+            enabled={formData.votingDeadlineEnabled}
+            date={formData.votingDeadline}
+            time={formData.votingDeadlineTime}
+            enableLabel={t("createEvent.votingDeadline.enable")}
+            dateLabel={t("createEvent.votingDeadline.date")}
+            timeLabel={t("createEvent.votingDeadline.time")}
+            datePlaceholder={t("createEvent.configuration.selectDate")}
+            timePlaceholder={t("createEvent.configuration.selectTime")}
+            errorMessage={VotingDeadlineErrorMessage}
+            onEnabledChange={handleVotingDeadlineEnabledChange}
+            onDateChange={handleVotingDeadlineDateChange}
+            onTimeChange={handleVotingDeadlineTimeChange}
+          />
 
           {/* Time Error Message */}
           {hasTimeError && (
