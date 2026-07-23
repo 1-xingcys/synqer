@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { LineGroupSection } from "./LineGroupSection";
 import { LineGroupInfoModal } from "./LineGroupInfoModal";
 import { useFormStateContext } from "./CreateEventFormContext";
-import { TITLE_MAX_LENGTH } from "./types";
+import { LINE_GROUP_BINDING_ENABLED, TITLE_MAX_LENGTH } from "./types";
 import { useTextFields } from "./hooks/useTextFields";
 import { useLineGroupFields } from "./hooks/useLineGroupFields";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
@@ -142,7 +142,7 @@ export function GeneralSection() {
           </div>
 
           {/* LINE Group Selection (only in LIFF) */}
-          {isInLiff && (
+          {LINE_GROUP_BINDING_ENABLED && isInLiff && (
             <LineGroupSection
               selectedGroupId={formData.lineGroupId}
               selectedMemberIds={formData.selectedLineUserIds}
@@ -154,10 +154,12 @@ export function GeneralSection() {
         </div>
       </div>
 
-      <LineGroupInfoModal
-        isOpen={showLineGroupInfoModal}
-        onClose={() => setShowLineGroupInfoModal(false)}
-      />
+      {LINE_GROUP_BINDING_ENABLED && (
+        <LineGroupInfoModal
+          isOpen={showLineGroupInfoModal}
+          onClose={() => setShowLineGroupInfoModal(false)}
+        />
+      )}
     </div>
   );
 }
