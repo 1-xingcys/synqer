@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { apiFetchJson } from "@/lib/apiClient";
@@ -20,7 +20,7 @@ type UpdateEventRequest =
 type UpdateEventResponse =
   operations["EventCoreController_update"]["responses"][200]["content"]["application/json"];
 
-const SAVE_SUCCESS_DURATION_MS = 3000;
+const SAVE_SUCCESS_DURATION_MS = 1500;
 
 /**
  * 投票截止時間區塊的狀態：本地表單、與伺服器版本的差異、以及儲存流程。
@@ -63,8 +63,6 @@ export function useVotingDeadlineForm() {
     [serverDeadline],
   );
 
-  // Switching off keeps the picked date and time, so flipping the switch back
-  // on restores what the host had rather than making them pick again.
   const setEnabled = useCallback((enabled: boolean) => {
     setFormData((prev) => ({ ...prev, deadlineEnabled: enabled }));
   }, []);
@@ -81,11 +79,24 @@ export function useVotingDeadlineForm() {
   const isLocked = isVotingDeadlineLocked(event);
   const isValid = getVotingDeadlineError(formData) === null;
 
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearSuccessTimer = useCallback(() => {
+    if (successTimerRef.current !== null) {
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => clearSuccessTimer, [clearSuccessTimer]);
+
   const persist = useCallback(
     async (votingDeadline: string | null | undefined) => {
       try {
+        clearSuccessTimer();
         setSaving(true);
         setSaveError(null);
+        setSaveSuccess(false);
 
         const payload: UpdateEventRequest = { votingDeadline };
 
@@ -97,9 +108,16 @@ export function useVotingDeadlineForm() {
           body: JSON.stringify(payload),
         });
 
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), SAVE_SUCCESS_DURATION_MS);
+        // Refetch before flagging success: the spinner has to cover the whole
+        // round trip, otherwise it overlaps the "saved" badge and the badge's
+        // countdown starts while the form is still showing the old value.
         await refetch();
+
+        setSaveSuccess(true);
+        successTimerRef.current = setTimeout(() => {
+          successTimerRef.current = null;
+          setSaveSuccess(false);
+        }, SAVE_SUCCESS_DURATION_MS);
         return true;
       } catch (error) {
         setSaveError(
@@ -110,7 +128,7 @@ export function useVotingDeadlineForm() {
         setSaving(false);
       }
     },
-    [eventId, refetch],
+    [clearSuccessTimer, eventId, refetch],
   );
 
   const save = useCallback(async () => {
@@ -131,10 +149,11 @@ export function useVotingDeadlineForm() {
   }, [isLocked, persist]);
 
   const reset = useCallback(() => {
+    clearSuccessTimer();
     setSaveError(null);
     setSaveSuccess(false);
     setFormData(buildVotingDeadlineFormData(serverDeadline));
-  }, [serverDeadline]);
+  }, [clearSuccessTimer, serverDeadline]);
 
   return {
     isLoading: isEventLoading && !event,
