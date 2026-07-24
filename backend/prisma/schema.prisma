@@ -307,4 +307,7 @@ model Session {
   sid       String   @unique
   data      String
   expiresAt DateTime
+
+  // 清理過期 session 時會用 expiresAt 過濾，避免掃全表
+  @@index([expiresAt])
 }
