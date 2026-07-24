@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { apiFetchJson } from "@/lib/apiClient";
@@ -9,7 +9,6 @@ import {
   EMPTY_VOTING_DEADLINE_FORM_DATA,
   areVotingDeadlineFormsEqual,
   buildVotingDeadlineFormData,
-  cloneVotingDeadlineFormData,
   getVotingDeadlineError,
   isVotingDeadlineLocked,
   toVotingDeadlinePayload,
@@ -35,44 +34,34 @@ export function useVotingDeadlineForm() {
     refetch,
   } = useHostedEventDetail(eventId);
 
+  const event = eventData?.event ?? null;
+  // The whole deadline is one naive-ISO string on the server, so that string
+  // doubles as the sync token: the form only needs rebuilding when it changes.
+  const serverDeadline = event?.votingDeadline ?? null;
+
   const [formData, setFormData] = useState<VotingDeadlineFormData>(
     EMPTY_VOTING_DEADLINE_FORM_DATA,
   );
-  const [savedFormData, setSavedFormData] =
-    useState<VotingDeadlineFormData | null>(null);
+  const [syncedDeadline, setSyncedDeadline] = useState<
+    string | null | undefined
+  >(undefined);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Initialize local form data from server, but do not overwrite unsaved edits.
-  useEffect(() => {
-    if (eventData?.event) {
-      const nextSavedFormData = buildVotingDeadlineFormData(
-        eventData.event.votingDeadline,
-      );
-      setFormData((prev) => {
-        const hasUnsavedChanges =
-          savedFormData !== null &&
-          !areVotingDeadlineFormsEqual(prev, savedFormData);
+  // Adopt the server value during render rather than in an effect, so there is
+  // no flash of stale form state. Unsaved edits survive every refetch that
+  // leaves the deadline untouched, and are replaced only when the server value
+  // itself moved — which means our own save landed, or another host edited it.
+  if (event && syncedDeadline !== serverDeadline) {
+    setSyncedDeadline(serverDeadline);
+    setFormData(buildVotingDeadlineFormData(serverDeadline));
+  }
 
-        const isAlreadySynced = areVotingDeadlineFormsEqual(
-          prev,
-          nextSavedFormData,
-        );
-
-        return hasUnsavedChanges || isAlreadySynced
-          ? prev
-          : cloneVotingDeadlineFormData(nextSavedFormData);
-      });
-
-      if (
-        savedFormData === null ||
-        !areVotingDeadlineFormsEqual(savedFormData, nextSavedFormData)
-      ) {
-        setSavedFormData(cloneVotingDeadlineFormData(nextSavedFormData));
-      }
-    }
-  }, [eventData, savedFormData]);
+  const savedFormData = useMemo(
+    () => buildVotingDeadlineFormData(serverDeadline),
+    [serverDeadline],
+  );
 
   // Switching off keeps the picked date and time, so flipping the switch back
   // on restores what the host had rather than making them pick again.
@@ -88,27 +77,12 @@ export function useVotingDeadlineForm() {
     setFormData((prev) => ({ ...prev, deadlineTime: time }));
   }, []);
 
-  const isDirty = useMemo(() => {
-    if (!savedFormData) return false;
-    return !areVotingDeadlineFormsEqual(formData, savedFormData);
-  }, [formData, savedFormData]);
-
-  const isLocked = useMemo(
-    () => isVotingDeadlineLocked(eventData?.event),
-    [eventData?.event],
-  );
-
-  const deadlineError = useMemo(() => {
-    if (!eventData?.event) return null;
-    return getVotingDeadlineError(formData);
-  }, [eventData?.event, formData]);
+  const isDirty = !areVotingDeadlineFormsEqual(formData, savedFormData);
+  const isLocked = isVotingDeadlineLocked(event);
+  const isValid = getVotingDeadlineError(formData) === null;
 
   const save = useCallback(async () => {
-    if (!isDirty) return;
-
-    if (isLocked || deadlineError !== null) {
-      return;
-    }
+    if (isLocked || !isDirty || !isValid) return;
 
     try {
       setSaving(true);
@@ -136,22 +110,20 @@ export function useVotingDeadlineForm() {
     } finally {
       setSaving(false);
     }
-  }, [deadlineError, eventId, formData, isDirty, isLocked, refetch]);
+  }, [eventId, formData, isDirty, isLocked, isValid, refetch]);
 
   const reset = useCallback(() => {
-    if (!savedFormData) return;
-
     setSaveError(null);
     setSaveSuccess(false);
-    setFormData(cloneVotingDeadlineFormData(savedFormData));
-  }, [savedFormData]);
+    setFormData(buildVotingDeadlineFormData(serverDeadline));
+  }, [serverDeadline]);
 
   return {
-    isLoading: isEventLoading && !eventData,
+    isLoading: isEventLoading && !event,
     formData,
     isDirty,
     isLocked,
-    isValid: deadlineError === null,
+    isValid,
     saving,
     saveSuccess,
     saveError,

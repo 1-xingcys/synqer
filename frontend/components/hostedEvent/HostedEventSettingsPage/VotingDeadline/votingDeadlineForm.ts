@@ -18,17 +18,6 @@ export const EMPTY_VOTING_DEADLINE_FORM_DATA: VotingDeadlineFormData = {
   deadlineTime: null,
 };
 
-export function cloneVotingDeadlineFormData(
-  formData: VotingDeadlineFormData,
-): VotingDeadlineFormData {
-  return {
-    ...formData,
-    deadlineDate: formData.deadlineDate
-      ? new Date(formData.deadlineDate)
-      : null,
-  };
-}
-
 function areSameCalendarDay(left: Date | null, right: Date | null): boolean {
   if (!left || !right) return left === right;
 
