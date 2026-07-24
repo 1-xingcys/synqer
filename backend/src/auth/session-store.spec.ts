@@ -66,6 +66,12 @@ describe('createSessionStore', () => {
     expect(setIntervalSpy).not.toHaveBeenCalled();
   });
 
+  it('不提供 touch()，讓 express-session 不會對每個 request 寫 Session', () => {
+    const store = createSessionStore(asPrismaService(prisma));
+
+    expect(store.touch).toBeUndefined();
+  });
+
   it('寫入 session 時順便刪除已過期的資料', async () => {
     const store = createSessionStore(asPrismaService(prisma));
 

@@ -18,12 +18,18 @@ type StoreSet = (
 /**
  * 建立 express-session 用的 Prisma store。
  *
- * 相對於直接 new PrismaSessionStore()，這裡關掉了 checkPeriod 的背景輪詢。
- * 原本的 prune() 會定期 findMany 整張 Session 表再逐筆刪除，只要間隔小於
- * Neon 的 autosuspend 門檻，compute 就永遠不會休眠。改成在 set() 時順便用
- * 一次 deleteMany 清掉過期資料 —— 那個當下 compute 本來就是醒著的，等於
- * 不用多付錢。過期但沒被清掉的 session 也不會被誤用，
- * PrismaSessionStore.get() 讀到過期資料時會自己刪掉並視為未登入。
+ * 相對於直接 new PrismaSessionStore()，這裡做了兩件事來降低 Neon 的 CU-hrs：
+ *
+ * 1. 關掉 checkPeriod 的背景輪詢。原本的 prune() 會定期 findMany 整張 Session
+ *    表再逐筆刪除，只要間隔小於 Neon 的 autosuspend 門檻，compute 就永遠不會休眠。
+ *    改成在 set() 時順便用一次 deleteMany 清掉過期資料 —— 那個當下 compute
+ *    本來就是醒著的，等於不用多付錢。過期但沒被清掉的 session 也不會被誤用，
+ *    PrismaSessionStore.get() 讀到過期資料時會自己刪掉並視為未登入。
+ *
+ * 2. 移除 touch()。express-session 只有在 store 提供 touch() 時才會做 sliding
+ *    expiration，而每次 touch() 都是一組 SELECT + UPDATE。由於 session 沒有開
+ *    rolling，cookie 的有效期本來就不會延長（Set-Cookie 只在建立 session 時送出），
+ *    server 端延長 expiresAt 對使用者沒有任何效果，只是白白產生寫入。
  */
 export function createSessionStore(prisma: PrismaService): Store {
   const logger = new Logger('SessionStore');
@@ -55,15 +61,20 @@ export function createSessionStore(prisma: PrismaService): Store {
     }
   };
 
-  // PrismaSessionStore 把 set 掛成唯讀的 instance property，
-  // 這裡透過一次轉型改寫它。
-  const mutableStore = store as unknown as { set: StoreSet };
+  // PrismaSessionStore 把 set/touch 掛成唯讀的 instance property，
+  // 這裡透過一次轉型改寫它們。
+  const mutableStore = store as unknown as {
+    set: StoreSet;
+    touch?: StoreSet;
+  };
 
   const setSession = mutableStore.set;
   mutableStore.set = (sid, session, callback) => {
     void pruneIfDue();
     setSession(sid, session, callback);
   };
+
+  delete mutableStore.touch;
 
   return store;
 }
