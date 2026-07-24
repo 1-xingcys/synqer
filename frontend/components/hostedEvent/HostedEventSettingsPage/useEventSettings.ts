@@ -2,99 +2,21 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
-import {
-  combineVotingDeadline,
-  validateVotingDeadline,
-  VOTING_DEADLINE_ERROR,
-  type VotingDeadlineError,
-} from "@/lib/votingDeadline";
+import { VOTING_DEADLINE_ERROR } from "@/lib/votingDeadline";
 import { apiFetchJson } from "@/lib/apiClient";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 import { myEventsKeys } from "@/hooks/useMyEvents";
-import { formatMinutesToTime } from "@/lib/utils";
 import type { operations } from "@/generated/openapi";
-import { EventStatus } from "@/types/event";
-
-export interface VotingDeadlineFormData {
-  deadlineEnabled: boolean;
-  deadlineDate: Date | null;
-  deadlineTime: string | null;
-}
-
-const EMPTY_FORM_DATA: VotingDeadlineFormData = {
-  deadlineEnabled: false,
-  deadlineDate: null,
-  deadlineTime: null,
-};
-
-function cloneVotingDeadlineFormData(
-  formData: VotingDeadlineFormData,
-): VotingDeadlineFormData {
-  return {
-    ...formData,
-    deadlineDate: formData.deadlineDate
-      ? new Date(formData.deadlineDate)
-      : null,
-  };
-}
-
-function areSameCalendarDay(left: Date | null, right: Date | null): boolean {
-  if (!left || !right) return left === right;
-
-  return (
-    left.getFullYear() === right.getFullYear() &&
-    left.getMonth() === right.getMonth() &&
-    left.getDate() === right.getDate()
-  );
-}
-
-function areVotingDeadlineFormsEqual(
-  left: VotingDeadlineFormData,
-  right: VotingDeadlineFormData,
-): boolean {
-  if (left.deadlineEnabled !== right.deadlineEnabled) {
-    return false;
-  }
-
-  if (!left.deadlineEnabled) {
-    return true;
-  }
-
-  return (
-    left.deadlineTime === right.deadlineTime &&
-    areSameCalendarDay(left.deadlineDate, right.deadlineDate)
-  );
-}
-
-export function buildVotingDeadlineFormData(
-  votingDeadline?: string | null,
-): VotingDeadlineFormData {
-  if (votingDeadline) {
-    // votingDeadline is stored naive: UTC fields carry the wall-clock digits
-    // for the event's time zone. Read those digits via getUTC* — local
-    // getters would apply the runner's local offset and shift the day/time.
-    const deadline = new Date(votingDeadline);
-    const time = formatMinutesToTime(
-      deadline.getUTCHours() * 60 + deadline.getUTCMinutes(),
-    );
-    // Build a local-midnight Date whose local Y/M/D match the naive UTC
-    // digits, matching the date-picker contract used elsewhere (see
-    // combineVotingDeadline in lib/votingDeadline.ts).
-    const deadlineDate = new Date(
-      deadline.getUTCFullYear(),
-      deadline.getUTCMonth(),
-      deadline.getUTCDate(),
-    );
-
-    return {
-      deadlineEnabled: true,
-      deadlineDate,
-      deadlineTime: time,
-    };
-  }
-
-  return { ...EMPTY_FORM_DATA };
-}
+import {
+  EMPTY_VOTING_DEADLINE_FORM_DATA,
+  areVotingDeadlineFormsEqual,
+  buildVotingDeadlineFormData,
+  cloneVotingDeadlineFormData,
+  getVotingDeadlineError,
+  isVotingDeadlineLocked,
+  toVotingDeadlinePayload,
+  type VotingDeadlineFormData,
+} from "./VotingDeadline/votingDeadlineForm";
 
 type UpdateEventRequest =
   operations["EventCoreController_update"]["requestBody"]["content"]["application/json"];
@@ -103,46 +25,14 @@ type UpdateEventResponse =
 type RemoveEventResponse =
   operations["EventCoreController_remove"]["responses"][200]["content"]["application/json"];
 
-type DeadlineLockableEvent = {
-  status: EventStatus;
-};
-
-/**
- * The deadline is only locked once the event time is confirmed, mirroring the
- * API's single update guard. An event that merely started is still collecting
- * votes, so the host keeps control over the deadline.
- */
-function isVotingDeadlineLocked(
-  event: DeadlineLockableEvent | null | undefined,
-) {
-  if (!event) {
-    return false;
-  }
-
-  return (
-    event.status === EventStatus.CONFIRMED ||
-    event.status === EventStatus.COMPLETED
-  );
-}
-
-function getHostedDeadlineError(
-  formData: VotingDeadlineFormData,
-): VotingDeadlineError | null {
-  // The deadline value is unconstrained here too; only completeness matters.
-  return validateVotingDeadline({
-    enabled: formData.deadlineEnabled,
-    date: formData.deadlineDate,
-    time: formData.deadlineTime,
-  });
-}
-
 export function useEventSettings(eventId: string) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: eventData, isLoading, refetch } = useHostedEventDetail(eventId);
 
-  const [formData, setFormData] =
-    useState<VotingDeadlineFormData>(EMPTY_FORM_DATA);
+  const [formData, setFormData] = useState<VotingDeadlineFormData>(
+    EMPTY_VOTING_DEADLINE_FORM_DATA,
+  );
   const [savedFormData, setSavedFormData] =
     useState<VotingDeadlineFormData | null>(null);
   const [saving, setSaving] = useState(false);
@@ -238,10 +128,9 @@ export function useEventSettings(eventId: string) {
     [eventData?.event],
   );
 
-  // Reuse the same validation engine as the create page.
-  const deadlineError = useMemo<VotingDeadlineError | null>(() => {
+  const deadlineError = useMemo(() => {
     if (!eventData?.event) return null;
-    return getHostedDeadlineError(formData);
+    return getVotingDeadlineError(formData);
   }, [eventData?.event, formData]);
 
   const isDeadlineValid = deadlineError === null;
@@ -259,18 +148,7 @@ export function useEventSettings(eventId: string) {
       setSaving(true);
       setSaveError(null);
 
-      // 組合日期和時間
-      let votingDeadline: string | null | undefined;
-      if (!formData.deadlineEnabled) {
-        votingDeadline = null;
-      } else if (formData.deadlineDate && formData.deadlineTime) {
-        votingDeadline = combineVotingDeadline(
-          formData.deadlineDate,
-          formData.deadlineTime,
-        ).toISOString();
-      }
-
-      await updateVotingDeadline(votingDeadline);
+      await updateVotingDeadline(toVotingDeadlinePayload(formData));
 
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
