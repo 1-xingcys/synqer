@@ -449,7 +449,7 @@
       "deleteEvent": "刪除活動",
       "deleteWarning": "此操作無法復原。所有投票和資料將被永久刪除。",
       "confirmDelete": "您確定要刪除此活動嗎？",
-      "deadlineLockedDescription": "活動已開始或已確認時間，無法修改投票截止時間",
+      "deadlineLockedDescription": "已確認活動時間，無法修改投票截止時間",
       "inviteLink": {
         "title": "邀請連結",
         "description": "分享此連結，邀請他人加入活動",

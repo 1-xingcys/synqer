@@ -11,11 +11,9 @@ import {
 import { apiFetchJson } from "@/lib/apiClient";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 import { myEventsKeys } from "@/hooks/useMyEvents";
-import { getOneTimeEventStartInstant } from "@/lib/eventSchedule";
 import { formatMinutesToTime } from "@/lib/utils";
-import { instantToZonedWallClock } from "@/lib/time";
 import type { operations } from "@/generated/openapi";
-import { EventStatus, type EventSchedule } from "@/types/event";
+import { EventStatus } from "@/types/event";
 
 export interface VotingDeadlineFormData {
   deadlineEnabled: boolean;
@@ -107,36 +105,24 @@ type RemoveEventResponse =
 
 type DeadlineLockableEvent = {
   status: EventStatus;
-  schedule: EventSchedule;
-  timeZone: string;
 };
 
+/**
+ * The deadline is only locked once the event time is confirmed, mirroring the
+ * API's single update guard. An event that merely started is still collecting
+ * votes, so the host keeps control over the deadline.
+ */
 function isVotingDeadlineLocked(
   event: DeadlineLockableEvent | null | undefined,
-  now: Date = new Date(),
 ) {
   if (!event) {
     return false;
   }
 
-  if (
+  return (
     event.status === EventStatus.CONFIRMED ||
     event.status === EventStatus.COMPLETED
-  ) {
-    return true;
-  }
-
-  if (event.schedule.kind !== "ONE_TIME") {
-    return false;
-  }
-
-  // getOneTimeEventStartInstant returns a naive wall-clock Date (UTC fields
-  // carry the digits); project "now" into the event's time zone before
-  // comparing so both sides are in the same space.
-  const eventStart = getOneTimeEventStartInstant(event.schedule);
-  const wallNow = instantToZonedWallClock(now, event.timeZone);
-
-  return wallNow >= eventStart;
+  );
 }
 
 function getHostedDeadlineError(
@@ -164,9 +150,6 @@ export function useEventSettings(eventId: string) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  // Force a fresh "now" validation after the user clicks save, without
-  // keeping a timer running while the form sits idle.
-  const [validationRevision, setValidationRevision] = useState(0);
 
   const updateVotingDeadline = useCallback(
     async (votingDeadline?: string | null) => {
@@ -250,10 +233,10 @@ export function useEventSettings(eventId: string) {
     return !areVotingDeadlineFormsEqual(formData, savedFormData);
   }, [formData, savedFormData]);
 
-  const isDeadlineLocked = useMemo(() => {
-    void validationRevision;
-    return isVotingDeadlineLocked(eventData?.event);
-  }, [eventData?.event, validationRevision]);
+  const isDeadlineLocked = useMemo(
+    () => isVotingDeadlineLocked(eventData?.event),
+    [eventData?.event],
+  );
 
   // Reuse the same validation engine as the create page.
   const deadlineError = useMemo<VotingDeadlineError | null>(() => {
@@ -268,15 +251,7 @@ export function useEventSettings(eventId: string) {
   const handleSave = useCallback(async () => {
     if (!isDirty) return;
 
-    // Re-check the lock against a fresh clock: the event may have started
-    // while the form sat idle. The deadline value itself needs no re-check.
-    const latestIsDeadlineLocked = isVotingDeadlineLocked(
-      eventData?.event,
-      new Date(),
-    );
-
-    if (latestIsDeadlineLocked || deadlineError !== null) {
-      setValidationRevision((previous) => previous + 1);
+    if (isDeadlineLocked || deadlineError !== null) {
       return;
     }
 
@@ -309,8 +284,8 @@ export function useEventSettings(eventId: string) {
     }
   }, [
     deadlineError,
-    eventData?.event,
     formData,
+    isDeadlineLocked,
     isDirty,
     refetch,
     updateVotingDeadline,

@@ -449,7 +449,7 @@
       "deleteEvent": "Delete Event",
       "deleteWarning": "This action cannot be undone. All votes and data will be permanently deleted.",
       "confirmDelete": "Are you sure you want to delete this event?",
-      "deadlineLockedDescription": "Voting deadline cannot be modified after the event starts or the event time is confirmed",
+      "deadlineLockedDescription": "Voting deadline cannot be modified after the event time is confirmed",
       "inviteLink": {
         "title": "Invite Link",
         "description": "Share this link to invite others to the event",
