@@ -3,11 +3,10 @@
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check, Copy } from "lucide-react";
-import { VotingDeadlineFields } from "./VotingDeadlineFields";
 import { Button } from "@/components/ui/button";
-import { LoadingState } from "@/components/ui/loading-state";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { useEventSettings } from "./useEventSettings";
+import { VotingDeadline } from "./VotingDeadline";
 import { DangerZone } from "./DangerZone";
 
 export default function HostedEventSettingsPage() {
@@ -15,33 +14,10 @@ export default function HostedEventSettingsPage() {
   const eventId = params.eventId as string;
   const t = useTranslations();
 
-  const {
-    eventData,
-    formData,
-    isDirty,
-    isDeadlineLocked,
-    isDeadlineValid,
-    hasDeadlineRequiredError,
-    updateDeadlineEnabled,
-    updateDeadlineDate,
-    updateDeadlineTime,
-    isLoading,
-    saving,
-    saveSuccess,
-    saveError,
-    deleting,
-    showDeleteConfirm,
-    handleSave,
-    resetForm,
-    handleDelete,
-    toggleDeleteConfirm,
-  } = useEventSettings(eventId);
+  const { deleting, showDeleteConfirm, handleDelete, toggleDeleteConfirm } =
+    useEventSettings(eventId);
 
   const { shareUrl, copied: linkCopied, copyLink } = useEventShareLink(eventId);
-
-  if (isLoading && (!eventData || !formData)) {
-    return <LoadingState label={t("common.loading")} viewport="section" />;
-  }
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -80,72 +56,7 @@ export default function HostedEventSettingsPage() {
         </div>
       </div>
 
-      {/* Voting Deadline Section */}
-      <div
-        className={`border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden ${isDeadlineLocked ? "opacity-60" : ""}`}
-      >
-        {/* Section Header */}
-        <div className="px-4 py-3 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-700">
-          <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-            {t("createEvent.votingDeadline.title")}
-          </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-            {isDeadlineLocked
-              ? t("hosted.settingsPage.deadlineLockedDescription")
-              : t("createEvent.votingDeadline.description")}
-          </p>
-        </div>
-
-        {/* Section Content */}
-        <div className="p-4 bg-white dark:bg-zinc-900">
-          <VotingDeadlineFields
-            enabled={formData.deadlineEnabled}
-            date={formData.deadlineDate}
-            time={formData.deadlineTime}
-            enableLabel={t("createEvent.votingDeadline.enable")}
-            dateLabel={t("createEvent.votingDeadline.date")}
-            timeLabel={t("createEvent.votingDeadline.time")}
-            datePlaceholder={t("createEvent.configuration.selectDate")}
-            errorMessage={
-              hasDeadlineRequiredError
-                ? t("createEvent.votingDeadline.errorRequired")
-                : undefined
-            }
-            disabled={isDeadlineLocked}
-            onEnabledChange={updateDeadlineEnabled}
-            onDateChange={updateDeadlineDate}
-            onTimeChange={updateDeadlineTime}
-          />
-
-          {/* Save Button */}
-          {!isDeadlineLocked && (
-            <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-700">
-              {saveError && (
-                <span className="text-sm text-destructive">{saveError}</span>
-              )}
-              {saveSuccess && (
-                <span className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
-                  <Check className="w-4 h-4" />
-                  {t("hosted.settingsPage.saved")}
-                </span>
-              )}
-
-              {isDirty && (
-                <Button variant="outline" onClick={resetForm} disabled={saving}>
-                  {t("hosted.settingsPage.discard")}
-                </Button>
-              )}
-
-              <Button
-                onClick={() => void handleSave()}
-                disabled={saving || !isDeadlineValid || !isDirty}
-              >
-                {saving ? t("common.saving") : t("common.save")}
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
+      <VotingDeadline />
 
       {/* Danger Zone */}
       <DangerZone

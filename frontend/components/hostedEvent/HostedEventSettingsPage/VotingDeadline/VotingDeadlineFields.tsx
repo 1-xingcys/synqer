@@ -30,14 +30,6 @@ interface VotingDeadlineFieldsProps {
   onTimeChange: (time: string) => void;
 }
 
-/**
- * 主辦設定頁專用的投票截止時間欄位。
- * 只負責顯示 checkbox、日期/時間欄位與錯誤訊息，
- * 是否可編輯與驗證規則由 useEventSettings 決定。
- *
- * 建立活動頁有自己的一份（CreateEventForm/VotingDeadlineFields），
- * 兩邊的樣式可以各自調整，不互相牽動。
- */
 export function VotingDeadlineFields({
   enabled,
   date,
