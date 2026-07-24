@@ -892,8 +892,6 @@
       "startDateInPastError": "Event start date cannot be earlier than today"
     },
     "votingDeadline": {
-      "title": "Voting Deadline",
-      "description": "Set a deadline for participants to submit their votes",
       "enable": "Set voting deadline",
       "date": "Deadline date",
       "time": "Deadline time",

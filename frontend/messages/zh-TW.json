@@ -892,8 +892,6 @@
       "startDateInPastError": "活動開始日期不能早於今天"
     },
     "votingDeadline": {
-      "title": "Voting Deadline",
-      "description": "設定活動的投票截止時間",
       "enable": "設定截止時間",
       "date": "截止日期",
       "time": "截止時間",

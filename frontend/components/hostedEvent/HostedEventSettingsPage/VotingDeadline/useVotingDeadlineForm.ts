@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { apiFetchJson } from "@/lib/apiClient";
-import { VOTING_DEADLINE_ERROR } from "@/lib/votingDeadline";
 import type { operations } from "@/generated/openapi";
 import {
   EMPTY_VOTING_DEADLINE_FORM_DATA,
@@ -75,22 +74,10 @@ export function useVotingDeadlineForm() {
     }
   }, [eventData, savedFormData]);
 
+  // Switching off keeps the picked date and time, so flipping the switch back
+  // on restores what the host had rather than making them pick again.
   const setEnabled = useCallback((enabled: boolean) => {
-    setFormData((prev) => {
-      if (enabled) {
-        return {
-          ...prev,
-          deadlineEnabled: true,
-        };
-      }
-
-      return {
-        ...prev,
-        deadlineEnabled: false,
-        deadlineDate: null,
-        deadlineTime: null,
-      };
-    });
+    setFormData((prev) => ({ ...prev, deadlineEnabled: enabled }));
   }, []);
 
   const setDate = useCallback((date: Date | null) => {
@@ -165,7 +152,6 @@ export function useVotingDeadlineForm() {
     isDirty,
     isLocked,
     isValid: deadlineError === null,
-    hasRequiredError: deadlineError === VOTING_DEADLINE_ERROR.REQUIRED,
     saving,
     saveSuccess,
     saveError,

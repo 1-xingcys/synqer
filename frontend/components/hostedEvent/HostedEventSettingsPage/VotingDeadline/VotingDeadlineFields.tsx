@@ -1,29 +1,23 @@
 "use client";
 
-import { AlertCircle } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/eventCommon/DatePicker";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
-
-const CHECKBOX_ID = "hosted-enable-voting-deadline";
-const LABEL_CLASS_NAME = "text-sm font-medium text-zinc-700 dark:text-zinc-300";
+import { cn } from "@/lib/utils";
 
 interface VotingDeadlineFieldsProps {
+  /** 由開關控制的展開狀態 */
   enabled: boolean;
   /** 投票截止日期 */
   date: Date | null;
   /** 投票截止時間 (HH:MM 格式)，未選擇時為 null */
   time: string | null;
-  enableLabel: string;
   dateLabel: string;
   timeLabel: string;
   datePlaceholder: string;
+  timePlaceholder: string;
   /** 活動已確認時段或已開始後鎖定整組欄位 */
   disabled?: boolean;
-  /** 由上層驗證邏輯提供的錯誤訊息 */
-  errorMessage?: string | null;
-  onEnabledChange: (enabled: boolean) => void;
   /** 日期變更回調 */
   onDateChange: (date: Date | null) => void;
   /** 時間變更回調 */
@@ -34,70 +28,53 @@ export function VotingDeadlineFields({
   enabled,
   date,
   time,
-  enableLabel,
   dateLabel,
   timeLabel,
   datePlaceholder,
+  timePlaceholder,
   disabled = false,
-  errorMessage = null,
-  onEnabledChange,
   onDateChange,
   onTimeChange,
 }: VotingDeadlineFieldsProps) {
-  const showError = enabled && !disabled && Boolean(errorMessage);
-
   return (
-    <div className={`space-y-4 ${disabled ? "pointer-events-none" : ""}`}>
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id={CHECKBOX_ID}
-            checked={enabled}
-            onCheckedChange={(checked) => onEnabledChange(checked === true)}
-            disabled={disabled}
-          />
-          <Label
-            htmlFor={CHECKBOX_ID}
-            className={`${LABEL_CLASS_NAME} cursor-pointer`}
-          >
-            {enableLabel}
-          </Label>
-        </div>
-      </div>
-
-      {enabled ? (
-        <>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className={LABEL_CLASS_NAME}>{dateLabel}</Label>
-              <DatePicker
-                value={date}
-                onChange={onDateChange}
-                placeholder={datePlaceholder}
-                disabled={disabled}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className={LABEL_CLASS_NAME}>{timeLabel}</Label>
-              <TimePicker
-                value={time}
-                onChange={onTimeChange}
-                type="start"
-                hasError={showError}
-                disabled={disabled}
-              />
-            </div>
+    /*
+      The fields stay mounted so the height can animate in both directions:
+      the grid row goes 0fr -> 1fr while the inner wrapper clips the overflow.
+      `inert` keeps the collapsed fields out of the tab order and the
+      accessibility tree, since they are only visually hidden.
+    */
+    <div
+      className={cn(
+        "grid transition-all duration-300 ease-in-out motion-reduce:transition-none",
+        enabled ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+      )}
+      inert={!enabled}
+    >
+      <div className="overflow-hidden">
+        {/* Padding lives inside the clipped area so it collapses too. */}
+        <div className="grid grid-cols-2 gap-4 pt-4">
+          <div className="space-y-1.5">
+            <Label>{dateLabel}</Label>
+            <DatePicker
+              value={date}
+              onChange={onDateChange}
+              placeholder={datePlaceholder}
+              disabled={disabled}
+            />
           </div>
 
-          {showError ? (
-            <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-              <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-              <p className="text-sm text-destructive">{errorMessage}</p>
-            </div>
-          ) : null}
-        </>
-      ) : null}
+          <div className="space-y-1.5">
+            <Label>{timeLabel}</Label>
+            <TimePicker
+              value={time}
+              onChange={onTimeChange}
+              type="start"
+              placeholder={timePlaceholder}
+              disabled={disabled}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
