@@ -64,39 +64,6 @@ describe('EventScheduleService', () => {
     });
   });
 
-  describe('getEventStartInstant', () => {
-    it('should return null for recurring events', () => {
-      expect(
-        service.getEventStartInstant({
-          type: EventType.RECURRING,
-          oneTimeSchedule: null,
-          recurringSchedule: {
-            weekdays: [Weekday.FRIDAY],
-            startMinuteOfDay: 540,
-            endMinuteOfDay: 600,
-            slotDurationMin: 15,
-          },
-        }),
-      ).toBeNull();
-    });
-
-    it('should return start instant for one-time events', () => {
-      expect(
-        service.getEventStartInstant({
-          type: EventType.ONE_TIME,
-          oneTimeSchedule: {
-            startDate: new Date('2024-02-01T00:00:00.000Z'),
-            endDate: new Date('2024-02-02T00:00:00.000Z'),
-            startMinuteOfDay: 540,
-            endMinuteOfDay: 600,
-            slotDurationMin: 15,
-          },
-          recurringSchedule: null,
-        }),
-      ).toEqual(new Date('2024-02-01T09:00:00.000Z'));
-    });
-  });
-
   describe('getCalendarRange', () => {
     it('should return null for recurring events', () => {
       expect(

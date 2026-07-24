@@ -102,21 +102,15 @@ export class EventUpdateService {
   }
 
   /**
-   * 驗證投票截止時間是否仍可編輯：
-   * - 已確認活動時間後不可調整
-   * - 單次活動開始後不可調整
+   * 驗證投票截止時間是否仍可編輯：確認活動時間後不可調整。
+   *
+   * 活動是否已開始不列入判斷 —— 只要時間還沒確認，主辦人就能繼續調整截止
+   * 時間來開關投票，與建立活動時一樣不做多餘限制。
    */
   private assertVotingDeadlineIsEditable(event: VotingDeadlineEditableEvent) {
     if (event.confirmedTimeSlots.length > 0) {
       throw new BadRequestException(
         'Voting deadline cannot be changed after confirming the event time',
-      );
-    }
-
-    const eventStart = this.eventScheduleService.getEventStartInstant(event);
-    if (eventStart && new Date() >= eventStart) {
-      throw new BadRequestException(
-        'Voting deadline cannot be changed after the event has started',
       );
     }
   }
