@@ -454,6 +454,11 @@
         "title": "邀請連結",
         "copy": "複製",
         "copied": "已複製！"
+      },
+      "clearDeadlineConfirm": {
+        "title": "取消投票截止時間？",
+        "keep": "保留截止時間",
+        "confirm": "取消截止時間"
       }
     }
   },

@@ -52,6 +52,7 @@ export function VotingDeadlineFields({
     >
       <div className="overflow-hidden">
         {/* Padding lives inside the clipped area so it collapses too. */}
+        <hr className="my-2 border-t border-gray-300" />
         <div className="grid grid-cols-2 gap-4 pt-4">
           <div className="space-y-1.5">
             <Label>{dateLabel}</Label>

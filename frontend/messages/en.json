@@ -454,6 +454,11 @@
         "title": "Invite Link",
         "copy": "Copy",
         "copied": "Copied!"
+      },
+      "clearDeadlineConfirm": {
+        "title": "Cancel voting deadline?",
+        "keep": "Keep deadline",
+        "confirm": "Cancel deadline"
       }
     }
   },

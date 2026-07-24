@@ -1,10 +1,12 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
+import { ClearDeadlineConfirmModal } from "./ClearDeadlineConfirmModal";
 import { VotingDeadlineFields } from "./VotingDeadlineFields";
 import { useVotingDeadlineForm } from "./useVotingDeadlineForm";
 
@@ -18,6 +20,7 @@ export function VotingDeadline() {
     isDirty,
     isLocked,
     isValid,
+    hasSavedDeadline,
     saving,
     saveSuccess,
     saveError,
@@ -25,8 +28,35 @@ export function VotingDeadline() {
     setDate,
     setTime,
     save,
+    clearDeadline,
     reset,
   } = useVotingDeadlineForm();
+
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  // Switching off a deadline that is already live is the one change that skips
+  // the Save button: it is destructive, so it confirms and writes immediately.
+  // Every other edit stays staged in the form until the host saves.
+  const handleEnabledChange = useCallback(
+    (enabled: boolean) => {
+      if (!enabled && hasSavedDeadline) {
+        setShowClearConfirm(true);
+        return;
+      }
+
+      setEnabled(enabled);
+    },
+    [hasSavedDeadline, setEnabled],
+  );
+
+  const handleConfirmClear = useCallback(async () => {
+    const cleared = await clearDeadline();
+    if (cleared) {
+      setShowClearConfirm(false);
+    }
+  }, [clearDeadline]);
+
+  const closeClearConfirm = useCallback(() => setShowClearConfirm(false), []);
 
   // The action row only takes up space when there is something to act on or
   // report, so an untouched section stays at the header plus fields.
@@ -44,7 +74,7 @@ export function VotingDeadline() {
         <Switch
           aria-labelledby={HEADING_ID}
           checked={formData.deadlineEnabled}
-          onCheckedChange={setEnabled}
+          onCheckedChange={handleEnabledChange}
           disabled={isLoading || isLocked || saving}
         />
       </div>
@@ -84,20 +114,30 @@ export function VotingDeadline() {
 
           {isDirty && (
             <>
-              <Button variant="outline" onClick={reset} disabled={saving}>
-                {t("hosted.settingsPage.discard")}
-              </Button>
-              {saving ? (
-                <Spinner size="sm" tone="current" className="mr-2" />
-              ) : (
-                <Button onClick={() => void save()} disabled={!isValid}>
-                  {t("common.save")}
+              {!saving && (
+                <Button variant="outline" onClick={reset} disabled={saving}>
+                  {t("hosted.settingsPage.discard")}
                 </Button>
               )}
+              <Button onClick={() => void save()} disabled={!isValid}>
+                {saving ? (
+                  <Spinner size="sm" tone="current" className="mr-2" />
+                ) : (
+                  t("common.save")
+                )}
+              </Button>
             </>
           )}
         </div>
       )}
+
+      <ClearDeadlineConfirmModal
+        open={showClearConfirm}
+        saving={saving}
+        error={saveError}
+        onCancel={closeClearConfirm}
+        onConfirm={() => void handleConfirmClear()}
+      />
     </section>
   );
 }

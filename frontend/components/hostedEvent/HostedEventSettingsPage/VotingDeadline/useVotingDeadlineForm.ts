@@ -81,36 +81,54 @@ export function useVotingDeadlineForm() {
   const isLocked = isVotingDeadlineLocked(event);
   const isValid = getVotingDeadlineError(formData) === null;
 
+  const persist = useCallback(
+    async (votingDeadline: string | null | undefined) => {
+      try {
+        setSaving(true);
+        setSaveError(null);
+
+        const payload: UpdateEventRequest = { votingDeadline };
+
+        await apiFetchJson<UpdateEventResponse>(`/events/${eventId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), SAVE_SUCCESS_DURATION_MS);
+        await refetch();
+        return true;
+      } catch (error) {
+        setSaveError(
+          error instanceof Error ? error.message : "Failed to save settings",
+        );
+        return false;
+      } finally {
+        setSaving(false);
+      }
+    },
+    [eventId, refetch],
+  );
+
   const save = useCallback(async () => {
-    if (isLocked || !isDirty || !isValid) return;
+    if (isLocked || !isDirty || !isValid) return false;
 
-    try {
-      setSaving(true);
-      setSaveError(null);
+    return persist(toVotingDeadlinePayload(formData));
+  }, [formData, isDirty, isLocked, isValid, persist]);
 
-      const payload: UpdateEventRequest = {
-        votingDeadline: toVotingDeadlinePayload(formData),
-      };
+  /**
+   * Clearing a deadline participants can already see is destructive, so the UI
+   * confirms first and then writes immediately — nothing is staged in the form,
+   * which keeps the switch honest if the request fails.
+   */
+  const clearDeadline = useCallback(async () => {
+    if (isLocked) return false;
 
-      await apiFetchJson<UpdateEventResponse>(`/events/${eventId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), SAVE_SUCCESS_DURATION_MS);
-      await refetch();
-    } catch (error) {
-      setSaveError(
-        error instanceof Error ? error.message : "Failed to save settings",
-      );
-    } finally {
-      setSaving(false);
-    }
-  }, [eventId, formData, isDirty, isLocked, isValid, refetch]);
+    return persist(null);
+  }, [isLocked, persist]);
 
   const reset = useCallback(() => {
     setSaveError(null);
@@ -124,6 +142,8 @@ export function useVotingDeadlineForm() {
     isDirty,
     isLocked,
     isValid,
+    /** 伺服器上已有截止時間，關閉開關等於刪掉參與者看得到的資訊 */
+    hasSavedDeadline: serverDeadline !== null,
     saving,
     saveSuccess,
     saveError,
@@ -131,6 +151,7 @@ export function useVotingDeadlineForm() {
     setDate,
     setTime,
     save,
+    clearDeadline,
     reset,
   };
 }
