@@ -445,9 +445,7 @@
       "saveChanges": "Save Changes",
       "discard": "Discard Changes",
       "saved": "Changes saved!",
-      "dangerZone": "Danger Zone",
       "deleteEvent": "Delete Event",
-      "deleteWarning": "This action cannot be undone. All votes and data will be permanently deleted.",
       "deadlineLockedDescription": "Voting deadline cannot be modified after the event time is confirmed",
       "inviteLink": {
         "title": "Invite Link",

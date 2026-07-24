@@ -445,9 +445,7 @@
       "saveChanges": "儲存變更",
       "discard": "捨棄變更",
       "saved": "變更已儲存！",
-      "dangerZone": "Danger Zone",
       "deleteEvent": "刪除活動",
-      "deleteWarning": "此操作無法復原。所有投票和資料將被永久刪除。",
       "deadlineLockedDescription": "已確認活動時間，無法修改投票截止時間",
       "inviteLink": {
         "title": "邀請連結",
