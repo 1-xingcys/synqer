@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useDeleteEvent } from "./useDeleteEvent";
 
-export function DangerZone() {
+export function DeleteEvent() {
   const t = useTranslations();
   const { deleting, showConfirm, requestDelete, cancelDelete, confirmDelete } =
     useDeleteEvent();
