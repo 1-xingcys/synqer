@@ -452,7 +452,6 @@
       "deadlineLockedDescription": "已確認活動時間，無法修改投票截止時間",
       "inviteLink": {
         "title": "邀請連結",
-        "description": "分享此連結，邀請他人加入活動",
         "copy": "複製",
         "copied": "已複製！"
       }

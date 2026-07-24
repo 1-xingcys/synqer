@@ -452,7 +452,6 @@
       "deadlineLockedDescription": "Voting deadline cannot be modified after the event time is confirmed",
       "inviteLink": {
         "title": "Invite Link",
-        "description": "Share this link to invite others to the event",
         "copy": "Copy",
         "copied": "Copied!"
       }
