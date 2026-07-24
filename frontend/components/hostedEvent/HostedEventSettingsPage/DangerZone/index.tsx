@@ -3,23 +3,12 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { useDeleteEvent } from "./useDeleteEvent";
 
-interface DangerZoneProps {
-  showDeleteConfirm: boolean;
-  deleting: boolean;
-  onDeleteClick: () => void;
-  onConfirmDelete: () => void;
-  onCancelDelete: () => void;
-}
-
-export function DangerZone({
-  showDeleteConfirm,
-  deleting,
-  onDeleteClick,
-  onConfirmDelete,
-  onCancelDelete,
-}: DangerZoneProps) {
+export function DangerZone() {
   const t = useTranslations();
+  const { deleting, showConfirm, requestDelete, cancelDelete, confirmDelete } =
+    useDeleteEvent();
 
   return (
     <div className="border border-red-200 dark:border-red-900/50 rounded-lg overflow-hidden">
@@ -32,7 +21,7 @@ export function DangerZone({
 
       {/* Content */}
       <div className="p-4">
-        {!showDeleteConfirm ? (
+        {!showConfirm ? (
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0 pr-4">
               <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
@@ -44,7 +33,7 @@ export function DangerZone({
             </div>
             <Button
               variant="outline"
-              onClick={onDeleteClick}
+              onClick={requestDelete}
               className="shrink-0 border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-400 dark:hover:border-red-700"
             >
               {t("hosted.settingsPage.deleteEvent")}
@@ -67,7 +56,7 @@ export function DangerZone({
               <div className="flex gap-2 sm:ml-auto">
                 <Button
                   variant="destructive"
-                  onClick={onConfirmDelete}
+                  onClick={() => void confirmDelete()}
                   disabled={deleting}
                   className="flex-1 sm:flex-none"
                 >
@@ -82,7 +71,7 @@ export function DangerZone({
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={onCancelDelete}
+                  onClick={cancelDelete}
                   className="flex-1 sm:flex-none"
                 >
                   {t("common.cancel")}

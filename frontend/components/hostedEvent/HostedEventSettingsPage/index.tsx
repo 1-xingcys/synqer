@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
-import { useEventSettings } from "./useEventSettings";
 import { VotingDeadline } from "./VotingDeadline";
 import { DangerZone } from "./DangerZone";
 
@@ -13,9 +12,6 @@ export default function HostedEventSettingsPage() {
   const params = useParams();
   const eventId = params.eventId as string;
   const t = useTranslations();
-
-  const { deleting, showDeleteConfirm, handleDelete, toggleDeleteConfirm } =
-    useEventSettings(eventId);
 
   const { shareUrl, copied: linkCopied, copyLink } = useEventShareLink(eventId);
 
@@ -58,14 +54,7 @@ export default function HostedEventSettingsPage() {
 
       <VotingDeadline />
 
-      {/* Danger Zone */}
-      <DangerZone
-        showDeleteConfirm={showDeleteConfirm}
-        deleting={deleting}
-        onDeleteClick={() => toggleDeleteConfirm(true)}
-        onConfirmDelete={() => void handleDelete()}
-        onCancelDelete={() => toggleDeleteConfirm(false)}
-      />
+      <DangerZone />
     </div>
   );
 }

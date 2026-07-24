@@ -1,5 +1,7 @@
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+"use client";
+
+import { useCallback, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { apiFetchJson } from "@/lib/apiClient";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
@@ -9,23 +11,27 @@ import type { operations } from "@/generated/openapi";
 type RemoveEventResponse =
   operations["EventCoreController_remove"]["responses"][200]["content"]["application/json"];
 
-export function useEventSettings(eventId: string) {
+/**
+ * 刪除活動的兩段式流程：先開啟確認、確認後才送出並導回總覽頁。
+ */
+export function useDeleteEvent() {
+  const params = useParams();
+  const eventId = params.eventId as string;
   const router = useRouter();
   const queryClient = useQueryClient();
 
   const [deleting, setDeleting] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  const deleteEvent = useCallback(async () => {
-    await apiFetchJson<RemoveEventResponse>(`/events/${eventId}`, {
-      method: "DELETE",
-    });
-  }, [eventId]);
+  const requestDelete = useCallback(() => setShowConfirm(true), []);
+  const cancelDelete = useCallback(() => setShowConfirm(false), []);
 
-  const handleDelete = useCallback(async () => {
+  const confirmDelete = useCallback(async () => {
     try {
       setDeleting(true);
-      await deleteEvent();
+      await apiFetchJson<RemoveEventResponse>(`/events/${eventId}`, {
+        method: "DELETE",
+      });
       await queryClient.invalidateQueries({ queryKey: myEventsKeys.all });
 
       router.push(DEFAULT_OVERVIEW_PATH);
@@ -33,16 +39,13 @@ export function useEventSettings(eventId: string) {
       console.error("Failed to delete event:", error);
       setDeleting(false);
     }
-  }, [deleteEvent, queryClient, router]);
-
-  const toggleDeleteConfirm = useCallback((show: boolean) => {
-    setShowDeleteConfirm(show);
-  }, []);
+  }, [eventId, queryClient, router]);
 
   return {
     deleting,
-    showDeleteConfirm,
-    handleDelete,
-    toggleDeleteConfirm,
+    showConfirm,
+    requestDelete,
+    cancelDelete,
+    confirmDelete,
   };
 }
