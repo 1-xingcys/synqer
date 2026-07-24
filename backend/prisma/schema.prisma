@@ -307,4 +307,7 @@ model Session {
   sid       String   @unique
   data      String
   expiresAt DateTime
+
+  // Expired-session cleanup filters on expiresAt; keeps it off a full scan
+  @@index([expiresAt])
 }
