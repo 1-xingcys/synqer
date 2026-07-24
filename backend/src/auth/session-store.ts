@@ -4,8 +4,8 @@ import type { SessionData, Store } from 'express-session';
 import { PrismaService } from '../prisma/prisma.service';
 
 /**
- * 同一個 process 內清理過期 session 的最小間隔。
- * 清理是搭著既有的 session 寫入一起做，不另外開 timer。
+ * Minimum gap between expired-session cleanups within a single process.
+ * Cleanup rides along with session writes instead of running on a timer.
  */
 export const SESSION_PRUNE_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
@@ -16,26 +16,31 @@ type StoreSet = (
 ) => void;
 
 /**
- * 建立 express-session 用的 Prisma store。
+ * Builds the Prisma-backed store for express-session.
  *
- * 相對於直接 new PrismaSessionStore()，這裡做了兩件事來降低 Neon 的 CU-hrs：
+ * Compared to using PrismaSessionStore directly, this does two things to
+ * keep Neon's CU-hrs down:
  *
- * 1. 關掉 checkPeriod 的背景輪詢。原本的 prune() 會定期 findMany 整張 Session
- *    表再逐筆刪除，只要間隔小於 Neon 的 autosuspend 門檻，compute 就永遠不會休眠。
- *    改成在 set() 時順便用一次 deleteMany 清掉過期資料 —— 那個當下 compute
- *    本來就是醒著的，等於不用多付錢。過期但沒被清掉的 session 也不會被誤用，
- *    PrismaSessionStore.get() 讀到過期資料時會自己刪掉並視為未登入。
+ * 1. Turns off the checkPeriod polling. The built-in prune() periodically
+ *    reads the whole Session table and deletes row by row; any interval
+ *    shorter than Neon's autosuspend threshold keeps the compute awake
+ *    forever. Cleanup now happens inside set() as a single deleteMany, at a
+ *    point where the compute is already serving a request. Sessions that
+ *    expire in between are still safe: PrismaSessionStore.get() deletes an
+ *    expired row as it reads it and reports the user as signed out.
  *
- * 2. 移除 touch()。express-session 只有在 store 提供 touch() 時才會做 sliding
- *    expiration，而每次 touch() 都是一組 SELECT + UPDATE。由於 session 沒有開
- *    rolling，cookie 的有效期本來就不會延長（Set-Cookie 只在建立 session 時送出），
- *    server 端延長 expiresAt 對使用者沒有任何效果，只是白白產生寫入。
+ * 2. Removes touch(). express-session only performs sliding expiration when
+ *    the store exposes touch(), and each call is a SELECT plus an UPDATE.
+ *    Since rolling is off, Set-Cookie only goes out when the session is
+ *    created, so the cookie's lifetime never gets extended anyway. Pushing
+ *    expiresAt forward server-side changed nothing for the user and only
+ *    produced writes.
  */
 export function createSessionStore(prisma: PrismaService): Store {
   const logger = new Logger('SessionStore');
 
   const store = new PrismaSessionStore(prisma, {
-    checkPeriod: 0, // 不開背景 interval，見上方說明
+    checkPeriod: 0, // no background interval, see above
     dbRecordIdIsSessionId: true,
   });
 
@@ -56,13 +61,13 @@ export function createSessionStore(prisma: PrismaService): Store {
         logger.log(`Pruned ${count} expired session(s)`);
       }
     } catch (error) {
-      // 清理失敗不影響登入流程，等下一個間隔再試。
+      // A failed cleanup must not break sign-in; retry on the next window.
       logger.error('Failed to prune expired sessions', error);
     }
   };
 
-  // PrismaSessionStore 把 set/touch 掛成唯讀的 instance property，
-  // 這裡透過一次轉型改寫它們。
+  // PrismaSessionStore attaches set/touch as readonly instance properties,
+  // so a single cast is needed to swap them out.
   const mutableStore = store as unknown as {
     set: StoreSet;
     touch?: StoreSet;

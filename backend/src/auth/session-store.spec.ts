@@ -34,7 +34,7 @@ const sessionData = () =>
     },
   }) as unknown as SessionData;
 
-/** 呼叫 store.set() 並等待它的 callback。 */
+/** Calls store.set() and waits for its callback. */
 const setSession = (store: Store, sid: string) =>
   new Promise<void>((resolve, reject) => {
     store.set(sid, sessionData(), (err?: unknown) => {
@@ -43,7 +43,7 @@ const setSession = (store: Store, sid: string) =>
     });
   });
 
-/** 讓 fire-and-forget 的清理有機會跑完。 */
+/** Gives the fire-and-forget cleanup a chance to finish. */
 const flush = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('createSessionStore', () => {
@@ -57,7 +57,7 @@ describe('createSessionStore', () => {
     jest.restoreAllMocks();
   });
 
-  it('不啟動背景輪詢的 interval（避免 Neon compute 無法 autosuspend）', async () => {
+  it('should not start a background polling interval', async () => {
     const setIntervalSpy = jest.spyOn(global, 'setInterval');
 
     createSessionStore(asPrismaService(prisma));
@@ -66,13 +66,13 @@ describe('createSessionStore', () => {
     expect(setIntervalSpy).not.toHaveBeenCalled();
   });
 
-  it('不提供 touch()，讓 express-session 不會對每個 request 寫 Session', () => {
+  it('should not expose touch(), so express-session skips per-request writes', () => {
     const store = createSessionStore(asPrismaService(prisma));
 
     expect(store.touch).toBeUndefined();
   });
 
-  it('寫入 session 時順便刪除已過期的資料', async () => {
+  it('should delete expired sessions while writing a session', async () => {
     const store = createSessionStore(asPrismaService(prisma));
 
     await setSession(store, 'sid-1');
@@ -84,7 +84,7 @@ describe('createSessionStore', () => {
     });
   });
 
-  it('仍然把 session 寫進資料庫', async () => {
+  it('should still persist the session', async () => {
     const store = createSessionStore(asPrismaService(prisma));
 
     await setSession(store, 'sid-1');
@@ -92,7 +92,7 @@ describe('createSessionStore', () => {
     expect(prisma.session.create).toHaveBeenCalledTimes(1);
   });
 
-  it('清理間隔內不重複清理', async () => {
+  it('should not clean up twice within the same interval', async () => {
     const store = createSessionStore(asPrismaService(prisma));
 
     await setSession(store, 'sid-1');
@@ -103,7 +103,7 @@ describe('createSessionStore', () => {
     expect(prisma.session.deleteMany).toHaveBeenCalledTimes(1);
   });
 
-  it('超過清理間隔後會再次清理', async () => {
+  it('should clean up again once the interval has elapsed', async () => {
     const store = createSessionStore(asPrismaService(prisma));
     const startedAt = Date.now();
     const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(startedAt);
@@ -118,7 +118,7 @@ describe('createSessionStore', () => {
     expect(prisma.session.deleteMany).toHaveBeenCalledTimes(2);
   });
 
-  it('清理失敗不影響 session 寫入', async () => {
+  it('should persist the session even when cleanup fails', async () => {
     prisma.session.deleteMany.mockRejectedValue(new Error('db is down'));
     jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     const store = createSessionStore(asPrismaService(prisma));
