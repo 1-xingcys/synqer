@@ -448,7 +448,6 @@
       "dangerZone": "Danger Zone",
       "deleteEvent": "刪除活動",
       "deleteWarning": "此操作無法復原。所有投票和資料將被永久刪除。",
-      "confirmDelete": "您確定要刪除此活動嗎？",
       "deadlineLockedDescription": "已確認活動時間，無法修改投票截止時間",
       "inviteLink": {
         "title": "邀請連結",
@@ -459,6 +458,10 @@
         "title": "取消投票截止時間？",
         "keep": "保留截止時間",
         "confirm": "取消截止時間"
+      },
+      "deleteEventConfirm": {
+        "title": "確定要刪除此活動嗎？",
+        "warning": "此操作無法復原。所有投票和資料將被永久刪除。"
       }
     }
   },

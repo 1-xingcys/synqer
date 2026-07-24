@@ -448,7 +448,6 @@
       "dangerZone": "Danger Zone",
       "deleteEvent": "Delete Event",
       "deleteWarning": "This action cannot be undone. All votes and data will be permanently deleted.",
-      "confirmDelete": "Are you sure you want to delete this event?",
       "deadlineLockedDescription": "Voting deadline cannot be modified after the event time is confirmed",
       "inviteLink": {
         "title": "Invite Link",
@@ -459,6 +458,10 @@
         "title": "Cancel voting deadline?",
         "keep": "Keep deadline",
         "confirm": "Cancel deadline"
+      },
+      "deleteEventConfirm": {
+        "title": "Delete this event?",
+        "warning": "This action cannot be undone. All votes and data will be permanently deleted."
       }
     }
   },
