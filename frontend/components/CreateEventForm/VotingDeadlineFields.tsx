@@ -29,14 +29,6 @@ interface VotingDeadlineFieldsProps {
   onTimeChange: (time: string) => void;
 }
 
-/**
- * 建立活動頁專用的投票截止時間欄位。
- * 只負責顯示開關、日期/時間欄位與錯誤訊息，
- * 驗證規則由 useFormValidation 決定。
- *
- * 主辦設定頁有自己的一份（HostedEventSettingsPage/VotingDeadlineFields），
- * 兩邊的樣式可以各自調整，不互相牽動。
- */
 export function VotingDeadlineFields({
   enabled,
   date,
