@@ -110,12 +110,7 @@ export function UnifiedEventDetailContent({
     },
     ...(isHost
       ? [
-          {
-            id: "participants",
-            label: t("hosted.participants"),
-            href: eventDetailPath(eventId, "participants"),
-            icon: NavIcons.participants,
-          },
+          // TODO: participants tab entry is temporarily disabled; the page itself is kept for re-enabling later.
           {
             id: "settings",
             label: t("hosted.settings"),
