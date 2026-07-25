@@ -29,6 +29,8 @@ interface UseVotingGridControllerProps {
   eventTitle: VotingGridProps["eventTitle"];
   timeZone: VotingGridProps["timeZone"];
   capabilities: EventCapabilities;
+  defaultGranularity: VotingGridProps["defaultGranularity"];
+  defaultVoteMode: VotingGridProps["defaultVoteMode"];
 }
 
 interface UseVotingGridControllerResult {
@@ -113,8 +115,11 @@ export function useVotingGridController({
   eventTitle,
   timeZone,
   capabilities,
+  defaultGranularity,
+  defaultVoteMode,
 }: UseVotingGridControllerProps): UseVotingGridControllerResult {
-  const [granularity, setGranularity] = useState<TimeGranularity>(30);
+  const [granularity, setGranularity] =
+    useState<TimeGranularity>(defaultGranularity);
   const { datesPerPage, slotHeight } = useResponsiveGrid();
 
   const {
@@ -156,6 +161,7 @@ export function useVotingGridController({
     stagedSlots,
     hasStagedVoteDraft,
     hasVoted: currentUserHasVoted,
+    initialVoteMode: defaultVoteMode,
     onSelectionCommit: updateStagedVotes,
   });
 

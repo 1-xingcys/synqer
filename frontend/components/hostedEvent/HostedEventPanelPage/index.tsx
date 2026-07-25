@@ -6,6 +6,7 @@ import { useCallback } from "react";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { LoadingState } from "@/components/ui/loading-state";
 import { EventStatus } from "@/types/event";
+import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
 import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
 import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
 import { EventTimeSelector } from "./EventTimeSelector";
@@ -133,6 +134,8 @@ export default function HostedEventPanelPage() {
         votes={votesWithAvatars}
         participants={participantsWithAvatars}
         eventId={eventId}
+        defaultGranularity={normalizeGranularity(event.defaultGranularityMin)}
+        defaultMode={toVoteMode(event.defaultVoteMode)}
         tip={t("hosted.eventTimeSelector.emptyHint")}
         canAddToEventTime={true}
         isVotingPhase={isVotingPhase}

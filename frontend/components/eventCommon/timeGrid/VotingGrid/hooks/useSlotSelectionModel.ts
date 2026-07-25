@@ -18,6 +18,8 @@ interface UseSlotSelectionModelProps {
   stagedSlots: Set<string>;
   hasStagedVoteDraft: boolean;
   hasVoted: boolean;
+  /** The host's default mode, used until the visitor picks one themselves. */
+  initialVoteMode: VoteMode;
   onSelectionCommit: (
     addSlotIds: string[],
     removeSlotIds: string[],
@@ -71,9 +73,10 @@ export function useSlotSelectionModel({
   stagedSlots,
   hasStagedVoteDraft,
   hasVoted,
+  initialVoteMode,
   onSelectionCommit,
 }: UseSlotSelectionModelProps): UseSlotSelectionModelReturn {
-  const [voteMode, setVoteModeState] = useState<VoteMode>(VoteMode.AVAILABLE);
+  const [voteMode, setVoteModeState] = useState<VoteMode>(initialVoteMode);
   const allSlotIds = useMemo(() => slots.map((slot) => slot.id), [slots]);
 
   const effectiveAvailableSlots = useMemo(() => {
