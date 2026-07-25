@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ParticipantRepository } from '../repositories/participant.repository';
 import { UpdateParticipantsDto } from '../dto/update-participants.dto';
-import { EventStatusService } from '../../shared/services/event-status.service';
 import { EventAuthorizationService } from '../../shared/services/event-authorization.service';
 
 /**
@@ -11,7 +10,6 @@ import { EventAuthorizationService } from '../../shared/services/event-authoriza
 export class ParticipantService {
   constructor(
     private participantRepository: ParticipantRepository,
-    private eventStatusService: EventStatusService,
     private eventAuthorizationService: EventAuthorizationService,
   ) {}
 
@@ -68,135 +66,6 @@ export class ParticipantService {
       lineGroupLineId: event.lineGroup?.lineGroupId,
       unvotedParticipants: unvoted,
     };
-  }
-
-  /**
-   * 整理預期參與者資料，標註是否已投票和參與者狀態
-   */
-  async enrichExpectedParticipants(
-    expectedParticipants: Array<{
-      id: string;
-      userId: string | null;
-      lineUserId: string | null;
-      reminderSentAt: Date | null;
-      user: {
-        id: string;
-        displayName: string | null;
-        avatarUrl: string | null;
-      } | null;
-    }>,
-    votedUserIds: Set<string>,
-    lineGroupId: string | null,
-  ) {
-    // 批次查詢 LINE 群組成員資料
-    const lineUserIds = expectedParticipants
-      .map((ep) => ep.lineUserId)
-      .filter((id): id is string => !!id);
-
-    const lineGroupMembers = lineGroupId
-      ? await this.participantRepository.findLineGroupMembersByLineUserIdsAndGroupId(
-          lineGroupId,
-          lineUserIds,
-        )
-      : [];
-
-    // 建立 lineUserId -> member 的映射
-    const memberMap = new Map(
-      lineGroupMembers.map((m) => [
-        m.lineUserId,
-        { displayName: m.displayName, pictureUrl: m.pictureUrl },
-      ]),
-    );
-
-    return expectedParticipants.map((ep) => {
-      const hasVoted = ep.userId ? votedUserIds.has(ep.userId) : false;
-      const lineGroupMember = ep.lineUserId
-        ? (memberMap.get(ep.lineUserId) ?? null)
-        : null;
-
-      const participantStatus =
-        this.eventStatusService.computeParticipantStatus({
-          userId: ep.userId,
-          lineUserId: ep.lineUserId,
-          hasVoted,
-        });
-
-      return {
-        id: ep.id,
-        lineUserId: ep.lineUserId,
-        userId: ep.userId,
-        hasVoted,
-        status: participantStatus,
-        reminderSentAt: ep.reminderSentAt,
-        user: ep.user,
-        lineGroupMember,
-      };
-    });
-  }
-
-  /**
-   * 整理預期參與者資料（Host 端版本）
-   */
-  async enrichExpectedParticipantsForHost(
-    expectedParticipants: Array<{
-      id: string;
-      userId: string | null;
-      lineUserId: string | null;
-      user: {
-        id: string;
-        displayName: string | null;
-        avatarUrl: string | null;
-      } | null;
-    }>,
-    votedUserIds: Set<string>,
-    lineGroupId: string | null,
-  ) {
-    // 批次查詢 LINE 群組成員資料（避免 N+1，且限定群組）
-    const lineUserIds = expectedParticipants
-      .map((ep) => ep.lineUserId)
-      .filter((id): id is string => !!id);
-
-    const lineGroupMembers = lineGroupId
-      ? await this.participantRepository.findLineGroupMembersByLineUserIdsAndGroupId(
-          lineGroupId,
-          lineUserIds,
-        )
-      : [];
-
-    // 建立 lineUserId -> LineGroupMember 的映射
-    const lineUserIdToMember = new Map(
-      lineGroupMembers.map((m) => [
-        m.lineUserId,
-        { displayName: m.displayName, pictureUrl: m.pictureUrl },
-      ]),
-    );
-
-    // 整理預期參與者資料
-    return expectedParticipants.map((ep) => {
-      const lineMember = ep.lineUserId
-        ? lineUserIdToMember.get(ep.lineUserId)
-        : null;
-
-      const hasVoted = ep.userId ? votedUserIds.has(ep.userId) : false;
-
-      const participantStatus =
-        this.eventStatusService.computeParticipantStatus({
-          userId: ep.userId,
-          lineUserId: ep.lineUserId,
-          hasVoted,
-        });
-
-      return {
-        id: ep.id,
-        lineUserId: ep.lineUserId || undefined,
-        userId: ep.userId || undefined,
-        displayName:
-          ep.user?.displayName || lineMember?.displayName || undefined,
-        pictureUrl: ep.user?.avatarUrl || lineMember?.pictureUrl || undefined,
-        hasVoted,
-        status: participantStatus,
-      };
-    });
   }
 
   /**

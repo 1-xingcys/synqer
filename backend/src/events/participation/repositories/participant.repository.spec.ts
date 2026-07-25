@@ -72,54 +72,6 @@ describe('ParticipantRepository', () => {
     });
   });
 
-  describe('findLineGroupMember', () => {
-    it('should find LINE group member', async () => {
-      const lineGroupId = 'group-1';
-      const lineUserId = 'line-1';
-      const mockMember = { lineGroupId, lineUserId, displayName: 'Test' };
-
-      mockPrismaService.lineGroupMember.findUnique.mockResolvedValue(mockMember);
-
-      const result = await repository.findLineGroupMember(lineGroupId, lineUserId);
-
-      expect(prismaService.lineGroupMember.findUnique).toHaveBeenCalledWith({
-        where: {
-          lineGroupId_lineUserId: {
-            lineGroupId,
-            lineUserId,
-          },
-        },
-      });
-      expect(result).toEqual(mockMember);
-    });
-  });
-
-  describe('findLineGroupMemberInfo', () => {
-    it('should find LINE group member info', async () => {
-      const lineGroupId = 'group-1';
-      const lineUserId = 'line-1';
-      const mockMemberInfo = { displayName: 'Test', pictureUrl: 'url' };
-
-      mockPrismaService.lineGroupMember.findUnique.mockResolvedValue(mockMemberInfo);
-
-      const result = await repository.findLineGroupMemberInfo(lineGroupId, lineUserId);
-
-      expect(prismaService.lineGroupMember.findUnique).toHaveBeenCalledWith({
-        where: {
-          lineGroupId_lineUserId: {
-            lineGroupId,
-            lineUserId,
-          },
-        },
-        select: {
-          displayName: true,
-          pictureUrl: true,
-        },
-      });
-      expect(result).toEqual(mockMemberInfo);
-    });
-  });
-
   describe('findLineGroupMembersByLineUserIdsAndGroupId', () => {
     it('should find multiple LINE group members', async () => {
       const lineGroupId = 'group-1';
@@ -293,64 +245,6 @@ describe('ParticipantRepository', () => {
         },
       });
       expect(result).toEqual(mockParticipants);
-    });
-  });
-
-  describe('softDeleteParticipants', () => {
-    it('should soft delete participants', async () => {
-      const participantIds = ['ep-1', 'ep-2'];
-
-      mockPrismaService.eventExpectedParticipant.updateMany.mockResolvedValue({ count: 2 });
-
-      const result = await repository.softDeleteParticipants(participantIds);
-
-      expect(prismaService.eventExpectedParticipant.updateMany).toHaveBeenCalledWith({
-        where: {
-          id: { in: participantIds },
-        },
-        data: {
-          isRemoved: true,
-        },
-      });
-      expect(result).toEqual({ count: 2 });
-    });
-  });
-
-  describe('restoreParticipants', () => {
-    it('should restore participants', async () => {
-      const participantIds = ['ep-1', 'ep-2'];
-
-      mockPrismaService.eventExpectedParticipant.updateMany.mockResolvedValue({ count: 2 });
-
-      const result = await repository.restoreParticipants(participantIds);
-
-      expect(prismaService.eventExpectedParticipant.updateMany).toHaveBeenCalledWith({
-        where: {
-          id: { in: participantIds },
-        },
-        data: {
-          isRemoved: false,
-        },
-      });
-      expect(result).toEqual({ count: 2 });
-    });
-  });
-
-  describe('createParticipants', () => {
-    it('should create multiple participants', async () => {
-      const data = [
-        { eventId: 'event-123', lineUserId: 'line-1' },
-        { eventId: 'event-123', userId: 'user-1' },
-      ];
-
-      mockPrismaService.eventExpectedParticipant.createMany.mockResolvedValue({ count: 2 });
-
-      const result = await repository.createParticipants(data);
-
-      expect(prismaService.eventExpectedParticipant.createMany).toHaveBeenCalledWith({
-        data,
-      });
-      expect(result).toEqual({ count: 2 });
     });
   });
 

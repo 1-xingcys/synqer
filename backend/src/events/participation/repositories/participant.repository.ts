@@ -37,38 +37,6 @@ export class ParticipantRepository {
   }
 
   /**
-   * 根據 LINE 群組和使用者 ID 查詢成員資料
-   */
-  async findLineGroupMember(lineGroupId: string, lineUserId: string) {
-    return this.prisma.lineGroupMember.findUnique({
-      where: {
-        lineGroupId_lineUserId: {
-          lineGroupId,
-          lineUserId,
-        },
-      },
-    });
-  }
-
-  /**
-   * 根據 LINE 群組和使用者 ID 查詢成員資料（僅 displayName 和 pictureUrl）
-   */
-  async findLineGroupMemberInfo(lineGroupId: string, lineUserId: string) {
-    return this.prisma.lineGroupMember.findUnique({
-      where: {
-        lineGroupId_lineUserId: {
-          lineGroupId,
-          lineUserId,
-        },
-      },
-      select: {
-        displayName: true,
-        pictureUrl: true,
-      },
-    });
-  }
-
-  /**
    * 批次查詢指定群組的 LINE 群組成員
    */
   async findLineGroupMembersByLineUserIdsAndGroupId(
@@ -165,49 +133,6 @@ export class ParticipantRepository {
         userId: true,
         isRemoved: true,
       },
-    });
-  }
-
-  /**
-   * 批次軟刪除參與者
-   */
-  async softDeleteParticipants(participantIds: string[]) {
-    return this.prisma.eventExpectedParticipant.updateMany({
-      where: {
-        id: { in: participantIds },
-      },
-      data: {
-        isRemoved: true,
-      },
-    });
-  }
-
-  /**
-   * 批次恢復參與者
-   */
-  async restoreParticipants(participantIds: string[]) {
-    return this.prisma.eventExpectedParticipant.updateMany({
-      where: {
-        id: { in: participantIds },
-      },
-      data: {
-        isRemoved: false,
-      },
-    });
-  }
-
-  /**
-   * 批次建立參與者
-   */
-  async createParticipants(
-    data: Array<{
-      eventId: string;
-      lineUserId?: string | null;
-      userId?: string | null;
-    }>,
-  ) {
-    return this.prisma.eventExpectedParticipant.createMany({
-      data,
     });
   }
 

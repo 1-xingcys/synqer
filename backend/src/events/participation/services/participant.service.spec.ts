@@ -2,13 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { ParticipantService } from './participant.service';
 import { ParticipantRepository } from '../repositories/participant.repository';
-import { EventStatusService, ParticipantStatus } from '../../shared/services/event-status.service';
 import { EventAuthorizationService } from '../../shared/services/event-authorization.service';
 
 describe('ParticipantService', () => {
   let service: ParticipantService;
   let participantRepository: jest.Mocked<ParticipantRepository>;
-  let eventStatusService: jest.Mocked<EventStatusService>;
   let eventAuthorizationService: jest.Mocked<EventAuthorizationService>;
 
   const mockParticipantRepository = {
@@ -24,10 +22,6 @@ describe('ParticipantService', () => {
     updateParticipantsInTransaction: jest.fn(),
   };
 
-  const mockEventStatusService = {
-    computeParticipantStatus: jest.fn(),
-  };
-
   const mockEventAuthorizationService = {
     verifyOwner: jest.fn(),
   };
@@ -37,14 +31,12 @@ describe('ParticipantService', () => {
       providers: [
         ParticipantService,
         { provide: ParticipantRepository, useValue: mockParticipantRepository },
-        { provide: EventStatusService, useValue: mockEventStatusService },
         { provide: EventAuthorizationService, useValue: mockEventAuthorizationService },
       ],
     }).compile();
 
     service = module.get<ParticipantService>(ParticipantService);
     participantRepository = module.get(ParticipantRepository);
-    eventStatusService = module.get(EventStatusService);
     eventAuthorizationService = module.get(EventAuthorizationService);
 
     jest.clearAllMocks();
@@ -305,107 +297,4 @@ describe('ParticipantService', () => {
     });
   });
 
-  describe('enrichExpectedParticipants', () => {
-    it('should enrich expected participants with vote status', async () => {
-      const participants = [
-        {
-          id: 'ep-1',
-          userId: 'user-1',
-          lineUserId: 'line-1',
-          reminderSentAt: null,
-          user: { id: 'user-1', displayName: 'User 1', avatarUrl: null },
-        },
-      ];
-      const votedUserIds = new Set(['user-1']);
-      const lineGroupId = 'group-1';
-
-      mockParticipantRepository.findLineGroupMembersByLineUserIdsAndGroupId.mockResolvedValue([]);
-      mockEventStatusService.computeParticipantStatus.mockReturnValue(ParticipantStatus.VOTED);
-
-      const result = await service.enrichExpectedParticipants(
-        participants,
-        votedUserIds,
-        lineGroupId,
-      );
-
-      expect(result[0].hasVoted).toBe(true);
-      expect(result[0].status).toBe(ParticipantStatus.VOTED);
-    });
-
-    it('should handle participants without line group', async () => {
-      const participants = [
-        {
-          id: 'ep-1',
-          userId: 'user-1',
-          lineUserId: null,
-          reminderSentAt: null,
-          user: null,
-        },
-      ];
-
-      mockEventStatusService.computeParticipantStatus.mockReturnValue(ParticipantStatus.NOT_VOTED);
-
-      const result = await service.enrichExpectedParticipants(
-        participants,
-        new Set(),
-        null,
-      );
-
-      expect(result[0].lineGroupMember).toBeNull();
-    });
-  });
-
-  describe('enrichExpectedParticipantsForHost', () => {
-    it('should enrich participants for host view', async () => {
-      const participants = [
-        {
-          id: 'ep-1',
-          userId: 'user-1',
-          lineUserId: 'line-1',
-          user: { id: 'user-1', displayName: 'User 1', avatarUrl: 'avatar-url' },
-        },
-      ];
-      const votedUserIds = new Set<string>();
-      const lineGroupId = 'group-1';
-
-      mockParticipantRepository.findLineGroupMembersByLineUserIdsAndGroupId.mockResolvedValue([
-        { lineUserId: 'line-1', displayName: 'Line User', pictureUrl: 'pic-url' },
-      ]);
-      mockEventStatusService.computeParticipantStatus.mockReturnValue(ParticipantStatus.NOT_VOTED);
-
-      const result = await service.enrichExpectedParticipantsForHost(
-        participants,
-        votedUserIds,
-        lineGroupId,
-      );
-
-      expect(result[0].displayName).toBe('User 1'); // Prefers user displayName
-      expect(result[0].hasVoted).toBe(false);
-    });
-
-    it('should use LINE member info when user info is not available', async () => {
-      const participants = [
-        {
-          id: 'ep-1',
-          userId: null,
-          lineUserId: 'line-1',
-          user: null,
-        },
-      ];
-
-      mockParticipantRepository.findLineGroupMembersByLineUserIdsAndGroupId.mockResolvedValue([
-        { lineUserId: 'line-1', displayName: 'Line User', pictureUrl: 'pic-url' },
-      ]);
-      mockEventStatusService.computeParticipantStatus.mockReturnValue(ParticipantStatus.NOT_REGISTERED);
-
-      const result = await service.enrichExpectedParticipantsForHost(
-        participants,
-        new Set(),
-        'group-1',
-      );
-
-      expect(result[0].displayName).toBe('Line User');
-      expect(result[0].pictureUrl).toBe('pic-url');
-    });
-  });
 });
