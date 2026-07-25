@@ -285,24 +285,6 @@ export async function getLiffAccessToken(): Promise<string | null> {
 }
 
 /**
- * 取得 LIFF ID Token
- * 包含使用者資訊的 JWT
- */
-export async function getLiffIdToken(): Promise<string | null> {
-  const liff = await getLiff();
-  if (!liff || !liff.isLoggedIn()) {
-    return null;
-  }
-
-  try {
-    return liff.getIDToken();
-  } catch (error) {
-    console.error("Failed to get LIFF ID token:", error);
-    return null;
-  }
-}
-
-/**
  * 取得 LIFF Profile
  */
 export async function getLiffProfile(): Promise<LiffProfile | null> {

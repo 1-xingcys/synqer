@@ -6,7 +6,6 @@ import {
   getLiffProfile,
   getLiffContext,
   getLiffAccessToken,
-  getLiffIdToken,
   liffLogin,
   liffLogout,
   closeLiff,
@@ -37,10 +36,6 @@ export interface UseLiffReturn {
   logout: () => Promise<void>;
   closeWindow: () => Promise<void>;
   getAccessToken: () => Promise<string | null>;
-  getIdToken: () => Promise<string | null>;
-
-  // 工具
-  isLiffEnvironment: boolean;
 }
 
 /**
@@ -187,11 +182,6 @@ export function useLiff(): UseLiffReturn {
     return getLiffAccessToken();
   }, []);
 
-  // Get ID token
-  const getIdToken = useCallback(async () => {
-    return getLiffIdToken();
-  }, []);
-
   return {
     // 狀態
     isInitialized: state.isInitialized,
@@ -209,11 +199,5 @@ export function useLiff(): UseLiffReturn {
     logout,
     closeWindow,
     getAccessToken,
-    getIdToken,
-
-    // 工具
-    isLiffEnvironment: isLiffEnabled(),
   };
 }
-
-export default useLiff;

@@ -106,10 +106,6 @@ export function useGoogleCalendar() {
     [],
   );
 
-  const refetchStatus = useCallback(async () => {
-    await statusQuery.refetch();
-  }, [statusQuery]);
-
   const error =
     statusQuery.error instanceof Error
       ? statusQuery.error.message
@@ -124,36 +120,5 @@ export function useGoogleCalendar() {
     connect,
     disconnect,
     getConflictingSlots,
-    refetchStatus,
   };
-}
-
-// 工具函數：檢查時段是否與 Calendar 事件衝突
-export function checkSlotConflict(
-  slotDate: Date,
-  startMinute: number,
-  endMinute: number,
-  calendarEvents: CalendarEvent[],
-): CalendarEvent | null {
-  // 計算 slot 的實際時間
-  const slotStart = new Date(slotDate);
-  slotStart.setHours(0, 0, 0, 0);
-  slotStart.setMinutes(startMinute);
-
-  const slotEnd = new Date(slotDate);
-  slotEnd.setHours(0, 0, 0, 0);
-  slotEnd.setMinutes(endMinute);
-
-  // 檢查是否有衝突的 Calendar 事件
-  for (const event of calendarEvents) {
-    const eventStart = new Date(event.startTime);
-    const eventEnd = new Date(event.endTime);
-
-    // 檢查時間重疊
-    if (slotStart < eventEnd && slotEnd > eventStart) {
-      return event;
-    }
-  }
-
-  return null;
 }
