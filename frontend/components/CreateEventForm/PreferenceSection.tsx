@@ -1,13 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { ChevronDown } from "lucide-react";
 import { EventPreferenceFields } from "@/components/eventCommon/EventPreferenceFields";
 import type { VoteMode } from "@/types/event";
 import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
+import { cn } from "@/lib/utils";
 import { useFormStateContext } from "./CreateEventFormContext";
+
+const PREFERENCE_CONTENT_ID = "create-event-preference-content";
 
 export function PreferenceSection() {
   const t = useTranslations();
+
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const {
     state: { formData, setFormData },
@@ -32,20 +39,48 @@ export function PreferenceSection() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 space-y-4">
-          <div>
-            <h2 className="text-base font-semibold text-foreground mb-1">
+        <div className="flex-1">
+          <button
+            type="button"
+            onClick={() => setIsExpanded((prev) => !prev)}
+            aria-expanded={isExpanded}
+            aria-controls={PREFERENCE_CONTENT_ID}
+            className="flex w-fit items-center gap-1.5 text-left cursor-pointer"
+          >
+            <h2 className="text-base font-semibold text-foreground">
               {t("createEvent.preference.title")}
             </h2>
-          </div>
+            <ChevronDown
+              className={cn(
+                "w-4 h-4 shrink-0 text-muted-foreground transition-transform duration-200",
+                isExpanded && "rotate-180",
+              )}
+              aria-hidden="true"
+            />
+          </button>
 
-          <EventPreferenceFields
-            granularity={formData.defaultGranularityMin}
-            voteMode={formData.defaultVoteMode}
-            showPreviewGrid
-            onGranularityChange={handleGranularityChange}
-            onVoteModeChange={handleVoteModeChange}
-          />
+          <div
+            id={PREFERENCE_CONTENT_ID}
+            className={cn(
+              "grid transition-all duration-300 ease-in-out motion-reduce:transition-none",
+              isExpanded
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0",
+            )}
+            inert={!isExpanded}
+          >
+            <div className="overflow-hidden">
+              <div className="pt-4">
+                <EventPreferenceFields
+                  granularity={formData.defaultGranularityMin}
+                  voteMode={formData.defaultVoteMode}
+                  showPreviewGrid
+                  onGranularityChange={handleGranularityChange}
+                  onVoteModeChange={handleVoteModeChange}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
