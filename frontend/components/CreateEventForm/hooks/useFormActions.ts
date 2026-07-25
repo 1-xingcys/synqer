@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
 import { combineVotingDeadline } from "@/lib/votingDeadline";
+import { toVoteModeDto } from "@/lib/eventPreference";
 import { useLiff } from "@/hooks/useLiff";
 import { apiFetchJson } from "@/lib/apiClient";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
@@ -94,6 +95,8 @@ export function useFormActions({
           endTime: formData.endTime,
           slotDurationMin: 15,
           timeZone: formData.timeZone,
+          defaultGranularityMin: formData.defaultGranularityMin,
+          defaultVoteMode: toVoteModeDto(formData.defaultVoteMode),
           votingDeadline: votingDeadlineISO,
           lineGroupId: formData.lineGroupId || undefined,
           expectedLineUserIds:

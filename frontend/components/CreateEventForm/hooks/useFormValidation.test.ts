@@ -1,9 +1,12 @@
 import { describe, expect, it } from "@jest/globals";
 import {
   getCreateEventValidationErrors,
+  hasCreateEventUnsavedChanges,
   ValidationError,
 } from "./useFormValidation";
+import { VoteMode } from "@/types/event";
 import { CreateEventFormData, DEFAULT_WEEKDAYS } from "../types";
+import { DEFAULT_GRANULARITY, DEFAULT_VOTE_MODE } from "@/lib/eventPreference";
 
 function buildFormData(
   overrides: Partial<CreateEventFormData> = {},
@@ -18,6 +21,8 @@ function buildFormData(
     startTime: "09:00",
     endTime: "10:00",
     timeZone: "America/New_York",
+    defaultGranularityMin: DEFAULT_GRANULARITY,
+    defaultVoteMode: DEFAULT_VOTE_MODE,
     votingDeadlineEnabled: true,
     votingDeadline: new Date(2026, 6, 13), // local 2026-07-13
     votingDeadlineTime: "18:00",
@@ -121,5 +126,35 @@ describe("getCreateEventValidationErrors - start date", () => {
     );
 
     expect(errors.has(ValidationError.StartDateInPast)).toBe(false);
+  });
+});
+
+describe("hasCreateEventUnsavedChanges - grid preferences", () => {
+  it("reports no changes for an untouched form", () => {
+    const initial = buildFormData();
+
+    expect(hasCreateEventUnsavedChanges(buildFormData(), initial)).toBe(false);
+  });
+
+  it("notices a changed view granularity", () => {
+    const initial = buildFormData();
+
+    expect(
+      hasCreateEventUnsavedChanges(
+        buildFormData({ defaultGranularityMin: 60 }),
+        initial,
+      ),
+    ).toBe(true);
+  });
+
+  it("notices a changed vote mode", () => {
+    const initial = buildFormData();
+
+    expect(
+      hasCreateEventUnsavedChanges(
+        buildFormData({ defaultVoteMode: VoteMode.UNAVAILABLE }),
+        initial,
+      ),
+    ).toBe(true);
   });
 });
