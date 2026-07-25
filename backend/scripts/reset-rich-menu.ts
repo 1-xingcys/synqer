@@ -217,15 +217,7 @@ function generateRichMenuImage(): Buffer {
     '快速建立投票並邀請朋友',
     'plus',
   );
-  drawButton(
-    1250,
-    0,
-    1250,
-    height,
-    '查看活動',
-    '管理你所發起的所有活動',
-    'list',
-  );
+  drawButton(1250, 0, 1250, height, '查看活動', '管理您的所有活動', 'list');
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   return canvas.toBuffer('image/png');
@@ -302,7 +294,7 @@ async function createRichMenu(): Promise<string | null> {
         bounds: { x: 1250, y: 0, width: 1250, height: 843 },
         action: {
           type: 'uri',
-          uri: `${LINE_LIFF_URL}/hosted`,
+          uri: `${LINE_LIFF_URL}/events/voting`,
           label: '查看發起的活動',
         },
       },
