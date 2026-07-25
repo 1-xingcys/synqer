@@ -20,6 +20,11 @@ enum EventSlotAxisType {
   WEEKDAY
 }
 
+enum EventVoteMode {
+  AVAILABLE
+  UNAVAILABLE
+}
+
 enum Weekday {
   MONDAY
   TUESDAY
@@ -129,6 +134,12 @@ model Event {
   ownerId     String? // 活動擁有者
   owner       User?   @relation("OwnedEvents", fields: [ownerId], references: [id], onDelete: SetNull)
   timeZone        String @default("Asia/Taipei") // 預留：未來可自動轉換時區
+
+  // 主辦人設定的檢視預設：時間格的顯示顆粒度（15/30/60 分鐘）
+  // 底層 slot 仍是 15 分鐘，這裡只影響前端合併顯示的粗細
+  defaultGranularityMin Int           @default(30)
+  // 主辦人設定的檢視預設：參與者進入投票時的初始模式
+  defaultVoteMode       EventVoteMode @default(AVAILABLE)
 
   // 投票截止時間
   votingDeadline DateTime?
