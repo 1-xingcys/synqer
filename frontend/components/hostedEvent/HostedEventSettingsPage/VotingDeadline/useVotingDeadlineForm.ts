@@ -23,7 +23,8 @@ type UpdateEventResponse =
 const SAVE_SUCCESS_DURATION_MS = 1500;
 
 /**
- * 投票截止時間區塊的狀態：本地表單、與伺服器版本的差異、以及儲存流程。
+ * State for the voting deadline section: the local form, how it differs from the
+ * server version, and the save flow.
  */
 export function useVotingDeadlineForm() {
   const params = useParams();
@@ -161,7 +162,6 @@ export function useVotingDeadlineForm() {
     isDirty,
     isLocked,
     isValid,
-    /** 伺服器上已有截止時間，關閉開關等於刪掉參與者看得到的資訊 */
     hasSavedDeadline: serverDeadline !== null,
     saving,
     saveSuccess,

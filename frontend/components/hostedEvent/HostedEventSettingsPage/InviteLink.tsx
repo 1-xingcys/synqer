@@ -6,10 +6,6 @@ import { Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 
-/**
- * 邀請連結區塊。分享連結完全由 eventId 推導，不需要活動明細，
- * 所以這個區塊不受活動載入狀態影響。
- */
 export function InviteLink() {
   const params = useParams();
   const eventId = params.eventId as string;

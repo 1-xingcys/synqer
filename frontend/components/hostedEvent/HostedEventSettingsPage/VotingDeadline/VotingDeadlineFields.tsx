@@ -6,21 +6,18 @@ import { TimePicker } from "@/components/eventCommon/TimePicker";
 import { cn } from "@/lib/utils";
 
 interface VotingDeadlineFieldsProps {
-  /** 由開關控制的展開狀態 */
+  /** Expanded state driven by the toggle */
   enabled: boolean;
-  /** 投票截止日期 */
+  /** Voting deadline date */
   date: Date | null;
-  /** 投票截止時間 (HH:MM 格式)，未選擇時為 null */
+  /** Voting deadline time (HH:MM format), null when not picked */
   time: string | null;
   dateLabel: string;
   timeLabel: string;
   datePlaceholder: string;
   timePlaceholder: string;
-  /** 活動已確認時段或已開始後鎖定整組欄位 */
   disabled?: boolean;
-  /** 日期變更回調 */
   onDateChange: (date: Date | null) => void;
-  /** 時間變更回調 */
   onTimeChange: (time: string) => void;
 }
 

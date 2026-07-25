@@ -10,7 +10,7 @@ type VotingDeadlineEditableEvent = NonNullable<
 >;
 
 /**
- * 活動更新服務（業務邏輯層）
+ * Event update service (business logic layer)
  */
 @Injectable()
 export class EventUpdateService {
@@ -20,13 +20,6 @@ export class EventUpdateService {
     private eventScheduleService: EventScheduleService,
   ) {}
 
-  /**
-   * 更新活動設定
-   *
-   * 注意：為了保持資料一致性，以下欄位不允許更新：
-   * - startDate, endDate, startTime, endTime, slotDurationMin
-   * 這些欄位已從 UpdateEventDto 中移除
-   */
   async update(eventId: string, userId: string, updateDto: UpdateEventDto) {
     await this.eventAuthorizationService.verifyOwner(eventId, userId);
 
@@ -79,9 +72,6 @@ export class EventUpdateService {
     };
   }
 
-  /**
-   * 刪除活動
-   */
   async remove(eventId: string, userId: string) {
     await this.eventAuthorizationService.verifyOwner(eventId, userId);
 
@@ -102,10 +92,8 @@ export class EventUpdateService {
   }
 
   /**
-   * 驗證投票截止時間是否仍可編輯：確認活動時間後不可調整。
-   *
-   * 活動是否已開始不列入判斷 —— 只要時間還沒確認，主辦人就能繼續調整截止
-   * 時間來開關投票，與建立活動時一樣不做多餘限制。
+   * Check whether the voting deadline can still be edited: it is locked once
+   * the event time is confirmed.
    */
   private assertVotingDeadlineIsEditable(event: VotingDeadlineEditableEvent) {
     if (event.confirmedTimeSlots.length > 0) {
@@ -116,10 +104,7 @@ export class EventUpdateService {
   }
 
   /**
-   * 驗證投票截止時間：只檢查格式。
-   *
-   * 截止時間的「數值」不設限 —— 主辦人可以刻意設在過去（立即關閉投票），
-   * 或設在活動時間之後。是否還能編輯由 assertVotingDeadlineIsEditable 決定。
+   * Validate the voting deadline: format only.
    */
   private validateVotingDeadline(votingDeadline: string) {
     const deadline = new Date(votingDeadline);

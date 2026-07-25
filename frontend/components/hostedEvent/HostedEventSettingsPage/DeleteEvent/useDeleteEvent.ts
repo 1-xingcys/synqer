@@ -11,9 +11,6 @@ import type { operations } from "@/generated/openapi";
 type RemoveEventResponse =
   operations["EventCoreController_remove"]["responses"][200]["content"]["application/json"];
 
-/**
- * 刪除活動的兩段式流程：先開啟確認、確認後才送出並導回總覽頁。
- */
 export function useDeleteEvent() {
   const params = useParams();
   const eventId = params.eventId as string;

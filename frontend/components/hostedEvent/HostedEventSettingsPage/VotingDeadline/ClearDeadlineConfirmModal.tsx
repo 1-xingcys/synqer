@@ -9,9 +9,9 @@ import { Z_INDEX } from "@/lib/zIndex";
 
 interface ClearDeadlineConfirmModalProps {
   open: boolean;
-  /** 清除請求進行中 */
+  /** Clear request in flight */
   saving: boolean;
-  /** 清除失敗時的訊息，成功時彈窗會由上層關閉 */
+  /** Message shown when clearing fails; on success the parent closes the modal */
   error: string | null;
   onCancel: () => void;
   onConfirm: () => void;
