@@ -17,13 +17,15 @@ import {
 import { GRANULARITY_OPTIONS } from '../../../../shared/event-preference.constants';
 
 /**
- * 更新活動 DTO
+ * Update event DTO
  *
- * 注意：為了保持資料一致性，以下欄位不允許更新：
+ * Note: to keep data consistent, the following fields cannot be updated:
  * - startDate, endDate, startTime, endTime, slotDurationMin
- *   這些欄位會影響 slots 的生成，更新後會造成 slots 與 event 設定不同步
+ *   These fields affect slot generation, so updating them would leave the slots
+ *   out of sync with the event settings.
  *
- * 若未來需要支援這些欄位的更新，必須同時重建 slots 並清除相關投票
+ * If updating these fields needs to be supported later, the slots must be
+ * regenerated and the related votes cleared at the same time.
  */
 export class UpdateEventDto {
   @IsOptional()
@@ -44,7 +46,7 @@ export class UpdateEventDto {
   @IsString()
   timeZone?: string;
 
-  // 投票截止時間（ISO 8601 格式）
+  // Voting deadline (ISO 8601 format)
   @ApiPropertyOptional({
     type: String,
     format: 'date-time',
@@ -55,14 +57,14 @@ export class UpdateEventDto {
   @IsISO8601()
   votingDeadline?: string | null;
 
-  // 時間格的顯示顆粒度
+  // Display granularity of the time grid
   @ApiPropertyOptional({ enum: GRANULARITY_OPTIONS })
   @IsOptional()
   @IsInt()
   @IsIn([...GRANULARITY_OPTIONS])
   defaultGranularityMin?: number;
 
-  // 參與者進入投票時的初始模式
+  // Initial mode participants get when they open the vote
   @ApiPropertyOptional({ enum: EventVoteMode, enumName: 'EventVoteMode' })
   @IsOptional()
   @IsEnum(EventVoteMode)

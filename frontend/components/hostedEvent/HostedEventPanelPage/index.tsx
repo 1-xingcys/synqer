@@ -81,7 +81,7 @@ export default function HostedEventPanelPage() {
   const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
   const eventTitle = event?.title || t("event.untitled");
 
-  // 主辦資料來自獨立的 /events/:id/hosted query，載入中需自行顯示 loading。
+  // Host data comes from a separate /events/:id/hosted query, so this view shows its own loading state.
   if (isLoading) {
     return <LoadingState label={t("common.loading")} viewport="section" />;
   }

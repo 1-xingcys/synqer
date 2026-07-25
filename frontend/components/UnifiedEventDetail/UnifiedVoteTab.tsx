@@ -19,7 +19,6 @@ export default function UnifiedVoteTab() {
   if (!data || !user) return null;
   if (data.event.status !== EventStatus.VOTING) return null;
 
-  // TODO: 加上 useEffect 監聽 event status，若非 voting 狀態則導回 JoinedEventPage
   const currentUserHasVoted = data.expectedParticipants.some(
     (participant) =>
       (participant.userId === user.id.toString() ||

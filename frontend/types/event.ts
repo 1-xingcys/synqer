@@ -8,32 +8,30 @@ export type ConfirmedSelectionKind =
 /** Wire format of the host's default vote mode (uppercase, unlike `VoteMode`). */
 export type EventVoteModeDto = components["schemas"]["EventVoteMode"];
 
-// 活動狀態
 export const EventStatus = {
-  VOTING: "VOTING", // 正在進行投票 (活動創建後 ~ 投票 deadline)
-  VOTING_ENDED: "VOTING_ENDED", // 已經投票結束 (投票 deadline 已過，但 host 還沒決定活動時間)
-  CONFIRMED: "CONFIRMED", // 活動時間已定 (host 決定活動時間 ~ 活動時間結束)
-  COMPLETED: "COMPLETED", // 活動時間已過 (活動已經辦完)
+  VOTING: "VOTING", // Voting is open (event created ~ voting deadline)
+  VOTING_ENDED: "VOTING_ENDED", // Voting is over (deadline passed, but the host has not picked a time yet)
+  CONFIRMED: "CONFIRMED", // Event time is set (host picked a time ~ event time ends)
+  COMPLETED: "COMPLETED", // Event time has passed (the event is over)
 } as const;
 export type EventStatus = (typeof EventStatus)[keyof typeof EventStatus];
 
-// 參與者狀態
 export const ParticipantStatus = {
-  VOTED: "VOTED", // 已經投票
-  NOT_VOTED: "NOT_VOTED", // 還沒投票（已註冊）
-  NOT_REGISTERED: "NOT_REGISTERED", // 還沒註冊（只有 LINE 使用者）
+  VOTED: "VOTED", // Has voted
+  NOT_VOTED: "NOT_VOTED", // Has not voted (registered)
+  NOT_REGISTERED: "NOT_REGISTERED", // Not registered (LINE user only)
 } as const;
 export type ParticipantStatus =
   (typeof ParticipantStatus)[keyof typeof ParticipantStatus];
 
-// 投票模式
+// Vote mode
 export const VoteMode = {
-  AVAILABLE: "available", // 可參加
-  UNAVAILABLE: "unavailable", // 不可參加
+  AVAILABLE: "available", // Can attend
+  UNAVAILABLE: "unavailable", // Cannot attend
 } as const;
 export type VoteMode = (typeof VoteMode)[keyof typeof VoteMode];
 
-// 合併後的時間範圍（連續時段合併成一個範圍）
+// Merged time ranges (consecutive slots merged into a single range)
 export type ConfirmedSelection = components["schemas"]["ConfirmedSelectionDto"];
 export type EventCapabilities = components["schemas"]["EventCapabilitiesDto"];
 
@@ -77,7 +75,7 @@ export function supportsAddToCalendar(event: EventWithCapabilities): boolean {
   return event.capabilities.supportsAddToCalendar;
 }
 
-// 預期參與者
+// Expected participant
 export interface ExpectedParticipant {
   id: string;
   lineUserId?: string;

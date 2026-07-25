@@ -59,12 +59,12 @@ function diffSets(currentSet: Set<string>, targetSet: Set<string>) {
 }
 
 /**
- * staged/committed 投票的選取規則：
- * - has staged draft: 以 staged canonical available slots 為主
- * - no staged + hasVoted: 以 committed available slots 為主
+ * Selection rules for staged/committed votes:
+ * - has staged draft: use the staged canonical available slots
+ * - no staged + hasVoted: use the committed available slots
  * - no staged + !hasVoted:
- *   - available mode 預設全沒空（available=[]）
- *   - unavailable mode 預設全有空（available=all）
+ *   - available mode defaults to nothing available (available=[])
+ *   - unavailable mode defaults to everything available (available=all)
  */
 export function useSlotSelectionModel({
   slots,

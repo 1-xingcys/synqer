@@ -102,8 +102,9 @@ interface UseVotingGridControllerResult {
 }
 
 /**
- * TimeGrid 的編排層 controller：
- * 串接各子 hooks，對外提供畫面需要的狀態、衍生資料與互動 handler。
+ * Orchestration controller for the TimeGrid:
+ * wires the child hooks together and exposes the state, derived data and
+ * interaction handlers the view needs.
  */
 export function useVotingGridController({
   slots,

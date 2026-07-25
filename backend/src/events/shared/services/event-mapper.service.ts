@@ -33,7 +33,7 @@ type MappedEventList = {
 };
 
 /**
- * 活動數據轉換服務
+ * Event data mapping service
  */
 @Injectable()
 export class EventMapperService {
@@ -45,7 +45,7 @@ export class EventMapperService {
   ) {}
 
   /**
-   * 轉換 votes 數據為簡化格式
+   * Map vote data into a simplified format
    */
   mapVotes(
     votes: Array<{
@@ -61,9 +61,6 @@ export class EventMapperService {
     }));
   }
 
-  /**
-   * 從 votes 中提取參與者列表
-   */
   extractParticipants(
     votes: Array<{
       userId: string;
@@ -85,9 +82,6 @@ export class EventMapperService {
     return Array.from(participantsMap.values());
   }
 
-  /**
-   * 從 votes 中提取參與者列表（Host 版本，包含 hasVoted）
-   */
   extractParticipantsForHost(
     votes: Array<{
       userId: string;
@@ -110,9 +104,6 @@ export class EventMapperService {
     return Array.from(participantsMap.values());
   }
 
-  /**
-   * 計算投票統計
-   */
   calculateVotingStats(
     expectedParticipants: Array<{ hasVoted?: boolean }>,
     participants: Array<{ hasVoted?: boolean }>,
@@ -130,7 +121,7 @@ export class EventMapperService {
   }
 
   /**
-   * 映射事件為列表項格式
+   * Map an event into the list item format
    */
   mapEventToList(event: {
     id: string;
@@ -180,7 +171,7 @@ export class EventMapperService {
   }
 
   /**
-   * 映射事件為詳細格式
+   * Map an event into the detail format
    */
   mapEventToDetail(event: {
     id: string;

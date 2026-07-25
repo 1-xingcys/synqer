@@ -6,9 +6,6 @@ import { EventRepository } from '../repositories/event.repository';
 import { DEFAULT_TIME_ZONE } from '../../../common/time';
 import { DEFAULT_GRANULARITY_MIN } from '../../../../shared/event-preference.constants';
 
-/**
- * 活動創建服務（業務邏輯層）
- */
 @Injectable()
 export class EventCreationService {
   constructor(
@@ -17,7 +14,7 @@ export class EventCreationService {
   ) {}
 
   /**
-   * 創建活動並處理所有相關數據
+   * Create an event and handle all the related data
    */
   async create(createEventDto: CreateEventDto, userId?: string) {
     const {
@@ -38,7 +35,6 @@ export class EventCreationService {
       expectedLineUserIds,
     } = createEventDto;
 
-    // 對 expectedLineUserIds 去重
     const uniqueLineUserIds = expectedLineUserIds?.length
       ? [...new Set(expectedLineUserIds)]
       : [];
@@ -48,7 +44,6 @@ export class EventCreationService {
       this.validateVotingDeadline(votingDeadline);
     }
 
-    // 解析時間為分鐘數
     const startMinuteOfDay = this.timeSlotService.parseTimeToMinutes(startTime);
     // Handle "24:00" as end of day
     const endMinuteOfDay =
@@ -57,7 +52,6 @@ export class EventCreationService {
         : this.timeSlotService.parseTimeToMinutes(endTime);
     const votingDeadlineObj = votingDeadline ? new Date(votingDeadline) : null;
 
-    // 準備參與者資料（使用去重後的 lineUserIds）
     const participantData = uniqueLineUserIds.map((lineUserId) => ({
       lineUserId,
     }));
@@ -211,7 +205,7 @@ export class EventCreationService {
   }
 
   /**
-   * 驗證日期範圍：startDate <= endDate
+   * Validate the date range: startDate <= endDate
    */
   private requireOneTimeDateRange(startDate?: string, endDate?: string) {
     if (!startDate || !endDate) {
@@ -228,7 +222,7 @@ export class EventCreationService {
   }
 
   /**
-   * 驗證時間範圍：startTime < endTime
+   * Validate the time range: startTime < endTime
    */
   private validateTimes(startTime: string, endTime: string) {
     const startMinutes = this.timeSlotService.parseTimeToMinutes(startTime);
@@ -257,10 +251,7 @@ export class EventCreationService {
   }
 
   /**
-   * 驗證投票截止時間：只檢查格式。
-   *
-   * 截止時間的「數值」不設限 —— 主辦人可以刻意設在過去，或設在活動時間之後，
-   * 以便更彈性地開關投票。
+   * Validate the voting deadline: only the format is checked.
    */
   private validateVotingDeadline(votingDeadline: string) {
     const deadline = new Date(votingDeadline);

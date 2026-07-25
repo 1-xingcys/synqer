@@ -87,11 +87,11 @@ export class CreateEventDto {
   @IsInt()
   @Min(5)
   @Max(120)
-  slotDurationMin?: number; // 預設 15，未來可支援 30/60
+  slotDurationMin?: number;
 
   @IsOptional()
   @IsString()
-  timeZone?: string; // 預設 "Asia/Taipei"
+  timeZone?: string;
 
   @ApiPropertyOptional({ enum: GRANULARITY_OPTIONS })
   @IsOptional()
@@ -104,17 +104,17 @@ export class CreateEventDto {
   @IsEnum(EventVoteMode)
   defaultVoteMode?: EventVoteMode;
 
-  // 投票截止時間（ISO 8601 格式）
+  // Voting deadline (ISO 8601 format)
   @IsOptional()
   @IsISO8601()
   votingDeadline?: string; // "2025-08-14T23:59:59.000Z"
 
-  // LINE 群組綁定（群組的資料庫 ID）
+  // LINE group binding (the group's database ID)
   @IsOptional()
   @IsString()
   lineGroupId?: string;
 
-  // 預期應該投票的成員 LINE userIds
+  // LINE userIds of the members expected to vote
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
