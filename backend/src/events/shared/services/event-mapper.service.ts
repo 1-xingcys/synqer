@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventType, Weekday } from '@prisma/client';
+import { EventType, EventVoteMode, Weekday } from '@prisma/client';
 import { EventStatusService } from './event-status.service';
 import { ConfirmedTimeService } from './confirmed-time.service';
 import { ConfirmedTimeSlotData } from '../interfaces/confirmed-time.interface';
@@ -189,6 +189,8 @@ export class EventMapperService {
     description: string | null;
     createdAt: Date;
     timeZone: string;
+    defaultGranularityMin: number;
+    defaultVoteMode: EventVoteMode;
     lineGroupId: string | null;
     ownerId: string | null;
     votingDeadline: Date | null;
@@ -218,6 +220,8 @@ export class EventMapperService {
         slotDurationMin: schedule.slotDurationMin,
       },
       timeZone: event.timeZone,
+      defaultGranularityMin: event.defaultGranularityMin,
+      defaultVoteMode: event.defaultVoteMode,
       lineGroupId: event.lineGroupId,
       ownerId: event.ownerId,
       votingDeadline: event.votingDeadline,

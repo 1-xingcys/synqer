@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
-import { EventType, Weekday } from '@prisma/client';
+import { EventType, EventVoteMode, Weekday } from '@prisma/client';
 import { EventCreationService } from './event-creation.service';
 import { EventRepository } from '../repositories/event.repository';
 import { TimeSlotService } from '../../shared/services/time-slot.service';
@@ -105,6 +105,55 @@ describe('EventCreationService', () => {
       expect(eventRepository.createWithSlotsAndParticipants).toHaveBeenCalledWith(
         expect.objectContaining({
           votingDeadline: null,
+        }),
+        expect.any(Array),
+        expect.any(Array),
+        'user-123',
+      );
+    });
+
+    it('should fall back to the default view preferences when they are not supplied', async () => {
+      const mockResult = {
+        event: { id: 'event-123', title: 'Test Event', lineGroupId: null },
+        creatorLineUserId: undefined,
+      };
+
+      mockEventRepository.createWithSlotsAndParticipants.mockResolvedValue(mockResult);
+
+      await service.create(validDto, 'user-123');
+
+      expect(eventRepository.createWithSlotsAndParticipants).toHaveBeenCalledWith(
+        expect.objectContaining({
+          defaultGranularityMin: 30,
+          defaultVoteMode: EventVoteMode.AVAILABLE,
+        }),
+        expect.any(Array),
+        expect.any(Array),
+        'user-123',
+      );
+    });
+
+    it('should persist the view preferences chosen by the host', async () => {
+      const mockResult = {
+        event: { id: 'event-123', title: 'Test Event', lineGroupId: null },
+        creatorLineUserId: undefined,
+      };
+
+      mockEventRepository.createWithSlotsAndParticipants.mockResolvedValue(mockResult);
+
+      await service.create(
+        {
+          ...validDto,
+          defaultGranularityMin: 60,
+          defaultVoteMode: EventVoteMode.UNAVAILABLE,
+        },
+        'user-123',
+      );
+
+      expect(eventRepository.createWithSlotsAndParticipants).toHaveBeenCalledWith(
+        expect.objectContaining({
+          defaultGranularityMin: 60,
+          defaultVoteMode: EventVoteMode.UNAVAILABLE,
         }),
         expect.any(Array),
         expect.any(Array),

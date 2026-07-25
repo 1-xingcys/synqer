@@ -1,15 +1,20 @@
 import {
   IsString,
   IsOptional,
+  IsEnum,
+  IsIn,
+  IsInt,
   IsISO8601,
   MaxLength,
   ValidateIf,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { EventVoteMode } from '@prisma/client';
 import {
   TITLE_MAX_LENGTH,
   DESCRIPTION_MAX_LENGTH,
 } from '../../../../shared/event-validation.constants';
+import { GRANULARITY_OPTIONS } from '../../../../shared/event-preference.constants';
 
 /**
  * 更新活動 DTO
@@ -49,4 +54,17 @@ export class UpdateEventDto {
   @ValidateIf((_, value: string | null | undefined) => value !== null)
   @IsISO8601()
   votingDeadline?: string | null;
+
+  // 時間格的顯示顆粒度
+  @ApiPropertyOptional({ enum: GRANULARITY_OPTIONS })
+  @IsOptional()
+  @IsInt()
+  @IsIn([...GRANULARITY_OPTIONS])
+  defaultGranularityMin?: number;
+
+  // 參與者進入投票時的初始模式
+  @ApiPropertyOptional({ enum: EventVoteMode, enumName: 'EventVoteMode' })
+  @IsOptional()
+  @IsEnum(EventVoteMode)
+  defaultVoteMode?: EventVoteMode;
 }

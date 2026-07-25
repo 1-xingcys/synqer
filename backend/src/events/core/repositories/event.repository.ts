@@ -5,6 +5,7 @@ import {
   Event,
   EventSlotAxisType,
   EventType,
+  EventVoteMode,
   Weekday,
 } from '@prisma/client';
 
@@ -31,6 +32,8 @@ export class EventRepository {
       endMinuteOfDay: number;
       slotDurationMin: number;
       timeZone: string;
+      defaultGranularityMin: number;
+      defaultVoteMode: EventVoteMode;
       votingDeadline: Date | null;
       lineGroupId: string | null;
     },
@@ -54,6 +57,8 @@ export class EventRepository {
           type: eventData.type,
           ownerId: eventData.ownerId,
           timeZone: eventData.timeZone,
+          defaultGranularityMin: eventData.defaultGranularityMin,
+          defaultVoteMode: eventData.defaultVoteMode,
           votingDeadline: eventData.votingDeadline,
           lineGroupId: eventData.lineGroupId,
         },
@@ -114,6 +119,8 @@ export class EventRepository {
       endMinuteOfDay: number;
       slotDurationMin: number;
       timeZone: string;
+      defaultGranularityMin: number;
+      defaultVoteMode: EventVoteMode;
       votingDeadline: Date | null;
       lineGroupId: string | null;
       weekdays: Weekday[];
@@ -141,6 +148,8 @@ export class EventRepository {
           type: eventData.type,
           ownerId: eventData.ownerId,
           timeZone: eventData.timeZone,
+          defaultGranularityMin: eventData.defaultGranularityMin,
+          defaultVoteMode: eventData.defaultVoteMode,
           votingDeadline: eventData.votingDeadline,
           lineGroupId: eventData.lineGroupId,
         },

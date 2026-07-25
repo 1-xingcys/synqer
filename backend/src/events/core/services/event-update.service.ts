@@ -46,6 +46,14 @@ export class EventUpdateService {
       updateData.timeZone = updateDto.timeZone;
     }
 
+    if (updateDto.defaultGranularityMin !== undefined) {
+      updateData.defaultGranularityMin = updateDto.defaultGranularityMin;
+    }
+
+    if (updateDto.defaultVoteMode !== undefined) {
+      updateData.defaultVoteMode = updateDto.defaultVoteMode;
+    }
+
     if (updateDto.votingDeadline !== undefined) {
       updateData.votingDeadline =
         updateDto.votingDeadline === null

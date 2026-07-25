@@ -1,9 +1,10 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { EventType, Weekday } from '@prisma/client';
+import { EventType, EventVoteMode, Weekday } from '@prisma/client';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { TimeSlotService } from '../../shared/services/time-slot.service';
 import { EventRepository } from '../repositories/event.repository';
 import { DEFAULT_TIME_ZONE } from '../../../common/time';
+import { DEFAULT_GRANULARITY_MIN } from '../../../../shared/event-preference.constants';
 
 /**
  * 活動創建服務（業務邏輯層）
@@ -30,6 +31,8 @@ export class EventCreationService {
       endTime,
       slotDurationMin = 15,
       timeZone = DEFAULT_TIME_ZONE,
+      defaultGranularityMin = DEFAULT_GRANULARITY_MIN,
+      defaultVoteMode = EventVoteMode.AVAILABLE,
       votingDeadline,
       lineGroupId,
       expectedLineUserIds,
@@ -69,6 +72,8 @@ export class EventCreationService {
           endMinuteOfDay,
           slotDurationMin,
           timeZone,
+          defaultGranularityMin,
+          defaultVoteMode,
           votingDeadlineObj,
           lineGroupId,
         },
@@ -88,6 +93,8 @@ export class EventCreationService {
         endMinuteOfDay,
         slotDurationMin,
         timeZone,
+        defaultGranularityMin,
+        defaultVoteMode,
         votingDeadlineObj,
         lineGroupId,
       },
@@ -107,6 +114,8 @@ export class EventCreationService {
       endMinuteOfDay: number;
       slotDurationMin: number;
       timeZone: string;
+      defaultGranularityMin: number;
+      defaultVoteMode: EventVoteMode;
       votingDeadlineObj: Date | null;
       lineGroupId?: string;
     },
@@ -133,6 +142,8 @@ export class EventCreationService {
         endMinuteOfDay: input.endMinuteOfDay,
         slotDurationMin: input.slotDurationMin,
         timeZone: input.timeZone,
+        defaultGranularityMin: input.defaultGranularityMin,
+        defaultVoteMode: input.defaultVoteMode,
         votingDeadline: input.votingDeadlineObj,
         lineGroupId: input.lineGroupId || null,
         weekdays: normalizedWeekdays,
@@ -153,6 +164,8 @@ export class EventCreationService {
       endMinuteOfDay: number;
       slotDurationMin: number;
       timeZone: string;
+      defaultGranularityMin: number;
+      defaultVoteMode: EventVoteMode;
       votingDeadlineObj: Date | null;
       lineGroupId?: string;
     },
@@ -186,6 +199,8 @@ export class EventCreationService {
         endMinuteOfDay: input.endMinuteOfDay,
         slotDurationMin: input.slotDurationMin,
         timeZone: input.timeZone,
+        defaultGranularityMin: input.defaultGranularityMin,
+        defaultVoteMode: input.defaultVoteMode,
         votingDeadline: input.votingDeadlineObj,
         lineGroupId: input.lineGroupId || null,
       },

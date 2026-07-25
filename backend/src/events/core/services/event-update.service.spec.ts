@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
-import { EventType } from '@prisma/client';
+import { EventType, EventVoteMode } from '@prisma/client';
 import { EventUpdateService } from './event-update.service';
 import { EventRepository } from '../repositories/event.repository';
 import { EventAuthorizationService } from '../../shared/services/event-authorization.service';
@@ -174,6 +174,82 @@ describe('EventUpdateService', () => {
       await service.update(eventId, userId, updateDto);
 
       expect(eventRepository.update).toHaveBeenCalledWith(eventId, { timeZone: 'America/New_York' });
+    });
+
+    it('should update the view preferences', async () => {
+      const updateDto = {
+        defaultGranularityMin: 60,
+        defaultVoteMode: EventVoteMode.UNAVAILABLE,
+      };
+      const updatedEvent = {
+        id: eventId,
+        type: EventType.ONE_TIME,
+        title: 'Title',
+        description: null,
+        confirmedTimeSlots: [],
+        oneTimeSchedule: {
+          startDate: new Date(),
+          endDate: new Date(),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
+        recurringSchedule: null,
+      };
+
+      mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
+      mockEventRepository.update.mockResolvedValue(updatedEvent);
+      mockEventScheduleService.resolveSchedule.mockReturnValue({
+        type: EventType.ONE_TIME,
+        startDate: updatedEvent.oneTimeSchedule.startDate,
+        endDate: updatedEvent.oneTimeSchedule.endDate,
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 600,
+        slotDurationMin: 15,
+      });
+
+      await service.update(eventId, userId, updateDto);
+
+      expect(eventRepository.update).toHaveBeenCalledWith(eventId, {
+        defaultGranularityMin: 60,
+        defaultVoteMode: EventVoteMode.UNAVAILABLE,
+      });
+    });
+
+    it('should update the view preferences after the event time is confirmed', async () => {
+      const updateDto = { defaultGranularityMin: 15 };
+      const updatedEvent = {
+        id: eventId,
+        type: EventType.ONE_TIME,
+        title: 'Title',
+        description: null,
+        confirmedTimeSlots: [{ slotId: 'slot-1' }],
+        oneTimeSchedule: {
+          startDate: new Date(),
+          endDate: new Date(),
+          startMinuteOfDay: 540,
+          endMinuteOfDay: 600,
+          slotDurationMin: 15,
+        },
+        recurringSchedule: null,
+      };
+
+      mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
+      mockEventRepository.update.mockResolvedValue(updatedEvent);
+      mockEventScheduleService.resolveSchedule.mockReturnValue({
+        type: EventType.ONE_TIME,
+        startDate: updatedEvent.oneTimeSchedule.startDate,
+        endDate: updatedEvent.oneTimeSchedule.endDate,
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 600,
+        slotDurationMin: 15,
+      });
+
+      await service.update(eventId, userId, updateDto);
+
+      expect(eventRepository.update).toHaveBeenCalledWith(eventId, {
+        defaultGranularityMin: 15,
+      });
     });
 
     it('should update votingDeadline when valid', async () => {

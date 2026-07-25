@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsDateString,
   IsInt,
+  IsIn,
   Min,
   Max,
   IsArray,
@@ -15,11 +16,12 @@ import {
   IsEnum,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { EventType, Weekday } from '@prisma/client';
+import { EventType, EventVoteMode, Weekday } from '@prisma/client';
 import {
   TITLE_MAX_LENGTH,
   DESCRIPTION_MAX_LENGTH,
 } from '../../../../shared/event-validation.constants';
+import { GRANULARITY_OPTIONS } from '../../../../shared/event-preference.constants';
 
 type CreateEventValidationTarget = {
   type?: EventType;
@@ -73,13 +75,13 @@ export class CreateEventDto {
   @Matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, {
     message: 'startTime must be in HH:mm format (00:00-23:59)',
   })
-  startTime: string; // "09:00"
+  startTime!: string; // "09:00"
 
   @IsString()
   @Matches(/^(([01]?[0-9]|2[0-3]):[0-5][0-9]|24:00)$/, {
     message: 'endTime must be in HH:mm format (00:00-24:00)',
   })
-  endTime: string; // "18:00" or "24:00"
+  endTime!: string; // "18:00" or "24:00"
 
   @IsOptional()
   @IsInt()
@@ -90,6 +92,17 @@ export class CreateEventDto {
   @IsOptional()
   @IsString()
   timeZone?: string; // 預設 "Asia/Taipei"
+
+  @ApiPropertyOptional({ enum: GRANULARITY_OPTIONS })
+  @IsOptional()
+  @IsInt()
+  @IsIn([...GRANULARITY_OPTIONS])
+  defaultGranularityMin?: number;
+
+  @ApiPropertyOptional({ enum: EventVoteMode, enumName: 'EventVoteMode' })
+  @IsOptional()
+  @IsEnum(EventVoteMode)
+  defaultVoteMode?: EventVoteMode;
 
   // 投票截止時間（ISO 8601 格式）
   @IsOptional()

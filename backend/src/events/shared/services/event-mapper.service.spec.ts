@@ -1,5 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventSlotAxisType, EventType, Weekday } from '@prisma/client';
+import {
+  EventSlotAxisType,
+  EventType,
+  EventVoteMode,
+  Weekday,
+} from '@prisma/client';
 import { EventMapperService } from './event-mapper.service';
 import { EventStatusService } from './event-status.service';
 import { ConfirmedTimeService } from './confirmed-time.service';
@@ -317,6 +322,8 @@ describe('EventMapperService', () => {
       },
       recurringSchedule: null,
       timeZone: 'Asia/Taipei',
+      defaultGranularityMin: 30,
+      defaultVoteMode: EventVoteMode.AVAILABLE,
       lineGroupId: 'group-1',
       ownerId: 'user-123',
       votingDeadline: null,
@@ -348,6 +355,8 @@ describe('EventMapperService', () => {
           weekdays: undefined,
         },
         timeZone: 'Asia/Taipei',
+        defaultGranularityMin: 30,
+        defaultVoteMode: EventVoteMode.AVAILABLE,
         lineGroupId: 'group-1',
         ownerId: 'user-123',
         votingDeadline: null,
@@ -419,6 +428,8 @@ describe('EventMapperService', () => {
         endMinuteOfDay: 1080,
         slotDurationMin: 15,
         timeZone: 'Asia/Taipei',
+        defaultGranularityMin: 60,
+        defaultVoteMode: EventVoteMode.UNAVAILABLE,
         lineGroupId: null,
         ownerId: 'user-123',
         votingDeadline: null,
@@ -465,6 +476,8 @@ describe('EventMapperService', () => {
           endDate: undefined,
         },
         timeZone: 'Asia/Taipei',
+        defaultGranularityMin: 60,
+        defaultVoteMode: EventVoteMode.UNAVAILABLE,
         lineGroupId: null,
         ownerId: 'user-123',
         votingDeadline: null,
