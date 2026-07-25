@@ -6,6 +6,7 @@ import { useCallback } from "react";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { LoadingState } from "@/components/ui/loading-state";
 import { EventStatus } from "@/types/event";
+import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
 import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
 import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
 import { EventTimeSelector } from "./EventTimeSelector";
@@ -80,7 +81,7 @@ export default function HostedEventPanelPage() {
   const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
   const eventTitle = event?.title || t("event.untitled");
 
-  // 主辦資料來自獨立的 /events/:id/hosted query，載入中需自行顯示 loading。
+  // Host data comes from a separate /events/:id/hosted query, so this view shows its own loading state.
   if (isLoading) {
     return <LoadingState label={t("common.loading")} viewport="section" />;
   }
@@ -133,6 +134,8 @@ export default function HostedEventPanelPage() {
         votes={votesWithAvatars}
         participants={participantsWithAvatars}
         eventId={eventId}
+        defaultGranularity={normalizeGranularity(event.defaultGranularityMin)}
+        defaultMode={toVoteMode(event.defaultVoteMode)}
         tip={t("hosted.eventTimeSelector.emptyHint")}
         canAddToEventTime={true}
         isVotingPhase={isVotingPhase}

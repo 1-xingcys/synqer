@@ -1,4 +1,9 @@
-import { EventCapabilities, EventSlotAxisType, Weekday } from "@/types/event";
+import {
+  EventCapabilities,
+  EventSlotAxisType,
+  VoteMode,
+  Weekday,
+} from "@/types/event";
 
 export type TimeGranularity = 15 | 30 | 60;
 
@@ -64,6 +69,8 @@ export interface VotingGridProps {
   eventTitle: string;
   timeZone: string;
   capabilities: EventCapabilities;
+  defaultGranularity: TimeGranularity;
+  defaultVoteMode: VoteMode;
 }
 
 export interface SlotMatrixCellViewModel {

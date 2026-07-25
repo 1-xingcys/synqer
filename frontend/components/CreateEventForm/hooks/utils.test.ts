@@ -5,6 +5,7 @@ import {
   withSyncedVotingDeadline,
 } from "./utils";
 import { CreateEventFormData, DEFAULT_WEEKDAYS } from "../types";
+import { DEFAULT_GRANULARITY, DEFAULT_VOTE_MODE } from "@/lib/eventPreference";
 
 function buildFormData(
   overrides: Partial<CreateEventFormData> = {},
@@ -19,6 +20,8 @@ function buildFormData(
     startTime: "09:00",
     endTime: "17:00",
     timeZone: "America/New_York",
+    defaultGranularityMin: DEFAULT_GRANULARITY,
+    defaultVoteMode: DEFAULT_VOTE_MODE,
     votingDeadlineEnabled: false,
     votingDeadline: null,
     votingDeadlineTime: null,

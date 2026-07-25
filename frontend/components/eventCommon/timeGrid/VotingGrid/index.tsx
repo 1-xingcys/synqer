@@ -23,6 +23,8 @@ export default function VotingGrid({
   eventTitle,
   timeZone,
   capabilities,
+  defaultGranularity,
+  defaultVoteMode,
 }: VotingGridProps) {
   const tJoined = useTranslations("joined");
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
@@ -38,6 +40,8 @@ export default function VotingGrid({
     eventTitle,
     timeZone,
     capabilities,
+    defaultGranularity,
+    defaultVoteMode,
   });
 
   const {

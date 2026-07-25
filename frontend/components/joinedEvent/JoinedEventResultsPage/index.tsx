@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
 import { LoadingState } from "@/components/ui/loading-state";
+import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
 import { useJoinedEventResults } from "./useJoinedEventResults";
 import { ErrorView } from "./ErrorView";
 
@@ -40,6 +41,10 @@ export default function JoinedEventResultsPage({
         votes={votesWithAvatars}
         participants={participantsWithAvatars}
         eventId={eventId}
+        defaultGranularity={normalizeGranularity(
+          data.event.defaultGranularityMin,
+        )}
+        defaultMode={toVoteMode(data.event.defaultVoteMode)}
         tip={tJoined("results.clickToSeeWho")}
       />
     </div>

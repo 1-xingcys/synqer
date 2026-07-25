@@ -24,17 +24,23 @@ const SELECTED_PARAM = "selected";
 const SELECTED_ALL = "all";
 const MODE_PARAM = "mode";
 const GRANULARITY_PARAM = "granularity";
-const DEFAULT_MODE: ResultsAvailabilityMode = "available";
-const DEFAULT_GRANULARITY: TimeGranularity = 15;
-
-function normalizeMode(value: string | null): ResultsAvailabilityMode {
-  return value === "unavailable" ? "unavailable" : "available";
+function normalizeMode(
+  value: string | null,
+  fallback: ResultsAvailabilityMode,
+): ResultsAvailabilityMode {
+  if (value === "unavailable") return "unavailable";
+  if (value === "available") return "available";
+  return fallback;
 }
 
-function normalizeGranularity(value: string | null): TimeGranularity {
+function normalizeGranularity(
+  value: string | null,
+  fallback: TimeGranularity,
+): TimeGranularity {
+  if (value === "15") return 15;
   if (value === "30") return 30;
   if (value === "60") return 60;
-  return 15;
+  return fallback;
 }
 
 export default function ResultsView({
@@ -42,6 +48,8 @@ export default function ResultsView({
   votes,
   participants,
   eventId,
+  defaultGranularity,
+  defaultMode,
   tip,
   canAddToEventTime = false,
   isVotingPhase = false,
@@ -72,13 +80,17 @@ export default function ResultsView({
   }, [searchParams, participants]);
 
   const availabilityMode = useMemo(
-    () => normalizeMode(searchParams.get(MODE_PARAM)),
-    [searchParams],
+    () => normalizeMode(searchParams.get(MODE_PARAM), defaultMode),
+    [searchParams, defaultMode],
   );
 
   const granularity = useMemo(
-    () => normalizeGranularity(searchParams.get(GRANULARITY_PARAM)),
-    [searchParams],
+    () =>
+      normalizeGranularity(
+        searchParams.get(GRANULARITY_PARAM),
+        defaultGranularity,
+      ),
+    [searchParams, defaultGranularity],
   );
 
   const serializeSelectionParam = useCallback(
@@ -101,18 +113,25 @@ export default function ResultsView({
       changed = true;
     }
     if (searchParams.get(MODE_PARAM) === null) {
-      params.set(MODE_PARAM, DEFAULT_MODE);
+      params.set(MODE_PARAM, defaultMode);
       changed = true;
     }
     if (searchParams.get(GRANULARITY_PARAM) === null) {
-      params.set(GRANULARITY_PARAM, String(DEFAULT_GRANULARITY));
+      params.set(GRANULARITY_PARAM, String(defaultGranularity));
       changed = true;
     }
 
     if (changed) {
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     }
-  }, [searchParams, pathname, router, participants.length]);
+  }, [
+    searchParams,
+    pathname,
+    router,
+    participants.length,
+    defaultMode,
+    defaultGranularity,
+  ]);
 
   // Update URL when selection changes
   const handleSelectionChange = useCallback(

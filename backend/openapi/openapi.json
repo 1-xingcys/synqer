@@ -1565,6 +1565,13 @@
           "isHost"
         ]
       },
+      "EventVoteMode": {
+        "type": "string",
+        "enum": [
+          "AVAILABLE",
+          "UNAVAILABLE"
+        ]
+      },
       "CreateEventDto": {
         "type": "object",
         "properties": {
@@ -1582,6 +1589,21 @@
             "items": {
               "$ref": "#/components/schemas/Weekday"
             }
+          },
+          "defaultGranularityMin": {
+            "type": "number",
+            "enum": [
+              15,
+              30,
+              60
+            ]
+          },
+          "defaultVoteMode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventVoteMode"
+              }
+            ]
           },
           "title": {
             "type": "string",
@@ -1652,6 +1674,13 @@
               }
             ]
           },
+          "defaultVoteMode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventVoteMode"
+              }
+            ]
+          },
           "id": {
             "type": "string"
           },
@@ -1668,6 +1697,9 @@
           },
           "timeZone": {
             "type": "string"
+          },
+          "defaultGranularityMin": {
+            "type": "number"
           },
           "lineGroupId": {
             "type": "string",
@@ -1709,11 +1741,13 @@
         },
         "required": [
           "type",
+          "defaultVoteMode",
           "id",
           "title",
           "description",
           "schedule",
           "timeZone",
+          "defaultGranularityMin",
           "lineGroupId",
           "ownerId",
           "votingDeadline",
@@ -2244,6 +2278,21 @@
             "type": "string",
             "nullable": true,
             "format": "date-time"
+          },
+          "defaultGranularityMin": {
+            "type": "number",
+            "enum": [
+              15,
+              30,
+              60
+            ]
+          },
+          "defaultVoteMode": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EventVoteMode"
+              }
+            ]
           },
           "title": {
             "type": "string",

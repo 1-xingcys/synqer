@@ -460,6 +460,10 @@
       "deleteEventConfirm": {
         "title": "確定要刪除此活動嗎？",
         "warning": "此操作無法復原。所有投票和資料將被永久刪除。"
+      },
+      "preference": {
+        "title": "投票表格預設",
+        "saveError": "設定儲存失敗，請再試一次"
       }
     }
   },
@@ -932,6 +936,20 @@
       "sending": "發送中...",
       "sentSuccess": "發送成功！",
       "sentFailed": "發送失敗，請稍後再試"
+    },
+    "preference": {
+      "title": "Preference"
     }
+  },
+  "eventPreference": {
+    "granularity15": "15min",
+    "granularity30": "30min",
+    "granularity60": "1hr",
+    "voteModeAvailableHint": "投「可以」的時間",
+    "voteModeUnavailableHint": "投「不行」的時間",
+    "previewLabel": "投票畫面預覽",
+    "previewAria": "投票表格預覽：4 天 × 2 小時，每格 {granularity} 分鐘",
+    "defaultGranularityLabel": "預設時間區間",
+    "defaultVoteModeLabel": "預設模式"
   }
 }

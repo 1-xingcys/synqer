@@ -1,6 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { EventStatus } from '../../shared/services/event-status.service';
-import { EventSlotAxisType, EventType, Weekday } from '@prisma/client';
+import {
+  EventSlotAxisType,
+  EventType,
+  EventVoteMode,
+  Weekday,
+} from '@prisma/client';
 import {
   ConfirmedSelectionDto,
   EventCapabilitiesDto,
@@ -15,6 +20,9 @@ export class EventDetailEventDto {
   description!: string | null;
   schedule!: EventScheduleDto;
   timeZone!: string;
+  defaultGranularityMin!: number;
+  @ApiProperty({ enum: EventVoteMode, enumName: 'EventVoteMode' })
+  defaultVoteMode!: EventVoteMode;
   lineGroupId!: string | null;
   ownerId!: string | null;
   votingDeadline!: Date | null;

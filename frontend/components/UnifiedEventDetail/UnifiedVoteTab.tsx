@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { EventStatus } from "@/types/event";
+import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
 import VotingGrid from "@/components/eventCommon/timeGrid/VotingGrid";
 import { Text } from "@/components/ui/text";
 
@@ -18,7 +19,6 @@ export default function UnifiedVoteTab() {
   if (!data || !user) return null;
   if (data.event.status !== EventStatus.VOTING) return null;
 
-  // TODO: 加上 useEffect 監聽 event status，若非 voting 狀態則導回 JoinedEventPage
   const currentUserHasVoted = data.expectedParticipants.some(
     (participant) =>
       (participant.userId === user.id.toString() ||
@@ -43,6 +43,10 @@ export default function UnifiedVoteTab() {
         eventTitle={data.event.title || tJoined("untitledEvent")}
         timeZone={data.event.timeZone}
         capabilities={data.event.capabilities}
+        defaultGranularity={normalizeGranularity(
+          data.event.defaultGranularityMin,
+        )}
+        defaultVoteMode={toVoteMode(data.event.defaultVoteMode)}
       />
     </div>
   );

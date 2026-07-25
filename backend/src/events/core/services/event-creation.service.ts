@@ -1,13 +1,11 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { EventType, Weekday } from '@prisma/client';
+import { EventType, EventVoteMode, Weekday } from '@prisma/client';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { TimeSlotService } from '../../shared/services/time-slot.service';
 import { EventRepository } from '../repositories/event.repository';
 import { DEFAULT_TIME_ZONE } from '../../../common/time';
+import { DEFAULT_GRANULARITY_MIN } from '../../../../shared/event-preference.constants';
 
-/**
- * 活動創建服務（業務邏輯層）
- */
 @Injectable()
 export class EventCreationService {
   constructor(
@@ -16,7 +14,7 @@ export class EventCreationService {
   ) {}
 
   /**
-   * 創建活動並處理所有相關數據
+   * Create an event and handle all the related data
    */
   async create(createEventDto: CreateEventDto, userId?: string) {
     const {
@@ -30,12 +28,13 @@ export class EventCreationService {
       endTime,
       slotDurationMin = 15,
       timeZone = DEFAULT_TIME_ZONE,
+      defaultGranularityMin = DEFAULT_GRANULARITY_MIN,
+      defaultVoteMode = EventVoteMode.AVAILABLE,
       votingDeadline,
       lineGroupId,
       expectedLineUserIds,
     } = createEventDto;
 
-    // 對 expectedLineUserIds 去重
     const uniqueLineUserIds = expectedLineUserIds?.length
       ? [...new Set(expectedLineUserIds)]
       : [];
@@ -45,7 +44,6 @@ export class EventCreationService {
       this.validateVotingDeadline(votingDeadline);
     }
 
-    // 解析時間為分鐘數
     const startMinuteOfDay = this.timeSlotService.parseTimeToMinutes(startTime);
     // Handle "24:00" as end of day
     const endMinuteOfDay =
@@ -54,7 +52,6 @@ export class EventCreationService {
         : this.timeSlotService.parseTimeToMinutes(endTime);
     const votingDeadlineObj = votingDeadline ? new Date(votingDeadline) : null;
 
-    // 準備參與者資料（使用去重後的 lineUserIds）
     const participantData = uniqueLineUserIds.map((lineUserId) => ({
       lineUserId,
     }));
@@ -69,6 +66,8 @@ export class EventCreationService {
           endMinuteOfDay,
           slotDurationMin,
           timeZone,
+          defaultGranularityMin,
+          defaultVoteMode,
           votingDeadlineObj,
           lineGroupId,
         },
@@ -88,6 +87,8 @@ export class EventCreationService {
         endMinuteOfDay,
         slotDurationMin,
         timeZone,
+        defaultGranularityMin,
+        defaultVoteMode,
         votingDeadlineObj,
         lineGroupId,
       },
@@ -107,6 +108,8 @@ export class EventCreationService {
       endMinuteOfDay: number;
       slotDurationMin: number;
       timeZone: string;
+      defaultGranularityMin: number;
+      defaultVoteMode: EventVoteMode;
       votingDeadlineObj: Date | null;
       lineGroupId?: string;
     },
@@ -133,6 +136,8 @@ export class EventCreationService {
         endMinuteOfDay: input.endMinuteOfDay,
         slotDurationMin: input.slotDurationMin,
         timeZone: input.timeZone,
+        defaultGranularityMin: input.defaultGranularityMin,
+        defaultVoteMode: input.defaultVoteMode,
         votingDeadline: input.votingDeadlineObj,
         lineGroupId: input.lineGroupId || null,
         weekdays: normalizedWeekdays,
@@ -153,6 +158,8 @@ export class EventCreationService {
       endMinuteOfDay: number;
       slotDurationMin: number;
       timeZone: string;
+      defaultGranularityMin: number;
+      defaultVoteMode: EventVoteMode;
       votingDeadlineObj: Date | null;
       lineGroupId?: string;
     },
@@ -186,6 +193,8 @@ export class EventCreationService {
         endMinuteOfDay: input.endMinuteOfDay,
         slotDurationMin: input.slotDurationMin,
         timeZone: input.timeZone,
+        defaultGranularityMin: input.defaultGranularityMin,
+        defaultVoteMode: input.defaultVoteMode,
         votingDeadline: input.votingDeadlineObj,
         lineGroupId: input.lineGroupId || null,
       },
@@ -196,7 +205,7 @@ export class EventCreationService {
   }
 
   /**
-   * 驗證日期範圍：startDate <= endDate
+   * Validate the date range: startDate <= endDate
    */
   private requireOneTimeDateRange(startDate?: string, endDate?: string) {
     if (!startDate || !endDate) {
@@ -213,7 +222,7 @@ export class EventCreationService {
   }
 
   /**
-   * 驗證時間範圍：startTime < endTime
+   * Validate the time range: startTime < endTime
    */
   private validateTimes(startTime: string, endTime: string) {
     const startMinutes = this.timeSlotService.parseTimeToMinutes(startTime);
@@ -242,10 +251,7 @@ export class EventCreationService {
   }
 
   /**
-   * 驗證投票截止時間：只檢查格式。
-   *
-   * 截止時間的「數值」不設限 —— 主辦人可以刻意設在過去，或設在活動時間之後，
-   * 以便更彈性地開關投票。
+   * Validate the voting deadline: only the format is checked.
    */
   private validateVotingDeadline(votingDeadline: string) {
     const deadline = new Date(votingDeadline);

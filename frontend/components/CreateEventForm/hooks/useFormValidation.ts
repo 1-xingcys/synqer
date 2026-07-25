@@ -66,6 +66,61 @@ export function getCreateEventValidationErrors(
   return errorSet;
 }
 
+function isSameDay(first: Date | null, second: Date | null) {
+  if (!first || !second) return first === second;
+  return first.toDateString() === second.toDateString();
+}
+
+function isSameStringArray(first: string[], second: string[]) {
+  return (
+    first.length === second.length &&
+    first.every((value, index) => value === second[index])
+  );
+}
+
+function isSameVotingDeadlineState(
+  current: CreateEventFormData,
+  initial: CreateEventFormData,
+) {
+  if (current.votingDeadlineEnabled !== initial.votingDeadlineEnabled) {
+    return false;
+  }
+
+  if (!current.votingDeadlineEnabled) {
+    return true;
+  }
+
+  return (
+    isSameDay(current.votingDeadline, initial.votingDeadline) &&
+    current.votingDeadlineTime === initial.votingDeadlineTime
+  );
+}
+
+export function hasCreateEventUnsavedChanges(
+  formData: CreateEventFormData,
+  initialFormData: CreateEventFormData,
+) {
+  return (
+    formData.eventType !== initialFormData.eventType ||
+    formData.title !== initialFormData.title ||
+    formData.description !== initialFormData.description ||
+    !isSameDay(formData.startDate, initialFormData.startDate) ||
+    !isSameDay(formData.endDate, initialFormData.endDate) ||
+    !isSameStringArray(formData.weekdays, initialFormData.weekdays) ||
+    formData.startTime !== initialFormData.startTime ||
+    formData.endTime !== initialFormData.endTime ||
+    formData.timeZone !== initialFormData.timeZone ||
+    formData.defaultGranularityMin !== initialFormData.defaultGranularityMin ||
+    formData.defaultVoteMode !== initialFormData.defaultVoteMode ||
+    !isSameVotingDeadlineState(formData, initialFormData) ||
+    formData.lineGroupId !== initialFormData.lineGroupId ||
+    !isSameStringArray(
+      formData.selectedLineUserIds,
+      initialFormData.selectedLineUserIds,
+    )
+  );
+}
+
 export function useFormValidation(
   formData: CreateEventFormData,
   initialFormData: CreateEventFormData,
@@ -77,52 +132,11 @@ export function useFormValidation(
     return getCreateEventValidationErrors(formData);
   }, [formData, validationRevision]);
 
-  const hasUnsavedChanges = useMemo(() => {
-    const isSameDay = (d1: Date | null, d2: Date | null) => {
-      if (!d1 || !d2) return d1 === d2;
-      return d1.toDateString() === d2.toDateString();
-    };
+  const hasUnsavedChanges = useMemo(
+    () => hasCreateEventUnsavedChanges(formData, initialFormData),
+    [formData, initialFormData],
+  );
 
-    const isSameStringArray = (first: string[], second: string[]) =>
-      first.length === second.length &&
-      first.every((value, index) => value === second[index]);
-
-    const isSameVotingDeadlineState = (
-      current: CreateEventFormData,
-      initial: CreateEventFormData,
-    ) => {
-      if (current.votingDeadlineEnabled !== initial.votingDeadlineEnabled) {
-        return false;
-      }
-
-      if (!current.votingDeadlineEnabled) {
-        return true;
-      }
-
-      return (
-        isSameDay(current.votingDeadline, initial.votingDeadline) &&
-        current.votingDeadlineTime === initial.votingDeadlineTime
-      );
-    };
-
-    return (
-      formData.eventType !== initialFormData.eventType ||
-      formData.title !== initialFormData.title ||
-      formData.description !== initialFormData.description ||
-      !isSameDay(formData.startDate, initialFormData.startDate) ||
-      !isSameDay(formData.endDate, initialFormData.endDate) ||
-      !isSameStringArray(formData.weekdays, initialFormData.weekdays) ||
-      formData.startTime !== initialFormData.startTime ||
-      formData.endTime !== initialFormData.endTime ||
-      formData.timeZone !== initialFormData.timeZone ||
-      !isSameVotingDeadlineState(formData, initialFormData) ||
-      formData.lineGroupId !== initialFormData.lineGroupId ||
-      !isSameStringArray(
-        formData.selectedLineUserIds,
-        initialFormData.selectedLineUserIds,
-      )
-    );
-  }, [formData, initialFormData]);
   return {
     errors,
     hasUnsavedChanges,

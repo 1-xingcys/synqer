@@ -29,6 +29,8 @@ interface UseVotingGridControllerProps {
   eventTitle: VotingGridProps["eventTitle"];
   timeZone: VotingGridProps["timeZone"];
   capabilities: EventCapabilities;
+  defaultGranularity: VotingGridProps["defaultGranularity"];
+  defaultVoteMode: VotingGridProps["defaultVoteMode"];
 }
 
 interface UseVotingGridControllerResult {
@@ -100,8 +102,9 @@ interface UseVotingGridControllerResult {
 }
 
 /**
- * TimeGrid 的編排層 controller：
- * 串接各子 hooks，對外提供畫面需要的狀態、衍生資料與互動 handler。
+ * Orchestration controller for the TimeGrid:
+ * wires the child hooks together and exposes the state, derived data and
+ * interaction handlers the view needs.
  */
 export function useVotingGridController({
   slots,
@@ -113,8 +116,11 @@ export function useVotingGridController({
   eventTitle,
   timeZone,
   capabilities,
+  defaultGranularity,
+  defaultVoteMode,
 }: UseVotingGridControllerProps): UseVotingGridControllerResult {
-  const [granularity, setGranularity] = useState<TimeGranularity>(30);
+  const [granularity, setGranularity] =
+    useState<TimeGranularity>(defaultGranularity);
   const { datesPerPage, slotHeight } = useResponsiveGrid();
 
   const {
@@ -156,6 +162,7 @@ export function useVotingGridController({
     stagedSlots,
     hasStagedVoteDraft,
     hasVoted: currentUserHasVoted,
+    initialVoteMode: defaultVoteMode,
     onSelectionCommit: updateStagedVotes,
   });
 

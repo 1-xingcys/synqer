@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EventType, Weekday } from '@prisma/client';
+import { EventType, EventVoteMode, Weekday } from '@prisma/client';
 import { EventRepository } from './event.repository';
 import { PrismaService } from '../../../prisma/prisma.service';
 
@@ -66,6 +66,8 @@ describe('EventRepository', () => {
         endMinuteOfDay: 1080,
         slotDurationMin: 15,
         timeZone: 'Asia/Taipei',
+        defaultGranularityMin: 30,
+        defaultVoteMode: EventVoteMode.AVAILABLE,
         votingDeadline: null,
         lineGroupId: null,
       };
@@ -123,6 +125,8 @@ describe('EventRepository', () => {
         endMinuteOfDay: 1080,
         slotDurationMin: 15,
         timeZone: 'Asia/Taipei',
+        defaultGranularityMin: 30,
+        defaultVoteMode: EventVoteMode.AVAILABLE,
         votingDeadline: null,
         lineGroupId: null,
       };
@@ -201,6 +205,8 @@ describe('EventRepository', () => {
         endMinuteOfDay: 1080,
         slotDurationMin: 15,
         timeZone: 'Asia/Taipei',
+        defaultGranularityMin: 30,
+        defaultVoteMode: EventVoteMode.AVAILABLE,
         votingDeadline: null,
         lineGroupId: null,
         weekdays: [Weekday.MONDAY, Weekday.FRIDAY],

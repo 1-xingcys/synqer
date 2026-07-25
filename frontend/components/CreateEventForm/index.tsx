@@ -7,6 +7,7 @@ import {
 } from "./CreateEventFormContext";
 import { GeneralSection } from "./GeneralSection";
 import { ConfigurationSection } from "./ConfigurationSection";
+import { PreferenceSection } from "./PreferenceSection";
 import { FormActions } from "./FormActions";
 import { CancelConfirmModal } from "./CancelConfirmModal";
 
@@ -42,6 +43,7 @@ function CreateEventFormContent() {
           />
           <GeneralSection />
           <ConfigurationSection />
+          <PreferenceSection />
         </div>
 
         <FormActions />

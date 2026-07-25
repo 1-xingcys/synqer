@@ -18,6 +18,8 @@ interface UseSlotSelectionModelProps {
   stagedSlots: Set<string>;
   hasStagedVoteDraft: boolean;
   hasVoted: boolean;
+  /** The host's default mode, used until the visitor picks one themselves. */
+  initialVoteMode: VoteMode;
   onSelectionCommit: (
     addSlotIds: string[],
     removeSlotIds: string[],
@@ -57,12 +59,12 @@ function diffSets(currentSet: Set<string>, targetSet: Set<string>) {
 }
 
 /**
- * staged/committed 投票的選取規則：
- * - has staged draft: 以 staged canonical available slots 為主
- * - no staged + hasVoted: 以 committed available slots 為主
+ * Selection rules for staged/committed votes:
+ * - has staged draft: use the staged canonical available slots
+ * - no staged + hasVoted: use the committed available slots
  * - no staged + !hasVoted:
- *   - available mode 預設全沒空（available=[]）
- *   - unavailable mode 預設全有空（available=all）
+ *   - available mode defaults to nothing available (available=[])
+ *   - unavailable mode defaults to everything available (available=all)
  */
 export function useSlotSelectionModel({
   slots,
@@ -71,9 +73,10 @@ export function useSlotSelectionModel({
   stagedSlots,
   hasStagedVoteDraft,
   hasVoted,
+  initialVoteMode,
   onSelectionCommit,
 }: UseSlotSelectionModelProps): UseSlotSelectionModelReturn {
-  const [voteMode, setVoteModeState] = useState<VoteMode>(VoteMode.AVAILABLE);
+  const [voteMode, setVoteModeState] = useState<VoteMode>(initialVoteMode);
   const allSlotIds = useMemo(() => slots.map((slot) => slot.id), [slots]);
 
   const effectiveAvailableSlots = useMemo(() => {

@@ -812,9 +812,14 @@ export interface components {
             host: components["schemas"]["AttendedEventHostDto"] | null;
             isHost: boolean;
         };
+        /** @enum {string} */
+        EventVoteMode: "AVAILABLE" | "UNAVAILABLE";
         CreateEventDto: {
             type?: components["schemas"]["EventType"];
             weekdays?: components["schemas"]["Weekday"][];
+            /** @enum {number} */
+            defaultGranularityMin?: 15 | 30 | 60;
+            defaultVoteMode?: components["schemas"]["EventVoteMode"];
             title?: string;
             description?: string;
             startDate?: string;
@@ -832,11 +837,13 @@ export interface components {
         };
         EventDetailEventDto: {
             type: components["schemas"]["EventType"];
+            defaultVoteMode: components["schemas"]["EventVoteMode"];
             id: string;
             title: string | null;
             description: string | null;
             schedule: components["schemas"]["EventScheduleDto"];
             timeZone: string;
+            defaultGranularityMin: number;
             lineGroupId: string | null;
             ownerId: string | null;
             /** Format: date-time */
@@ -965,6 +972,9 @@ export interface components {
         UpdateEventDto: {
             /** Format: date-time */
             votingDeadline?: string | null;
+            /** @enum {number} */
+            defaultGranularityMin?: 15 | 30 | 60;
+            defaultVoteMode?: components["schemas"]["EventVoteMode"];
             title?: string;
             description?: string;
             timeZone?: string;

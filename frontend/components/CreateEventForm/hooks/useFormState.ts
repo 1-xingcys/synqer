@@ -10,6 +10,7 @@ import {
 } from "../types";
 import { getTodayInTimeZone, withSyncedVotingDeadline } from "./utils";
 import { resolveDefaultTimeZone } from "@/lib/time";
+import { DEFAULT_GRANULARITY, DEFAULT_VOTE_MODE } from "@/lib/eventPreference";
 
 function getInitialFormData(): CreateEventFormData {
   const timeZone = resolveDefaultTimeZone();
@@ -25,6 +26,8 @@ function getInitialFormData(): CreateEventFormData {
     startTime: DEFAULT_START_TIME,
     endTime: DEFAULT_END_TIME,
     timeZone,
+    defaultGranularityMin: DEFAULT_GRANULARITY,
+    defaultVoteMode: DEFAULT_VOTE_MODE,
     votingDeadlineEnabled: false,
     votingDeadline: null,
     votingDeadlineTime: null,

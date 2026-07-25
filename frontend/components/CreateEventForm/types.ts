@@ -1,4 +1,5 @@
-import type { EventType, Weekday } from "@/types/event";
+import type { EventType, VoteMode, Weekday } from "@/types/event";
+import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
 
 export const TITLE_MAX_LENGTH = 50;
 
@@ -28,6 +29,10 @@ export interface CreateEventFormData {
   startTime: string;
   endTime: string;
   timeZone: string;
+
+  // Grid view defaults participants start from
+  defaultGranularityMin: TimeGranularity;
+  defaultVoteMode: VoteMode;
 
   // Voting deadline fields
   votingDeadlineEnabled: boolean;

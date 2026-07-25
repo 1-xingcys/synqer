@@ -5,19 +5,20 @@ import {
   Event,
   EventSlotAxisType,
   EventType,
+  EventVoteMode,
   Weekday,
 } from '@prisma/client';
 
 /**
- * 活動資料存取層
+ * Event data access layer
  */
 @Injectable()
 export class EventRepository {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * 建立活動（含時間槽與預期參與者）- 使用 Transaction
-   * @returns 包含 event 和 creatorLineUserId（用於正確計算參與者數量）
+   * Create an event (with time slots and expected participants) - uses a Transaction
+   * @returns the event plus creatorLineUserId (used to count participants correctly)
    */
   async createWithSlotsAndParticipants(
     eventData: {
@@ -31,6 +32,8 @@ export class EventRepository {
       endMinuteOfDay: number;
       slotDurationMin: number;
       timeZone: string;
+      defaultGranularityMin: number;
+      defaultVoteMode: EventVoteMode;
       votingDeadline: Date | null;
       lineGroupId: string | null;
     },
@@ -46,7 +49,6 @@ export class EventRepository {
     creatorLineUserId?: string;
   }> {
     return this.prisma.$transaction(async (prisma) => {
-      // 建立 Event
       const event = await prisma.event.create({
         data: {
           title: eventData.title,
@@ -54,6 +56,8 @@ export class EventRepository {
           type: eventData.type,
           ownerId: eventData.ownerId,
           timeZone: eventData.timeZone,
+          defaultGranularityMin: eventData.defaultGranularityMin,
+          defaultVoteMode: eventData.defaultVoteMode,
           votingDeadline: eventData.votingDeadline,
           lineGroupId: eventData.lineGroupId,
         },
@@ -70,7 +74,6 @@ export class EventRepository {
         },
       });
 
-      // 建立時間槽
       if (slots.length > 0) {
         await prisma.eventTimeSlot.createMany({
           data: slots.map((slot, index) => ({
@@ -85,7 +88,7 @@ export class EventRepository {
         });
       }
 
-      // 建立預期參與者，並取得 creatorLineUserId
+      // Create the expected participants and get creatorLineUserId
       const { participants, creatorLineUserId } =
         await this.buildParticipantData(
           prisma,
@@ -114,6 +117,8 @@ export class EventRepository {
       endMinuteOfDay: number;
       slotDurationMin: number;
       timeZone: string;
+      defaultGranularityMin: number;
+      defaultVoteMode: EventVoteMode;
       votingDeadline: Date | null;
       lineGroupId: string | null;
       weekdays: Weekday[];
@@ -141,6 +146,8 @@ export class EventRepository {
           type: eventData.type,
           ownerId: eventData.ownerId,
           timeZone: eventData.timeZone,
+          defaultGranularityMin: eventData.defaultGranularityMin,
+          defaultVoteMode: eventData.defaultVoteMode,
           votingDeadline: eventData.votingDeadline,
           lineGroupId: eventData.lineGroupId,
         },
@@ -189,7 +196,7 @@ export class EventRepository {
   }
 
   /**
-   * 查詢使用者建立的活動列表
+   * List the events created by a user
    */
   async findByOwnerId(userId: string) {
     return this.prisma.event.findMany({
@@ -235,7 +242,7 @@ export class EventRepository {
   }
 
   /**
-   * 查詢使用者參與的活動列表
+   * List the events a user participates in
    */
   async findByParticipantUserId(userId: string) {
     return this.prisma.event.findMany({
@@ -293,7 +300,7 @@ export class EventRepository {
   }
 
   /**
-   * 查詢單一活動詳情
+   * Get the details of a single event
    */
   async findOneWithDetails(eventId: string) {
     return this.prisma.event.findUnique({
@@ -369,7 +376,7 @@ export class EventRepository {
   }
 
   /**
-   * 查詢指定使用者在活動中的暫存投票草稿
+   * Get a user's staged vote draft for an event
    */
   async findStagedVoteByEventAndUser(eventId: string, userId: string) {
     return this.prisma.eventStagedVote.findUnique({
@@ -388,7 +395,7 @@ export class EventRepository {
   }
 
   /**
-   * 查詢活動的暫存確認時間草稿
+   * Get an event's staged confirmed-time draft
    */
   async findStagedConfirmationByEventId(eventId: string) {
     return this.prisma.eventStagedConfirmation.findUnique({
@@ -402,7 +409,7 @@ export class EventRepository {
   }
 
   /**
-   * 查詢活動公開資訊
+   * Get an event's public information
    */
   async findPublicInfo(eventId: string) {
     return this.prisma.event.findUnique({
@@ -440,7 +447,7 @@ export class EventRepository {
   }
 
   /**
-   * 查詢活動基本資訊（用於驗證）
+   * Get an event's basic information (used for validation)
    */
   async findOneBasic(eventId: string) {
     return this.prisma.event.findUnique({
@@ -456,7 +463,7 @@ export class EventRepository {
   }
 
   /**
-   * 更新活動
+   * Update an event
    */
   async update(eventId: string, data: Prisma.EventUpdateInput) {
     return this.prisma.event.update({
@@ -470,7 +477,7 @@ export class EventRepository {
   }
 
   /**
-   * 軟刪除活動
+   * Soft delete an event
    */
   async softDelete(eventId: string) {
     return this.prisma.event.update({
@@ -480,8 +487,8 @@ export class EventRepository {
   }
 
   /**
-   * 建立預期參與者資料
-   * @returns 包含 participants 陣列和 creatorLineUserId（用於正確計算參與者數量）
+   * Build the expected participant data
+   * @returns the participants array plus creatorLineUserId (used to count participants correctly)
    */
   private async buildParticipantData(
     prisma: Prisma.TransactionClient,
@@ -502,7 +509,7 @@ export class EventRepository {
       userId?: string;
     }> = [];
 
-    // 查詢創建者的 LINE userId
+    // Look up the creator's LINE userId
     let creatorLineUserId: string | undefined;
     if (creatorUserId) {
       const creatorAuthIdentity = await prisma.authIdentity.findFirst({
@@ -511,7 +518,7 @@ export class EventRepository {
       });
       creatorLineUserId = creatorAuthIdentity?.providerUserId;
 
-      // 自動將創建者加入為參與者（包含 lineUserId）
+      // Automatically add the creator as a participant (including lineUserId)
       participantData.push({
         eventId,
         userId: creatorUserId,
@@ -519,13 +526,13 @@ export class EventRepository {
       });
     }
 
-    // 加入 LINE 群組的預期參與者
+    // Add the expected participants from the LINE group
     const lineUserIds = expectedLineUserIds
       ?.filter((p) => p.lineUserId)
       .map((p) => p.lineUserId as string);
 
     if (lineUserIds && lineUserIds.length > 0) {
-      // 對 lineUserIds 去重，避免建立重複的參與者
+      // Deduplicate lineUserIds to avoid creating duplicate participants
       const uniqueLineUserIds = [...new Set(lineUserIds)];
 
       const linkedMembers = await prisma.lineGroupMember.findMany({
@@ -544,7 +551,7 @@ export class EventRepository {
       );
 
       uniqueLineUserIds.forEach((lineUserId) => {
-        // 如果創建者也在 LINE 群組中，避免重複添加
+        // Skip if the creator is also in the LINE group, to avoid adding them twice
         if (creatorLineUserId && lineUserId === creatorLineUserId) {
           return;
         }
