@@ -11,32 +11,21 @@ const SWITCH_ID = "enable-voting-deadline";
 
 interface VotingDeadlineFieldsProps {
   enabled: boolean;
-  /** 投票截止日期 */
+  /** Voting deadline date */
   date: Date | null;
-  /** 投票截止時間 (HH:MM 格式)，未選擇時為 null */
+  /** Voting deadline time (HH:MM format), null when not picked */
   time: string | null;
   enableLabel: string;
   dateLabel: string;
   timeLabel: string;
   datePlaceholder: string;
   timePlaceholder: string;
-  /** 由上層驗證邏輯提供的錯誤訊息 */
   errorMessage?: string | null;
   onEnabledChange: (enabled: boolean) => void;
-  /** 日期變更回調 */
   onDateChange: (date: Date | null) => void;
-  /** 時間變更回調 */
   onTimeChange: (time: string) => void;
 }
 
-/**
- * 建立活動頁專用的投票截止時間欄位。
- * 只負責顯示開關、日期/時間欄位與錯誤訊息，
- * 驗證規則由 useFormValidation 決定。
- *
- * 主辦設定頁有自己的一份（HostedEventSettingsPage/VotingDeadlineFields），
- * 兩邊的樣式可以各自調整，不互相牽動。
- */
 export function VotingDeadlineFields({
   enabled,
   date,

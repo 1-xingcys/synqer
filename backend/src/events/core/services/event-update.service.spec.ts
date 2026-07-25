@@ -24,7 +24,6 @@ describe('EventUpdateService', () => {
 
   const mockEventScheduleService = {
     resolveSchedule: jest.fn(),
-    getEventStartInstant: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -212,9 +211,6 @@ describe('EventUpdateService', () => {
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.findOneBasic.mockResolvedValue(mockEvent);
       mockEventRepository.update.mockResolvedValue(updatedEvent);
-      mockEventScheduleService.getEventStartInstant.mockReturnValue(
-        new Date('2024-12-25T09:00:00.000Z'),
-      );
       mockEventScheduleService.resolveSchedule.mockReturnValue({
         type: EventType.ONE_TIME,
         startDate: updatedEvent.oneTimeSchedule.startDate,
@@ -266,9 +262,6 @@ describe('EventUpdateService', () => {
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.findOneBasic.mockResolvedValue(mockEvent);
       mockEventRepository.update.mockResolvedValue(updatedEvent);
-      mockEventScheduleService.getEventStartInstant.mockReturnValue(
-        new Date('2024-12-25T09:00:00.000Z'),
-      );
       mockEventScheduleService.resolveSchedule.mockReturnValue({
         type: EventType.ONE_TIME,
         startDate: updatedEvent.oneTimeSchedule.startDate,
@@ -313,9 +306,6 @@ describe('EventUpdateService', () => {
         title: 'Title',
         description: null,
       });
-      mockEventScheduleService.getEventStartInstant.mockReturnValue(
-        new Date('2024-12-25T09:00:00.000Z'),
-      );
       mockEventScheduleService.resolveSchedule.mockReturnValue({
         type: EventType.ONE_TIME,
         ...schedule,
@@ -357,9 +347,6 @@ describe('EventUpdateService', () => {
 
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.findOneBasic.mockResolvedValue(mockEvent);
-      mockEventScheduleService.getEventStartInstant.mockReturnValue(
-        new Date('2024-12-25T09:00:00.000Z'),
-      );
 
       await expect(service.update(eventId, userId, updateDto)).rejects.toThrow(
         new BadRequestException('Invalid voting deadline'),
@@ -445,7 +432,7 @@ describe('EventUpdateService', () => {
       expect(updateCall).not.toHaveProperty('votingDeadline');
     });
 
-    it('should allow updating votingDeadline after previous deadline has passed if event has not started', async () => {
+    it('should allow updating votingDeadline after the previous deadline has passed', async () => {
       const updateDto = { votingDeadline: '2024-12-24T08:00:00Z' };
       const mockEvent = {
         id: eventId,
@@ -480,9 +467,6 @@ describe('EventUpdateService', () => {
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.findOneBasic.mockResolvedValue(mockEvent);
       mockEventRepository.update.mockResolvedValue(updatedEvent);
-      mockEventScheduleService.getEventStartInstant.mockReturnValue(
-        new Date('2024-12-25T09:00:00.000Z'),
-      );
       mockEventScheduleService.resolveSchedule.mockReturnValue({
         type: EventType.ONE_TIME,
         startDate: updatedEvent.oneTimeSchedule.startDate,
@@ -525,33 +509,43 @@ describe('EventUpdateService', () => {
       );
     });
 
-    it('should throw BadRequestException when votingDeadline is changed after event start', async () => {
+    it('should allow changing votingDeadline after the event has started when the time is not confirmed', async () => {
+      // An event that started without a confirmed time is still collecting
+      // votes, so the host keeps full control over the deadline.
       const updateDto = { votingDeadline: null };
+      const schedule = {
+        startDate: new Date('2024-12-15'),
+        endDate: new Date('2024-12-15'),
+        startMinuteOfDay: 540,
+        endMinuteOfDay: 600,
+        slotDurationMin: 15,
+      };
       const mockEvent = {
         id: eventId,
         type: EventType.ONE_TIME,
+        timeZone: 'Asia/Taipei',
         confirmedTimeSlots: [],
-        oneTimeSchedule: {
-          startDate: new Date('2024-12-25'),
-          endDate: new Date('2024-12-25'),
-          startMinuteOfDay: 540,
-          endMinuteOfDay: 600,
-          slotDurationMin: 15,
-        },
+        oneTimeSchedule: schedule,
         recurringSchedule: null,
       };
 
       mockEventAuthorizationService.verifyOwner.mockResolvedValue(undefined);
       mockEventRepository.findOneBasic.mockResolvedValue(mockEvent);
-      mockEventScheduleService.getEventStartInstant.mockReturnValue(
-        new Date('2024-12-19T09:00:00.000Z'),
-      );
+      mockEventRepository.update.mockResolvedValue({
+        ...mockEvent,
+        title: 'Title',
+        description: null,
+      });
+      mockEventScheduleService.resolveSchedule.mockReturnValue({
+        type: EventType.ONE_TIME,
+        ...schedule,
+      });
 
-      await expect(service.update(eventId, userId, updateDto)).rejects.toThrow(
-        new BadRequestException(
-          'Voting deadline cannot be changed after the event has started',
-        ),
-      );
+      await service.update(eventId, userId, updateDto);
+
+      expect(eventRepository.update).toHaveBeenCalledWith(eventId, {
+        votingDeadline: null,
+      });
     });
 
     it('should accept a votingDeadline in the past', async () => {
@@ -580,9 +574,6 @@ describe('EventUpdateService', () => {
         title: 'Title',
         description: null,
       });
-      mockEventScheduleService.getEventStartInstant.mockReturnValue(
-        new Date('2024-12-25T09:00:00.000Z'),
-      );
       mockEventScheduleService.resolveSchedule.mockReturnValue({
         type: EventType.ONE_TIME,
         ...schedule,

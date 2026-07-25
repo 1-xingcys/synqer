@@ -50,19 +50,6 @@ export class EventScheduleService {
     };
   }
 
-  getEventStartInstant(event: EventScheduleSource): Date | null {
-    const schedule = this.resolveSchedule(event);
-
-    if (schedule.type !== EventType.ONE_TIME || !schedule.startDate) {
-      return null;
-    }
-
-    const eventStart = new Date(schedule.startDate);
-    eventStart.setUTCHours(0, 0, 0, 0);
-    eventStart.setUTCMinutes(schedule.startMinuteOfDay);
-    return eventStart;
-  }
-
   getCalendarRange(event: EventScheduleSource) {
     const schedule = this.resolveSchedule(event);
 

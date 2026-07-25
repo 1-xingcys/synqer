@@ -445,16 +445,21 @@
       "saveChanges": "Save Changes",
       "discard": "Discard Changes",
       "saved": "Changes saved!",
-      "dangerZone": "Danger Zone",
       "deleteEvent": "Delete Event",
-      "deleteWarning": "This action cannot be undone. All votes and data will be permanently deleted.",
-      "confirmDelete": "Are you sure you want to delete this event?",
-      "deadlineLockedDescription": "Voting deadline cannot be modified after the event starts or the event time is confirmed",
+      "deadlineLockedDescription": "Voting deadline cannot be modified after the event time is confirmed",
       "inviteLink": {
         "title": "Invite Link",
-        "description": "Share this link to invite others to the event",
         "copy": "Copy",
         "copied": "Copied!"
+      },
+      "clearDeadlineConfirm": {
+        "title": "Cancel voting deadline?",
+        "keep": "Keep deadline",
+        "confirm": "Cancel deadline"
+      },
+      "deleteEventConfirm": {
+        "title": "Delete this event?",
+        "warning": "This action cannot be undone. All votes and data will be permanently deleted."
       }
     }
   },
@@ -893,8 +898,6 @@
       "startDateInPastError": "Event start date cannot be earlier than today"
     },
     "votingDeadline": {
-      "title": "Voting Deadline",
-      "description": "Set a deadline for participants to submit their votes",
       "enable": "Set voting deadline",
       "date": "Deadline date",
       "time": "Deadline time",
