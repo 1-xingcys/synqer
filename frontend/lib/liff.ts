@@ -403,55 +403,9 @@ export async function closeLiff(): Promise<void> {
 }
 
 /**
- * 在外部瀏覽器開啟連結
- */
-export async function openExternalBrowser(url: string): Promise<void> {
-  const liff = await getLiff();
-  if (liff && liff.isInClient()) {
-    liff.openWindow({
-      url,
-      external: true,
-    });
-  } else {
-    window.open(url, "_blank");
-  }
-}
-
-/**
- * 分享訊息到聊天室（只有在 LINE App 內才能使用）
- */
-export async function shareMessage(text: string): Promise<boolean> {
-  const liff = await getLiff();
-  if (!liff || !liff.isInClient()) {
-    return false;
-  }
-
-  try {
-    await liff.shareTargetPicker([
-      {
-        type: "text",
-        text,
-      },
-    ]);
-    return true;
-  } catch (error) {
-    console.error("Failed to share message:", error);
-    return false;
-  }
-}
-
-/**
  * 檢查是否在 LINE App 內運行
  */
 export async function isInLineClient(): Promise<boolean> {
   const liff = await getLiff();
   return liff?.isInClient() ?? false;
-}
-
-/**
- * 檢查 LIFF 是否已登入
- */
-export async function isLiffLoggedIn(): Promise<boolean> {
-  const liff = await getLiff();
-  return liff?.isLoggedIn() ?? false;
 }
