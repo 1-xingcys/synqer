@@ -1,11 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import {
-  CreateEventFormData,
-  TITLE_MAX_LENGTH,
-  DESCRIPTION_MAX_LENGTH,
-} from "../types";
+import { CreateEventFormData, TITLE_MAX_LENGTH } from "../types";
 
 function countCharacters(str: string): number {
   return str.length;
@@ -27,11 +23,6 @@ export function useTextFields(
     [formData.title],
   );
 
-  const descriptionCharCount = useMemo(
-    () => countCharacters(formData.description),
-    [formData.description],
-  );
-
   const updateTitle = useCallback(
     (value: string) => {
       const charCount = countCharacters(value);
@@ -45,23 +36,8 @@ export function useTextFields(
     [setFormData],
   );
 
-  const updateDescription = useCallback(
-    (value: string) => {
-      const charCount = countCharacters(value);
-      if (charCount <= DESCRIPTION_MAX_LENGTH) {
-        setFormData((prev) => ({ ...prev, description: value }));
-      } else {
-        const truncated = truncateToMaxChars(value, DESCRIPTION_MAX_LENGTH);
-        setFormData((prev) => ({ ...prev, description: truncated }));
-      }
-    },
-    [setFormData],
-  );
-
   return {
     titleCharCount,
-    descriptionCharCount,
     updateTitle,
-    updateDescription,
   };
 }

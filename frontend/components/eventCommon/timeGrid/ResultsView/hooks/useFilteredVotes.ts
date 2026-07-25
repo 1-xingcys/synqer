@@ -9,8 +9,6 @@ interface UseFilteredVotesProps {
 }
 
 interface UseFilteredVotesResult {
-  /** 根據選中參與者過濾後的投票 */
-  filteredVotes: Vote[];
   /** 根據 slotId 分組的投票 */
   votesBySlot: Record<string, Vote[]>;
   /** 熱力圖縮放用的最大投票數 */
@@ -64,7 +62,6 @@ export function useFilteredVotes({
   }, [filteredVotes]);
 
   return {
-    filteredVotes,
     votesBySlot,
     maxVotes,
   };

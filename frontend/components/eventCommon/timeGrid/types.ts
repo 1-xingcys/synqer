@@ -54,11 +54,6 @@ export interface CalendarEvent {
   isAllDay: boolean;
 }
 
-export interface GridPosition {
-  dateIndex: number;
-  timeIndex: number;
-}
-
 export interface VotingGridProps {
   slots: TimeSlot[];
   votes: Vote[];
@@ -69,13 +64,6 @@ export interface VotingGridProps {
   eventTitle: string;
   timeZone: string;
   capabilities: EventCapabilities;
-}
-
-export interface RectangleBounds {
-  minDate: number;
-  maxDate: number;
-  minTime: number;
-  maxTime: number;
 }
 
 export interface SlotMatrixCellViewModel {

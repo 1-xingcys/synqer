@@ -97,50 +97,6 @@ export class RichMenuService {
     }
   }
 
-  /**
-   * 為特定使用者連結 Rich Menu
-   */
-  async linkRichMenuToUser(
-    userId: string,
-    richMenuId: string,
-  ): Promise<boolean> {
-    try {
-      await axios.post(
-        `${this.baseUrl}/bot/user/${userId}/richmenu/${richMenuId}`,
-        {},
-        {
-          headers: this.getAuthHeaders(),
-        },
-      );
-
-      this.logger.log(`Rich Menu linked to user: ${userId}`);
-      return true;
-    } catch (error) {
-      this.logger.error(`Failed to link Rich Menu to user: ${userId}`, error);
-      return false;
-    }
-  }
-
-  /**
-   * 取消特定使用者的 Rich Menu
-   */
-  async unlinkRichMenuFromUser(userId: string): Promise<boolean> {
-    try {
-      await axios.delete(`${this.baseUrl}/bot/user/${userId}/richmenu`, {
-        headers: this.getAuthHeaders(),
-      });
-
-      this.logger.log(`Rich Menu unlinked from user: ${userId}`);
-      return true;
-    } catch (error) {
-      this.logger.error(
-        `Failed to unlink Rich Menu from user: ${userId}`,
-        error,
-      );
-      return false;
-    }
-  }
-
   private getAuthHeaders() {
     return {
       Authorization: `Bearer ${this.config.get('LINE_CHANNEL_ACCESS_TOKEN', {

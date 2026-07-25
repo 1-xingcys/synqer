@@ -105,23 +105,6 @@ export function useLineGroupParticipantsState(eventId: string) {
     [isHost],
   );
 
-  // Add all members from group
-  const addAllMembers = useCallback(() => {
-    const newParticipants: SelectedParticipant[] = [];
-    members.forEach((member) => {
-      if (!isSelected(member.lineUserId, member.linkedUser?.id)) {
-        newParticipants.push({
-          lineUserId: member.lineUserId,
-          userId: member.linkedUser?.id,
-          displayName:
-            member.linkedUser?.displayName || member.displayName || "Unknown",
-          pictureUrl: member.linkedUser?.avatarUrl || member.pictureUrl,
-        });
-      }
-    });
-    setSelectedParticipants((prev) => [...prev, ...newParticipants]);
-  }, [members, isSelected]);
-
   // Save participants
   const saveParticipants = useCallback(async () => {
     try {
@@ -256,7 +239,6 @@ export function useLineGroupParticipantsState(eventId: string) {
     filteredLineGroupList,
     setSearchQuery,
     addMember,
-    addAllMembers,
     saveParticipants,
     isSelected,
     isHost,

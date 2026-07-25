@@ -285,24 +285,6 @@ export async function getLiffAccessToken(): Promise<string | null> {
 }
 
 /**
- * 取得 LIFF ID Token
- * 包含使用者資訊的 JWT
- */
-export async function getLiffIdToken(): Promise<string | null> {
-  const liff = await getLiff();
-  if (!liff || !liff.isLoggedIn()) {
-    return null;
-  }
-
-  try {
-    return liff.getIDToken();
-  } catch (error) {
-    console.error("Failed to get LIFF ID token:", error);
-    return null;
-  }
-}
-
-/**
  * 取得 LIFF Profile
  */
 export async function getLiffProfile(): Promise<LiffProfile | null> {
@@ -403,55 +385,9 @@ export async function closeLiff(): Promise<void> {
 }
 
 /**
- * 在外部瀏覽器開啟連結
- */
-export async function openExternalBrowser(url: string): Promise<void> {
-  const liff = await getLiff();
-  if (liff && liff.isInClient()) {
-    liff.openWindow({
-      url,
-      external: true,
-    });
-  } else {
-    window.open(url, "_blank");
-  }
-}
-
-/**
- * 分享訊息到聊天室（只有在 LINE App 內才能使用）
- */
-export async function shareMessage(text: string): Promise<boolean> {
-  const liff = await getLiff();
-  if (!liff || !liff.isInClient()) {
-    return false;
-  }
-
-  try {
-    await liff.shareTargetPicker([
-      {
-        type: "text",
-        text,
-      },
-    ]);
-    return true;
-  } catch (error) {
-    console.error("Failed to share message:", error);
-    return false;
-  }
-}
-
-/**
  * 檢查是否在 LINE App 內運行
  */
 export async function isInLineClient(): Promise<boolean> {
   const liff = await getLiff();
   return liff?.isInClient() ?? false;
-}
-
-/**
- * 檢查 LIFF 是否已登入
- */
-export async function isLiffLoggedIn(): Promise<boolean> {
-  const liff = await getLiff();
-  return liff?.isLoggedIn() ?? false;
 }
