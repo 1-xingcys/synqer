@@ -5,6 +5,8 @@ export type Weekday = components["schemas"]["Weekday"];
 export type EventSlotAxisType = components["schemas"]["EventSlotAxisType"];
 export type ConfirmedSelectionKind =
   components["schemas"]["ConfirmedSelectionKind"];
+/** Wire format of the host's default vote mode (uppercase, unlike `VoteMode`). */
+export type EventVoteModeDto = components["schemas"]["EventVoteMode"];
 
 // 活動狀態
 export const EventStatus = {
