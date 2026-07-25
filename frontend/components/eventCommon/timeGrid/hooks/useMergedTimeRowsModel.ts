@@ -15,7 +15,6 @@ interface UseMergedTimeRowsModelProps {
 
 interface UseMergedTimeRowsModelReturn {
   mergedTimeRows: MergedTimeRow[];
-  getSlotIndicesForRow: (rowIndex: number) => number[];
 }
 
 /**
@@ -144,12 +143,7 @@ export function useMergedTimeRowsModel({
     return result;
   }, [timeSlots, granularity]);
 
-  const getSlotIndicesForRow = (rowIndex: number): number[] => {
-    return mergedTimeRows[rowIndex]?.slotIndices || [];
-  };
-
   return {
     mergedTimeRows,
-    getSlotIndicesForRow,
   };
 }

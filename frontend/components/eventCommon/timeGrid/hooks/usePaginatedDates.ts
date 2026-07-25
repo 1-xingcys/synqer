@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 
 interface UsePaginatedDatesProps {
   dates: string[];
@@ -13,10 +13,6 @@ interface UsePaginatedDatesReturn {
   currentPage: number;
   totalPages: number;
   setCurrentPage: (page: number) => void;
-  goToNextPage: () => void;
-  goToPrevPage: () => void;
-  canGoNext: boolean;
-  canGoPrev: boolean;
 }
 
 /**
@@ -45,29 +41,10 @@ export function usePaginatedDates({
     return dates.slice(startIdx, startIdx + datesPerPage);
   }, [dates, clampedCurrentPage, datesPerPage]);
 
-  const canGoNext = clampedCurrentPage < totalPages - 1;
-  const canGoPrev = clampedCurrentPage > 0;
-
-  const goToNextPage = useCallback(() => {
-    if (canGoNext) {
-      setCurrentPage((p) => p + 1);
-    }
-  }, [canGoNext]);
-
-  const goToPrevPage = useCallback(() => {
-    if (canGoPrev) {
-      setCurrentPage((p) => p - 1);
-    }
-  }, [canGoPrev]);
-
   return {
     paginatedDates,
     currentPage: clampedCurrentPage,
     totalPages,
     setCurrentPage,
-    goToNextPage,
-    goToPrevPage,
-    canGoNext,
-    canGoPrev,
   };
 }

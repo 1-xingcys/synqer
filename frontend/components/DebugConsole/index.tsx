@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useState,
-  useCallback,
-  createContext,
-  useContext,
-  useEffect,
-  ReactNode,
-} from "react";
+import { useState, createContext, useEffect, ReactNode } from "react";
 import type { LiffState } from "@/lib/liff";
 
 // ========== 設定 ==========
@@ -68,27 +61,6 @@ interface DebugContextType {
 
 // ========== Context ==========
 const DebugContext = createContext<DebugContextType | null>(null);
-
-export function useDebug() {
-  const context = useContext(DebugContext);
-
-  // 如果 DEBUG_ENABLED 為 false，返回空操作
-  if (!DEBUG_ENABLED) {
-    return {
-      logs: [],
-      liffState: null,
-      setLiffState: () => {},
-      extraInfo: {},
-      setExtraInfo: () => {},
-    };
-  }
-
-  if (!context) {
-    throw new Error("useDebug must be used within a DebugProvider");
-  }
-
-  return context;
-}
 
 // ========== Provider ==========
 interface DebugProviderProps {
@@ -287,16 +259,4 @@ function DebugPanel({
       </div>
     </div>
   );
-}
-
-// ========== Standalone Hook (不需要 Provider) ==========
-export function useDebugLogs(prefix: string = "Debug") {
-  const addLog = useCallback(
-    (message: string, data?: unknown) => {
-      debugLog(prefix, message, data);
-    },
-    [prefix],
-  );
-
-  return { addLog, clearLogs: clearDebugLogs };
 }

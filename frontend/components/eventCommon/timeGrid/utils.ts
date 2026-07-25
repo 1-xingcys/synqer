@@ -166,25 +166,6 @@ export const groupVotesBySlot = (votes: Vote[]): Record<string, Vote[]> => {
   );
 };
 
-// Create 2D grid map for quick position lookups
-export const createSlotGrid = (
-  dates: string[],
-  timeSlots: TimeSlot[],
-  slotsByDate: Record<string, TimeSlot[]>,
-): string[][] => {
-  const grid: string[][] = [];
-  timeSlots.forEach((_, timeIndex) => {
-    grid[timeIndex] = [];
-    dates.forEach((dateKey, dateIndex) => {
-      const slot = slotsByDate[dateKey][timeIndex];
-      if (slot) {
-        grid[timeIndex][dateIndex] = slot.id;
-      }
-    });
-  });
-  return grid;
-};
-
 // Map calendar events to slots
 export const mapCalendarEventsToSlots = (
   calendarEvents: CalendarEvent[],
