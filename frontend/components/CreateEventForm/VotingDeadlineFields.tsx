@@ -45,10 +45,7 @@ export function VotingDeadlineFields({
   return (
     <div>
       <div className="flex items-center justify-between gap-4">
-        <Label
-          htmlFor={SWITCH_ID}
-          className="text-sm font-medium cursor-pointer"
-        >
+        <Label htmlFor={SWITCH_ID} className="text-sm cursor-pointer">
           {enableLabel}
         </Label>
         <Switch
