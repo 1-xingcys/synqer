@@ -74,10 +74,13 @@ export function PreferencePreviewGrid({
           {/* The row count is what granularity changes, so the grid grows and
             shrinks; animating this height turns the switch into a resize. The
             extra 0.5rem is the inner top padding that keeps the first time
-            label from being clipped. */}
+            label from being clipped, and the 2px is the grid's own top and
+            bottom border — without it overflow-hidden clips the bottom rule. */}
           <div
             className="overflow-hidden transition-[height] duration-300 ease-out motion-reduce:transition-none"
-            style={{ height: `calc(${rows.length} * ${slotHeight} + 0.5rem)` }}
+            style={{
+              height: `calc(${rows.length} * ${slotHeight} + 0.5rem + 2px)`,
+            }}
           >
             {/* Remounted per granularity so the new rows fade in over the
               resize; a mode switch keeps the same cells and only recolors. */}
