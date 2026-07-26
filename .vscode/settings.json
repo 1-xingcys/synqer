@@ -16,6 +16,5 @@
   "i18n-ally.namespace": false,
   "i18n-ally.sortKeys": false,
   "i18n-ally.extract.autoDetect": true,
-  "prisma.pinToPrisma6": true,
-  "workbench.tree.indent": 12
+  "prisma.pinToPrisma6": true
 }

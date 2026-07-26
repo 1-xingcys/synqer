@@ -4,7 +4,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  output: "standalone", // 启用 standalone 模式以优化 Docker 镜像大小
+  output: "standalone", // standalone mode keeps the Docker image small
   experimental: {
     externalDir: true,
     viewTransition: true,

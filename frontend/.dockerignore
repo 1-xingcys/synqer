@@ -1,23 +1,23 @@
-# 依赖
+# Dependencies
 node_modules
 npm-debug.log
 yarn-error.log
 .pnpm-debug.log
 
-# 构建产物
+# Build output
 .next
 out
 dist
 coverage
 
-# 测试文件
+# Tests
 *.spec.ts
 *.test.ts
 *.test.tsx
 __tests__
 test
 
-# 开发工具
+# Editor / IDE
 .vscode
 .idea
 *.swp
@@ -28,19 +28,19 @@ test
 .git
 .gitignore
 
-# 环境变量文件
+# Environment files
 .env
 .env.local
 .env.*.local
 
-# 文档
+# Docs
 README.md
 *.md
 
-# 其他
+# Misc
 .DS_Store
 Thumbs.db
 
-# Next.js 特定
+# Next.js specific
 .vercel
 

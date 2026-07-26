@@ -32,16 +32,16 @@ jobs:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
-      # 讓 runner 有 gcloud + docker credential helper
+      # Gives the runner gcloud plus the docker credential helper
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      # 讓 docker 可以 push 到 Artifact Registry
+      # Lets docker push to Artifact Registry
       - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-      # buildx（可以快取、跨平台）
+      # buildx, for layer caching and cross-platform builds
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
