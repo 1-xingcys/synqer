@@ -37,14 +37,9 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
-# Create the data directory for the SQLite database
-RUN mkdir -p /app/data
-
 # Environment variables
 ENV NODE_ENV=production
 ENV PORT=8080
-# Default DATABASE_URL, can be overridden at runtime
-ENV DATABASE_URL="file:/app/data/production.db"
 
 # Expose port 8080 (required by GCP)
 EXPOSE 8080
