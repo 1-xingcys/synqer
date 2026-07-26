@@ -1,6 +1,0 @@
-# 載入 nvm 環境（如果存在）
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-cd backend && npx lint-staged
-cd ../frontend && npx lint-staged

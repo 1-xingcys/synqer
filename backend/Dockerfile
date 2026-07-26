@@ -29,7 +29,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# 只安装生产依赖（跳过 prepare 脚本，因为 husky 是 devDependency）
+# 只安装生产依赖（使用 --ignore-scripts 跳过 canvas 的原生编译）
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
 # 从构建阶段复制构建产物和 Prisma Client
