@@ -1,10 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { EventPreferenceFields } from "@/components/eventCommon/EventPreferenceFields";
+import { GridDefaultFields } from "@/components/eventCommon/eventPreference";
 import { useEventPreference } from "./useEventPreference";
 
-export function EventPreference() {
+export function GridDefaultSection() {
   const t = useTranslations();
   const {
     isLoading,
@@ -18,12 +18,12 @@ export function EventPreference() {
   return (
     <section className="space-y-3">
       <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-        {t("hosted.settingsPage.preference.title")}
+        {t("hosted.settingsPage.preference.gridDefaultTitle")}
       </h2>
 
       <hr className="my-2 border-t border-gray-300" />
 
-      <EventPreferenceFields
+      <GridDefaultFields
         granularity={granularity}
         voteMode={voteMode}
         disabled={isLoading}
