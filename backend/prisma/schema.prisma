@@ -140,6 +140,9 @@ model Event {
   defaultGranularityMin Int           @default(30)
   // Host-configured view default: initial mode participants get when they open the vote
   defaultVoteMode       EventVoteMode @default(AVAILABLE)
+  // Host-configured: whether committing a vote posts a notice into the chat the
+  // participant voted from. Some hosts want the reminder, others find it spammy.
+  shareVoteToChat       Boolean       @default(true)
 
   // Voting deadline
   votingDeadline DateTime?

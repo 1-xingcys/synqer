@@ -180,6 +180,7 @@ describe('EventUpdateService', () => {
       const updateDto = {
         defaultGranularityMin: 60,
         defaultVoteMode: EventVoteMode.UNAVAILABLE,
+        shareVoteToChat: false,
       };
       const updatedEvent = {
         id: eventId,
@@ -213,6 +214,7 @@ describe('EventUpdateService', () => {
       expect(eventRepository.update).toHaveBeenCalledWith(eventId, {
         defaultGranularityMin: 60,
         defaultVoteMode: EventVoteMode.UNAVAILABLE,
+        shareVoteToChat: false,
       });
     });
 

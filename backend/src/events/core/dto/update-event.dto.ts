@@ -1,6 +1,7 @@
 import {
   IsString,
   IsOptional,
+  IsBoolean,
   IsEnum,
   IsIn,
   IsInt,
@@ -69,4 +70,9 @@ export class UpdateEventDto {
   @IsOptional()
   @IsEnum(EventVoteMode)
   defaultVoteMode?: EventVoteMode;
+
+  // Whether committing a vote posts a notice into the participant's chat
+  @IsOptional()
+  @IsBoolean()
+  shareVoteToChat?: boolean;
 }

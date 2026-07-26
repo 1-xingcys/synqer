@@ -54,6 +54,10 @@ export class EventUpdateService {
       updateData.defaultVoteMode = updateDto.defaultVoteMode;
     }
 
+    if (updateDto.shareVoteToChat !== undefined) {
+      updateData.shareVoteToChat = updateDto.shareVoteToChat;
+    }
+
     if (updateDto.votingDeadline !== undefined) {
       updateData.votingDeadline =
         updateDto.votingDeadline === null

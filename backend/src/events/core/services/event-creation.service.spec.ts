@@ -51,6 +51,7 @@ describe('EventCreationService', () => {
       endTime: '18:00',
       slotDurationMin: 15,
       timeZone: 'Asia/Taipei',
+      shareVoteToChat: true,
     };
 
     const mockSlots = [
@@ -146,6 +147,7 @@ describe('EventCreationService', () => {
           ...validDto,
           defaultGranularityMin: 60,
           defaultVoteMode: EventVoteMode.UNAVAILABLE,
+          shareVoteToChat: false,
         },
         'user-123',
       );
@@ -154,6 +156,7 @@ describe('EventCreationService', () => {
         expect.objectContaining({
           defaultGranularityMin: 60,
           defaultVoteMode: EventVoteMode.UNAVAILABLE,
+          shareVoteToChat: false,
         }),
         expect.any(Array),
         expect.any(Array),
@@ -353,6 +356,7 @@ describe('EventCreationService', () => {
         slotDurationMin: 15,
         timeZone: 'Asia/Taipei',
         votingDeadline: '2024-12-24T08:00:00Z',
+        shareVoteToChat: true,
       };
       const mockResult = {
         event: { id: 'event-recurring-123', title: 'Recurring Event' },
@@ -395,6 +399,7 @@ describe('EventCreationService', () => {
         title: 'Recurring Event',
         startTime: '09:00',
         endTime: '18:00',
+        shareVoteToChat: true,
       };
 
       await expect(service.create(recurringDto)).rejects.toThrow(

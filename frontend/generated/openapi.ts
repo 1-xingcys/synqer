@@ -828,6 +828,7 @@ export interface components {
             endTime: string;
             slotDurationMin?: number;
             timeZone?: string;
+            shareVoteToChat: boolean;
             votingDeadline?: string;
             lineGroupId?: string;
             expectedLineUserIds?: string[];
@@ -844,6 +845,7 @@ export interface components {
             schedule: components["schemas"]["EventScheduleDto"];
             timeZone: string;
             defaultGranularityMin: number;
+            shareVoteToChat: boolean;
             lineGroupId: string | null;
             ownerId: string | null;
             /** Format: date-time */
@@ -978,6 +980,7 @@ export interface components {
             title?: string;
             description?: string;
             timeZone?: string;
+            shareVoteToChat?: boolean;
         };
         UpdateEventResponseDto: {
             id: string;
