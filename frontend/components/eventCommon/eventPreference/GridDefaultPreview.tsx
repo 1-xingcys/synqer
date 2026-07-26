@@ -13,7 +13,7 @@ import {
   type PreviewCellFill,
 } from "./previewGridModel";
 
-interface PreferencePreviewGridProps {
+interface GridDefaultPreviewProps {
   granularity: TimeGranularity;
   voteMode: VoteMode;
 }
@@ -46,11 +46,11 @@ const PARTIAL_STRIPES: Record<VoteMode, string> = {
  */
 const STRIPE_MODES: VoteMode[] = [VoteMode.AVAILABLE, VoteMode.UNAVAILABLE];
 
-export function PreferencePreviewGrid({
+export function GridDefaultPreview({
   granularity,
   voteMode,
-}: PreferencePreviewGridProps) {
-  const t = useTranslations("eventPreference");
+}: GridDefaultPreviewProps) {
+  const t = useTranslations("eventPreference.gridDefault");
   // Same cell height as the voting grid: a coarser granularity means fewer,
   // not taller, cells — exactly what the host will see while voting.
   const { slotHeight } = useResponsiveGrid();

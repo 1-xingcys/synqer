@@ -2,46 +2,47 @@
 
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { VoteMode } from "@/types/event";
 import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
 import { GRANULARITY_OPTIONS } from "@/lib/eventPreference";
 import { cn } from "@/lib/utils";
-import { PreferencePreviewGrid } from "./PreferencePreviewGrid";
+import { PreferenceRow } from "./PreferenceRow";
+import { GridDefaultPreview } from "./GridDefaultPreview";
 
-interface EventPreferenceFieldsProps {
+interface GridDefaultFieldsProps {
   granularity: TimeGranularity;
   voteMode: VoteMode;
   onGranularityChange: (granularity: TimeGranularity) => void;
   onVoteModeChange: (voteMode: VoteMode) => void;
   disabled?: boolean;
-  showPreviewGrid?: boolean;
+  showPreview?: boolean;
 }
 
-const VOTE_MODE_SWITCH_ID = "event-preference-vote-mode";
+const VOTE_MODE_SWITCH_ID = "grid-default-vote-mode";
 
 /**
- * The shared body of the event preference settings, used by both the create
- * form and the hosted settings page. Fully controlled: the caller owns the
- * values and decides whether a change goes into form state or straight to the
- * server.
+ * How the time grid first appears to participants.
+ *
+ * These only seed the initial view: participants can still switch granularity
+ * and vote mode themselves, and their choice is never persisted. Fully
+ * controlled — the caller owns the values and decides whether a change goes
+ * into form state or straight to the server.
  */
-export function EventPreferenceFields({
+export function GridDefaultFields({
   granularity,
   voteMode,
   onGranularityChange,
   onVoteModeChange,
   disabled = false,
-  showPreviewGrid = false,
-}: EventPreferenceFieldsProps) {
-  const t = useTranslations("eventPreference");
+  showPreview = false,
+}: GridDefaultFieldsProps) {
+  const t = useTranslations("eventPreference.gridDefault");
   const isAvailableMode = voteMode === VoteMode.AVAILABLE;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <Label className="shrink-0">{t("defaultGranularityLabel")}</Label>
+      <PreferenceRow label={t("granularityLabel")}>
         <div className="flex items-center gap-1">
           {GRANULARITY_OPTIONS.map((option) => {
             const isSelected = option === granularity;
@@ -63,12 +64,9 @@ export function EventPreferenceFields({
             );
           })}
         </div>
-      </div>
+      </PreferenceRow>
 
-      <div className="flex items-center justify-between gap-4">
-        <Label className="shrink-0" htmlFor={VOTE_MODE_SWITCH_ID}>
-          {t("defaultVoteModeLabel")}
-        </Label>
+      <PreferenceRow label={t("voteModeLabel")} htmlFor={VOTE_MODE_SWITCH_ID}>
         <div className="flex items-center gap-2">
           <p
             className={cn(
@@ -96,10 +94,10 @@ export function EventPreferenceFields({
             }
           />
         </div>
-      </div>
+      </PreferenceRow>
 
-      {showPreviewGrid && (
-        <PreferencePreviewGrid granularity={granularity} voteMode={voteMode} />
+      {showPreview && (
+        <GridDefaultPreview granularity={granularity} voteMode={voteMode} />
       )}
     </div>
   );
