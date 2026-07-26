@@ -25,6 +25,7 @@ export default function VotingGrid({
   capabilities,
   defaultGranularity,
   defaultVoteMode,
+  shareVoteToChat,
 }: VotingGridProps) {
   const tJoined = useTranslations("joined");
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
@@ -42,6 +43,7 @@ export default function VotingGrid({
     capabilities,
     defaultGranularity,
     defaultVoteMode,
+    shareVoteToChat,
   });
 
   const {

@@ -18,6 +18,7 @@ interface UseOptimisticVotingProps {
   eventTitle: string;
   votes: Vote[];
   stagedVote: StagedVote | null;
+  shareVoteToChat: boolean;
 }
 
 export type CommitFeedback = "idle" | "success" | "error";
@@ -75,6 +76,25 @@ function areOrderedSlotIdsEqual(left: string[], right: string[]): boolean {
 }
 
 /**
+ * Whether a committed vote posts its notice flex message into the chat.
+ *
+ * Three independent reasons to stay silent: the host turned the notice off,
+ * there is no chat to post into, or this voter has already announced once and
+ * a re-vote should not announce again.
+ */
+export function shouldShareVoteNotice({
+  shareVoteToChat,
+  isInLiffClient,
+  hadVotedBeforeCommit,
+}: {
+  shareVoteToChat: boolean;
+  isInLiffClient: boolean;
+  hadVotedBeforeCommit: boolean;
+}): boolean {
+  return shareVoteToChat && isInLiffClient && !hadVotedBeforeCommit;
+}
+
+/**
  * staged 投票的樂觀更新：
  * - PATCH /voting/staged 只更新草稿
  * - POST /voting/commit 才覆蓋 committed votes
@@ -85,6 +105,7 @@ export function useOptimisticVoting({
   eventTitle,
   votes,
   stagedVote,
+  shareVoteToChat,
 }: UseOptimisticVotingProps): UseOptimisticVotingReturn {
   const queryClient = useQueryClient();
   const [commitFeedback, setCommitFeedback] = useState<CommitFeedback>("idle");
@@ -280,8 +301,14 @@ export function useOptimisticVoting({
 
       setCommitFeedback("success");
 
-      const liff = await getLiff();
-      if (liff?.isInClient() && !context?.hadVotedBeforeCommit) {
+      const liff = shareVoteToChat ? await getLiff() : null;
+      if (
+        shouldShareVoteNotice({
+          shareVoteToChat,
+          isInLiffClient: liff?.isInClient() ?? false,
+          hadVotedBeforeCommit: context?.hadVotedBeforeCommit ?? false,
+        })
+      ) {
         const shareResult = await shareVoteCommitFlexMessage({
           eventId,
           eventTitle,

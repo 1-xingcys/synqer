@@ -31,6 +31,7 @@ interface UseVotingGridControllerProps {
   capabilities: EventCapabilities;
   defaultGranularity: VotingGridProps["defaultGranularity"];
   defaultVoteMode: VotingGridProps["defaultVoteMode"];
+  shareVoteToChat: VotingGridProps["shareVoteToChat"];
 }
 
 interface UseVotingGridControllerResult {
@@ -118,6 +119,7 @@ export function useVotingGridController({
   capabilities,
   defaultGranularity,
   defaultVoteMode,
+  shareVoteToChat,
 }: UseVotingGridControllerProps): UseVotingGridControllerResult {
   const [granularity, setGranularity] =
     useState<TimeGranularity>(defaultGranularity);
@@ -138,6 +140,7 @@ export function useVotingGridController({
     eventTitle,
     votes,
     stagedVote,
+    shareVoteToChat,
   });
 
   const { slotsByDate, dates, columns, timeSlots } = useSlotGridModel({

@@ -5,7 +5,11 @@ import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { EventStatus } from "@/types/event";
-import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
+import {
+  normalizeGranularity,
+  normalizeShareVoteToChat,
+  toVoteMode,
+} from "@/lib/eventPreference";
 import VotingGrid from "@/components/eventCommon/timeGrid/VotingGrid";
 import { Text } from "@/components/ui/text";
 
@@ -47,6 +51,7 @@ export default function UnifiedVoteTab() {
           data.event.defaultGranularityMin,
         )}
         defaultVoteMode={toVoteMode(data.event.defaultVoteMode)}
+        shareVoteToChat={normalizeShareVoteToChat(data.event.shareVoteToChat)}
       />
     </div>
   );
