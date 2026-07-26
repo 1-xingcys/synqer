@@ -7,7 +7,7 @@ import { VoteMode } from "@/types/event";
 import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
 import { GRANULARITY_OPTIONS } from "@/lib/eventPreference";
 import { cn } from "@/lib/utils";
-import { PreferenceRow } from "./PreferenceRow";
+import { PreferenceRow } from "../PreferenceRow";
 import { GridDefaultPreview } from "./GridDefaultPreview";
 
 interface GridDefaultFieldsProps {

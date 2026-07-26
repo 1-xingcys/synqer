@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { CircleHelp } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { PreferenceRow } from "./PreferenceRow";
+import { PreferenceRow } from "../PreferenceRow";
 import { VoteNoticeInfoModal } from "./VoteNoticeInfoModal";
 
 interface VoteNoticeFieldsProps {
