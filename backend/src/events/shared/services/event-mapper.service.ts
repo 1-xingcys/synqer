@@ -182,6 +182,7 @@ export class EventMapperService {
     timeZone: string;
     defaultGranularityMin: number;
     defaultVoteMode: EventVoteMode;
+    shareVoteToChat: boolean;
     lineGroupId: string | null;
     ownerId: string | null;
     votingDeadline: Date | null;
@@ -213,6 +214,7 @@ export class EventMapperService {
       timeZone: event.timeZone,
       defaultGranularityMin: event.defaultGranularityMin,
       defaultVoteMode: event.defaultVoteMode,
+      shareVoteToChat: event.shareVoteToChat,
       lineGroupId: event.lineGroupId,
       ownerId: event.ownerId,
       votingDeadline: event.votingDeadline,

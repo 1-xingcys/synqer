@@ -9,6 +9,7 @@ import {
   Min,
   Max,
   IsArray,
+  IsBoolean,
   IsISO8601,
   MaxLength,
   Matches,
@@ -103,6 +104,10 @@ export class CreateEventDto {
   @IsOptional()
   @IsEnum(EventVoteMode)
   defaultVoteMode?: EventVoteMode;
+
+  // Whether committing a vote posts a notice into the participant's chat.
+  @IsBoolean()
+  shareVoteToChat!: boolean;
 
   // Voting deadline (ISO 8601 format)
   @IsOptional()

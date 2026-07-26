@@ -462,7 +462,8 @@
         "warning": "This action cannot be undone. All votes and data will be permanently deleted."
       },
       "preference": {
-        "title": "Grid defaults",
+        "gridDefaultTitle": "Grid Defaults",
+        "voteNoticeTitle": "Notifications",
         "saveError": "Could not save the setting. Please try again."
       }
     }
@@ -902,7 +903,7 @@
       "startDateInPastError": "Event start date cannot be earlier than today"
     },
     "votingDeadline": {
-      "enable": "Set voting deadline",
+      "enable": "Set Voting Deadline",
       "date": "Deadline date",
       "time": "Deadline time",
       "errorRequired": "Please select a deadline date first"
@@ -942,14 +943,27 @@
     }
   },
   "eventPreference": {
-    "granularity15": "15 min",
-    "granularity30": "30 min",
-    "granularity60": "1 hr",
-    "voteModeAvailableHint": "Select available times",
-    "voteModeUnavailableHint": "Select unavailable times",
-    "previewLabel": "Vote grid preview",
-    "previewAria": "Voting grid preview: 4 days by 2 hours, {granularity} minutes per cell",
-    "defaultGranularityLabel": "Default view",
-    "defaultVoteModeLabel": "Default mode"
+    "gridDefault": {
+      "granularityLabel": "Default view",
+      "voteModeLabel": "Default mode",
+      "granularity15": "15 min",
+      "granularity30": "30 min",
+      "granularity60": "1 hr",
+      "voteModeAvailableHint": "Select available times",
+      "voteModeUnavailableHint": "Select unavailable times",
+      "previewLabel": "Vote grid preview",
+      "previewAria": "Voting grid preview: 4 days by 2 hours, {granularity} minutes per cell"
+    },
+    "voteNotice": {
+      "shareVoteToChatLabel": "Send notice after voting",
+      "openInfoAriaLabel": "About the vote notice",
+      "modal": {
+        "title": "Send notice after voting",
+        "intro": "When this is on and a participant opens the event from LINE and submits their vote, system posts a notice into the chat they voted from:",
+        "previewAria": "Preview of the LINE notice message: Voted, the event name, and View and Go Vote buttons",
+        "previewEventTitle": "Team Dinner",
+        "close": "Got it"
+      }
+    }
   }
 }

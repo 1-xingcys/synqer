@@ -71,6 +71,8 @@ export interface VotingGridProps {
   capabilities: EventCapabilities;
   defaultGranularity: TimeGranularity;
   defaultVoteMode: VoteMode;
+  /** Host preference: whether committing a vote posts a notice into the chat. */
+  shareVoteToChat: boolean;
 }
 
 export interface SlotMatrixCellViewModel {

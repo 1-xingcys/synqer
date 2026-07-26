@@ -8,7 +8,7 @@ export interface VoteCommitShareInfo {
   voterUserId: string;
 }
 
-interface VoteShareCopy {
+export interface VoteShareCopy {
   votedText: string;
   viewLabel: string;
   untitledEvent: string;
@@ -16,13 +16,19 @@ interface VoteShareCopy {
   eventPrefix: string;
 }
 
-function getLocalePrefix(pathname: string): string {
+function getLocale(pathname: string): string {
   const localeMatch = pathname.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/|$)/);
-  return localeMatch ? `/${localeMatch[1]}` : "";
+  return localeMatch ? localeMatch[1] : "";
 }
 
-function getVoteShareCopy(localePrefix: string): VoteShareCopy {
-  if (localePrefix === "/zh-TW") {
+/**
+ * The words that end up on the notice bubble.
+ *
+ * Exported so the settings preview can render the same strings the chat will
+ * actually receive, rather than a copy that drifts.
+ */
+export function getVoteShareCopy(locale: string): VoteShareCopy {
+  if (locale === "zh-TW") {
     return {
       votedText: "已投票",
       viewLabel: "查看",
@@ -78,8 +84,7 @@ function buildGoVoteUrl(info: VoteCommitShareInfo): string {
 export function buildVoteCommitShareFlexMessage(info: VoteCommitShareInfo) {
   const pathname =
     typeof window !== "undefined" ? window.location.pathname : "";
-  const localePrefix = getLocalePrefix(pathname);
-  const copy = getVoteShareCopy(localePrefix);
+  const copy = getVoteShareCopy(getLocale(pathname));
   const title = info.eventTitle || copy.untitledEvent;
   const resultsUrl = buildVoteResultsUrl(info);
   const goVoteUrl = buildGoVoteUrl(info);

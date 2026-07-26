@@ -23,6 +23,7 @@ export class EventDetailEventDto {
   defaultGranularityMin!: number;
   @ApiProperty({ enum: EventVoteMode, enumName: 'EventVoteMode' })
   defaultVoteMode!: EventVoteMode;
+  shareVoteToChat!: boolean;
   lineGroupId!: string | null;
   ownerId!: string | null;
   votingDeadline!: Date | null;

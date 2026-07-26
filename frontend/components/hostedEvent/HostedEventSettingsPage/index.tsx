@@ -2,7 +2,7 @@
 
 import { InviteLink } from "./InviteLink";
 import { VotingDeadline } from "./VotingDeadline";
-import { EventPreference } from "./EventPreference";
+import { GridDefaultSection, VoteNoticeSection } from "./EventPreference";
 import { DeleteEvent } from "./DeleteEvent";
 
 export default function HostedEventSettingsPage() {
@@ -10,7 +10,8 @@ export default function HostedEventSettingsPage() {
     <div className="space-y-6 max-w-2xl mx-auto">
       <InviteLink />
       <VotingDeadline />
-      <EventPreference />
+      <VoteNoticeSection />
+      <GridDefaultSection />
       <DeleteEvent />
     </div>
   );

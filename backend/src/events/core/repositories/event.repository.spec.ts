@@ -68,6 +68,7 @@ describe('EventRepository', () => {
         timeZone: 'Asia/Taipei',
         defaultGranularityMin: 30,
         defaultVoteMode: EventVoteMode.AVAILABLE,
+        shareVoteToChat: true,
         votingDeadline: null,
         lineGroupId: null,
       };
@@ -127,6 +128,7 @@ describe('EventRepository', () => {
         timeZone: 'Asia/Taipei',
         defaultGranularityMin: 30,
         defaultVoteMode: EventVoteMode.AVAILABLE,
+        shareVoteToChat: true,
         votingDeadline: null,
         lineGroupId: null,
       };
@@ -207,6 +209,7 @@ describe('EventRepository', () => {
         timeZone: 'Asia/Taipei',
         defaultGranularityMin: 30,
         defaultVoteMode: EventVoteMode.AVAILABLE,
+        shareVoteToChat: true,
         votingDeadline: null,
         lineGroupId: null,
         weekdays: [Weekday.MONDAY, Weekday.FRIDAY],

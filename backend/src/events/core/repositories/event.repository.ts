@@ -34,6 +34,7 @@ export class EventRepository {
       timeZone: string;
       defaultGranularityMin: number;
       defaultVoteMode: EventVoteMode;
+      shareVoteToChat: boolean;
       votingDeadline: Date | null;
       lineGroupId: string | null;
     },
@@ -58,6 +59,7 @@ export class EventRepository {
           timeZone: eventData.timeZone,
           defaultGranularityMin: eventData.defaultGranularityMin,
           defaultVoteMode: eventData.defaultVoteMode,
+          shareVoteToChat: eventData.shareVoteToChat,
           votingDeadline: eventData.votingDeadline,
           lineGroupId: eventData.lineGroupId,
         },
@@ -119,6 +121,7 @@ export class EventRepository {
       timeZone: string;
       defaultGranularityMin: number;
       defaultVoteMode: EventVoteMode;
+      shareVoteToChat: boolean;
       votingDeadline: Date | null;
       lineGroupId: string | null;
       weekdays: Weekday[];
@@ -148,6 +151,7 @@ export class EventRepository {
           timeZone: eventData.timeZone,
           defaultGranularityMin: eventData.defaultGranularityMin,
           defaultVoteMode: eventData.defaultVoteMode,
+          shareVoteToChat: eventData.shareVoteToChat,
           votingDeadline: eventData.votingDeadline,
           lineGroupId: eventData.lineGroupId,
         },

@@ -2,15 +2,28 @@ import { VoteMode, type EventVoteModeDto } from "@/types/event";
 import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
 
 /**
- * Host-controlled view defaults for an event's time grid.
+ * Host-controlled preferences for an event.
  *
- * These only seed the initial view: participants can still switch granularity
- * and vote mode themselves, and their choice is never persisted.
+ * The granularity and vote mode only seed the initial view: participants can
+ * still switch them themselves, and their choice is never persisted.
+ * `shareVoteToChat` is different — it is binding on participants, deciding
+ * whether committing a vote posts a notice into the chat they voted from.
  */
 
 export const GRANULARITY_OPTIONS: TimeGranularity[] = [15, 30, 60];
 export const DEFAULT_GRANULARITY: TimeGranularity = 30;
 export const DEFAULT_VOTE_MODE: VoteMode = VoteMode.AVAILABLE;
+export const DEFAULT_SHARE_VOTE_TO_CHAT = true;
+
+/**
+ * An API older than the preference omits the field. Treat that as "on" so a
+ * version skew never silently swallows notices that should have gone out.
+ */
+export function normalizeShareVoteToChat(
+  value: boolean | null | undefined,
+): boolean {
+  return value ?? DEFAULT_SHARE_VOTE_TO_CHAT;
+}
 
 export function normalizeGranularity(
   value: number | null | undefined,

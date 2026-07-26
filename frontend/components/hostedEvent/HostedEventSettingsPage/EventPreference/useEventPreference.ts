@@ -14,8 +14,10 @@ import { VoteMode } from "@/types/event";
 import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
 import {
   DEFAULT_GRANULARITY,
+  DEFAULT_SHARE_VOTE_TO_CHAT,
   DEFAULT_VOTE_MODE,
   normalizeGranularity,
+  normalizeShareVoteToChat,
   toVoteMode,
   toVoteModeDto,
 } from "@/lib/eventPreference";
@@ -31,11 +33,12 @@ type RawHostedEventDetail =
 const MUTATION_KEY = ["eventPreference"] as const;
 
 /**
- * The two grid defaults on the hosted settings page.
+ * The host-controlled event preferences, backing both settings sections.
  *
- * Every toggle writes immediately and optimistically: these preferences only
- * seed what participants see first, so there is nothing worth staging behind a
- * save button.
+ * They share one hook because they share one endpoint and one optimistic
+ * write; the sections differ in what they mean to a participant, not in how
+ * they are saved. Every toggle writes immediately: none of them is worth
+ * staging behind a save button.
  */
 export function useEventPreference() {
   const params = useParams();
@@ -71,6 +74,9 @@ export function useEventPreference() {
             }),
             ...(payload.defaultVoteMode !== undefined && {
               defaultVoteMode: payload.defaultVoteMode,
+            }),
+            ...(payload.shareVoteToChat !== undefined && {
+              shareVoteToChat: payload.shareVoteToChat,
             }),
           },
         };
@@ -111,14 +117,27 @@ export function useEventPreference() {
     [mutate],
   );
 
+  const setShareVoteToChat = useCallback(
+    (shareVoteToChat: boolean) => {
+      mutate({ shareVoteToChat });
+    },
+    [mutate],
+  );
+
   return {
     isLoading: isLoading && !event,
     granularity: event
       ? normalizeGranularity(event.defaultGranularityMin)
       : DEFAULT_GRANULARITY,
     voteMode: event ? toVoteMode(event.defaultVoteMode) : DEFAULT_VOTE_MODE,
+    shareVoteToChat: event
+      ? normalizeShareVoteToChat(event.shareVoteToChat)
+      : DEFAULT_SHARE_VOTE_TO_CHAT,
+    // Each section calls this hook separately, so this observer only ever sees
+    // its own section's failures — the message lands where the toggle was.
     hasError: mutation.isError,
     setGranularity,
     setVoteMode,
+    setShareVoteToChat,
   };
 }

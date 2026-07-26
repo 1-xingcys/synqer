@@ -30,6 +30,7 @@ export class EventCreationService {
       timeZone = DEFAULT_TIME_ZONE,
       defaultGranularityMin = DEFAULT_GRANULARITY_MIN,
       defaultVoteMode = EventVoteMode.AVAILABLE,
+      shareVoteToChat,
       votingDeadline,
       lineGroupId,
       expectedLineUserIds,
@@ -68,6 +69,7 @@ export class EventCreationService {
           timeZone,
           defaultGranularityMin,
           defaultVoteMode,
+          shareVoteToChat,
           votingDeadlineObj,
           lineGroupId,
         },
@@ -89,6 +91,7 @@ export class EventCreationService {
         timeZone,
         defaultGranularityMin,
         defaultVoteMode,
+        shareVoteToChat,
         votingDeadlineObj,
         lineGroupId,
       },
@@ -110,6 +113,7 @@ export class EventCreationService {
       timeZone: string;
       defaultGranularityMin: number;
       defaultVoteMode: EventVoteMode;
+      shareVoteToChat: boolean;
       votingDeadlineObj: Date | null;
       lineGroupId?: string;
     },
@@ -138,6 +142,7 @@ export class EventCreationService {
         timeZone: input.timeZone,
         defaultGranularityMin: input.defaultGranularityMin,
         defaultVoteMode: input.defaultVoteMode,
+        shareVoteToChat: input.shareVoteToChat,
         votingDeadline: input.votingDeadlineObj,
         lineGroupId: input.lineGroupId || null,
         weekdays: normalizedWeekdays,
@@ -160,6 +165,7 @@ export class EventCreationService {
       timeZone: string;
       defaultGranularityMin: number;
       defaultVoteMode: EventVoteMode;
+      shareVoteToChat: boolean;
       votingDeadlineObj: Date | null;
       lineGroupId?: string;
     },
@@ -195,6 +201,7 @@ export class EventCreationService {
         timeZone: input.timeZone,
         defaultGranularityMin: input.defaultGranularityMin,
         defaultVoteMode: input.defaultVoteMode,
+        shareVoteToChat: input.shareVoteToChat,
         votingDeadline: input.votingDeadlineObj,
         lineGroupId: input.lineGroupId || null,
       },

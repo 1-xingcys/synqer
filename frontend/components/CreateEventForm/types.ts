@@ -34,6 +34,9 @@ export interface CreateEventFormData {
   defaultGranularityMin: TimeGranularity;
   defaultVoteMode: VoteMode;
 
+  /** Whether committing a vote posts a notice into the voter's chat. */
+  shareVoteToChat: boolean;
+
   // Voting deadline fields
   votingDeadlineEnabled: boolean;
   votingDeadline: Date | null;
