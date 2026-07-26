@@ -1,18 +1,18 @@
-# 依赖
+# Dependencies
 node_modules
 npm-debug.log
 yarn-error.log
 
-# 构建产物
+# Build output
 dist
 coverage
 
-# 测试文件
+# Tests
 *.spec.ts
 test
 *.e2e-spec.ts
 
-# 开发工具
+# Editor / IDE
 .vscode
 .idea
 *.swp
@@ -23,22 +23,22 @@ test
 .git
 .gitignore
 
-# 环境变量文件
+# Environment files
 .env
 .env.local
 .env.*.local
 
-# 数据库文件（生产环境应该使用外部数据库）
+# Database files
 *.db
 *.db-journal
 prisma/dev.db
 
-# 文档
+# Docs
 README.md
 ESLINT.md
 *.md
 
-# 其他
+# Misc
 .DS_Store
 Thumbs.db
 

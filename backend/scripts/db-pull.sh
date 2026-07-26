@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
-# 把 production（Neon）的資料庫內容複製到本地 Docker Postgres。
+# Copy the production (Neon) database into the local Docker Postgres.
 #
 #   npm run db:pull
 #
-# 需要 .env 內有 PROD_DATABASE_URL。
+# Requires PROD_DATABASE_URL in .env.
 
 set -euo pipefail
 
@@ -20,7 +20,8 @@ if [[ ! -f .env ]]; then
   exit 1
 fi
 
-# 環境變數優先，方便臨時指定其他來源；平常都是從 .env 讀。
+# The environment variable wins so another source can be pointed at ad hoc;
+# normally this is read from .env.
 PROD_URL="${PROD_DATABASE_URL:-$(grep -m1 '^PROD_DATABASE_URL=' .env | cut -d= -f2- || true)}"
 if [[ -z "$PROD_URL" ]]; then
   echo "Set PROD_DATABASE_URL=<connection string> in backend/.env" >&2
@@ -37,7 +38,8 @@ mkdir -p "$BACKUP_DIR"
 echo "==> Starting local database"
 docker compose up -d --wait
 
-# 覆蓋前先留一份本地現況，萬一 production 那份有問題還能還原。
+# Snapshot the current local database before overwriting it, so it can be
+# restored if the production dump turns out to be bad.
 if docker compose exec -T postgres psql -U "$DB_USER" -d postgres -tAc \
   "select 1 from pg_database where datname='${DB_NAME}'" | grep -q 1; then
   LOCAL_BACKUP="${BACKUP_DIR}/local-${TIMESTAMP}.dump"
@@ -49,8 +51,9 @@ PROD_BACKUP="${BACKUP_DIR}/prod-${TIMESTAMP}.dump"
 echo "==> Dumping from production"
 docker compose exec -T postgres pg_dump "$PROD_URL" -Fc --no-owner --no-privileges > "$PROD_BACKUP"
 
-# WITH (FORCE) 會踢掉還連著的 session（dev server、Prisma Studio、GUI），
-# 否則 Postgres 拒絕 drop 正在使用中的資料庫。PG13+ 才有。
+# WITH (FORCE) terminates sessions that are still connected (dev server,
+# Prisma Studio, GUI clients); otherwise Postgres refuses to drop a database
+# that is in use. Requires PG13+.
 echo "==> Recreating local database"
 docker compose exec -T postgres psql -U "$DB_USER" -d postgres -v ON_ERROR_STOP=1 \
   -c "DROP DATABASE IF EXISTS ${DB_NAME} WITH (FORCE)" \

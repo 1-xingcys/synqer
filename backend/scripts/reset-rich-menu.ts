@@ -1,13 +1,13 @@
 /**
- * Rich Menu 重設腳本
+ * Rich Menu reset script
  *
- * 用法：
+ * Usage:
  *   npx ts-node scripts/reset-rich-menu.ts
  *
- * 或者透過 npm script：
+ * Or through the npm script:
  *   npm run reset-rich-menu
  *
- * 注意：需要設定環境變數 LINE_CHANNEL_ACCESS_TOKEN 和 LINE_LIFF_URL
+ * Note: LINE_CHANNEL_ACCESS_TOKEN and LINE_LIFF_URL must be set
  */
 
 import * as dotenv from 'dotenv';
@@ -15,7 +15,7 @@ import axios from 'axios';
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment
 const { createCanvas } = require('canvas');
 
-// 載入環境變數
+// Load environment variables
 dotenv.config();
 
 const LINE_CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
@@ -32,7 +32,7 @@ const authHeaders = {
 };
 
 /**
- * 生成 Rich Menu 圖片
+ * Generate the rich menu image
  */
 function generateRichMenuImage(): Buffer {
   const width = 2500;
@@ -42,22 +42,22 @@ function generateRichMenuImage(): Buffer {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   const ctx = canvas.getContext('2d');
 
-  // 1. 繪製主背景漸層
+  // 1. Main background gradient
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   const bgGradient = ctx.createLinearGradient(0, 0, width, height);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  bgGradient.addColorStop(0, '#9B8FD9'); // 淡紫色 (logo 左上)
+  bgGradient.addColorStop(0, '#9B8FD9'); // light purple (top-left of the logo)
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  bgGradient.addColorStop(0.5, '#7A9BE0'); // 藍紫色 (logo 中間)
+  bgGradient.addColorStop(0.5, '#7A9BE0'); // blue-purple (middle of the logo)
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  bgGradient.addColorStop(1, '#5DC4E0'); // 淡青色 (logo 右下)
+  bgGradient.addColorStop(1, '#5DC4E0'); // light cyan (bottom-right of the logo)
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   ctx.fillStyle = bgGradient;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   ctx.fillRect(0, 0, width, height);
 
-  // 2. 繪製背景裝飾（圓圈與弧線）
+  // 2. Background decoration (circles and arcs)
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   ctx.globalAlpha = 0.1;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -76,7 +76,7 @@ function generateRichMenuImage(): Buffer {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   ctx.fill();
 
-  // 繪製模擬 S logo 的大弧線
+  // Large arc echoing the S in the logo
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   ctx.strokeStyle = '#FFFFFF';
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -88,7 +88,7 @@ function generateRichMenuImage(): Buffer {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   ctx.stroke();
 
-  // 3. 繪製中間分隔模糊效果
+  // 3. Blurred divider down the middle
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   ctx.globalAlpha = 0.2;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -96,7 +96,7 @@ function generateRichMenuImage(): Buffer {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   ctx.fillRect(1248, 0, 4, height);
 
-  // 4. 定義按鈕繪製函式
+  // 4. Button drawing helper
   const drawButton = (
     x: number,
     y: number,
@@ -110,7 +110,7 @@ function generateRichMenuImage(): Buffer {
     ctx.globalAlpha = 1.0;
     const centerX = x + w / 2;
 
-    // 繪製按鈕背景容器（毛玻璃感）
+    // Button background container (frosted glass look)
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
     const padding = 60;
@@ -133,11 +133,11 @@ function generateRichMenuImage(): Buffer {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     ctx.stroke();
 
-    // 繪製圖示
+    // Icon
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ctx.fillStyle = '#FFFFFF';
     if (iconType === 'plus') {
-      // 繪製加號圖示
+      // Plus icon
       const iconY = 320;
       const size = 100;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
@@ -164,7 +164,7 @@ function generateRichMenuImage(): Buffer {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       ctx.stroke();
     } else {
-      // 繪製清單圖示
+      // List icon
       const iconY = 320;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       ctx.strokeStyle = '#FFFFFF';
@@ -178,7 +178,7 @@ function generateRichMenuImage(): Buffer {
         ctx.moveTo(centerX - 60, lineY);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         ctx.lineTo(centerX + 60, lineY);
-        // 繪製點點
+        // Bullet dots
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         ctx.arc(centerX - 85, lineY, 8, 0, Math.PI * 2);
       }
@@ -186,19 +186,19 @@ function generateRichMenuImage(): Buffer {
       ctx.stroke();
     }
 
-    // 繪製文字
+    // Text
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ctx.textAlign = 'center';
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ctx.fillStyle = '#FFFFFF';
 
-    // 主標題
+    // Title
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ctx.font = 'bold 84px "PingFang TC", "Microsoft JhengHei", sans-serif';
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     ctx.fillText(title, centerX, 520);
 
-    // 副標題
+    // Subtitle
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ctx.font = '42px "PingFang TC", "Microsoft JhengHei", sans-serif';
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -207,7 +207,7 @@ function generateRichMenuImage(): Buffer {
     ctx.fillText(subtitle, centerX, 600);
   };
 
-  // 5. 繪製左右按鈕
+  // 5. Left and right buttons
   drawButton(
     0,
     0,
@@ -224,7 +224,7 @@ function generateRichMenuImage(): Buffer {
 }
 
 /**
- * 取得所有 Rich Menu 列表
+ * List every rich menu
  */
 async function listRichMenus(): Promise<
   Array<{ richMenuId: string; name: string }>
@@ -242,7 +242,7 @@ async function listRichMenus(): Promise<
 }
 
 /**
- * 刪除 Rich Menu
+ * Delete a rich menu
  */
 async function deleteRichMenu(richMenuId: string): Promise<boolean> {
   try {
@@ -256,7 +256,7 @@ async function deleteRichMenu(richMenuId: string): Promise<boolean> {
 }
 
 /**
- * 取消預設 Rich Menu
+ * Unset the default rich menu
  */
 async function cancelDefaultRichMenu(): Promise<boolean> {
   try {
@@ -270,7 +270,7 @@ async function cancelDefaultRichMenu(): Promise<boolean> {
 }
 
 /**
- * 創建 Rich Menu
+ * Create the rich menu
  */
 async function createRichMenu(): Promise<string | null> {
   const richMenuObject = {
@@ -320,7 +320,7 @@ async function createRichMenu(): Promise<string | null> {
 }
 
 /**
- * 上傳 Rich Menu 圖片
+ * Upload the rich menu image
  */
 async function uploadRichMenuImage(richMenuId: string): Promise<boolean> {
   try {
@@ -344,7 +344,7 @@ async function uploadRichMenuImage(richMenuId: string): Promise<boolean> {
 }
 
 /**
- * 設定預設 Rich Menu
+ * Set the default rich menu
  */
 async function setDefaultRichMenu(richMenuId: string): Promise<boolean> {
   try {
@@ -363,17 +363,17 @@ async function setDefaultRichMenu(richMenuId: string): Promise<boolean> {
 }
 
 /**
- * 主函式
+ * Entry point
  */
 async function main() {
   console.log('🔄 開始重設 Rich Menu...\n');
 
-  // 1. 取消預設 Rich Menu
+  // 1. Unset the default rich menu
   console.log('📌 步驟 1/5: 取消預設 Rich Menu');
   await cancelDefaultRichMenu();
   console.log('   ✅ 完成\n');
 
-  // 2. 刪除所有舊的 Rich Menu
+  // 2. Delete every old rich menu
   console.log('📌 步驟 2/5: 刪除所有舊的 Rich Menu');
   const existingMenus = await listRichMenus();
   if (existingMenus.length > 0) {
@@ -386,7 +386,7 @@ async function main() {
   }
   console.log('   ✅ 完成\n');
 
-  // 3. 創建新的 Rich Menu
+  // 3. Create the new rich menu
   console.log('📌 步驟 3/5: 創建新的 Rich Menu');
   const richMenuId = await createRichMenu();
   if (!richMenuId) {
@@ -395,7 +395,7 @@ async function main() {
   }
   console.log(`   ✅ 完成: ${richMenuId}\n`);
 
-  // 4. 上傳 Rich Menu 圖片
+  // 4. Upload the rich menu image
   console.log('📌 步驟 4/5: 上傳 Rich Menu 圖片');
   const imageUploaded = await uploadRichMenuImage(richMenuId);
   if (!imageUploaded) {
@@ -405,7 +405,7 @@ async function main() {
   }
   console.log('   ✅ 完成\n');
 
-  // 5. 設定為預設 Rich Menu
+  // 5. Make it the default rich menu
   console.log('📌 步驟 5/5: 設定為預設 Rich Menu');
   const setDefault = await setDefaultRichMenu(richMenuId);
   if (!setDefault) {

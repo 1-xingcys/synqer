@@ -7,49 +7,49 @@ import nestjsTyped from '@darraghor/eslint-plugin-nestjs-typed';
 
 export default tseslint.config(
   {
-    // 忽略 eslint 配置檔案本身和測試檔案
+    // Ignore the ESLint config itself and test files
     ignores: ['eslint.config.mjs', '**/*.spec.ts', '**/*.e2e-spec.ts'],
   },
-  // 使用 ESLint 推薦的基本規則
+  // Base recommended ESLint rules
   eslint.configs.recommended,
-  // 使用 TypeScript ESLint 推薦的型別檢查規則
+  // Recommended type-checked rules from typescript-eslint
   ...tseslint.configs.recommendedTypeChecked,
-  // 整合 Prettier 格式化規則
+  // Prettier formatting integration
   eslintPluginPrettierRecommended,
   {
     languageOptions: {
       globals: {
-        // 加入 Node.js 全域變數
+        // Node.js globals
         ...globals.node,
-        // 加入 Jest 測試框架全域變數
+        // Jest globals
         ...globals.jest,
       },
       sourceType: 'commonjs',
       parserOptions: {
-        // 啟用專案服務以進行型別檢查
+        // Enable the project service for type-aware linting
         projectService: true,
-        // 設定 tsconfig 的根目錄
+        // Root directory used to resolve tsconfig
         tsconfigRootDir: import.meta.dirname,
       },
     },
   },
   {
     plugins: {
-      // 載入 NestJS 型別檢查插件
+      // NestJS type-checking plugin
       '@darraghor/nestjs-typed': nestjsTyped.plugin,
     },
     rules: {
-      // TypeScript 相關規則
-      '@typescript-eslint/no-explicit-any': 'warn', // 警告使用 any 型別
-      '@typescript-eslint/no-floating-promises': 'warn', // 警告未處理的 Promise
-      '@typescript-eslint/no-unsafe-argument': 'warn', // 警告不安全的參數型別
-      "prettier/prettier": "warn", // 警告 Prettier 格式問題
+      // TypeScript rules
+      '@typescript-eslint/no-explicit-any': 'warn', // warn on the any type
+      '@typescript-eslint/no-floating-promises': 'warn', // warn on unhandled promises
+      '@typescript-eslint/no-unsafe-argument': 'warn', // warn on unsafe argument types
+      "prettier/prettier": "warn", // warn on Prettier formatting issues
 
-      // NestJS 專屬規則
-      '@darraghor/nestjs-typed/injectable-should-be-provided': 'error', // 可注入的類別必須被提供
-      '@darraghor/nestjs-typed/controllers-should-supply-api-tags': 'off', // 控制器應提供 API 標籤
-      '@darraghor/nestjs-typed/api-method-should-specify-api-response': 'off', // API 方法應指定回應
-      '@darraghor/nestjs-typed/validated-non-primitive-property-needs-type-decorator': 'warn', // 驗證的非原始屬性需要型別裝飾器
+      // NestJS-specific rules
+      '@darraghor/nestjs-typed/injectable-should-be-provided': 'error', // injectables must be provided
+      '@darraghor/nestjs-typed/controllers-should-supply-api-tags': 'off', // controllers should supply API tags
+      '@darraghor/nestjs-typed/api-method-should-specify-api-response': 'off', // API methods should specify a response
+      '@darraghor/nestjs-typed/validated-non-primitive-property-needs-type-decorator': 'warn', // validated non-primitive properties need a type decorator
     },
   },
 );
