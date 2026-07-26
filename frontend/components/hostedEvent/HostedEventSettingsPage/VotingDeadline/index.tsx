@@ -115,11 +115,16 @@ export function VotingDeadline() {
           {isDirty && (
             <>
               {!saving && (
-                <Button variant="outline" onClick={reset} disabled={saving}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={reset}
+                  disabled={saving}
+                >
                   {t("hosted.settingsPage.discard")}
                 </Button>
               )}
-              <Button onClick={() => void save()} disabled={!isValid}>
+              <Button size="sm" onClick={() => void save()} disabled={!isValid}>
                 {saving ? (
                   <Spinner size="sm" tone="current" className="mr-2" />
                 ) : (
