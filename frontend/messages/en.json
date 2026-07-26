@@ -955,7 +955,15 @@
       "previewAria": "Voting grid preview: 4 days by 2 hours, {granularity} minutes per cell"
     },
     "voteNotice": {
-      "shareVoteToChatLabel": "Send notice after voting"
+      "shareVoteToChatLabel": "Send notice after voting",
+      "openInfoAriaLabel": "About the vote notice",
+      "modal": {
+        "title": "Send notice after voting",
+        "intro": "When this is on and a participant opens the event from LINE and submits their vote, system posts a notice into the chat they voted from:",
+        "previewAria": "Preview of the LINE notice message: Voted, the event name, and View and Go Vote buttons",
+        "previewEventTitle": "Team Dinner",
+        "close": "Got it"
+      }
     }
   }
 }

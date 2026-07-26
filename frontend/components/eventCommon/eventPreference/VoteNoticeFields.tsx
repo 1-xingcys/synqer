@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { CircleHelp } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { PreferenceRow } from "./PreferenceRow";
+import { VoteNoticeInfoModal } from "./VoteNoticeInfoModal";
 
 interface VoteNoticeFieldsProps {
   shareVoteToChat: boolean;
@@ -25,12 +28,23 @@ export function VoteNoticeFields({
   disabled = false,
 }: VoteNoticeFieldsProps) {
   const t = useTranslations("eventPreference.voteNotice");
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
 
   return (
     <div className="space-y-4">
       <PreferenceRow
         label={t("shareVoteToChatLabel")}
         htmlFor={SHARE_VOTE_SWITCH_ID}
+        hint={
+          <button
+            type="button"
+            onClick={() => setIsInfoOpen(true)}
+            className="inline-flex h-6 w-6 items-center justify-center text-muted-foreground"
+            aria-label={t("openInfoAriaLabel")}
+          >
+            <CircleHelp className="h-3.5 w-3.5" />
+          </button>
+        }
       >
         <Switch
           id={SHARE_VOTE_SWITCH_ID}
@@ -39,6 +53,11 @@ export function VoteNoticeFields({
           onCheckedChange={onShareVoteToChatChange}
         />
       </PreferenceRow>
+
+      <VoteNoticeInfoModal
+        isOpen={isInfoOpen}
+        onClose={() => setIsInfoOpen(false)}
+      />
     </div>
   );
 }

@@ -955,7 +955,15 @@
       "previewAria": "投票表格預覽：4 天 × 2 小時，每格 {granularity} 分鐘"
     },
     "voteNotice": {
-      "shareVoteToChatLabel": "投票後傳送通知"
+      "shareVoteToChatLabel": "投票後傳送通知",
+      "openInfoAriaLabel": "查看投票通知說明",
+      "modal": {
+        "title": "投票後傳送通知",
+        "intro": "開啟後，參與者從 LINE 進入活動並送出投票時，系統會自動傳送通知到當前所在的聊天室：",
+        "previewAria": "LINE 通知訊息預覽：已投票，活動名稱，以及查看與前往投票兩個按鈕",
+        "previewEventTitle": "期末聚餐",
+        "close": "了解"
+      }
     }
   }
 }

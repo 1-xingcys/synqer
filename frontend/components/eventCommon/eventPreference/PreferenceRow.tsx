@@ -7,6 +7,8 @@ interface PreferenceRowProps {
   label: string;
   /** Set when the row's control is a single labelable element. */
   htmlFor?: string;
+  /** Sits beside the label, for preferences that need more than a label. */
+  hint?: ReactNode;
   children: ReactNode;
 }
 
@@ -19,13 +21,15 @@ interface PreferenceRowProps {
 export function PreferenceRow({
   label,
   htmlFor,
+  hint,
   children,
 }: PreferenceRowProps) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <Label className="shrink-0" htmlFor={htmlFor}>
-        {label}
-      </Label>
+      <div className="flex shrink-0 items-center">
+        <Label htmlFor={htmlFor}>{label}</Label>
+        {hint}
+      </div>
       {children}
     </div>
   );
