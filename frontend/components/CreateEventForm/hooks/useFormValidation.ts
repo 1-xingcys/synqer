@@ -112,6 +112,7 @@ export function hasCreateEventUnsavedChanges(
     formData.timeZone !== initialFormData.timeZone ||
     formData.defaultGranularityMin !== initialFormData.defaultGranularityMin ||
     formData.defaultVoteMode !== initialFormData.defaultVoteMode ||
+    formData.shareVoteToChat !== initialFormData.shareVoteToChat ||
     !isSameVotingDeadlineState(formData, initialFormData) ||
     formData.lineGroupId !== initialFormData.lineGroupId ||
     !isSameStringArray(

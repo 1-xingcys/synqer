@@ -97,6 +97,7 @@ export function useFormActions({
           timeZone: formData.timeZone,
           defaultGranularityMin: formData.defaultGranularityMin,
           defaultVoteMode: toVoteModeDto(formData.defaultVoteMode),
+          shareVoteToChat: formData.shareVoteToChat,
           votingDeadline: votingDeadlineISO,
           lineGroupId: formData.lineGroupId || undefined,
           expectedLineUserIds:

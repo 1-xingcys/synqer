@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
-import { EventPreferenceFields } from "@/components/eventCommon/EventPreferenceFields";
+import {
+  GridDefaultFields,
+  VoteNoticeFields,
+} from "@/components/eventCommon/eventPreference";
 import type { VoteMode } from "@/types/event";
 import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
 import { cn } from "@/lib/utils";
@@ -26,6 +29,10 @@ export function PreferenceSection() {
 
   const handleVoteModeChange = (voteMode: VoteMode) => {
     setFormData((prev) => ({ ...prev, defaultVoteMode: voteMode }));
+  };
+
+  const handleShareVoteToChatChange = (shareVoteToChat: boolean) => {
+    setFormData((prev) => ({ ...prev, shareVoteToChat }));
   };
 
   return (
@@ -70,11 +77,15 @@ export function PreferenceSection() {
             inert={!isExpanded}
           >
             <div className="overflow-hidden">
-              <div className="pt-4">
-                <EventPreferenceFields
+              <div className="pt-4 space-y-4">
+                <VoteNoticeFields
+                  shareVoteToChat={formData.shareVoteToChat}
+                  onShareVoteToChatChange={handleShareVoteToChatChange}
+                />
+                <GridDefaultFields
                   granularity={formData.defaultGranularityMin}
                   voteMode={formData.defaultVoteMode}
-                  showPreviewGrid
+                  showPreview
                   onGranularityChange={handleGranularityChange}
                   onVoteModeChange={handleVoteModeChange}
                 />

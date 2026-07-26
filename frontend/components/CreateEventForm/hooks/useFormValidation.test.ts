@@ -6,7 +6,11 @@ import {
 } from "./useFormValidation";
 import { VoteMode } from "@/types/event";
 import { CreateEventFormData, DEFAULT_WEEKDAYS } from "../types";
-import { DEFAULT_GRANULARITY, DEFAULT_VOTE_MODE } from "@/lib/eventPreference";
+import {
+  DEFAULT_GRANULARITY,
+  DEFAULT_SHARE_VOTE_TO_CHAT,
+  DEFAULT_VOTE_MODE,
+} from "@/lib/eventPreference";
 
 function buildFormData(
   overrides: Partial<CreateEventFormData> = {},
@@ -23,6 +27,7 @@ function buildFormData(
     timeZone: "America/New_York",
     defaultGranularityMin: DEFAULT_GRANULARITY,
     defaultVoteMode: DEFAULT_VOTE_MODE,
+    shareVoteToChat: DEFAULT_SHARE_VOTE_TO_CHAT,
     votingDeadlineEnabled: true,
     votingDeadline: new Date(2026, 6, 13), // local 2026-07-13
     votingDeadlineTime: "18:00",
@@ -153,6 +158,17 @@ describe("hasCreateEventUnsavedChanges - grid preferences", () => {
     expect(
       hasCreateEventUnsavedChanges(
         buildFormData({ defaultVoteMode: VoteMode.UNAVAILABLE }),
+        initial,
+      ),
+    ).toBe(true);
+  });
+
+  it("notices the vote notice being turned off", () => {
+    const initial = buildFormData();
+
+    expect(
+      hasCreateEventUnsavedChanges(
+        buildFormData({ shareVoteToChat: false }),
         initial,
       ),
     ).toBe(true);
