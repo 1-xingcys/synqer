@@ -462,7 +462,8 @@
         "warning": "This action cannot be undone. All votes and data will be permanently deleted."
       },
       "preference": {
-        "title": "Grid defaults",
+        "gridDefaultTitle": "Grid Defaults",
+        "voteNoticeTitle": "Notifications",
         "saveError": "Could not save the setting. Please try again."
       }
     }
@@ -942,14 +943,19 @@
     }
   },
   "eventPreference": {
-    "granularity15": "15 min",
-    "granularity30": "30 min",
-    "granularity60": "1 hr",
-    "voteModeAvailableHint": "Select available times",
-    "voteModeUnavailableHint": "Select unavailable times",
-    "previewLabel": "Vote grid preview",
-    "previewAria": "Voting grid preview: 4 days by 2 hours, {granularity} minutes per cell",
-    "defaultGranularityLabel": "Default view",
-    "defaultVoteModeLabel": "Default mode"
+    "gridDefault": {
+      "granularityLabel": "Default view",
+      "voteModeLabel": "Default mode",
+      "granularity15": "15 min",
+      "granularity30": "30 min",
+      "granularity60": "1 hr",
+      "voteModeAvailableHint": "Select available times",
+      "voteModeUnavailableHint": "Select unavailable times",
+      "previewLabel": "Vote grid preview",
+      "previewAria": "Voting grid preview: 4 days by 2 hours, {granularity} minutes per cell"
+    },
+    "voteNotice": {
+      "shareVoteToChatLabel": "Send notice after voting"
+    }
   }
 }

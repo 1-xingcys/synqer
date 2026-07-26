@@ -462,8 +462,9 @@
         "warning": "此操作無法復原。所有投票和資料將被永久刪除。"
       },
       "preference": {
-        "title": "投票表格預設",
-        "saveError": "設定儲存失敗，請再試一次"
+        "gridDefaultTitle": "投票表格預設",
+        "voteNoticeTitle": "通知",
+        "saveError": "儲存失敗，請再試一次"
       }
     }
   },
@@ -942,14 +943,19 @@
     }
   },
   "eventPreference": {
-    "granularity15": "15min",
-    "granularity30": "30min",
-    "granularity60": "1hr",
-    "voteModeAvailableHint": "投「可以」的時間",
-    "voteModeUnavailableHint": "投「不行」的時間",
-    "previewLabel": "投票畫面預覽",
-    "previewAria": "投票表格預覽：4 天 × 2 小時，每格 {granularity} 分鐘",
-    "defaultGranularityLabel": "預設時間區間",
-    "defaultVoteModeLabel": "預設模式"
+    "gridDefault": {
+      "granularityLabel": "預設時間區間",
+      "voteModeLabel": "預設模式",
+      "granularity15": "15min",
+      "granularity30": "30min",
+      "granularity60": "1hr",
+      "voteModeAvailableHint": "投「可以」的時間",
+      "voteModeUnavailableHint": "投「不行」的時間",
+      "previewLabel": "投票畫面預覽",
+      "previewAria": "投票表格預覽：4 天 × 2 小時，每格 {granularity} 分鐘"
+    },
+    "voteNotice": {
+      "shareVoteToChatLabel": "投票後傳送通知"
+    }
   }
 }
