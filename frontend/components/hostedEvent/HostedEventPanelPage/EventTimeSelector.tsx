@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Z_INDEX } from "@/lib/zIndex";
-import { formatLocalizedRangeLabel } from "@/components/eventCommon/timeRangeFormat";
+import { formatLocalizedRangeLabel } from "@/lib/event-time";
 import type { SelectedTimeRange } from "./types";
 
 interface EventTimeSelectorProps {

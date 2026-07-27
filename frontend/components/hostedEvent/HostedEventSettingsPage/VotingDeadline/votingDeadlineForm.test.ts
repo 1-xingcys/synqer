@@ -6,7 +6,7 @@ import {
   isVotingDeadlineLocked,
   toVotingDeadlinePayload,
 } from "@/components/hostedEvent/HostedEventSettingsPage/VotingDeadline/votingDeadlineForm";
-import { VOTING_DEADLINE_ERROR } from "@/lib/votingDeadline";
+import { VOTING_DEADLINE_ERROR } from "@/lib/event-time";
 import { EventStatus } from "@/types/event";
 import { calendarDay } from "@/lib/time";
 import { wallClock } from "@/lib/time";

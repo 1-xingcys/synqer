@@ -1,5 +1,5 @@
 import { EventType, EventWithCapabilities, EventSchedule } from "@/types/event";
-import { formatWeekdayLabel } from "@/lib/weekdays";
+import { formatWeekdayLabel } from "@/lib/event-time";
 import { calendarDayToDate, parseCalendarDayValue } from "@/lib/time";
 import type { AxisSpan } from "@/lib/axisSpan";
 

@@ -1,4 +1,4 @@
-import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
+import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/event-time";
 import { parseCalendarDayValue } from "@/lib/time";
 import type { CalendarDay } from "@/lib/time";
 import { calendarDayMinuteToInstant } from "@/lib/time";

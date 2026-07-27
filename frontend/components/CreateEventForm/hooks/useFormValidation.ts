@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import {
   validateVotingDeadline,
   VOTING_DEADLINE_ERROR,
-} from "@/lib/votingDeadline";
+} from "@/lib/event-time";
 import { CreateEventFormData } from "../types";
 import { todayInZone } from "@/lib/time";
 import { parseTimeToMinutes } from "./utils";

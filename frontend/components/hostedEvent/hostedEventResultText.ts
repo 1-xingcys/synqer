@@ -1,5 +1,5 @@
 import { type HostedEventResultSummary } from "./resultSummary";
-import { formatLocalizedRangeLabel } from "@/components/eventCommon/timeRangeFormat";
+import { formatLocalizedRangeLabel } from "@/lib/event-time";
 
 export type HostedEventResultTextCopy = {
   title: string;

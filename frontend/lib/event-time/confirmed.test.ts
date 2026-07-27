@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { formatConfirmedSelection } from "@/components/eventCommon/confirmed-time-formatters";
+import { formatConfirmedSelection } from "@/lib/event-time";
 import { wallClock } from "@/lib/time";
 
 describe("confirmed-time-formatters", () => {

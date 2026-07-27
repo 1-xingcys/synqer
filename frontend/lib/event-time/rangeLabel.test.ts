@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { formatLocalizedRangeLabel } from "@/components/eventCommon/timeRangeFormat";
+import { formatLocalizedRangeLabel } from "@/lib/event-time";
 import { calendarDay } from "@/lib/time";
 
 // The two cases that used to live here — a zone-bearing axis key, and a weekday

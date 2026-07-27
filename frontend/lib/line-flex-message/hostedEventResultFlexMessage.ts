@@ -1,4 +1,4 @@
-import { formatLocalizedRangeLabel } from "@/components/eventCommon/timeRangeFormat";
+import { formatLocalizedRangeLabel } from "@/lib/event-time";
 import { type HostedEventResultSummary } from "@/components/hostedEvent/resultSummary";
 import { getLiff, getLiffId } from "@/lib/liff";
 import { eventDetailPath } from "@/lib/eventRoutes";

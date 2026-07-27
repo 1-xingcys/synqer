@@ -3,7 +3,7 @@ import {
   formatVotingDeadlineWallClock,
   validateVotingDeadline,
   VOTING_DEADLINE_ERROR,
-} from "@/lib/votingDeadline";
+} from "@/lib/event-time";
 import { calendarDayToWallClock } from "@/lib/time";
 import { calendarDay } from "@/lib/time";
 import { wallClock } from "@/lib/time";
