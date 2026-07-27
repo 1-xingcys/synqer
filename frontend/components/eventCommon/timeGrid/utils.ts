@@ -7,7 +7,7 @@ function warnInvalidSlot(slot: TimeSlot, reason: string) {
   console.warn(`[timeGrid] Skip invalid slot ${slot.id}: ${reason}`);
 }
 
-// Map app locale to date-fns locale string
+// Map app locale to an Intl locale string
 const getDateLocale = (locale: string): string => {
   const localeMap: Record<string, string> = {
     "zh-TW": "zh-TW",
