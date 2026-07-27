@@ -1,5 +1,5 @@
 import { getLiff, getLiffId } from "@/lib/liff";
-import { wallClockToDate, type WallClock } from "@/lib/wallClock";
+import { wallClockToDate, type WallClock } from "@/lib/time";
 
 export interface EventShareInfo {
   eventId: string;

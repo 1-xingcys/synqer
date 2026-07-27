@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import { buildHostedEventResultTextFromSummary } from "@/components/hostedEvent/hostedEventResultText";
-import { calendarDay } from "@/lib/calendarDay";
+import { calendarDay } from "@/lib/time";
 
 describe("hostedEventResultText", () => {
   it("formats recurring confirmed ranges with the shared confirmed format", () => {

@@ -1,10 +1,10 @@
 "use client";
-import { axisDateToCalendarDay } from "@/lib/calendarDay";
+import { axisDateToCalendarDay } from "@/lib/time";
 import { axisSpanOfSlot, extendAxisSpan, type AxisSpan } from "@/lib/axisSpan";
 
 import { useMemo } from "react";
 import { StagedConfirmation } from "@/types/event";
-import { CANONICAL_WEEKDAY_ORDER } from "@/lib/weekdays";
+import { CANONICAL_WEEKDAY_ORDER } from "@/lib/event-time";
 import type { EventSlot, SelectedTimeRange } from "../types";
 
 interface UseEventTimeSelectionOptions {

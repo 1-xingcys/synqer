@@ -3,7 +3,7 @@ import {
   formatGoogleCalendarDate,
   generateGoogleCalendarUrl,
 } from "@/components/joinedEvent/JoinedEventPage/google-calendar-url";
-import { wallClock } from "@/lib/wallClock";
+import { wallClock } from "@/lib/time";
 
 describe("formatGoogleCalendarDate", () => {
   it("resolves a naive wall-clock value to the real UTC instant and appends Z", () => {

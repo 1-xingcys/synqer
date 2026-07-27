@@ -5,7 +5,7 @@ import {
   formatEventCandidateDaySummary,
   formatEventDateRangeLabel,
 } from "@/lib/event-presentation";
-import { calendarDay } from "@/lib/calendarDay";
+import { calendarDay } from "@/lib/time";
 
 type EventFixture = EventWithCapabilities & {
   schedule?: EventSchedule;

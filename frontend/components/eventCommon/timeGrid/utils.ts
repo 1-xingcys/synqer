@@ -1,8 +1,12 @@
-import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
-import { parseCalendarDayValue } from "@/lib/calendarDay";
-import type { CalendarDay } from "@/lib/calendarDay";
-import { calendarDayMinuteToInstant } from "@/lib/wallClock";
-import { axisDateToCalendarDay } from "@/lib/calendarDay";
+import {
+  formatWeekdayLabel,
+  formatWeekdayLabelFromDate,
+  getOrderedWeekdays,
+} from "@/lib/event-time";
+import { calendarDayParts, calendarDayToDate } from "@/lib/time";
+import type { CalendarDay } from "@/lib/time";
+import { calendarDayMinuteToInstant } from "@/lib/time";
+import { axisDateToCalendarDay } from "@/lib/time";
 import { axisSpanKey, axisSpanOfSlot } from "@/lib/axisSpan";
 import { TimeSlot, Vote, CalendarEvent, GridAxisColumn } from "./types";
 
@@ -29,12 +33,20 @@ export const formatAxisHeader = (
     };
   }
 
-  const date = parseCalendarDayValue(column.axis.startDay);
+  // The day number is a stored digit; only the weekday and month *names* need
+  // Intl. Those go through the UTC anchor with the formatter pinned to UTC, so
+  // the runner's zone cannot shift the name off the digit shown beside it.
   const dateLocale = getDateLocale(locale);
-  const weekday = date.toLocaleDateString(dateLocale, { weekday: "short" });
-  const day = date.getDate();
-  const month = date.toLocaleDateString(dateLocale, { month: "short" });
-  return { weekday, day, month };
+  const date = calendarDayToDate(column.axis.startDay);
+
+  return {
+    weekday: formatWeekdayLabelFromDate(date, dateLocale, "short", "UTC"),
+    day: calendarDayParts(column.axis.startDay).day,
+    month: new Intl.DateTimeFormat(dateLocale, {
+      month: "short",
+      timeZone: "UTC",
+    }).format(date),
+  };
 };
 
 export const formatAxisPageRange = (
@@ -63,8 +75,8 @@ export const formatAxisPageRange = (
 };
 
 const formatDatePageValue = (day: CalendarDay): string => {
-  const date = parseCalendarDayValue(day);
-  return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+  const parts = calendarDayParts(day);
+  return `${parts.year}/${parts.month}/${parts.day}`;
 };
 
 export const buildAxisColumns = (

@@ -1,11 +1,12 @@
 "use client";
 
-import { formatMinutesToTime } from "@/lib/utils";
-import { formatWeekdayLabel, formatWeekdayLabelFromDate } from "@/lib/weekdays";
+import { formatMinutesToTime } from "@/lib/time/minuteOfDay";
+// Intra-module import stays relative: see lib/time/calendarDay.ts.
+import { formatWeekdayLabel, formatWeekdayLabelFromDate } from "./weekdays";
 import { type Weekday } from "@/types/event";
 import type { AxisSpan } from "@/lib/axisSpan";
-import { wallClockToDate, type WallClock } from "@/lib/wallClock";
-import { calendarDay, calendarDayToDate } from "@/lib/calendarDay";
+import { wallClockToDate, type WallClock } from "@/lib/time";
+import { calendarDay, calendarDayToDate } from "@/lib/time";
 
 export type LocalizedTimeRangeFormatOptions = {
   timeZone?: string;

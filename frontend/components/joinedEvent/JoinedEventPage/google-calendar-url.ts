@@ -1,4 +1,4 @@
-import { wallClockToInstant, type WallClock } from "@/lib/wallClock";
+import { wallClockToInstant, type WallClock } from "@/lib/time";
 
 /**
  * Format a confirmed selection's date for a Google Calendar URL.

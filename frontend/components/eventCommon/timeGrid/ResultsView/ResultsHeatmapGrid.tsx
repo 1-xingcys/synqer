@@ -12,11 +12,11 @@ import {
   DatePagination,
   TimeColumn,
 } from "@/components/eventCommon/timeGrid/ui";
-import { formatMinutesToTime } from "@/lib/utils";
+import { formatMinutesToTime } from "@/lib/time/minuteOfDay";
 import { Z_INDEX } from "@/lib/zIndex";
 import { formatAxisKeyLabel } from "@/lib/event-presentation";
 import type { AxisSpan } from "@/lib/axisSpan";
-import type { CalendarDay } from "@/lib/calendarDay";
+import type { CalendarDay } from "@/lib/time";
 import {
   useResponsiveGrid,
   usePaginatedDates,

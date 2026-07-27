@@ -6,7 +6,7 @@ import {
   DEFAULT_SHARE_VOTE_TO_CHAT,
   DEFAULT_VOTE_MODE,
 } from "@/lib/eventPreference";
-import { calendarDay } from "@/lib/calendarDay";
+import { calendarDay } from "@/lib/time";
 
 function buildFormData(
   overrides: Partial<CreateEventFormData> = {},

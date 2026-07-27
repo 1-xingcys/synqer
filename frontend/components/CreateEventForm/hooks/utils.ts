@@ -6,10 +6,10 @@ import {
   addCalendarDays,
   calendarDayToWallClock,
   todayInZone,
-} from "@/lib/calendarDay";
+} from "@/lib/time";
 import { instantToZonedWallClock } from "@/lib/time";
-import { wallClockToDate } from "@/lib/wallClock";
-import type { CalendarDay } from "@/lib/calendarDay";
+import { wallClockToDate } from "@/lib/time";
+import type { CalendarDay } from "@/lib/time";
 import type { CreateEventFormData } from "../types";
 
 /** How long a recurring event collects availability by default. */

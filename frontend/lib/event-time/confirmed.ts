@@ -1,8 +1,9 @@
 import type { ConfirmedSelection } from "@/types/event";
+// Intra-module import stays relative: see lib/time/calendarDay.ts.
 import {
   formatLocalizedDateTimeRangeLabel,
   formatLocalizedRangeLabel,
-} from "./timeRangeFormat";
+} from "./rangeLabel";
 
 /**
  * Narrow a confirmed selection to the one-time shape used by one-off events.

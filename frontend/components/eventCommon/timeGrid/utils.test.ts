@@ -11,7 +11,7 @@ import {
   CalendarEvent,
   TimeSlot,
 } from "@/components/eventCommon/timeGrid/types";
-import { calendarDay } from "@/lib/calendarDay";
+import { calendarDay } from "@/lib/time";
 
 const recurringSlots: TimeSlot[] = [
   {

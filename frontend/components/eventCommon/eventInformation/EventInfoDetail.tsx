@@ -5,7 +5,7 @@ import { EventStatusText } from "@/components/eventCommon/EventStatusText";
 import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
 import { EventConfigurationSummary } from "@/components/eventCommon/eventInformation/EventConfigurationSummary";
 import { EventSchedule, EventStatus, EventType } from "@/types/event";
-import type { WallClock } from "@/lib/wallClock";
+import type { WallClock } from "@/lib/time";
 
 interface EventInfoDetailProps {
   eventType: EventType;

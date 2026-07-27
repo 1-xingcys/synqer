@@ -1,6 +1,6 @@
 import { EventType, EventWithCapabilities, EventSchedule } from "@/types/event";
-import { formatWeekdayLabel } from "@/lib/weekdays";
-import { calendarDayToDate, parseCalendarDayValue } from "@/lib/calendarDay";
+import { formatWeekdayLabel } from "@/lib/event-time";
+import { calendarDayParts, calendarDayToDate } from "@/lib/time";
 import type { AxisSpan } from "@/lib/axisSpan";
 
 type EventWithDateRange = EventWithCapabilities & {
@@ -73,9 +73,9 @@ export function formatAxisKeyLabel(span: AxisSpan, locale: string): string {
     return formatWeekdayLabel(span.weekday, locale);
   }
 
-  // Shares the grid header's parser so the modal label can never disagree with
-  // the column the user selected. Grid headers read these back with local
-  // getters, so the day is anchored at local noon rather than UTC midnight.
-  const date = parseCalendarDayValue(span.startDay);
-  return `${date.getMonth() + 1}/${date.getDate()}`;
+  // Month and day are the stored digits, so they are read off the string
+  // rather than routed through a Date whose anchor could disagree with the
+  // grid header's.
+  const { month, day } = calendarDayParts(span.startDay);
+  return `${month}/${day}`;
 }

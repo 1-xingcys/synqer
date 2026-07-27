@@ -1,5 +1,6 @@
-import { wallClockToCalendarDay, type CalendarDay } from "@/lib/calendarDay";
-import { zonedWallClockToInstant } from "@/lib/time";
+// Intra-module imports stay relative: see calendarDay.ts.
+import { wallClockToCalendarDay, type CalendarDay } from "./calendarDay";
+import { zonedWallClockToInstant } from "./zone";
 
 /**
  * A naive wall-clock timestamp: a day plus a time, with no zone of its own.

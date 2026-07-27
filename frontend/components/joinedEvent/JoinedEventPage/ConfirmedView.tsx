@@ -5,7 +5,7 @@ import { CalendarCheck, Calendar } from "lucide-react";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { AddToCalendarPanel } from "./AddToCalendarPanel";
 import { ConfirmedSelection } from "@/types/event";
-import type { OneTimeConfirmedSelection } from "@/components/eventCommon/confirmed-time-formatters";
+import type { OneTimeConfirmedSelection } from "@/lib/event-time";
 
 function isOneTimeConfirmedSelection(
   selection: ConfirmedSelection,

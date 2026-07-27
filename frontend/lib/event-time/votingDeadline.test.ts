@@ -3,10 +3,10 @@ import {
   formatVotingDeadlineWallClock,
   validateVotingDeadline,
   VOTING_DEADLINE_ERROR,
-} from "@/lib/votingDeadline";
-import { calendarDayToWallClock } from "@/lib/calendarDay";
-import { calendarDay } from "@/lib/calendarDay";
-import { wallClock } from "@/lib/wallClock";
+} from "@/lib/event-time";
+import { calendarDayToWallClock } from "@/lib/time";
+import { calendarDay } from "@/lib/time";
+import { wallClock } from "@/lib/time";
 
 describe("votingDeadline", () => {
   it("returns required when enabled without a date", () => {

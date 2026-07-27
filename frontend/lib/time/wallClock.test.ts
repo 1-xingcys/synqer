@@ -6,8 +6,8 @@ import {
   wallClockTime,
   wallClockToDate,
   wallClockToInstant,
-} from "@/lib/wallClock";
-import { calendarDay } from "@/lib/calendarDay";
+} from "@/lib/time";
+import { calendarDay } from "@/lib/time";
 
 describe("wallClock", () => {
   it("accepts the wire form unchanged", () => {

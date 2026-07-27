@@ -1,5 +1,5 @@
-import type { CalendarDay } from "@/lib/calendarDay";
-import { wallClockToDate, type WallClock } from "@/lib/wallClock";
+import type { CalendarDay } from "@/lib/time";
+import { wallClockToDate, type WallClock } from "@/lib/time";
 import { formatDateTimeInZone } from "@/lib/time";
 
 export const VOTING_DEADLINE_ERROR = {

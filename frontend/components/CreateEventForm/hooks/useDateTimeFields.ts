@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import type { CalendarDay } from "@/lib/calendarDay";
+import type { CalendarDay } from "@/lib/time";
 import { CreateEventFormData } from "../types";
 import { withSyncedVotingDeadline } from "./utils";
 import type { EventType } from "@/types/event";

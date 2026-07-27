@@ -10,7 +10,7 @@ import {
 } from "../types";
 import { withSyncedVotingDeadline } from "./utils";
 import { resolveDefaultTimeZone } from "@/lib/time";
-import { todayInZone } from "@/lib/calendarDay";
+import { todayInZone } from "@/lib/time";
 import {
   DEFAULT_GRANULARITY,
   DEFAULT_SHARE_VOTE_TO_CHAT,

@@ -5,7 +5,7 @@ import {
   extendAxisSpan,
   type AxisSpan,
 } from "@/lib/axisSpan";
-import { CANONICAL_WEEKDAY_ORDER } from "@/lib/weekdays";
+import { CANONICAL_WEEKDAY_ORDER } from "@/lib/event-time";
 
 export type HostedResultSlot = {
   id: string;

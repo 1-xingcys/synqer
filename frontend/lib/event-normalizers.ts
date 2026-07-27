@@ -1,6 +1,6 @@
 import type { operations } from "@/generated/openapi";
-import { wallClockToCalendarDay, type CalendarDay } from "@/lib/calendarDay";
-import { wallClock, type WallClock } from "@/lib/wallClock";
+import { wallClockToCalendarDay, type CalendarDay } from "@/lib/time";
+import { wallClock, type WallClock } from "@/lib/time";
 import {
   ConfirmedSelection,
   EventCapabilities,

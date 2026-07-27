@@ -1,9 +1,9 @@
 import {
   validateVotingDeadline,
   type VotingDeadlineError,
-} from "@/lib/votingDeadline";
-import { calendarDayToWallClock, type CalendarDay } from "@/lib/calendarDay";
-import { wallClockDay, wallClockTime, type WallClock } from "@/lib/wallClock";
+} from "@/lib/event-time";
+import { calendarDayToWallClock, type CalendarDay } from "@/lib/time";
+import { wallClockDay, wallClockTime, type WallClock } from "@/lib/time";
 import { EventStatus } from "@/types/event";
 
 export interface VotingDeadlineFormData {
