@@ -51,6 +51,12 @@ describe("event-presentation", () => {
     );
   });
 
+  it("uses short weekday labels in zh-TW rather than narrow ones", () => {
+    expect(formatEventCandidateDaySummary(recurringEvent, "zh-TW")).toBe(
+      "週一, 週三, 週五",
+    );
+  });
+
   // Reading these UTC-midnight values with local getters shifts them to the
   // previous day for viewers west of UTC. Run under `TZ=America/New_York` to
   // exercise that path; the assertion itself holds in every zone.

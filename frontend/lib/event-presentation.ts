@@ -25,13 +25,7 @@ export function formatEventCandidateDaySummary(
 
   if (recurringWeekdays?.length) {
     return recurringWeekdays
-      .map((weekday) =>
-        formatWeekdayLabel(
-          weekday,
-          locale,
-          locale.startsWith("zh") ? "narrow" : "short",
-        ),
-      )
+      .map((weekday) => formatWeekdayLabel(weekday, locale))
       .join(", ");
   }
 

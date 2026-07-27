@@ -11,6 +11,9 @@ interface EventInfoParticipantsProps {
   currentUserId?: string;
 }
 
+/**
+ * Read-only view of who is expected at an event and who has voted so far.
+ */
 export function EventInfoParticipants({
   expectedParticipants,
   currentUserId,
@@ -29,8 +32,8 @@ export function EventInfoParticipants({
   const notVotedParticipants = expectedParticipants.filter((p) => !p.hasVoted);
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-2xl py-4 px-5 sm:py-5 sm:px-6 border border-zinc-200 dark:border-zinc-800 shadow-sm sticky top-6">
-      <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-6 flex items-center justify-between">
+    <>
+      <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-3 sm:mb-4 flex items-center justify-between">
         <span className="flex items-center gap-2">
           <Users className="w-5 h-5" />
           {t("eventInfo.participantsStatus")}
@@ -64,6 +67,6 @@ export function EventInfoParticipants({
           />
         </div>
       )}
-    </div>
+    </>
   );
 }
