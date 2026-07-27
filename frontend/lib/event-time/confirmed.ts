@@ -26,71 +26,53 @@ type WeekdayConfirmedSelection = ConfirmedSelection & {
   endMinute: number;
 };
 
-// Validate that a confirmed selection has the required one-time fields.
-function isOneTimeConfirmedSelection(
+export function isOneTimeConfirmedSelection(
   selection: ConfirmedSelection,
 ): selection is OneTimeConfirmedSelection {
   return (
     selection.kind === "ONE_TIME_RANGE" &&
-    typeof selection.startTime === "string" &&
-    typeof selection.endTime === "string"
+    selection.startTime !== undefined &&
+    selection.endTime !== undefined
   );
 }
 
-// Validate that a confirmed selection has the required weekday-range fields.
 function isWeekdayConfirmedSelection(
   selection: ConfirmedSelection,
 ): selection is WeekdayConfirmedSelection {
   return (
     selection.kind === "WEEKDAY_RANGE" &&
-    Boolean(selection.weekday) &&
-    typeof selection.startMinute === "number" &&
-    typeof selection.endMinute === "number"
+    selection.weekday !== undefined &&
+    selection.startMinute !== undefined &&
+    selection.endMinute !== undefined
   );
 }
 
-// Adapt a one-time confirmed selection to the canonical datetime formatter.
-function formatOneTimeConfirmedSelection(
-  selection: OneTimeConfirmedSelection,
-  locale: string,
-) {
-  return formatLocalizedDateTimeRangeLabel(
-    {
-      startTime: selection.startTime,
-      endTime: selection.endTime,
-    },
-    locale,
-  );
-}
-
-// Adapt a recurring confirmed selection to the canonical range formatter.
-function formatWeekdayConfirmedSelection(
-  selection: WeekdayConfirmedSelection,
-  locale: string,
-) {
-  return formatLocalizedRangeLabel(
-    {
-      axisType: "WEEKDAY",
-      weekday: selection.weekday,
-      startMinute: selection.startMinute,
-      endMinute: selection.endMinute,
-    },
-    locale,
-  );
-}
-
-// Format any supported confirmed selection into the product's display label.
+/**
+ * A confirmed selection as the product's display label, or null when it carries
+ * neither kind's fields — a shape only malformed data reaches.
+ */
 export function formatConfirmedSelection(
   selection: ConfirmedSelection,
   locale: string,
 ): string | null {
   if (isOneTimeConfirmedSelection(selection)) {
-    return formatOneTimeConfirmedSelection(selection, locale);
+    return formatLocalizedDateTimeRangeLabel(
+      { startTime: selection.startTime, endTime: selection.endTime },
+      locale,
+    );
   }
 
-  if (!isWeekdayConfirmedSelection(selection)) {
-    return null;
+  if (isWeekdayConfirmedSelection(selection)) {
+    return formatLocalizedRangeLabel(
+      {
+        axisType: "WEEKDAY",
+        weekday: selection.weekday,
+        startMinute: selection.startMinute,
+        endMinute: selection.endMinute,
+      },
+      locale,
+    );
   }
 
-  return formatWeekdayConfirmedSelection(selection, locale);
+  return null;
 }

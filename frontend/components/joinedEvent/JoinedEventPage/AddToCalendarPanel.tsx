@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import {
-  formatConfirmedSelection,
+  formatLocalizedDateTimeRangeLabel,
   type OneTimeConfirmedSelection,
 } from "@/lib/event-time";
 import { generateGoogleCalendarUrl } from "./google-calendar-url";
@@ -174,7 +174,7 @@ export function AddToCalendarPanel({
                   />
                 </svg>
                 <span className="text-sm text-gray-700 dark:text-zinc-300 truncate">
-                  {formatConfirmedSelection(selection, locale) ?? ""}
+                  {formatLocalizedDateTimeRangeLabel(selection, locale)}
                 </span>
               </div>
               <button
