@@ -4,6 +4,7 @@ import { AlertCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/eventCommon/DatePicker";
+import type { CalendarDay } from "@/lib/calendarDay";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +13,7 @@ const SWITCH_ID = "enable-voting-deadline";
 interface VotingDeadlineFieldsProps {
   enabled: boolean;
   /** Voting deadline date */
-  date: Date | null;
+  date: CalendarDay | null;
   /** Voting deadline time (HH:MM format), null when not picked */
   time: string | null;
   enableLabel: string;
@@ -22,7 +23,7 @@ interface VotingDeadlineFieldsProps {
   timePlaceholder: string;
   errorMessage?: string | null;
   onEnabledChange: (enabled: boolean) => void;
-  onDateChange: (date: Date | null) => void;
+  onDateChange: (day: CalendarDay | null) => void;
   onTimeChange: (time: string) => void;
 }
 

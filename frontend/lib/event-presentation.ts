@@ -5,7 +5,8 @@ import {
   EventSchedule,
 } from "@/types/event";
 import { formatWeekdayLabel } from "@/lib/weekdays";
-import { formatDateInZone, parseCalendarDayValue } from "@/lib/time";
+import { parseCalendarDayValue } from "@/lib/time";
+import { calendarDayToDate } from "@/lib/calendarDay";
 
 type EventWithDateRange = EventWithCapabilities & {
   type?: EventType;
@@ -33,12 +34,43 @@ export function formatEventCandidateDaySummary(
     return "";
   }
 
-  // Candidate dates are naive calendar days stored at UTC midnight, so they are
-  // read back in UTC — local getters would shift them for viewers west of UTC.
-  return [
-    formatDateInZone(new Date(event.schedule.startDate), "UTC"),
-    formatDateInZone(new Date(event.schedule.endDate), "UTC"),
-  ].join(" ~ ");
+  return [event.schedule.startDate, event.schedule.endDate]
+    .map((day) => day.split("-").join("/"))
+    .join(" ~ ");
+}
+
+/**
+ * Compact candidate-day label for event list rows: "Jul 30 - Aug 2, 2026", or
+ * the weekday list for recurring events.
+ */
+export function formatEventDateRangeLabel(
+  schedule: EventSchedule | undefined,
+  locale: string,
+): string {
+  if (schedule?.kind === "RECURRING" && schedule.weekdays?.length) {
+    return schedule.weekdays
+      .map((weekday) => formatWeekdayLabel(weekday, locale))
+      .join(", ");
+  }
+
+  if (schedule?.kind !== "ONE_TIME") {
+    return "";
+  }
+
+  // Calendar days carry no zone, so they are rendered through UTC rather than
+  // the viewer's local fields.
+  const startDate = calendarDayToDate(schedule.startDate);
+  const endDate = calendarDayToDate(schedule.endDate);
+  const format = (date: Date, withYear: boolean) =>
+    new Intl.DateTimeFormat(locale, {
+      month: "short",
+      day: "numeric",
+      ...(withYear ? { year: "numeric" as const } : {}),
+      timeZone: "UTC",
+    }).format(date);
+
+  const isSameYear = startDate.getUTCFullYear() === endDate.getUTCFullYear();
+  return `${format(startDate, !isSameYear)} - ${format(endDate, true)}`;
 }
 
 export function formatAxisKeyLabel(

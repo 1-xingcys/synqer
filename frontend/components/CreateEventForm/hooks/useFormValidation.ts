@@ -6,7 +6,8 @@ import {
   VOTING_DEADLINE_ERROR,
 } from "@/lib/votingDeadline";
 import { CreateEventFormData } from "../types";
-import { parseTimeToMinutes, getTodayInTimeZone } from "./utils";
+import { todayInZone } from "@/lib/calendarDay";
+import { parseTimeToMinutes } from "./utils";
 
 export enum ValidationError {
   TitleRequired = "TitleRequired",
@@ -40,17 +41,12 @@ export function getCreateEventValidationErrors(
   // Only the calendar day matters: a voting window may legitimately start
   // earlier today than "now" (e.g. creating a 09:00-18:00 window at noon),
   // so the time of day is never compared against the clock.
-  if (!isRecurring && formData.startDate) {
-    const todayInZone = getTodayInTimeZone(formData.timeZone, now);
-    const startDay = new Date(
-      formData.startDate.getFullYear(),
-      formData.startDate.getMonth(),
-      formData.startDate.getDate(),
-    );
-
-    if (startDay < todayInZone) {
-      errorSet.add(ValidationError.StartDateInPast);
-    }
+  if (
+    !isRecurring &&
+    formData.startDate &&
+    formData.startDate < todayInZone(formData.timeZone, now)
+  ) {
+    errorSet.add(ValidationError.StartDateInPast);
   }
 
   const deadlineError = validateVotingDeadline({
@@ -64,11 +60,6 @@ export function getCreateEventValidationErrors(
   }
 
   return errorSet;
-}
-
-function isSameDay(first: Date | null, second: Date | null) {
-  if (!first || !second) return first === second;
-  return first.toDateString() === second.toDateString();
 }
 
 function isSameStringArray(first: string[], second: string[]) {
@@ -91,7 +82,7 @@ function isSameVotingDeadlineState(
   }
 
   return (
-    isSameDay(current.votingDeadline, initial.votingDeadline) &&
+    current.votingDeadline === initial.votingDeadline &&
     current.votingDeadlineTime === initial.votingDeadlineTime
   );
 }
@@ -104,8 +95,8 @@ export function hasCreateEventUnsavedChanges(
     formData.eventType !== initialFormData.eventType ||
     formData.title !== initialFormData.title ||
     formData.description !== initialFormData.description ||
-    !isSameDay(formData.startDate, initialFormData.startDate) ||
-    !isSameDay(formData.endDate, initialFormData.endDate) ||
+    formData.startDate !== initialFormData.startDate ||
+    formData.endDate !== initialFormData.endDate ||
     !isSameStringArray(formData.weekdays, initialFormData.weekdays) ||
     formData.startTime !== initialFormData.startTime ||
     formData.endTime !== initialFormData.endTime ||

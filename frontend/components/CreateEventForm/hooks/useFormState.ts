@@ -8,8 +8,9 @@ import {
   DEFAULT_START_TIME,
   DEFAULT_WEEKDAYS,
 } from "../types";
-import { getTodayInTimeZone, withSyncedVotingDeadline } from "./utils";
+import { withSyncedVotingDeadline } from "./utils";
 import { resolveDefaultTimeZone } from "@/lib/time";
+import { todayInZone } from "@/lib/calendarDay";
 import {
   DEFAULT_GRANULARITY,
   DEFAULT_SHARE_VOTE_TO_CHAT,
@@ -18,14 +19,14 @@ import {
 
 function getInitialFormData(): CreateEventFormData {
   const timeZone = resolveDefaultTimeZone();
-  const today = getTodayInTimeZone(timeZone);
+  const today = todayInZone(timeZone);
 
   return withSyncedVotingDeadline({
     eventType: DEFAULT_EVENT_TYPE,
     title: "",
     description: "",
     startDate: today,
-    endDate: new Date(today),
+    endDate: today,
     weekdays: [...DEFAULT_WEEKDAYS],
     startTime: DEFAULT_START_TIME,
     endTime: DEFAULT_END_TIME,
@@ -45,12 +46,7 @@ function getInitialFormData(): CreateEventFormData {
 function cloneFormData(formData: CreateEventFormData): CreateEventFormData {
   return {
     ...formData,
-    startDate: formData.startDate ? new Date(formData.startDate) : null,
-    endDate: formData.endDate ? new Date(formData.endDate) : null,
     weekdays: [...formData.weekdays],
-    votingDeadline: formData.votingDeadline
-      ? new Date(formData.votingDeadline)
-      : null,
     selectedLineUserIds: [...formData.selectedLineUserIds],
   };
 }

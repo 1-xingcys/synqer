@@ -1,3 +1,5 @@
+import type { CalendarDay } from "@/lib/calendarDay";
+import { wallClockToDate, type WallClock } from "@/lib/wallClock";
 import { formatDateTimeInZone } from "@/lib/time";
 
 export const VOTING_DEADLINE_ERROR = {
@@ -9,39 +11,19 @@ export type VotingDeadlineError =
 
 interface ValidateVotingDeadlineInput {
   enabled: boolean;
-  date: Date | null;
+  date: CalendarDay | null;
   time: string | null;
 }
 
 /**
- * Combine a calendar date and HH:mm string into a naive wall-clock Date,
- * encoding the picked day + time into the UTC fields. The event's time zone
- * (event.timeZone) resolves this to a real instant when needed.
- */
-export function combineVotingDeadline(date: Date, time: string): Date {
-  const [hours, minutes] = time.split(":").map(Number);
-  return new Date(
-    Date.UTC(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-      hours,
-      minutes,
-      0,
-      0,
-    ),
-  );
-}
-
-/**
- * Inverse of {@link combineVotingDeadline}: the stored value carries the picked
- * wall-clock digits in its UTC fields, so it must be read back in UTC. Reading
- * it in the viewer's zone shifts the deadline by their UTC offset.
+ * The stored value carries the picked wall-clock digits in its UTC fields, so it
+ * must be read back in UTC. Reading it in the viewer's zone shifts the deadline
+ * by their UTC offset. See `calendarDayToWallClock` for the inverse.
  */
 export function formatVotingDeadlineWallClock(
-  votingDeadline: string | Date,
+  votingDeadline: WallClock,
 ): string {
-  return formatDateTimeInZone(new Date(votingDeadline), "UTC");
+  return formatDateTimeInZone(wallClockToDate(votingDeadline), "UTC");
 }
 
 /**

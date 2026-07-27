@@ -79,6 +79,26 @@ export default tseslint.config(
 
       // Tailwind CSS rules
       '@next/next/no-html-link-for-pages': 'off', // we use the next-intl Link
+
+      // Time handling: date-fns formats and reads a Date's LOCAL fields, which
+      // silently shifts this app's naive wall-clock values (candidate days,
+      // votingDeadline, slot axisDate) by the viewer's UTC offset. Everything
+      // date-related goes through lib/time.ts or lib/calendarDay.ts, which are
+      // explicit about the zone they read in. react-day-picker still uses
+      // date-fns internally; that is its business, not ours.
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'date-fns',
+              message:
+                'date-fns reads local fields. Use lib/time.ts (instants, zone conversion) or lib/calendarDay.ts (calendar days) instead.',
+            },
+          ],
+          patterns: ['date-fns/*'],
+        },
+      ],
     },
   },
   {

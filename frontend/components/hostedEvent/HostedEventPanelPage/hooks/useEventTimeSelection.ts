@@ -1,4 +1,5 @@
 "use client";
+import { axisDateToCalendarDay } from "@/lib/calendarDay";
 
 import { useMemo } from "react";
 import { StagedConfirmation } from "@/types/event";
@@ -33,12 +34,12 @@ function getSlotDateKey(slot: EventSlot): string | null {
     return slot.axisWeekday;
   }
 
-  if (!slot.axisDate) {
+  const axisKey = axisDateToCalendarDay(slot.axisDate);
+  if (!axisKey) {
     warnInvalidSlot(slot.id, "missing axisDate");
-    return null;
   }
 
-  return new Date(slot.axisDate).toISOString().split("T")[0];
+  return axisKey;
 }
 
 function sortSlots(slots: EventSlot[]) {
@@ -67,9 +68,9 @@ function sortSlots(slots: EventSlot[]) {
       return left.startMinute - right.startMinute;
     }
 
-    const leftDate = new Date(left.axisDate).getTime();
-    const rightDate = new Date(right.axisDate).getTime();
-    if (leftDate !== rightDate) return leftDate - rightDate;
+    const leftDay = axisDateToCalendarDay(left.axisDate) ?? "";
+    const rightDay = axisDateToCalendarDay(right.axisDate) ?? "";
+    if (leftDay !== rightDay) return leftDay.localeCompare(rightDay);
     return left.startMinute - right.startMinute;
   });
 }

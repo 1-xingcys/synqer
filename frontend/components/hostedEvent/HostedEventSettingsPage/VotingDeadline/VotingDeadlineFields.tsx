@@ -2,6 +2,7 @@
 
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/eventCommon/DatePicker";
+import type { CalendarDay } from "@/lib/calendarDay";
 import { TimePicker } from "@/components/eventCommon/TimePicker";
 import { cn } from "@/lib/utils";
 
@@ -9,7 +10,7 @@ interface VotingDeadlineFieldsProps {
   /** Expanded state driven by the toggle */
   enabled: boolean;
   /** Voting deadline date */
-  date: Date | null;
+  date: CalendarDay | null;
   /** Voting deadline time (HH:MM format), null when not picked */
   time: string | null;
   dateLabel: string;
@@ -17,7 +18,7 @@ interface VotingDeadlineFieldsProps {
   datePlaceholder: string;
   timePlaceholder: string;
   disabled?: boolean;
-  onDateChange: (date: Date | null) => void;
+  onDateChange: (day: CalendarDay | null) => void;
   onTimeChange: (time: string) => void;
 }
 

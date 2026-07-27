@@ -1,4 +1,5 @@
 import type { EventType, VoteMode, Weekday } from "@/types/event";
+import type { CalendarDay } from "@/lib/calendarDay";
 import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
 
 export const TITLE_MAX_LENGTH = 50;
@@ -23,8 +24,8 @@ export interface CreateEventFormData {
   eventType: EventType;
   title: string;
   description: string;
-  startDate: Date | null;
-  endDate: Date | null;
+  startDate: CalendarDay | null;
+  endDate: CalendarDay | null;
   weekdays: Weekday[];
   startTime: string;
   endTime: string;
@@ -39,7 +40,7 @@ export interface CreateEventFormData {
 
   // Voting deadline fields
   votingDeadlineEnabled: boolean;
-  votingDeadline: Date | null;
+  votingDeadline: CalendarDay | null;
   votingDeadlineTime: string | null;
   /**
    * Set once the host edits the deadline by hand, which stops it from

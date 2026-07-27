@@ -1,12 +1,14 @@
 import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
-import { parseCalendarDayValue, zonedWallClockToInstant } from "@/lib/time";
+import { parseCalendarDayValue } from "@/lib/time";
+import { calendarDayMinuteToInstant } from "@/lib/wallClock";
+import { axisDateToCalendarDay } from "@/lib/calendarDay";
 import { TimeSlot, Vote, CalendarEvent, GridAxisColumn } from "./types";
 
 function warnInvalidSlot(slot: TimeSlot, reason: string) {
   console.warn(`[timeGrid] Skip invalid slot ${slot.id}: ${reason}`);
 }
 
-// Map app locale to date-fns locale string
+// Map app locale to an Intl locale string
 const getDateLocale = (locale: string): string => {
   const localeMap: Record<string, string> = {
     "zh-TW": "zh-TW",
@@ -91,12 +93,12 @@ export const getSlotAxisKey = (slot: TimeSlot): string | null => {
     return slot.axisWeekday;
   }
 
-  if (!slot.axisDate) {
+  const axisKey = axisDateToCalendarDay(slot.axisDate);
+  if (!axisKey) {
     warnInvalidSlot(slot, "missing axisDate");
-    return null;
   }
 
-  return slot.axisDate.split("T")[0];
+  return axisKey;
 };
 
 export const sortAxisKeys = (
@@ -167,24 +169,25 @@ export const mapCalendarEventsToSlots = (
   const eventMap = new Map<string, CalendarEvent[]>();
 
   for (const slot of slots) {
-    if (slot.axisType !== "DATE" || !slot.axisDate) {
+    if (slot.axisType !== "DATE") {
       continue;
     }
 
-    // Convert the slot's wall-clock (carried in UTC fields) to a real instant
-    // using the event's time zone, mirroring the backend conflict check so the
-    // overlay lines up with the highlighted conflict slots. Using the browser's
-    // local zone here would skew the mapping whenever it differs from the event
-    // time zone (e.g. a Tokyo event viewed from a Taipei browser).
-    const wallStart = new Date(slot.axisDate);
-    wallStart.setUTCHours(0, 0, 0, 0);
-    wallStart.setUTCMinutes(slot.startMinute);
-    const slotStart = zonedWallClockToInstant(wallStart, timeZone);
+    const day = axisDateToCalendarDay(slot.axisDate);
+    if (!day) {
+      continue;
+    }
 
-    const wallEnd = new Date(slot.axisDate);
-    wallEnd.setUTCHours(0, 0, 0, 0);
-    wallEnd.setUTCMinutes(slot.endMinute);
-    const slotEnd = zonedWallClockToInstant(wallEnd, timeZone);
+    // Resolve the slot against the event's time zone, mirroring the backend
+    // conflict check so the overlay lines up with the highlighted conflict
+    // slots. The browser's local zone would skew the mapping whenever it
+    // differs (e.g. a Tokyo event viewed from a Taipei browser).
+    const slotStart = calendarDayMinuteToInstant(
+      day,
+      slot.startMinute,
+      timeZone,
+    );
+    const slotEnd = calendarDayMinuteToInstant(day, slot.endMinute, timeZone);
 
     const overlappingEvents: CalendarEvent[] = [];
 

@@ -1,4 +1,5 @@
 import type { operations } from "@/generated/openapi";
+import { wallClockToCalendarDay } from "@/lib/calendarDay";
 import {
   EventCapabilities,
   EventSchedule,
@@ -36,6 +37,17 @@ export type NormalizedEventLike<T extends EventLike> = Omit<
   type: EventType;
   schedule: EventSchedule;
 };
+
+/**
+ * Candidate days arrive as naive UTC-midnight timestamps
+ * ("2026-07-30T00:00:00.000Z"). Convert them to calendar days here, at the one
+ * place every response passes through, so no downstream reader has to decide
+ * whether that string is an instant or a day — the ambiguity that repeatedly
+ * shifted these dates onto the wrong day.
+ */
+function toCandidateDay(value: string): string {
+  return wallClockToCalendarDay(new Date(value));
+}
 
 function requireField<T>(
   value: T | null | undefined,
@@ -80,15 +92,11 @@ function buildSchedule(event: EventLike): EventSchedule {
 
   return {
     kind: "ONE_TIME",
-    startDate: requireField(
-      event.schedule.startDate,
-      "startDate",
-      event.schedule.kind,
+    startDate: toCandidateDay(
+      requireField(event.schedule.startDate, "startDate", event.schedule.kind),
     ),
-    endDate: requireField(
-      event.schedule.endDate,
-      "endDate",
-      event.schedule.kind,
+    endDate: toCandidateDay(
+      requireField(event.schedule.endDate, "endDate", event.schedule.kind),
     ),
     startMinuteOfDay: requireField(
       event.schedule.startMinuteOfDay,

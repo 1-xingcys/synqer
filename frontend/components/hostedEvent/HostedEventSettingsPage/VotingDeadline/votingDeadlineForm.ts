@@ -1,14 +1,14 @@
 import {
-  combineVotingDeadline,
   validateVotingDeadline,
   type VotingDeadlineError,
 } from "@/lib/votingDeadline";
-import { formatMinutesToTime } from "@/lib/utils";
+import { calendarDayToWallClock, type CalendarDay } from "@/lib/calendarDay";
+import { wallClockDay, wallClockTime } from "@/lib/wallClock";
 import { EventStatus } from "@/types/event";
 
 export interface VotingDeadlineFormData {
   deadlineEnabled: boolean;
-  deadlineDate: Date | null;
+  deadlineDate: CalendarDay | null;
   deadlineTime: string | null;
 }
 
@@ -17,16 +17,6 @@ export const EMPTY_VOTING_DEADLINE_FORM_DATA: VotingDeadlineFormData = {
   deadlineDate: null,
   deadlineTime: null,
 };
-
-function areSameCalendarDay(left: Date | null, right: Date | null): boolean {
-  if (!left || !right) return left === right;
-
-  return (
-    left.getFullYear() === right.getFullYear() &&
-    left.getMonth() === right.getMonth() &&
-    left.getDate() === right.getDate()
-  );
-}
 
 export function areVotingDeadlineFormsEqual(
   left: VotingDeadlineFormData,
@@ -42,7 +32,7 @@ export function areVotingDeadlineFormsEqual(
 
   return (
     left.deadlineTime === right.deadlineTime &&
-    areSameCalendarDay(left.deadlineDate, right.deadlineDate)
+    left.deadlineDate === right.deadlineDate
   );
 }
 
@@ -50,21 +40,8 @@ export function buildVotingDeadlineFormData(
   votingDeadline?: string | null,
 ): VotingDeadlineFormData {
   if (votingDeadline) {
-    // votingDeadline is stored naive: UTC fields carry the wall-clock digits
-    // for the event's time zone. Read those digits via getUTC* — local
-    // getters would apply the runner's local offset and shift the day/time.
-    const deadline = new Date(votingDeadline);
-    const time = formatMinutesToTime(
-      deadline.getUTCHours() * 60 + deadline.getUTCMinutes(),
-    );
-    // Build a local-midnight Date whose local Y/M/D match the naive UTC
-    // digits, matching the date-picker contract used elsewhere (see
-    // combineVotingDeadline in lib/votingDeadline.ts).
-    const deadlineDate = new Date(
-      deadline.getUTCFullYear(),
-      deadline.getUTCMonth(),
-      deadline.getUTCDate(),
-    );
+    const time = wallClockTime(votingDeadline);
+    const deadlineDate = wallClockDay(votingDeadline);
 
     return {
       deadlineEnabled: true,
@@ -124,10 +101,7 @@ export function toVotingDeadlinePayload(
   }
 
   if (formData.deadlineDate && formData.deadlineTime) {
-    return combineVotingDeadline(
-      formData.deadlineDate,
-      formData.deadlineTime,
-    ).toISOString();
+    return calendarDayToWallClock(formData.deadlineDate, formData.deadlineTime);
   }
 
   return undefined;

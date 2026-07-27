@@ -3,6 +3,7 @@
 import { formatMinutesToTime } from "@/lib/utils";
 import { formatWeekdayLabel, formatWeekdayLabelFromDate } from "@/lib/weekdays";
 import { type EventSlotAxisType, type Weekday } from "@/types/event";
+import { wallClockToDate, type WallClock } from "@/lib/wallClock";
 
 export type LocalizedTimeRangeFormatOptions = {
   timeZone?: string;
@@ -157,14 +158,14 @@ function formatLocalizedWeekdayTimeRangeLabel(
 // Format a concrete datetime range, including both dates when it crosses days.
 export function formatLocalizedDateTimeRangeLabel(
   range: {
-    startTime: string;
-    endTime: string;
+    startTime: WallClock;
+    endTime: WallClock;
   },
   locale: string,
   options: LocalizedTimeRangeFormatOptions = {},
 ) {
-  const startDate = new Date(range.startTime);
-  const endDate = new Date(range.endTime);
+  const startDate = wallClockToDate(range.startTime);
+  const endDate = wallClockToDate(range.endTime);
   const startDateLabel = formatLocalizedDateLabelFromDate(
     startDate,
     locale,

@@ -18,7 +18,7 @@ import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
 import { ValidationError } from "./hooks/useFormValidation";
 import { VotingDeadlineFields } from "./VotingDeadlineFields";
-import { getTodayInTimeZone } from "./hooks/utils";
+import { todayInZone } from "@/lib/calendarDay";
 import { cn } from "@/lib/utils";
 import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
 
@@ -44,7 +44,7 @@ export function ConfigurationSection() {
 
   // Same source as the form validation, so the picker never offers a day the
   // validator rejects (or hides one it would accept) in a foreign time zone.
-  const today = getTodayInTimeZone(formData.timeZone);
+  const today = todayInZone(formData.timeZone);
   const orderedWeekdays = getOrderedWeekdays(locale);
   const isRecurring = formData.eventType === "RECURRING";
 

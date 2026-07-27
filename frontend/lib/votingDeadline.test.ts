@@ -1,19 +1,12 @@
 import { describe, expect, it } from "@jest/globals";
 import {
-  combineVotingDeadline,
   formatVotingDeadlineWallClock,
   validateVotingDeadline,
   VOTING_DEADLINE_ERROR,
 } from "@/lib/votingDeadline";
+import { calendarDayToWallClock } from "@/lib/calendarDay";
 
 describe("votingDeadline", () => {
-  it("encodes the picked wall-clock into UTC fields (naive)", () => {
-    // 2026-07-13 as the local calendar date returned by the date picker.
-    const picked = new Date(2026, 6, 13); // local 7/13 00:00
-    const result = combineVotingDeadline(picked, "18:00");
-    expect(result.toISOString()).toBe("2026-07-13T18:00:00.000Z");
-  });
-
   it("returns required when enabled without a date", () => {
     expect(
       validateVotingDeadline({
@@ -28,7 +21,7 @@ describe("votingDeadline", () => {
     expect(
       validateVotingDeadline({
         enabled: true,
-        date: new Date(2026, 3, 10),
+        date: "2026-04-10",
         time: null,
       }),
     ).toBe(VOTING_DEADLINE_ERROR.REQUIRED);
@@ -40,7 +33,7 @@ describe("votingDeadline", () => {
     expect(
       validateVotingDeadline({
         enabled: true,
-        date: new Date(2020, 0, 1),
+        date: "2020-01-01",
         time: "09:00",
       }),
     ).toBeNull();
@@ -51,7 +44,7 @@ describe("votingDeadline", () => {
     expect(
       validateVotingDeadline({
         enabled: true,
-        date: new Date(2099, 11, 31),
+        date: "2099-12-31",
         time: "23:45",
       }),
     ).toBeNull();
@@ -80,8 +73,8 @@ describe("formatVotingDeadlineWallClock", () => {
     );
   });
 
-  it("round-trips a deadline produced by combineVotingDeadline", () => {
-    const picked = combineVotingDeadline(new Date(2026, 6, 13), "18:00");
+  it("round-trips a deadline produced by calendarDayToWallClock", () => {
+    const picked = calendarDayToWallClock("2026-07-13", "18:00");
     expect(formatVotingDeadlineWallClock(picked)).toBe("2026/07/13 18:00");
   });
 });

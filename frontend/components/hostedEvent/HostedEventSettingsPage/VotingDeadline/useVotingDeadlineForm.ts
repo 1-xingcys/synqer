@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { apiFetchJson } from "@/lib/apiClient";
 import type { operations } from "@/generated/openapi";
+import type { CalendarDay } from "@/lib/calendarDay";
 import {
   EMPTY_VOTING_DEADLINE_FORM_DATA,
   areVotingDeadlineFormsEqual,
@@ -68,8 +69,8 @@ export function useVotingDeadlineForm() {
     setFormData((prev) => ({ ...prev, deadlineEnabled: enabled }));
   }, []);
 
-  const setDate = useCallback((date: Date | null) => {
-    setFormData((prev) => ({ ...prev, deadlineDate: date }));
+  const setDate = useCallback((day: CalendarDay | null) => {
+    setFormData((prev) => ({ ...prev, deadlineDate: day }));
   }, []);
 
   const setTime = useCallback((time: string) => {
