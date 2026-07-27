@@ -1,4 +1,5 @@
 import { type EventSlotAxisType, type Weekday } from "@/types/event";
+import { axisDateToCalendarDay } from "@/lib/calendarDay";
 import { CANONICAL_WEEKDAY_ORDER } from "@/lib/weekdays";
 
 export type HostedResultSlot = {
@@ -55,11 +56,7 @@ function getSlotAxisKey(slot: HostedResultSlot): string | null {
     return slot.axisWeekday ?? null;
   }
 
-  if (!slot.axisDate) {
-    return null;
-  }
-
-  return new Date(slot.axisDate).toISOString().split("T")[0];
+  return axisDateToCalendarDay(slot.axisDate);
 }
 
 function sortSlots(slots: HostedResultSlot[]) {

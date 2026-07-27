@@ -1,4 +1,5 @@
 "use client";
+import { axisDateToCalendarDay } from "@/lib/calendarDay";
 
 import { useMemo } from "react";
 import type { HostedResultSlot } from "@/components/hostedEvent/resultSummary";
@@ -8,14 +9,6 @@ import type { EventSlot } from "../types";
 interface UseConfirmedHostedResultSlotsOptions {
   slots: EventSlot[];
   confirmedSlotIds?: string[];
-}
-
-function normalizeAxisDate(axisDate?: string | Date | null): string | null {
-  if (!axisDate) {
-    return null;
-  }
-
-  return new Date(axisDate).toISOString().split("T")[0];
 }
 
 function sortHostedResultSlots(
@@ -64,7 +57,7 @@ export function useConfirmedHostedResultSlots({
       .map((slot) => ({
         id: slot.id,
         axisType: slot.axisType,
-        axisDate: normalizeAxisDate(slot.axisDate),
+        axisDate: axisDateToCalendarDay(slot.axisDate),
         axisWeekday: slot.axisWeekday,
         startMinute: slot.startMinute,
         endMinute: slot.endMinute,

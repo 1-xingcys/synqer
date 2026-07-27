@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import {
   addCalendarDays,
+  axisDateToCalendarDay,
   calendarDayToWallClock,
   todayInZone,
   wallClockToCalendarDay,
@@ -51,6 +52,35 @@ describe("wallClockToCalendarDay", () => {
     expect(wallClockToCalendarDay(new Date("2026-07-14T02:00:00Z"))).toBe(
       "2026-07-14",
     );
+  });
+});
+
+describe("axisDateToCalendarDay", () => {
+  // Slot axis dates are naive wall-clock values: the UTC fields carry the
+  // digits. Reading them any other way drifts a day at the edges.
+  it("reads the naive digits regardless of the runner's zone", () => {
+    expect(axisDateToCalendarDay("2026-07-14T00:00:00.000Z")).toBe(
+      "2026-07-14",
+    );
+    expect(axisDateToCalendarDay("2026-07-14T23:00:00.000Z")).toBe(
+      "2026-07-14",
+    );
+  });
+
+  it("accepts a date-only value unchanged", () => {
+    expect(axisDateToCalendarDay("2026-07-14")).toBe("2026-07-14");
+  });
+
+  it("accepts a Date as well as a string", () => {
+    expect(axisDateToCalendarDay(new Date("2026-07-14T00:00:00.000Z"))).toBe(
+      "2026-07-14",
+    );
+  });
+
+  it("returns null for missing values", () => {
+    expect(axisDateToCalendarDay(null)).toBeNull();
+    expect(axisDateToCalendarDay(undefined)).toBeNull();
+    expect(axisDateToCalendarDay("")).toBeNull();
   });
 });
 

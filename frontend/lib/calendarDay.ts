@@ -40,6 +40,25 @@ export function wallClockToCalendarDay(wallClock: Date): CalendarDay {
   return `${wallClock.getUTCFullYear()}-${pad(wallClock.getUTCMonth() + 1)}-${pad(wallClock.getUTCDate())}`;
 }
 
+/**
+ * Read a slot's `axisDate` as the calendar day it stands for, or null when the
+ * slot has none.
+ *
+ * `axisDate` is a naive wall-clock value carrying its digits in the UTC fields,
+ * and reaches us as either a string or a Date depending on the caller. Four
+ * separate open-coded versions of this used to exist, one of which assumed a
+ * string and threw on a Date.
+ */
+export function axisDateToCalendarDay(
+  axisDate?: string | Date | null,
+): CalendarDay | null {
+  if (!axisDate) {
+    return null;
+  }
+
+  return wallClockToCalendarDay(new Date(axisDate));
+}
+
 /** Shift a calendar day by whole days, rolling over months and years. */
 export function addCalendarDays(day: CalendarDay, days: number): CalendarDay {
   const [year, month, date] = day.split("-").map(Number);

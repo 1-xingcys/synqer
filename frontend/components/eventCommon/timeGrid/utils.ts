@@ -1,5 +1,6 @@
 import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
 import { parseCalendarDayValue, zonedWallClockToInstant } from "@/lib/time";
+import { axisDateToCalendarDay } from "@/lib/calendarDay";
 import { TimeSlot, Vote, CalendarEvent, GridAxisColumn } from "./types";
 
 function warnInvalidSlot(slot: TimeSlot, reason: string) {
@@ -91,12 +92,12 @@ export const getSlotAxisKey = (slot: TimeSlot): string | null => {
     return slot.axisWeekday;
   }
 
-  if (!slot.axisDate) {
+  const axisKey = axisDateToCalendarDay(slot.axisDate);
+  if (!axisKey) {
     warnInvalidSlot(slot, "missing axisDate");
-    return null;
   }
 
-  return slot.axisDate.split("T")[0];
+  return axisKey;
 };
 
 export const sortAxisKeys = (
