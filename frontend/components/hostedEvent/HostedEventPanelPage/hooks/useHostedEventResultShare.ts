@@ -6,18 +6,18 @@ import { useLiff } from "@/hooks/useLiff";
 import {
   buildHostedEventResultTextFromSummary,
   type HostedEventResultTextCopy,
-} from "@/components/hostedEvent/hostedEventResultText";
+} from "../hostedEventResultText";
 import {
   buildHostedEventResultSummary,
   type HostedResultExpectedParticipant,
   type HostedResultSlot,
   type HostedResultVote,
-} from "@/components/hostedEvent/resultSummary";
+} from "@/lib/hostedEventResultSummary";
 import {
   canShareHostedEventResultText,
   shareHostedEventResultText,
   TextShareResult,
-} from "@/components/hostedEvent/shareHostedEventResultText";
+} from "../shareHostedEventResultText";
 import { shareHostedEventResultFlexMessage } from "@/lib/line-flex-message/hostedEventResultFlexMessage";
 import { ShareResult } from "@/lib/line-flex-message/shareEventFlexMessage";
 

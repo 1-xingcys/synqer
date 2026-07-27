@@ -6,7 +6,7 @@ import { Share2 } from "lucide-react";
 import {
   type HostedResultExpectedParticipant,
   type HostedResultVote,
-} from "@/components/hostedEvent/resultSummary";
+} from "@/lib/hostedEventResultSummary";
 import {
   useConfirmedHostedResultSlots,
   useHostedEventResultShare,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { buildHostedEventResultTextFromSummary } from "@/components/hostedEvent/hostedEventResultText";
+import { buildHostedEventResultTextFromSummary } from "@/components/hostedEvent/HostedEventPanelPage/hostedEventResultText";
 import { calendarDay } from "@/lib/time";
 
 describe("hostedEventResultText", () => {

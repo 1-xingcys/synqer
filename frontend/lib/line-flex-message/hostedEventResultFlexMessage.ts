@@ -1,5 +1,5 @@
 import { formatLocalizedRangeLabel } from "@/lib/event-time";
-import { type HostedEventResultSummary } from "@/components/hostedEvent/resultSummary";
+import { type HostedEventResultSummary } from "@/lib/hostedEventResultSummary";
 import { getLiff, getLiffId } from "@/lib/liff";
 import { eventDetailPath } from "@/lib/eventRoutes";
 import { ShareResult } from "./shareEventFlexMessage";
