@@ -9,22 +9,23 @@ export type LocalizedTimeRangeFormatOptions = {
   weekdayStyle?: "narrow" | "short";
 };
 
-// Parse supported string/date inputs into a Date while preserving UTC-only dates.
-function parseDateInput(
-  dateInput: string | Date,
+/**
+ * Resolve a date input into the instant to render *and* the zone to render it in.
+ *
+ * A value carrying a "T" is a real instant, so it stays in the caller's zone. A
+ * date-only value ("2026-07-30") is a naive calendar day with no zone of its
+ * own: anchoring it in one zone and rendering it in another shifts it off the
+ * stored day whenever the two disagree, so it is pinned to UTC on both sides.
+ */
+function resolveDateInput(
+  dateInput: string,
   options: LocalizedTimeRangeFormatOptions = {},
-) {
-  if (dateInput instanceof Date) {
-    return dateInput;
-  }
-
+): { date: Date; timeZone?: string } {
   if (dateInput.includes("T")) {
-    return new Date(dateInput);
+    return { date: new Date(dateInput), timeZone: options.timeZone };
   }
 
-  return options.timeZone === "UTC"
-    ? new Date(`${dateInput}T00:00:00Z`)
-    : new Date(`${dateInput}T00:00:00`);
+  return { date: new Date(`${dateInput}T00:00:00Z`), timeZone: "UTC" };
 }
 
 // Limit locale handling to the product's supported date formatting variants.
@@ -98,8 +99,11 @@ function formatLocalizedDateLabel(
   locale: string,
   options: LocalizedTimeRangeFormatOptions = {},
 ) {
-  const date = parseDateInput(dateString, options);
-  return formatLocalizedDateLabelFromDate(date, locale, options);
+  const { date, timeZone } = resolveDateInput(dateString, options);
+  return formatLocalizedDateLabelFromDate(date, locale, {
+    ...options,
+    timeZone,
+  });
 }
 
 // Format a date span, collapsing same-day ranges to a single label.
