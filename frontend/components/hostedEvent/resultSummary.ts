@@ -1,5 +1,10 @@
 import { type EventSlotAxisType, type Weekday } from "@/types/event";
-import { axisDateToCalendarDay } from "@/lib/calendarDay";
+import {
+  axisSpanKey,
+  axisSpanOfSlot,
+  extendAxisSpan,
+  type AxisSpan,
+} from "@/lib/axisSpan";
 import { CANONICAL_WEEKDAY_ORDER } from "@/lib/weekdays";
 
 export type HostedResultSlot = {
@@ -12,9 +17,7 @@ export type HostedResultSlot = {
 };
 
 type MergedConfirmedRange = {
-  axisType: EventSlotAxisType;
-  startDate: string;
-  endDate: string;
+  axis: AxisSpan;
   startMinute: number;
   endMinute: number;
   slotIds: string[];
@@ -37,9 +40,7 @@ export type HostedResultSummaryParticipant = {
 };
 
 export type HostedResultSummaryRange = {
-  axisType: EventSlotAxisType;
-  startDate: string;
-  endDate: string;
+  axis: AxisSpan;
   startMinute: number;
   endMinute: number;
   availableCount: number;
@@ -50,14 +51,6 @@ export type HostedEventResultSummary = {
   totalExpected: number;
   ranges: HostedResultSummaryRange[];
 };
-
-function getSlotAxisKey(slot: HostedResultSlot): string | null {
-  if (slot.axisType === "WEEKDAY") {
-    return slot.axisWeekday ?? null;
-  }
-
-  return axisDateToCalendarDay(slot.axisDate);
-}
 
 function sortSlots(slots: HostedResultSlot[]) {
   return [...slots].sort((left, right) => {
@@ -77,10 +70,14 @@ function sortSlots(slots: HostedResultSlot[]) {
       return left.startMinute - right.startMinute;
     }
 
-    const leftKey = getSlotAxisKey(left);
-    const rightKey = getSlotAxisKey(right);
-    if (leftKey && rightKey && leftKey !== rightKey) {
-      return leftKey.localeCompare(rightKey);
+    const leftSpan = axisSpanOfSlot(left);
+    const rightSpan = axisSpanOfSlot(right);
+    if (leftSpan && rightSpan) {
+      const leftKey = axisSpanKey(leftSpan);
+      const rightKey = axisSpanKey(rightSpan);
+      if (leftKey !== rightKey) {
+        return leftKey.localeCompare(rightKey);
+      }
     }
 
     return left.startMinute - right.startMinute;
@@ -95,25 +92,21 @@ function mergeConfirmedSlots(
   const merged: MergedConfirmedRange[] = [];
 
   sortSlots(slots).forEach((slot) => {
-    const current = merged[merged.length - 1];
-    const axisKey = getSlotAxisKey(slot);
-    if (!axisKey) return;
+    const span = axisSpanOfSlot(slot);
+    if (!span) return;
 
-    if (
-      current &&
-      current.axisType === slot.axisType &&
-      current.endDate === axisKey &&
-      current.endMinute === slot.startMinute
-    ) {
+    const current = merged[merged.length - 1];
+    const extended = current && extendAxisSpan(current.axis, span);
+
+    if (current && extended && current.endMinute === slot.startMinute) {
+      current.axis = extended;
       current.endMinute = slot.endMinute;
       current.slotIds.push(slot.id);
       return;
     }
 
     merged.push({
-      axisType: slot.axisType,
-      startDate: axisKey,
-      endDate: axisKey,
+      axis: span,
       startMinute: slot.startMinute,
       endMinute: slot.endMinute,
       slotIds: [slot.id],
@@ -214,9 +207,7 @@ export function buildHostedEventResultSummary(opts: {
     );
 
     return {
-      axisType: range.axisType,
-      startDate: range.startDate,
-      endDate: range.endDate,
+      axis: range.axis,
       startMinute: range.startMinute,
       endMinute: range.endMinute,
       availableCount: availableIndexes.size,

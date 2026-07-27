@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import { buildHostedEventResultTextFromSummary } from "@/components/hostedEvent/hostedEventResultText";
+import { calendarDay } from "@/lib/calendarDay";
 
 describe("hostedEventResultText", () => {
   it("formats recurring confirmed ranges with the shared confirmed format", () => {
@@ -19,9 +20,7 @@ describe("hostedEventResultText", () => {
         totalExpected: 3,
         ranges: [
           {
-            axisType: "WEEKDAY",
-            startDate: "MONDAY",
-            endDate: "MONDAY",
+            axis: { axisType: "WEEKDAY", weekday: "MONDAY" },
             startMinute: 600,
             endMinute: 720,
             availableCount: 2,
@@ -53,9 +52,11 @@ describe("hostedEventResultText", () => {
         totalExpected: 1,
         ranges: [
           {
-            axisType: "DATE",
-            startDate: "2026-06-13",
-            endDate: "2026-06-14",
+            axis: {
+              axisType: "DATE",
+              startDay: calendarDay("2026-06-13"),
+              endDay: calendarDay("2026-06-14"),
+            },
             startMinute: 1230,
             endMinute: 1410,
             availableCount: 1,

@@ -97,9 +97,7 @@ function buildRangeSection(params: {
 }) {
   const slotLabel = formatLocalizedRangeLabel(
     {
-      axisType: params.range.axisType,
-      startDate: params.range.startDate,
-      endDate: params.range.endDate,
+      ...params.range.axis,
       startMinute: params.range.startMinute,
       endMinute: params.range.endMinute,
     },

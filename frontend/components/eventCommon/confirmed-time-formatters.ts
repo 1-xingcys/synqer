@@ -71,8 +71,7 @@ function formatWeekdayConfirmedSelection(
   return formatLocalizedRangeLabel(
     {
       axisType: "WEEKDAY",
-      startDate: selection.weekday,
-      endDate: selection.weekday,
+      weekday: selection.weekday,
       startMinute: selection.startMinute,
       endMinute: selection.endMinute,
     },

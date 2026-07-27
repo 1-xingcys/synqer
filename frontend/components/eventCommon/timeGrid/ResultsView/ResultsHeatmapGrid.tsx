@@ -15,6 +15,8 @@ import {
 import { formatMinutesToTime } from "@/lib/utils";
 import { Z_INDEX } from "@/lib/zIndex";
 import { formatAxisKeyLabel } from "@/lib/event-presentation";
+import type { AxisSpan } from "@/lib/axisSpan";
+import type { CalendarDay } from "@/lib/calendarDay";
 import {
   useResponsiveGrid,
   usePaginatedDates,
@@ -91,11 +93,6 @@ export function ResultsHeatmapGrid({
   const { slotsByDate, dates, columns, timeSlots } = useSlotGridModel({
     slots,
   });
-  const columnsByKey = useMemo(
-    () => new Map(columns.map((column) => [column.key, column])),
-    [columns],
-  );
-
   // Merged rows for granularity (using shared hook)
   const { mergedTimeRows } = useMergedTimeRowsModel({ timeSlots, granularity });
 
@@ -104,6 +101,15 @@ export function ResultsHeatmapGrid({
     dates,
     datesPerPage,
   });
+
+  // buildAxisColumns maps over `dates`, so the two stay 1:1 and index-aligned.
+  const paginatedColumns = useMemo(() => {
+    const byKey = new Map(columns.map((column) => [column.key, column]));
+    return paginatedDates.flatMap((dateKey) => {
+      const column = byKey.get(dateKey);
+      return column ? [column] : [];
+    });
+  }, [columns, paginatedDates]);
 
   const {
     getCellCount,
@@ -205,17 +211,25 @@ export function ResultsHeatmapGrid({
     [getCellSelectionState, paginatedDates, mergedTimeRows],
   );
 
-  // Format date for modal
-  const formatDateForModal = useCallback(
-    (axisKey: string) => {
-      const column = columnsByKey.get(axisKey);
-      return formatAxisKeyLabel(
-        axisKey,
-        column?.kind === "weekday" ? "WEEKDAY" : "DATE",
-        locale,
-      );
+  // Label a span's ends. The range carries its own axis, so the kind no longer
+  // has to be recovered by looking the start key up in the column map.
+  const formatSpanForModal = useCallback(
+    (axis: AxisSpan) => {
+      if (axis.axisType === "WEEKDAY") {
+        return formatAxisKeyLabel(axis, locale);
+      }
+
+      const label = (day: CalendarDay) =>
+        formatAxisKeyLabel(
+          { axisType: "DATE", startDay: day, endDay: day },
+          locale,
+        );
+
+      return axis.startDay === axis.endDay
+        ? label(axis.startDay)
+        : `${label(axis.startDay)} ~ ${label(axis.endDay)}`;
     },
-    [columnsByKey, locale],
+    [locale],
   );
 
   // Show modal with selection data
@@ -225,29 +239,16 @@ export function ResultsHeatmapGrid({
       const nonVoters = getUnavailableParticipantsForRange(range.cells);
       const slotIds = getSlotIdsFromRange(range.cells);
 
-      // Format date label
-      let dateLabel: string;
-      if (range.startDate === range.endDate) {
-        dateLabel = formatDateForModal(range.startDate);
-      } else {
-        dateLabel = `${formatDateForModal(range.startDate)} ~ ${formatDateForModal(range.endDate)}`;
-      }
-
       // Format time label
       const timeLabel = `${formatMinutesToTime(range.startTime)} - ${formatMinutesToTime(range.endTime)}`;
 
       setModalData({
-        dateLabel,
+        dateLabel: formatSpanForModal(range.axis),
         timeLabel,
         voters,
         nonVoters,
         rangeInfo: {
-          startDate: range.startDate,
-          endDate: range.endDate,
-          axisType:
-            columnsByKey.get(range.startDate)?.kind === "weekday"
-              ? "WEEKDAY"
-              : "DATE",
+          axis: range.axis,
           startTime: range.startTime,
           endTime: range.endTime,
           slotIds,
@@ -258,8 +259,7 @@ export function ResultsHeatmapGrid({
       getAvailableVotesForRange,
       getUnavailableParticipantsForRange,
       getSlotIdsFromRange,
-      formatDateForModal,
-      columnsByKey,
+      formatSpanForModal,
     ],
   );
 
@@ -277,7 +277,7 @@ export function ResultsHeatmapGrid({
   } = useResultsRangeSelection({
     gridRef,
     mergedTimeRows,
-    paginatedDates,
+    paginatedColumns,
     onRangeSelect: showModalForSelection,
   });
   const maxHeatmapCount =
@@ -336,9 +336,7 @@ export function ResultsHeatmapGrid({
         </div>
 
         <DateHeader
-          columns={columns.filter((column) =>
-            paginatedDates.includes(column.key),
-          )}
+          columns={paginatedColumns}
           selectable={false}
           firstTimeLabel={firstTimeLabel}
           isStickyActive={isStickyActive}
@@ -370,7 +368,8 @@ export function ResultsHeatmapGrid({
             >
               {mergedTimeRows.map((row, rowIndex) => (
                 <div key={rowIndex} className="flex">
-                  {paginatedDates.map((dateKey, dateIndex) => {
+                  {paginatedColumns.map((column, dateIndex) => {
+                    const dateKey = column.key;
                     const cellCount = getCellCount(rowIndex, dateKey, mode);
                     const colors = getHeatmapClasses(
                       cellCount,
@@ -446,7 +445,7 @@ export function ResultsHeatmapGrid({
                         data-row={rowIndex}
                         data-date={dateIndex}
                         onClick={() =>
-                          handleCellClick(dateKey, rowIndex, row.slotIndices)
+                          handleCellClick(column, rowIndex, row.slotIndices)
                         }
                         onMouseDown={(e) =>
                           handleMouseDown(rowIndex, dateIndex, e)

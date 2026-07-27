@@ -66,17 +66,40 @@ describe("event-presentation", () => {
     );
   });
 
-  it("formats weekday axis keys for recurring grids", () => {
-    expect(formatAxisKeyLabel("WEDNESDAY", "WEEKDAY", "en-US")).toBe("Wed");
-  });
+  describe("formatAxisKeyLabel", () => {
+    // Date spans are date-only calendar days, which parse as UTC midnight;
+    // reading them with local getters shifts them to the previous day for
+    // viewers west of UTC. Run under `TZ=America/New_York` to exercise that
+    // path — the label has to match the column header the user clicked in
+    // every zone.
+    it("labels a date span with its month and day", () => {
+      expect(
+        formatAxisKeyLabel(
+          {
+            axisType: "DATE",
+            startDay: calendarDay("2026-07-30"),
+            endDay: calendarDay("2026-07-30"),
+          },
+          "en-US",
+        ),
+      ).toBe("7/30");
+      expect(
+        formatAxisKeyLabel(
+          {
+            axisType: "DATE",
+            startDay: calendarDay("2026-01-01"),
+            endDay: calendarDay("2026-01-01"),
+          },
+          "en-US",
+        ),
+      ).toBe("1/1");
+    });
 
-  // Date axis keys are date-only calendar days, which parse as UTC midnight;
-  // reading them with local getters shifts them to the previous day for viewers
-  // west of UTC. Run under `TZ=America/New_York` to exercise that path — the
-  // label has to match the column header the user clicked in every zone.
-  it("keeps date axis keys on the stored calendar day", () => {
-    expect(formatAxisKeyLabel("2026-07-30", "DATE", "en-US")).toBe("7/30");
-    expect(formatAxisKeyLabel("2026-01-01", "DATE", "en-US")).toBe("1/1");
+    it("labels a weekday span with its weekday name", () => {
+      expect(
+        formatAxisKeyLabel({ axisType: "WEEKDAY", weekday: "MONDAY" }, "en-US"),
+      ).toBe("Mon");
+    });
   });
 
   describe("formatEventDateRangeLabel", () => {

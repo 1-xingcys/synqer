@@ -1,13 +1,11 @@
 import type { ReactNode } from "react";
-import { EventSlotAxisType } from "@/types/event";
+import type { AxisSpan } from "@/lib/axisSpan";
 import { TimeGranularity, TimeSlot, Vote, Participant } from "../types";
 
 export type ResultsAvailabilityMode = "available" | "unavailable";
 
 export interface SlotRangeInfo {
-  startDate: string;
-  endDate: string;
-  axisType: EventSlotAxisType;
+  axis: AxisSpan;
   startTime: number;
   endTime: number;
   slotIds: string[];

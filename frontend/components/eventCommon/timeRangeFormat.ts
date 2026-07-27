@@ -2,7 +2,8 @@
 
 import { formatMinutesToTime } from "@/lib/utils";
 import { formatWeekdayLabel, formatWeekdayLabelFromDate } from "@/lib/weekdays";
-import { type EventSlotAxisType, type Weekday } from "@/types/event";
+import { type Weekday } from "@/types/event";
+import type { AxisSpan } from "@/lib/axisSpan";
 import { wallClockToDate, type WallClock } from "@/lib/wallClock";
 import { calendarDay, calendarDayToDate } from "@/lib/calendarDay";
 
@@ -185,22 +186,18 @@ export function formatLocalizedDateTimeRangeLabel(
   return `${startDateLabel} - ${endDateLabel} ${timeLabel}`;
 }
 
-// Dispatch axis-based ranges to the matching shape-specific formatter.
+// Dispatch a range to the formatter matching its axis. The union narrows on
+// axisType, so the weekday payload can no longer reach the date formatter and
+// the `as Weekday` cast this used to need is gone.
 export function formatLocalizedRangeLabel(
-  range: {
-    axisType: EventSlotAxisType;
-    startDate: string;
-    endDate: string;
-    startMinute: number;
-    endMinute: number;
-  },
+  range: AxisSpan & { startMinute: number; endMinute: number },
   locale: string,
   options: LocalizedTimeRangeFormatOptions = {},
 ) {
-  if (range.axisType === "WEEKDAY" && range.startDate === range.endDate) {
+  if (range.axisType === "WEEKDAY") {
     return formatLocalizedWeekdayTimeRangeLabel(
       {
-        weekday: range.startDate as Weekday,
+        weekday: range.weekday,
         startMinute: range.startMinute,
         endMinute: range.endMinute,
       },
@@ -211,8 +208,8 @@ export function formatLocalizedRangeLabel(
 
   return formatLocalizedDateMinuteRangeLabel(
     {
-      startDate: range.startDate,
-      endDate: range.endDate,
+      startDate: range.startDay,
+      endDate: range.endDay,
       startMinute: range.startMinute,
       endMinute: range.endMinute,
     },

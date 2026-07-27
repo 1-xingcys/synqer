@@ -1,5 +1,6 @@
 "use client";
 import { axisDateToCalendarDay } from "@/lib/calendarDay";
+import { axisSpanOfSlot, extendAxisSpan, type AxisSpan } from "@/lib/axisSpan";
 
 import { useMemo } from "react";
 import { StagedConfirmation } from "@/types/event";
@@ -24,22 +25,16 @@ function warnInvalidSlot(slotId: string, reason: string) {
   console.warn(`[eventTimeSelection] Skip invalid slot ${slotId}: ${reason}`);
 }
 
-function getSlotDateKey(slot: EventSlot): string | null {
-  if (slot.axisType === "WEEKDAY") {
-    if (!slot.axisWeekday) {
-      warnInvalidSlot(slot.id, "missing axisWeekday");
-      return null;
-    }
-
-    return slot.axisWeekday;
+function spanOfSlot(slot: EventSlot) {
+  const span = axisSpanOfSlot(slot);
+  if (!span) {
+    warnInvalidSlot(
+      slot.id,
+      slot.axisType === "WEEKDAY" ? "missing axisWeekday" : "missing axisDate",
+    );
   }
 
-  const axisKey = axisDateToCalendarDay(slot.axisDate);
-  if (!axisKey) {
-    warnInvalidSlot(slot.id, "missing axisDate");
-  }
-
-  return axisKey;
+  return span;
 }
 
 function sortSlots(slots: EventSlot[]) {
@@ -75,78 +70,57 @@ function sortSlots(slots: EventSlot[]) {
   });
 }
 
-function buildRangesFromSlotIds(
-  slotIds: string[],
+interface BuildSelectedRangesOptions {
+  idPrefix: string;
+  isConfirmed: boolean;
+  isStaged: boolean;
+  isToBeRemoved?: boolean;
+}
+
+/**
+ * Merge sorted slots into the ranges the panel lists.
+ *
+ * Exported so the merge rule can be tested without rendering: this repo has no
+ * jsdom, and the rule — not the hook's memoisation — is the part worth pinning.
+ */
+export function buildSelectedRanges(
   slots: EventSlot[],
-  options: {
-    idPrefix: string;
-    isConfirmed: boolean;
-    isStaged: boolean;
-    isToBeRemoved?: boolean;
-  },
+  options: BuildSelectedRangesOptions,
 ): SelectedTimeRange[] {
-  if (slotIds.length === 0) return [];
-
-  const slotsById = new Map(slots.map((slot) => [slot.id, slot]));
-  const sortedSlots = sortSlots(
-    slotIds
-      .map((slotId) => slotsById.get(slotId))
-      .filter((slot): slot is EventSlot => Boolean(slot))
-      .filter((slot) => getSlotDateKey(slot) !== null),
-  );
-
-  if (sortedSlots.length === 0) return [];
-
   const ranges: SelectedTimeRange[] = [];
   let currentRange: SelectedTimeRange | null = null;
 
-  sortedSlots.forEach((slot) => {
-    const axisType = slot.axisType === "WEEKDAY" ? "WEEKDAY" : "DATE";
-    const dateKey = getSlotDateKey(slot);
-    if (!dateKey) {
-      return;
-    }
+  const startRange = (slot: EventSlot, span: AxisSpan): SelectedTimeRange => ({
+    id: `${options.idPrefix}-${slot.id}`,
+    axis: span,
+    startTime: slot.startMinute,
+    endTime: slot.endMinute,
+    slotIds: [slot.id],
+    isConfirmed: options.isConfirmed,
+    isStaged: options.isStaged,
+    isToBeRemoved: options.isToBeRemoved,
+  });
+
+  sortSlots(slots).forEach((slot) => {
+    const span = spanOfSlot(slot);
+    if (!span) return;
 
     if (!currentRange) {
-      currentRange = {
-        id: `${options.idPrefix}-${slot.id}`,
-        startDate: dateKey,
-        endDate: dateKey,
-        axisType,
-        startTime: slot.startMinute,
-        endTime: slot.endMinute,
-        slotIds: [slot.id],
-        isConfirmed: options.isConfirmed,
-        isStaged: options.isStaged,
-        isToBeRemoved: options.isToBeRemoved,
-      };
+      currentRange = startRange(slot, span);
       return;
     }
 
-    const isSameDate =
-      currentRange.axisType === axisType && currentRange.endDate === dateKey;
-    const isContiguous =
-      isSameDate && currentRange.endTime === slot.startMinute;
+    const extended = extendAxisSpan(currentRange.axis, span);
 
-    if (isContiguous) {
+    if (extended && currentRange.endTime === slot.startMinute) {
+      currentRange.axis = extended;
       currentRange.endTime = slot.endMinute;
       currentRange.slotIds.push(slot.id);
       return;
     }
 
     ranges.push(currentRange);
-    currentRange = {
-      id: `${options.idPrefix}-${slot.id}`,
-      startDate: dateKey,
-      endDate: dateKey,
-      axisType,
-      startTime: slot.startMinute,
-      endTime: slot.endMinute,
-      slotIds: [slot.id],
-      isConfirmed: options.isConfirmed,
-      isStaged: options.isStaged,
-      isToBeRemoved: options.isToBeRemoved,
-    };
+    currentRange = startRange(slot, span);
   });
 
   if (currentRange) {
@@ -154,6 +128,23 @@ function buildRangesFromSlotIds(
   }
 
   return ranges;
+}
+
+function buildRangesFromSlotIds(
+  slotIds: string[],
+  slots: EventSlot[],
+  options: BuildSelectedRangesOptions,
+): SelectedTimeRange[] {
+  if (slotIds.length === 0) return [];
+
+  const slotsById = new Map(slots.map((slot) => [slot.id, slot]));
+
+  return buildSelectedRanges(
+    slotIds
+      .map((slotId) => slotsById.get(slotId))
+      .filter((slot): slot is EventSlot => Boolean(slot)),
+    options,
+  );
 }
 
 export function useEventTimeSelection({

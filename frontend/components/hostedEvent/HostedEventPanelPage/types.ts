@@ -1,4 +1,5 @@
 import type { EventSlotAxisType, Weekday } from "@/types/event";
+import type { AxisSpan } from "@/lib/axisSpan";
 
 export interface EventSlot {
   id: string;
@@ -11,9 +12,7 @@ export interface EventSlot {
 
 export interface SelectedTimeRange {
   id: string;
-  startDate: string;
-  endDate: string;
-  axisType: EventSlotAxisType;
+  axis: AxisSpan;
   startTime: number;
   endTime: number;
   slotIds: string[];
