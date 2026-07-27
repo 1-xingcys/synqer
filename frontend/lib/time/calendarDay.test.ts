@@ -3,7 +3,7 @@ import {
   addCalendarDays,
   axisDateToCalendarDay,
   calendarDay,
-  parseCalendarDayValue,
+  calendarDayParts,
   calendarDayToWallClock,
   todayInZone,
   wallClockToCalendarDay,
@@ -170,31 +170,32 @@ describe("calendar days compare as plain strings", () => {
   });
 });
 
-describe("parseCalendarDayValue", () => {
-  // Consumers read this back with *local* getters, so the noon anchor is what
-  // keeps the digits intact in every runner zone. Run under
-  // TZ=America/New_York and TZ=Pacific/Kiritimati to prove it.
-  it("keeps the calendar day intact under local getters", () => {
-    const date = parseCalendarDayValue("2026-07-30");
-
-    expect(date.getFullYear()).toBe(2026);
-    expect(date.getMonth()).toBe(6);
-    expect(date.getDate()).toBe(30);
+// This replaces parseCalendarDayValue, which existed only so that callers
+// wanting the numbers could reach them through a Date. Every one of them was
+// really after the digits the string already holds.
+describe("calendarDayParts", () => {
+  it("reads the numbers off the digits, unpadded", () => {
+    expect(calendarDayParts(calendarDay("2026-06-13"))).toEqual({
+      year: 2026,
+      month: 6,
+      day: 13,
+    });
+    expect(calendarDayParts(calendarDay("2026-01-01"))).toEqual({
+      year: 2026,
+      month: 1,
+      day: 1,
+    });
   });
 
-  // Axis keys stopped carrying zoned instants when candidate days moved to the
-  // naive encoding; nothing produces this shape any more.
-  it("rejects a zone-bearing value by name", () => {
-    expect(() => parseCalendarDayValue("2026-06-13T00:00:00+08:00")).toThrow(
-      /not a calendar day/i,
-    );
-  });
-
-  // A weekday key reaching here used to yield an invalid Date, and the callers
-  // render it straight into labels as "NaN/NaN/NaN".
-  it("rejects a weekday key by name", () => {
-    expect(() => parseCalendarDayValue("MONDAY")).toThrow(
-      /not a calendar day/i,
-    );
+  // The point of not going through a Date: there is no anchor to get wrong, so
+  // the runner's zone cannot move the answer. This used to be a real bug class
+  // -- a UTC-midnight anchor read with local getters lands on the previous day
+  // everywhere west of UTC.
+  it("does not depend on the runner's zone", () => {
+    expect(calendarDayParts(calendarDay("2026-07-30"))).toEqual({
+      year: 2026,
+      month: 7,
+      day: 30,
+    });
   });
 });

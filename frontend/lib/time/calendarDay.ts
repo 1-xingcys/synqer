@@ -72,21 +72,19 @@ export function calendarDayToDate(day: CalendarDay): Date {
 }
 
 /**
- * The day as a Date whose *local* fields hold its digits — the counterpart to
- * {@link calendarDayToDate}, for callers that read back with local getters
- * (`getDate`, `toLocaleDateString`) rather than an `Intl` formatter pinned to
- * UTC. Anchoring at local noon rather than midnight keeps the digits intact in
- * every zone, including those whose DST transition happens at midnight.
+ * The day's numbers, read straight off the digits: no Date, no zone, no anchor.
  *
- * This used to also accept a zone-bearing instant and pass it through. Nothing
- * produces that shape any more — every axis key comes from
- * {@link axisDateToCalendarDay} or a weekday enum — and the branch let a
- * weekday key ("MONDAY") through to an invalid Date, which the grid renders as
- * "NaN/NaN/NaN". `calendarDay()` rejects both by name instead.
+ * Use {@link calendarDayToDate} when the day genuinely has to reach `Intl` —
+ * for a localized weekday or month name — and pin that formatter to
+ * `timeZone: "UTC"` so it reads the same anchor back.
  */
-export function parseCalendarDayValue(rawValue: string): Date {
-  const [year, month, date] = calendarDay(rawValue).split("-").map(Number);
-  return new Date(year, month - 1, date, 12);
+export function calendarDayParts(day: CalendarDay): {
+  year: number;
+  month: number;
+  day: number;
+} {
+  const [year, month, date] = day.split("-").map(Number);
+  return { year, month, day: date };
 }
 
 /**
