@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { EventStatus, supportsAddToCalendar } from "@/types/event";
-import { EventInfoDetail } from "@/components/joinedEvent/eventInformation/EventInfoDetail";
-import { EventInfoParticipants } from "@/components/joinedEvent/eventInformation/EventInfoParticipants";
+import { EventInfoDetail } from "@/components/eventCommon/eventInformation/EventInfoDetail";
+import { EventInfoParticipants } from "@/components/eventCommon/eventInformation/EventInfoParticipants";
 import { VotingEndedView } from "./VotingEndedView";
 import { ConfirmedView } from "./ConfirmedView";
 import { CompletedView } from "./CompletedView";
@@ -51,10 +51,12 @@ export default function JoinedEventPage() {
         </div>
 
         <div className="lg:col-span-1">
-          <EventInfoParticipants
-            expectedParticipants={eventDetailData.expectedParticipants}
-            currentUserId={currentUserId}
-          />
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl py-4 px-5 sm:py-5 sm:px-6 border border-zinc-200 dark:border-zinc-800 shadow-sm sticky top-6">
+            <EventInfoParticipants
+              expectedParticipants={eventDetailData.expectedParticipants}
+              currentUserId={currentUserId}
+            />
+          </div>
         </div>
       </div>
     );

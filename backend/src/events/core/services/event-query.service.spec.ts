@@ -325,6 +325,7 @@ describe('EventQueryService', () => {
       const mockEvent = {
         id: eventId,
         isDeleted: false,
+        timeZone: 'Asia/Taipei',
         votingDeadline: null,
         expectedParticipants: [{ id: 'ep-1' }],
         confirmedTimeSlots: [],
@@ -337,9 +338,12 @@ describe('EventQueryService', () => {
       });
       const result = await service.getEventPublicInfo(eventId);
 
+      // The join page renders naive wall-clock times, so it needs the event's
+      // time zone to label them.
       expect(result).toEqual({
         isDeleted: false,
         id: eventId,
+        timeZone: 'Asia/Taipei',
         host: null,
         expectedParticipantCount: 1,
         status: 'VOTING',
@@ -359,6 +363,7 @@ describe('EventQueryService', () => {
       const mockEvent = {
         id: 'event-123',
         isDeleted: true,
+        timeZone: 'Asia/Taipei',
         votingDeadline: null,
       };
 
@@ -369,6 +374,7 @@ describe('EventQueryService', () => {
       const result = await service.getEventPublicInfo('event-123');
 
       expect(result?.isDeleted).toBe(true);
+      expect(result?.timeZone).toBe('Asia/Taipei');
       expect(result?.expectedParticipantCount).toBe(0);
     });
 

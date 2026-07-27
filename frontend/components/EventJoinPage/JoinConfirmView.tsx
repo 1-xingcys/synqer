@@ -1,13 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { format } from "date-fns";
-import { CalendarDays, Clock3, UserPlus, User, Hourglass } from "lucide-react";
-import { formatMinutesToTime } from "@/lib/utils";
+import { UserPlus, User } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
-import { formatEventCandidateDaySummary } from "@/lib/event-presentation";
+import { EventConfigurationSummary } from "@/components/eventCommon/eventInformation/EventConfigurationSummary";
+import { formatDateTimeInZone } from "@/lib/time";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 import { EventPublicInfo } from "./useEventJoin";
 
@@ -23,9 +22,6 @@ export function JoinConfirmView({
   onJoin,
 }: JoinConfirmViewProps) {
   const t = useTranslations();
-  const locale = useLocale();
-  const isRecurring = eventInfo.type === "RECURRING";
-  const candidateDaySummary = formatEventCandidateDaySummary(eventInfo, locale);
 
   return (
     <div className="min-h-[60vh] py-8">
@@ -61,7 +57,10 @@ export function JoinConfirmView({
               <>
                 <span>{t("eventInfo.createdOn")}</span>
                 <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                  {format(new Date(eventInfo.createdAt), "yyyy/MM/dd HH:mm")}
+                  {formatDateTimeInZone(
+                    new Date(eventInfo.createdAt),
+                    eventInfo.timeZone,
+                  )}
                 </span>
               </>
             )}
@@ -69,56 +68,12 @@ export function JoinConfirmView({
         </div>
 
         <div className="bg-white dark:bg-zinc-900 rounded-2xl py-4 px-4 sm:py-5 sm:px-6 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-          <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-3 sm:mb-4 flex items-center gap-2">
-            {t("eventInfo.candidateInfo")}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div className="flex flex-col gap-1.5 sm:gap-2">
-              <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1">
-                <CalendarDays className="w-4 h-4" />
-                <span className="text-xs sm:text-sm font-medium">
-                  {isRecurring
-                    ? t("eventInfo.candidateWeekdays")
-                    : t("eventJoin.votingDateRange")}
-                </span>
-              </div>
-              <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-5 sm:pl-6">
-                {candidateDaySummary}
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-1.5 sm:gap-2">
-              <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1">
-                <Clock3 className="w-4 h-4" />
-                <span className="text-xs sm:text-sm font-medium">
-                  {t("eventInfo.candidateTime")}
-                </span>
-              </div>
-              <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-5 sm:pl-6">
-                {typeof eventInfo.schedule.startMinuteOfDay === "number" &&
-                typeof eventInfo.schedule.endMinuteOfDay === "number"
-                  ? `${formatMinutesToTime(eventInfo.schedule.startMinuteOfDay)} ~ ${formatMinutesToTime(eventInfo.schedule.endMinuteOfDay)}`
-                  : "-"}
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-1.5 sm:gap-2">
-              <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1">
-                <Hourglass className="w-4 h-4" />
-                <span className="text-xs sm:text-sm font-medium">
-                  {t("eventInfo.votingDeadline")}
-                </span>
-              </div>
-              <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-5 sm:pl-6">
-                {eventInfo.votingDeadline
-                  ? format(
-                      new Date(eventInfo.votingDeadline),
-                      "yyyy/MM/dd HH:mm",
-                    )
-                  : t("eventInfo.noDeadline")}
-              </p>
-            </div>
-          </div>
+          <EventConfigurationSummary
+            eventType={eventInfo.type}
+            schedule={eventInfo.schedule}
+            timeZone={eventInfo.timeZone}
+            votingDeadline={eventInfo.votingDeadline}
+          />
         </div>
 
         <div className="text-sm sm:text-base bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm p-4 sm:p-5">

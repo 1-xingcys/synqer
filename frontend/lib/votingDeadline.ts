@@ -1,3 +1,5 @@
+import { formatDateTimeInZone } from "@/lib/time";
+
 export const VOTING_DEADLINE_ERROR = {
   REQUIRED: "required",
 } as const;
@@ -29,6 +31,17 @@ export function combineVotingDeadline(date: Date, time: string): Date {
       0,
     ),
   );
+}
+
+/**
+ * Inverse of {@link combineVotingDeadline}: the stored value carries the picked
+ * wall-clock digits in its UTC fields, so it must be read back in UTC. Reading
+ * it in the viewer's zone shifts the deadline by their UTC offset.
+ */
+export function formatVotingDeadlineWallClock(
+  votingDeadline: string | Date,
+): string {
+  return formatDateTimeInZone(new Date(votingDeadline), "UTC");
 }
 
 /**

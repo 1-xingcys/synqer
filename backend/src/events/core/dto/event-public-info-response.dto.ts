@@ -21,6 +21,7 @@ export class EventPublicInfoResponseDto {
   title!: string | null;
   description!: string | null;
   schedule!: EventScheduleDto;
+  timeZone!: string;
   createdAt!: Date;
   votingDeadline!: Date | null;
   confirmedSlotIds!: string[];
