@@ -61,11 +61,10 @@ export function useFormActions({
           formData.votingDeadline &&
           formData.votingDeadlineTime
         ) {
-          const deadlineDateTime = calendarDayToWallClock(
+          votingDeadlineISO = calendarDayToWallClock(
             formData.votingDeadline,
             formData.votingDeadlineTime,
           );
-          votingDeadlineISO = deadlineDateTime.toISOString();
         }
 
         const payload: CreateEventRequest = {

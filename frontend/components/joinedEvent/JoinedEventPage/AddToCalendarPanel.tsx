@@ -1,5 +1,6 @@
 "use client";
 
+import { wallClockToDate } from "@/lib/wallClock";
 import { useTranslations } from "next-intl";
 import { ConfirmedSelection } from "@/types/event";
 import { generateGoogleCalendarUrl } from "./google-calendar-url";
@@ -134,10 +135,11 @@ export function AddToCalendarPanel({
   };
 
   const formatTimeRange = (selection: OneTimeConfirmedSelection) => {
-    const start = new Date(selection.startTime);
-    const end = new Date(selection.endTime);
+    const start = wallClockToDate(selection.startTime);
+    const end = wallClockToDate(selection.endTime);
 
-    // 後端使用 UTC 時間儲存，前端顯示時也要用 UTC
+    // The digits live in the UTC fields, so every formatter below is pinned
+    // to UTC.
     const dateFormatter = new Intl.DateTimeFormat("en", {
       month: "numeric",
       day: "numeric",

@@ -1,4 +1,5 @@
 import type { CalendarDay } from "@/lib/calendarDay";
+import { wallClockToDate, type WallClock } from "@/lib/wallClock";
 import { formatDateTimeInZone } from "@/lib/time";
 
 export const VOTING_DEADLINE_ERROR = {
@@ -20,9 +21,9 @@ interface ValidateVotingDeadlineInput {
  * by their UTC offset. See `calendarDayToWallClock` for the inverse.
  */
 export function formatVotingDeadlineWallClock(
-  votingDeadline: string | Date,
+  votingDeadline: WallClock,
 ): string {
-  return formatDateTimeInZone(new Date(votingDeadline), "UTC");
+  return formatDateTimeInZone(wallClockToDate(votingDeadline), "UTC");
 }
 
 /**

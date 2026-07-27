@@ -6,6 +6,7 @@ import {
   todayInZone,
   wallClockToCalendarDay,
 } from "@/lib/calendarDay";
+import { wallClockDay } from "@/lib/wallClock";
 
 // Every assertion here must hold regardless of the runner's own zone: that is
 // the whole point of moving pickers off local-midnight Date carriers. Run the
@@ -30,20 +31,21 @@ describe("todayInZone", () => {
 
 describe("calendarDayToWallClock", () => {
   it("encodes the picked day and time into the UTC fields", () => {
-    expect(calendarDayToWallClock("2026-07-13", "18:00").toISOString()).toBe(
+    expect(calendarDayToWallClock("2026-07-13", "18:00")).toBe(
       "2026-07-13T18:00:00.000Z",
     );
   });
 
-  it("round-trips through wallClockToCalendarDay", () => {
-    const wallClock = calendarDayToWallClock("2026-07-13", "18:00");
-    expect(wallClockToCalendarDay(wallClock)).toBe("2026-07-13");
+  it("round-trips through wallClockDay", () => {
+    expect(wallClockDay(calendarDayToWallClock("2026-07-13", "18:00"))).toBe(
+      "2026-07-13",
+    );
   });
 
   it("keeps midnight on the picked day", () => {
     const wallClock = calendarDayToWallClock("2026-07-13", "00:00");
-    expect(wallClock.toISOString()).toBe("2026-07-13T00:00:00.000Z");
-    expect(wallClockToCalendarDay(wallClock)).toBe("2026-07-13");
+    expect(wallClock).toBe("2026-07-13T00:00:00.000Z");
+    expect(wallClockDay(wallClock)).toBe("2026-07-13");
   });
 });
 

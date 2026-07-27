@@ -1,4 +1,5 @@
 import { getLiff, getLiffId } from "@/lib/liff";
+import { wallClockToDate } from "@/lib/wallClock";
 
 export interface EventShareInfo {
   eventId: string;
@@ -65,10 +66,9 @@ function formatDeadline(
   localePrefix: string,
 ): string | null {
   if (!votingDeadline) return null;
-  // votingDeadline is stored naive: UTC fields carry the wall-clock digits
-  // for the event's time zone. Read those digits back as UTC — formatting
+  // Pinned to UTC below because the digits live in the UTC fields; formatting
   // through the event's real zone here would double-apply the offset.
-  const d = new Date(votingDeadline);
+  const d = wallClockToDate(votingDeadline);
   const locale = getDateLocale(localePrefix);
   const monthDay = new Intl.DateTimeFormat(locale, {
     month: "numeric",

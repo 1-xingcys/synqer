@@ -6,7 +6,7 @@ import {
 } from "@/types/event";
 import { formatWeekdayLabel } from "@/lib/weekdays";
 import { parseCalendarDayValue } from "@/lib/time";
-import { calendarDayToWallClock } from "@/lib/calendarDay";
+import { calendarDayToDate } from "@/lib/calendarDay";
 
 type EventWithDateRange = EventWithCapabilities & {
   type?: EventType;
@@ -59,8 +59,8 @@ export function formatEventDateRangeLabel(
 
   // Calendar days carry no zone, so they are rendered through UTC rather than
   // the viewer's local fields.
-  const startDate = calendarDayToWallClock(schedule.startDate, "00:00");
-  const endDate = calendarDayToWallClock(schedule.endDate, "00:00");
+  const startDate = calendarDayToDate(schedule.startDate);
+  const endDate = calendarDayToDate(schedule.endDate);
   const format = (date: Date, withYear: boolean) =>
     new Intl.DateTimeFormat(locale, {
       month: "short",

@@ -1,4 +1,4 @@
-import { zonedWallClockToInstant } from "@/lib/time";
+import { wallClockToInstant, type WallClock } from "@/lib/wallClock";
 
 /**
  * Format a confirmed selection's date for a Google Calendar URL.
@@ -14,11 +14,10 @@ import { zonedWallClockToInstant } from "@/lib/time";
  * of the viewer's own Google Calendar timezone.
  */
 export function formatGoogleCalendarDate(
-  dateStr: string,
+  dateStr: WallClock,
   timeZone: string,
 ): string {
-  const wallClock = new Date(dateStr);
-  const instant = zonedWallClockToInstant(wallClock, timeZone);
+  const instant = wallClockToInstant(dateStr, timeZone);
 
   const year = instant.getUTCFullYear();
   const month = String(instant.getUTCMonth() + 1).padStart(2, "0");
@@ -35,8 +34,8 @@ export function formatGoogleCalendarDate(
 export function generateGoogleCalendarUrl(
   title: string,
   description: string | undefined,
-  startTime: string,
-  endTime: string,
+  startTime: WallClock,
+  endTime: WallClock,
   timeZone: string,
 ): string {
   const baseUrl = "https://calendar.google.com/calendar/render";

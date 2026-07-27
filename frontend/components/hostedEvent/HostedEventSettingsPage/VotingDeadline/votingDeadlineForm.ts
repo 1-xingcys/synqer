@@ -2,12 +2,8 @@ import {
   validateVotingDeadline,
   type VotingDeadlineError,
 } from "@/lib/votingDeadline";
-import {
-  calendarDayToWallClock,
-  wallClockToCalendarDay,
-  type CalendarDay,
-} from "@/lib/calendarDay";
-import { formatMinutesToTime } from "@/lib/utils";
+import { calendarDayToWallClock, type CalendarDay } from "@/lib/calendarDay";
+import { wallClockDay, wallClockTime } from "@/lib/wallClock";
 import { EventStatus } from "@/types/event";
 
 export interface VotingDeadlineFormData {
@@ -44,14 +40,8 @@ export function buildVotingDeadlineFormData(
   votingDeadline?: string | null,
 ): VotingDeadlineFormData {
   if (votingDeadline) {
-    // votingDeadline is stored naive: UTC fields carry the wall-clock digits
-    // for the event's time zone. Read those digits via getUTC* — local getters
-    // would apply the runner's local offset and shift the day/time.
-    const deadline = new Date(votingDeadline);
-    const time = formatMinutesToTime(
-      deadline.getUTCHours() * 60 + deadline.getUTCMinutes(),
-    );
-    const deadlineDate = wallClockToCalendarDay(deadline);
+    const time = wallClockTime(votingDeadline);
+    const deadlineDate = wallClockDay(votingDeadline);
 
     return {
       deadlineEnabled: true,
@@ -111,10 +101,7 @@ export function toVotingDeadlinePayload(
   }
 
   if (formData.deadlineDate && formData.deadlineTime) {
-    return calendarDayToWallClock(
-      formData.deadlineDate,
-      formData.deadlineTime,
-    ).toISOString();
+    return calendarDayToWallClock(formData.deadlineDate, formData.deadlineTime);
   }
 
   return undefined;

@@ -1,4 +1,5 @@
 import { instantToZonedWallClock } from "@/lib/time";
+import type { WallClock } from "@/lib/wallClock";
 
 /**
  * A naive calendar day in "YYYY-MM-DD" form: no time, no zone.
@@ -25,14 +26,28 @@ export function todayInZone(
 }
 
 /**
- * Combine a calendar day and an "HH:mm" string into a naive wall-clock Date,
- * encoding the digits into the UTC fields. The event's time zone resolves this
- * to a real instant via `zonedWallClockToInstant` when one is needed.
+ * The day as a Date whose UTC fields hold its digits at midnight, for `Intl`
+ * formatters pinned to `timeZone: "UTC"`.
  */
-export function calendarDayToWallClock(day: CalendarDay, time: string): Date {
+export function calendarDayToDate(day: CalendarDay): Date {
+  const [year, month, date] = day.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, date));
+}
+
+/**
+ * Combine a calendar day and an "HH:mm" string into a {@link WallClock} — the
+ * shape the API expects for `votingDeadline`, so the result needs no further
+ * serialisation.
+ */
+export function calendarDayToWallClock(
+  day: CalendarDay,
+  time: string,
+): WallClock {
   const [year, month, date] = day.split("-").map(Number);
   const [hours, minutes] = time.split(":").map(Number);
-  return new Date(Date.UTC(year, month - 1, date, hours, minutes, 0, 0));
+  return new Date(
+    Date.UTC(year, month - 1, date, hours, minutes, 0, 0),
+  ).toISOString();
 }
 
 /** Inverse of {@link calendarDayToWallClock}: read the naive digits back. */

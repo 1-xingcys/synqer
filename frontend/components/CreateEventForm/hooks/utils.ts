@@ -8,6 +8,7 @@ import {
   todayInZone,
 } from "@/lib/calendarDay";
 import { instantToZonedWallClock } from "@/lib/time";
+import { wallClockToDate } from "@/lib/wallClock";
 import type { CalendarDay } from "@/lib/calendarDay";
 import type { CreateEventFormData } from "../types";
 
@@ -71,7 +72,9 @@ export function getDefaultVotingDeadline(
   // created, so fall back to the end of the same day's window.
   const wallNow = instantToZonedWallClock(now, formData.timeZone);
   const hasStartPassed =
-    calendarDayToWallClock(formData.startDate, formData.startTime) <= wallNow;
+    wallClockToDate(
+      calendarDayToWallClock(formData.startDate, formData.startTime),
+    ) <= wallNow;
 
   return {
     date: formData.startDate,
