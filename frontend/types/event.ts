@@ -1,5 +1,6 @@
 import type { components } from "@/generated/openapi";
 import type { CalendarDay } from "@/lib/calendarDay";
+import type { WallClock } from "@/lib/wallClock";
 
 export type EventType = components["schemas"]["EventType"];
 export type Weekday = components["schemas"]["Weekday"];
@@ -32,8 +33,32 @@ export const VoteMode = {
 } as const;
 export type VoteMode = (typeof VoteMode)[keyof typeof VoteMode];
 
-// Merged time ranges (consecutive slots merged into a single range)
-export type ConfirmedSelection = components["schemas"]["ConfirmedSelectionDto"];
+type ConfirmedSelectionDto = components["schemas"]["ConfirmedSelectionDto"];
+
+/**
+ * Guards the `Omit` below: if the generated DTO ever stops carrying these
+ * fields, omitting them still succeeds and the refinement would silently
+ * become dead. Referencing them here turns that into a compile error.
+ */
+type _ConfirmedSelectionCarriesTimes = ConfirmedSelectionDto[
+  | "startTime"
+  | "endTime"];
+
+/**
+ * Merged time ranges (consecutive slots merged into a single range).
+ *
+ * The generated DTO types `startTime`/`endTime` as plain `string` because the
+ * wire format is a date-time. They are naive {@link WallClock} values though —
+ * digits carried in the UTC fields — so they are re-typed here rather than at
+ * each reader, which is what let `new Date(...)` creep back in.
+ */
+export type ConfirmedSelection = Omit<
+  ConfirmedSelectionDto,
+  "startTime" | "endTime"
+> & {
+  startTime?: WallClock;
+  endTime?: WallClock;
+};
 export type EventCapabilities = components["schemas"]["EventCapabilitiesDto"];
 
 export type StagedConfirmation =
