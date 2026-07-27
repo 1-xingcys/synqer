@@ -2071,6 +2071,9 @@
           "schedule": {
             "$ref": "#/components/schemas/EventScheduleDto"
           },
+          "timeZone": {
+            "type": "string"
+          },
           "createdAt": {
             "format": "date-time",
             "type": "string"
@@ -2123,6 +2126,7 @@
           "title",
           "description",
           "schedule",
+          "timeZone",
           "createdAt",
           "votingDeadline",
           "confirmedSlotIds",

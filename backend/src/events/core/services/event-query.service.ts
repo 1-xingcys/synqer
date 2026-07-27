@@ -207,6 +207,7 @@ export class EventQueryService {
       return {
         isDeleted: true,
         ...this.eventMapper.mapEventToList(event),
+        timeZone: event.timeZone,
         expectedParticipantCount: 0,
         status: this.eventStatusService.computeEventStatus({
           eventType: event.type,
@@ -228,6 +229,7 @@ export class EventQueryService {
     return {
       isDeleted: false,
       ...this.eventMapper.mapEventToList(event),
+      timeZone: event.timeZone,
       expectedParticipantCount: event.expectedParticipants.length,
       host,
     };

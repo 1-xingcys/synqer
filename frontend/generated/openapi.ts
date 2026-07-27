@@ -925,6 +925,7 @@ export interface components {
             title: string | null;
             description: string | null;
             schedule: components["schemas"]["EventScheduleDto"];
+            timeZone: string;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
