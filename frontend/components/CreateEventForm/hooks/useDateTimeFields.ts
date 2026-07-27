@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import type { CalendarDay } from "@/lib/calendarDay";
 import { CreateEventFormData } from "../types";
 import { withSyncedVotingDeadline } from "./utils";
 import type { EventType } from "@/types/event";
@@ -28,17 +29,17 @@ export function useDateTimeFields(
   );
 
   const handleStartDateChange = useCallback(
-    (date: Date | null) => {
+    (day: CalendarDay | null) => {
       setFormData((prev) => {
-        const newData = { ...prev, startDate: date };
+        const newData = { ...prev, startDate: day };
 
         // If end date is before start date, update it
-        if (date && prev.endDate && prev.endDate < date) {
-          newData.endDate = date;
+        if (day && prev.endDate && prev.endDate < day) {
+          newData.endDate = day;
         }
         // If end date is null, set it to start date
-        if (date && !prev.endDate) {
-          newData.endDate = date;
+        if (day && !prev.endDate) {
+          newData.endDate = day;
         }
 
         return withSyncedVotingDeadline(newData);
@@ -48,16 +49,16 @@ export function useDateTimeFields(
   );
 
   const handleEndDateChange = useCallback(
-    (date: Date | null) => {
+    (day: CalendarDay | null) => {
       setFormData((prev) => {
-        const newData = { ...prev, endDate: date };
+        const newData = { ...prev, endDate: day };
 
-        if (date && prev.startDate && prev.startDate > date) {
-          newData.startDate = date;
+        if (day && prev.startDate && prev.startDate > day) {
+          newData.startDate = day;
         }
 
-        if (date && !prev.startDate) {
-          newData.startDate = date;
+        if (day && !prev.startDate) {
+          newData.startDate = day;
         }
 
         return newData;
@@ -95,10 +96,10 @@ export function useDateTimeFields(
 
   // Editing either deadline field by hand stops it from tracking the schedule.
   const handleVotingDeadlineDateChange = useCallback(
-    (date: Date | null) => {
+    (day: CalendarDay | null) => {
       setFormData((prev) => ({
         ...prev,
-        votingDeadline: date,
+        votingDeadline: day,
         votingDeadlineTouched: true,
       }));
     },

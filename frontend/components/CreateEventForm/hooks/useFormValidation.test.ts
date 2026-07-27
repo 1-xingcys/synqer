@@ -19,8 +19,8 @@ function buildFormData(
     eventType: "ONE_TIME",
     title: "Team sync",
     description: "",
-    startDate: new Date(2026, 6, 20), // local 2026-07-20
-    endDate: new Date(2026, 6, 20),
+    startDate: "2026-07-20",
+    endDate: "2026-07-20",
     weekdays: DEFAULT_WEEKDAYS,
     startTime: "09:00",
     endTime: "10:00",
@@ -29,7 +29,7 @@ function buildFormData(
     defaultVoteMode: DEFAULT_VOTE_MODE,
     shareVoteToChat: DEFAULT_SHARE_VOTE_TO_CHAT,
     votingDeadlineEnabled: true,
-    votingDeadline: new Date(2026, 6, 13), // local 2026-07-13
+    votingDeadline: "2026-07-13",
     votingDeadlineTime: "18:00",
     votingDeadlineTouched: false,
     lineGroupId: null,
@@ -54,7 +54,7 @@ describe("getCreateEventValidationErrors - voting deadline", () => {
     const errors = getCreateEventValidationErrors(
       buildFormData({
         // Event starts 2026-07-20 09:00; deadline lands well after that.
-        votingDeadline: new Date(2026, 6, 25),
+        votingDeadline: "2026-07-25",
         votingDeadlineTime: "23:00",
       }),
       now,
@@ -92,8 +92,8 @@ describe("getCreateEventValidationErrors - start date", () => {
 
     const errors = getCreateEventValidationErrors(
       buildFormData({
-        startDate: new Date(2026, 6, 19), // local 2026-07-19
-        endDate: new Date(2026, 6, 19),
+        startDate: "2026-07-19",
+        endDate: "2026-07-19",
       }),
       now,
     );
@@ -109,8 +109,8 @@ describe("getCreateEventValidationErrors - start date", () => {
 
     const errors = getCreateEventValidationErrors(
       buildFormData({
-        startDate: new Date(2026, 6, 15),
-        endDate: new Date(2026, 6, 15),
+        startDate: "2026-07-15",
+        endDate: "2026-07-15",
       }),
       now,
     );
@@ -124,8 +124,8 @@ describe("getCreateEventValidationErrors - start date", () => {
     const errors = getCreateEventValidationErrors(
       buildFormData({
         eventType: "RECURRING",
-        startDate: new Date(2020, 0, 1),
-        endDate: new Date(2020, 0, 1),
+        startDate: "2020-01-01",
+        endDate: "2020-01-01",
       }),
       now,
     );

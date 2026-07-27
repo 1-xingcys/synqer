@@ -2,8 +2,13 @@
 // Date/Time Utilities (shared across hooks and components)
 // =============================================================================
 
-import { combineVotingDeadline } from "@/lib/votingDeadline";
+import {
+  addCalendarDays,
+  calendarDayToWallClock,
+  todayInZone,
+} from "@/lib/calendarDay";
 import { instantToZonedWallClock } from "@/lib/time";
+import type { CalendarDay } from "@/lib/calendarDay";
 import type { CreateEventFormData } from "../types";
 
 /** How long a recurring event collects availability by default. */
@@ -22,39 +27,11 @@ function toDeadlineTime(time: string): string {
 }
 
 /**
- * Combine date and time into a single Date object
- */
-export function combineDateAndTime(date: Date, time: string): Date {
-  return combineVotingDeadline(date, time);
-}
-
-/**
  * Parse time string (HH:MM) to total minutes
  */
 export function parseTimeToMinutes(time: string): number {
   const [hours, minutes] = time.split(":").map(Number);
   return hours * 60 + minutes;
-}
-
-/**
- * Today's calendar day *in the given time zone*, as a local-midnight Date.
- *
- * The date pickers speak local-midnight Dates that act purely as Y/M/D
- * carriers (combineDateAndTime re-encodes those digits into UTC fields), so
- * this returns the same shape. Deriving the day from the event's time zone
- * rather than the browser's keeps the picker bounds and the form validation
- * on the same calendar even when the host picks a foreign time zone.
- */
-export function getTodayInTimeZone(timeZone: string, now: Date = new Date()) {
-  // instantToZonedWallClock carries the zone's wall-clock digits in UTC
-  // fields, so read them back with getUTC*.
-  const wallNow = instantToZonedWallClock(now, timeZone);
-
-  return new Date(
-    wallNow.getUTCFullYear(),
-    wallNow.getUTCMonth(),
-    wallNow.getUTCDate(),
-  );
 }
 
 type VotingDeadlineDefaultInput = Pick<
@@ -74,15 +51,12 @@ type VotingDeadlineDefaultInput = Pick<
 export function getDefaultVotingDeadline(
   formData: VotingDeadlineDefaultInput,
   now: Date = new Date(),
-): { date: Date; time: string } | null {
+): { date: CalendarDay; time: string } | null {
   if (formData.eventType === "RECURRING") {
-    const today = getTodayInTimeZone(formData.timeZone, now);
-
     return {
-      date: new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate() + RECURRING_DEADLINE_DAYS,
+      date: addCalendarDays(
+        todayInZone(formData.timeZone, now),
+        RECURRING_DEADLINE_DAYS,
       ),
       time: toDeadlineTime(formData.endTime),
     };
@@ -97,10 +71,10 @@ export function getDefaultVotingDeadline(
   // created, so fall back to the end of the same day's window.
   const wallNow = instantToZonedWallClock(now, formData.timeZone);
   const hasStartPassed =
-    combineDateAndTime(formData.startDate, formData.startTime) <= wallNow;
+    calendarDayToWallClock(formData.startDate, formData.startTime) <= wallNow;
 
   return {
-    date: new Date(formData.startDate),
+    date: formData.startDate,
     time: toDeadlineTime(
       hasStartPassed ? formData.endTime : formData.startTime,
     ),

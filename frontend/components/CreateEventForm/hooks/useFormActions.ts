@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
-import { combineVotingDeadline } from "@/lib/votingDeadline";
+import { calendarDayToWallClock } from "@/lib/calendarDay";
 import { toVoteModeDto } from "@/lib/eventPreference";
 import { useLiff } from "@/hooks/useLiff";
 import { apiFetchJson } from "@/lib/apiClient";
@@ -34,13 +34,6 @@ export function useFormActions({
   const router = useRouter();
   const { isInClient: isInLiff, closeWindow } = useLiff();
 
-  const formatDate = (date: Date): string => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -68,7 +61,7 @@ export function useFormActions({
           formData.votingDeadline &&
           formData.votingDeadlineTime
         ) {
-          const deadlineDateTime = combineVotingDeadline(
+          const deadlineDateTime = calendarDayToWallClock(
             formData.votingDeadline,
             formData.votingDeadlineTime,
           );
@@ -79,14 +72,10 @@ export function useFormActions({
           type: formData.eventType,
           title: formData.title,
           description: formData.description || undefined,
-          startDate:
-            !isRecurring && formData.startDate
-              ? formatDate(formData.startDate)
-              : undefined,
-          endDate:
-            !isRecurring && formData.endDate
-              ? formatDate(formData.endDate)
-              : undefined,
+          startDate: !isRecurring
+            ? (formData.startDate ?? undefined)
+            : undefined,
+          endDate: !isRecurring ? (formData.endDate ?? undefined) : undefined,
           weekdays:
             isRecurring && formData.weekdays.length > 0
               ? formData.weekdays

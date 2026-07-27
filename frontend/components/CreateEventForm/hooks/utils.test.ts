@@ -1,9 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import {
-  getDefaultVotingDeadline,
-  getTodayInTimeZone,
-  withSyncedVotingDeadline,
-} from "./utils";
+import { getDefaultVotingDeadline, withSyncedVotingDeadline } from "./utils";
 import { CreateEventFormData, DEFAULT_WEEKDAYS } from "../types";
 import {
   DEFAULT_GRANULARITY,
@@ -18,8 +14,8 @@ function buildFormData(
     eventType: "ONE_TIME",
     title: "Team sync",
     description: "",
-    startDate: new Date(2026, 6, 20), // local 2026-07-20
-    endDate: new Date(2026, 6, 22),
+    startDate: "2026-07-20",
+    endDate: "2026-07-22",
     weekdays: DEFAULT_WEEKDAYS,
     startTime: "09:00",
     endTime: "17:00",
@@ -37,29 +33,13 @@ function buildFormData(
   };
 }
 
-function toYmd(date: Date) {
-  return [date.getFullYear(), date.getMonth() + 1, date.getDate()];
-}
-
-describe("getTodayInTimeZone", () => {
-  it("uses the given time zone's calendar day, not the runner's", () => {
-    // 2026-07-16T02:00Z is still 2026-07-15 22:00 in America/New_York.
-    const today = getTodayInTimeZone(
-      "America/New_York",
-      new Date("2026-07-16T02:00:00.000Z"),
-    );
-
-    expect(toYmd(today)).toEqual([2026, 7, 15]);
-  });
-});
-
 describe("getDefaultVotingDeadline - one-time events", () => {
   it("proposes the event start when it is still ahead", () => {
     const now = new Date("2026-07-13T12:00:00.000Z");
 
     const result = getDefaultVotingDeadline(buildFormData(), now);
 
-    expect(toYmd(result!.date)).toEqual([2026, 7, 20]);
+    expect(result!.date).toBe("2026-07-20");
     expect(result!.time).toBe("09:00");
   });
 
@@ -70,7 +50,7 @@ describe("getDefaultVotingDeadline - one-time events", () => {
 
     const result = getDefaultVotingDeadline(buildFormData(), now);
 
-    expect(toYmd(result!.date)).toEqual([2026, 7, 20]);
+    expect(result!.date).toBe("2026-07-20");
     expect(result!.time).toBe("17:00");
   });
 
@@ -106,7 +86,7 @@ describe("getDefaultVotingDeadline - recurring events", () => {
       now,
     );
 
-    expect(toYmd(result!.date)).toEqual([2026, 7, 20]);
+    expect(result!.date).toBe("2026-07-20");
     expect(result!.time).toBe("17:00");
   });
 
@@ -118,7 +98,7 @@ describe("getDefaultVotingDeadline - recurring events", () => {
       now,
     );
 
-    expect(toYmd(result!.date)).toEqual([2026, 8, 4]);
+    expect(result!.date).toBe("2026-08-04");
   });
 
   it("counts the week from today in the event's time zone", () => {
@@ -130,7 +110,7 @@ describe("getDefaultVotingDeadline - recurring events", () => {
       now,
     );
 
-    expect(toYmd(result!.date)).toEqual([2026, 7, 22]);
+    expect(result!.date).toBe("2026-07-22");
   });
 
   it("ignores the start date entirely", () => {
@@ -141,7 +121,7 @@ describe("getDefaultVotingDeadline - recurring events", () => {
       now,
     );
 
-    expect(toYmd(result!.date)).toEqual([2026, 7, 20]);
+    expect(result!.date).toBe("2026-07-20");
   });
 });
 
@@ -151,29 +131,29 @@ describe("withSyncedVotingDeadline", () => {
   it("fills the deadline fields while untouched", () => {
     const result = withSyncedVotingDeadline(buildFormData(), now);
 
-    expect(toYmd(result.votingDeadline!)).toEqual([2026, 7, 20]);
+    expect(result.votingDeadline!).toBe("2026-07-20");
     expect(result.votingDeadlineTime).toBe("09:00");
   });
 
   it("keeps tracking the schedule as the start date moves", () => {
     const moved = withSyncedVotingDeadline(
-      buildFormData({ startDate: new Date(2026, 7, 3) }),
+      buildFormData({ startDate: "2026-08-03" }),
       now,
     );
 
-    expect(toYmd(moved.votingDeadline!)).toEqual([2026, 8, 3]);
+    expect(moved.votingDeadline!).toBe("2026-08-03");
   });
 
   it("leaves a host-edited deadline alone", () => {
     const edited = buildFormData({
-      votingDeadline: new Date(2026, 6, 5),
+      votingDeadline: "2026-07-05",
       votingDeadlineTime: "12:30",
       votingDeadlineTouched: true,
     });
 
     const result = withSyncedVotingDeadline(edited, now);
 
-    expect(toYmd(result.votingDeadline!)).toEqual([2026, 7, 5]);
+    expect(result.votingDeadline!).toBe("2026-07-05");
     expect(result.votingDeadlineTime).toBe("12:30");
   });
 
