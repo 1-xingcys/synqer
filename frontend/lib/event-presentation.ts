@@ -41,6 +41,42 @@ export function formatEventCandidateDaySummary(
   ].join(" ~ ");
 }
 
+/**
+ * Compact candidate-day label for event list rows: "Jul 30 - Aug 2, 2026", or
+ * the weekday list for recurring events.
+ *
+ * Candidate dates are naive calendar days stored at UTC midnight, so they are
+ * rendered in UTC — `date-fns` formatting reads local fields and would show the
+ * previous day for viewers west of UTC.
+ */
+export function formatEventDateRangeLabel(
+  schedule: EventSchedule | undefined,
+  locale: string,
+): string {
+  if (schedule?.kind === "RECURRING" && schedule.weekdays?.length) {
+    return schedule.weekdays
+      .map((weekday) => formatWeekdayLabel(weekday, locale))
+      .join(", ");
+  }
+
+  if (schedule?.kind !== "ONE_TIME") {
+    return "";
+  }
+
+  const startDate = new Date(schedule.startDate);
+  const endDate = new Date(schedule.endDate);
+  const format = (date: Date, withYear: boolean) =>
+    new Intl.DateTimeFormat(locale, {
+      month: "short",
+      day: "numeric",
+      ...(withYear ? { year: "numeric" as const } : {}),
+      timeZone: "UTC",
+    }).format(date);
+
+  const isSameYear = startDate.getUTCFullYear() === endDate.getUTCFullYear();
+  return `${format(startDate, !isSameYear)} - ${format(endDate, true)}`;
+}
+
 export function formatAxisKeyLabel(
   axisKey: string,
   axisType: EventSlotAxisType,

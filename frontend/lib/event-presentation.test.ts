@@ -3,6 +3,7 @@ import { EventWithCapabilities, EventSchedule } from "@/types/event";
 import {
   formatAxisKeyLabel,
   formatEventCandidateDaySummary,
+  formatEventDateRangeLabel,
 } from "@/lib/event-presentation";
 
 type EventFixture = EventWithCapabilities & {
@@ -77,5 +78,42 @@ describe("event-presentation", () => {
   it("keeps date axis keys on the stored calendar day", () => {
     expect(formatAxisKeyLabel("2026-07-30", "DATE", "en-US")).toBe("7/30");
     expect(formatAxisKeyLabel("2026-01-01", "DATE", "en-US")).toBe("1/1");
+  });
+
+  describe("formatEventDateRangeLabel", () => {
+    // Candidate dates arrive as naive UTC midnight, so reading them with local
+    // getters (as date-fns `format` does) shows the previous day for viewers
+    // west of UTC. Run under `TZ=America/New_York` to exercise that path.
+    it("keeps a one-time range on the stored calendar days", () => {
+      expect(formatEventDateRangeLabel(oneTimeEvent.schedule, "en-US")).toBe(
+        "Jul 30 - Aug 2, 2026",
+      );
+    });
+
+    it("spells out both years when the range crosses a year boundary", () => {
+      expect(
+        formatEventDateRangeLabel(
+          {
+            kind: "ONE_TIME",
+            startDate: "2026-12-30T00:00:00.000Z",
+            endDate: "2027-01-02T00:00:00.000Z",
+            startMinuteOfDay: 540,
+            endMinuteOfDay: 660,
+            slotDurationMin: 30,
+          },
+          "en-US",
+        ),
+      ).toBe("Dec 30, 2026 - Jan 2, 2027");
+    });
+
+    it("lists weekdays for recurring events", () => {
+      expect(formatEventDateRangeLabel(recurringEvent.schedule, "en-US")).toBe(
+        "Mon, Wed, Fri",
+      );
+    });
+
+    it("returns an empty label when there is no schedule", () => {
+      expect(formatEventDateRangeLabel(undefined, "en-US")).toBe("");
+    });
   });
 });

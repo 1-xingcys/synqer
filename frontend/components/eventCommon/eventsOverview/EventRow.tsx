@@ -22,10 +22,9 @@ import {
   Vote,
   type LucideIcon,
 } from "lucide-react";
-import { format } from "date-fns";
 import { EventRowData } from "./types";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
-import { formatWeekdayLabel } from "@/lib/weekdays";
+import { formatEventDateRangeLabel } from "@/lib/event-presentation";
 import { eventDetailPath } from "@/lib/eventRoutes";
 import { eventStatusColor } from "@/components/eventCommon/eventStatusStyles";
 
@@ -62,32 +61,10 @@ export default function EventRow({
   // 邀請連結複製按鈕：統一清單以每列 isHost 判定。
   const canCopyInviteLink = Boolean(event.isHost);
 
-  const formatDateRange = () => {
-    if (
-      event.schedule?.kind === "RECURRING" &&
-      event.schedule.weekdays?.length
-    ) {
-      return event.schedule.weekdays
-        .map((weekday) => formatWeekdayLabel(weekday, "en-US"))
-        .join(", ");
-    }
-
-    if (event.schedule?.kind !== "ONE_TIME") {
-      return "";
-    }
-
-    const startDate = new Date(event.schedule.startDate);
-    const endDate = new Date(event.schedule.endDate);
-    const start = format(startDate, "MMM d");
-    const end = format(endDate, "MMM d, yyyy");
-    const startYear = startDate.getFullYear();
-    const endYear = endDate.getFullYear();
-
-    if (startYear === endYear) {
-      return `${start} - ${end}`;
-    }
-    return `${format(startDate, "MMM d, yyyy")} - ${end}`;
-  };
+  // Kept on "en-US" rather than the active locale, matching the label's prior
+  // behaviour; localising it is a separate change.
+  const formatDateRange = () =>
+    formatEventDateRangeLabel(event.schedule, "en-US");
 
   const votedCount = event.votedCount ?? 0;
   const expectedCount = event.expectedParticipantCount;
