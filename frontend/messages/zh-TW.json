@@ -470,7 +470,6 @@
   },
   "eventJoin": {
     "youAreInvited": "您被邀請參加",
-    "votingDateRange": "投票日期範圍",
     "votingDeadline": "投票截止時間",
     "confirmedTime": "確認的活動時間",
     "currentParticipants": "目前參與者",

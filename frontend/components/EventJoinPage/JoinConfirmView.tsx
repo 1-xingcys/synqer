@@ -3,11 +3,20 @@
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { format } from "date-fns";
-import { CalendarDays, Clock3, UserPlus, User, Hourglass } from "lucide-react";
+import {
+  Calendar,
+  CalendarDays,
+  Clock3,
+  UserPlus,
+  User,
+  Timer,
+  Globe,
+} from "lucide-react";
 import { formatMinutesToTime } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 import { formatEventCandidateDaySummary } from "@/lib/event-presentation";
+import { formatDateTimeInZone } from "@/lib/time";
+import { formatVotingDeadlineWallClock } from "@/lib/votingDeadline";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 import { EventPublicInfo } from "./useEventJoin";
 
@@ -61,7 +70,10 @@ export function JoinConfirmView({
               <>
                 <span>{t("eventInfo.createdOn")}</span>
                 <span className="font-medium text-zinc-700 dark:text-zinc-300">
-                  {format(new Date(eventInfo.createdAt), "yyyy/MM/dd HH:mm")}
+                  {formatDateTimeInZone(
+                    new Date(eventInfo.createdAt),
+                    eventInfo.timeZone,
+                  )}
                 </span>
               </>
             )}
@@ -70,6 +82,7 @@ export function JoinConfirmView({
 
         <div className="bg-white dark:bg-zinc-900 rounded-2xl py-4 px-4 sm:py-5 sm:px-6 border border-zinc-200 dark:border-zinc-800 shadow-sm">
           <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-3 sm:mb-4 flex items-center gap-2">
+            <Calendar className="w-5 h-5" />
             {t("eventInfo.candidateInfo")}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -79,7 +92,7 @@ export function JoinConfirmView({
                 <span className="text-xs sm:text-sm font-medium">
                   {isRecurring
                     ? t("eventInfo.candidateWeekdays")
-                    : t("eventJoin.votingDateRange")}
+                    : t("eventInfo.candidateDates")}
                 </span>
               </div>
               <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-5 sm:pl-6">
@@ -104,17 +117,26 @@ export function JoinConfirmView({
 
             <div className="flex flex-col gap-1.5 sm:gap-2">
               <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1">
-                <Hourglass className="w-4 h-4" />
+                <Globe className="w-4 h-4" />
+                <span className="text-xs sm:text-sm font-medium">
+                  {t("eventInfo.timeZone")}
+                </span>
+              </div>
+              <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-5 sm:pl-6">
+                {eventInfo.timeZone}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1.5 sm:gap-2">
+              <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400 mb-1">
+                <Timer className="w-4 h-4" />
                 <span className="text-xs sm:text-sm font-medium">
                   {t("eventInfo.votingDeadline")}
                 </span>
               </div>
               <p className="text-sm sm:text-base font-mono text-zinc-900 dark:text-zinc-100 pl-5 sm:pl-6">
                 {eventInfo.votingDeadline
-                  ? format(
-                      new Date(eventInfo.votingDeadline),
-                      "yyyy/MM/dd HH:mm",
-                    )
+                  ? formatVotingDeadlineWallClock(eventInfo.votingDeadline)
                   : t("eventInfo.noDeadline")}
               </p>
             </div>

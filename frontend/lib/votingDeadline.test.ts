@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import {
   combineVotingDeadline,
+  formatVotingDeadlineWallClock,
   validateVotingDeadline,
   VOTING_DEADLINE_ERROR,
 } from "@/lib/votingDeadline";
@@ -64,5 +65,23 @@ describe("votingDeadline", () => {
         time: "09:00",
       }),
     ).toBeNull();
+  });
+});
+
+describe("formatVotingDeadlineWallClock", () => {
+  it("shows the digits the host picked, not a zone-shifted instant", () => {
+    // 18:00 is late enough that any eastward viewer zone would roll the day.
+    expect(formatVotingDeadlineWallClock("2026-07-30T18:00:00.000Z")).toBe(
+      "2026/07/30 18:00",
+    );
+    // 02:00 is early enough that any westward viewer zone would roll it back.
+    expect(formatVotingDeadlineWallClock("2026-07-30T02:00:00.000Z")).toBe(
+      "2026/07/30 02:00",
+    );
+  });
+
+  it("round-trips a deadline produced by combineVotingDeadline", () => {
+    const picked = combineVotingDeadline(new Date(2026, 6, 13), "18:00");
+    expect(formatVotingDeadlineWallClock(picked)).toBe("2026/07/13 18:00");
   });
 });

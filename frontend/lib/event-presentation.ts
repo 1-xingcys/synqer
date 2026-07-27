@@ -5,6 +5,7 @@ import {
   EventSchedule,
 } from "@/types/event";
 import { formatWeekdayLabel } from "@/lib/weekdays";
+import { formatDateInZone } from "@/lib/time";
 
 type EventWithDateRange = EventWithCapabilities & {
   type?: EventType;
@@ -38,17 +39,11 @@ export function formatEventCandidateDaySummary(
     return "";
   }
 
-  const start = new Date(event.schedule.startDate);
-  const end = new Date(event.schedule.endDate);
+  // Candidate dates are naive calendar days stored at UTC midnight, so they are
+  // read back in UTC — local getters would shift them for viewers west of UTC.
   return [
-    `${start.getFullYear()}/${(start.getMonth() + 1).toString().padStart(2, "0")}/${start
-      .getDate()
-      .toString()
-      .padStart(2, "0")}`,
-    `${end.getFullYear()}/${(end.getMonth() + 1).toString().padStart(2, "0")}/${end
-      .getDate()
-      .toString()
-      .padStart(2, "0")}`,
+    formatDateInZone(new Date(event.schedule.startDate), "UTC"),
+    formatDateInZone(new Date(event.schedule.endDate), "UTC"),
   ].join(" ~ ");
 }
 

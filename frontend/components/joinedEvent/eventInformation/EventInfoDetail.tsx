@@ -1,9 +1,10 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { format } from "date-fns";
 import { Calendar, Clock, Globe, Timer } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/utils";
+import { formatDateInZone } from "@/lib/time";
+import { formatVotingDeadlineWallClock } from "@/lib/votingDeadline";
 import { EventStatusText } from "@/components/eventCommon/EventStatusText";
 import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
 import { EventSchedule, EventStatus, EventType } from "@/types/event";
@@ -16,25 +17,6 @@ interface EventInfoDetailProps {
   timeZone: string;
   votingDeadline?: string | null;
   currentUserHasVoted: boolean;
-}
-
-function formatVotingDeadlineWallClock(votingDeadline: string): string {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "UTC",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(new Date(votingDeadline));
-
-  const map: Record<string, string> = {};
-  for (const part of parts) {
-    if (part.type !== "literal") map[part.type] = part.value;
-  }
-
-  return `${map.year}/${map.month}/${map.day} ${map.hour}:${map.minute}`;
 }
 
 export function EventInfoDetail({
@@ -57,8 +39,8 @@ export function EventInfoDetail({
           .join(", ")
       : schedule.kind === "ONE_TIME"
         ? [
-            format(new Date(schedule.startDate), "yyyy/MM/dd"),
-            format(new Date(schedule.endDate), "yyyy/MM/dd"),
+            formatDateInZone(new Date(schedule.startDate), "UTC"),
+            formatDateInZone(new Date(schedule.endDate), "UTC"),
           ].join(" ~ ")
         : "-";
 

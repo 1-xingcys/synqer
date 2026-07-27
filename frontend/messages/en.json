@@ -470,7 +470,6 @@
   },
   "eventJoin": {
     "youAreInvited": "You're invited to",
-    "votingDateRange": "Voting Date Range",
     "votingDeadline": "Voting Deadline",
     "confirmedTime": "Confirmed Event Time",
     "currentParticipants": "Current Participants",
