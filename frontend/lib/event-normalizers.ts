@@ -1,6 +1,8 @@
 import type { operations } from "@/generated/openapi";
-import { wallClockToCalendarDay } from "@/lib/calendarDay";
+import { wallClockToCalendarDay, type CalendarDay } from "@/lib/calendarDay";
+import type { WallClock } from "@/lib/wallClock";
 import {
+  ConfirmedSelection,
   EventCapabilities,
   EventSchedule,
   EventType,
@@ -30,9 +32,29 @@ type EventLike = {
   };
 };
 
-export type NormalizedEventLike<T extends EventLike> = Omit<
-  T,
-  "type" | "schedule"
+/**
+ * Re-type the response fields that carry naive wall-clock values. The generated
+ * DTOs say `string` because the wire format is a date-time, but these hold
+ * their digits in the UTC fields — reading one as a real instant shifts it by
+ * the viewer's offset.
+ *
+ * Doing it here keeps a single choke point: every read path reaches these
+ * fields through `normalizeEventLike`, so no downstream reader has to restate
+ * the shape (or forget to).
+ *
+ * Each clause is conditional because not every `EventLike` response carries
+ * every field.
+ */
+type WithNaiveTimes<T> = Omit<T, "votingDeadline" | "confirmedSelections"> &
+  ("votingDeadline" extends keyof T
+    ? { votingDeadline: WallClock | null }
+    : object) &
+  ("confirmedSelections" extends keyof T
+    ? { confirmedSelections: ConfirmedSelection[] }
+    : object);
+
+export type NormalizedEventLike<T extends EventLike> = WithNaiveTimes<
+  Omit<T, "type" | "schedule">
 > & {
   type: EventType;
   schedule: EventSchedule;
@@ -45,7 +67,7 @@ export type NormalizedEventLike<T extends EventLike> = Omit<
  * whether that string is an instant or a day — the ambiguity that repeatedly
  * shifted these dates onto the wrong day.
  */
-function toCandidateDay(value: string): string {
+function toCandidateDay(value: string): CalendarDay {
   return wallClockToCalendarDay(new Date(value));
 }
 
@@ -120,11 +142,19 @@ export function normalizeEventLike<T extends EventLike>(
   event: T,
 ): NormalizedEventLike<T> {
   const { type, schedule: _schedule, ...rest } = event;
-  return {
+  const normalized: Omit<T, "type" | "schedule"> & {
+    type: EventType;
+    schedule: EventSchedule;
+  } = {
     ...rest,
     type,
     schedule: buildSchedule(event),
   };
+
+  // `WithNaiveTimes` cannot reduce while `T` is still generic, so the assertion
+  // stands in for it. It only renames the shape the naive fields already hold —
+  // `normalized` above is checked field by field.
+  return normalized as NormalizedEventLike<T>;
 }
 
 export function normalizeMyEventsResponse(response: MyEventsResponse) {

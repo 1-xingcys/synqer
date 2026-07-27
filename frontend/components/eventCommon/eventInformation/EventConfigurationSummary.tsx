@@ -6,12 +6,13 @@ import { formatMinutesToTime } from "@/lib/utils";
 import { formatEventCandidateDaySummary } from "@/lib/event-presentation";
 import { formatVotingDeadlineWallClock } from "@/lib/votingDeadline";
 import { EventSchedule, EventType } from "@/types/event";
+import type { WallClock } from "@/lib/wallClock";
 
 interface EventConfigurationSummaryProps {
   eventType: EventType;
   schedule: EventSchedule;
   timeZone: string;
-  votingDeadline?: string | null;
+  votingDeadline?: WallClock | null;
 }
 
 interface ConfigurationFieldProps {

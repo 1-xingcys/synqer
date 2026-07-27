@@ -5,13 +5,14 @@ import { EventStatusText } from "@/components/eventCommon/EventStatusText";
 import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
 import { EventConfigurationSummary } from "@/components/eventCommon/eventInformation/EventConfigurationSummary";
 import { EventSchedule, EventStatus, EventType } from "@/types/event";
+import type { WallClock } from "@/lib/wallClock";
 
 interface EventInfoDetailProps {
   eventType: EventType;
   status: EventStatus;
   schedule: EventSchedule;
   timeZone: string;
-  votingDeadline?: string | null;
+  votingDeadline?: WallClock | null;
   currentUserHasVoted: boolean;
 }
 

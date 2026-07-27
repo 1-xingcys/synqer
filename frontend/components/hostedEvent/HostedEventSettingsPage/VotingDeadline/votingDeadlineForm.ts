@@ -3,7 +3,7 @@ import {
   type VotingDeadlineError,
 } from "@/lib/votingDeadline";
 import { calendarDayToWallClock, type CalendarDay } from "@/lib/calendarDay";
-import { wallClockDay, wallClockTime } from "@/lib/wallClock";
+import { wallClockDay, wallClockTime, type WallClock } from "@/lib/wallClock";
 import { EventStatus } from "@/types/event";
 
 export interface VotingDeadlineFormData {
@@ -37,7 +37,7 @@ export function areVotingDeadlineFormsEqual(
 }
 
 export function buildVotingDeadlineFormData(
-  votingDeadline?: string | null,
+  votingDeadline?: WallClock | null,
 ): VotingDeadlineFormData {
   if (votingDeadline) {
     const time = wallClockTime(votingDeadline);

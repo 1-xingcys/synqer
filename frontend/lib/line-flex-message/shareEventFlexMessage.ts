@@ -1,12 +1,12 @@
 import { getLiff, getLiffId } from "@/lib/liff";
-import { wallClockToDate } from "@/lib/wallClock";
+import { wallClockToDate, type WallClock } from "@/lib/wallClock";
 
 export interface EventShareInfo {
   eventId: string;
   title: string;
   hostName: string;
   hostAvatarUrl?: string;
-  votingDeadline?: string; // ISO string
+  votingDeadline?: WallClock;
   timeZone?: string;
 }
 
@@ -61,7 +61,7 @@ function getDateLocale(localePrefix: string) {
 }
 
 function formatDeadline(
-  votingDeadline: string | undefined,
+  votingDeadline: WallClock | undefined,
   copy: EventShareCopy,
   localePrefix: string,
 ): string | null {
