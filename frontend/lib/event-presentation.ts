@@ -5,7 +5,8 @@ import {
   EventSchedule,
 } from "@/types/event";
 import { formatWeekdayLabel } from "@/lib/weekdays";
-import { formatDateInZone, parseCalendarDayValue } from "@/lib/time";
+import { parseCalendarDayValue } from "@/lib/time";
+import { calendarDayToWallClock } from "@/lib/calendarDay";
 
 type EventWithDateRange = EventWithCapabilities & {
   type?: EventType;
@@ -33,21 +34,14 @@ export function formatEventCandidateDaySummary(
     return "";
   }
 
-  // Candidate dates are naive calendar days stored at UTC midnight, so they are
-  // read back in UTC — local getters would shift them for viewers west of UTC.
-  return [
-    formatDateInZone(new Date(event.schedule.startDate), "UTC"),
-    formatDateInZone(new Date(event.schedule.endDate), "UTC"),
-  ].join(" ~ ");
+  return [event.schedule.startDate, event.schedule.endDate]
+    .map((day) => day.split("-").join("/"))
+    .join(" ~ ");
 }
 
 /**
  * Compact candidate-day label for event list rows: "Jul 30 - Aug 2, 2026", or
  * the weekday list for recurring events.
- *
- * Candidate dates are naive calendar days stored at UTC midnight, so they are
- * rendered in UTC — `date-fns` formatting reads local fields and would show the
- * previous day for viewers west of UTC.
  */
 export function formatEventDateRangeLabel(
   schedule: EventSchedule | undefined,
@@ -63,8 +57,10 @@ export function formatEventDateRangeLabel(
     return "";
   }
 
-  const startDate = new Date(schedule.startDate);
-  const endDate = new Date(schedule.endDate);
+  // Calendar days carry no zone, so they are rendered through UTC rather than
+  // the viewer's local fields.
+  const startDate = calendarDayToWallClock(schedule.startDate, "00:00");
+  const endDate = calendarDayToWallClock(schedule.endDate, "00:00");
   const format = (date: Date, withYear: boolean) =>
     new Intl.DateTimeFormat(locale, {
       month: "short",

@@ -1,4 +1,5 @@
 import type { components } from "@/generated/openapi";
+import type { CalendarDay } from "@/lib/calendarDay";
 
 export type EventType = components["schemas"]["EventType"];
 export type Weekday = components["schemas"]["Weekday"];
@@ -44,8 +45,9 @@ export interface EventWithCapabilities {
 
 export interface OneTimeEventSchedule {
   kind: "ONE_TIME";
-  startDate: string;
-  endDate: string;
+  /** Candidate days, normalised at the API boundary (see event-normalizers). */
+  startDate: CalendarDay;
+  endDate: CalendarDay;
   startMinuteOfDay: number;
   endMinuteOfDay: number;
   slotDurationMin: number;

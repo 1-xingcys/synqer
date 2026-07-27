@@ -36,9 +36,10 @@ const oneTimeEvent: EventFixture = {
   },
   schedule: {
     kind: "ONE_TIME",
-    // Candidate dates are naive calendar days stored at UTC midnight.
-    startDate: "2026-07-30T00:00:00.000Z",
-    endDate: "2026-08-02T00:00:00.000Z",
+    // Post-normalizer shape: the boundary has already turned the wire's naive
+    // UTC-midnight timestamps into calendar days.
+    startDate: "2026-07-30",
+    endDate: "2026-08-02",
     startMinuteOfDay: 540,
     endMinuteOfDay: 660,
     slotDurationMin: 30,
@@ -58,9 +59,6 @@ describe("event-presentation", () => {
     );
   });
 
-  // Reading these UTC-midnight values with local getters shifts them to the
-  // previous day for viewers west of UTC. Run under `TZ=America/New_York` to
-  // exercise that path; the assertion itself holds in every zone.
   it("keeps one-time candidate dates on the stored calendar day", () => {
     expect(formatEventCandidateDaySummary(oneTimeEvent, "en-US")).toBe(
       "2026/07/30 ~ 2026/08/02",
@@ -81,9 +79,7 @@ describe("event-presentation", () => {
   });
 
   describe("formatEventDateRangeLabel", () => {
-    // Candidate dates arrive as naive UTC midnight, so reading them with local
-    // getters (as date-fns `format` does) shows the previous day for viewers
-    // west of UTC. Run under `TZ=America/New_York` to exercise that path.
+    // Calendar days must render identically in every runner zone.
     it("keeps a one-time range on the stored calendar days", () => {
       expect(formatEventDateRangeLabel(oneTimeEvent.schedule, "en-US")).toBe(
         "Jul 30 - Aug 2, 2026",
@@ -95,8 +91,8 @@ describe("event-presentation", () => {
         formatEventDateRangeLabel(
           {
             kind: "ONE_TIME",
-            startDate: "2026-12-30T00:00:00.000Z",
-            endDate: "2027-01-02T00:00:00.000Z",
+            startDate: "2026-12-30",
+            endDate: "2027-01-02",
             startMinuteOfDay: 540,
             endMinuteOfDay: 660,
             slotDurationMin: 30,
