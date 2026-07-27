@@ -5,7 +5,7 @@ import {
   EventSchedule,
 } from "@/types/event";
 import { formatWeekdayLabel } from "@/lib/weekdays";
-import { formatDateInZone } from "@/lib/time";
+import { formatDateInZone, parseCalendarDayValue } from "@/lib/time";
 
 type EventWithDateRange = EventWithCapabilities & {
   type?: EventType;
@@ -53,6 +53,8 @@ export function formatAxisKeyLabel(
     );
   }
 
-  const date = new Date(axisKey);
+  // Shares the grid header's parser so the modal label can never disagree with
+  // the column the user selected.
+  const date = parseCalendarDayValue(axisKey);
   return `${date.getMonth() + 1}/${date.getDate()}`;
 }
