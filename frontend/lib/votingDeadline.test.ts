@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { isVotingDeadlineComplete } from "@/lib/event-time";
+import { isVotingDeadlineComplete } from "@/lib/votingDeadline";
 import { calendarDay } from "@/lib/time";
 
 describe("votingDeadline", () => {
