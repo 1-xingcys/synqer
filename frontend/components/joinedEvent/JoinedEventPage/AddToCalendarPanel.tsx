@@ -1,8 +1,8 @@
 "use client";
 
-import { wallClockToDate } from "@/lib/wallClock";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ConfirmedSelection } from "@/types/event";
+import { formatConfirmedSelection } from "@/components/eventCommon/confirmed-time-formatters";
 import { generateGoogleCalendarUrl } from "./google-calendar-url";
 
 type OneTimeConfirmedSelection = ConfirmedSelection & {
@@ -118,6 +118,7 @@ export function AddToCalendarPanel({
   timeZone,
 }: AddToCalendarPanelProps) {
   const t = useTranslations("joined");
+  const locale = useLocale();
 
   if (oneTimeConfirmedSelections.length === 0) {
     return null;
@@ -132,36 +133,6 @@ export function AddToCalendarPanel({
       timeZone,
     );
     window.open(url, "_blank", "noopener,noreferrer");
-  };
-
-  const formatTimeRange = (selection: OneTimeConfirmedSelection) => {
-    const start = wallClockToDate(selection.startTime);
-    const end = wallClockToDate(selection.endTime);
-
-    // The digits live in the UTC fields, so every formatter below is pinned
-    // to UTC.
-    const dateFormatter = new Intl.DateTimeFormat("en", {
-      month: "numeric",
-      day: "numeric",
-      weekday: "short",
-      timeZone: "UTC",
-    });
-    const timeFormatter = new Intl.DateTimeFormat("en", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "UTC",
-    });
-
-    const sameDay =
-      start.getUTCFullYear() === end.getUTCFullYear() &&
-      start.getUTCMonth() === end.getUTCMonth() &&
-      start.getUTCDate() === end.getUTCDate();
-
-    if (sameDay) {
-      return `${dateFormatter.format(start)} ${timeFormatter.format(start)} - ${timeFormatter.format(end)}`;
-    }
-    return `${dateFormatter.format(start)} ${timeFormatter.format(start)} - ${dateFormatter.format(end)} ${timeFormatter.format(end)}`;
   };
 
   return (
@@ -207,7 +178,7 @@ export function AddToCalendarPanel({
                   />
                 </svg>
                 <span className="text-sm text-gray-700 dark:text-zinc-300 truncate">
-                  {formatTimeRange(selection)}
+                  {formatConfirmedSelection(selection, locale) ?? ""}
                 </span>
               </div>
               <button
