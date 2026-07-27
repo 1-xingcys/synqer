@@ -1,6 +1,6 @@
 import type { operations } from "@/generated/openapi";
 import { wallClockToCalendarDay, type CalendarDay } from "@/lib/calendarDay";
-import type { WallClock } from "@/lib/wallClock";
+import { wallClock, type WallClock } from "@/lib/wallClock";
 import {
   ConfirmedSelection,
   EventCapabilities,
@@ -138,6 +138,52 @@ function buildSchedule(event: EventLike): EventSchedule {
   };
 }
 
+/**
+ * The response shape the naive-time fields arrive in. `EventLike` does not
+ * declare them — they ride through on the rest spread — so they are read back
+ * through this rather than widening the constraint.
+ */
+type NaiveTimeCarrier = {
+  votingDeadline?: string | null;
+  confirmedSelections?: { startTime?: string; endTime?: string }[];
+};
+
+/**
+ * Validate the naive-time fields rather than asserting them.
+ *
+ * These are the only values in a response that become branded types, and a
+ * bare assertion would let a malformed one through to be read as a
+ * plausible-looking time — a calendar day sitting in `votingDeadline` reports
+ * "00:00" rather than failing. Throwing here surfaces it as a query error at
+ * the one place every read path passes through.
+ */
+function validateNaiveTimes(rest: object): Partial<NaiveTimeCarrier> {
+  const carrier = rest as NaiveTimeCarrier;
+  const validated: Partial<NaiveTimeCarrier> = {};
+
+  if ("votingDeadline" in carrier) {
+    validated.votingDeadline = carrier.votingDeadline
+      ? wallClock(carrier.votingDeadline)
+      : null;
+  }
+
+  if ("confirmedSelections" in carrier) {
+    validated.confirmedSelections = carrier.confirmedSelections?.map(
+      (selection) => ({
+        ...selection,
+        // Weekday selections carry startMinute/endMinute instead, so an absent
+        // time stays absent rather than being rejected.
+        ...(selection.startTime
+          ? { startTime: wallClock(selection.startTime) }
+          : {}),
+        ...(selection.endTime ? { endTime: wallClock(selection.endTime) } : {}),
+      }),
+    );
+  }
+
+  return validated;
+}
+
 export function normalizeEventLike<T extends EventLike>(
   event: T,
 ): NormalizedEventLike<T> {
@@ -147,13 +193,13 @@ export function normalizeEventLike<T extends EventLike>(
     schedule: EventSchedule;
   } = {
     ...rest,
+    ...validateNaiveTimes(rest),
     type,
     schedule: buildSchedule(event),
   };
 
   // `WithNaiveTimes` cannot reduce while `T` is still generic, so the assertion
-  // stands in for it. It only renames the shape the naive fields already hold —
-  // `normalized` above is checked field by field.
+  // stands in for it. Every field it renames has been validated above.
   return normalized as NormalizedEventLike<T>;
 }
 

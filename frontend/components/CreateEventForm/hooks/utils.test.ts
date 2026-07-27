@@ -6,6 +6,7 @@ import {
   DEFAULT_SHARE_VOTE_TO_CHAT,
   DEFAULT_VOTE_MODE,
 } from "@/lib/eventPreference";
+import { calendarDay } from "@/lib/calendarDay";
 
 function buildFormData(
   overrides: Partial<CreateEventFormData> = {},
@@ -14,8 +15,8 @@ function buildFormData(
     eventType: "ONE_TIME",
     title: "Team sync",
     description: "",
-    startDate: "2026-07-20",
-    endDate: "2026-07-22",
+    startDate: calendarDay("2026-07-20"),
+    endDate: calendarDay("2026-07-22"),
     weekdays: DEFAULT_WEEKDAYS,
     startTime: "09:00",
     endTime: "17:00",
@@ -137,7 +138,7 @@ describe("withSyncedVotingDeadline", () => {
 
   it("keeps tracking the schedule as the start date moves", () => {
     const moved = withSyncedVotingDeadline(
-      buildFormData({ startDate: "2026-08-03" }),
+      buildFormData({ startDate: calendarDay("2026-08-03") }),
       now,
     );
 
@@ -146,7 +147,7 @@ describe("withSyncedVotingDeadline", () => {
 
   it("leaves a host-edited deadline alone", () => {
     const edited = buildFormData({
-      votingDeadline: "2026-07-05",
+      votingDeadline: calendarDay("2026-07-05"),
       votingDeadlineTime: "12:30",
       votingDeadlineTouched: true,
     });

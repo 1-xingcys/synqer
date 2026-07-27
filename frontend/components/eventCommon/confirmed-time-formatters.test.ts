@@ -1,13 +1,14 @@
 import { describe, expect, it } from "@jest/globals";
 import { formatConfirmedSelection } from "@/components/eventCommon/confirmed-time-formatters";
+import { wallClock } from "@/lib/wallClock";
 
 describe("confirmed-time-formatters", () => {
   it("formats one-time confirmed selections with date and time", () => {
     const result = formatConfirmedSelection(
       {
         kind: "ONE_TIME_RANGE",
-        startTime: "2025-04-21T10:00:00.000Z",
-        endTime: "2025-04-21T11:00:00.000Z",
+        startTime: wallClock("2025-04-21T10:00:00.000Z"),
+        endTime: wallClock("2025-04-21T11:00:00.000Z"),
         slotIds: ["slot-1"],
       },
       "en-US",

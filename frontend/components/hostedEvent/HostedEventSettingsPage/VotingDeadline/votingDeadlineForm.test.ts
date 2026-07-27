@@ -8,6 +8,8 @@ import {
 } from "@/components/hostedEvent/HostedEventSettingsPage/VotingDeadline/votingDeadlineForm";
 import { VOTING_DEADLINE_ERROR } from "@/lib/votingDeadline";
 import { EventStatus } from "@/types/event";
+import { calendarDay } from "@/lib/calendarDay";
+import { wallClock } from "@/lib/wallClock";
 
 describe("buildVotingDeadlineFormData", () => {
   it("reads the naive votingDeadline's wall-clock digits via UTC fields, not local getters", () => {
@@ -17,7 +19,9 @@ describe("buildVotingDeadlineFormData", () => {
     // TZ happens to be UTC — run this suite under TZ=America/Los_Angeles to
     // catch the regression (local getters would read 2026-07-13 19:00
     // instead of the correct 2026-07-14 02:00).
-    const result = buildVotingDeadlineFormData("2026-07-14T02:00:00.000Z");
+    const result = buildVotingDeadlineFormData(
+      wallClock("2026-07-14T02:00:00.000Z"),
+    );
 
     expect(result.deadlineEnabled).toBe(true);
     expect(result.deadlineTime).toBe("02:00");
@@ -39,7 +43,7 @@ describe("areVotingDeadlineFormsEqual", () => {
   it("ignores leftover date/time once the deadline is disabled on both sides", () => {
     const left = {
       deadlineEnabled: false,
-      deadlineDate: "2026-07-14",
+      deadlineDate: calendarDay("2026-07-14"),
       deadlineTime: "02:00",
     };
     const right = {
@@ -54,14 +58,14 @@ describe("areVotingDeadlineFormsEqual", () => {
   it("reports a difference when the day or the time changes", () => {
     const base = {
       deadlineEnabled: true,
-      deadlineDate: "2026-07-14",
+      deadlineDate: calendarDay("2026-07-14"),
       deadlineTime: "02:00",
     };
 
     expect(
       areVotingDeadlineFormsEqual(base, {
         ...base,
-        deadlineDate: "2026-07-15",
+        deadlineDate: calendarDay("2026-07-15"),
       }),
     ).toBe(false);
     expect(
@@ -101,7 +105,7 @@ describe("getVotingDeadlineError", () => {
     expect(
       getVotingDeadlineError({
         deadlineEnabled: true,
-        deadlineDate: "2026-07-14",
+        deadlineDate: calendarDay("2026-07-14"),
         deadlineTime: null,
       }),
     ).toBe(VOTING_DEADLINE_ERROR.REQUIRED);
@@ -118,7 +122,7 @@ describe("getVotingDeadlineError", () => {
     expect(
       getVotingDeadlineError({
         deadlineEnabled: true,
-        deadlineDate: "2026-07-14",
+        deadlineDate: calendarDay("2026-07-14"),
         deadlineTime: "02:00",
       }),
     ).toBeNull();
@@ -130,7 +134,7 @@ describe("toVotingDeadlinePayload", () => {
     expect(
       toVotingDeadlinePayload({
         deadlineEnabled: false,
-        deadlineDate: "2026-07-14",
+        deadlineDate: calendarDay("2026-07-14"),
         deadlineTime: "02:00",
       }),
     ).toBeNull();
@@ -140,7 +144,7 @@ describe("toVotingDeadlinePayload", () => {
     expect(
       toVotingDeadlinePayload({
         deadlineEnabled: true,
-        deadlineDate: "2026-07-14",
+        deadlineDate: calendarDay("2026-07-14"),
         deadlineTime: "02:00",
       }),
     ).toBe("2026-07-14T02:00:00.000Z");
@@ -150,7 +154,7 @@ describe("toVotingDeadlinePayload", () => {
     expect(
       toVotingDeadlinePayload({
         deadlineEnabled: true,
-        deadlineDate: "2026-07-14",
+        deadlineDate: calendarDay("2026-07-14"),
         deadlineTime: null,
       }),
     ).toBeUndefined();

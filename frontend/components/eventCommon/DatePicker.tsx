@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { CalendarIcon } from "lucide-react";
-import type { CalendarDay } from "@/lib/calendarDay";
+import { calendarDay, type CalendarDay } from "@/lib/calendarDay";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -35,7 +35,9 @@ function toPickerDate(day: CalendarDay): Date {
 
 function fromPickerDate(date: Date): CalendarDay {
   const pad = (value: number) => String(value).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  return calendarDay(
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
+  );
 }
 
 export function DatePicker({

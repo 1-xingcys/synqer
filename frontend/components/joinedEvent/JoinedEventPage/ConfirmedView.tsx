@@ -5,14 +5,11 @@ import { CalendarCheck, Calendar } from "lucide-react";
 import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
 import { AddToCalendarPanel } from "./AddToCalendarPanel";
 import { ConfirmedSelection } from "@/types/event";
+import type { OneTimeConfirmedSelection } from "@/components/eventCommon/confirmed-time-formatters";
 
 function isOneTimeConfirmedSelection(
   selection: ConfirmedSelection,
-): selection is ConfirmedSelection & {
-  kind: "ONE_TIME_RANGE";
-  startTime: string;
-  endTime: string;
-} {
+): selection is OneTimeConfirmedSelection {
   return (
     selection.kind === "ONE_TIME_RANGE" &&
     typeof selection.startTime === "string" &&
