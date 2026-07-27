@@ -3,6 +3,7 @@ import {
   addCalendarDays,
   axisDateToCalendarDay,
   calendarDay,
+  parseCalendarDayValue,
   calendarDayToWallClock,
   todayInZone,
   wallClockToCalendarDay,
@@ -165,6 +166,35 @@ describe("calendar days compare as plain strings", () => {
     expect("2026-09-01" > "2026-08-31").toBe(true);
     expect(todayInZone("UTC", new Date("2026-07-13T00:00:00Z"))).toBe(
       "2026-07-13",
+    );
+  });
+});
+
+describe("parseCalendarDayValue", () => {
+  // Consumers read this back with *local* getters, so the noon anchor is what
+  // keeps the digits intact in every runner zone. Run under
+  // TZ=America/New_York and TZ=Pacific/Kiritimati to prove it.
+  it("keeps the calendar day intact under local getters", () => {
+    const date = parseCalendarDayValue("2026-07-30");
+
+    expect(date.getFullYear()).toBe(2026);
+    expect(date.getMonth()).toBe(6);
+    expect(date.getDate()).toBe(30);
+  });
+
+  // Axis keys stopped carrying zoned instants when candidate days moved to the
+  // naive encoding; nothing produces this shape any more.
+  it("rejects a zone-bearing value by name", () => {
+    expect(() => parseCalendarDayValue("2026-06-13T00:00:00+08:00")).toThrow(
+      /not a calendar day/i,
+    );
+  });
+
+  // A weekday key reaching here used to yield an invalid Date, and the callers
+  // render it straight into labels as "NaN/NaN/NaN".
+  it("rejects a weekday key by name", () => {
+    expect(() => parseCalendarDayValue("MONDAY")).toThrow(
+      /not a calendar day/i,
     );
   });
 });

@@ -20,9 +20,7 @@ describe("hostedEventResultFlexMessage", () => {
         totalExpected: 3,
         ranges: [
           {
-            axisType: "WEEKDAY",
-            startDate: "MONDAY",
-            endDate: "MONDAY",
+            axis: { axisType: "WEEKDAY", weekday: "MONDAY" },
             startMinute: 600,
             endMinute: 720,
             availableCount: 2,

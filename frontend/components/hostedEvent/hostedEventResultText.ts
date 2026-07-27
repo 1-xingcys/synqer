@@ -16,9 +16,7 @@ function buildRangeLabel(
 ) {
   return formatLocalizedRangeLabel(
     {
-      axisType: range.axisType,
-      startDate: range.startDate,
-      endDate: range.endDate,
+      ...range.axis,
       startMinute: range.startMinute,
       endMinute: range.endMinute,
     },

@@ -189,9 +189,7 @@ export function EventTimeSelector({
                 <span className="font-medium text-zinc-900 dark:text-zinc-100">
                   {formatLocalizedRangeLabel(
                     {
-                      axisType: range.axisType,
-                      startDate: range.startDate,
-                      endDate: range.endDate,
+                      ...range.axis,
                       startMinute: range.startTime,
                       endMinute: range.endTime,
                     },

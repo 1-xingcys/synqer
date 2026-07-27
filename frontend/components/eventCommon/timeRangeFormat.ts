@@ -2,8 +2,10 @@
 
 import { formatMinutesToTime } from "@/lib/utils";
 import { formatWeekdayLabel, formatWeekdayLabelFromDate } from "@/lib/weekdays";
-import { type EventSlotAxisType, type Weekday } from "@/types/event";
+import { type Weekday } from "@/types/event";
+import type { AxisSpan } from "@/lib/axisSpan";
 import { wallClockToDate, type WallClock } from "@/lib/wallClock";
+import { calendarDay, calendarDayToDate } from "@/lib/calendarDay";
 
 export type LocalizedTimeRangeFormatOptions = {
   timeZone?: string;
@@ -11,22 +13,20 @@ export type LocalizedTimeRangeFormatOptions = {
 };
 
 /**
- * Resolve a date input into the instant to render *and* the zone to render it in.
+ * Read a date-only axis key as the day it stands for.
  *
- * A value carrying a "T" is a real instant, so it stays in the caller's zone. A
- * date-only value ("2026-07-30") is a naive calendar day with no zone of its
- * own: anchoring it in one zone and rendering it in another shifts it off the
- * stored day whenever the two disagree, so it is pinned to UTC on both sides.
+ * A calendar day has no zone of its own: anchoring it in one zone and rendering
+ * it in another shifts it off the stored day whenever the two disagree, so it
+ * is pinned to UTC on both sides.
+ *
+ * This used to also accept a zone-bearing instant and re-project it into the
+ * caller's zone. Nothing produces that shape any more — every axis key now
+ * comes from `axisDateToCalendarDay` or a weekday enum — and keeping the branch
+ * meant a bad key reached `Intl` and surfaced as "RangeError: Invalid time
+ * value", naming nothing. `calendarDay()` rejects it here by name instead.
  */
-function resolveDateInput(
-  dateInput: string,
-  options: LocalizedTimeRangeFormatOptions = {},
-): { date: Date; timeZone?: string } {
-  if (dateInput.includes("T")) {
-    return { date: new Date(dateInput), timeZone: options.timeZone };
-  }
-
-  return { date: new Date(`${dateInput}T00:00:00Z`), timeZone: "UTC" };
+function axisKeyToDate(axisKey: string): Date {
+  return calendarDayToDate(calendarDay(axisKey));
 }
 
 // Limit locale handling to the product's supported date formatting variants.
@@ -94,16 +94,16 @@ function formatLocalizedTimeLabelFromDate(
   }).format(date);
 }
 
-// Parse and format a date string with the canonical date label formatter.
+// Parse and format an axis key with the canonical date label formatter.
 function formatLocalizedDateLabel(
   dateString: string,
   locale: string,
   options: LocalizedTimeRangeFormatOptions = {},
 ) {
-  const { date, timeZone } = resolveDateInput(dateString, options);
-  return formatLocalizedDateLabelFromDate(date, locale, {
+  return formatLocalizedDateLabelFromDate(axisKeyToDate(dateString), locale, {
     ...options,
-    timeZone,
+    // The caller's zone is deliberately discarded: see axisKeyToDate.
+    timeZone: "UTC",
   });
 }
 
@@ -186,22 +186,18 @@ export function formatLocalizedDateTimeRangeLabel(
   return `${startDateLabel} - ${endDateLabel} ${timeLabel}`;
 }
 
-// Dispatch axis-based ranges to the matching shape-specific formatter.
+// Dispatch a range to the formatter matching its axis. The union narrows on
+// axisType, so the weekday payload can no longer reach the date formatter and
+// the `as Weekday` cast this used to need is gone.
 export function formatLocalizedRangeLabel(
-  range: {
-    axisType: EventSlotAxisType;
-    startDate: string;
-    endDate: string;
-    startMinute: number;
-    endMinute: number;
-  },
+  range: AxisSpan & { startMinute: number; endMinute: number },
   locale: string,
   options: LocalizedTimeRangeFormatOptions = {},
 ) {
-  if (range.axisType === "WEEKDAY" && range.startDate === range.endDate) {
+  if (range.axisType === "WEEKDAY") {
     return formatLocalizedWeekdayTimeRangeLabel(
       {
-        weekday: range.startDate as Weekday,
+        weekday: range.weekday,
         startMinute: range.startMinute,
         endMinute: range.endMinute,
       },
@@ -212,8 +208,8 @@ export function formatLocalizedRangeLabel(
 
   return formatLocalizedDateMinuteRangeLabel(
     {
-      startDate: range.startDate,
-      endDate: range.endDate,
+      startDate: range.startDay,
+      endDate: range.endDay,
       startMinute: range.startMinute,
       endMinute: range.endMinute,
     },

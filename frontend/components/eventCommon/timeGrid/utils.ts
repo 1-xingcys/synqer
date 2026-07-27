@@ -1,7 +1,9 @@
 import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
-import { parseCalendarDayValue } from "@/lib/time";
+import { parseCalendarDayValue } from "@/lib/calendarDay";
+import type { CalendarDay } from "@/lib/calendarDay";
 import { calendarDayMinuteToInstant } from "@/lib/wallClock";
 import { axisDateToCalendarDay } from "@/lib/calendarDay";
+import { axisSpanKey, axisSpanOfSlot } from "@/lib/axisSpan";
 import { TimeSlot, Vote, CalendarEvent, GridAxisColumn } from "./types";
 
 function warnInvalidSlot(slot: TimeSlot, reason: string) {
@@ -21,13 +23,13 @@ export const formatAxisHeader = (
   column: GridAxisColumn,
   locale: string = "en",
 ): { weekday: string; day?: number; month?: string } => {
-  if (column.kind === "weekday" && column.axisWeekday) {
+  if (column.axis.axisType === "WEEKDAY") {
     return {
-      weekday: formatWeekdayLabel(column.axisWeekday, locale),
+      weekday: formatWeekdayLabel(column.axis.weekday, locale),
     };
   }
 
-  const date = parseCalendarDayValue(column.rawValue);
+  const date = parseCalendarDayValue(column.axis.startDay);
   const dateLocale = getDateLocale(locale);
   const weekday = date.toLocaleDateString(dateLocale, { weekday: "short" });
   const day = date.getDate();
@@ -42,25 +44,26 @@ export const formatAxisPageRange = (
 ): string => {
   if (!startColumn || !endColumn) return "";
 
-  if (startColumn.kind === "weekday" && endColumn.kind === "weekday") {
-    const startLabel =
-      startColumn.axisWeekday &&
-      formatWeekdayLabel(startColumn.axisWeekday, locale);
-    const endLabel =
-      endColumn.axisWeekday &&
-      formatWeekdayLabel(endColumn.axisWeekday, locale);
+  // A grid is never mixed-kind, and the union now says so: the start column
+  // alone decides which formatter both ends go through. Testing both columns
+  // was the weaker guard — it silently fell into the date branch on a mismatch.
+  if (startColumn.axis.axisType === "WEEKDAY") {
+    if (endColumn.axis.axisType !== "WEEKDAY") return "";
 
-    if (!startLabel || !endLabel) return "";
+    const startLabel = formatWeekdayLabel(startColumn.axis.weekday, locale);
+    const endLabel = formatWeekdayLabel(endColumn.axis.weekday, locale);
     return startLabel === endLabel ? startLabel : `${startLabel} ~ ${endLabel}`;
   }
 
-  const startLabel = formatDatePageValue(startColumn.rawValue);
-  const endLabel = formatDatePageValue(endColumn.rawValue);
+  if (endColumn.axis.axisType !== "DATE") return "";
+
+  const startLabel = formatDatePageValue(startColumn.axis.startDay);
+  const endLabel = formatDatePageValue(endColumn.axis.startDay);
   return startLabel === endLabel ? startLabel : `${startLabel} ~ ${endLabel}`;
 };
 
-const formatDatePageValue = (dateStr: string): string => {
-  const date = parseCalendarDayValue(dateStr);
+const formatDatePageValue = (day: CalendarDay): string => {
+  const date = parseCalendarDayValue(day);
   return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
 };
 
@@ -68,37 +71,12 @@ export const buildAxisColumns = (
   axisKeys: string[],
   slotsByAxis: Record<string, TimeSlot[]>,
 ): GridAxisColumn[] => {
-  return axisKeys.map((axisKey) => {
+  return axisKeys.flatMap((axisKey) => {
     const firstSlot = slotsByAxis[axisKey]?.[0];
+    const axis = firstSlot && axisSpanOfSlot(firstSlot);
 
-    if (firstSlot?.axisType === "WEEKDAY" && firstSlot.axisWeekday) {
-      return {
-        key: axisKey,
-        kind: "weekday",
-        rawValue: axisKey,
-        axisWeekday: firstSlot.axisWeekday,
-      };
-    }
-
-    return {
-      key: axisKey,
-      kind: "date",
-      rawValue: axisKey,
-    };
+    return axis ? [{ key: axisKey, axis }] : [];
   });
-};
-
-export const getSlotAxisKey = (slot: TimeSlot): string | null => {
-  if (slot.axisType === "WEEKDAY" && slot.axisWeekday) {
-    return slot.axisWeekday;
-  }
-
-  const axisKey = axisDateToCalendarDay(slot.axisDate);
-  if (!axisKey) {
-    warnInvalidSlot(slot, "missing axisDate");
-  }
-
-  return axisKey;
 };
 
 export const sortAxisKeys = (
@@ -133,10 +111,13 @@ export const groupSlotsByAxis = (
 ): Record<string, TimeSlot[]> => {
   return slots.reduce(
     (acc, slot) => {
-      const axisKey = getSlotAxisKey(slot);
-      if (!axisKey) {
+      const span = axisSpanOfSlot(slot);
+      if (!span) {
+        warnInvalidSlot(slot, "missing axisDate");
         return acc;
       }
+
+      const axisKey = axisSpanKey(span);
       if (!acc[axisKey]) acc[axisKey] = [];
       acc[axisKey].push(slot);
       return acc;

@@ -5,8 +5,7 @@ import { GridAxisColumn } from "../types";
 import { formatAxisHeader } from "../utils";
 
 interface DateHeaderProps {
-  dates?: string[];
-  columns?: GridAxisColumn[];
+  columns: GridAxisColumn[];
   isDayFullySelected?: (columnKey: string) => boolean;
   onSelectDay?: (columnKey: string) => void;
   firstTimeLabel?: string;
@@ -15,7 +14,6 @@ interface DateHeaderProps {
 }
 
 export function DateHeader({
-  dates = [],
   columns,
   isDayFullySelected,
   onSelectDay,
@@ -25,9 +23,6 @@ export function DateHeader({
 }: DateHeaderProps) {
   const locale = useLocale();
   const showBottomGridLine = isStickyActive;
-  const axisColumns =
-    columns ??
-    dates.map((dateKey) => ({ key: dateKey, kind: "date", rawValue: dateKey }));
 
   return (
     <div className="relative flex">
@@ -40,7 +35,7 @@ export function DateHeader({
         )}
       </div>
       {/* Date columns */}
-      {axisColumns.map((column) => {
+      {columns.map((column) => {
         const { weekday, day, month } = formatAxisHeader(column, locale);
         const isFullySelected = isDayFullySelected?.(column.key) ?? false;
 

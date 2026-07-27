@@ -3,7 +3,6 @@ import {
   buildAxisColumns,
   formatAxisHeader,
   formatAxisPageRange,
-  getSlotAxisKey,
   groupSlotsByAxis,
   mapCalendarEventsToSlots,
   sortAxisKeys,
@@ -12,6 +11,7 @@ import {
   CalendarEvent,
   TimeSlot,
 } from "@/components/eventCommon/timeGrid/types";
+import { calendarDay } from "@/lib/calendarDay";
 
 const recurringSlots: TimeSlot[] = [
   {
@@ -45,7 +45,9 @@ const recurringSlots: TimeSlot[] = [
 
 describe("timeGrid utils", () => {
   it("uses weekday as axis key for recurring slots", () => {
-    expect(getSlotAxisKey(recurringSlots[0])).toBe("MONDAY");
+    expect(Object.keys(groupSlotsByAxis([recurringSlots[0]]))).toEqual([
+      "MONDAY",
+    ]);
   });
 
   it("sorts recurring axis keys in locale weekday order", () => {
@@ -61,18 +63,8 @@ describe("timeGrid utils", () => {
     const columns = buildAxisColumns(["MONDAY", "WEDNESDAY"], slotsByAxis);
 
     expect(columns).toEqual([
-      {
-        key: "MONDAY",
-        kind: "weekday",
-        rawValue: "MONDAY",
-        axisWeekday: "MONDAY",
-      },
-      {
-        key: "WEDNESDAY",
-        kind: "weekday",
-        rawValue: "WEDNESDAY",
-        axisWeekday: "WEDNESDAY",
-      },
+      { key: "MONDAY", axis: { axisType: "WEEKDAY", weekday: "MONDAY" } },
+      { key: "WEDNESDAY", axis: { axisType: "WEEKDAY", weekday: "WEDNESDAY" } },
     ]);
     expect(formatAxisHeader(columns[0], "en-US")).toEqual({ weekday: "Mon" });
     expect(formatAxisPageRange(columns[0], columns[1], "en-US")).toBe(
@@ -83,8 +75,11 @@ describe("timeGrid utils", () => {
   it("formats date columns as stable calendar days", () => {
     const dateColumn = {
       key: "2026-06-13",
-      kind: "date" as const,
-      rawValue: "2026-06-13",
+      axis: {
+        axisType: "DATE" as const,
+        startDay: calendarDay("2026-06-13"),
+        endDay: calendarDay("2026-06-13"),
+      },
     };
 
     expect(formatAxisHeader(dateColumn, "en-US")).toEqual({

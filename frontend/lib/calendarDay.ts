@@ -70,6 +70,24 @@ export function calendarDayToDate(day: CalendarDay): Date {
 }
 
 /**
+ * The day as a Date whose *local* fields hold its digits — the counterpart to
+ * {@link calendarDayToDate}, for callers that read back with local getters
+ * (`getDate`, `toLocaleDateString`) rather than an `Intl` formatter pinned to
+ * UTC. Anchoring at local noon rather than midnight keeps the digits intact in
+ * every zone, including those whose DST transition happens at midnight.
+ *
+ * This used to also accept a zone-bearing instant and pass it through. Nothing
+ * produces that shape any more — every axis key comes from
+ * {@link axisDateToCalendarDay} or a weekday enum — and the branch let a
+ * weekday key ("MONDAY") through to an invalid Date, which the grid renders as
+ * "NaN/NaN/NaN". `calendarDay()` rejects both by name instead.
+ */
+export function parseCalendarDayValue(rawValue: string): Date {
+  const [year, month, date] = calendarDay(rawValue).split("-").map(Number);
+  return new Date(year, month - 1, date, 12);
+}
+
+/**
  * Combine a calendar day and an "HH:mm" string into a {@link WallClock} — the
  * shape the API expects for `votingDeadline`, so the result needs no further
  * serialisation.

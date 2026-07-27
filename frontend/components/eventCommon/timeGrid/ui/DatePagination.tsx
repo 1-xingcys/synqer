@@ -6,43 +6,28 @@ import { GridAxisColumn } from "../types";
 import { formatAxisPageRange } from "../utils";
 
 interface DatePaginationProps {
-  dates?: string[];
-  columns?: GridAxisColumn[];
+  columns: GridAxisColumn[];
   currentPage: number;
   datesPerPage: number;
   onPageChange: (page: number) => void;
 }
 
 export function DatePagination({
-  dates = [],
-  columns,
+  columns: axisColumns,
   currentPage,
   datesPerPage,
   onPageChange,
 }: DatePaginationProps) {
   const locale = useLocale();
-  const axisColumns =
-    columns ??
-    dates.map((dateKey) => ({ key: dateKey, kind: "date", rawValue: dateKey }));
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const totalPages = Math.ceil(axisColumns.length / datesPerPage);
 
-  // Get all page ranges for dropdown
-  const pageRanges = useMemo(() => {
-    return Array.from({ length: totalPages }).map((_, pageIdx) => {
-      const startIdx = pageIdx * datesPerPage;
-      const endIdx = Math.min(
-        startIdx + datesPerPage - 1,
-        axisColumns.length - 1,
-      );
-      return {
-        pageIdx,
-        startDate: axisColumns[startIdx]?.rawValue,
-        endDate: axisColumns[endIdx]?.rawValue,
-      };
-    });
-  }, [axisColumns, datesPerPage, totalPages]);
+  // Page indices for the dropdown; each row labels itself from axisColumns.
+  const pageRanges = useMemo(
+    () => Array.from({ length: totalPages }, (_, pageIdx) => ({ pageIdx })),
+    [totalPages],
+  );
 
   // Close dropdown when clicking outside
   useEffect(() => {

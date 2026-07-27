@@ -9,7 +9,8 @@ import {
   type RefObject,
   type TouchEvent as ReactTouchEvent,
 } from "react";
-import { MergedTimeRow } from "../../types";
+import { extendAxisSpan, type AxisSpan } from "@/lib/axisSpan";
+import { GridAxisColumn, MergedTimeRow } from "../../types";
 
 interface CellPosition {
   rowIndex: number;
@@ -18,8 +19,7 @@ interface CellPosition {
 
 export interface SelectionRange {
   cells: Array<{ dateKey: string; rowIndex: number; slotIndices: number[] }>;
-  startDate: string;
-  endDate: string;
+  axis: AxisSpan;
   startTime: number;
   endTime: number;
 }
@@ -31,10 +31,56 @@ interface RectBounds {
   maxDate: number;
 }
 
+/**
+ * Fold the selected columns into one range, or null when the selection covers
+ * no cells or spans columns that are not adjacent on the same axis.
+ *
+ * Exported as a pure function so it can be tested without rendering: this repo
+ * has no jsdom. Carrying the span means the heatmap no longer has to recover
+ * the axis kind by looking the start key back up in its column map.
+ */
+export function buildSelectionRange(
+  columns: GridAxisColumn[],
+  mergedTimeRows: MergedTimeRow[],
+  bounds: RectBounds,
+): SelectionRange | null {
+  const cells: SelectionRange["cells"] = [];
+  let axis: AxisSpan | null = null;
+
+  for (let dateIdx = bounds.minDate; dateIdx <= bounds.maxDate; dateIdx++) {
+    const column = columns[dateIdx];
+    if (!column) continue;
+
+    axis = axis ? extendAxisSpan(axis, column.axis) : column.axis;
+    if (!axis) return null;
+
+    for (let rowIdx = bounds.minRow; rowIdx <= bounds.maxRow; rowIdx++) {
+      const row = mergedTimeRows[rowIdx];
+      if (!row) continue;
+      cells.push({
+        dateKey: column.key,
+        rowIndex: rowIdx,
+        slotIndices: row.slotIndices,
+      });
+    }
+  }
+
+  if (!axis || cells.length === 0) return null;
+
+  const startRow = mergedTimeRows[bounds.minRow];
+  const endRow = mergedTimeRows[bounds.maxRow];
+  return {
+    cells,
+    axis,
+    startTime: startRow?.startMinute ?? 0,
+    endTime: endRow?.endMinute ?? 0,
+  };
+}
+
 interface UseResultsRangeSelectionParams {
   gridRef: RefObject<HTMLDivElement | null>;
   mergedTimeRows: MergedTimeRow[];
-  paginatedDates: string[];
+  paginatedColumns: GridAxisColumn[];
   onRangeSelect: (range: SelectionRange) => void;
 }
 
@@ -43,7 +89,7 @@ interface UseResultsRangeSelectionResult {
   rectBounds: RectBounds | null;
   isInDragRectangle: (rowIndex: number, dateIndex: number) => boolean;
   handleCellClick: (
-    dateKey: string,
+    column: GridAxisColumn,
     rowIndex: number,
     slotIndices: number[],
   ) => void;
@@ -66,7 +112,7 @@ interface UseResultsRangeSelectionResult {
 export function useResultsRangeSelection({
   gridRef,
   mergedTimeRows,
-  paginatedDates,
+  paginatedColumns,
   onRangeSelect,
 }: UseResultsRangeSelectionParams): UseResultsRangeSelectionResult {
   const [isDragging, setIsDragging] = useState(false);
@@ -113,39 +159,9 @@ export function useResultsRangeSelection({
   }, [dragStart, dragEnd]);
 
   const buildRangeFromBounds = useCallback(
-    (bounds: RectBounds): SelectionRange | null => {
-      const cells: SelectionRange["cells"] = [];
-      const dateKeys: string[] = [];
-
-      for (let dateIdx = bounds.minDate; dateIdx <= bounds.maxDate; dateIdx++) {
-        const dateKey = paginatedDates[dateIdx];
-        if (!dateKey) continue;
-        dateKeys.push(dateKey);
-
-        for (let rowIdx = bounds.minRow; rowIdx <= bounds.maxRow; rowIdx++) {
-          const row = mergedTimeRows[rowIdx];
-          if (!row) continue;
-          cells.push({
-            dateKey,
-            rowIndex: rowIdx,
-            slotIndices: row.slotIndices,
-          });
-        }
-      }
-
-      if (cells.length === 0) return null;
-
-      const startRow = mergedTimeRows[bounds.minRow];
-      const endRow = mergedTimeRows[bounds.maxRow];
-      return {
-        cells,
-        startDate: dateKeys[0],
-        endDate: dateKeys[dateKeys.length - 1],
-        startTime: startRow?.startMinute ?? 0,
-        endTime: endRow?.endMinute ?? 0,
-      };
-    },
-    [paginatedDates, mergedTimeRows],
+    (bounds: RectBounds): SelectionRange | null =>
+      buildSelectionRange(paginatedColumns, mergedTimeRows, bounds),
+    [paginatedColumns, mergedTimeRows],
   );
 
   const completeDragSelection = useCallback(() => {
@@ -169,7 +185,7 @@ export function useResultsRangeSelection({
   }, [isDragging, getRectangleBounds, buildRangeFromBounds, onRangeSelect]);
 
   const handleCellClick = useCallback(
-    (dateKey: string, rowIndex: number, slotIndices: number[]) => {
+    (column: GridAxisColumn, rowIndex: number, slotIndices: number[]) => {
       if (hasDraggedRef.current) {
         hasDraggedRef.current = false;
         return;
@@ -179,9 +195,8 @@ export function useResultsRangeSelection({
       if (!row) return;
 
       onRangeSelect({
-        cells: [{ dateKey, rowIndex, slotIndices }],
-        startDate: dateKey,
-        endDate: dateKey,
+        cells: [{ dateKey: column.key, rowIndex, slotIndices }],
+        axis: column.axis,
         startTime: row.startMinute,
         endTime: row.endMinute,
       });
