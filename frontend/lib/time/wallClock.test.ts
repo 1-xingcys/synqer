@@ -1,13 +1,14 @@
 import { describe, expect, it } from "@jest/globals";
 import {
   calendarDayMinuteToInstant,
+  formatWallClock,
   wallClock,
   wallClockDay,
   wallClockTime,
   wallClockToDate,
   wallClockToInstant,
 } from "@/lib/time";
-import { calendarDay } from "@/lib/time";
+import { calendarDay, calendarDayToWallClock } from "@/lib/time";
 
 describe("wallClock", () => {
   it("accepts the wire form unchanged", () => {
@@ -127,6 +128,24 @@ describe("calendarDayMinuteToInstant", () => {
         "America/New_York",
       ).toISOString(),
     ).toBe("2026-07-04T13:00:00.000Z");
+  });
+});
+
+describe("formatWallClock", () => {
+  it("shows the digits it carries, not a zone-shifted instant", () => {
+    // 18:00 is late enough that any eastward viewer zone would roll the day.
+    expect(formatWallClock(wallClock("2026-07-30T18:00:00.000Z"))).toBe(
+      "2026/07/30 18:00",
+    );
+    // 02:00 is early enough that any westward viewer zone would roll it back.
+    expect(formatWallClock(wallClock("2026-07-30T02:00:00.000Z"))).toBe(
+      "2026/07/30 02:00",
+    );
+  });
+
+  it("round-trips a value produced by calendarDayToWallClock", () => {
+    const picked = calendarDayToWallClock(calendarDay("2026-07-13"), "18:00");
+    expect(formatWallClock(picked)).toBe("2026/07/13 18:00");
   });
 });
 

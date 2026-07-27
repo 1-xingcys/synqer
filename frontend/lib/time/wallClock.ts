@@ -1,6 +1,6 @@
 // Intra-module imports stay relative: see calendarDay.ts.
 import { wallClockToCalendarDay, type CalendarDay } from "./calendarDay";
-import { zonedWallClockToInstant } from "./zone";
+import { formatDateTimeInZone, zonedWallClockToInstant } from "./zone";
 
 /**
  * A naive wall-clock timestamp: a day plus a time, with no zone of its own.
@@ -78,6 +78,16 @@ export function wallClockToDate(value: WallClock): Date {
 /** The calendar day part. */
 export function wallClockDay(value: WallClock): CalendarDay {
   return wallClockToCalendarDay(wallClockToDate(value));
+}
+
+/**
+ * The value as "yyyy/MM/dd HH:mm".
+ *
+ * Pinned to UTC because that is where the digits live. Formatting it in the
+ * viewer's zone shifts it by their offset, which near midnight rolls the day.
+ */
+export function formatWallClock(value: WallClock): string {
+  return formatDateTimeInZone(wallClockToDate(value), "UTC");
 }
 
 /** The time-of-day part as "HH:mm". */

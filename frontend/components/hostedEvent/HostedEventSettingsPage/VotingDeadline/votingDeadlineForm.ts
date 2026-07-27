@@ -1,7 +1,4 @@
-import {
-  validateVotingDeadline,
-  type VotingDeadlineError,
-} from "@/lib/event-time";
+import { isVotingDeadlineComplete } from "@/lib/event-time";
 import { calendarDayToWallClock, type CalendarDay } from "@/lib/time";
 import { wallClockDay, wallClockTime, type WallClock } from "@/lib/time";
 import { EventStatus } from "@/types/event";
@@ -75,12 +72,11 @@ export function isVotingDeadlineLocked(
   );
 }
 
-/** Reuse the same validation engine as the create page. */
-export function getVotingDeadlineError(
+/** Reuse the same validation engine as the create page, in this form's shape. */
+export function isVotingDeadlineFormComplete(
   formData: VotingDeadlineFormData,
-): VotingDeadlineError | null {
-  // The deadline value is unconstrained here too; only completeness matters.
-  return validateVotingDeadline({
+): boolean {
+  return isVotingDeadlineComplete({
     enabled: formData.deadlineEnabled,
     date: formData.deadlineDate,
     time: formData.deadlineTime,

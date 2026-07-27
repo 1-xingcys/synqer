@@ -4,9 +4,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { CalendarDays, Clock3, Globe, Timer, Calendar } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/time/minuteOfDay";
 import { formatEventCandidateDaySummary } from "@/lib/event-presentation";
-import { formatVotingDeadlineWallClock } from "@/lib/event-time";
 import { EventSchedule, EventType } from "@/types/event";
-import type { WallClock } from "@/lib/time";
+import { formatWallClock, type WallClock } from "@/lib/time";
 
 interface EventConfigurationSummaryProps {
   eventType: EventType;
@@ -87,7 +86,7 @@ export function EventConfigurationSummary({
           label={t("eventInfo.votingDeadline")}
           value={
             votingDeadline
-              ? formatVotingDeadlineWallClock(votingDeadline)
+              ? formatWallClock(votingDeadline)
               : t("eventInfo.noDeadline")
           }
         />

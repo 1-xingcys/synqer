@@ -1,10 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-  validateVotingDeadline,
-  VOTING_DEADLINE_ERROR,
-} from "@/lib/event-time";
+import { isVotingDeadlineComplete } from "@/lib/event-time";
 import { CreateEventFormData } from "../types";
 import { todayInZone } from "@/lib/time";
 import { parseTimeToMinutes } from "./utils";
@@ -49,13 +46,13 @@ export function getCreateEventValidationErrors(
     errorSet.add(ValidationError.StartDateInPast);
   }
 
-  const deadlineError = validateVotingDeadline({
-    enabled: formData.votingDeadlineEnabled,
-    date: formData.votingDeadline,
-    time: formData.votingDeadlineTime,
-  });
-
-  if (deadlineError === VOTING_DEADLINE_ERROR.REQUIRED) {
+  if (
+    !isVotingDeadlineComplete({
+      enabled: formData.votingDeadlineEnabled,
+      date: formData.votingDeadline,
+      time: formData.votingDeadlineTime,
+    })
+  ) {
     errorSet.add(ValidationError.DeadlineRequired);
   }
 
