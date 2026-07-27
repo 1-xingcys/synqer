@@ -1,5 +1,5 @@
 "use client";
-import { axisDateToCalendarDay } from "@/lib/calendarDay";
+import { axisDateToCalendarDay } from "@/lib/time";
 import { axisSpanOfSlot, extendAxisSpan, type AxisSpan } from "@/lib/axisSpan";
 
 import { useMemo } from "react";

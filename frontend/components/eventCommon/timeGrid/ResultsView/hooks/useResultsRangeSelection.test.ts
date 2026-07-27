@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import { buildSelectionRange } from "./useResultsRangeSelection";
-import { calendarDay } from "@/lib/calendarDay";
+import { calendarDay } from "@/lib/time";
 
 const columns = [
   {

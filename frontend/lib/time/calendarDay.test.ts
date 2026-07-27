@@ -7,8 +7,8 @@ import {
   calendarDayToWallClock,
   todayInZone,
   wallClockToCalendarDay,
-} from "@/lib/calendarDay";
-import { wallClockDay } from "@/lib/wallClock";
+} from "@/lib/time";
+import { wallClockDay } from "@/lib/time";
 
 describe("calendarDay", () => {
   it("accepts a padded YYYY-MM-DD value unchanged", () => {

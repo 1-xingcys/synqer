@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 import { buildEventShareFlexMessage } from "@/lib/line-flex-message/shareEventFlexMessage";
-import { wallClock } from "@/lib/wallClock";
+import { wallClock } from "@/lib/time";
 
 type FlexTextNode = {
   type?: string;

@@ -1,5 +1,5 @@
-import { addCalendarDays, axisDateToCalendarDay } from "@/lib/calendarDay";
-import type { CalendarDay } from "@/lib/calendarDay";
+import { addCalendarDays, axisDateToCalendarDay } from "@/lib/time";
+import type { CalendarDay } from "@/lib/time";
 import type { EventSlotAxisType, Weekday } from "@/types/event";
 
 /**

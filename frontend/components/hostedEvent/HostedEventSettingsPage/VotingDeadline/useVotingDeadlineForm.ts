@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { apiFetchJson } from "@/lib/apiClient";
 import type { operations } from "@/generated/openapi";
-import type { CalendarDay } from "@/lib/calendarDay";
+import type { CalendarDay } from "@/lib/time";
 import {
   EMPTY_VOTING_DEADLINE_FORM_DATA,
   areVotingDeadlineFormsEqual,

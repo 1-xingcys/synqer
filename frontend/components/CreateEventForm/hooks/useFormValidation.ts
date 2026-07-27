@@ -6,7 +6,7 @@ import {
   VOTING_DEADLINE_ERROR,
 } from "@/lib/votingDeadline";
 import { CreateEventFormData } from "../types";
-import { todayInZone } from "@/lib/calendarDay";
+import { todayInZone } from "@/lib/time";
 import { parseTimeToMinutes } from "./utils";
 
 export enum ValidationError {

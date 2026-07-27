@@ -1,5 +1,5 @@
 "use client";
-import { axisDateToCalendarDay } from "@/lib/calendarDay";
+import { axisDateToCalendarDay } from "@/lib/time";
 
 import { useMemo } from "react";
 import type { HostedResultSlot } from "@/components/hostedEvent/resultSummary";

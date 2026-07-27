@@ -5,7 +5,7 @@ import {
   extendAxisSpan,
   type AxisSpan,
 } from "@/lib/axisSpan";
-import { calendarDay } from "@/lib/calendarDay";
+import { calendarDay } from "@/lib/time";
 
 const day = (value: string): AxisSpan => ({
   axisType: "DATE",

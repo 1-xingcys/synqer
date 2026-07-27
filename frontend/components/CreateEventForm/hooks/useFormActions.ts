@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
-import { calendarDayToWallClock } from "@/lib/calendarDay";
+import { calendarDayToWallClock } from "@/lib/time";
 import { toVoteModeDto } from "@/lib/eventPreference";
 import { useLiff } from "@/hooks/useLiff";
 import { apiFetchJson } from "@/lib/apiClient";

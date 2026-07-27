@@ -1,5 +1,7 @@
-import { instantToZonedWallClock } from "@/lib/time";
-import type { WallClock } from "@/lib/wallClock";
+// Intra-module imports stay relative: routing them through the barrel would
+// make the calendarDay/wallClock/zone cycle a runtime one.
+import { instantToZonedWallClock } from "./zone";
+import type { WallClock } from "./wallClock";
 
 /**
  * A naive calendar day in "YYYY-MM-DD" form: no time, no zone.

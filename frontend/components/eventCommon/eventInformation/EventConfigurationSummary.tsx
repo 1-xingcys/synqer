@@ -6,7 +6,7 @@ import { formatMinutesToTime } from "@/lib/time/minuteOfDay";
 import { formatEventCandidateDaySummary } from "@/lib/event-presentation";
 import { formatVotingDeadlineWallClock } from "@/lib/votingDeadline";
 import { EventSchedule, EventType } from "@/types/event";
-import type { WallClock } from "@/lib/wallClock";
+import type { WallClock } from "@/lib/time";
 
 interface EventConfigurationSummaryProps {
   eventType: EventType;

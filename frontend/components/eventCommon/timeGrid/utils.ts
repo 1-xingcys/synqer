@@ -1,8 +1,8 @@
 import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
-import { parseCalendarDayValue } from "@/lib/calendarDay";
-import type { CalendarDay } from "@/lib/calendarDay";
-import { calendarDayMinuteToInstant } from "@/lib/wallClock";
-import { axisDateToCalendarDay } from "@/lib/calendarDay";
+import { parseCalendarDayValue } from "@/lib/time";
+import type { CalendarDay } from "@/lib/time";
+import { calendarDayMinuteToInstant } from "@/lib/time";
+import { axisDateToCalendarDay } from "@/lib/time";
 import { axisSpanKey, axisSpanOfSlot } from "@/lib/axisSpan";
 import { TimeSlot, Vote, CalendarEvent, GridAxisColumn } from "./types";
 

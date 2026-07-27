@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import { formatConfirmedSelection } from "@/components/eventCommon/confirmed-time-formatters";
-import { wallClock } from "@/lib/wallClock";
+import { wallClock } from "@/lib/time";
 
 describe("confirmed-time-formatters", () => {
   it("formats one-time confirmed selections with date and time", () => {

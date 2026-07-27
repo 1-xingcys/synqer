@@ -1,6 +1,6 @@
 import type { components } from "@/generated/openapi";
-import type { CalendarDay } from "@/lib/calendarDay";
-import type { WallClock } from "@/lib/wallClock";
+import type { CalendarDay } from "@/lib/time";
+import type { WallClock } from "@/lib/time";
 
 export type EventType = components["schemas"]["EventType"];
 export type Weekday = components["schemas"]["Weekday"];
