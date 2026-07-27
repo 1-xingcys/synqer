@@ -1,8 +1,5 @@
-import type {
-  MergedTimeRow,
-  TimeGranularity,
-} from "@/components/eventCommon/timeGrid/types";
-import { VoteMode, type Weekday } from "@/types/event";
+import type { MergedTimeRow } from "@/components/eventCommon/timeGrid/types";
+import { VoteMode, type TimeGranularity, type Weekday } from "@/types/event";
 
 /**
  * The static demo data behind the preference preview.

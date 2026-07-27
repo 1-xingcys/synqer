@@ -1,5 +1,5 @@
 import { VoteMode, type EventVoteModeDto } from "@/types/event";
-import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
+import type { TimeGranularity } from "@/types/event";
 
 /**
  * Host-controlled preferences for an event.

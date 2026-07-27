@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, Copy, Share, Share2, X } from "lucide-react";
 import { createPortal } from "react-dom";
-import { TimeGranularity } from "../types";
+import type { TimeGranularity } from "@/types/event";
 import { ResultsAvailabilityMode } from "./types";
 import { Z_INDEX } from "@/lib/zIndex";
 

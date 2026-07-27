@@ -10,6 +10,13 @@ export type ConfirmedSelectionKind =
 /** Wire format of the host's default vote mode (uppercase, unlike `VoteMode`). */
 export type EventVoteModeDto = components["schemas"]["EventVoteMode"];
 
+/**
+ * The slot size a grid is drawn at, in minutes.
+ */
+export type TimeGranularity = NonNullable<
+  components["schemas"]["CreateEventDto"]["defaultGranularityMin"]
+>;
+
 export const EventStatus = {
   VOTING: "VOTING", // Voting is open (event created ~ voting deadline)
   VOTING_ENDED: "VOTING_ENDED", // Voting is over (deadline passed, but the host has not picked a time yet)

@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { TimeGranularity, MergedTimeRow } from "../types";
+import { MergedTimeRow } from "../types";
+import type { TimeGranularity } from "@/types/event";
 
 interface TimeSlotForMerge {
   startMinute: number;

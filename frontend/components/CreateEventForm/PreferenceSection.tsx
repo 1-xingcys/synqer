@@ -6,7 +6,7 @@ import { ChevronDown } from "lucide-react";
 import { GridDefaultFields } from "@/components/eventCommon/eventPreference/GridDefaultFields";
 import { VoteNoticeFields } from "@/components/eventCommon/eventPreference/VoteNoticeFields";
 import type { VoteMode } from "@/types/event";
-import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
+import type { TimeGranularity } from "@/types/event";
 import { cn } from "@/lib/utils";
 import { useFormStateContext } from "./CreateEventFormContext";
 

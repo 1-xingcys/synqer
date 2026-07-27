@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { VoteMode } from "@/types/event";
-import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
+import type { TimeGranularity } from "@/types/event";
 import { TimeColumn } from "@/components/eventCommon/timeGrid/ui";
 import { useResponsiveGrid } from "@/components/eventCommon/timeGrid/hooks";
 import { cn } from "@/lib/utils";
