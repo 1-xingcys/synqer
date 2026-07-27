@@ -5,8 +5,7 @@ import {
   EventSchedule,
 } from "@/types/event";
 import { formatWeekdayLabel } from "@/lib/weekdays";
-import { parseCalendarDayValue } from "@/lib/time";
-import { calendarDayToDate } from "@/lib/calendarDay";
+import { calendarDayToDate, parseCalendarDayValue } from "@/lib/calendarDay";
 
 type EventWithDateRange = EventWithCapabilities & {
   type?: EventType;

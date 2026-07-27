@@ -34,7 +34,9 @@ describe("hostedEventResultText", () => {
     expect(result).toContain("1. (Mon) 10:00 - 12:00");
   });
 
-  it("formats one-time confirmed ranges in the event time zone", () => {
+  // Candidate days are naive, so the label reads the stored digits rather than
+  // re-projecting them through the event zone.
+  it("formats one-time confirmed ranges on their stored calendar days", () => {
     const result = buildHostedEventResultTextFromSummary({
       eventTitle: "Weekend Plan",
       timeZone: "Asia/Taipei",
@@ -52,8 +54,8 @@ describe("hostedEventResultText", () => {
         ranges: [
           {
             axisType: "DATE",
-            startDate: "2026-06-13T00:00:00+08:00",
-            endDate: "2026-06-14T00:00:00+08:00",
+            startDate: "2026-06-13",
+            endDate: "2026-06-14",
             startMinute: 1230,
             endMinute: 1410,
             availableCount: 1,
