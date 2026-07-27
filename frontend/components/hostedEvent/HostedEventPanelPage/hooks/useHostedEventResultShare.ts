@@ -43,7 +43,6 @@ type ResultTextShareStatus =
 export function useHostedEventResultShare(opts: {
   eventId: string;
   eventTitle: string;
-  eventTimeZone: string;
   locale: string;
   confirmedSlots: HostedResultSlot[];
   votes: HostedResultVote[];
@@ -83,7 +82,6 @@ export function useHostedEventResultShare(opts: {
 
     return buildHostedEventResultTextFromSummary({
       eventTitle: opts.eventTitle,
-      timeZone: opts.eventTimeZone,
       summary: resultSummary,
       locale: opts.locale,
       copy: opts.copy,
@@ -132,7 +130,6 @@ export function useHostedEventResultShare(opts: {
     const result = await shareHostedEventResultFlexMessage({
       eventId: opts.eventId,
       eventTitle: opts.eventTitle,
-      timeZone: opts.eventTimeZone,
       summary: resultSummary,
       locale: opts.locale,
     });

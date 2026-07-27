@@ -60,7 +60,6 @@ function formatOneTimeConfirmedSelection(
       endTime: selection.endTime,
     },
     locale,
-    { timeZone: "UTC" },
   );
 }
 

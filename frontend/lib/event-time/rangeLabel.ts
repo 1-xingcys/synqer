@@ -1,220 +1,146 @@
-"use client";
-
-import { formatMinutesToTime } from "@/lib/time/minuteOfDay";
 // Intra-module import stays relative: see lib/time/calendarDay.ts.
 import { formatWeekdayLabel, formatWeekdayLabelFromDate } from "./weekdays";
 import { type Weekday } from "@/types/event";
 import type { AxisSpan } from "@/lib/axisSpan";
-import { wallClockToDate, type WallClock } from "@/lib/time";
-import { calendarDay, calendarDayToDate } from "@/lib/time";
-
-export type LocalizedTimeRangeFormatOptions = {
-  timeZone?: string;
-  weekdayStyle?: "narrow" | "short";
-};
+import {
+  calendarDayToDate,
+  formatMinutesToTime,
+  wallClockDay,
+  wallClockToDate,
+  type CalendarDay,
+  type WallClock,
+} from "@/lib/time";
 
 /**
- * Read a date-only axis key as the day it stands for.
- *
- * A calendar day has no zone of its own: anchoring it in one zone and rendering
- * it in another shifts it off the stored day whenever the two disagree, so it
- * is pinned to UTC on both sides.
- *
- * This used to also accept a zone-bearing instant and re-project it into the
- * caller's zone. Nothing produces that shape any more — every axis key now
- * comes from `axisDateToCalendarDay` or a weekday enum — and keeping the branch
- * meant a bad key reached `Intl` and surfaced as "RangeError: Invalid time
- * value", naming nothing. `calendarDay()` rejects it here by name instead.
+ * Every value labelled here is naive: a calendar day has no zone of its own,
+ * and a `WallClock` carries its digits in a Date's UTC fields. Projecting
+ * either into a real zone shifts it off the stored value, so all formatting is
+ * pinned to UTC and no function here takes a time zone.
  */
-function axisKeyToDate(axisKey: string): Date {
-  return calendarDayToDate(calendarDay(axisKey));
-}
+const NAIVE_TIME_ZONE = "UTC";
 
 // Limit locale handling to the product's supported date formatting variants.
-function getLocalizedDateLocale(locale: string) {
+function dateLocaleOf(locale: string) {
   return locale === "zh-TW" ? "zh-TW" : "en-US";
 }
 
-// Format a minute-based range such as 1020-1140 into "17:00 - 19:00".
-function formatMinuteTimeRange(startMinute: number, endMinute: number) {
-  return `${formatMinutesToTime(startMinute)} - ${formatMinutesToTime(endMinute)}`;
+function weekdayStyleOf(locale: string): "narrow" | "short" {
+  return locale === "zh-TW" ? "narrow" : "short";
 }
 
-// Format a concrete date into the product's canonical date + weekday label.
-function formatLocalizedDateLabelFromDate(
-  date: Date,
-  locale: string,
-  options: LocalizedTimeRangeFormatOptions = {},
-) {
-  const dateLocale = getLocalizedDateLocale(locale);
-  // Use one shared time zone for both the numeric date and weekday text so
+// "(Mon)" / "（一）".
+function bracketWeekday(weekdayText: string, locale: string) {
+  return locale === "zh-TW" ? `（${weekdayText}）` : `(${weekdayText})`;
+}
+
+// zh-TW butts the bracketed weekday against the date; en-US spaces it out.
+function withWeekday(dateText: string, weekdayText: string, locale: string) {
+  const bracketed = bracketWeekday(weekdayText, locale);
+
+  return locale === "zh-TW"
+    ? `${dateText}${bracketed}`
+    : `${dateText} ${bracketed}`;
+}
+
+// A concrete date as the product's canonical date + weekday label, "6/13 (Sat)".
+function formatDayLabel(date: Date, locale: string) {
+  const dateLocale = dateLocaleOf(locale);
+  // One shared time zone for both the numeric date and the weekday text, so
   // labels like "6/13 (Sat)" cannot disagree internally.
   const dateText = new Intl.DateTimeFormat(dateLocale, {
     month: "numeric",
     day: "numeric",
-    timeZone: options.timeZone,
+    timeZone: NAIVE_TIME_ZONE,
   }).format(date);
   const weekdayText = formatWeekdayLabelFromDate(
     date,
     dateLocale,
-    options.weekdayStyle ?? (locale === "zh-TW" ? "narrow" : "short"),
-    options.timeZone,
+    weekdayStyleOf(locale),
+    NAIVE_TIME_ZONE,
   );
 
-  return locale === "zh-TW"
-    ? `${dateText}（${weekdayText}）`
-    : `${dateText} (${weekdayText})`;
+  return withWeekday(dateText, weekdayText, locale);
 }
 
-// Format a weekday-only label for recurring events.
-function formatLocalizedWeekdayLabel(
-  weekday: Weekday,
-  locale: string,
-  options: LocalizedTimeRangeFormatOptions = {},
-) {
-  const weekdayText = formatWeekdayLabel(
-    weekday,
-    locale,
-    options.weekdayStyle ?? (locale === "zh-TW" ? "narrow" : "short"),
-  );
-
-  return locale === "zh-TW" ? `（${weekdayText}）` : `(${weekdayText})`;
-}
-
-// Format the time portion of a concrete datetime.
-function formatLocalizedTimeLabelFromDate(
-  date: Date,
-  locale: string,
-  options: LocalizedTimeRangeFormatOptions = {},
-) {
-  return new Intl.DateTimeFormat(getLocalizedDateLocale(locale), {
+// The time-of-day part of a concrete datetime, "18:00".
+function formatClockLabel(date: Date, locale: string) {
+  return new Intl.DateTimeFormat(dateLocaleOf(locale), {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-    timeZone: options.timeZone,
+    timeZone: NAIVE_TIME_ZONE,
   }).format(date);
 }
 
-// Parse and format an axis key with the canonical date label formatter.
-function formatLocalizedDateLabel(
-  dateString: string,
-  locale: string,
-  options: LocalizedTimeRangeFormatOptions = {},
-) {
-  return formatLocalizedDateLabelFromDate(axisKeyToDate(dateString), locale, {
-    ...options,
-    // The caller's zone is deliberately discarded: see axisKeyToDate.
-    timeZone: "UTC",
-  });
+// A minute-based range such as 1020-1140 as "17:00 - 19:00".
+function formatMinuteRange(startMinute: number, endMinute: number) {
+  return `${formatMinutesToTime(startMinute)} - ${formatMinutesToTime(endMinute)}`;
 }
 
-// Format a date span, collapsing same-day ranges to a single label.
-function formatLocalizedDateRange(
-  startDate: string,
-  endDate: string,
+// A date span, collapsing a same-day range to a single label.
+function formatDaySpanLabel(
+  startDay: CalendarDay,
+  endDay: CalendarDay,
   locale: string,
-  options: LocalizedTimeRangeFormatOptions = {},
 ) {
-  const startDateLabel = formatLocalizedDateLabel(startDate, locale, options);
-  if (startDate === endDate) {
-    return startDateLabel;
+  const startLabel = formatDayLabel(calendarDayToDate(startDay), locale);
+
+  if (startDay === endDay) {
+    return startLabel;
   }
 
-  return `${startDateLabel} - ${formatLocalizedDateLabel(endDate, locale, options)}`;
+  return `${startLabel} - ${formatDayLabel(calendarDayToDate(endDay), locale)}`;
 }
 
-// Format a date-based slot range such as "4/21 (Mon) 10:00 - 11:00".
-function formatLocalizedDateMinuteRangeLabel(
-  range: {
-    startDate: string;
-    endDate: string;
-    startMinute: number;
-    endMinute: number;
-  },
-  locale: string,
-  options: LocalizedTimeRangeFormatOptions = {},
-) {
-  return `${formatLocalizedDateRange(range.startDate, range.endDate, locale, options)} ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`;
-}
+// A recurring weekday as its bracketed label, "(Mon)".
+function formatWeekdaySpanLabel(weekday: Weekday, locale: string) {
+  const dateLocale = dateLocaleOf(locale);
 
-// Format a recurring weekday slot range such as "(Mon) 10:00 - 12:00".
-function formatLocalizedWeekdayTimeRangeLabel(
-  range: {
-    weekday: Weekday;
-    startMinute: number;
-    endMinute: number;
-  },
-  locale: string,
-  options: LocalizedTimeRangeFormatOptions = {},
-) {
-  const weekdayLabel = formatLocalizedWeekdayLabel(
-    range.weekday,
+  return bracketWeekday(
+    formatWeekdayLabel(weekday, dateLocale, weekdayStyleOf(locale)),
     locale,
-    options,
   );
-
-  return `${weekdayLabel} ${formatMinuteTimeRange(range.startMinute, range.endMinute)}`;
 }
 
-// Format a concrete datetime range, including both dates when it crosses days.
+/**
+ * A concrete datetime range: "7/30 (Thu) 18:00 - 20:00", widening to both days
+ * when it crosses midnight.
+ */
 export function formatLocalizedDateTimeRangeLabel(
   range: {
     startTime: WallClock;
     endTime: WallClock;
   },
   locale: string,
-  options: LocalizedTimeRangeFormatOptions = {},
 ) {
   const startDate = wallClockToDate(range.startTime);
   const endDate = wallClockToDate(range.endTime);
-  const startDateLabel = formatLocalizedDateLabelFromDate(
-    startDate,
-    locale,
-    options,
-  );
-  const endDateLabel = formatLocalizedDateLabelFromDate(
-    endDate,
-    locale,
-    options,
-  );
-  const timeLabel = `${formatLocalizedTimeLabelFromDate(startDate, locale, options)} - ${formatLocalizedTimeLabelFromDate(endDate, locale, options)}`;
-  const isSameDay = startDateLabel === endDateLabel;
+  // Compare the days themselves rather than their rendered labels: whether the
+  // range crosses midnight is a fact about the times, not about how they print.
+  const isSameDay =
+    wallClockDay(range.startTime) === wallClockDay(range.endTime);
+  const dayLabel = isSameDay
+    ? formatDayLabel(startDate, locale)
+    : `${formatDayLabel(startDate, locale)} - ${formatDayLabel(endDate, locale)}`;
 
-  if (isSameDay) {
-    return `${startDateLabel} ${timeLabel}`;
-  }
-
-  return `${startDateLabel} - ${endDateLabel} ${timeLabel}`;
+  return `${dayLabel} ${formatClockLabel(startDate, locale)} - ${formatClockLabel(endDate, locale)}`;
 }
 
-// Dispatch a range to the formatter matching its axis. The union narrows on
-// axisType, so the weekday payload can no longer reach the date formatter and
-// the `as Weekday` cast this used to need is gone.
+/**
+ * A slot range on its axis: "6/13（六） - 6/14（日） 20:30 - 23:30" for a date
+ * span, "(Mon) 10:00 - 12:00" for a recurring weekday.
+ *
+ * The union narrows on `axisType`, so a weekday payload cannot reach the date
+ * formatter.
+ */
 export function formatLocalizedRangeLabel(
   range: AxisSpan & { startMinute: number; endMinute: number },
   locale: string,
-  options: LocalizedTimeRangeFormatOptions = {},
 ) {
-  if (range.axisType === "WEEKDAY") {
-    return formatLocalizedWeekdayTimeRangeLabel(
-      {
-        weekday: range.weekday,
-        startMinute: range.startMinute,
-        endMinute: range.endMinute,
-      },
-      locale,
-      options,
-    );
-  }
+  const axisLabel =
+    range.axisType === "WEEKDAY"
+      ? formatWeekdaySpanLabel(range.weekday, locale)
+      : formatDaySpanLabel(range.startDay, range.endDay, locale);
 
-  return formatLocalizedDateMinuteRangeLabel(
-    {
-      startDate: range.startDay,
-      endDate: range.endDay,
-      startMinute: range.startMinute,
-      endMinute: range.endMinute,
-    },
-    locale,
-    options,
-  );
+  return `${axisLabel} ${formatMinuteRange(range.startMinute, range.endMinute)}`;
 }

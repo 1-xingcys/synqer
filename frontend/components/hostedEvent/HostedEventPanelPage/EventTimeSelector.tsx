@@ -10,7 +10,6 @@ import type { SelectedTimeRange } from "./types";
 
 interface EventTimeSelectorProps {
   selectedRanges: SelectedTimeRange[];
-  timeZone: string;
   onRemove: (id: string) => Promise<void>;
   hasConfirmedTime: boolean;
   hasStagedChanges: boolean;
@@ -91,7 +90,6 @@ function ConfirmDialog({
 
 export function EventTimeSelector({
   selectedRanges,
-  timeZone,
   onRemove,
   hasConfirmedTime,
   hasStagedChanges,
@@ -194,7 +192,6 @@ export function EventTimeSelector({
                       endMinute: range.endTime,
                     },
                     locale,
-                    { timeZone },
                   )}
                 </span>
               </div>
