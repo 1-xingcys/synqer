@@ -1,5 +1,5 @@
 import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/weekdays";
-import { zonedWallClockToInstant } from "@/lib/time";
+import { parseCalendarDayValue, zonedWallClockToInstant } from "@/lib/time";
 import { TimeSlot, Vote, CalendarEvent, GridAxisColumn } from "./types";
 
 function warnInvalidSlot(slot: TimeSlot, reason: string) {
@@ -15,17 +15,6 @@ const getDateLocale = (locale: string): string => {
   return localeMap[locale] || locale;
 };
 
-function parseAxisCalendarDate(rawValue: string): Date {
-  if (rawValue.includes("T")) {
-    return new Date(rawValue);
-  }
-
-  // Date-only axis keys represent a calendar day, not a UTC instant. Parse
-  // them into local wall-clock time so headers stay on the same day across
-  // environments with negative UTC offsets.
-  return new Date(`${rawValue}T12:00:00`);
-}
-
 export const formatAxisHeader = (
   column: GridAxisColumn,
   locale: string = "en",
@@ -36,7 +25,7 @@ export const formatAxisHeader = (
     };
   }
 
-  const date = parseAxisCalendarDate(column.rawValue);
+  const date = parseCalendarDayValue(column.rawValue);
   const dateLocale = getDateLocale(locale);
   const weekday = date.toLocaleDateString(dateLocale, { weekday: "short" });
   const day = date.getDate();
@@ -69,7 +58,7 @@ export const formatAxisPageRange = (
 };
 
 const formatDatePageValue = (dateStr: string): string => {
-  const date = parseAxisCalendarDate(dateStr);
+  const date = parseCalendarDayValue(dateStr);
   return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
 };
 

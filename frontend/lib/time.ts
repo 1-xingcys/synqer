@@ -78,6 +78,23 @@ export function formatDateInZone(instant: Date, timeZone: string): string {
   return formatDateTimeInZone(instant, timeZone).slice(0, "yyyy/MM/dd".length);
 }
 
+/**
+ * Parse a grid axis key ("2026-07-30") into a Date whose *local* fields are that
+ * calendar day.
+ *
+ * Date-only strings parse as UTC midnight, so reading them back with local
+ * getters lands on the previous day for viewers west of UTC. Anchoring at local
+ * noon keeps the calendar day intact in every zone; callers that render axis
+ * keys must go through this rather than `new Date(axisKey)`.
+ */
+export function parseCalendarDayValue(rawValue: string): Date {
+  if (rawValue.includes("T")) {
+    return new Date(rawValue);
+  }
+
+  return new Date(`${rawValue}T12:00:00`);
+}
+
 export function resolveDefaultTimeZone(): string {
   try {
     return (
