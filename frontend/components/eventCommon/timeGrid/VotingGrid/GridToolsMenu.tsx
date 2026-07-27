@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, X } from "lucide-react";
 import { VoteMode } from "@/types/event";
-import { TimeGranularity } from "../types";
+import type { TimeGranularity } from "@/types/event";
 
 interface GridToolsMenuProps {
   voteMode: VoteMode;

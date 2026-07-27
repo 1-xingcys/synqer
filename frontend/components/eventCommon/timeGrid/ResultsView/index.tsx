@@ -12,7 +12,7 @@ import { ParticipantFilter } from "./ParticipantFilter";
 import { HeatMapLegend } from "./HeatMapLegend";
 import { ResultsHeatmapGrid } from "./ResultsHeatmapGrid";
 import { useFilteredVotes } from "./hooks/useFilteredVotes";
-import { TimeGranularity } from "../types";
+import type { TimeGranularity } from "@/types/event";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { eventDetailPath } from "@/lib/eventRoutes";
 import { Z_INDEX } from "@/lib/zIndex";

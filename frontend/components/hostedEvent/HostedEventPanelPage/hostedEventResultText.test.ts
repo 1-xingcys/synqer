@@ -1,12 +1,11 @@
 import { describe, expect, it } from "@jest/globals";
-import { buildHostedEventResultTextFromSummary } from "@/components/hostedEvent/hostedEventResultText";
+import { buildHostedEventResultTextFromSummary } from "@/components/hostedEvent/HostedEventPanelPage/hostedEventResultText";
 import { calendarDay } from "@/lib/time";
 
 describe("hostedEventResultText", () => {
   it("formats recurring confirmed ranges with the shared confirmed format", () => {
     const result = buildHostedEventResultTextFromSummary({
       eventTitle: "Team Sync",
-      timeZone: "UTC",
       locale: "en-US",
       copy: {
         title: "Confirmed result",
@@ -38,7 +37,6 @@ describe("hostedEventResultText", () => {
   it("formats one-time confirmed ranges on their stored calendar days", () => {
     const result = buildHostedEventResultTextFromSummary({
       eventTitle: "Weekend Plan",
-      timeZone: "Asia/Taipei",
       locale: "zh-TW",
       copy: {
         title: "已確認結果",

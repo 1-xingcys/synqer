@@ -10,7 +10,7 @@ import {
   EMPTY_VOTING_DEADLINE_FORM_DATA,
   areVotingDeadlineFormsEqual,
   buildVotingDeadlineFormData,
-  getVotingDeadlineError,
+  isVotingDeadlineFormComplete,
   isVotingDeadlineLocked,
   toVotingDeadlinePayload,
   type VotingDeadlineFormData,
@@ -79,7 +79,7 @@ export function useVotingDeadlineForm() {
 
   const isDirty = !areVotingDeadlineFormsEqual(formData, savedFormData);
   const isLocked = isVotingDeadlineLocked(event);
-  const isValid = getVotingDeadlineError(formData) === null;
+  const isValid = isVotingDeadlineFormComplete(formData);
 
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

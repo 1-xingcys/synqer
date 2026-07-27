@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { VoteMode } from "@/types/event";
-import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
+import type { TimeGranularity } from "@/types/event";
 import { GRANULARITY_OPTIONS } from "@/lib/eventPreference";
 import { cn } from "@/lib/utils";
 import { PreferenceRow } from "../PreferenceRow";

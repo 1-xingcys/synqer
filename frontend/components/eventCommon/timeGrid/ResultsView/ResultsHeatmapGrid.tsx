@@ -23,7 +23,8 @@ import {
   useMergedTimeRowsModel,
   useSlotGridModel,
 } from "../hooks";
-import { TimeGranularity, TimeSlot, Vote, Participant } from "../types";
+import { TimeSlot, Vote, Participant } from "../types";
+import type { TimeGranularity } from "@/types/event";
 import {
   SelectionRange,
   useResultsRangeSelection,

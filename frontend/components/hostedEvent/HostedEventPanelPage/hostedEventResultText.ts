@@ -1,4 +1,4 @@
-import { type HostedEventResultSummary } from "./resultSummary";
+import { type HostedEventResultSummary } from "@/lib/hostedEventResultSummary";
 import { formatLocalizedRangeLabel } from "@/lib/event-time";
 
 export type HostedEventResultTextCopy = {
@@ -12,7 +12,6 @@ export type HostedEventResultTextCopy = {
 function buildRangeLabel(
   range: HostedEventResultSummary["ranges"][number],
   locale: string,
-  timeZone: string,
 ) {
   return formatLocalizedRangeLabel(
     {
@@ -21,13 +20,11 @@ function buildRangeLabel(
       endMinute: range.endMinute,
     },
     locale,
-    { timeZone },
   );
 }
 
 export function buildHostedEventResultTextFromSummary(opts: {
   eventTitle: string;
-  timeZone: string;
   summary: HostedEventResultSummary;
   locale: string;
   copy: HostedEventResultTextCopy;
@@ -46,9 +43,7 @@ export function buildHostedEventResultTextFromSummary(opts: {
         ? unavailableNames.join("、")
         : opts.copy.none;
 
-    lines.push(
-      `${index + 1}. ${buildRangeLabel(range, opts.locale, opts.timeZone)}`,
-    );
+    lines.push(`${index + 1}. ${buildRangeLabel(range, opts.locale)}`);
     lines.push(
       opts.copy.availableLine(range.availableCount, opts.summary.totalExpected),
     );

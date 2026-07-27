@@ -10,8 +10,7 @@ import {
 import { eventDetailKeys } from "@/hooks/useEventDetail";
 import { apiFetchJson } from "@/lib/apiClient";
 import type { operations } from "@/generated/openapi";
-import { VoteMode } from "@/types/event";
-import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
+import { VoteMode, type TimeGranularity } from "@/types/event";
 import {
   DEFAULT_GRANULARITY,
   DEFAULT_SHARE_VOTE_TO_CHAT,

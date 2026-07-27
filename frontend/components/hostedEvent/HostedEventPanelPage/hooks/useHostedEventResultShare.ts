@@ -6,18 +6,18 @@ import { useLiff } from "@/hooks/useLiff";
 import {
   buildHostedEventResultTextFromSummary,
   type HostedEventResultTextCopy,
-} from "@/components/hostedEvent/hostedEventResultText";
+} from "../hostedEventResultText";
 import {
   buildHostedEventResultSummary,
   type HostedResultExpectedParticipant,
   type HostedResultSlot,
   type HostedResultVote,
-} from "@/components/hostedEvent/resultSummary";
+} from "@/lib/hostedEventResultSummary";
 import {
   canShareHostedEventResultText,
   shareHostedEventResultText,
   TextShareResult,
-} from "@/components/hostedEvent/shareHostedEventResultText";
+} from "../shareHostedEventResultText";
 import { shareHostedEventResultFlexMessage } from "@/lib/line-flex-message/hostedEventResultFlexMessage";
 import { ShareResult } from "@/lib/line-flex-message/shareEventFlexMessage";
 
@@ -43,7 +43,6 @@ type ResultTextShareStatus =
 export function useHostedEventResultShare(opts: {
   eventId: string;
   eventTitle: string;
-  eventTimeZone: string;
   locale: string;
   confirmedSlots: HostedResultSlot[];
   votes: HostedResultVote[];
@@ -83,7 +82,6 @@ export function useHostedEventResultShare(opts: {
 
     return buildHostedEventResultTextFromSummary({
       eventTitle: opts.eventTitle,
-      timeZone: opts.eventTimeZone,
       summary: resultSummary,
       locale: opts.locale,
       copy: opts.copy,
@@ -132,7 +130,6 @@ export function useHostedEventResultShare(opts: {
     const result = await shareHostedEventResultFlexMessage({
       eventId: opts.eventId,
       eventTitle: opts.eventTitle,
-      timeZone: opts.eventTimeZone,
       summary: resultSummary,
       locale: opts.locale,
     });

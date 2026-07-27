@@ -1,12 +1,11 @@
 import {
   EventCapabilities,
   EventSlotAxisType,
+  TimeGranularity,
   VoteMode,
   Weekday,
 } from "@/types/event";
 import type { AxisSpan } from "@/lib/axisSpan";
-
-export type TimeGranularity = 15 | 30 | 60;
 
 export interface GridAxisColumn {
   /** Stable key for grouping and lookup; see axisSpanKey. */

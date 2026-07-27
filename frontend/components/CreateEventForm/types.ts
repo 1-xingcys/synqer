@@ -1,6 +1,6 @@
 import type { EventType, VoteMode, Weekday } from "@/types/event";
 import type { CalendarDay } from "@/lib/time";
-import type { TimeGranularity } from "@/components/eventCommon/timeGrid/types";
+import type { TimeGranularity } from "@/types/event";
 
 export const TITLE_MAX_LENGTH = 50;
 

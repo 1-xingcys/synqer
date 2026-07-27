@@ -2,11 +2,10 @@ import { describe, expect, it } from "@jest/globals";
 import {
   areVotingDeadlineFormsEqual,
   buildVotingDeadlineFormData,
-  getVotingDeadlineError,
+  isVotingDeadlineFormComplete,
   isVotingDeadlineLocked,
   toVotingDeadlinePayload,
 } from "@/components/hostedEvent/HostedEventSettingsPage/VotingDeadline/votingDeadlineForm";
-import { VOTING_DEADLINE_ERROR } from "@/lib/event-time";
 import { EventStatus } from "@/types/event";
 import { calendarDay } from "@/lib/time";
 import { wallClock } from "@/lib/time";
@@ -100,32 +99,32 @@ describe("isVotingDeadlineLocked", () => {
   });
 });
 
-describe("getVotingDeadlineError", () => {
+describe("isVotingDeadlineFormComplete", () => {
   it("requires both fields once the deadline is enabled", () => {
     expect(
-      getVotingDeadlineError({
+      isVotingDeadlineFormComplete({
         deadlineEnabled: true,
         deadlineDate: calendarDay("2026-07-14"),
         deadlineTime: null,
       }),
-    ).toBe(VOTING_DEADLINE_ERROR.REQUIRED);
+    ).toBe(false);
   });
 
   it("accepts a disabled deadline and a fully filled one", () => {
     expect(
-      getVotingDeadlineError({
+      isVotingDeadlineFormComplete({
         deadlineEnabled: false,
         deadlineDate: null,
         deadlineTime: null,
       }),
-    ).toBeNull();
+    ).toBe(true);
     expect(
-      getVotingDeadlineError({
+      isVotingDeadlineFormComplete({
         deadlineEnabled: true,
         deadlineDate: calendarDay("2026-07-14"),
         deadlineTime: "02:00",
       }),
-    ).toBeNull();
+    ).toBe(true);
   });
 });
 

@@ -6,7 +6,7 @@ import { Share2 } from "lucide-react";
 import {
   type HostedResultExpectedParticipant,
   type HostedResultVote,
-} from "@/components/hostedEvent/resultSummary";
+} from "@/lib/hostedEventResultSummary";
 import {
   useConfirmedHostedResultSlots,
   useHostedEventResultShare,
@@ -17,7 +17,6 @@ import type { EventSlot } from "./types";
 interface EventResultShareButtonProps {
   eventId: string;
   eventTitle: string;
-  eventTimeZone: string;
   slots: EventSlot[];
   confirmedSlotIds?: string[];
   votes: HostedResultVote[];
@@ -28,7 +27,6 @@ interface EventResultShareButtonProps {
 export function EventResultShareButton({
   eventId,
   eventTitle,
-  eventTimeZone,
   slots,
   confirmedSlotIds,
   votes,
@@ -56,7 +54,6 @@ export function EventResultShareButton({
   } = useHostedEventResultShare({
     eventId,
     eventTitle,
-    eventTimeZone,
     locale,
     confirmedSlots,
     votes,

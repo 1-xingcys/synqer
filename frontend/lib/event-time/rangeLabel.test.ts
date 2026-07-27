@@ -2,10 +2,10 @@ import { describe, expect, it } from "@jest/globals";
 import { formatLocalizedRangeLabel } from "@/lib/event-time";
 import { calendarDay } from "@/lib/time";
 
-// The two cases that used to live here — a zone-bearing axis key, and a weekday
-// key falling through into the date formatter — are gone because AxisSpan makes
-// them unrepresentable: a date span's days are branded CalendarDay, and a
-// weekday span has no second end to disagree with.
+// The cases that used to live here are gone because the types and the API make
+// them unrepresentable: AxisSpan brands a date span's days as CalendarDay and
+// gives a weekday span no second end, and the formatter no longer accepts a
+// time zone to project a naive day into.
 describe("timeRangeFormat", () => {
   it("renders a multi-day date range", () => {
     expect(
@@ -18,15 +18,15 @@ describe("timeRangeFormat", () => {
           endMinute: 1410,
         },
         "zh-TW",
-        { timeZone: "Asia/Taipei" },
       ),
     ).toBe("6/13（六） - 6/14（日） 20:30 - 23:30");
   });
 
-  // Candidate days are naive: the label must read the stored digits rather
-  // than re-projecting them through the viewer's or the event's zone.
-  it("keeps a date span on its stored day in every event zone", () => {
-    const label = (timeZone: string) =>
+  // Candidate days are naive: the label reads the stored digits. Jest runs in
+  // the machine's zone rather than UTC, so this fails if the formatters ever
+  // stop being pinned.
+  it("keeps a date span on its stored day", () => {
+    expect(
       formatLocalizedRangeLabel(
         {
           axisType: "DATE",
@@ -36,13 +36,8 @@ describe("timeRangeFormat", () => {
           endMinute: 660,
         },
         "en-US",
-        { timeZone },
-      );
-
-    expect(label("America/New_York")).toBe("7/30 (Thu) 10:00 - 11:00");
-    expect(label("Pacific/Honolulu")).toBe("7/30 (Thu) 10:00 - 11:00");
-    expect(label("Asia/Taipei")).toBe("7/30 (Thu) 10:00 - 11:00");
-    expect(label("UTC")).toBe("7/30 (Thu) 10:00 - 11:00");
+      ),
+    ).toBe("7/30 (Thu) 10:00 - 11:00");
   });
 
   it("renders a weekday span", () => {
