@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 import { buildEventShareFlexMessage } from "@/lib/line-flex-message/shareEventFlexMessage";
+import { wallClock } from "@/lib/wallClock";
 
 type FlexTextNode = {
   type?: string;
@@ -27,7 +28,7 @@ describe("shareEventFlexMessage", () => {
       eventId: "event-1",
       title: "Team Sync",
       hostName: "Alex",
-      votingDeadline: "2026-07-13T18:00:00Z",
+      votingDeadline: wallClock("2026-07-13T18:00:00Z"),
       timeZone: "Asia/Taipei",
     });
 

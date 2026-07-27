@@ -11,6 +11,7 @@ import {
   DEFAULT_SHARE_VOTE_TO_CHAT,
   DEFAULT_VOTE_MODE,
 } from "@/lib/eventPreference";
+import { calendarDay } from "@/lib/calendarDay";
 
 function buildFormData(
   overrides: Partial<CreateEventFormData> = {},
@@ -19,8 +20,8 @@ function buildFormData(
     eventType: "ONE_TIME",
     title: "Team sync",
     description: "",
-    startDate: "2026-07-20",
-    endDate: "2026-07-20",
+    startDate: calendarDay("2026-07-20"),
+    endDate: calendarDay("2026-07-20"),
     weekdays: DEFAULT_WEEKDAYS,
     startTime: "09:00",
     endTime: "10:00",
@@ -29,7 +30,7 @@ function buildFormData(
     defaultVoteMode: DEFAULT_VOTE_MODE,
     shareVoteToChat: DEFAULT_SHARE_VOTE_TO_CHAT,
     votingDeadlineEnabled: true,
-    votingDeadline: "2026-07-13",
+    votingDeadline: calendarDay("2026-07-13"),
     votingDeadlineTime: "18:00",
     votingDeadlineTouched: false,
     lineGroupId: null,
@@ -54,7 +55,7 @@ describe("getCreateEventValidationErrors - voting deadline", () => {
     const errors = getCreateEventValidationErrors(
       buildFormData({
         // Event starts 2026-07-20 09:00; deadline lands well after that.
-        votingDeadline: "2026-07-25",
+        votingDeadline: calendarDay("2026-07-25"),
         votingDeadlineTime: "23:00",
       }),
       now,
@@ -92,8 +93,8 @@ describe("getCreateEventValidationErrors - start date", () => {
 
     const errors = getCreateEventValidationErrors(
       buildFormData({
-        startDate: "2026-07-19",
-        endDate: "2026-07-19",
+        startDate: calendarDay("2026-07-19"),
+        endDate: calendarDay("2026-07-19"),
       }),
       now,
     );
@@ -109,8 +110,8 @@ describe("getCreateEventValidationErrors - start date", () => {
 
     const errors = getCreateEventValidationErrors(
       buildFormData({
-        startDate: "2026-07-15",
-        endDate: "2026-07-15",
+        startDate: calendarDay("2026-07-15"),
+        endDate: calendarDay("2026-07-15"),
       }),
       now,
     );
@@ -124,8 +125,8 @@ describe("getCreateEventValidationErrors - start date", () => {
     const errors = getCreateEventValidationErrors(
       buildFormData({
         eventType: "RECURRING",
-        startDate: "2020-01-01",
-        endDate: "2020-01-01",
+        startDate: calendarDay("2020-01-01"),
+        endDate: calendarDay("2020-01-01"),
       }),
       now,
     );

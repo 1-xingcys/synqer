@@ -17,7 +17,54 @@ import { zonedWallClockToInstant } from "@/lib/time";
  * `votingDeadline` and `ConfirmedSelection.startTime`/`endTime` are the two
  * fields carrying this shape.
  */
-export type WallClock = string;
+export type WallClock = string & { readonly __brand: "WallClock" };
+
+const WALL_CLOCK_PATTERN =
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{3}))?)?Z$/;
+
+/**
+ * The only way to turn an arbitrary string into a {@link WallClock}.
+ *
+ * Throws rather than coercing. The misuse this guards against is the quietest
+ * one in the codebase: a calendar day read as a wall clock reports "00:00",
+ * a plausible-looking time rather than an obvious failure.
+ *
+ * The trailing "Z" is required. A value carrying a real offset is an instant,
+ * and reading its digits as naive shifts it by that offset.
+ */
+export function wallClock(value: string): WallClock {
+  const match = WALL_CLOCK_PATTERN.exec(value);
+
+  if (!match) {
+    throw new TypeError(
+      `"${value}" is not a wall clock (expected YYYY-MM-DDTHH:mm[:ss[.SSS]]Z)`,
+    );
+  }
+
+  const [year, month, date, hours, minutes, seconds, ms] = match
+    .slice(1)
+    .map((part) => (part === undefined ? 0 : Number(part)));
+  const parsed = new Date(
+    Date.UTC(year, month - 1, date, hours, minutes, seconds, ms),
+  );
+
+  // `Date.parse` is no help here: it rolls impossible values over rather than
+  // rejecting them, so "2026-02-30T18:00:00.000Z" would quietly land two days
+  // later. Only a full round trip of the digits catches that.
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month - 1 ||
+    parsed.getUTCDate() !== date ||
+    parsed.getUTCHours() !== hours ||
+    parsed.getUTCMinutes() !== minutes ||
+    parsed.getUTCSeconds() !== seconds ||
+    parsed.getUTCMilliseconds() !== ms
+  ) {
+    throw new TypeError(`"${value}" is not a wall clock (no such time)`);
+  }
+
+  return value as WallClock;
+}
 
 /**
  * The value as a Date whose UTC fields hold the digits, for `Intl` formatters

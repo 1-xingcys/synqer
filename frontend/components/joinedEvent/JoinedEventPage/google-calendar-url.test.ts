@@ -3,12 +3,13 @@ import {
   formatGoogleCalendarDate,
   generateGoogleCalendarUrl,
 } from "@/components/joinedEvent/JoinedEventPage/google-calendar-url";
+import { wallClock } from "@/lib/wallClock";
 
 describe("formatGoogleCalendarDate", () => {
   it("resolves a naive wall-clock value to the real UTC instant and appends Z", () => {
     // Naive wall-clock: "09:00" digits stored as UTC, meaning 09:00 in Asia/Tokyo.
     const result = formatGoogleCalendarDate(
-      "2026-07-13T09:00:00.000Z",
+      wallClock("2026-07-13T09:00:00.000Z"),
       "Asia/Tokyo",
     );
 
@@ -24,8 +25,8 @@ describe("generateGoogleCalendarUrl", () => {
     const url = generateGoogleCalendarUrl(
       "Team Sync",
       undefined,
-      "2026-07-13T09:00:00.000Z",
-      "2026-07-13T10:00:00.000Z",
+      wallClock("2026-07-13T09:00:00.000Z"),
+      wallClock("2026-07-13T10:00:00.000Z"),
       "Asia/Tokyo",
     );
 

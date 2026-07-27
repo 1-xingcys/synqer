@@ -5,6 +5,8 @@ import {
   VOTING_DEADLINE_ERROR,
 } from "@/lib/votingDeadline";
 import { calendarDayToWallClock } from "@/lib/calendarDay";
+import { calendarDay } from "@/lib/calendarDay";
+import { wallClock } from "@/lib/wallClock";
 
 describe("votingDeadline", () => {
   it("returns required when enabled without a date", () => {
@@ -21,7 +23,7 @@ describe("votingDeadline", () => {
     expect(
       validateVotingDeadline({
         enabled: true,
-        date: "2026-04-10",
+        date: calendarDay("2026-04-10"),
         time: null,
       }),
     ).toBe(VOTING_DEADLINE_ERROR.REQUIRED);
@@ -33,7 +35,7 @@ describe("votingDeadline", () => {
     expect(
       validateVotingDeadline({
         enabled: true,
-        date: "2020-01-01",
+        date: calendarDay("2020-01-01"),
         time: "09:00",
       }),
     ).toBeNull();
@@ -44,7 +46,7 @@ describe("votingDeadline", () => {
     expect(
       validateVotingDeadline({
         enabled: true,
-        date: "2099-12-31",
+        date: calendarDay("2099-12-31"),
         time: "23:45",
       }),
     ).toBeNull();
@@ -64,17 +66,17 @@ describe("votingDeadline", () => {
 describe("formatVotingDeadlineWallClock", () => {
   it("shows the digits the host picked, not a zone-shifted instant", () => {
     // 18:00 is late enough that any eastward viewer zone would roll the day.
-    expect(formatVotingDeadlineWallClock("2026-07-30T18:00:00.000Z")).toBe(
-      "2026/07/30 18:00",
-    );
+    expect(
+      formatVotingDeadlineWallClock(wallClock("2026-07-30T18:00:00.000Z")),
+    ).toBe("2026/07/30 18:00");
     // 02:00 is early enough that any westward viewer zone would roll it back.
-    expect(formatVotingDeadlineWallClock("2026-07-30T02:00:00.000Z")).toBe(
-      "2026/07/30 02:00",
-    );
+    expect(
+      formatVotingDeadlineWallClock(wallClock("2026-07-30T02:00:00.000Z")),
+    ).toBe("2026/07/30 02:00");
   });
 
   it("round-trips a deadline produced by calendarDayToWallClock", () => {
-    const picked = calendarDayToWallClock("2026-07-13", "18:00");
+    const picked = calendarDayToWallClock(calendarDay("2026-07-13"), "18:00");
     expect(formatVotingDeadlineWallClock(picked)).toBe("2026/07/13 18:00");
   });
 });

@@ -2,11 +2,53 @@ import { describe, expect, it } from "@jest/globals";
 import {
   addCalendarDays,
   axisDateToCalendarDay,
+  calendarDay,
   calendarDayToWallClock,
   todayInZone,
   wallClockToCalendarDay,
 } from "@/lib/calendarDay";
 import { wallClockDay } from "@/lib/wallClock";
+
+describe("calendarDay", () => {
+  it("accepts a padded YYYY-MM-DD value unchanged", () => {
+    expect(calendarDay("2026-07-13")).toBe("2026-07-13");
+    expect(calendarDay("2026-01-05")).toBe("2026-01-05");
+  });
+
+  // The asymmetric misuse: a wall clock passed where a day belongs used to
+  // reach addCalendarDays and come back "NaN-NaN-NaN".
+  it("rejects a wall-clock value", () => {
+    expect(() => calendarDay("2026-07-30T18:00:00.000Z")).toThrow(
+      /not a calendar day/i,
+    );
+  });
+
+  // Lexicographic ordering is the reason the encoding exists, and it only
+  // holds at a fixed width.
+  it("rejects unpadded components", () => {
+    expect(() => calendarDay("2026-7-13")).toThrow(/not a calendar day/i);
+    expect(() => calendarDay("2026-07-3")).toThrow(/not a calendar day/i);
+  });
+
+  it("rejects days that do not exist", () => {
+    expect(() => calendarDay("2026-02-30")).toThrow(/not a calendar day/i);
+    expect(() => calendarDay("2026-13-01")).toThrow(/not a calendar day/i);
+    expect(() => calendarDay("2026-00-10")).toThrow(/not a calendar day/i);
+  });
+
+  it("accepts a real leap day", () => {
+    expect(calendarDay("2028-02-29")).toBe("2028-02-29");
+  });
+
+  it("rejects empty and malformed values", () => {
+    expect(() => calendarDay("")).toThrow(/not a calendar day/i);
+    expect(() => calendarDay("not a date")).toThrow(/not a calendar day/i);
+  });
+
+  it("names the offending value so a bad response is traceable", () => {
+    expect(() => calendarDay("2026-02-30")).toThrow("2026-02-30");
+  });
+});
 
 // Every assertion here must hold regardless of the runner's own zone: that is
 // the whole point of moving pickers off local-midnight Date carriers. Run the
@@ -31,19 +73,22 @@ describe("todayInZone", () => {
 
 describe("calendarDayToWallClock", () => {
   it("encodes the picked day and time into the UTC fields", () => {
-    expect(calendarDayToWallClock("2026-07-13", "18:00")).toBe(
+    expect(calendarDayToWallClock(calendarDay("2026-07-13"), "18:00")).toBe(
       "2026-07-13T18:00:00.000Z",
     );
   });
 
   it("round-trips through wallClockDay", () => {
-    expect(wallClockDay(calendarDayToWallClock("2026-07-13", "18:00"))).toBe(
-      "2026-07-13",
-    );
+    expect(
+      wallClockDay(calendarDayToWallClock(calendarDay("2026-07-13"), "18:00")),
+    ).toBe("2026-07-13");
   });
 
   it("keeps midnight on the picked day", () => {
-    const wallClock = calendarDayToWallClock("2026-07-13", "00:00");
+    const wallClock = calendarDayToWallClock(
+      calendarDay("2026-07-13"),
+      "00:00",
+    );
     expect(wallClock).toBe("2026-07-13T00:00:00.000Z");
     expect(wallClockDay(wallClock)).toBe("2026-07-13");
   });
@@ -53,6 +98,14 @@ describe("wallClockToCalendarDay", () => {
   it("reads the naive digits out of the UTC fields", () => {
     expect(wallClockToCalendarDay(new Date("2026-07-14T02:00:00Z"))).toBe(
       "2026-07-14",
+    );
+  });
+
+  // Without this the getters yield NaN and the template produces the string
+  // "NaN-NaN-NaN", which then flows on as though it were a real day.
+  it("rejects an invalid Date instead of producing NaN-NaN-NaN", () => {
+    expect(() => wallClockToCalendarDay(new Date("garbage"))).toThrow(
+      /invalid date/i,
     );
   });
 });
@@ -88,20 +141,20 @@ describe("axisDateToCalendarDay", () => {
 
 describe("addCalendarDays", () => {
   it("advances by whole days", () => {
-    expect(addCalendarDays("2026-07-13", 7)).toBe("2026-07-20");
+    expect(addCalendarDays(calendarDay("2026-07-13"), 7)).toBe("2026-07-20");
   });
 
   it("rolls over month and year boundaries", () => {
-    expect(addCalendarDays("2026-07-28", 7)).toBe("2026-08-04");
-    expect(addCalendarDays("2026-12-30", 7)).toBe("2027-01-06");
+    expect(addCalendarDays(calendarDay("2026-07-28"), 7)).toBe("2026-08-04");
+    expect(addCalendarDays(calendarDay("2026-12-30"), 7)).toBe("2027-01-06");
   });
 
   it("handles leap days", () => {
-    expect(addCalendarDays("2028-02-28", 1)).toBe("2028-02-29");
+    expect(addCalendarDays(calendarDay("2028-02-28"), 1)).toBe("2028-02-29");
   });
 
   it("supports negative offsets", () => {
-    expect(addCalendarDays("2026-01-01", -1)).toBe("2025-12-31");
+    expect(addCalendarDays(calendarDay("2026-01-01"), -1)).toBe("2025-12-31");
   });
 });
 

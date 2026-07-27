@@ -5,6 +5,7 @@ import {
   formatEventCandidateDaySummary,
   formatEventDateRangeLabel,
 } from "@/lib/event-presentation";
+import { calendarDay } from "@/lib/calendarDay";
 
 type EventFixture = EventWithCapabilities & {
   schedule?: EventSchedule;
@@ -38,8 +39,8 @@ const oneTimeEvent: EventFixture = {
     kind: "ONE_TIME",
     // Post-normalizer shape: the boundary has already turned the wire's naive
     // UTC-midnight timestamps into calendar days.
-    startDate: "2026-07-30",
-    endDate: "2026-08-02",
+    startDate: calendarDay("2026-07-30"),
+    endDate: calendarDay("2026-08-02"),
     startMinuteOfDay: 540,
     endMinuteOfDay: 660,
     slotDurationMin: 30,
@@ -91,8 +92,8 @@ describe("event-presentation", () => {
         formatEventDateRangeLabel(
           {
             kind: "ONE_TIME",
-            startDate: "2026-12-30",
-            endDate: "2027-01-02",
+            startDate: calendarDay("2026-12-30"),
+            endDate: calendarDay("2027-01-02"),
             startMinuteOfDay: 540,
             endMinuteOfDay: 660,
             slotDurationMin: 30,

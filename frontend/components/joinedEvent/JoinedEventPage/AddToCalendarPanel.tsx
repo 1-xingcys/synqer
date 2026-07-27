@@ -1,15 +1,11 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { ConfirmedSelection } from "@/types/event";
-import { formatConfirmedSelection } from "@/components/eventCommon/confirmed-time-formatters";
+import {
+  formatConfirmedSelection,
+  type OneTimeConfirmedSelection,
+} from "@/components/eventCommon/confirmed-time-formatters";
 import { generateGoogleCalendarUrl } from "./google-calendar-url";
-
-type OneTimeConfirmedSelection = ConfirmedSelection & {
-  kind: "ONE_TIME_RANGE";
-  startTime: string;
-  endTime: string;
-};
 
 interface AddToCalendarPanelProps {
   eventTitle: string;

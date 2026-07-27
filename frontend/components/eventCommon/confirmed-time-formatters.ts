@@ -4,11 +4,17 @@ import {
   formatLocalizedRangeLabel,
 } from "./timeRangeFormat";
 
-// Narrow a confirmed selection to the one-time shape used by one-off events.
-type OneTimeConfirmedSelection = ConfirmedSelection & {
+/**
+ * Narrow a confirmed selection to the one-time shape used by one-off events.
+ *
+ * The times are read off `ConfirmedSelection` rather than restated as `string`
+ * so they stay WallClock: writing `string` here would have been dead text the
+ * intersection discards, but it read as though these were unbranded.
+ */
+export type OneTimeConfirmedSelection = ConfirmedSelection & {
   kind: "ONE_TIME_RANGE";
-  startTime: string;
-  endTime: string;
+  startTime: NonNullable<ConfirmedSelection["startTime"]>;
+  endTime: NonNullable<ConfirmedSelection["endTime"]>;
 };
 
 // Narrow a confirmed selection to the weekday-based shape used by recurring events.
