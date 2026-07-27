@@ -1,6 +1,6 @@
 "use client";
 
-import { formatMinutesToTime } from "@/lib/utils";
+import { formatMinutesToTime } from "@/lib/time/minuteOfDay";
 import { formatWeekdayLabel, formatWeekdayLabelFromDate } from "@/lib/weekdays";
 import { type Weekday } from "@/types/event";
 import type { AxisSpan } from "@/lib/axisSpan";

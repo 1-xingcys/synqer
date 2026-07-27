@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { formatMinutesToTime } from "@/lib/utils";
+import { formatMinutesToTime } from "@/lib/time/minuteOfDay";
 import { MergedTimeRow } from "../types";
 
 interface TimeColumnProps {
