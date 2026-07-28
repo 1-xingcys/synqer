@@ -22,6 +22,7 @@ export interface UseJoinedEventResultsResult {
   error: string | null;
   participantsWithAvatars: ParticipantWithAvatar[];
   votesWithAvatars: VoteWithAvatar[];
+  committedSlotIds: Set<string>;
 }
 
 export function useJoinedEventResults(
@@ -61,11 +62,17 @@ export function useJoinedEventResults(
     }));
   }, [eventDetailData, pictureUrlMap]);
 
+  const committedSlotIds = useMemo(
+    () => new Set(eventDetailData?.event.confirmedSlotIds ?? []),
+    [eventDetailData],
+  );
+
   return {
     data: eventDetailData,
     isLoading,
     error,
     participantsWithAvatars,
     votesWithAvatars,
+    committedSlotIds,
   };
 }

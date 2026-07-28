@@ -16,8 +16,14 @@ export default function JoinedEventResultsPage({
 }: JoinedEventResultsPageProps) {
   const tEvent = useTranslations("event");
   const tJoined = useTranslations("joined");
-  const { data, isLoading, error, participantsWithAvatars, votesWithAvatars } =
-    useJoinedEventResults(eventId);
+  const {
+    data,
+    isLoading,
+    error,
+    participantsWithAvatars,
+    votesWithAvatars,
+    committedSlotIds,
+  } = useJoinedEventResults(eventId);
 
   if (isLoading) {
     return (
@@ -46,6 +52,7 @@ export default function JoinedEventResultsPage({
         )}
         defaultMode={toVoteMode(data.event.defaultVoteMode)}
         tip={tJoined("results.clickToSeeWho")}
+        committedSlotIds={committedSlotIds}
       />
     </div>
   );
