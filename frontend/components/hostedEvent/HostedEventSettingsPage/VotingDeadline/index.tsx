@@ -85,20 +85,18 @@ export function VotingDeadline() {
         </p>
       )}
 
-      {!isLoading && (
-        <VotingDeadlineFields
-          enabled={formData.deadlineEnabled}
-          date={formData.deadlineDate}
-          time={formData.deadlineTime}
-          dateLabel={t("createEvent.votingDeadline.date")}
-          timeLabel={t("createEvent.votingDeadline.time")}
-          datePlaceholder={t("createEvent.configuration.selectDate")}
-          timePlaceholder={t("createEvent.configuration.selectTime")}
-          disabled={isLocked}
-          onDateChange={setDate}
-          onTimeChange={setTime}
-        />
-      )}
+      <VotingDeadlineFields
+        enabled={formData.deadlineEnabled}
+        date={formData.deadlineDate}
+        time={formData.deadlineTime}
+        dateLabel={t("createEvent.votingDeadline.date")}
+        timeLabel={t("createEvent.votingDeadline.time")}
+        datePlaceholder={t("createEvent.configuration.selectDate")}
+        timePlaceholder={t("createEvent.configuration.selectTime")}
+        disabled={isLoading || isLocked}
+        onDateChange={setDate}
+        onTimeChange={setTime}
+      />
 
       {showActions && (
         <div className="flex items-center justify-end gap-3 pt-4">
