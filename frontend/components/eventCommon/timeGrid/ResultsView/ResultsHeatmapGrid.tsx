@@ -29,6 +29,10 @@ import {
   SelectionRange,
   useResultsRangeSelection,
 } from "./hooks/useResultsRangeSelection";
+import {
+  CELL_SELECTION_STYLES,
+  type CellSelectionState,
+} from "./cellSelectionStyles";
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];
@@ -127,7 +131,7 @@ export function ResultsHeatmapGrid({
   });
 
   const getCellSelectionState = useCallback(
-    (slotIndices: number[], dateKey: string) => {
+    (slotIndices: number[], dateKey: string): CellSelectionState => {
       const slotIds = slotIndices
         .map((idx) => slotsByDate[dateKey]?.[idx]?.id)
         .filter((slotId): slotId is string => Boolean(slotId));
@@ -171,7 +175,7 @@ export function ResultsHeatmapGrid({
       dateIndex: number,
       slotIndices: number[],
       dateKey: string,
-      targetState: "none" | "committed" | "staged-add" | "staged-remove",
+      targetState: CellSelectionState,
     ): {
       isTop: boolean;
       isBottom: boolean;
@@ -386,7 +390,10 @@ export function ResultsHeatmapGrid({
                       row.slotIndices,
                       dateKey,
                     );
-                    const isSelectedEventTime = selectionState !== "none";
+                    const selectionStyle =
+                      selectionState === "none"
+                        ? null
+                        : CELL_SELECTION_STYLES[selectionState];
                     const selectedBoundaries = getSelectedCellBoundaries(
                       rowIndex,
                       dateIndex,
@@ -414,28 +421,18 @@ export function ResultsHeatmapGrid({
 
                     // Determine border classes for selected event times (persistent highlight)
                     let selectedEventTimeBorderClasses = "";
-                    if (isSelectedEventTime && !inSelection) {
+                    if (selectionStyle && !inSelection) {
                       const borders = [];
-                      const borderColorClass =
-                        selectionState === "staged-add"
-                          ? "border-orange-500 dark:border-orange-400"
-                          : selectionState === "staged-remove"
-                            ? "border-rose-300 dark:border-rose-700"
-                            : "border-blue-500 dark:border-blue-400";
-                      const borderStyleClass =
-                        selectionState === "staged-add" ||
-                        selectionState === "staged-remove"
-                          ? "border-dashed"
-                          : "";
                       if (selectedBoundaries.isTop)
-                        borders.push(`border-t-2 ${borderColorClass}`);
+                        borders.push(`border-t-2 ${selectionStyle.border}`);
                       if (selectedBoundaries.isBottom)
-                        borders.push(`border-b-2 ${borderColorClass}`);
+                        borders.push(`border-b-2 ${selectionStyle.border}`);
                       if (selectedBoundaries.isLeft)
-                        borders.push(`border-l-2 ${borderColorClass}`);
+                        borders.push(`border-l-2 ${selectionStyle.border}`);
                       if (selectedBoundaries.isRight)
-                        borders.push(`border-r-2 ${borderColorClass}`);
-                      if (borderStyleClass) borders.push(borderStyleClass);
+                        borders.push(`border-r-2 ${selectionStyle.border}`);
+                      if (selectionStyle.borderStyle)
+                        borders.push(selectionStyle.borderStyle);
                       selectedEventTimeBorderClasses = borders.join(" ");
                     }
 
@@ -459,23 +456,17 @@ export function ResultsHeatmapGrid({
                         className={`
                           flex-1 min-w-0 h-10 sm:h-11 relative
                           cursor-pointer transition-all duration-75
-                          ${!inSelection && !isSelectedEventTime ? "border-r border-b border-gray-100 dark:border-zinc-800" : ""}
+                          ${!inSelection && !selectionStyle ? "border-r border-b border-gray-100 dark:border-zinc-800" : ""}
                           ${colors.bg}
                           ${inSelection ? `bg-blue-200 dark:bg-blue-800/50 ${selectionBorderClasses}` : ""}
-                          ${isSelectedEventTime && !inSelection ? selectedEventTimeBorderClasses : ""}
+                          ${selectionStyle && !inSelection ? selectedEventTimeBorderClasses : ""}
                           ${!isDragging ? "hover:ring-2 hover:ring-blue-400 dark:hover:ring-blue-500 hover:z-10" : ""}
                         `}
                       >
                         {/* Selected event time indicator */}
-                        {isSelectedEventTime && !inSelection && (
+                        {selectionStyle && !inSelection && (
                           <div
-                            className={`absolute inset-0 pointer-events-none ${
-                              selectionState === "staged-add"
-                                ? "bg-orange-100/30 dark:bg-orange-900/15"
-                                : selectionState === "staged-remove"
-                                  ? "bg-rose-100/70 dark:bg-rose-900/10"
-                                  : "bg-blue-100/35 dark:bg-blue-900/20"
-                            }`}
+                            className={`absolute inset-0 pointer-events-none ${selectionStyle.fill}`}
                           />
                         )}
 
@@ -485,15 +476,7 @@ export function ResultsHeatmapGrid({
                             className={`
                               absolute inset-0 flex items-center justify-center pointer-events-none
                               text-xs sm:text-sm font-semibold
-                              ${
-                                isSelectedEventTime
-                                  ? selectionState === "staged-add"
-                                    ? "text-orange-700 dark:text-orange-300"
-                                    : selectionState === "staged-remove"
-                                      ? "text-rose-700 dark:text-rose-300"
-                                      : "text-blue-700 dark:text-blue-300"
-                                  : colors.text
-                              }
+                              ${selectionStyle ? selectionStyle.text : colors.text}
                             `}
                           >
                             {cellCount}
