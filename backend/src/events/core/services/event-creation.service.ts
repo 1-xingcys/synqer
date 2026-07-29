@@ -4,7 +4,7 @@ import { CreateEventDto } from '../dto/create-event.dto';
 import { TimeSlotService } from '../../shared/services/time-slot.service';
 import { EventRepository } from '../repositories/event.repository';
 import { DEFAULT_TIME_ZONE } from '../../../common/time';
-import { DEFAULT_GRANULARITY_MIN } from '../../../../shared/event-preference.constants';
+import { DEFAULT_GRANULARITY_MIN } from '../../shared/constants/event-preference.constants';
 
 @Injectable()
 export class EventCreationService {

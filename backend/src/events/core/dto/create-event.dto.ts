@@ -21,8 +21,8 @@ import { EventType, EventVoteMode, Weekday } from '@prisma/client';
 import {
   TITLE_MAX_LENGTH,
   DESCRIPTION_MAX_LENGTH,
-} from '../../../../shared/event-validation.constants';
-import { GRANULARITY_OPTIONS } from '../../../../shared/event-preference.constants';
+} from '../../shared/constants/event-validation.constants';
+import { GRANULARITY_OPTIONS } from '../../shared/constants/event-preference.constants';
 
 type CreateEventValidationTarget = {
   type?: EventType;
