@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { MergedTimeRow } from "../../types";
+import type { SlotMatrixDragRect } from "./slotMatrixCellModel";
 
 interface MergedTimeGridPosition {
   rowIndex: number;
@@ -19,9 +20,9 @@ interface UseMergedTimeGridSelectionInteractionProps {
 
 interface UseMergedTimeGridSelectionInteractionReturn {
   isDragging: boolean;
-  hoveredCell: MergedTimeGridPosition | null;
-  longPressCell: MergedTimeGridPosition | null;
   displaySelection: Set<string>;
+  /** The rectangle being dragged, or null when no drag is in progress. */
+  dragRect: SlotMatrixDragRect | null;
 
   handleMouseDown: (
     rowIndex: number,
@@ -38,14 +39,6 @@ interface UseMergedTimeGridSelectionInteractionReturn {
   handleTouchMove: (e: React.TouchEvent) => void;
   handleTouchEnd: () => void;
   handleClick: (rowIndex: number, dateIndex: number) => void;
-  setHoveredCell: (cell: MergedTimeGridPosition | null) => void;
-  isInDragRectangle: (rowIndex: number, dateIndex: number) => boolean;
-  getRectangleBounds: () => {
-    minRow: number;
-    maxRow: number;
-    minDate: number;
-    maxDate: number;
-  } | null;
 }
 
 /**
@@ -85,13 +78,7 @@ export function useMergedTimeGridSelectionInteraction({
   );
   const [dragEnd, setDragEnd] = useState<MergedTimeGridPosition | null>(null);
   const [baseSelection, setBaseSelection] = useState<Set<string>>(new Set());
-  const [hoveredCell, setHoveredCell] = useState<MergedTimeGridPosition | null>(
-    null,
-  );
-  const [longPressCell, setLongPressCell] =
-    useState<MergedTimeGridPosition | null>(null);
 
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   // Guard against duplicate commits from local + global mouseup handlers.
   const hasCommittedRef = useRef(false);
 
@@ -180,36 +167,22 @@ export function useMergedTimeGridSelectionInteraction({
 
   const displaySelection = isDragging ? previewSelection : selectedSlots;
 
-  // Check if cell is in current drag rectangle
-  const isInDragRectangle = useCallback(
-    (rowIndex: number, dateIndex: number): boolean => {
-      if (!isDragging || !dragStart || !dragEnd) return false;
+  /**
+   * The rectangle currently being dragged.
+   *
+   * Memoised, and null whenever no drag is in progress, so the matrix view
+   * model rebuilds only when the rectangle actually moves.
+   */
+  const dragRect = useMemo<SlotMatrixDragRect | null>(() => {
+    if (!isDragging || !dragStart || !dragEnd) return null;
 
-      const minRow = Math.min(dragStart.rowIndex, dragEnd.rowIndex);
-      const maxRow = Math.max(dragStart.rowIndex, dragEnd.rowIndex);
-      const minDate = Math.min(dragStart.dateIndex, dragEnd.dateIndex);
-      const maxDate = Math.max(dragStart.dateIndex, dragEnd.dateIndex);
-
-      return (
-        rowIndex >= minRow &&
-        rowIndex <= maxRow &&
-        dateIndex >= minDate &&
-        dateIndex <= maxDate
-      );
-    },
-    [isDragging, dragStart, dragEnd],
-  );
-
-  // Get rectangle bounds
-  const getRectangleBounds = useCallback(() => {
-    if (!dragStart || !dragEnd) return null;
     return {
       minRow: Math.min(dragStart.rowIndex, dragEnd.rowIndex),
       maxRow: Math.max(dragStart.rowIndex, dragEnd.rowIndex),
       minDate: Math.min(dragStart.dateIndex, dragEnd.dateIndex),
       maxDate: Math.max(dragStart.dateIndex, dragEnd.dateIndex),
     };
-  }, [dragStart, dragEnd]);
+  }, [isDragging, dragStart, dragEnd]);
 
   // Commit the selection diff and reset drag state
   const commitAndReset = useCallback(
@@ -260,9 +233,9 @@ export function useMergedTimeGridSelectionInteraction({
     [selectedSlots],
   );
 
+  // Hover styling is pure CSS; this only has to extend an in-progress drag.
   const handleMouseEnter = useCallback(
     (rowIndex: number, dateIndex: number) => {
-      setHoveredCell({ rowIndex, dateIndex });
       if (isDragging) {
         setDragEnd({ rowIndex, dateIndex });
       }
@@ -307,10 +280,6 @@ export function useMergedTimeGridSelectionInteraction({
       e.preventDefault();
       hasCommittedRef.current = false;
 
-      longPressTimer.current = setTimeout(() => {
-        setLongPressCell({ rowIndex, dateIndex });
-      }, 500);
-
       setIsDragging(true);
       setDragStart({ rowIndex, dateIndex });
       setDragEnd({ rowIndex, dateIndex });
@@ -321,11 +290,6 @@ export function useMergedTimeGridSelectionInteraction({
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
-      if (longPressTimer.current) {
-        clearTimeout(longPressTimer.current);
-        longPressTimer.current = null;
-      }
-
       if (!isDragging) return;
       e.preventDefault();
 
@@ -348,17 +312,11 @@ export function useMergedTimeGridSelectionInteraction({
   );
 
   const handleTouchEnd = useCallback(() => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-
     commitDragPreview();
 
     setIsDragging(false);
     setDragStart(null);
     setDragEnd(null);
-    setTimeout(() => setLongPressCell(null), 100);
   }, [commitDragPreview]);
 
   // Global mouse up handler
@@ -376,9 +334,8 @@ export function useMergedTimeGridSelectionInteraction({
 
   return {
     isDragging,
-    hoveredCell,
-    longPressCell,
     displaySelection,
+    dragRect,
     handleMouseDown,
     handleMouseEnter,
     handleMouseUp,
@@ -386,8 +343,5 @@ export function useMergedTimeGridSelectionInteraction({
     handleTouchMove,
     handleTouchEnd,
     handleClick,
-    setHoveredCell,
-    isInDragRectangle,
-    getRectangleBounds,
   };
 }

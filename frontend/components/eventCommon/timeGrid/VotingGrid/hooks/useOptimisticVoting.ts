@@ -332,12 +332,18 @@ export function useOptimisticVoting({
     },
   });
 
+  // useMutation returns a fresh object every render, so depending on the
+  // mutation itself would make this callback — and every grid cell's onClick
+  // downstream of it — a new identity on every render. `mutate` is the stable
+  // part.
+  const { mutate: patchStagedVotes } = patchMutation;
+
   const updateStagedVotes = useCallback(
     (addSlotIds: string[], removeSlotIds: string[], voteMode: VoteMode) => {
       if (addSlotIds.length === 0 && removeSlotIds.length === 0) return;
-      patchMutation.mutate({ addSlotIds, removeSlotIds, voteMode });
+      patchStagedVotes({ addSlotIds, removeSlotIds, voteMode });
     },
-    [patchMutation],
+    [patchStagedVotes],
   );
 
   const commitStagedVotes = useCallback(() => {

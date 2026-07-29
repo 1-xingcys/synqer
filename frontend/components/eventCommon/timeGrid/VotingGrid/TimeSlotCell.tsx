@@ -1,16 +1,9 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { memo } from "react";
 import { TimeSlot, CalendarEvent } from "../types";
 import { VoteMode } from "@/types/event";
 import { formatEventTime } from "../utils";
-
-interface MergedRectBounds {
-  minRow: number;
-  maxRow: number;
-  minDate: number;
-  maxDate: number;
-}
 
 interface TimeSlotCellProps {
   slot: TimeSlot;
@@ -19,82 +12,95 @@ interface TimeSlotCellProps {
   isSelected: boolean;
   isPartiallySelected?: boolean;
   selectionTone?: "none" | "committed" | "staged";
-  isHovered: boolean;
   isDragging: boolean;
+  /** True only while a drag is in progress and this cell is inside the rectangle. */
   inRectangle: boolean;
-  mergedRectBounds: MergedRectBounds | null;
+  rectEdgeTop: boolean;
+  rectEdgeBottom: boolean;
+  rectEdgeLeft: boolean;
+  rectEdgeRight: boolean;
   voteMode: VoteMode;
   voters: string[];
   slotCalendarEvents: CalendarEvent[];
-  eventSpanById?: Map<string, number>;
+  eventSpanById: Map<string, number>;
   showCalendarOnGrid: boolean;
-  mergedSlotIds?: string[]; // IDs of all slots in this merged cell
-  onMouseDown: (e: React.MouseEvent) => void;
-  onMouseEnter: () => void;
-  onTouchStart: (e: React.TouchEvent) => void;
-  onTouchMove: (e: React.TouchEvent) => void;
-  onTouchEnd: () => void;
-  onClick: () => void;
+  /** Comma-joined ids of every slot in this merged cell. */
+  mergedSlotIdsAttr: string;
+  allDayLabel: string;
+  onMouseDown: (
+    rowIndex: number,
+    dateIndex: number,
+    e: React.MouseEvent,
+  ) => void;
+  onMouseEnter: (rowIndex: number, dateIndex: number) => void;
+  onTouchStart: (
+    rowIndex: number,
+    dateIndex: number,
+    e: React.TouchEvent,
+  ) => void;
+  onClick: (rowIndex: number, dateIndex: number) => void;
 }
 
-export function TimeSlotCell({
+/**
+ * One merged cell of the voting grid.
+ *
+ * Memoised, and it only works because every prop above is a primitive or a
+ * reference that survives a drag step. Adding a prop that is rebuilt each
+ * render — an inline handler, a fresh array, a bounds object — silently turns
+ * every drag back into a full-grid repaint.
+ */
+export const TimeSlotCell = memo(function TimeSlotCell({
   slot,
   rowIndex,
   dateIndex,
   isSelected,
   isPartiallySelected = false,
   selectionTone = "none",
-  isHovered,
   isDragging,
   inRectangle,
-  mergedRectBounds,
+  rectEdgeTop,
+  rectEdgeBottom,
+  rectEdgeLeft,
+  rectEdgeRight,
   voteMode,
   voters,
   slotCalendarEvents,
   eventSpanById,
   showCalendarOnGrid,
-  mergedSlotIds,
+  mergedSlotIdsAttr,
+  allDayLabel,
   onMouseDown,
   onMouseEnter,
   onTouchStart,
-  onTouchMove,
-  onTouchEnd,
   onClick,
 }: TimeSlotCellProps) {
-  const tJoined = useTranslations("joined");
-
   // Determine border style for rectangle selection
   // Only show blue border on the outer edges of the selection rectangle
   let borderClasses = "border-r border-b border-gray-100 dark:border-zinc-800";
-  if (isDragging && mergedRectBounds && inRectangle) {
-    const isTopEdge = rowIndex === mergedRectBounds.minRow;
-    const isBottomEdge = rowIndex === mergedRectBounds.maxRow;
-    const isLeftEdge = dateIndex === mergedRectBounds.minDate;
-    const isRightEdge = dateIndex === mergedRectBounds.maxDate;
-
+  if (inRectangle) {
     // Build border classes - only outer edges get blue border
     const borders = [];
 
     // Top border: blue if top edge, else transparent (no internal lines)
     borders.push(
-      isTopEdge ? "border-t-2 border-t-blue-500 dark:border-t-blue-400" : "",
+      rectEdgeTop ? "border-t-2 border-t-blue-500 dark:border-t-blue-400" : "",
     );
 
     // Bottom border: blue if bottom edge, else normal grid line
     borders.push(
-      isBottomEdge
+      rectEdgeBottom
         ? "border-b-2 border-b-blue-500 dark:border-b-blue-400"
         : "border-b border-b-gray-100 dark:border-b-zinc-800",
     );
 
     // Left border: blue if left edge, else transparent (no internal lines)
     borders.push(
-      isLeftEdge ? "border-l-2 border-l-blue-500 dark:border-l-blue-400" : "",
+      rectEdgeLeft ? "border-l-2 border-l-blue-500 dark:border-l-blue-400" : "",
     );
 
     // Right border: blue if right edge, else normal grid line
     borders.push(
-      isRightEdge
+      rectEdgeRight
         ? "border-r-2 border-r-blue-500 dark:border-r-blue-400"
         : "border-r border-r-gray-100 dark:border-r-zinc-800",
     );
@@ -129,19 +135,17 @@ export function TimeSlotCell({
       data-slot-id={slot.id}
       data-row-index={rowIndex}
       data-date-index={dateIndex}
-      data-merged-slot-ids={mergedSlotIds?.join(",")}
-      onClick={onClick}
-      onMouseDown={onMouseDown}
-      onMouseEnter={onMouseEnter}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
+      data-merged-slot-ids={mergedSlotIdsAttr}
+      onClick={() => onClick(rowIndex, dateIndex)}
+      onMouseDown={(e) => onMouseDown(rowIndex, dateIndex, e)}
+      onMouseEnter={() => onMouseEnter(rowIndex, dateIndex)}
+      onTouchStart={(e) => onTouchStart(rowIndex, dateIndex, e)}
       className={`
         flex-1 min-w-0 relative
         cursor-pointer transition-colors duration-75
         ${borderClasses}
         ${getBackgroundClass()}
-        ${!isDragging && isHovered && !isSelected && !isPartiallySelected ? "bg-gray-50 dark:bg-zinc-800" : ""}
+        ${!isDragging && !isSelected && !isPartiallySelected ? "hover:bg-gray-50 dark:hover:bg-zinc-800" : ""}
       `}
       style={{ height: "var(--slot-height, 2.5rem)" }}
     >
@@ -162,7 +166,7 @@ export function TimeSlotCell({
       {showCalendarOnGrid && slotCalendarEvents.length > 0 && (
         <div className="absolute inset-0 pointer-events-none overflow-visible">
           {slotCalendarEvents.slice(0, 2).map((event, idx) => {
-            const span = eventSpanById?.get(event.id) ?? 0;
+            const span = eventSpanById.get(event.id) ?? 0;
             if (span === 0) return null;
 
             const borderColors = [
@@ -189,7 +193,7 @@ export function TimeSlotCell({
                   height: `calc(${span} * var(--slot-height, 2.5rem) - ${offset}px)`,
                   zIndex: 10 + idx,
                 }}
-                title={`${event.summary}\n${formatEventTime(event, tJoined("googleCalendar.allDay"))}`}
+                title={`${event.summary}\n${formatEventTime(event, allDayLabel)}`}
               >
                 {/* Event title badge at top */}
                 <div
@@ -237,4 +241,4 @@ export function TimeSlotCell({
       )}
     </div>
   );
-}
+});
