@@ -1,22 +1,15 @@
 "use client";
 
 import { memo } from "react";
+import { useTranslations } from "next-intl";
 import { TimeSlotCell } from "./TimeSlotCell";
 import { SlotMatrixRowViewModel } from "../types";
 import { VoteMode } from "@/types/event";
-
-interface MergedRectBounds {
-  minRow: number;
-  maxRow: number;
-  minDate: number;
-  maxDate: number;
-}
 
 interface SlotMatrixProps {
   rows: SlotMatrixRowViewModel[];
   voteMode: VoteMode;
   isDragging: boolean;
-  mergedRectBounds: MergedRectBounds | null;
   slotHeight: string;
   showCalendarOnGrid: boolean;
   onMouseDown: (
@@ -35,11 +28,23 @@ interface SlotMatrixProps {
   onClick: (rowIndex: number, dateIndex: number) => void;
 }
 
+/**
+ * Renders the merged slot grid.
+ *
+ * Two rules keep TimeSlotCell's memo working, and both are easy to undo by
+ * accident:
+ *
+ * 1. Handlers are passed straight through rather than bound per cell — the cell
+ *    binds its own indices internally, so no new closure reaches it here.
+ * 2. Only handlers with a stable identity may go to a cell at all. touchmove and
+ *    touchend live on this container instead: they are rebuilt on every drag
+ *    step, and touch events fire on the element the touch started in and bubble
+ *    here anyway.
+ */
 export const SlotMatrix = memo(function SlotMatrix({
   rows,
   voteMode,
   isDragging,
-  mergedRectBounds,
   slotHeight,
   showCalendarOnGrid,
   onMouseDown,
@@ -49,6 +54,10 @@ export const SlotMatrix = memo(function SlotMatrix({
   onTouchEnd,
   onClick,
 }: SlotMatrixProps) {
+  const tJoined = useTranslations("joined");
+  // Read once here instead of in every cell.
+  const allDayLabel = tJoined("googleCalendar.allDay");
+
   return (
     <div
       className="flex-1 border border-gray-200 dark:border-zinc-700 rounded-r-lg overflow-hidden"
@@ -58,42 +67,39 @@ export const SlotMatrix = memo(function SlotMatrix({
           touchAction: "none",
         } as React.CSSProperties
       }
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
     >
       {rows.map((row) => (
         <div key={row.rowIndex} className="flex">
-          {row.cells.map((cell) => {
-            return (
-              <TimeSlotCell
-                key={cell.key}
-                slot={cell.slot}
-                rowIndex={cell.rowIndex}
-                dateIndex={cell.dateIndex}
-                isSelected={cell.isSelected}
-                isPartiallySelected={cell.isPartiallySelected}
-                selectionTone={cell.selectionTone}
-                isHovered={cell.isHovered}
-                isDragging={isDragging}
-                inRectangle={cell.inRectangle}
-                mergedRectBounds={mergedRectBounds}
-                voteMode={voteMode}
-                voters={cell.voters}
-                slotCalendarEvents={cell.slotCalendarEvents}
-                eventSpanById={cell.eventSpanById}
-                showCalendarOnGrid={showCalendarOnGrid}
-                mergedSlotIds={cell.mergedSlotIds}
-                onMouseDown={(e) =>
-                  onMouseDown(cell.rowIndex, cell.dateIndex, e)
-                }
-                onMouseEnter={() => onMouseEnter(cell.rowIndex, cell.dateIndex)}
-                onTouchStart={(e) =>
-                  onTouchStart(cell.rowIndex, cell.dateIndex, e)
-                }
-                onTouchMove={onTouchMove}
-                onTouchEnd={onTouchEnd}
-                onClick={() => onClick(cell.rowIndex, cell.dateIndex)}
-              />
-            );
-          })}
+          {row.cells.map((cell) => (
+            <TimeSlotCell
+              key={cell.key}
+              slot={cell.slot}
+              rowIndex={cell.rowIndex}
+              dateIndex={cell.dateIndex}
+              isSelected={cell.isSelected}
+              isPartiallySelected={cell.isPartiallySelected}
+              selectionTone={cell.selectionTone}
+              isDragging={isDragging}
+              inRectangle={cell.inRectangle}
+              rectEdgeTop={cell.rectEdgeTop}
+              rectEdgeBottom={cell.rectEdgeBottom}
+              rectEdgeLeft={cell.rectEdgeLeft}
+              rectEdgeRight={cell.rectEdgeRight}
+              voteMode={voteMode}
+              voters={cell.voters}
+              slotCalendarEvents={cell.slotCalendarEvents}
+              eventSpanById={cell.eventSpanById}
+              showCalendarOnGrid={showCalendarOnGrid}
+              mergedSlotIdsAttr={cell.mergedSlotIdsAttr}
+              allDayLabel={allDayLabel}
+              onMouseDown={onMouseDown}
+              onMouseEnter={onMouseEnter}
+              onTouchStart={onTouchStart}
+              onClick={onClick}
+            />
+          ))}
         </div>
       ))}
     </div>

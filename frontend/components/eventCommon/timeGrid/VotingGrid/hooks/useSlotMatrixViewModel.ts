@@ -1,42 +1,15 @@
 "use client";
 
 import { useMemo } from "react";
+import { SlotMatrixRowViewModel } from "../../types";
 import {
-  CalendarEvent,
-  MergedTimeRow,
-  TimeSlot,
-  SlotMatrixCellViewModel,
-  SlotMatrixRowViewModel,
-} from "../../types";
-
-interface CellPosition {
-  rowIndex: number;
-  dateIndex: number;
-}
-
-interface UseSlotMatrixViewModelProps {
-  mergedTimeRows: MergedTimeRow[];
-  paginatedDates: string[];
-  slotsByDate: Record<string, TimeSlot[]>;
-  displaySelection: Set<string>;
-  committedDisplaySelection: Set<string>;
-  hasStagedVoteDraft: boolean;
-  hoveredCell: CellPosition | null;
-  longPressCell: CellPosition | null;
-  isInDragRectangle: (rowIndex: number, dateIndex: number) => boolean;
-  getVotersForMergedRow: (slotIndices: number[], dateKey: string) => string[];
-  getCalendarProjectionForCell: (
-    rowIndex: number,
-    dateKey: string,
-  ) => {
-    events: CalendarEvent[];
-    eventSpanById: Map<string, number>;
-  };
-}
+  buildSlotMatrixRows,
+  type BuildSlotMatrixRowsInput,
+} from "./slotMatrixCellModel";
 
 /**
- * 組裝 Slot Matrix 渲染所需的 view model：
- * 把 selection/hover/drag、投票者與日曆 overlay 合併成逐列逐格資料。
+ * Memoises the slot matrix view model. All of the logic lives in
+ * buildSlotMatrixRows so it can be tested without rendering.
  */
 export function useSlotMatrixViewModel({
   mergedTimeRows,
@@ -45,96 +18,33 @@ export function useSlotMatrixViewModel({
   displaySelection,
   committedDisplaySelection,
   hasStagedVoteDraft,
-  hoveredCell,
-  longPressCell,
-  isInDragRectangle,
-  getVotersForMergedRow,
+  dragRect,
+  getCellData,
   getCalendarProjectionForCell,
-}: UseSlotMatrixViewModelProps): SlotMatrixRowViewModel[] {
-  return useMemo(() => {
-    const rows: SlotMatrixRowViewModel[] = [];
-
-    for (let rowIndex = 0; rowIndex < mergedTimeRows.length; rowIndex++) {
-      const row = mergedTimeRows[rowIndex];
-      const cells: SlotMatrixCellViewModel[] = [];
-
-      for (let dateIndex = 0; dateIndex < paginatedDates.length; dateIndex++) {
-        const dateKey = paginatedDates[dateIndex];
-        const firstSlotIdx = row.slotIndices[0];
-        const firstSlot = slotsByDate[dateKey]?.[firstSlotIdx];
-        if (!firstSlot) continue;
-
-        const mergedSlotIds = row.slotIndices
-          .map((idx) => slotsByDate[dateKey]?.[idx]?.id)
-          .filter((id): id is string => Boolean(id));
-
-        const selectedCount = row.slotIndices.filter((idx) => {
-          const slot = slotsByDate[dateKey]?.[idx];
-          return Boolean(slot && displaySelection.has(slot.id));
-        }).length;
-
-        const isSelected =
-          mergedSlotIds.length > 0 && selectedCount === row.slotIndices.length;
-        const isPartiallySelected =
-          selectedCount > 0 && selectedCount < row.slotIndices.length;
-
-        const hasSelectionDiff =
-          isSelected &&
-          mergedSlotIds.some(
-            (slotId) =>
-              displaySelection.has(slotId) !==
-              committedDisplaySelection.has(slotId),
-          );
-
-        const selectionTone: SlotMatrixCellViewModel["selectionTone"] =
-          isSelected
-            ? hasStagedVoteDraft && hasSelectionDiff
-              ? "staged"
-              : "committed"
-            : "none";
-
-        const calendarProjection = getCalendarProjectionForCell(
-          rowIndex,
-          dateKey,
-        );
-
-        cells.push({
-          key: `${dateKey}-${rowIndex}`,
-          slot: firstSlot,
-          rowIndex,
-          dateIndex,
-          mergedSlotIds,
-          isSelected,
-          isPartiallySelected,
-          selectionTone,
-          isHovered:
-            hoveredCell?.rowIndex === rowIndex &&
-            hoveredCell?.dateIndex === dateIndex,
-          isLongPressed:
-            longPressCell?.rowIndex === rowIndex &&
-            longPressCell?.dateIndex === dateIndex,
-          inRectangle: isInDragRectangle(rowIndex, dateIndex),
-          voters: getVotersForMergedRow(row.slotIndices, dateKey),
-          slotCalendarEvents: calendarProjection.events,
-          eventSpanById: calendarProjection.eventSpanById,
-        });
-      }
-
-      rows.push({ rowIndex, cells });
-    }
-
-    return rows;
-  }, [
-    mergedTimeRows,
-    paginatedDates,
-    slotsByDate,
-    displaySelection,
-    committedDisplaySelection,
-    hasStagedVoteDraft,
-    hoveredCell,
-    longPressCell,
-    isInDragRectangle,
-    getVotersForMergedRow,
-    getCalendarProjectionForCell,
-  ]);
+}: BuildSlotMatrixRowsInput): SlotMatrixRowViewModel[] {
+  return useMemo(
+    () =>
+      buildSlotMatrixRows({
+        mergedTimeRows,
+        paginatedDates,
+        slotsByDate,
+        displaySelection,
+        committedDisplaySelection,
+        hasStagedVoteDraft,
+        dragRect,
+        getCellData,
+        getCalendarProjectionForCell,
+      }),
+    [
+      mergedTimeRows,
+      paginatedDates,
+      slotsByDate,
+      displaySelection,
+      committedDisplaySelection,
+      hasStagedVoteDraft,
+      dragRect,
+      getCellData,
+      getCalendarProjectionForCell,
+    ],
+  );
 }

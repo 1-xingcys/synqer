@@ -74,10 +74,8 @@ export default function VotingGrid({
     slotHeight,
     mergedTimeRows,
     slotMatrixRows,
-    mergedRectBounds,
     isDragging,
     handleGridMouseUp,
-    handleGridMouseLeave,
     handleMergedMouseDown,
     handleMergedMouseEnter,
     handleMergedTouchStart,
@@ -198,7 +196,6 @@ export default function VotingGrid({
         <div
           className="select-none transition-opacity duration-200 touch-pan-y"
           onMouseUp={handleGridMouseUp}
-          onMouseLeave={handleGridMouseLeave}
         >
           <div className="relative">
             <div className="flex">
@@ -212,7 +209,6 @@ export default function VotingGrid({
                 rows={slotMatrixRows}
                 voteMode={voteMode}
                 isDragging={isDragging}
-                mergedRectBounds={mergedRectBounds}
                 slotHeight={slotHeight}
                 showCalendarOnGrid={showCalendarOnGrid}
                 onMouseDown={handleMergedMouseDown}

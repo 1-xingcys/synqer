@@ -74,18 +74,29 @@ export interface VotingGridProps {
   shareVoteToChat: boolean;
 }
 
+/**
+ * Everything `TimeSlotCell` renders from, and nothing else.
+ *
+ * Every field is either a primitive or a reference that only changes when the
+ * underlying data changes — never on hover or on a drag step. That is what lets
+ * `memo` skip the cells a drag did not touch; see slotMatrixCellModel.ts.
+ */
 export interface SlotMatrixCellViewModel {
   key: string;
   slot: TimeSlot;
   rowIndex: number;
   dateIndex: number;
-  mergedSlotIds: string[];
+  /** Comma-joined slot ids, pre-joined so the cell receives a primitive. */
+  mergedSlotIdsAttr: string;
   isSelected: boolean;
   isPartiallySelected: boolean;
   selectionTone: "none" | "committed" | "staged";
-  isHovered: boolean;
-  isLongPressed: boolean;
+  /** True only while a drag is in progress and this cell is inside the rectangle. */
   inRectangle: boolean;
+  rectEdgeTop: boolean;
+  rectEdgeBottom: boolean;
+  rectEdgeLeft: boolean;
+  rectEdgeRight: boolean;
   voters: string[];
   slotCalendarEvents: CalendarEvent[];
   eventSpanById: Map<string, number>;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { Vote, VotingGridProps } from "../../types";
+import { VotingGridProps } from "../../types";
 import { useCalendarConflictSyncApi } from "./useCalendarConflictSyncApi";
 import { useMergedTimeGridSelectionInteraction } from "./useMergedTimeGridSelectionInteraction";
 import { useMergedTimeRowsModel } from "../../hooks/useMergedTimeRowsModel";
@@ -12,6 +12,7 @@ import {
   type CommitFeedback,
 } from "./useOptimisticVoting";
 import { useCalendarOverlayProjection } from "./useCalendarOverlayProjection";
+import { useSlotCellDataProjection } from "./useSlotCellDataProjection";
 import { useSlotMatrixViewModel } from "./useSlotMatrixViewModel";
 import { useSlotGridModel } from "../../hooks/useSlotGridModel";
 import { useSlotSelectionModel } from "./useSlotSelectionModel";
@@ -66,14 +67,8 @@ interface UseVotingGridControllerResult {
     slotHeight: string;
     mergedTimeRows: ReturnType<typeof useMergedTimeRowsModel>["mergedTimeRows"];
     slotMatrixRows: ReturnType<typeof useSlotMatrixViewModel>;
-    mergedRectBounds: ReturnType<
-      typeof useMergedTimeGridSelectionInteraction
-    >["getRectangleBounds"] extends (...args: never[]) => infer R
-      ? R
-      : never;
     isDragging: boolean;
     handleGridMouseUp: () => void;
-    handleGridMouseLeave: () => void;
     handleMergedMouseDown: (
       rowIndex: number,
       dateIndex: number,
@@ -185,9 +180,8 @@ export function useVotingGridController({
 
   const {
     isDragging,
-    hoveredCell,
-    longPressCell,
     displaySelection,
+    dragRect,
     handleMouseDown: handleMergedMouseDown,
     handleMouseEnter: handleMergedMouseEnter,
     handleMouseUp: handleMergedMouseUp,
@@ -195,9 +189,6 @@ export function useVotingGridController({
     handleTouchMove: handleMergedTouchMove,
     handleTouchEnd: handleMergedTouchEnd,
     handleClick: handleMergedClick,
-    setHoveredCell,
-    isInDragRectangle,
-    getRectangleBounds: getMergedRectangleBounds,
   } = useMergedTimeGridSelectionInteraction({
     selectedSlots: modeDisplaySelection,
     mergedTimeRows,
@@ -233,43 +224,24 @@ export function useVotingGridController({
 
   const votesBySlot = useMemo(() => groupVotesBySlot(votes), [votes]);
 
-  const getVotersForSlot = useCallback(
-    (slotId: string): string[] => {
-      return (votesBySlot[slotId] || []).map((v: Vote) => v.userDisplayName);
-    },
-    [votesBySlot],
-  );
-
-  const getVotersForMergedRow = useCallback(
-    (slotIndices: number[], dateKey: string): string[] => {
-      const allVoters = new Set<string>();
-      slotIndices.forEach((idx) => {
-        const slot = slotsByDate[dateKey]?.[idx];
-        if (!slot) return;
-
-        const voters = getVotersForSlot(slot.id);
-        voters.forEach((v) => allVoters.add(v));
-      });
-      return Array.from(allVoters);
-    },
-    [slotsByDate, getVotersForSlot],
-  );
+  const { getCellData } = useSlotCellDataProjection({
+    mergedTimeRows,
+    paginatedDates,
+    slotsByDate,
+    votesBySlot,
+  });
 
   const slotMatrixRows = useSlotMatrixViewModel({
     mergedTimeRows,
     paginatedDates,
     slotsByDate,
     displaySelection,
-    hoveredCell,
-    longPressCell,
-    isInDragRectangle,
-    getVotersForMergedRow,
     committedDisplaySelection,
     hasStagedVoteDraft,
+    dragRect,
+    getCellData,
     getCalendarProjectionForCell,
   });
-
-  const mergedRectBounds = getMergedRectangleBounds();
 
   const markConflictsAsUnavailable = useCallback(() => {
     applyConflicts(conflictingSlotIds);
@@ -281,10 +253,6 @@ export function useVotingGridController({
     },
     [setCurrentPage],
   );
-
-  const handleGridMouseLeave = useCallback(() => {
-    setHoveredCell(null);
-  }, [setHoveredCell]);
 
   return {
     selection: {
@@ -314,10 +282,8 @@ export function useVotingGridController({
       slotHeight,
       mergedTimeRows,
       slotMatrixRows,
-      mergedRectBounds,
       isDragging,
       handleGridMouseUp: handleMergedMouseUp,
-      handleGridMouseLeave,
       handleMergedMouseDown,
       handleMergedMouseEnter,
       handleMergedTouchStart,
