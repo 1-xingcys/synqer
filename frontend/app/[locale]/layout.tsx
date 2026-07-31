@@ -10,6 +10,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { QueryProvider } from "@/components/QueryProvider";
 import { DebugWrapper } from "@/components/DebugConsole/DebugWrapper";
 import { LiffPathHandler } from "@/components/LiffPathHandler";
+// TEMPORARY: loading-time instrumentation, remove with lib/perfTrace.ts
+import { PerfTraceOverlay } from "@/components/PerfTraceOverlay";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
@@ -70,6 +72,9 @@ export default async function LocaleLayout({
                   </AuthProvider>
                 </LiffPathHandler>
               </LiffProvider>
+              {/* TEMPORARY: on-screen load timeline, must sit outside
+                  LiffPathHandler so it also renders during redirects */}
+              <PerfTraceOverlay />
             </NextIntlClientProvider>
           </QueryProvider>
         </ThemeProvider>

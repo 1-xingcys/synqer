@@ -12,9 +12,13 @@ import {
 } from "@/lib/liff";
 import { debugLog } from "@/components/DebugConsole";
 import { LoadingState } from "@/components/ui/loading-state";
+// TEMPORARY: loading-time instrumentation, remove with lib/perfTrace.ts
+import { perfMark } from "@/lib/perfTrace";
 
-const log = (message: string, data?: unknown) =>
+const log = (message: string, data?: unknown) => {
+  perfMark(`LiffPathHandler · ${message}`, data);
   debugLog("LiffPath", message, data);
+};
 const LIFF_AUTO_REDIRECT_KEY = "synqer:liff-auto-redirect:url";
 
 /**
@@ -52,6 +56,7 @@ export function LiffPathHandler({
   );
 
   useEffect(() => {
+    perfMark("LiffPathHandler · effect", { needsLiffCheck, isLineClient });
     if (!needsLiffCheck) return;
 
     const handleLiffPath = async () => {
@@ -134,7 +139,12 @@ export function LiffPathHandler({
     };
 
     void handleLiffPath();
-  }, [needsLiffCheck]);
+  }, [needsLiffCheck, isLineClient]);
+
+  // TEMPORARY: shows when children (and their chunks) finally start rendering
+  useEffect(() => {
+    perfMark(`LiffPathHandler · status = ${status}`);
+  }, [status]);
 
   // Show loading while checking or redirecting. This avoids loading the
   // children's chunks mid-redirect and prevents "Failed to load chunk" errors.
