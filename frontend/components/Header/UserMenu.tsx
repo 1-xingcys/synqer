@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -20,14 +21,18 @@ import { cn } from "@/lib/utils";
 
 export default function UserMenu() {
   const t = useTranslations();
-  const { user, logout } = useAuthContext();
+  const { user, loading, logout } = useAuthContext();
   const { isInClient: isInLiff } = useLiff();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
+  // The placeholder matches the avatar size so the header layout stays the same
+  // before and after /auth/me responds
+  if (loading) return <Skeleton className="size-9 rounded-full" />;
+
   if (!user) return null;
 
-  // 從 displayName 或 email 取得首字作為 fallback
+  // Use the first character of displayName or email as the fallback
   const getInitials = () => {
     const name = user.displayName || user.primaryEmail || "U";
     return name.charAt(0).toUpperCase();
@@ -79,7 +84,7 @@ export default function UserMenu() {
         <DropdownMenuSeparator />
         <LanguageSwitcher asSubmenu />
         <ThemeSwitcher asSubmenu />
-        {/* 在 LIFF 環境中不顯示登出按鈕，保持始終登入狀態 */}
+        {/* Hide the logout button inside LIFF so the user stays signed in */}
         {!isInLiff && (
           <>
             <DropdownMenuSeparator />

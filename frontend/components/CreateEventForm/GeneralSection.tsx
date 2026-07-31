@@ -6,6 +6,7 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -26,7 +27,7 @@ import type { EventType } from "@/types/event";
 
 export function GeneralSection() {
   const t = useTranslations();
-  const { user } = useAuthContext();
+  const { user, loading: authLoading } = useAuthContext();
   const { isInClient: isInLiff } = useLiff();
   const [showLineGroupInfoModal, setShowLineGroupInfoModal] = useState(false);
 
@@ -67,20 +68,29 @@ export function GeneralSection() {
             <div className="w-full md:w-48 shrink-0 space-y-1.5">
               <Label>{t("createEvent.general.host")}</Label>
               <div className="flex items-center gap-2 px-3 h-9 border border-input rounded-md bg-muted/50">
-                <Avatar className="h-5 w-5">
-                  <AvatarImage
-                    src={user?.avatarUrl || undefined}
-                    alt={user?.displayName || "User"}
-                  />
-                  <AvatarFallback className="text-xs">
-                    {(user?.displayName || user?.primaryEmail || "U")
-                      .charAt(0)
-                      .toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm text-foreground truncate">
-                  {user?.displayName || user?.primaryEmail || "You"}
-                </span>
+                {authLoading ? (
+                  <>
+                    <Skeleton className="h-5 w-5 rounded-full" />
+                    <Skeleton className="h-4 w-24" />
+                  </>
+                ) : (
+                  <>
+                    <Avatar className="h-5 w-5">
+                      <AvatarImage
+                        src={user?.avatarUrl || undefined}
+                        alt={user?.displayName || "User"}
+                      />
+                      <AvatarFallback className="text-xs">
+                        {(user?.displayName || user?.primaryEmail || "U")
+                          .charAt(0)
+                          .toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm text-foreground truncate">
+                      {user?.displayName || user?.primaryEmail || "You"}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 

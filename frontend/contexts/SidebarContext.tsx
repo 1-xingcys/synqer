@@ -8,9 +8,15 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
+import {
+  nextSidebarOpenState,
+  type SidebarOpenState,
+} from "@/components/ui/sidebarState";
+
+const DESKTOP_QUERY = "(min-width: 1024px)";
 
 interface SidebarContextType {
-  isOpen: boolean;
+  isOpen: SidebarOpenState;
   toggle: () => void;
   open: () => void;
   close: () => void;
@@ -23,17 +29,18 @@ interface SidebarContextType {
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
-  // 桌面端預設展開，手機端預設關閉
-  const [isOpen, setIsOpen] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.innerWidth >= 1024; // lg breakpoint
-    }
-    return true; // SSR 時預設展開（桌面端）
-  });
+  // null = never toggled manually. The default appearance (collapsed on mobile,
+  // expanded on desktop) comes from CSS breakpoints; window is not read here so
+  // that the first server and client render agree.
+  const [isOpen, setIsOpen] = useState<SidebarOpenState>(null);
   const [content, setContent] = useState<ReactNode>(null);
   const [title, setTitle] = useState<string | undefined>(undefined);
 
-  const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
+  const toggle = useCallback(() => {
+    // Runs only on user interaction, where reading the window width is safe
+    const isDesktop = window.matchMedia(DESKTOP_QUERY).matches;
+    setIsOpen((prev) => nextSidebarOpenState(prev, isDesktop));
+  }, []);
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
 

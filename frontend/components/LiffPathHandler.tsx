@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   buildLiffEntryUrl,
   getLiffStatePath,
@@ -19,35 +20,49 @@ const LIFF_AUTO_REDIRECT_KEY = "synqer:liff-auto-redirect:url";
 /**
  * LiffPathHandler
  *
- * 處理 LIFF 路徑重定向與 LINE client 中轉 LIFF 的組件。
- * 當使用 https://liff.line.me/{liffId}/{path} 格式開啟時，
- * LINE 會把 {path} 存在 liff.state query parameter 中，
- * 這個組件負責檢測並重定向到正確的路徑。
+ * Handles LIFF path redirects and forwards the LINE in-app browser into LIFF.
+ * When the app is opened as https://liff.line.me/{liffId}/{path}, LINE stores
+ * {path} in the liff.state query parameter, and this component detects it and
+ * redirects to the correct path.
  *
- * 必須放在 root layout 中，在其他認證邏輯之前執行。
+ * Must live in the root layout and run before any other auth logic.
+ *
+ * @param isLineClient Passed in by the root layout after checking the
+ *   User-Agent, so the server already knows whether to block children.
  */
 export function LiffPathHandler({
   children,
+  isLineClient,
 }: {
   children: React.ReactNode;
+  isLineClient: boolean;
 }): React.ReactNode {
-  // 使用 "checking" | "redirecting" | "done" 三種狀態
-  // 初始值是 "checking"，在確認不需要重定向之前不渲染 children
-  // 這可以避免在重定向過程中載入不必要的 chunks
+  const searchParams = useSearchParams();
+
+  // Only LIFF-related requests can ever redirect, so only they need to be held
+  // back. A regular browser never redirects here, and blocking it would just
+  // stop the whole tree from server rendering.
+  const needsLiffCheck = isLineClient || searchParams.has("liff.state");
+
+  // Three states: "checking" | "redirecting" | "done".
+  // Children are not rendered until we know no redirect is needed, which avoids
+  // loading unnecessary chunks while a redirect is in flight.
   const [status, setStatus] = useState<"checking" | "redirecting" | "done">(
-    "checking",
+    needsLiffCheck ? "checking" : "done",
   );
 
   useEffect(() => {
+    if (!needsLiffCheck) return;
+
     const handleLiffPath = async () => {
       try {
-        // 檢查是否有 liff.state 參數
+        // Check for a liff.state parameter
         const liffPath = getLiffStatePath();
 
         if (liffPath) {
           log("Found liff.state path", { liffPath });
 
-          // 檢查是否需要重定向
+          // Check whether a redirect is needed
           const targetPath = handleLiffPathRedirect();
 
           if (!targetPath) {
@@ -59,7 +74,7 @@ export function LiffPathHandler({
           log("Redirecting to liff path", { targetPath });
           setStatus("redirecting");
 
-          // 如果有 LIFF ID，先初始化 LIFF 以確保登入狀態被保留
+          // With a LIFF ID, initialize LIFF first so the login state is kept
           if (isLiffEnabled()) {
             try {
               await initializeLiff();
@@ -71,14 +86,14 @@ export function LiffPathHandler({
             }
           }
 
-          // 使用 window.location.replace 進行硬重定向
-          // 這確保在任何其他 React 邏輯執行之前完成重定向
-          // 並且不會在瀏覽器歷史中產生新條目
+          // Hard redirect via window.location.replace: it completes before any
+          // other React logic runs and leaves no extra browser history entry
           window.location.replace(targetPath);
           return;
         }
 
-        // 沒有 liff.state，嘗試將 LINE 內建瀏覽器中打開的原生網址中轉到 LIFF
+        // No liff.state: try to forward a plain URL opened in the LINE in-app
+        // browser over to LIFF
         if (!isLiffEnabled() || !isLineUserAgent()) {
           log("Skip LIFF auto redirect");
           setStatus("done");
@@ -119,10 +134,10 @@ export function LiffPathHandler({
     };
 
     void handleLiffPath();
-  }, []);
+  }, [needsLiffCheck]);
 
-  // 正在檢查或重定向時顯示 loading
-  // 這可以避免在重定向過程中載入 children 的 chunks，防止 "Failed to load chunk" 錯誤
+  // Show loading while checking or redirecting. This avoids loading the
+  // children's chunks mid-redirect and prevents "Failed to load chunk" errors.
   if (status === "checking" || status === "redirecting") {
     return (
       <LoadingState

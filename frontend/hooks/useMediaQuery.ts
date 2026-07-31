@@ -1,41 +1,34 @@
-import { useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 /**
  * useMediaQuery Hook
- * 監聽 media query 變化並返回當前狀態
+ * Subscribes to a media query and returns its current state.
  *
- * @param query - CSS media query 字串 (例如: "(min-width: 1024px)")
- * @returns boolean - 是否符合 media query
+ * There is no window to measure on the server, so the snapshot is always false;
+ * React re-renders with the real value right after mount and does not treat
+ * that difference as a hydration mismatch.
+ *
+ * Because of that, callers must not use this to decide what the first paint
+ * looks like -- leave that to CSS breakpoints, otherwise desktop renders the
+ * mobile layout first and then jumps.
+ *
+ * @param query - CSS media query string (e.g. "(min-width: 1024px)")
+ * @returns boolean - whether the media query matches; always false before mount
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(() => {
-    // Lazy initialization: 只在初始化時執行一次
-    if (typeof window === "undefined") {
-      return false;
-    }
-    return window.matchMedia(query).matches;
-  });
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      const mediaQuery = window.matchMedia(query);
+      mediaQuery.addEventListener("change", onStoreChange);
+      return () => mediaQuery.removeEventListener("change", onStoreChange);
+    },
+    [query],
+  );
 
-  useEffect(() => {
-    // 檢查是否在瀏覽器環境
-    if (typeof window === "undefined") {
-      return;
-    }
+  const getSnapshot = useCallback(
+    () => window.matchMedia(query).matches,
+    [query],
+  );
 
-    const mediaQuery = window.matchMedia(query);
-
-    // 監聽變化
-    const handleChange = (event: MediaQueryListEvent) => {
-      setMatches(event.matches);
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-
-    // 清理
-    return () => {
-      mediaQuery.removeEventListener("change", handleChange);
-    };
-  }, [query]);
-
-  return matches;
+  return useSyncExternalStore(subscribe, getSnapshot, () => false);
 }

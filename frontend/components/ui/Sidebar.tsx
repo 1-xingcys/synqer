@@ -20,19 +20,24 @@ import {
   type OverviewStatus,
 } from "@/lib/eventRoutes";
 import { useMyEvents } from "@/hooks/useMyEvents";
+import {
+  isHiddenFromAssistiveTech,
+  resolveSidebarPresentation,
+  type SidebarOpenState,
+} from "./sidebarState";
 
 /**
- * Sidebar 通用元件
- * 提供乾淨的 UI 結構，不依賴特定業務邏輯
+ * Generic Sidebar component.
+ * Provides a clean UI structure without depending on specific business logic.
  *
- * 可擴展性：
- * 1. 支援任意選單項目通過 children 傳入
- * 2. 支援收合/展開狀態
- * 3. 響應式設計（手機版/桌面版）
+ * Extensibility:
+ * 1. Accepts arbitrary menu items through children
+ * 2. Supports collapsed/expanded states
+ * 3. Responsive design (mobile/desktop)
  */
 
 interface SidebarProps {
-  isOpen: boolean;
+  isOpen: SidebarOpenState;
   onClose: () => void;
   title?: string;
   children?: ReactNode;
@@ -44,33 +49,34 @@ export default function Sidebar({
   title,
   children,
 }: SidebarProps) {
-  const isCollapsed = !isOpen;
-  const visibilityClass = isOpen
-    ? "translate-x-0 opacity-100 pointer-events-auto"
-    : "-translate-x-full opacity-0 pointer-events-none lg:translate-x-0 lg:opacity-100 lg:pointer-events-auto";
-  const widthClass = isOpen ? "lg:w-64" : "lg:w-20";
+  const { isCollapsed, showOverlay, visibilityClass, widthClass } =
+    resolveSidebarPresentation(isOpen);
 
-  // 如果沒有傳入 children，使用 context 中的 content，並自動設置內容
+  // Only affects the accessibility tree, not the appearance, so learning the
+  // window size after mount is fine
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+
+  // Without children, fall back to the content held in the context
   const { content: contextContent, title: contextTitle } = useSidebar();
   const sidebarContent = children !== undefined ? children : contextContent;
   const sidebarTitle = title !== undefined ? title : contextTitle;
 
-  // 如果沒有傳入 children，自動設置 sidebar 內容
+  // Without children, the sidebar content is set up automatically
   useEffect(() => {
     if (children === undefined) {
-      // ProtectedSidebarContent 會自動設置內容
+      // ProtectedSidebarContent sets the content itself
       return;
     }
   }, [children]);
 
-  // 處理 children，傳遞 collapsed prop
+  // Walk the children and pass down the collapsed prop
   const renderedChildren = sidebarContent
     ? Children.map(sidebarContent, (child) => {
         if (isValidElement(child)) {
-          // 只對有 collapsed prop 的元件（如 SidebarItem）傳遞 collapsed
-          // 原生 HTML 元素（如 button）會被跳過
+          // Only pass collapsed to components that accept it (such as
+          // SidebarItem); native HTML elements (such as button) are skipped
           if (typeof child.type === "function") {
-            // 檢查是否是 SidebarItem 組件
+            // Check whether this is the SidebarItem component
             const componentType = child.type as {
               name?: string;
               displayName?: string;
@@ -94,8 +100,8 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Overlay - 手機版點擊關閉 */}
-      {isOpen && (
+      {/* Overlay - tap to close on mobile */}
+      {showOverlay && (
         <div
           className={`fixed inset-0 bg-black/50 ${Z_INDEX.SIDEBAR_BACKDROP} lg:hidden`}
           onClick={onClose}
@@ -112,9 +118,9 @@ export default function Sidebar({
           ${Z_INDEX.SIDEBAR_PANEL} lg:z-0
           ${visibilityClass}
         `}
-        aria-hidden={!isOpen}
+        aria-hidden={isHiddenFromAssistiveTech(isOpen, isDesktop)}
       >
-        {/* Sidebar Header - 手機版顯示標題和關閉按鈕 */}
+        {/* Sidebar Header - shows the title and close button on mobile */}
         {sidebarTitle && (
           <div className="h-16 flex items-center justify-between px-4 border-b border-zinc-200 dark:border-zinc-800 lg:hidden">
             <span className="font-semibold text-zinc-900 dark:text-zinc-100">
@@ -153,8 +159,8 @@ export default function Sidebar({
 }
 
 /**
- * SidebarItem 元件
- * 用於 Sidebar 中的選單項目
+ * SidebarItem component.
+ * A menu entry inside the Sidebar.
  */
 interface SidebarItemProps {
   icon?: ReactNode;
@@ -199,7 +205,7 @@ export function SidebarItem({
 
 /**
  * ProtectedSidebarContent
- * 自動設置受保護頁面的 Sidebar 內容
+ * Sets up the Sidebar content for protected pages.
  */
 type SidebarView = OverviewStatus;
 
@@ -236,13 +242,15 @@ function ProtectedSidebarContent() {
   const router = useRouter();
   const t = useTranslations();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-  const isCollapsed = !isOpen;
-  // 與 overview 共用同一份清單快取，供 detail 頁反推所屬分類。
+  const { isCollapsed } = resolveSidebarPresentation(isOpen);
+  // Shares the same list cache as the overview so detail pages can work out
+  // which category they belong to.
   const { events } = useMyEvents();
 
-  // 判斷當前視圖：
-  // 1. 清單頁 /events/<status> → 精確命中該分類
-  // 2. detail 頁 /events/<eventId>[/tab] → 依該活動狀態高亮所屬分類
+  // Determine the current view:
+  // 1. List page /events/<status> -> exact match on that category
+  // 2. Detail page /events/<eventId>[/tab] -> highlight the category matching
+  //    the event's status
   const currentView = useMemo<SidebarView | null>(() => {
     const overviewMatch = OVERVIEW_ITEMS.find(
       (item) => pathname === eventOverviewPath(item.status),
@@ -259,7 +267,7 @@ function ProtectedSidebarContent() {
     return null;
   }, [pathname, events]);
 
-  // 設置 Sidebar 內容 - 所有頁面都顯示相同的 Dashboard sidebar
+  // Set the Sidebar content - every page shows the same dashboard sidebar
   useEffect(() => {
     setTitle(t("dashboard.menu"));
 
@@ -277,7 +285,7 @@ function ProtectedSidebarContent() {
 
     setContent(
       <>
-        {/* 建立活動按鈕 */}
+        {/* Create event button */}
         <Link
           href="/new"
           onClick={() => {
@@ -319,7 +327,7 @@ function ProtectedSidebarContent() {
           </span>
         </Link>
 
-        {/* 選單項目 */}
+        {/* Menu items */}
         {menuItems.map((item) => (
           <SidebarItem
             key={item.id}
@@ -349,6 +357,6 @@ function ProtectedSidebarContent() {
     isCollapsed,
   ]);
 
-  // 這個組件不渲染任何內容，只是用來設置 sidebar 內容
+  // This component renders nothing; it only sets up the sidebar content
   return null;
 }
