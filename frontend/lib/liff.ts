@@ -6,6 +6,7 @@
  */
 
 import { LOCALES } from "@/i18n/locales";
+import { matchesLineUserAgent } from "@/lib/auth-gate";
 
 // LIFF SDK 會在客戶端動態載入
 let liffObject: typeof import("@line/liff").default | null = null;
@@ -92,7 +93,7 @@ export function isLiffEnabled(): boolean {
  */
 export function isLineUserAgent(): boolean {
   if (typeof navigator === "undefined") return false;
-  return /Line/i.test(navigator.userAgent);
+  return matchesLineUserAgent(navigator.userAgent);
 }
 
 /**
