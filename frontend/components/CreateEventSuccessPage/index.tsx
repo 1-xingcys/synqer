@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
-import { useLiff } from "@/hooks/useLiff";
+import { useLiffContext } from "@/contexts/LiffContext";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -34,7 +34,8 @@ export default function CreateEventSuccessPage() {
   const t = useTranslations("createEvent.success");
   const router = useRouter();
   const { user } = useAuthContext();
-  const { isInClient: isInLiff, isInitialized: liffInitialized } = useLiff();
+  const { isInClient: isInLiff, isInitialized: liffInitialized } =
+    useLiffContext();
   const { copied: linkCopied, copyLink: handleCopyLink } =
     useEventShareLink(eventId);
   const { data, isLoading, error } = useEventDetail(eventId);

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
-import { useLiff } from "@/hooks/useLiff";
+import { useLiffContext } from "@/contexts/LiffContext";
 import {
   buildHostedEventResultTextFromSummary,
   type HostedEventResultTextCopy,
@@ -52,7 +52,7 @@ export function useHostedEventResultShare(opts: {
   const { copied: resultTextCopied, copy: copyResultText } =
     useCopyToClipboard();
   const { isInClient: isInLiffClient, isInitialized: isLiffInitialized } =
-    useLiff();
+    useLiffContext();
   const canNativeShareResultText = canShareHostedEventResultText();
   const [resultTextShareStatus, setResultTextShareStatus] =
     useState<ResultTextShareStatus>(ResultTextShareStatus.Idle);

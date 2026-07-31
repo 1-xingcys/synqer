@@ -12,6 +12,11 @@ import { perfMark, perfSpan } from "@/lib/perfTrace";
 // The LIFF SDK is loaded dynamically on the client
 let liffObject: typeof import("@line/liff").default | null = null;
 
+// One document only ever needs one init and one profile. Without this, every
+// component that calls useLiff() pays a separate round trip to LINE.
+let initPromise: Promise<LiffState> | null = null;
+let profilePromise: Promise<LiffProfile | null> | null = null;
+
 // TEMPORARY: instrumentation counter, remove with lib/perfTrace.ts
 let initializeLiffCalls = 0;
 
@@ -122,11 +127,21 @@ async function loadLiffSdk(): Promise<typeof import("@line/liff").default> {
 }
 
 /**
- * Initialize LIFF
+ * Initialize LIFF.
+ *
+ * Deduplicated per document: the returned state is a snapshot of isInClient /
+ * isLoggedIn, and both only change by navigating, which discards this module.
+ * A failed init is cached too — it fails the same way for every caller in a
+ * document, and useAuth already guards its own retry with liffAttemptedRef.
  *
  * @returns The LIFF initialization state
  */
-export async function initializeLiff(): Promise<LiffState> {
+export function initializeLiff(): Promise<LiffState> {
+  initPromise ??= runInitializeLiff();
+  return initPromise;
+}
+
+async function runInitializeLiff(): Promise<LiffState> {
   const liffId = getLiffId();
   // TEMPORARY: initializeLiff is called from LiffPathHandler, useLiff and
   // useAuth; the counter shows how often the same document repeats the work.
@@ -206,9 +221,17 @@ export async function getLiffAccessToken(): Promise<string | null> {
 }
 
 /**
- * Get the LIFF profile
+ * Get the LIFF profile.
+ *
+ * Deduplicated per document for the same reason as initializeLiff: it is a
+ * network round trip to LINE and the answer cannot change without a navigation.
  */
-export async function getLiffProfile(): Promise<LiffProfile | null> {
+export function getLiffProfile(): Promise<LiffProfile | null> {
+  profilePromise ??= runGetLiffProfile();
+  return profilePromise;
+}
+
+async function runGetLiffProfile(): Promise<LiffProfile | null> {
   const liff = await getLiff();
   if (!liff || !liff.isLoggedIn()) {
     return null;

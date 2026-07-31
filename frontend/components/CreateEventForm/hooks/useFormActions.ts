@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
 import { calendarDayToWallClock } from "@/lib/time";
 import { toVoteModeDto } from "@/lib/eventPreference";
-import { useLiff } from "@/hooks/useLiff";
+import { useLiffContext } from "@/contexts/LiffContext";
 import { apiFetchJson } from "@/lib/apiClient";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 import type { operations } from "@/generated/openapi";
@@ -32,7 +32,7 @@ export function useFormActions({
   setShowCancelConfirm,
 }: UseFormActionsProps) {
   const router = useRouter();
-  const { isInClient: isInLiff, closeWindow } = useLiff();
+  const { isInClient: isInLiff, closeWindow } = useLiffContext();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
