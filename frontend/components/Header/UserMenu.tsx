@@ -16,13 +16,13 @@ import {
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { LogOutIcon } from "lucide-react";
-import { useLiff } from "@/hooks/useLiff";
+import { useLiffContext } from "@/contexts/LiffContext";
 import { cn } from "@/lib/utils";
 
 export default function UserMenu() {
   const t = useTranslations();
   const { user, loading, logout } = useAuthContext();
-  const { isInClient: isInLiff } = useLiff();
+  const { isInClient: isInLiff } = useLiffContext();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 

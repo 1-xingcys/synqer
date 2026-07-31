@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useLiff } from "@/hooks/useLiff";
+import { useLiffContext } from "@/contexts/LiffContext";
 import { cn } from "@/lib/utils";
 import { LineGroupSection } from "./LineGroupSection";
 import { LineGroupInfoModal } from "./LineGroupInfoModal";
@@ -28,7 +28,7 @@ import type { EventType } from "@/types/event";
 export function GeneralSection() {
   const t = useTranslations();
   const { user, loading: authLoading } = useAuthContext();
-  const { isInClient: isInLiff } = useLiff();
+  const { isInClient: isInLiff } = useLiffContext();
   const [showLineGroupInfoModal, setShowLineGroupInfoModal] = useState(false);
 
   const {

@@ -60,6 +60,11 @@ export default async function LocaleLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* liff.init() fetches its platform extensions from this host; the
+            handshake costs ~1.4s cold, so start it alongside our own JS.
+            React hoists these into <head>. */}
+        <link rel="preconnect" href="https://static.line-scdn.net" />
+        <link rel="dns-prefetch" href="https://static.line-scdn.net" />
         <ThemeProvider>
           <QueryProvider>
             <NextIntlClientProvider messages={messages}>

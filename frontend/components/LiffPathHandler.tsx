@@ -1,29 +1,81 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  buildLiffEntryUrl,
-  getLiffStatePath,
-  handleLiffPathRedirect,
-  initializeLiff,
-  isLineUserAgent,
-  isLiffEnabled,
-} from "@/lib/liff";
+  LIFF_ENTRY_COOKIE_NAME,
+  LiffEntryAction,
+  resolveLiffEntryAction,
+  type LiffEntryDecision,
+} from "@/lib/liffEntry";
+import { getLiffId, initializeLiff, isLineUserAgent } from "@/lib/liff";
 import { debugLog } from "@/components/DebugConsole";
 import { LoadingState } from "@/components/ui/loading-state";
 
 const log = (message: string, data?: unknown) =>
   debugLog("LiffPath", message, data);
-const LIFF_AUTO_REDIRECT_KEY = "synqer:liff-auto-redirect:url";
+
+/** URL we have already routed through the LIFF entry flow, per browser tab. */
+const LIFF_ENTRY_HANDLED_KEY = "synqer:liff-entry-handled:url";
+
+function readHandledEntryUrl(): string | null {
+  try {
+    return sessionStorage.getItem(LIFF_ENTRY_HANDLED_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function writeHandledEntryUrl(url: string): void {
+  try {
+    sessionStorage.setItem(LIFF_ENTRY_HANDLED_KEY, url);
+  } catch {
+    // Private mode or a full quota: the worst case is one extra forward
+  }
+}
+
+function hasLiffEntryCookie(): boolean {
+  return document.cookie
+    .split("; ")
+    .some((entry) => entry.startsWith(`${LIFF_ENTRY_COOKIE_NAME}=`));
+}
+
+/**
+ * The decision depends only on the URL and two storage reads, none of which
+ * change while the document is alive, so it is computed once and cached. The
+ * cache also keeps the snapshot referentially stable for useSyncExternalStore.
+ */
+let cachedDecision: LiffEntryDecision | null = null;
+
+function getClientDecision(): LiffEntryDecision {
+  if (!cachedDecision) {
+    const currentUrl = window.location.href;
+    cachedDecision = resolveLiffEntryAction({
+      url: currentUrl,
+      liffId: getLiffId(),
+      isLineUserAgent: isLineUserAgent(),
+      arrivedFromLiff:
+        hasLiffEntryCookie() || readHandledEntryUrl() === currentUrl,
+    });
+  }
+  return cachedDecision;
+}
+
+/** The server cannot see the URL fragment, cookies or sessionStorage. */
+function getServerDecision(): null {
+  return null;
+}
+
+/** Nothing to subscribe to: the decision is fixed for the document's lifetime. */
+const subscribe = () => () => {};
 
 /**
  * LiffPathHandler
  *
- * Handles LIFF path redirects and forwards the LINE in-app browser into LIFF.
- * When the app is opened as https://liff.line.me/{liffId}/{path}, LINE stores
- * {path} in the liff.state query parameter, and this component detects it and
- * redirects to the correct path.
+ * Resolves how a document reached us from LINE, and redirects when the URL says
+ * it has to. The decision itself lives in lib/liffEntry and is derived from the
+ * URL, so the common case costs no LIFF SDK call — asking the SDK cost 4s on a
+ * cold start, spent showing a spinner on a page that had nothing to do.
  *
  * Must live in the root layout and run before any other auth logic.
  *
@@ -44,97 +96,54 @@ export function LiffPathHandler({
   // stop the whole tree from server rendering.
   const needsLiffCheck = isLineClient || searchParams.has("liff.state");
 
-  // Three states: "checking" | "redirecting" | "done".
-  // Children are not rendered until we know no redirect is needed, which avoids
-  // loading unnecessary chunks while a redirect is in flight.
-  const [status, setStatus] = useState<"checking" | "redirecting" | "done">(
-    needsLiffCheck ? "checking" : "done",
+  // null until the client has rendered: the decision needs browser-only state,
+  // so the server always reports "not known yet".
+  const decision = useSyncExternalStore(
+    subscribe,
+    getClientDecision,
+    getServerDecision,
   );
 
+  // Three states: "checking" | "redirecting" | "done".
+  // Children are not rendered until we know no redirect is needed, which avoids
+  // loading unnecessary chunks while a redirect is in flight. "checking" now
+  // lasts a single frame: the decision is synchronous.
+  const status =
+    !needsLiffCheck || decision?.action === LiffEntryAction.Continue
+      ? "done"
+      : decision === null
+        ? "checking"
+        : "redirecting";
+
   useEffect(() => {
-    if (!needsLiffCheck) return;
+    if (!needsLiffCheck || decision === null) return;
 
-    const handleLiffPath = async () => {
-      try {
-        // Check for a liff.state parameter
-        const liffPath = getLiffStatePath();
+    log(`decision ${decision.action}`, decision);
 
-        if (liffPath) {
-          log("Found liff.state path", { liffPath });
+    if (decision.action === LiffEntryAction.Continue) return;
 
-          // Check whether a redirect is needed
-          const targetPath = handleLiffPathRedirect();
+    if (decision.action === LiffEntryAction.ForwardToLiffEntry) {
+      writeHandledEntryUrl(window.location.href);
+      window.location.replace(decision.entryUrl);
+      return;
+    }
 
-          if (!targetPath) {
-            log("No redirect needed");
-            setStatus("done");
-            return;
-          }
+    // RedirectToStatePath. The destination is a plain in-app-browser URL again;
+    // without this marker its forward branch would bounce back to liff.line.me.
+    const { targetPath } = decision;
+    writeHandledEntryUrl(new URL(targetPath, window.location.origin).href);
 
-          log("Redirecting to liff path", { targetPath });
-          setStatus("redirecting");
+    if (decision.awaitLiffInit) {
+      // LINE Login callback: liff.init() exchanges ?code for a token, and the
+      // redirect drops the query, so it has to finish first.
+      void initializeLiff().finally(() => {
+        window.location.replace(targetPath);
+      });
+      return;
+    }
 
-          // With a LIFF ID, initialize LIFF first so the login state is kept
-          if (isLiffEnabled()) {
-            try {
-              await initializeLiff();
-              log("LIFF initialized before redirect");
-            } catch (e) {
-              log("LIFF init failed during path redirect", {
-                error: String(e),
-              });
-            }
-          }
-
-          // Hard redirect via window.location.replace: it completes before any
-          // other React logic runs and leaves no extra browser history entry
-          window.location.replace(targetPath);
-          return;
-        }
-
-        // No liff.state: try to forward a plain URL opened in the LINE in-app
-        // browser over to LIFF
-        if (!isLiffEnabled() || !isLineUserAgent()) {
-          log("Skip LIFF auto redirect");
-          setStatus("done");
-          return;
-        }
-
-        const currentUrl = window.location.href;
-        const lastAttemptUrl =
-          sessionStorage.getItem(LIFF_AUTO_REDIRECT_KEY) ?? "";
-        if (lastAttemptUrl === currentUrl) {
-          log("Skip LIFF auto redirect (already attempted)", { currentUrl });
-          setStatus("done");
-          return;
-        }
-
-        const liffState = await initializeLiff();
-        if (liffState.isInClient) {
-          log("Already in LIFF client");
-          setStatus("done");
-          return;
-        }
-
-        const liffEntryUrl = buildLiffEntryUrl(currentUrl);
-        if (!liffEntryUrl) {
-          log("Unable to build LIFF entry URL");
-          setStatus("done");
-          return;
-        }
-
-        sessionStorage.setItem(LIFF_AUTO_REDIRECT_KEY, currentUrl);
-        log("Redirecting LINE browser to LIFF", { liffEntryUrl });
-        setStatus("redirecting");
-        window.location.replace(liffEntryUrl);
-      } catch (error) {
-        log("LiffPathHandler failed", { error: String(error) });
-        setStatus("done");
-      }
-    };
-
-    void handleLiffPath();
-  }, [needsLiffCheck]);
+    window.location.replace(targetPath);
+  }, [needsLiffCheck, decision]);
 
   // Show loading while checking or redirecting. This avoids loading the
   // children's chunks mid-redirect and prevents "Failed to load chunk" errors.

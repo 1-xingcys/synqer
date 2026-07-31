@@ -5,11 +5,15 @@
  * user's LINE profile information.
  */
 
-import { LOCALES } from "@/i18n/locales";
 import { matchesLineUserAgent } from "@/lib/auth-gate";
 
 // The LIFF SDK is loaded dynamically on the client
 let liffObject: typeof import("@line/liff").default | null = null;
+
+// One document only ever needs one init and one profile. Without this, every
+// component that calls useLiff() pays a separate round trip to LINE.
+let initPromise: Promise<LiffState> | null = null;
+let profilePromise: Promise<LiffProfile | null> | null = null;
 
 /**
  * LIFF initialization state
@@ -97,31 +101,6 @@ export function isLineUserAgent(): boolean {
 }
 
 /**
- * Build the LIFF entry URL for the current page
- */
-export function buildLiffEntryUrl(currentUrl?: string): string | null {
-  const liffId = getLiffId();
-  if (!liffId) return null;
-
-  const sourceUrl =
-    currentUrl ?? (typeof window !== "undefined" ? window.location.href : "");
-  if (!sourceUrl) return null;
-
-  try {
-    const url = new URL(sourceUrl);
-
-    // Already a LIFF launch callback, no need to forward again
-    if (url.searchParams.has("liff.state")) {
-      return null;
-    }
-
-    return `https://liff.line.me/${liffId}${url.pathname}${url.search}${url.hash}`;
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Dynamically load the LIFF SDK
  */
 async function loadLiffSdk(): Promise<typeof import("@line/liff").default> {
@@ -140,80 +119,21 @@ async function loadLiffSdk(): Promise<typeof import("@line/liff").default> {
 }
 
 /**
- * Read the path carried by the liff.state parameter in the URL.
- * When opened as https://liff.line.me/{liffId}/{path}, LINE stores {path} in
- * the liff.state query parameter.
- */
-export function getLiffStatePath(): string | null {
-  if (typeof window === "undefined") return null;
-
-  const url = new URL(window.location.href);
-  const liffState = url.searchParams.get("liff.state");
-
-  if (!liffState) return null;
-
-  // liff.state may be a URL-encoded path
-  try {
-    const decodedState = decodeURIComponent(liffState);
-    // Make sure it is a path (starts with /)
-    if (decodedState.startsWith("/")) {
-      return decodedState;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Handle the LIFF path redirect.
- * If the URL carries a liff.state parameter containing a path, redirect there.
- * @returns The target path when a redirect is needed, otherwise null
- */
-export function handleLiffPathRedirect(): string | null {
-  const liffPath = getLiffStatePath();
-
-  if (!liffPath) return null;
-
-  // Read the current pathname
-  const currentPathname = window.location.pathname;
-
-  const localePattern = new RegExp(`^/(${LOCALES.join("|")})`);
-
-  // Check whether the path is only a locale prefix (e.g. /zh-TW or /en)
-  const localeOnlyPattern = /^\/[a-z]{2}(-[A-Z]{2})?\/?$/;
-  const isOnRootWithLocale = localeOnlyPattern.test(currentPathname);
-
-  // Redirect when we are on the root path (or only a locale) and liff.state
-  // points somewhere else
-  if (isOnRootWithLocale || currentPathname === "/") {
-    // Check whether liffPath already carries a locale prefix
-    const liffPathHasLocale = localePattern.test(liffPath);
-
-    if (liffPathHasLocale) {
-      // liff.state already includes the locale, use it as-is
-      return liffPath;
-    }
-
-    // liff.state has no locale, so prepend the current one
-    const localeMatch = currentPathname.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)/);
-    const locale = localeMatch ? localeMatch[1] : "";
-
-    // Build the target path
-    const targetPath = locale ? `/${locale}${liffPath}` : liffPath;
-
-    return targetPath;
-  }
-
-  return null;
-}
-
-/**
- * Initialize LIFF
+ * Initialize LIFF.
+ *
+ * Deduplicated per document: the returned state is a snapshot of isInClient /
+ * isLoggedIn, and both only change by navigating, which discards this module.
+ * A failed init is cached too — it fails the same way for every caller in a
+ * document, and useAuth already guards its own retry with liffAttemptedRef.
  *
  * @returns The LIFF initialization state
  */
-export async function initializeLiff(): Promise<LiffState> {
+export function initializeLiff(): Promise<LiffState> {
+  initPromise ??= runInitializeLiff();
+  return initPromise;
+}
+
+async function runInitializeLiff(): Promise<LiffState> {
   const liffId = getLiffId();
 
   if (!liffId) {
@@ -287,9 +207,17 @@ export async function getLiffAccessToken(): Promise<string | null> {
 }
 
 /**
- * Get the LIFF profile
+ * Get the LIFF profile.
+ *
+ * Deduplicated per document for the same reason as initializeLiff: it is a
+ * network round trip to LINE and the answer cannot change without a navigation.
  */
-export async function getLiffProfile(): Promise<LiffProfile | null> {
+export function getLiffProfile(): Promise<LiffProfile | null> {
+  profilePromise ??= runGetLiffProfile();
+  return profilePromise;
+}
+
+async function runGetLiffProfile(): Promise<LiffProfile | null> {
   const liff = await getLiff();
   if (!liff || !liff.isLoggedIn()) {
     return null;
