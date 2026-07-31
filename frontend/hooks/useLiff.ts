@@ -15,13 +15,9 @@ import {
   type LiffContext,
 } from "@/lib/liff";
 import { debugLog } from "@/components/DebugConsole";
-// TEMPORARY: loading-time instrumentation, remove with lib/perfTrace.ts
-import { perfMark } from "@/lib/perfTrace";
 
-const log = (message: string, data?: unknown) => {
-  perfMark(`useLiff · ${message}`, data);
+const log = (message: string, data?: unknown) =>
   debugLog("useLiff", message, data);
-};
 
 export interface UseLiffReturn {
   // 狀態

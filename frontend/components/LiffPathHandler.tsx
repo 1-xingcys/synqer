@@ -11,13 +11,9 @@ import {
 import { getLiffId, initializeLiff, isLineUserAgent } from "@/lib/liff";
 import { debugLog } from "@/components/DebugConsole";
 import { LoadingState } from "@/components/ui/loading-state";
-// TEMPORARY: loading-time instrumentation, remove with lib/perfTrace.ts
-import { perfMark } from "@/lib/perfTrace";
 
-const log = (message: string, data?: unknown) => {
-  perfMark(`LiffPathHandler · ${message}`, data);
+const log = (message: string, data?: unknown) =>
   debugLog("LiffPath", message, data);
-};
 
 /** URL we have already routed through the LIFF entry flow, per browser tab. */
 const LIFF_ENTRY_HANDLED_KEY = "synqer:liff-entry-handled:url";
@@ -148,11 +144,6 @@ export function LiffPathHandler({
 
     window.location.replace(targetPath);
   }, [needsLiffCheck, decision]);
-
-  // TEMPORARY: shows when children (and their chunks) finally start rendering
-  useEffect(() => {
-    perfMark(`LiffPathHandler · status = ${status}`);
-  }, [status]);
 
   // Show loading while checking or redirecting. This avoids loading the
   // children's chunks mid-redirect and prevents "Failed to load chunk" errors.

@@ -1,8 +1,5 @@
 "use client";
 
-// TEMPORARY: loading-time instrumentation, remove with lib/perfTrace.ts
-import { perfMark } from "@/lib/perfTrace";
-
 /**
  * Standardized API error object.
  * Contains HTTP status and parsed error payload from server response.
@@ -69,27 +66,10 @@ function extractErrorMessage(payload: unknown, status: number): string {
  * - defaults credentials to "include"
  */
 export async function apiFetch(path: string, init?: RequestInit) {
-  // TEMPORARY: loading-time instrumentation, remove with lib/perfTrace.ts
-  const method = init?.method ?? "GET";
-  const startedAt = Date.now();
-  perfMark(`api ⇢ ${method} ${path}`);
-  try {
-    const response = await fetch(toApiUrl(path), {
-      ...init,
-      credentials: init?.credentials ?? "include",
-    });
-    perfMark(
-      `api ⇠ ${method} ${path}`,
-      `${Date.now() - startedAt}ms · ${response.status}`,
-    );
-    return response;
-  } catch (error) {
-    perfMark(
-      `api ✗ ${method} ${path}`,
-      `${Date.now() - startedAt}ms · ${String(error)}`,
-    );
-    throw error;
-  }
+  return fetch(toApiUrl(path), {
+    ...init,
+    credentials: init?.credentials ?? "include",
+  });
 }
 
 /**

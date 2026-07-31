@@ -6,8 +6,6 @@
  */
 
 import { matchesLineUserAgent } from "@/lib/auth-gate";
-// TEMPORARY: loading-time instrumentation, remove with lib/perfTrace.ts
-import { perfMark, perfSpan } from "@/lib/perfTrace";
 
 // The LIFF SDK is loaded dynamically on the client
 let liffObject: typeof import("@line/liff").default | null = null;
@@ -16,9 +14,6 @@ let liffObject: typeof import("@line/liff").default | null = null;
 // component that calls useLiff() pays a separate round trip to LINE.
 let initPromise: Promise<LiffState> | null = null;
 let profilePromise: Promise<LiffProfile | null> | null = null;
-
-// TEMPORARY: instrumentation counter, remove with lib/perfTrace.ts
-let initializeLiffCalls = 0;
 
 /**
  * LIFF initialization state
@@ -114,10 +109,7 @@ async function loadLiffSdk(): Promise<typeof import("@line/liff").default> {
   }
 
   try {
-    const liff = await perfSpan(
-      "liff · import SDK chunk",
-      async () => (await import("@line/liff")).default,
-    );
+    const liff = (await import("@line/liff")).default;
     liffObject = liff;
     return liff;
   } catch (error) {
@@ -143,10 +135,6 @@ export function initializeLiff(): Promise<LiffState> {
 
 async function runInitializeLiff(): Promise<LiffState> {
   const liffId = getLiffId();
-  // TEMPORARY: initializeLiff is called from LiffPathHandler, useLiff and
-  // useAuth; the counter shows how often the same document repeats the work.
-  initializeLiffCalls += 1;
-  perfMark(`liff · initializeLiff() call #${initializeLiffCalls}`);
 
   if (!liffId) {
     return {
@@ -160,13 +148,11 @@ async function runInitializeLiff(): Promise<LiffState> {
   try {
     const liff = await loadLiffSdk();
 
-    await perfSpan("liff · liff.init()", () =>
-      liff.init({
-        liffId,
-        // Do not log in automatically when opened in an external browser
-        withLoginOnExternalBrowser: false,
-      }),
-    );
+    await liff.init({
+      liffId,
+      // Do not log in automatically when opened in an external browser
+      withLoginOnExternalBrowser: false,
+    });
 
     return {
       isInitialized: true,
@@ -238,9 +224,7 @@ async function runGetLiffProfile(): Promise<LiffProfile | null> {
   }
 
   try {
-    const profile = await perfSpan("liff · getProfile()", () =>
-      liff.getProfile(),
-    );
+    const profile = await liff.getProfile();
     return {
       userId: profile.userId,
       displayName: profile.displayName,
@@ -298,7 +282,6 @@ export async function liffLogin(redirectUri?: string): Promise<void> {
     return;
   }
 
-  perfMark("liff · login() redirect to LINE Login ⇢");
   liff.login({
     redirectUri: redirectUri || window.location.href,
   });

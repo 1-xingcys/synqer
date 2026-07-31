@@ -9,13 +9,9 @@ import {
   liffLogin,
 } from "@/lib/liff";
 import { debugLog } from "@/components/DebugConsole";
-// TEMPORARY: loading-time instrumentation, remove with lib/perfTrace.ts
-import { perfMark } from "@/lib/perfTrace";
 
-const log = (message: string, data?: unknown) => {
-  perfMark(`useAuth · ${message}`, data);
+const log = (message: string, data?: unknown) =>
   debugLog("useAuth", message, data);
-};
 
 export const authKeys = {
   me: ["auth", "me"] as const,
