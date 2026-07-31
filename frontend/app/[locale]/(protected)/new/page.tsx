@@ -1,10 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import CreateEventFormClient from "@/components/CreateEventForm/CreateEventFormClient";
 
-/**
- * 頁面外殼刻意留在 server component：標題與說明是 LCP 元素，讓它們進到 SSR
- * HTML 才能在 FCP 就畫出來，不必等表單的 chunk 或 /auth/me。
- */
 export default async function NewEventPage() {
   const t = await getTranslations();
 

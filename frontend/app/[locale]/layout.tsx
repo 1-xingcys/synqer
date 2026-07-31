@@ -49,8 +49,8 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
 
-  // 在 server 端就判斷是否為 LINE 內建瀏覽器，讓 LiffPathHandler 不必等到
-  // hydration 後才知道能不能放行 children。
+  // Detect the LINE in-app browser on the server so LiffPathHandler does not
+  // have to wait until hydration to know whether it can render children.
   const isLineClient = matchesLineUserAgent(
     (await headers()).get("user-agent") ?? "",
   );

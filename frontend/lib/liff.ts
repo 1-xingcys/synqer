@@ -1,28 +1,28 @@
 /**
- * LINE LIFF 初始化與工具函數
+ * LINE LIFF initialization and helper functions.
  *
- * LIFF (LINE Front-end Framework) 允許網頁應用程式在 LINE 內運行
- * 並取得使用者的 LINE Profile 資訊
+ * LIFF (LINE Front-end Framework) lets a web app run inside LINE and read the
+ * user's LINE profile information.
  */
 
 import { LOCALES } from "@/i18n/locales";
 import { matchesLineUserAgent } from "@/lib/auth-gate";
 
-// LIFF SDK 會在客戶端動態載入
+// The LIFF SDK is loaded dynamically on the client
 let liffObject: typeof import("@line/liff").default | null = null;
 
 /**
- * LIFF 初始化狀態
+ * LIFF initialization state
  */
 export interface LiffState {
   isInitialized: boolean;
-  isInClient: boolean; // 是否在 LINE App 內開啟
+  isInClient: boolean; // Whether the page is open inside the LINE app
   isLoggedIn: boolean;
   error: Error | null;
 }
 
 /**
- * LIFF Profile 資訊
+ * LIFF profile information
  */
 export interface LiffProfile {
   userId: string;
@@ -32,7 +32,7 @@ export interface LiffProfile {
 }
 
 /**
- * LIFF Context 類型
+ * LIFF context types
  */
 export const LiffContextType = {
   Utou: "utou",
@@ -46,7 +46,7 @@ export type LiffContextType =
   (typeof LiffContextType)[keyof typeof LiffContextType];
 
 /**
- * LIFF View 類型
+ * LIFF view types
  */
 export const LiffViewType = {
   Full: "full",
@@ -58,7 +58,7 @@ export const LiffViewType = {
 export type LiffViewType = (typeof LiffViewType)[keyof typeof LiffViewType];
 
 /**
- * LIFF Context 資訊
+ * LIFF context information
  */
 export interface LiffContext {
   type: LiffContextType;
@@ -70,7 +70,7 @@ export interface LiffContext {
 }
 
 /**
- * 取得 LIFF ID
+ * Get the LIFF ID
  */
 export function getLiffId(): string {
   const liffId = process.env.NEXT_PUBLIC_LINE_LIFF_ID;
@@ -82,14 +82,14 @@ export function getLiffId(): string {
 }
 
 /**
- * 檢查是否為 LIFF 環境（有設定 LIFF ID）
+ * Check whether this is a LIFF environment (a LIFF ID is configured)
  */
 export function isLiffEnabled(): boolean {
   return !!getLiffId();
 }
 
 /**
- * 檢查目前是否為 LINE App 內建瀏覽器
+ * Check whether we are currently in the LINE app's in-app browser
  */
 export function isLineUserAgent(): boolean {
   if (typeof navigator === "undefined") return false;
@@ -97,7 +97,7 @@ export function isLineUserAgent(): boolean {
 }
 
 /**
- * 產生目前頁面的 LIFF 入口網址
+ * Build the LIFF entry URL for the current page
  */
 export function buildLiffEntryUrl(currentUrl?: string): string | null {
   const liffId = getLiffId();
@@ -110,7 +110,7 @@ export function buildLiffEntryUrl(currentUrl?: string): string | null {
   try {
     const url = new URL(sourceUrl);
 
-    // 已經是 LIFF launch callback，不需要再轉
+    // Already a LIFF launch callback, no need to forward again
     if (url.searchParams.has("liff.state")) {
       return null;
     }
@@ -122,7 +122,7 @@ export function buildLiffEntryUrl(currentUrl?: string): string | null {
 }
 
 /**
- * 動態載入 LIFF SDK
+ * Dynamically load the LIFF SDK
  */
 async function loadLiffSdk(): Promise<typeof import("@line/liff").default> {
   if (liffObject) {
@@ -140,9 +140,9 @@ async function loadLiffSdk(): Promise<typeof import("@line/liff").default> {
 }
 
 /**
- * 從 URL 中取得 liff.state 參數中的路徑
- * 當使用 https://liff.line.me/{liffId}/{path} 格式時，
- * LINE 會把 {path} 存在 liff.state query parameter 中
+ * Read the path carried by the liff.state parameter in the URL.
+ * When opened as https://liff.line.me/{liffId}/{path}, LINE stores {path} in
+ * the liff.state query parameter.
  */
 export function getLiffStatePath(): string | null {
   if (typeof window === "undefined") return null;
@@ -152,10 +152,10 @@ export function getLiffStatePath(): string | null {
 
   if (!liffState) return null;
 
-  // liff.state 可能是 URL 編碼的路徑
+  // liff.state may be a URL-encoded path
   try {
     const decodedState = decodeURIComponent(liffState);
-    // 確保是一個路徑（以 / 開頭）
+    // Make sure it is a path (starts with /)
     if (decodedState.startsWith("/")) {
       return decodedState;
     }
@@ -166,39 +166,40 @@ export function getLiffStatePath(): string | null {
 }
 
 /**
- * 處理 LIFF 路徑重定向
- * 如果 URL 中有 liff.state 參數且包含路徑，就重定向到該路徑
- * @returns 如果需要重定向，返回目標路徑；否則返回 null
+ * Handle the LIFF path redirect.
+ * If the URL carries a liff.state parameter containing a path, redirect there.
+ * @returns The target path when a redirect is needed, otherwise null
  */
 export function handleLiffPathRedirect(): string | null {
   const liffPath = getLiffStatePath();
 
   if (!liffPath) return null;
 
-  // 取得目前的 pathname
+  // Read the current pathname
   const currentPathname = window.location.pathname;
 
   const localePattern = new RegExp(`^/(${LOCALES.join("|")})`);
 
-  // 檢查是否只有 locale 前綴（例如 /zh-TW 或 /en）
+  // Check whether the path is only a locale prefix (e.g. /zh-TW or /en)
   const localeOnlyPattern = /^\/[a-z]{2}(-[A-Z]{2})?\/?$/;
   const isOnRootWithLocale = localeOnlyPattern.test(currentPathname);
 
-  // 如果目前在根路徑（或只有 locale）且 liff.state 有其他路徑，需要重定向
+  // Redirect when we are on the root path (or only a locale) and liff.state
+  // points somewhere else
   if (isOnRootWithLocale || currentPathname === "/") {
-    // 檢查 liffPath 是否已經包含 locale 前綴
+    // Check whether liffPath already carries a locale prefix
     const liffPathHasLocale = localePattern.test(liffPath);
 
     if (liffPathHasLocale) {
-      // liff.state 已經包含 locale，直接使用
+      // liff.state already includes the locale, use it as-is
       return liffPath;
     }
 
-    // liff.state 不包含 locale，需要加上當前的 locale
+    // liff.state has no locale, so prepend the current one
     const localeMatch = currentPathname.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)/);
     const locale = localeMatch ? localeMatch[1] : "";
 
-    // 建立目標路徑
+    // Build the target path
     const targetPath = locale ? `/${locale}${liffPath}` : liffPath;
 
     return targetPath;
@@ -208,9 +209,9 @@ export function handleLiffPathRedirect(): string | null {
 }
 
 /**
- * 初始化 LIFF
+ * Initialize LIFF
  *
- * @returns LIFF 初始化狀態
+ * @returns The LIFF initialization state
  */
 export async function initializeLiff(): Promise<LiffState> {
   const liffId = getLiffId();
@@ -229,7 +230,7 @@ export async function initializeLiff(): Promise<LiffState> {
 
     await liff.init({
       liffId,
-      // 在外部瀏覽器開啟時，不自動登入
+      // Do not log in automatically when opened in an external browser
       withLoginOnExternalBrowser: false,
     });
 
@@ -251,7 +252,7 @@ export async function initializeLiff(): Promise<LiffState> {
 }
 
 /**
- * 取得 LIFF 物件（必須先初始化）
+ * Get the LIFF object (it must be initialized first)
  */
 export async function getLiff(): Promise<
   typeof import("@line/liff").default | null
@@ -268,8 +269,8 @@ export async function getLiff(): Promise<
 }
 
 /**
- * 取得 LIFF Access Token
- * 可用於後端驗證使用者身份
+ * Get the LIFF access token.
+ * Can be used by the backend to verify the user's identity.
  */
 export async function getLiffAccessToken(): Promise<string | null> {
   const liff = await getLiff();
@@ -286,7 +287,7 @@ export async function getLiffAccessToken(): Promise<string | null> {
 }
 
 /**
- * 取得 LIFF Profile
+ * Get the LIFF profile
  */
 export async function getLiffProfile(): Promise<LiffProfile | null> {
   const liff = await getLiff();
@@ -309,8 +310,8 @@ export async function getLiffProfile(): Promise<LiffProfile | null> {
 }
 
 /**
- * 取得 LIFF Context
- * 包含開啟來源（1:1 聊天、群組等）
+ * Get the LIFF context.
+ * Includes where the app was opened from (1:1 chat, group, and so on).
  */
 export async function getLiffContext(): Promise<LiffContext | null> {
   const liff = await getLiff();
@@ -339,8 +340,8 @@ export async function getLiffContext(): Promise<LiffContext | null> {
 }
 
 /**
- * 在 LINE App 內登入
- * 只有在 LIFF 內但未登入時才需要呼叫
+ * Log in inside the LINE app.
+ * Only needs to be called when inside LIFF but not logged in.
  */
 export async function liffLogin(redirectUri?: string): Promise<void> {
   const liff = await getLiff();
@@ -359,7 +360,7 @@ export async function liffLogin(redirectUri?: string): Promise<void> {
 }
 
 /**
- * LIFF 登出
+ * Log out of LIFF
  */
 export async function liffLogout(): Promise<void> {
   const liff = await getLiff();
@@ -373,8 +374,8 @@ export async function liffLogout(): Promise<void> {
 }
 
 /**
- * 關閉 LIFF 視窗
- * 只有在 LINE App 內開啟時才有效
+ * Close the LIFF window.
+ * Only has an effect when opened inside the LINE app.
  */
 export async function closeLiff(): Promise<void> {
   const liff = await getLiff();
@@ -386,7 +387,7 @@ export async function closeLiff(): Promise<void> {
 }
 
 /**
- * 檢查是否在 LINE App 內運行
+ * Check whether we are running inside the LINE app
  */
 export async function isInLineClient(): Promise<boolean> {
   const liff = await getLiff();

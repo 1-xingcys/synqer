@@ -1,10 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * 表單載入中的佔位畫面。
- *
- * 高度不需要跟真正的表單完全一致 —— 它是頁面上最後一個元素，撐高只會往下長，
- * 不會推動上方已經畫好的標題，所以不影響 CLS。這裡只求視覺節奏接近。
+ * Placeholder shown while the form is loading.
  */
 function SectionSkeleton({ rows }: { rows: number }) {
   return (

@@ -6,11 +6,12 @@ import { SESSION_COOKIE_NAME, resolveLoginRedirect } from "./lib/auth-gate";
 const handleIntl = createIntlMiddleware(routing);
 
 /**
- * 身份驗證分兩層：
- * 1. 這裡只擋「連 session cookie 都沒有」的請求，讓未登入者不必先下載整包 JS
- *    才被導走，受保護頁面也因此能直接 server render。
- * 2. cookie 存在但已失效的情況，仍由 (protected)/layout.tsx 在 /auth/me
- *    回應後導頁。
+ * Authentication happens in two layers:
+ * 1. This one only blocks requests that do not even carry a session cookie, so
+ *    signed-out visitors are redirected without first downloading the whole JS
+ *    bundle, and protected pages can be server rendered directly.
+ * 2. Requests whose cookie exists but is no longer valid are still redirected
+ *    by (protected)/layout.tsx once /auth/me responds.
  */
 export default function middleware(request: NextRequest) {
   const redirectTo = resolveLoginRedirect({

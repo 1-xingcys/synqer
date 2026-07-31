@@ -8,7 +8,8 @@ describe("resolveSidebarPresentation", () => {
   describe("尚未操作 (null)", () => {
     const presentation = resolveSidebarPresentation(null);
 
-    // 這組斷言就是 hydration 一致性的保證：不讀 window 也能同時對兩種視窗正確
+    // These assertions are the hydration-consistency guarantee: correct for
+    // both viewport sizes without ever reading window
     it("桌面維持展開寬度", () => {
       expect(presentation.widthClass).toBe("lg:w-64");
       expect(presentation.isCollapsed).toBe(false);

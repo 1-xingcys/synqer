@@ -2,16 +2,18 @@ import { useCallback, useSyncExternalStore } from "react";
 
 /**
  * useMediaQuery Hook
- * 監聽 media query 變化並返回當前狀態
+ * Subscribes to a media query and returns its current state.
  *
- * server 端沒有視窗可以量，snapshot 一律是 false；React 會在掛載後立刻用真正
- * 的值重新渲染，而且不會把這個差異視為 hydration mismatch。
+ * There is no window to measure on the server, so the snapshot is always false;
+ * React re-renders with the real value right after mount and does not treat
+ * that difference as a hydration mismatch.
  *
- * 也因為如此，呼叫端不能用它決定「第一次畫面長什麼樣」——那種需求請交給
- * CSS 斷點，否則桌面版會先畫成手機版再跳一下。
+ * Because of that, callers must not use this to decide what the first paint
+ * looks like -- leave that to CSS breakpoints, otherwise desktop renders the
+ * mobile layout first and then jumps.
  *
- * @param query - CSS media query 字串 (例如: "(min-width: 1024px)")
- * @returns boolean - 是否符合 media query，掛載前一律為 false
+ * @param query - CSS media query string (e.g. "(min-width: 1024px)")
+ * @returns boolean - whether the media query matches; always false before mount
  */
 export function useMediaQuery(query: string): boolean {
   const subscribe = useCallback(

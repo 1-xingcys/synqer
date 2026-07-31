@@ -13,20 +13,17 @@ interface ProtectedLayoutProps {
 
 /**
  * ProtectedLayoutContent
- * 內部組件，可以使用 SidebarContext 並渲染統一的 Sidebar
+ * Inner component that can consume SidebarContext and render the shared Sidebar.
  */
 function ProtectedLayoutContent({ children }: ProtectedLayoutProps) {
   const { isOpen, toggle, close } = useSidebar();
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-900">
-      {/* Header with hamburger button */}
       <Header variant="protected" onMenuClick={toggle} />
 
-      {/* Sidebar + Content 容器 */}
       <div className="w-full">
         <div className="flex gap-6 items-start">
-          {/* 統一的 Sidebar - 內容由 Sidebar 組件內部自動設置 */}
           <Sidebar isOpen={isOpen} onClose={close} />
 
           {/* Main Content */}
@@ -41,12 +38,13 @@ function ProtectedLayoutContent({ children }: ProtectedLayoutProps) {
 
 /**
  * ProtectedLayout
- * 為所有受保護的頁面提供統一的佈局結構。
+ * Provides the shared layout structure for every protected page.
  *
- * 這裡不再擋住整個頁面等 /auth/me：沒有 session cookie 的請求已經被
- * middleware 導去 /login，所以能走到這裡的請求幾乎都是已登入的。剩下
- * 「cookie 存在但已失效」的少數情況由下面的 effect 補導頁，畫面則先渲染，
- * 依賴 user 的區塊各自顯示 skeleton。
+ * This no longer blocks the whole page on /auth/me: requests without a session
+ * cookie are already redirected to /login by the middleware, so almost every
+ * request that reaches here is authenticated. The remaining "cookie exists but
+ * is no longer valid" case is handled by the effect below, while the page still
+ * renders immediately and user-dependent sections show their own skeletons.
  */
 export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const router = useRouter();

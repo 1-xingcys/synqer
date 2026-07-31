@@ -26,12 +26,13 @@ export default function UserMenu() {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
-  // 佔位跟頭像同尺寸，讓 header 在 /auth/me 回來前後的排版一致
+  // The placeholder matches the avatar size so the header layout stays the same
+  // before and after /auth/me responds
   if (loading) return <Skeleton className="size-9 rounded-full" />;
 
   if (!user) return null;
 
-  // 從 displayName 或 email 取得首字作為 fallback
+  // Use the first character of displayName or email as the fallback
   const getInitials = () => {
     const name = user.displayName || user.primaryEmail || "U";
     return name.charAt(0).toUpperCase();
@@ -83,7 +84,7 @@ export default function UserMenu() {
         <DropdownMenuSeparator />
         <LanguageSwitcher asSubmenu />
         <ThemeSwitcher asSubmenu />
-        {/* 在 LIFF 環境中不顯示登出按鈕，保持始終登入狀態 */}
+        {/* Hide the logout button inside LIFF so the user stays signed in */}
         {!isInLiff && (
           <>
             <DropdownMenuSeparator />

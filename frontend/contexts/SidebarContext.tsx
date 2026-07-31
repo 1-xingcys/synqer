@@ -29,14 +29,15 @@ interface SidebarContextType {
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
-  // null = 還沒手動開關過。預設外觀（手機收合、桌面展開）由 CSS 斷點決定，
-  // 這裡不讀 window，server 與 client 的第一次渲染才會一致。
+  // null = never toggled manually. The default appearance (collapsed on mobile,
+  // expanded on desktop) comes from CSS breakpoints; window is not read here so
+  // that the first server and client render agree.
   const [isOpen, setIsOpen] = useState<SidebarOpenState>(null);
   const [content, setContent] = useState<ReactNode>(null);
   const [title, setTitle] = useState<string | undefined>(undefined);
 
   const toggle = useCallback(() => {
-    // 只在使用者互動時執行，此時讀取視窗寬度是安全的
+    // Runs only on user interaction, where reading the window width is safe
     const isDesktop = window.matchMedia(DESKTOP_QUERY).matches;
     setIsOpen((prev) => nextSidebarOpenState(prev, isDesktop));
   }, []);
