@@ -8,9 +8,15 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
+import {
+  nextSidebarOpenState,
+  type SidebarOpenState,
+} from "@/components/ui/sidebarState";
+
+const DESKTOP_QUERY = "(min-width: 1024px)";
 
 interface SidebarContextType {
-  isOpen: boolean;
+  isOpen: SidebarOpenState;
   toggle: () => void;
   open: () => void;
   close: () => void;
@@ -23,17 +29,17 @@ interface SidebarContextType {
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
-  // 桌面端預設展開，手機端預設關閉
-  const [isOpen, setIsOpen] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.innerWidth >= 1024; // lg breakpoint
-    }
-    return true; // SSR 時預設展開（桌面端）
-  });
+  // null = 還沒手動開關過。預設外觀（手機收合、桌面展開）由 CSS 斷點決定，
+  // 這裡不讀 window，server 與 client 的第一次渲染才會一致。
+  const [isOpen, setIsOpen] = useState<SidebarOpenState>(null);
   const [content, setContent] = useState<ReactNode>(null);
   const [title, setTitle] = useState<string | undefined>(undefined);
 
-  const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
+  const toggle = useCallback(() => {
+    // 只在使用者互動時執行，此時讀取視窗寬度是安全的
+    const isDesktop = window.matchMedia(DESKTOP_QUERY).matches;
+    setIsOpen((prev) => nextSidebarOpenState(prev, isDesktop));
+  }, []);
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
 

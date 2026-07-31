@@ -20,6 +20,11 @@ import {
   type OverviewStatus,
 } from "@/lib/eventRoutes";
 import { useMyEvents } from "@/hooks/useMyEvents";
+import {
+  isHiddenFromAssistiveTech,
+  resolveSidebarPresentation,
+  type SidebarOpenState,
+} from "./sidebarState";
 
 /**
  * Sidebar 通用元件
@@ -32,7 +37,7 @@ import { useMyEvents } from "@/hooks/useMyEvents";
  */
 
 interface SidebarProps {
-  isOpen: boolean;
+  isOpen: SidebarOpenState;
   onClose: () => void;
   title?: string;
   children?: ReactNode;
@@ -44,11 +49,11 @@ export default function Sidebar({
   title,
   children,
 }: SidebarProps) {
-  const isCollapsed = !isOpen;
-  const visibilityClass = isOpen
-    ? "translate-x-0 opacity-100 pointer-events-auto"
-    : "-translate-x-full opacity-0 pointer-events-none lg:translate-x-0 lg:opacity-100 lg:pointer-events-auto";
-  const widthClass = isOpen ? "lg:w-64" : "lg:w-20";
+  const { isCollapsed, showOverlay, visibilityClass, widthClass } =
+    resolveSidebarPresentation(isOpen);
+
+  // 只影響無障礙樹，不影響外觀，所以掛載後才知道視窗大小也沒關係
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
   // 如果沒有傳入 children，使用 context 中的 content，並自動設置內容
   const { content: contextContent, title: contextTitle } = useSidebar();
@@ -95,7 +100,7 @@ export default function Sidebar({
   return (
     <>
       {/* Overlay - 手機版點擊關閉 */}
-      {isOpen && (
+      {showOverlay && (
         <div
           className={`fixed inset-0 bg-black/50 ${Z_INDEX.SIDEBAR_BACKDROP} lg:hidden`}
           onClick={onClose}
@@ -112,7 +117,7 @@ export default function Sidebar({
           ${Z_INDEX.SIDEBAR_PANEL} lg:z-0
           ${visibilityClass}
         `}
-        aria-hidden={!isOpen}
+        aria-hidden={isHiddenFromAssistiveTech(isOpen, isDesktop)}
       >
         {/* Sidebar Header - 手機版顯示標題和關閉按鈕 */}
         {sidebarTitle && (
@@ -236,7 +241,7 @@ function ProtectedSidebarContent() {
   const router = useRouter();
   const t = useTranslations();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
-  const isCollapsed = !isOpen;
+  const { isCollapsed } = resolveSidebarPresentation(isOpen);
   // 與 overview 共用同一份清單快取，供 detail 頁反推所屬分類。
   const { events } = useMyEvents();
 

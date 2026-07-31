@@ -1,41 +1,32 @@
-import { useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 /**
  * useMediaQuery Hook
  * 監聽 media query 變化並返回當前狀態
  *
+ * server 端沒有視窗可以量，snapshot 一律是 false；React 會在掛載後立刻用真正
+ * 的值重新渲染，而且不會把這個差異視為 hydration mismatch。
+ *
+ * 也因為如此，呼叫端不能用它決定「第一次畫面長什麼樣」——那種需求請交給
+ * CSS 斷點，否則桌面版會先畫成手機版再跳一下。
+ *
  * @param query - CSS media query 字串 (例如: "(min-width: 1024px)")
- * @returns boolean - 是否符合 media query
+ * @returns boolean - 是否符合 media query，掛載前一律為 false
  */
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(() => {
-    // Lazy initialization: 只在初始化時執行一次
-    if (typeof window === "undefined") {
-      return false;
-    }
-    return window.matchMedia(query).matches;
-  });
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      const mediaQuery = window.matchMedia(query);
+      mediaQuery.addEventListener("change", onStoreChange);
+      return () => mediaQuery.removeEventListener("change", onStoreChange);
+    },
+    [query],
+  );
 
-  useEffect(() => {
-    // 檢查是否在瀏覽器環境
-    if (typeof window === "undefined") {
-      return;
-    }
+  const getSnapshot = useCallback(
+    () => window.matchMedia(query).matches,
+    [query],
+  );
 
-    const mediaQuery = window.matchMedia(query);
-
-    // 監聽變化
-    const handleChange = (event: MediaQueryListEvent) => {
-      setMatches(event.matches);
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-
-    // 清理
-    return () => {
-      mediaQuery.removeEventListener("change", handleChange);
-    };
-  }, [query]);
-
-  return matches;
+  return useSyncExternalStore(subscribe, getSnapshot, () => false);
 }
