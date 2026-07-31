@@ -5,6 +5,8 @@
  * 並取得使用者的 LINE Profile 資訊
  */
 
+import { LOCALES } from "@/i18n/locales";
+
 // LIFF SDK 會在客戶端動態載入
 let liffObject: typeof import("@line/liff").default | null = null;
 
@@ -175,9 +177,7 @@ export function handleLiffPathRedirect(): string | null {
   // 取得目前的 pathname
   const currentPathname = window.location.pathname;
 
-  // 支持的 locales
-  const locales = ["en", "zh-TW"];
-  const localePattern = new RegExp(`^/(${locales.join("|")})`);
+  const localePattern = new RegExp(`^/(${LOCALES.join("|")})`);
 
   // 檢查是否只有 locale 前綴（例如 /zh-TW 或 /en）
   const localeOnlyPattern = /^\/[a-z]{2}(-[A-Z]{2})?\/?$/;
