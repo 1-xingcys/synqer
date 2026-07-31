@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -20,10 +21,13 @@ import { cn } from "@/lib/utils";
 
 export default function UserMenu() {
   const t = useTranslations();
-  const { user, logout } = useAuthContext();
+  const { user, loading, logout } = useAuthContext();
   const { isInClient: isInLiff } = useLiff();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // 佔位跟頭像同尺寸，讓 header 在 /auth/me 回來前後的排版一致
+  if (loading) return <Skeleton className="size-9 rounded-full" />;
 
   if (!user) return null;
 

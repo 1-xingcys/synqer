@@ -4,7 +4,6 @@ import { ReactNode, useEffect } from "react";
 import { useRouter, usePathname } from "@/i18n/routing";
 import Header from "@/components/Header";
 import Sidebar from "@/components/ui/Sidebar";
-import { LoadingState } from "@/components/ui/loading-state";
 import { SidebarProvider, useSidebar } from "@/contexts/SidebarContext";
 import { useAuthContext } from "@/contexts/AuthContext";
 
@@ -43,7 +42,11 @@ function ProtectedLayoutContent({ children }: ProtectedLayoutProps) {
 /**
  * ProtectedLayout
  * 為所有受保護的頁面提供統一的佈局結構。
- * 認證狀態由全域 AuthProvider 單一管理，這裡僅做導頁與渲染控制。
+ *
+ * 這裡不再擋住整個頁面等 /auth/me：沒有 session cookie 的請求已經被
+ * middleware 導去 /login，所以能走到這裡的請求幾乎都是已登入的。剩下
+ * 「cookie 存在但已失效」的少數情況由下面的 effect 補導頁，畫面則先渲染，
+ * 依賴 user 的區塊各自顯示 skeleton。
  */
 export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const router = useRouter();
@@ -57,17 +60,6 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
     }
   }, [loading, user, pathname, router]);
 
-  if (loading || !user) {
-    return (
-      <LoadingState
-        viewport="screen"
-        background="muted"
-        spinnerTone="neutral"
-      />
-    );
-  }
-
-  // 通過驗證，渲染佈局
   return (
     <SidebarProvider>
       <ProtectedLayoutContent>{children}</ProtectedLayoutContent>
