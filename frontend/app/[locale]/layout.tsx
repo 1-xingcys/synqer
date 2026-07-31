@@ -1,7 +1,9 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { matchesLineUserAgent } from "@/lib/auth-gate";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LiffProvider } from "@/contexts/LiffContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -47,6 +49,12 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
 
+  // 在 server 端就判斷是否為 LINE 內建瀏覽器，讓 LiffPathHandler 不必等到
+  // hydration 後才知道能不能放行 children。
+  const isLineClient = matchesLineUserAgent(
+    (await headers()).get("user-agent") ?? "",
+  );
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
@@ -56,7 +64,7 @@ export default async function LocaleLayout({
           <QueryProvider>
             <NextIntlClientProvider messages={messages}>
               <LiffProvider>
-                <LiffPathHandler>
+                <LiffPathHandler isLineClient={isLineClient}>
                   <AuthProvider>
                     <DebugWrapper>{children}</DebugWrapper>
                   </AuthProvider>

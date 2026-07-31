@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   buildLiffEntryUrl,
   getLiffStatePath,
@@ -25,20 +26,33 @@ const LIFF_AUTO_REDIRECT_KEY = "synqer:liff-auto-redirect:url";
  * 這個組件負責檢測並重定向到正確的路徑。
  *
  * 必須放在 root layout 中，在其他認證邏輯之前執行。
+ *
+ * @param isLineClient 由 root layout 從 User-Agent 判斷後傳入，讓 server 端
+ *   就能知道要不要擋住 children。
  */
 export function LiffPathHandler({
   children,
+  isLineClient,
 }: {
   children: React.ReactNode;
+  isLineClient: boolean;
 }): React.ReactNode {
+  const searchParams = useSearchParams();
+
+  // 只有 LIFF 相關的請求才可能發生重定向，也只有它們需要被擋住。
+  // 一般瀏覽器沒有任何重定向會發生，擋住只會讓整棵樹無法 server render。
+  const needsLiffCheck = isLineClient || searchParams.has("liff.state");
+
   // 使用 "checking" | "redirecting" | "done" 三種狀態
-  // 初始值是 "checking"，在確認不需要重定向之前不渲染 children
+  // 在確認不需要重定向之前不渲染 children
   // 這可以避免在重定向過程中載入不必要的 chunks
   const [status, setStatus] = useState<"checking" | "redirecting" | "done">(
-    "checking",
+    needsLiffCheck ? "checking" : "done",
   );
 
   useEffect(() => {
+    if (!needsLiffCheck) return;
+
     const handleLiffPath = async () => {
       try {
         // 檢查是否有 liff.state 參數
@@ -119,7 +133,7 @@ export function LiffPathHandler({
     };
 
     void handleLiffPath();
-  }, []);
+  }, [needsLiffCheck]);
 
   // 正在檢查或重定向時顯示 loading
   // 這可以避免在重定向過程中載入 children 的 chunks，防止 "Failed to load chunk" 錯誤
