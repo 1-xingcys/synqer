@@ -1,16 +1,22 @@
-"use client";
-
-import { useTranslations } from "next-intl";
-import Header from "@/components/Header";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import PublicHeader from "@/components/Header/PublicHeader";
 import Footer from "@/components/Footer";
 import { Link } from "@/i18n/routing";
 
-export default function PrivacyPolicyPage() {
-  const t = useTranslations("privacy");
+/** Static content with no session and no interaction: prerendered per locale. */
+export default async function PrivacyPolicyPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const t = await getTranslations("privacy");
 
   return (
     <div className="min-h-screen flex flex-col bg-linear-to-b from-zinc-50 to-white dark:from-black dark:to-zinc-900">
-      <Header variant="public" />
+      <PublicHeader />
 
       <main className="flex-1 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">

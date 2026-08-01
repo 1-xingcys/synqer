@@ -1,7 +1,5 @@
-"use client";
-
-import { useTranslations } from "next-intl";
-import Header from "@/components/Header";
+import { getTranslations } from "next-intl/server";
+import PublicHeader from "@/components/Header/PublicHeader";
 import Footer from "@/components/Footer";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 
@@ -9,15 +7,19 @@ interface LoginPageProps {
   redirectPath?: string;
 }
 
-export default function LoginPage({
+/**
+ * The sign-in screen. Both providers are plain links, so nothing here needs to
+ * run on the client.
+ */
+export default async function LoginPage({
   redirectPath = DEFAULT_OVERVIEW_PATH,
 }: LoginPageProps) {
-  const t = useTranslations();
+  const t = await getTranslations();
   const API_BASE = process.env.NEXT_PUBLIC_API;
 
   return (
     <div className="flex flex-col min-h-screen bg-zinc-50 font-sans dark:bg-black">
-      <Header variant="public" />
+      <PublicHeader isLoginPage />
       <main className="min-h-screen flex w-full max-w-md mx-auto flex-col items-center justify-center gap-8 px-4 py-32">
         <div className="w-full space-y-8">
           <div className="text-center">
