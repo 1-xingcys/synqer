@@ -1,15 +1,9 @@
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
-import { headers } from "next/headers";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { matchesLineUserAgent } from "@/lib/auth-gate";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { LiffProvider } from "@/contexts/LiffContext";
+import { LOCALES } from "@/i18n/locales";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { QueryProvider } from "@/components/QueryProvider";
-import { DebugWrapper } from "@/components/DebugConsole/DebugWrapper";
-import { LiffPathHandler } from "@/components/LiffPathHandler";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
@@ -34,6 +28,19 @@ export const metadata: Metadata = {
   },
 };
 
+/** Lets the public pages under this layout be prerendered, one per locale. */
+export function generateStaticParams() {
+  return LOCALES.map((locale) => ({ locale }));
+}
+
+/**
+ * The root layout is deliberately free of dynamic APIs and of every provider
+ * that only the app itself needs. Reading headers() or cookies() here would
+ * opt the whole tree out of static rendering, including the public pages that
+ * have nothing to do with a session.
+ *
+ * Auth, LIFF and react-query live in (protected)/layout.tsx instead.
+ */
 export default async function LocaleLayout({
   children,
   params,
@@ -47,13 +54,11 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const messages = await getMessages();
+  // Without this next-intl treats the render as dynamic and nothing below can
+  // be prerendered.
+  setRequestLocale(locale);
 
-  // Detect the LINE in-app browser on the server so LiffPathHandler does not
-  // have to wait until hydration to know whether it can render children.
-  const isLineClient = matchesLineUserAgent(
-    (await headers()).get("user-agent") ?? "",
-  );
+  const messages = await getMessages();
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -66,17 +71,9 @@ export default async function LocaleLayout({
         <link rel="preconnect" href="https://static.line-scdn.net" />
         <link rel="dns-prefetch" href="https://static.line-scdn.net" />
         <ThemeProvider>
-          <QueryProvider>
-            <NextIntlClientProvider messages={messages}>
-              <LiffProvider>
-                <LiffPathHandler isLineClient={isLineClient}>
-                  <AuthProvider>
-                    <DebugWrapper>{children}</DebugWrapper>
-                  </AuthProvider>
-                </LiffPathHandler>
-              </LiffProvider>
-            </NextIntlClientProvider>
-          </QueryProvider>
+          <NextIntlClientProvider messages={messages}>
+            {children}
+          </NextIntlClientProvider>
         </ThemeProvider>
       </body>
     </html>

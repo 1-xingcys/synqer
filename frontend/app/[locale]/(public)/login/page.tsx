@@ -1,56 +1,43 @@
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "@/i18n/routing";
-import { useSearchParams } from "next/navigation";
+import { cookies } from "next/headers";
+import { redirect } from "@/i18n/routing";
+import { DEFAULT_LOCALE, isLocale } from "@/i18n/locales";
 import LoginPage from "@/components/LoginPage";
-import { LoadingState } from "@/components/ui/loading-state";
-import { useAuthContext } from "@/contexts/AuthContext";
-import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
+import {
+  SESSION_COOKIE_NAME,
+  SESSION_EXPIRED_PARAM,
+  resolveSignedInRedirect,
+  validateRedirectPath,
+} from "@/lib/auth-gate";
 
 /**
- * 驗證 redirect 路徑，防止 open redirect 攻擊
+ * Unlike its neighbours this page is rendered per request rather than
+ * prerendered: it has to read `?redirect` to build the provider links, and the
+ * session cookie to decide whether to show itself at all.
  */
-const validateRedirectPath = (redirect: string | null): string => {
-  if (!redirect) return DEFAULT_OVERVIEW_PATH;
+export default async function Login({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const { locale } = await params;
+  const query = await searchParams;
 
-  // 只允許以 / 開頭的相對路徑
-  if (redirect.startsWith("/")) {
-    // 防止 protocol-relative URLs 如 //evil.com
-    if (redirect.startsWith("//")) {
-      return DEFAULT_OVERVIEW_PATH;
-    }
-    return redirect;
+  const requested = typeof query.redirect === "string" ? query.redirect : null;
+
+  const signedInDestination = resolveSignedInRedirect({
+    hasSessionCookie: (await cookies()).has(SESSION_COOKIE_NAME),
+    redirect: requested,
+    sessionExpired: query[SESSION_EXPIRED_PARAM] !== undefined,
+  });
+
+  if (signedInDestination) {
+    redirect({
+      href: signedInDestination,
+      locale: isLocale(locale) ? locale : DEFAULT_LOCALE,
+    });
   }
 
-  // 拒絕其他模式（絕對 URLs、javascript:、data: 等）
-  return DEFAULT_OVERVIEW_PATH;
-};
-
-export default function Login() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { user, loading } = useAuthContext();
-
-  // 如果已登入，重定向到 redirect 或 dashboard
-  useEffect(() => {
-    if (!loading && user) {
-      const redirect = validateRedirectPath(searchParams.get("redirect"));
-      router.replace(redirect);
-    }
-  }, [loading, user, router, searchParams]);
-
-  if (loading || user) {
-    return (
-      <LoadingState
-        viewport="screen"
-        background="muted"
-        spinnerTone="neutral"
-      />
-    );
-  }
-
-  const redirectPath = validateRedirectPath(searchParams.get("redirect"));
-
-  return <LoginPage redirectPath={redirectPath} />;
+  return <LoginPage redirectPath={validateRedirectPath(requested)} />;
 }

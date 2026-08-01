@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
-import { useSearchParams } from "next/navigation";
 import {
   LIFF_ENTRY_COOKIE_NAME,
   LiffEntryAction,
@@ -9,11 +8,7 @@ import {
   type LiffEntryDecision,
 } from "@/lib/liffEntry";
 import { getLiffId, initializeLiff, isLineUserAgent } from "@/lib/liff";
-import { debugLog } from "@/components/DebugConsole";
 import { LoadingState } from "@/components/ui/loading-state";
-
-const log = (message: string, data?: unknown) =>
-  debugLog("LiffPath", message, data);
 
 /** URL we have already routed through the LIFF entry flow, per browser tab. */
 const LIFF_ENTRY_HANDLED_KEY = "synqer:liff-entry-handled:url";
@@ -70,6 +65,20 @@ function getServerDecision(): null {
 const subscribe = () => () => {};
 
 /**
+ * Whether this document could possibly need a LIFF redirect.
+ *
+ * Read from the URL rather than useSearchParams: that hook forces the nearest
+ * Suspense boundary's fallback into the prerendered HTML, which on the static
+ * landing page would mean shipping an empty document.
+ */
+const getClientNeedsLiffCheck = () =>
+  isLineUserAgent() ||
+  new URLSearchParams(window.location.search).has("liff.state");
+
+/** The server render knows nothing beyond the isLineClient prop. */
+const getServerNeedsLiffCheck = () => false;
+
+/**
  * LiffPathHandler
  *
  * Resolves how a document reached us from LINE, and redirects when the URL says
@@ -77,24 +86,31 @@ const subscribe = () => () => {};
  * URL, so the common case costs no LIFF SDK call — asking the SDK cost 4s on a
  * cold start, spent showing a spinner on a page that had nothing to do.
  *
- * Must live in the root layout and run before any other auth logic.
+ * Must run before any other auth logic on the pages that mount it.
  *
- * @param isLineClient Passed in by the root layout after checking the
- *   User-Agent, so the server already knows whether to block children.
+ * @param isLineClient Passed in by (protected)/layout.tsx after checking the
+ *   User-Agent, so the server already knows whether to block children. The
+ *   prerendered landing page has no request to read, and omits it: the check
+ *   then happens on the client, and a LINE visitor may see a frame of content
+ *   before being forwarded.
  */
 export function LiffPathHandler({
   children,
-  isLineClient,
+  isLineClient = false,
 }: {
   children: React.ReactNode;
-  isLineClient: boolean;
+  isLineClient?: boolean;
 }): React.ReactNode {
-  const searchParams = useSearchParams();
+  const clientNeedsLiffCheck = useSyncExternalStore(
+    subscribe,
+    getClientNeedsLiffCheck,
+    getServerNeedsLiffCheck,
+  );
 
   // Only LIFF-related requests can ever redirect, so only they need to be held
   // back. A regular browser never redirects here, and blocking it would just
   // stop the whole tree from server rendering.
-  const needsLiffCheck = isLineClient || searchParams.has("liff.state");
+  const needsLiffCheck = isLineClient || clientNeedsLiffCheck;
 
   // null until the client has rendered: the decision needs browser-only state,
   // so the server always reports "not known yet".
@@ -117,8 +133,6 @@ export function LiffPathHandler({
 
   useEffect(() => {
     if (!needsLiffCheck || decision === null) return;
-
-    log(`decision ${decision.action}`, decision);
 
     if (decision.action === LiffEntryAction.Continue) return;
 

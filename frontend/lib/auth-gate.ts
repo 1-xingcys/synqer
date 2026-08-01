@@ -1,4 +1,5 @@
 import { LOCALES } from "@/i18n/locales";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 
 /**
  * Routing decisions the server can make before any client JavaScript runs.
@@ -6,6 +7,14 @@ import { LOCALES } from "@/i18n/locales";
 
 /** Session cookie issued by the API; scoped to .synqer.club in production. */
 export const SESSION_COOKIE_NAME = "synqer.sid";
+
+/**
+ * Query flag ProtectedLayout adds when it sends a rejected session back to
+ * /login. The login page only sees the *presence* of the session cookie, so
+ * without this marker a cookie the API has already invalidated would bounce
+ * between the two forever.
+ */
+export const SESSION_EXPIRED_PARAM = "expired";
 
 /** First URL segment of every route under app/[locale]/(protected). */
 const PROTECTED_SEGMENTS = ["events", "hosted", "joined", "new"];
@@ -75,4 +84,47 @@ export function resolveLoginRedirect({
   const { locale, path } = splitLocale(pathname);
   const loginPath = `${locale ? `/${locale}` : ""}/login`;
   return `${loginPath}?redirect=${encodeURIComponent(path)}`;
+}
+
+/**
+ * Constrain a `?redirect` value to a path on this origin.
+ *
+ * Shared by the login page's own redirect and by the hrefs it hands to the
+ * OAuth providers, so an open redirect cannot slip in through either.
+ */
+export function validateRedirectPath(redirect: string | null): string {
+  if (!redirect) return DEFAULT_OVERVIEW_PATH;
+
+  // "//evil.example.com" is a protocol-relative URL, not a path.
+  if (!redirect.startsWith("/") || redirect.startsWith("//")) {
+    return DEFAULT_OVERVIEW_PATH;
+  }
+
+  return redirect;
+}
+
+interface SignedInRedirectRequest {
+  hasSessionCookie: boolean;
+  /** Raw `?redirect` value, before validation. */
+  redirect: string | null;
+  /** True when ProtectedLayout sent this request back after /auth/me failed. */
+  sessionExpired: boolean;
+}
+
+/**
+ * Decide whether a request for the login page should skip it.
+ *
+ * Mirrors resolveLoginRedirect: only the presence of the cookie is checked, so
+ * a stale one still reaches the app and is caught by ProtectedLayout — which
+ * then sets sessionExpired to stop the two from redirecting at each other.
+ *
+ * @returns the path to send the visitor to, or null to render the login page.
+ */
+export function resolveSignedInRedirect({
+  hasSessionCookie,
+  redirect,
+  sessionExpired,
+}: SignedInRedirectRequest): string | null {
+  if (!hasSessionCookie || sessionExpired) return null;
+  return validateRedirectPath(redirect);
 }

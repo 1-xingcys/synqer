@@ -1,11 +1,10 @@
-"use client";
-
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 
-export default function Footer() {
-  const t = useTranslations("footer");
+/** Presentational only, so it renders on the server and ships no JavaScript. */
+export default async function Footer() {
+  const t = await getTranslations("footer");
 
   return (
     <footer className="w-full bg-zinc-100 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800">
