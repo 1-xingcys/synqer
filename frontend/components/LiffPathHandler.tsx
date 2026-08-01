@@ -9,11 +9,7 @@ import {
   type LiffEntryDecision,
 } from "@/lib/liffEntry";
 import { getLiffId, initializeLiff, isLineUserAgent } from "@/lib/liff";
-import { debugLog } from "@/components/DebugConsole";
 import { LoadingState } from "@/components/ui/loading-state";
-
-const log = (message: string, data?: unknown) =>
-  debugLog("LiffPath", message, data);
 
 /** URL we have already routed through the LIFF entry flow, per browser tab. */
 const LIFF_ENTRY_HANDLED_KEY = "synqer:liff-entry-handled:url";
@@ -117,8 +113,6 @@ export function LiffPathHandler({
 
   useEffect(() => {
     if (!needsLiffCheck || decision === null) return;
-
-    log(`decision ${decision.action}`, decision);
 
     if (decision.action === LiffEntryAction.Continue) return;
 

@@ -8,7 +8,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { LiffProvider } from "@/contexts/LiffContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { QueryProvider } from "@/components/QueryProvider";
-import { DebugWrapper } from "@/components/DebugConsole/DebugWrapper";
 import { LiffPathHandler } from "@/components/LiffPathHandler";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -71,7 +70,7 @@ export default async function LocaleLayout({
               <LiffProvider>
                 <LiffPathHandler isLineClient={isLineClient}>
                   <AuthProvider>
-                    <DebugWrapper>{children}</DebugWrapper>
+                    {children}
                   </AuthProvider>
                 </LiffPathHandler>
               </LiffProvider>

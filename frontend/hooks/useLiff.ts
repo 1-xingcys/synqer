@@ -14,10 +14,6 @@ import {
   type LiffProfile,
   type LiffContext,
 } from "@/lib/liff";
-import { debugLog } from "@/components/DebugConsole";
-
-const log = (message: string, data?: unknown) =>
-  debugLog("useLiff", message, data);
 
 export interface UseLiffReturn {
   // 狀態
@@ -89,7 +85,6 @@ export function useLiff(): UseLiffReturn {
       const shouldInit = hasLiffParams || isInLineClient;
 
       if (!shouldInit) {
-        log("skip init (not LIFF, not LINE UA)");
         if (mounted) {
           setIsLoading(false);
         }
@@ -121,12 +116,10 @@ export function useLiff(): UseLiffReturn {
 
         // 如果已登入，取得 Profile 和 Context
         if (liffState.isLoggedIn) {
-          log("fetching profile + context");
           const [profileData, contextData] = await Promise.all([
             getLiffProfile(),
             getLiffContext(),
           ]);
-          log("profile + context ready");
 
           if (mounted) {
             setProfile(profileData);
@@ -148,14 +141,12 @@ export function useLiff(): UseLiffReturn {
           }));
         }
       } finally {
-        log("init finished");
         if (mounted) {
           setIsLoading(false);
         }
       }
     };
 
-    log("init start");
     void init();
 
     return () => {
