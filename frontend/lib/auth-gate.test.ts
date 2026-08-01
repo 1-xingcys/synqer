@@ -2,8 +2,11 @@ import {
   isProtectedPath,
   matchesLineUserAgent,
   resolveLoginRedirect,
+  resolveSignedInRedirect,
   splitLocale,
+  validateRedirectPath,
 } from "@/lib/auth-gate";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 
 const CHROME_UA =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/120.0 Mobile/15E148 Safari/604.1";
@@ -144,5 +147,96 @@ describe("resolveLoginRedirect", () => {
         userAgent: CHROME_UA,
       }),
     ).toBeNull();
+  });
+});
+
+describe("validateRedirectPath", () => {
+  it("passes a same-origin path through untouched", () => {
+    expect(validateRedirectPath("/hosted/abc/settings")).toBe(
+      "/hosted/abc/settings",
+    );
+    expect(validateRedirectPath("/events/voting?tab=1")).toBe(
+      "/events/voting?tab=1",
+    );
+  });
+
+  it("falls back to the default when nothing was requested", () => {
+    expect(validateRedirectPath(null)).toBe(DEFAULT_OVERVIEW_PATH);
+    expect(validateRedirectPath("")).toBe(DEFAULT_OVERVIEW_PATH);
+  });
+
+  it("rejects a protocol-relative URL", () => {
+    expect(validateRedirectPath("//evil.example.com")).toBe(
+      DEFAULT_OVERVIEW_PATH,
+    );
+  });
+
+  it("rejects anything that is not a rooted path", () => {
+    expect(validateRedirectPath("https://evil.example.com")).toBe(
+      DEFAULT_OVERVIEW_PATH,
+    );
+    expect(validateRedirectPath("javascript:alert(1)")).toBe(
+      DEFAULT_OVERVIEW_PATH,
+    );
+    expect(validateRedirectPath("data:text/html,x")).toBe(
+      DEFAULT_OVERVIEW_PATH,
+    );
+    expect(validateRedirectPath("events/voting")).toBe(DEFAULT_OVERVIEW_PATH);
+  });
+});
+
+describe("resolveSignedInRedirect", () => {
+  it("sends a visitor who already has a session to the requested path", () => {
+    expect(
+      resolveSignedInRedirect({
+        hasSessionCookie: true,
+        redirect: "/hosted/abc/settings",
+        sessionExpired: false,
+      }),
+    ).toBe("/hosted/abc/settings");
+  });
+
+  it("defaults the destination when no redirect was requested", () => {
+    expect(
+      resolveSignedInRedirect({
+        hasSessionCookie: true,
+        redirect: null,
+        sessionExpired: false,
+      }),
+    ).toBe(DEFAULT_OVERVIEW_PATH);
+  });
+
+  it("renders the login page when there is no session cookie", () => {
+    expect(
+      resolveSignedInRedirect({
+        hasSessionCookie: false,
+        redirect: "/events/voting",
+        sessionExpired: false,
+      }),
+    ).toBeNull();
+  });
+
+  /**
+   * ProtectedLayout sets the flag after /auth/me rejects a cookie it still
+   * holds. Without this branch the two would redirect at each other forever.
+   */
+  it("renders the login page when the session it holds is known to be stale", () => {
+    expect(
+      resolveSignedInRedirect({
+        hasSessionCookie: true,
+        redirect: "/events/voting",
+        sessionExpired: true,
+      }),
+    ).toBeNull();
+  });
+
+  it("refuses to bounce a signed-in visitor off-origin", () => {
+    expect(
+      resolveSignedInRedirect({
+        hasSessionCookie: true,
+        redirect: "//evil.example.com",
+        sessionExpired: false,
+      }),
+    ).toBe(DEFAULT_OVERVIEW_PATH);
   });
 });
