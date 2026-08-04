@@ -3,7 +3,7 @@ import { useEventDetail } from "@/hooks/useEventDetail";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { isEventHost } from "@/lib/eventHost";
 
-export function useUnifiedEventDetail(eventId: string) {
+export function useEventDetailWithRole(eventId: string) {
   const { data, isLoading, isFetching, error, refetch } =
     useEventDetail(eventId);
   const { user } = useAuthContext();

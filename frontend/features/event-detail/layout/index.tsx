@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { useParams } from "next/navigation";
-import { useUnifiedEventDetail } from "@/hooks/useUnifiedEventDetail";
+import { useEventDetailWithRole } from "@/hooks/useEventDetailWithRole";
 import { EventDetailContent } from "./EventDetailContent";
 
 export default function EventDetailLayout({
@@ -12,7 +12,7 @@ export default function EventDetailLayout({
 }) {
   const params = useParams();
   const eventId = params.eventId as string;
-  const { isHost } = useUnifiedEventDetail(eventId);
+  const { isHost } = useEventDetailWithRole(eventId);
 
   return (
     <EventDetailContent isHost={isHost}>
