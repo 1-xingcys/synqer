@@ -3,7 +3,6 @@ import {
   matchesLineUserAgent,
   resolveLoginRedirect,
   resolveSignedInRedirect,
-  splitLocale,
   validateRedirectPath,
 } from "@/lib/auth-gate";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
@@ -12,35 +11,6 @@ const CHROME_UA =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/120.0 Mobile/15E148 Safari/604.1";
 const LINE_UA =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Line/14.1.0";
-
-describe("splitLocale", () => {
-  it("separates a locale prefix from the rest of the path", () => {
-    expect(splitLocale("/zh-TW/new")).toEqual({
-      locale: "zh-TW",
-      path: "/new",
-    });
-    expect(splitLocale("/en/hosted/abc/settings")).toEqual({
-      locale: "en",
-      path: "/hosted/abc/settings",
-    });
-  });
-
-  it("treats a bare locale as the root path", () => {
-    expect(splitLocale("/zh-TW")).toEqual({ locale: "zh-TW", path: "/" });
-  });
-
-  it("leaves an unprefixed path untouched", () => {
-    expect(splitLocale("/new")).toEqual({ locale: null, path: "/new" });
-    expect(splitLocale("/")).toEqual({ locale: null, path: "/" });
-  });
-
-  it("does not treat a lookalike segment as a locale", () => {
-    expect(splitLocale("/zh-TWx/new")).toEqual({
-      locale: null,
-      path: "/zh-TWx/new",
-    });
-  });
-});
 
 describe("isProtectedPath", () => {
   it.each([
