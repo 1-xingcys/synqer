@@ -11,7 +11,7 @@ import {
   DefaultParticipants,
 } from "./containers";
 
-export default function HostedEventParticipantsPage() {
+export default function ParticipantsTab() {
   const t = useTranslations();
   const params = useParams();
   const eventId = params.eventId as string;

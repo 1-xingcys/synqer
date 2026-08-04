@@ -9,7 +9,7 @@ import {
   ActiveLayout,
 } from "../components";
 import { SelectedParticipant } from "../types";
-import { SearchedUser } from "@/hooks/useUserSearch";
+import { SearchedUser } from "../hooks/useUserSearch";
 import { LoadingState } from "@/components/ui/loading-state";
 
 interface DefaultParticipantsViewProps {

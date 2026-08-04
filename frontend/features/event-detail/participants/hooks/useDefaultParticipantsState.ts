@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
-import { useUserSearch, type SearchedUser } from "@/hooks/useUserSearch";
+import { useUserSearch, type SearchedUser } from "./useUserSearch";
 import { SelectedParticipant } from "../types";
 import { updateEventParticipants } from "./participantsApi";
 
