@@ -1,3 +1,3 @@
-import HostedEventParticipantsPage from "@/components/hostedEvent/HostedEventParticipantsPage";
+import ParticipantsTab from "@/features/event-detail/participants";
 
-export default HostedEventParticipantsPage;
+export default ParticipantsTab;

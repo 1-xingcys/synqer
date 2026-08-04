@@ -1,0 +1,57 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import ResultsView from "@/features/time-grid/results-view";
+import { LoadingState } from "@/components/ui/loading-state";
+import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
+import { useJoinedEventResults } from "./useJoinedEventResults";
+import { ErrorView } from "./ErrorView";
+
+interface GuestResultsViewProps {
+  eventId: string;
+}
+
+export default function GuestResultsView({ eventId }: GuestResultsViewProps) {
+  const tEvent = useTranslations("event");
+  const tJoined = useTranslations("joined");
+  const {
+    data,
+    isLoading,
+    error,
+    participantsWithAvatars,
+    votesWithAvatars,
+    committedSlotIds,
+  } = useJoinedEventResults(eventId);
+
+  if (isLoading) {
+    return (
+      <LoadingState
+        label={tEvent("loading")}
+        viewport="section"
+        textSize="lg"
+      />
+    );
+  }
+
+  if (error || !data) {
+    return <ErrorView error={error} />;
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Results View with HeatMap */}
+      <ResultsView
+        slots={data.slots}
+        votes={votesWithAvatars}
+        participants={participantsWithAvatars}
+        eventId={eventId}
+        defaultGranularity={normalizeGranularity(
+          data.event.defaultGranularityMin,
+        )}
+        defaultMode={toVoteMode(data.event.defaultVoteMode)}
+        tip={tJoined("results.clickToSeeWho")}
+        committedSlotIds={committedSlotIds}
+      />
+    </div>
+  );
+}

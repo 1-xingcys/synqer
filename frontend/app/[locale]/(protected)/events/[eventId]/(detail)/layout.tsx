@@ -1,3 +1,3 @@
-import UnifiedEventDetailLayout from "@/components/UnifiedEventDetail/UnifiedEventDetailLayout";
+import EventDetailLayout from "@/features/event-detail/layout";
 
-export default UnifiedEventDetailLayout;
+export default EventDetailLayout;

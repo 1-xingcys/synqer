@@ -1,5 +1,5 @@
-import JoinedEventPage from "@/components/joinedEvent/JoinedEventPage";
+import OverviewTab from "@/features/event-detail/overview";
 
 export default function Page() {
-  return <JoinedEventPage />;
+  return <OverviewTab />;
 }

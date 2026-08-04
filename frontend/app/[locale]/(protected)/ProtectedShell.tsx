@@ -2,9 +2,9 @@
 
 import { ReactNode, useEffect } from "react";
 import { useRouter, usePathname } from "@/i18n/routing";
-import ProtectedHeader from "@/components/Header/ProtectedHeader";
-import { isEventDetailPagePath } from "@/components/Header/pathRules";
-import Sidebar from "@/components/ui/Sidebar";
+import ProtectedHeader from "@/components/layout/header/ProtectedHeader";
+import { isEventDetailPagePath } from "@/components/layout/header/pathRules";
+import Sidebar from "@/components/layout/Sidebar";
 import { SidebarProvider, useSidebar } from "@/contexts/SidebarContext";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { SESSION_EXPIRED_PARAM } from "@/lib/auth-gate";

@@ -1,4 +1,4 @@
-import { LOCALES } from "@/i18n/locales";
+import { splitLocale } from "@/i18n/locales";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 
 /**
@@ -16,33 +16,19 @@ export const SESSION_COOKIE_NAME = "synqer.sid";
  */
 export const SESSION_EXPIRED_PARAM = "expired";
 
-/** First URL segment of every route under app/[locale]/(protected). */
-const PROTECTED_SEGMENTS = ["events", "hosted", "joined", "new"];
+/**
+ * First URL segment of every route under app/[locale]/(protected).
+ *
+ * The retired "hosted" and "joined" segments are absent on purpose: middleware
+ * redirects them onto /events before the gate runs, so they never arrive here.
+ */
+const PROTECTED_SEGMENTS = ["events", "new"];
 
 /** Matches LINE's in-app browser. */
 const LINE_USER_AGENT_PATTERN = /Line/i;
 
 export function matchesLineUserAgent(userAgent: string): boolean {
   return LINE_USER_AGENT_PATTERN.test(userAgent);
-}
-
-/**
- * Split a pathname into its locale prefix and the locale-less remainder.
- * "/zh-TW/new" -> { locale: "zh-TW", path: "/new" }
- */
-export function splitLocale(pathname: string): {
-  locale: string | null;
-  path: string;
-} {
-  for (const locale of LOCALES) {
-    if (pathname === `/${locale}`) {
-      return { locale, path: "/" };
-    }
-    if (pathname.startsWith(`/${locale}/`)) {
-      return { locale, path: pathname.slice(locale.length + 1) };
-    }
-  }
-  return { locale: null, path: pathname };
 }
 
 export function isProtectedPath(pathname: string): boolean {

@@ -1,3 +1,3 @@
-import HostedEventSettingsPage from "@/components/hostedEvent/HostedEventSettingsPage";
+import SettingsTab from "@/features/event-detail/settings";
 
-export default HostedEventSettingsPage;
+export default SettingsTab;

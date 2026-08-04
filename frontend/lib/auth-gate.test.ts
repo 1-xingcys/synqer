@@ -3,7 +3,6 @@ import {
   matchesLineUserAgent,
   resolveLoginRedirect,
   resolveSignedInRedirect,
-  splitLocale,
   validateRedirectPath,
 } from "@/lib/auth-gate";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
@@ -13,35 +12,6 @@ const CHROME_UA =
 const LINE_UA =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Line/14.1.0";
 
-describe("splitLocale", () => {
-  it("separates a locale prefix from the rest of the path", () => {
-    expect(splitLocale("/zh-TW/new")).toEqual({
-      locale: "zh-TW",
-      path: "/new",
-    });
-    expect(splitLocale("/en/hosted/abc/settings")).toEqual({
-      locale: "en",
-      path: "/hosted/abc/settings",
-    });
-  });
-
-  it("treats a bare locale as the root path", () => {
-    expect(splitLocale("/zh-TW")).toEqual({ locale: "zh-TW", path: "/" });
-  });
-
-  it("leaves an unprefixed path untouched", () => {
-    expect(splitLocale("/new")).toEqual({ locale: null, path: "/new" });
-    expect(splitLocale("/")).toEqual({ locale: null, path: "/" });
-  });
-
-  it("does not treat a lookalike segment as a locale", () => {
-    expect(splitLocale("/zh-TWx/new")).toEqual({
-      locale: null,
-      path: "/zh-TWx/new",
-    });
-  });
-});
-
 describe("isProtectedPath", () => {
   it.each([
     "/new",
@@ -49,8 +19,7 @@ describe("isProtectedPath", () => {
     "/en/new",
     "/zh-TW/new/success/abc",
     "/zh-TW/events",
-    "/zh-TW/hosted/abc/participants",
-    "/zh-TW/joined",
+    "/zh-TW/events/abc/participants",
   ])("treats %s as protected", (pathname) => {
     expect(isProtectedPath(pathname)).toBe(true);
   });
@@ -65,6 +34,15 @@ describe("isProtectedPath", () => {
   it("does not match a segment that merely starts with a protected name", () => {
     expect(isProtectedPath("/zh-TW/newsletter")).toBe(false);
   });
+
+  // Middleware redirects these onto /events before the gate sees them, so the
+  // gate itself has no reason to know the retired segments.
+  it.each(["/zh-TW/hosted/abc/settings", "/zh-TW/joined"])(
+    "leaves the retired segment %s to the legacy redirect",
+    (pathname) => {
+      expect(isProtectedPath(pathname)).toBe(false);
+    },
+  );
 });
 
 describe("matchesLineUserAgent", () => {
@@ -95,11 +73,11 @@ describe("resolveLoginRedirect", () => {
   it("preserves the deep path in the redirect parameter", () => {
     expect(
       resolveLoginRedirect({
-        pathname: "/en/hosted/abc/settings",
+        pathname: "/en/events/abc/settings",
         hasSessionCookie: false,
         userAgent: CHROME_UA,
       }),
-    ).toBe("/en/login?redirect=%2Fhosted%2Fabc%2Fsettings");
+    ).toBe("/en/login?redirect=%2Fevents%2Fabc%2Fsettings");
   });
 
   it("omits the locale prefix when the path has none", () => {
@@ -152,8 +130,8 @@ describe("resolveLoginRedirect", () => {
 
 describe("validateRedirectPath", () => {
   it("passes a same-origin path through untouched", () => {
-    expect(validateRedirectPath("/hosted/abc/settings")).toBe(
-      "/hosted/abc/settings",
+    expect(validateRedirectPath("/events/abc/settings")).toBe(
+      "/events/abc/settings",
     );
     expect(validateRedirectPath("/events/voting?tab=1")).toBe(
       "/events/voting?tab=1",
@@ -190,10 +168,10 @@ describe("resolveSignedInRedirect", () => {
     expect(
       resolveSignedInRedirect({
         hasSessionCookie: true,
-        redirect: "/hosted/abc/settings",
+        redirect: "/events/abc/settings",
         sessionExpired: false,
       }),
-    ).toBe("/hosted/abc/settings");
+    ).toBe("/events/abc/settings");
   });
 
   it("defaults the destination when no redirect was requested", () => {
