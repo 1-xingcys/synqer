@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useLocale } from "next-intl";
 import { ResultsAvailabilityMode, SlotRangeInfo } from "./types";
 import { getHeatmapClasses } from "./HeatMapLegend";
-import { SlotDetailModal } from "./SlotDetailModal";
+import { SlotDetailModal } from "./slot-detail-modal";
 import { ResultsGridToolsMenu } from "./ResultsGridToolsMenu";
 import { useResultsAvailabilityMetrics } from "./hooks/useResultsAvailabilityMetrics";
 import {
