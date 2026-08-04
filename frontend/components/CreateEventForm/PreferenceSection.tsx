@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
-import { GridDefaultFields } from "@/components/eventCommon/eventPreference/GridDefaultFields";
-import { VoteNoticeFields } from "@/components/eventCommon/eventPreference/VoteNoticeFields";
+import { GridDefaultFields } from "@/features/event-preference/GridDefaultFields";
+import { VoteNoticeFields } from "@/features/event-preference/VoteNoticeFields";
 import type { VoteMode } from "@/types/event";
 import type { TimeGranularity } from "@/types/event";
 import { cn } from "@/lib/utils";
