@@ -19,8 +19,7 @@ describe("isProtectedPath", () => {
     "/en/new",
     "/zh-TW/new/success/abc",
     "/zh-TW/events",
-    "/zh-TW/hosted/abc/participants",
-    "/zh-TW/joined",
+    "/zh-TW/events/abc/participants",
   ])("treats %s as protected", (pathname) => {
     expect(isProtectedPath(pathname)).toBe(true);
   });
@@ -35,6 +34,15 @@ describe("isProtectedPath", () => {
   it("does not match a segment that merely starts with a protected name", () => {
     expect(isProtectedPath("/zh-TW/newsletter")).toBe(false);
   });
+
+  // Middleware redirects these onto /events before the gate sees them, so the
+  // gate itself has no reason to know the retired segments.
+  it.each(["/zh-TW/hosted/abc/settings", "/zh-TW/joined"])(
+    "leaves the retired segment %s to the legacy redirect",
+    (pathname) => {
+      expect(isProtectedPath(pathname)).toBe(false);
+    },
+  );
 });
 
 describe("matchesLineUserAgent", () => {
@@ -65,11 +73,11 @@ describe("resolveLoginRedirect", () => {
   it("preserves the deep path in the redirect parameter", () => {
     expect(
       resolveLoginRedirect({
-        pathname: "/en/hosted/abc/settings",
+        pathname: "/en/events/abc/settings",
         hasSessionCookie: false,
         userAgent: CHROME_UA,
       }),
-    ).toBe("/en/login?redirect=%2Fhosted%2Fabc%2Fsettings");
+    ).toBe("/en/login?redirect=%2Fevents%2Fabc%2Fsettings");
   });
 
   it("omits the locale prefix when the path has none", () => {
@@ -122,8 +130,8 @@ describe("resolveLoginRedirect", () => {
 
 describe("validateRedirectPath", () => {
   it("passes a same-origin path through untouched", () => {
-    expect(validateRedirectPath("/hosted/abc/settings")).toBe(
-      "/hosted/abc/settings",
+    expect(validateRedirectPath("/events/abc/settings")).toBe(
+      "/events/abc/settings",
     );
     expect(validateRedirectPath("/events/voting?tab=1")).toBe(
       "/events/voting?tab=1",
@@ -160,10 +168,10 @@ describe("resolveSignedInRedirect", () => {
     expect(
       resolveSignedInRedirect({
         hasSessionCookie: true,
-        redirect: "/hosted/abc/settings",
+        redirect: "/events/abc/settings",
         sessionExpired: false,
       }),
-    ).toBe("/hosted/abc/settings");
+    ).toBe("/events/abc/settings");
   });
 
   it("defaults the destination when no redirect was requested", () => {

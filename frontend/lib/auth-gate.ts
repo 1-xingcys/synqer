@@ -16,8 +16,13 @@ export const SESSION_COOKIE_NAME = "synqer.sid";
  */
 export const SESSION_EXPIRED_PARAM = "expired";
 
-/** First URL segment of every route under app/[locale]/(protected). */
-const PROTECTED_SEGMENTS = ["events", "hosted", "joined", "new"];
+/**
+ * First URL segment of every route under app/[locale]/(protected).
+ *
+ * The retired "hosted" and "joined" segments are absent on purpose: middleware
+ * redirects them onto /events before the gate runs, so they never arrive here.
+ */
+const PROTECTED_SEGMENTS = ["events", "new"];
 
 /** Matches LINE's in-app browser. */
 const LINE_USER_AGENT_PATTERN = /Line/i;
