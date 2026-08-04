@@ -1,9 +1,9 @@
 "use client";
 
 import { Label } from "@/components/ui/label";
-import { DatePicker } from "@/components/eventCommon/DatePicker";
+import { DatePicker } from "@/components/ui/DatePicker";
 import type { CalendarDay } from "@/lib/time";
-import { TimePicker } from "@/components/eventCommon/TimePicker";
+import { TimePicker } from "@/components/ui/TimePicker";
 import { cn } from "@/lib/utils";
 
 interface VotingDeadlineFieldsProps {

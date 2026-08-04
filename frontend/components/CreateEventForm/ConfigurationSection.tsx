@@ -12,8 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DatePicker } from "@/components/eventCommon/DatePicker";
-import { TimePicker } from "@/components/eventCommon/TimePicker";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { TimePicker } from "@/components/ui/TimePicker";
 import { useFormStateContext } from "./CreateEventFormContext";
 import { useDateTimeFields } from "./hooks/useDateTimeFields";
 import { ValidationError } from "./hooks/useFormValidation";
