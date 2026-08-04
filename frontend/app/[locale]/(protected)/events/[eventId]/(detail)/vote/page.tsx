@@ -1,5 +1,5 @@
-import UnifiedVoteTab from "@/components/UnifiedEventDetail/UnifiedVoteTab";
+import VoteTab from "@/features/event-detail/vote";
 
 export default function Page() {
-  return <UnifiedVoteTab />;
+  return <VoteTab />;
 }

@@ -13,7 +13,7 @@ import {
 import VotingGrid from "@/features/time-grid/VotingGrid";
 import { Text } from "@/components/ui/text";
 
-export default function UnifiedVoteTab() {
+export default function VoteTab() {
   const params = useParams();
   const eventId = params.eventId as string;
   const tJoined = useTranslations("joined");
