@@ -14,9 +14,5 @@ export default function EventDetailLayout({
   const eventId = params.eventId as string;
   const { isHost } = useEventDetailWithRole(eventId);
 
-  return (
-    <EventDetailContent isHost={isHost}>
-      {children}
-    </EventDetailContent>
-  );
+  return <EventDetailContent isHost={isHost}>{children}</EventDetailContent>;
 }

@@ -8,11 +8,7 @@ import { eventStatusForOverview, type OverviewStatus } from "@/lib/eventRoutes";
 
 const TRANSLATION_NS = "joinedEvents";
 
-export default function EventListPage({
-  status,
-}: {
-  status: OverviewStatus;
-}) {
+export default function EventListPage({ status }: { status: OverviewStatus }) {
   const t = useTranslations(TRANSLATION_NS);
   const tOverview = useTranslations("unifiedEvents.overview");
   const { events, loading, error } = useMyEvents();

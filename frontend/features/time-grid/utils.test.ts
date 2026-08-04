@@ -7,10 +7,7 @@ import {
   mapCalendarEventsToSlots,
   sortAxisKeys,
 } from "@/features/time-grid/utils";
-import {
-  CalendarEvent,
-  TimeSlot,
-} from "@/features/time-grid/types";
+import { CalendarEvent, TimeSlot } from "@/features/time-grid/types";
 import { calendarDay } from "@/lib/time";
 
 const recurringSlots: TimeSlot[] = [

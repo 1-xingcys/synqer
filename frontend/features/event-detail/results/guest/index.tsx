@@ -11,9 +11,7 @@ interface GuestResultsViewProps {
   eventId: string;
 }
 
-export default function GuestResultsView({
-  eventId,
-}: GuestResultsViewProps) {
+export default function GuestResultsView({ eventId }: GuestResultsViewProps) {
   const tEvent = useTranslations("event");
   const tJoined = useTranslations("joined");
   const {

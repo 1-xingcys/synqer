@@ -3,10 +3,7 @@
 import { ReactNode } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import {
-  EventDetailNav,
-  NavIcons,
-} from "./EventDetailNav";
+import { EventDetailNav, NavIcons } from "./EventDetailNav";
 import { DeletedEventView } from "@/components/event/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
 import { LoadingState } from "@/components/ui/loading-state";

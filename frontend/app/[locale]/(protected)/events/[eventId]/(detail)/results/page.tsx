@@ -11,9 +11,5 @@ export default function Page() {
   const { isHost } = useEventDetailWithRole(eventId);
 
   // 主辦者：HostResultsView 已含 EventTimeSelector + ResultsView 拖拉合併
-  return isHost ? (
-    <HostResultsView />
-  ) : (
-    <GuestResultsView eventId={eventId} />
-  );
+  return isHost ? <HostResultsView /> : <GuestResultsView eventId={eventId} />;
 }
