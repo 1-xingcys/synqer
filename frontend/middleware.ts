@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { SESSION_COOKIE_NAME, resolveLoginRedirect } from "./lib/auth-gate";
+import { resolveLegacyEventRedirect } from "./lib/legacyEventRoutes";
 import {
   LIFF_ENTRY_COOKIE_NAME,
   resolveLiffStateServerRedirect,
@@ -37,6 +38,18 @@ export default function middleware(request: NextRequest) {
       maxAge: 120,
     });
     return response;
+  }
+
+  // The /hosted and /joined trees have no route files left, so their old links
+  // are answered here. This runs before the auth gate so a signed-out visitor
+  // arriving on an old link comes back to the new path after logging in.
+  const legacyTarget = resolveLegacyEventRedirect(request.nextUrl.pathname);
+
+  if (legacyTarget) {
+    return NextResponse.redirect(
+      new URL(`${legacyTarget}${request.nextUrl.search}`, request.url),
+      308,
+    );
   }
 
   const redirectTo = resolveLoginRedirect({
