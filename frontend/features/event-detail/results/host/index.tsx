@@ -17,7 +17,7 @@ import {
   useParticipantsData,
 } from "./hooks";
 
-export default function HostedEventPanelPage() {
+export default function HostResultsView() {
   const params = useParams();
   const eventId = params.eventId as string;
   const t = useTranslations();

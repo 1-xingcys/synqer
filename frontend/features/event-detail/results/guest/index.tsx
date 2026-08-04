@@ -7,13 +7,13 @@ import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
 import { useJoinedEventResults } from "./useJoinedEventResults";
 import { ErrorView } from "./ErrorView";
 
-interface JoinedEventResultsPageProps {
+interface GuestResultsViewProps {
   eventId: string;
 }
 
-export default function JoinedEventResultsPage({
+export default function GuestResultsView({
   eventId,
-}: JoinedEventResultsPageProps) {
+}: GuestResultsViewProps) {
   const tEvent = useTranslations("event");
   const tJoined = useTranslations("joined");
   const {
