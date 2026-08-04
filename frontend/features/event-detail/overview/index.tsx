@@ -11,7 +11,7 @@ import { VotingEndedView } from "./VotingEndedView";
 import { ConfirmedView } from "./ConfirmedView";
 import { CompletedView } from "./CompletedView";
 
-export default function JoinedEventPage() {
+export default function OverviewTab() {
   const params = useParams();
   const eventId = params.eventId as string;
   const tJoined = useTranslations("joined");

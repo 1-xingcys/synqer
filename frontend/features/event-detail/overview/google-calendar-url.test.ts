@@ -2,7 +2,7 @@ import { describe, expect, it } from "@jest/globals";
 import {
   formatGoogleCalendarDate,
   generateGoogleCalendarUrl,
-} from "@/components/joinedEvent/JoinedEventPage/google-calendar-url";
+} from "./google-calendar-url";
 import { wallClock } from "@/lib/time";
 
 describe("formatGoogleCalendarDate", () => {
