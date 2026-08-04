@@ -1,9 +1,9 @@
 "use client";
 
 import { InviteLink } from "./InviteLink";
-import { VotingDeadline } from "./VotingDeadline";
-import { GridDefaultSection, VoteNoticeSection } from "./EventPreference";
-import { DeleteEvent } from "./DeleteEvent";
+import { VotingDeadline } from "./voting-deadline";
+import { GridDefaultSection, VoteNoticeSection } from "./event-preference";
+import { DeleteEvent } from "./delete-event";
 
 export default function SettingsTab() {
   return (
