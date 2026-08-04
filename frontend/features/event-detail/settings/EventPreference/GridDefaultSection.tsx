@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { GridDefaultFields } from "@/features/event-preference/GridDefaultFields";
+import { GridDefaultFields } from "@/features/event-preference/grid-default-fields";
 import { useEventPreference } from "./useEventPreference";
 
 export function GridDefaultSection() {

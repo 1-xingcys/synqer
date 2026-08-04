@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { VoteNoticeFields } from "@/features/event-preference/VoteNoticeFields";
+import { VoteNoticeFields } from "@/features/event-preference/vote-notice-fields";
 import { useEventPreference } from "./useEventPreference";
 
 export function VoteNoticeSection() {
