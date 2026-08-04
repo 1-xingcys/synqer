@@ -1,4 +1,4 @@
-import type { MergedTimeRow } from "@/components/eventCommon/timeGrid/types";
+import type { MergedTimeRow } from "@/features/time-grid/types";
 import { VoteMode, type TimeGranularity, type Weekday } from "@/types/event";
 
 /**

@@ -7,8 +7,8 @@ import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { LoadingState } from "@/components/ui/loading-state";
 import { EventStatus } from "@/types/event";
 import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
-import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
-import { SlotRangeInfo } from "@/components/eventCommon/timeGrid/ResultsView";
+import ResultsView from "@/features/time-grid/ResultsView";
+import { SlotRangeInfo } from "@/features/time-grid/ResultsView";
 import { EventTimeSelector } from "./EventTimeSelector";
 import { EventResultShareButton } from "./EventResultShareButton";
 import {

@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { HostedEventDetailData } from "@/hooks/useHostedEventDetail";
-import { Vote, Participant } from "@/components/eventCommon/timeGrid/types";
+import { Vote, Participant } from "@/features/time-grid/types";
 
 interface UseParticipantsDataReturn {
   participantsWithAvatars: Participant[];

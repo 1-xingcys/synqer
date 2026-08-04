@@ -4,8 +4,8 @@ import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { VoteMode } from "@/types/event";
 import type { TimeGranularity } from "@/types/event";
-import { TimeColumn } from "@/components/eventCommon/timeGrid/ui";
-import { useResponsiveGrid } from "@/components/eventCommon/timeGrid/hooks";
+import { TimeColumn } from "@/features/time-grid/ui";
+import { useResponsiveGrid } from "@/features/time-grid/hooks";
 import { cn } from "@/lib/utils";
 import {
   buildPreviewRows,

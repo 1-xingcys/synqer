@@ -11,7 +11,7 @@ import {
   DateHeader,
   DatePagination,
   TimeColumn,
-} from "@/components/eventCommon/timeGrid/ui";
+} from "@/features/time-grid/ui";
 import { formatMinutesToTime } from "@/lib/time/minuteOfDay";
 import { Z_INDEX } from "@/lib/zIndex";
 import { formatAxisKeyLabel } from "@/lib/event-presentation";

@@ -10,7 +10,7 @@ import {
   normalizeShareVoteToChat,
   toVoteMode,
 } from "@/lib/eventPreference";
-import VotingGrid from "@/components/eventCommon/timeGrid/VotingGrid";
+import VotingGrid from "@/features/time-grid/VotingGrid";
 import { Text } from "@/components/ui/text";
 
 export default function UnifiedVoteTab() {

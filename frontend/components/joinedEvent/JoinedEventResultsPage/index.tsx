@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import ResultsView from "@/components/eventCommon/timeGrid/ResultsView";
+import ResultsView from "@/features/time-grid/ResultsView";
 import { LoadingState } from "@/components/ui/loading-state";
 import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
 import { useJoinedEventResults } from "./useJoinedEventResults";
