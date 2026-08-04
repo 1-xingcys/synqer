@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import UserMenu from "@/components/layout/Header/UserMenu";
+import UserMenu from "@/components/layout/header/UserMenu";
 import Logo from "@/components/layout/Logo";
 
 interface ProtectedHeaderProps {

@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import PublicHeader from "@/components/layout/Header/PublicHeader";
-import Footer from "@/components/layout/Footer";
+import PublicHeader from "@/components/layout/header/PublicHeader";
+import Footer from "@/components/layout/footer";
 import { LiffPathHandler } from "@/components/providers/LiffPathHandler";
 import Image from "next/image";
 

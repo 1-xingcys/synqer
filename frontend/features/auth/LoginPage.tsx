@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import PublicHeader from "@/components/layout/Header/PublicHeader";
-import Footer from "@/components/layout/Footer";
+import PublicHeader from "@/components/layout/header/PublicHeader";
+import Footer from "@/components/layout/footer";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 
 interface LoginPageProps {

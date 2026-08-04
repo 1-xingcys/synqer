@@ -2,8 +2,8 @@
 
 import { ReactNode, useEffect } from "react";
 import { useRouter, usePathname } from "@/i18n/routing";
-import ProtectedHeader from "@/components/layout/Header/ProtectedHeader";
-import { isEventDetailPagePath } from "@/components/layout/Header/pathRules";
+import ProtectedHeader from "@/components/layout/header/ProtectedHeader";
+import { isEventDetailPagePath } from "@/components/layout/header/pathRules";
 import Sidebar from "@/components/layout/Sidebar";
 import { SidebarProvider, useSidebar } from "@/contexts/SidebarContext";
 import { useAuthContext } from "@/contexts/AuthContext";
