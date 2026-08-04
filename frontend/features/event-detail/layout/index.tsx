@@ -3,9 +3,9 @@
 import { ReactNode } from "react";
 import { useParams } from "next/navigation";
 import { useUnifiedEventDetail } from "@/hooks/useUnifiedEventDetail";
-import { UnifiedEventDetailContent } from "./UnifiedEventDetailContent";
+import { EventDetailContent } from "./EventDetailContent";
 
-export default function UnifiedEventDetailLayout({
+export default function EventDetailLayout({
   children,
 }: {
   children: ReactNode;
@@ -15,8 +15,8 @@ export default function UnifiedEventDetailLayout({
   const { isHost } = useUnifiedEventDetail(eventId);
 
   return (
-    <UnifiedEventDetailContent isHost={isHost}>
+    <EventDetailContent isHost={isHost}>
       {children}
-    </UnifiedEventDetailContent>
+    </EventDetailContent>
   );
 }

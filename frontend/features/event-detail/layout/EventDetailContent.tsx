@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import {
   EventDetailNav,
   NavIcons,
-} from "@/components/eventCommon/EventDetailNav";
+} from "./EventDetailNav";
 import { DeletedEventView } from "@/components/event/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
 import { LoadingState } from "@/components/ui/loading-state";
@@ -31,7 +31,7 @@ const OVERVIEW_LABEL_KEY: Record<OverviewStatus, string> = {
   completed: "dashboard.completed",
 };
 
-export function UnifiedEventDetailContent({
+export function EventDetailContent({
   children,
   isHost,
 }: {
