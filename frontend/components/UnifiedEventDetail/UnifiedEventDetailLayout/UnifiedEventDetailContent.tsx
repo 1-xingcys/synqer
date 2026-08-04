@@ -10,7 +10,7 @@ import {
 import { DeletedEventView } from "@/components/event/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
 import { LoadingState } from "@/components/ui/loading-state";
-import EventJoinPage from "@/components/EventJoinPage";
+import EventJoinPage from "@/features/event-join";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { EventStatus } from "@/types/event";
