@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { UserPlus, User } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
-import { EventConfigurationSummary } from "@/components/event/eventInformation/EventConfigurationSummary";
+import { EventConfigurationSummary } from "@/components/event/event-information/EventConfigurationSummary";
 import { formatDateTimeInZone } from "@/lib/time";
 import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 import { EventPublicInfo } from "./useEventJoin";

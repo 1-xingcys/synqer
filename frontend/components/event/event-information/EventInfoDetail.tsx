@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { EventStatusText } from "@/components/event/EventStatusText";
 import { VoteStatusText } from "@/components/event/VoteStatusText";
-import { EventConfigurationSummary } from "@/components/event/eventInformation/EventConfigurationSummary";
+import { EventConfigurationSummary } from "@/components/event/event-information/EventConfigurationSummary";
 import { EventSchedule, EventStatus, EventType } from "@/types/event";
 import type { WallClock } from "@/lib/time";
 
