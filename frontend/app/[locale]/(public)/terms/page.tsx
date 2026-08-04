@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import PublicHeader from "@/components/Header/PublicHeader";
-import Footer from "@/components/Footer";
+import PublicHeader from "@/components/layout/Header/PublicHeader";
+import Footer from "@/components/layout/Footer";
 import { Link } from "@/i18n/routing";
 
 /** Static content with no session and no interaction: prerendered per locale. */

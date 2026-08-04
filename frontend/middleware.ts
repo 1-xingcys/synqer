@@ -5,7 +5,7 @@ import { SESSION_COOKIE_NAME, resolveLoginRedirect } from "./lib/auth-gate";
 import {
   LIFF_ENTRY_COOKIE_NAME,
   resolveLiffStateServerRedirect,
-} from "./lib/liffEntry";
+} from "./components/providers/liffEntry";
 
 const handleIntl = createIntlMiddleware(routing);
 

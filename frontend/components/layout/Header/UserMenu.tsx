@@ -13,8 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
+import ThemeSwitcher from "@/components/layout/ThemeSwitcher";
 import { LogOutIcon } from "lucide-react";
 import { useLiffContext } from "@/contexts/LiffContext";
 import { cn } from "@/lib/utils";

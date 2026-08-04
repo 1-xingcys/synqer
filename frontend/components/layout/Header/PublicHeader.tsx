@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import Logo from "@/components/Logo";
+import Logo from "@/components/layout/Logo";
 import SettingsMenu from "./SettingsMenu";
 
 interface PublicHeaderProps {

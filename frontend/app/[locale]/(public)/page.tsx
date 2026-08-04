@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/routing";
-import PublicHeader from "@/components/Header/PublicHeader";
-import Footer from "@/components/Footer";
-import { LiffPathHandler } from "@/components/LiffPathHandler";
+import PublicHeader from "@/components/layout/Header/PublicHeader";
+import Footer from "@/components/layout/Footer";
+import { LiffPathHandler } from "@/components/providers/LiffPathHandler";
 import Image from "next/image";
 
 // Floating calendar/schedule icon component with animation

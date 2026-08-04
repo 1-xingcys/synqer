@@ -7,8 +7,8 @@ import {
   DropdownMenuContent,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
+import ThemeSwitcher from "@/components/layout/ThemeSwitcher";
 import { SettingsIcon } from "lucide-react";
 
 /**

@@ -11,7 +11,7 @@ import {
 import {
   nextSidebarOpenState,
   type SidebarOpenState,
-} from "@/components/ui/sidebarState";
+} from "@/components/layout/sidebarState";
 
 const DESKTOP_QUERY = "(min-width: 1024px)";
 

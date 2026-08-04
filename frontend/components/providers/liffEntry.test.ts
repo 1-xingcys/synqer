@@ -3,7 +3,7 @@ import {
   hasLoginCallbackParams,
   resolveLiffEntryAction,
   resolveLiffStateServerRedirect,
-} from "@/lib/liffEntry";
+} from "@/components/providers/liffEntry";
 
 const LIFF_ID = "2008737136-VvaKkvyd";
 const ORIGIN = "https://jbro.synqer.club";

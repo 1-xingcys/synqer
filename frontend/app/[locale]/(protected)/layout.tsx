@@ -3,8 +3,8 @@ import { headers } from "next/headers";
 import { matchesLineUserAgent } from "@/lib/auth-gate";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LiffProvider } from "@/contexts/LiffContext";
-import { QueryProvider } from "@/components/QueryProvider";
-import { LiffPathHandler } from "@/components/LiffPathHandler";
+import { QueryProvider } from "@/components/providers/QueryProvider";
+import { LiffPathHandler } from "@/components/providers/LiffPathHandler";
 import ProtectedShell from "./ProtectedShell";
 
 interface ProtectedLayoutProps {

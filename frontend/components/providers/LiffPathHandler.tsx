@@ -6,7 +6,7 @@ import {
   LiffEntryAction,
   resolveLiffEntryAction,
   type LiffEntryDecision,
-} from "@/lib/liffEntry";
+} from "@/components/providers/liffEntry";
 import { getLiffId, initializeLiff, isLineUserAgent } from "@/lib/liff";
 import { LoadingState } from "@/components/ui/loading-state";
 
