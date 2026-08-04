@@ -1,5 +1,5 @@
-import UnifiedOverviewList from "@/components/UnifiedEventsOverview/UnifiedOverviewList";
+import EventListPage from "@/features/event-list";
 
 export default function Page() {
-  return <UnifiedOverviewList status="voting" />;
+  return <EventListPage status="voting" />;
 }

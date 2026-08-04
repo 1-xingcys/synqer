@@ -2,13 +2,13 @@
 
 import { useTranslations } from "next-intl";
 import { useMyEvents } from "@/hooks/useMyEvents";
-import { EventListWithPagination } from "@/components/eventCommon/eventsOverview";
+import EventListWithPagination from "./EventListWithPagination";
 import { LoadingState } from "@/components/ui/loading-state";
 import { eventStatusForOverview, type OverviewStatus } from "@/lib/eventRoutes";
 
 const TRANSLATION_NS = "joinedEvents";
 
-export default function UnifiedOverviewList({
+export default function EventListPage({
   status,
 }: {
   status: OverviewStatus;

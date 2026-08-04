@@ -13,7 +13,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { paginateEvents } from "@/lib/paginateEvents";
+import { paginateEvents } from "./paginateEvents";
 import EmptyState from "./EmptyState";
 import { EventStatus } from "@/types/event";
 
