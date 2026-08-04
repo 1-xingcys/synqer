@@ -1,9 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { EventStatusText } from "@/components/eventCommon/EventStatusText";
-import { VoteStatusText } from "@/components/eventCommon/VoteStatusText";
-import { EventConfigurationSummary } from "@/components/eventCommon/eventInformation/EventConfigurationSummary";
+import { EventStatusText } from "@/components/event/EventStatusText";
+import { VoteStatusText } from "@/components/event/VoteStatusText";
+import { EventConfigurationSummary } from "@/components/event/eventInformation/EventConfigurationSummary";
 import { EventSchedule, EventStatus, EventType } from "@/types/event";
 import type { WallClock } from "@/lib/time";
 

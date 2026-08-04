@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEventJoin } from "./useEventJoin";
 import { ErrorView } from "./ErrorView";
 import { JoinConfirmView } from "./JoinConfirmView";
-import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
+import { DeletedEventView } from "@/components/event/DeletedEventView";
 import { LoadingState } from "@/components/ui/loading-state";
 import { useRouter } from "@/i18n/routing";
 import { EventStatus } from "@/types/event";

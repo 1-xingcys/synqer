@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { CheckCheck, Calendar } from "lucide-react";
-import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
+import { ConfirmedTimeDisplay } from "@/components/event/ConfirmedTimeDisplay";
 import { ConfirmedSelection } from "@/types/event";
 
 interface CompletedViewProps {

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { CalendarCheck, Calendar } from "lucide-react";
-import { ConfirmedTimeDisplay } from "@/components/eventCommon/ConfirmedTimeDisplay";
+import { ConfirmedTimeDisplay } from "@/components/event/ConfirmedTimeDisplay";
 import { AddToCalendarPanel } from "./AddToCalendarPanel";
 import { ConfirmedSelection } from "@/types/event";
 import { isOneTimeConfirmedSelection } from "@/lib/event-time";

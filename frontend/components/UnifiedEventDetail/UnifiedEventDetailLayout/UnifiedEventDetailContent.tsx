@@ -7,7 +7,7 @@ import {
   EventDetailNav,
   NavIcons,
 } from "@/components/eventCommon/EventDetailNav";
-import { DeletedEventView } from "@/components/eventCommon/DeletedEventView";
+import { DeletedEventView } from "@/components/event/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
 import { LoadingState } from "@/components/ui/loading-state";
 import EventJoinPage from "@/components/EventJoinPage";
