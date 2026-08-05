@@ -26,7 +26,8 @@ type ActionTone = "brand" | "neutral" | "success" | "error";
 
 const ACTION_TONE_STYLES: Record<ActionTone, string> = {
   // LINE's own brand green, so the button reads as "this goes to LINE".
-  brand: "bg-[#06C755] text-white hover:bg-[#05B34C]",
+  brand:
+    "bg-[#06C755] text-white hover:bg-[#05B34C] dark:bg-[#0A7B39] dark:hover:bg-[#0F9B4A]",
   neutral:
     "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white",
   success: "bg-emerald-600 text-white hover:bg-emerald-700",
