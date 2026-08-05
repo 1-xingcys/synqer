@@ -291,11 +291,9 @@
     "untitledEvent": "未命名活動",
     "addToCalendar": {
       "title": "加入 Google 日曆",
-      "description": "將活動時間儲存到你的日曆",
       "add": "加入",
       "addAll": "全部加入",
-      "addAllShort": "全部",
-      "hint": "將在新分頁中開啟 Google 日曆"
+      "addAllShort": "全部"
     },
     "completed": {
       "title": "活動已結束"
