@@ -182,7 +182,7 @@ export function ResultsGridToolsMenu({
             }`}
           >
             <Share2 className="w-4 h-4" />
-            <span>{tJoined("results.shareViaSystem")}</span>
+            <span>{tJoined("results.shareCurrentView")}</span>
           </button>
         </div>
       )}

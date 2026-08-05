@@ -198,7 +198,8 @@
       "copyLinkTitle": "複製目前篩選結果的連結",
       "linkCopied": "已複製！",
       "shareModalTitle": "分享目前篩選結果",
-      "shareViaSystem": "分享"
+      "shareViaSystem": "分享",
+      "shareCurrentView": "分享目前篩選結果"
     },
     "viewResultsDescription": "查看時段分析",
     "notParticipant": {

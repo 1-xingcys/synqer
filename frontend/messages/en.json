@@ -198,7 +198,8 @@
       "copyLinkTitle": "Copy shareable link with current filter",
       "linkCopied": "Copied!",
       "shareModalTitle": "Share current filtered results",
-      "shareViaSystem": "Share"
+      "shareViaSystem": "Share",
+      "shareCurrentView": "Share current filtered results"
     },
     "viewResultsDescription": "View availability analysis",
     "notParticipant": {
