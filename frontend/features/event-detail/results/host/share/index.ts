@@ -1,0 +1,1 @@
+export { EventResultShareButton } from "./EventResultShareButton";

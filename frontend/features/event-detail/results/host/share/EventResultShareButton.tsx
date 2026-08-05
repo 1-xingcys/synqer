@@ -12,7 +12,7 @@ import {
   useHostedEventResultShare,
 } from "./hooks";
 import { EventResultShareModal } from "./EventResultShareModal";
-import type { EventSlot } from "./types";
+import type { EventSlot } from "../types";
 
 interface EventResultShareButtonProps {
   eventId: string;
