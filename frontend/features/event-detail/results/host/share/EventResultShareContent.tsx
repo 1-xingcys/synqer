@@ -30,8 +30,12 @@ const ACTION_TONE_STYLES: Record<ActionTone, string> = {
     "bg-[#06C755] text-white hover:bg-[#05B34C] dark:bg-[#0A7B39] dark:hover:bg-[#0F9B4A]",
   neutral:
     "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white",
-  success: "bg-emerald-600 text-white hover:bg-emerald-700",
-  error: "bg-rose-600 text-white hover:bg-rose-700",
+  // Same reasoning as brand: the light-mode fills glare on a dark sheet, and
+  // hover goes lighter than rest in dark mode rather than darker.
+  success:
+    "bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600",
+  error:
+    "bg-rose-600 text-white hover:bg-rose-700 dark:bg-rose-700 dark:hover:bg-rose-600",
 };
 
 interface EventResultShareContentProps {
