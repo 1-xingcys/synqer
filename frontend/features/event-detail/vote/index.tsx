@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { EventStatus } from "@/types/event";
 import {
@@ -17,7 +17,7 @@ export default function VoteTab() {
   const params = useParams();
   const eventId = params.eventId as string;
   const tJoined = useTranslations("joined");
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const { data } = useEventDetail(eventId);
 
   if (!data || !user) return null;

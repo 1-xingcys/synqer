@@ -6,7 +6,7 @@ import ProtectedHeader from "@/components/layout/header/ProtectedHeader";
 import { isEventDetailPagePath } from "@/components/layout/header/pathRules";
 import Sidebar from "@/components/layout/Sidebar";
 import { SidebarProvider, useSidebar } from "@/contexts/SidebarContext";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { SESSION_EXPIRED_PARAM } from "@/lib/auth-gate";
 
 interface ProtectedShellProps {
@@ -53,7 +53,7 @@ function ProtectedShellContent({ children }: ProtectedShellProps) {
 export default function ProtectedShell({ children }: ProtectedShellProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, loading } = useAuthContext();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {

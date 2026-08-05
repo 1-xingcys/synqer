@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import {
   useLineGroups,
   useLineGroupMembers,
@@ -41,7 +41,7 @@ export function LineGroupSection({
   onOpenInfo,
 }: LineGroupSectionProps) {
   const t = useTranslations();
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const { groups, loading: groupsLoading } = useLineGroups();
   const { members, loading: membersLoading } =
     useLineGroupMembers(selectedGroupId);

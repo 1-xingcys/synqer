@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { headers } from "next/headers";
 import { matchesLineUserAgent } from "@/lib/auth-gate";
-import { AuthProvider } from "@/contexts/AuthContext";
 import { LiffProvider } from "@/contexts/LiffContext";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { LiffPathHandler } from "@/components/providers/LiffPathHandler";
@@ -30,9 +29,7 @@ export default async function ProtectedLayout({
     <QueryProvider>
       <LiffProvider>
         <LiffPathHandler isLineClient={isLineClient}>
-          <AuthProvider>
-            <ProtectedShell>{children}</ProtectedShell>
-          </AuthProvider>
+          <ProtectedShell>{children}</ProtectedShell>
         </LiffPathHandler>
       </LiffProvider>
     </QueryProvider>

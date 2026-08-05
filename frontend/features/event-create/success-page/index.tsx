@@ -7,7 +7,7 @@ import { useRouter } from "@/i18n/routing";
 import { useLiffContext } from "@/contexts/LiffContext";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { useEventDetail } from "@/hooks/useEventDetail";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { DEFAULT_OVERVIEW_PATH, eventDetailPath } from "@/lib/eventRoutes";
 import {
   shareEventFlexMessage,
@@ -33,7 +33,7 @@ export default function CreateEventSuccessPage() {
   const eventId = params.eventId;
   const t = useTranslations("createEvent.success");
   const router = useRouter();
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const { isInClient: isInLiff, isInitialized: liffInitialized } =
     useLiffContext();
   const { copied: linkCopied, copyLink: handleCopyLink } =

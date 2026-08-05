@@ -1,4 +1,3 @@
-import { useCallback, useRef, type MutableRefObject } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/apiClient";
 import type { LiffLoginRequest, LiffLoginResponse, User } from "@/types/auth";
@@ -14,14 +13,22 @@ export const authKeys = {
 };
 
 /**
+ * Whether this document has already run the LIFF handshake.
+ *
+ * Module scope rather than a ref: every caller of useAuth observes the same
+ * ["auth", "me"] query, and react-query runs whichever observer registered its
+ * queryFn last. A per-instance ref would tie "only try LIFF once" to whichever
+ * component happened to render most recently.
+ */
+let liffAttempted = false;
+
+/**
  * Resolve the current session.
  * Returns the user when authenticated, or null when not.
  * May navigate the browser away (LIFF login redirect); in that case the
  * promise stays pending until the page unloads, keeping the query loading.
  */
-async function resolveSession(
-  liffAttemptedRef: MutableRefObject<boolean>,
-): Promise<User | null> {
+async function resolveSession(): Promise<User | null> {
   const response = await apiFetch("/auth/me");
 
   if (response.ok) {
@@ -29,10 +36,10 @@ async function resolveSession(
     return userData;
   }
 
-  if (liffAttemptedRef.current || !isLiffEnabled()) {
+  if (liffAttempted || !isLiffEnabled()) {
     return null;
   }
-  liffAttemptedRef.current = true;
+  liffAttempted = true;
 
   const liffState = await initializeLiff();
 
@@ -74,17 +81,34 @@ async function resolveSession(
   return null;
 }
 
+/**
+ * The current session.
+ *
+ * Safe to call from as many components as need it: they all observe the one
+ * ["auth", "me"] query, so the cache — not a context — is what keeps them on
+ * the same answer, and react-query only re-renders the ones whose slice of the
+ * result actually changed.
+ */
 export function useAuth() {
-  const liffAttemptedRef = useRef(false);
-
   const query = useQuery({
     queryKey: authKeys.me,
-    queryFn: () => resolveSession(liffAttemptedRef),
+    queryFn: resolveSession,
     retry: false,
     staleTime: Infinity,
   });
 
-  const logoutMutation = useMutation({
+  const user = query.data ?? null;
+
+  return {
+    user,
+    loading: query.isLoading,
+    isAuthenticated: !!user,
+  };
+}
+
+/** Ends the session and sends the browser to /login. */
+export function useLogout(): () => void {
+  const { mutate } = useMutation({
     mutationFn: async () => {
       await apiFetch("/auth/logout", { method: "POST" });
     },
@@ -99,25 +123,5 @@ export function useAuth() {
     },
   });
 
-  const refetch = useCallback(async () => {
-    await query.refetch();
-  }, [query]);
-
-  const logout = useCallback(async () => {
-    try {
-      await logoutMutation.mutateAsync();
-    } catch {
-      // ignore error
-    }
-  }, [logoutMutation]);
-
-  const user = query.data ?? null;
-
-  return {
-    user,
-    loading: query.isLoading,
-    refetch,
-    logout,
-    isAuthenticated: !!user,
-  };
+  return mutate;
 }

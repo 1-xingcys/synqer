@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { EventStatus, supportsAddToCalendar } from "@/types/event";
 import { EventInfoDetail } from "@/components/event/event-information/EventInfoDetail";
@@ -15,7 +15,7 @@ export default function OverviewTab() {
   const params = useParams();
   const eventId = params.eventId as string;
   const tJoined = useTranslations("joined");
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const { data: eventDetailData } = useEventDetail(eventId);
 
   // Loading and error states are handled by the layout

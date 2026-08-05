@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth, useLogout } from "@/hooks/useAuth";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -21,7 +21,8 @@ import { cn } from "@/lib/utils";
 
 export default function UserMenu() {
   const t = useTranslations();
-  const { user, loading, logout } = useAuthContext();
+  const { user, loading } = useAuth();
+  const logout = useLogout();
   const { isInClient: isInLiff } = useLiffContext();
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -89,7 +90,7 @@ export default function UserMenu() {
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => void logout()}
+              onClick={() => logout()}
               variant="destructive"
               className="cursor-pointer"
             >

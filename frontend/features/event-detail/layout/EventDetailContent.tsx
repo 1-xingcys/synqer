@@ -9,7 +9,7 @@ import { BackButton } from "@/components/ui/BackButton";
 import { LoadingState } from "@/components/ui/loading-state";
 import EventJoinPage from "@/features/event-join";
 import { useEventDetail } from "@/hooks/useEventDetail";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { EventStatus } from "@/types/event";
 import { Z_INDEX } from "@/lib/zIndex";
 import { Crown } from "lucide-react";
@@ -39,7 +39,7 @@ export function EventDetailContent({
   const t = useTranslations();
   const eventId = params.eventId as string;
   const { data, isLoading } = useEventDetail(eventId);
-  const { user, loading: authLoading } = useAuthContext();
+  const { user, loading: authLoading } = useAuth();
 
   if (isLoading || authLoading) {
     return <LoadingState label={t("common.loading")} viewport="section" />;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +27,7 @@ import type { EventType } from "@/types/event";
 
 export function GeneralSection() {
   const t = useTranslations();
-  const { user, loading: authLoading } = useAuthContext();
+  const { user, loading: authLoading } = useAuth();
   const { isInClient: isInLiff } = useLiffContext();
   const [showLineGroupInfoModal, setShowLineGroupInfoModal] = useState(false);
 
