@@ -12,7 +12,6 @@ interface EventResultShareModalProps {
   isOpen: boolean;
   onClose: () => void;
   canNativeShareResultText: boolean;
-  resultTextShareStatus: "idle" | "sending" | "success" | "error";
   resultTextCopied: boolean;
   onShareResultText: () => Promise<boolean> | boolean;
   showShareToLineOption: boolean;
@@ -30,7 +29,6 @@ export function EventResultShareModal({
   isOpen,
   onClose,
   canNativeShareResultText,
-  resultTextShareStatus,
   resultTextCopied,
   onShareResultText,
   showShareToLineOption,
@@ -41,8 +39,6 @@ export function EventResultShareModal({
   const tEventInfo = useTranslations("eventInfo");
 
   const handleShareResultTextClick = async () => {
-    if (resultTextShareStatus === "sending") return;
-
     const didShare = await onShareResultText();
     if (didShare && canNativeShareResultText) {
       onClose();
@@ -58,9 +54,13 @@ export function EventResultShareModal({
     }
   };
 
-  const resultTextAction: ShareActionViewState = (() => {
-    if (!canNativeShareResultText) {
-      return {
+  const resultTextAction: ShareActionViewState = canNativeShareResultText
+    ? {
+        icon: <Share className="h-4 w-4" />,
+        label: tEventInfo("shareResultText"),
+        tone: "default",
+      }
+    : {
         icon: resultTextCopied ? (
           <CheckCheck className="h-4 w-4" />
         ) : (
@@ -71,38 +71,6 @@ export function EventResultShareModal({
           : tEventInfo("copyResultText"),
         tone: resultTextCopied ? "success" : "default",
       };
-    }
-
-    if (resultTextShareStatus === "sending") {
-      return {
-        icon: <Loader2 className="h-4 w-4 animate-spin" />,
-        label: tEventInfo("sharingResultText"),
-        tone: "default",
-      };
-    }
-
-    if (resultTextShareStatus === "success") {
-      return {
-        icon: <CheckCheck className="h-4 w-4" />,
-        label: tEventInfo("resultTextShared"),
-        tone: "success",
-      };
-    }
-
-    if (resultTextShareStatus === "error") {
-      return {
-        icon: <Share className="h-4 w-4" />,
-        label: tEventInfo("shareResultTextFailed"),
-        tone: "error",
-      };
-    }
-
-    return {
-      icon: <Share className="h-4 w-4" />,
-      label: tEventInfo("shareResultText"),
-      tone: "default",
-    };
-  })();
 
   const lineShareAction: ShareActionViewState = (() => {
     if (lineShareStatus === "sending") {
@@ -147,7 +115,6 @@ export function EventResultShareModal({
         icon={resultTextAction.icon}
         label={resultTextAction.label}
         tone={resultTextAction.tone}
-        disabled={resultTextShareStatus === "sending"}
         onClick={() => void handleShareResultTextClick()}
       />
 

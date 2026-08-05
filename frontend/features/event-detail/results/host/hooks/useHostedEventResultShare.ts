@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useLiffContext } from "@/contexts/LiffContext";
 import {
@@ -30,16 +30,6 @@ const LineShareStatus = {
 
 type LineShareStatus = (typeof LineShareStatus)[keyof typeof LineShareStatus];
 
-const ResultTextShareStatus = {
-  Idle: "idle",
-  Sending: "sending",
-  Success: "success",
-  Error: "error",
-} as const;
-
-type ResultTextShareStatus =
-  (typeof ResultTextShareStatus)[keyof typeof ResultTextShareStatus];
-
 export function useHostedEventResultShare(opts: {
   eventId: string;
   eventTitle: string;
@@ -54,8 +44,10 @@ export function useHostedEventResultShare(opts: {
   const { isInClient: isInLiffClient, isInitialized: isLiffInitialized } =
     useLiffContext();
   const canNativeShareResultText = canShareHostedEventResultText();
-  const [resultTextShareStatus, setResultTextShareStatus] =
-    useState<ResultTextShareStatus>(ResultTextShareStatus.Idle);
+  // The native share sheet is modal and reports its own progress, so this only
+  // needs to stop a second call while one is open. A ref, not state: nothing
+  // renders it.
+  const isSharingResultText = useRef(false);
   const [lineShareStatus, setLineShareStatus] = useState<LineShareStatus>(
     LineShareStatus.Idle,
   );
@@ -93,31 +85,18 @@ export function useHostedEventResultShare(opts: {
     if (!resultText) return false;
 
     if (!canNativeShareResultText) {
-      const copied = await copyResultText(resultText);
-      setResultTextShareStatus(
-        copied ? ResultTextShareStatus.Success : ResultTextShareStatus.Error,
-      );
-      return copied;
+      return await copyResultText(resultText);
     }
 
-    setResultTextShareStatus(ResultTextShareStatus.Sending);
+    if (isSharingResultText.current) return false;
+    isSharingResultText.current = true;
 
-    const result = await shareHostedEventResultText({
-      text: resultText,
-    });
-
-    if (result === TextShareResult.Success) {
-      setResultTextShareStatus(ResultTextShareStatus.Success);
-      return true;
+    try {
+      const result = await shareHostedEventResultText({ text: resultText });
+      return result === TextShareResult.Success;
+    } finally {
+      isSharingResultText.current = false;
     }
-
-    if (result === TextShareResult.Cancelled) {
-      setResultTextShareStatus(ResultTextShareStatus.Idle);
-      return false;
-    }
-
-    setResultTextShareStatus(ResultTextShareStatus.Error);
-    return false;
   };
 
   const handleShareResultToLine = async () => {
@@ -151,7 +130,6 @@ export function useHostedEventResultShare(opts: {
   return {
     canShareResult,
     canNativeShareResultText,
-    resultTextShareStatus,
     resultTextCopied,
     lineShareStatus,
     canShareResultToLine,

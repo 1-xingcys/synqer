@@ -45,7 +45,6 @@ export function EventResultShareButton({
   const {
     canShareResult,
     canNativeShareResultText,
-    resultTextShareStatus,
     resultTextCopied,
     lineShareStatus,
     canShareResultToLine,
@@ -92,7 +91,6 @@ export function EventResultShareButton({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         canNativeShareResultText={canNativeShareResultText}
-        resultTextShareStatus={resultTextShareStatus}
         resultTextCopied={resultTextCopied}
         onShareResultText={handleShareResultText}
         showShareToLineOption={canShareResultToLine}
