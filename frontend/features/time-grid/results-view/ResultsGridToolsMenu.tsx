@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, Copy, Share, Share2, X } from "lucide-react";
-import { createPortal } from "react-dom";
 import type { TimeGranularity } from "@/types/event";
+import { ShareOption, ShareSheet } from "@/components/ui/ShareSheet";
 import { ResultsAvailabilityMode } from "./types";
 import { Z_INDEX } from "@/lib/zIndex";
 
@@ -55,25 +55,6 @@ export function ResultsGridToolsMenu({
     }
   }, [open]);
 
-  useEffect(() => {
-    if (!isShareModalOpen) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsShareModalOpen(false);
-      }
-    };
-
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [isShareModalOpen]);
-
   const openShareModal = () => {
     setOpen(false);
     setIsShareModalOpen(true);
@@ -84,7 +65,6 @@ export function ResultsGridToolsMenu({
     try {
       await navigator.share({
         title: tJoined("results.shareModalTitle"),
-        text: tJoined("results.shareModalHint"),
         url: getShareableLink(),
       });
       setIsShareModalOpen(false);
@@ -202,80 +182,41 @@ export function ResultsGridToolsMenu({
             }`}
           >
             <Share2 className="w-4 h-4" />
-            <span>{tJoined("results.shareViaSystem")}</span>
+            <span>{tJoined("results.shareCurrentView")}</span>
           </button>
         </div>
       )}
 
-      {typeof window !== "undefined" &&
-        isShareModalOpen &&
-        createPortal(
-          <>
-            <div
-              className={`fixed inset-0 ${Z_INDEX.MODAL_BACKDROP} bg-black/55 backdrop-blur-sm animate-in fade-in duration-200`}
-              onClick={() => setIsShareModalOpen(false)}
-            />
-            <div
-              className={`fixed ${Z_INDEX.MODAL_CONTENT} inset-x-4 bottom-4 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:max-w-md sm:w-full animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-300`}
-            >
-              <div className="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white/95 dark:bg-zinc-900/95 shadow-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-zinc-200 dark:border-zinc-700 bg-zinc-50/80 dark:bg-zinc-800/60">
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                      {tJoined("results.shareModalTitle")}
-                    </h3>
-                    <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-                      {tJoined("results.shareModalHint")}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setIsShareModalOpen(false)}
-                    className="w-8 h-8 rounded-lg bg-white/90 dark:bg-zinc-800/90 text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors items-center justify-center flex"
-                    aria-label={tJoined("results.close")}
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
+      <ShareSheet
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        title={tJoined("results.shareModalTitle")}
+        closeLabel={tJoined("results.close")}
+      >
+        <ShareOption
+          icon={
+            linkCopied ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <Copy className="w-4 h-4" />
+            )
+          }
+          label={
+            linkCopied
+              ? tJoined("results.linkCopied")
+              : tJoined("results.copyLink")
+          }
+          tone={linkCopied ? "success" : "default"}
+          onClick={onCopyShareLink}
+        />
 
-                <div className="p-4 space-y-2">
-                  <button
-                    onClick={onCopyShareLink}
-                    className={`w-full px-3 py-2 rounded-lg text-left text-sm flex items-center gap-2 border transition-colors ${
-                      linkCopied
-                        ? "text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800"
-                        : "text-zinc-700 dark:text-zinc-200 bg-white dark:bg-zinc-800/70 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700/70"
-                    }`}
-                  >
-                    {linkCopied ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                    <span>
-                      {linkCopied
-                        ? tJoined("results.linkCopied")
-                        : tJoined("results.copyLink")}
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => void handleWebShare()}
-                    disabled={!canWebShare}
-                    className={`w-full px-3 py-2 rounded-lg text-left text-sm flex items-center gap-2 border transition-colors ${
-                      canWebShare
-                        ? "text-zinc-700 dark:text-zinc-200 bg-white dark:bg-zinc-800/70 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700/70"
-                        : "text-zinc-400 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 cursor-not-allowed"
-                    }`}
-                  >
-                    <Share className="w-4 h-4" />
-                    <span>{tJoined("results.shareViaSystem")}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </>,
-          document.body,
-        )}
+        <ShareOption
+          icon={<Share className="w-4 h-4" />}
+          label={tJoined("results.shareViaSystem")}
+          disabled={!canWebShare}
+          onClick={() => void handleWebShare()}
+        />
+      </ShareSheet>
     </div>
   );
 }

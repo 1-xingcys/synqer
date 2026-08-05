@@ -154,7 +154,7 @@ export function EventTimeSelector({
       {/* Header */}
       <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">
+          <h3 className="min-w-0 truncate font-semibold text-zinc-900 dark:text-zinc-100">
             {tHosted("eventTimeSelector.title")}
           </h3>
           <div className="flex items-center gap-2">

@@ -198,8 +198,8 @@
       "copyLinkTitle": "複製目前篩選結果的連結",
       "linkCopied": "已複製！",
       "shareModalTitle": "分享目前篩選結果",
-      "shareModalHint": "分享此連結，其他人可開啟相同的篩選視圖。",
-      "shareViaSystem": "分享"
+      "shareViaSystem": "分享",
+      "shareCurrentView": "分享目前篩選結果"
     },
     "viewResultsDescription": "查看時段分析",
     "notParticipant": {
@@ -609,22 +609,19 @@
     "copyVoteLink": "投票連結",
     "shareResult": "分享結果",
     "shareResultTitle": "分享已確認結果",
-    "shareResultHint": "選擇要分享已確認結果的方式。",
     "shareResultText": "分享結果文字",
-    "shareResultTextHint": "分享結果文字，方便追蹤請假原因",
-    "sharingResultText": "正在分享結果文字",
-    "resultTextShared": "結果文字已分享",
-    "shareResultTextFailed": "分享結果文字失敗",
-    "shareResultTextFailedHint": "無法開啟系統分享面板，請稍後再試",
     "copyResultText": "複製結果文字",
-    "copyResultTextHint": "複製可貼到聊天室或群組的純文字內容",
     "resultTextCopied": "結果文字已複製",
     "shareToLine": "分享到 LINE",
-    "shareToLineHint": "分享結果卡片到 LINE 聊天室",
     "sharingToLine": "正在分享到 LINE",
     "sharedToLine": "已分享到 LINE",
     "shareToLineFailed": "分享到 LINE 失敗",
-    "shareToLineFailedHint": "無法分享 Flex 卡片，請稍後再試",
+    "sharePreview": {
+      "tabsLabel": "選擇分享形式",
+      "lineTab": "LINE 訊息",
+      "textTab": "文字",
+      "flexAria": "LINE 訊息預覽"
+    },
     "resultText": {
       "title": "【投票結果】",
       "event": "活動：{eventTitle}",

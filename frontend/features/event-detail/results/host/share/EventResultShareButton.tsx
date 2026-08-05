@@ -12,7 +12,7 @@ import {
   useHostedEventResultShare,
 } from "./hooks";
 import { EventResultShareModal } from "./EventResultShareModal";
-import type { EventSlot } from "./types";
+import type { EventSlot } from "../types";
 
 interface EventResultShareButtonProps {
   eventId: string;
@@ -45,7 +45,8 @@ export function EventResultShareButton({
   const {
     canShareResult,
     canNativeShareResultText,
-    resultTextShareStatus,
+    resultText,
+    resultSummary,
     resultTextCopied,
     lineShareStatus,
     canShareResultToLine,
@@ -81,18 +82,21 @@ export function EventResultShareButton({
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/35"
+        className="inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/35"
         title={tEventInfo("shareResult")}
-        aria-label={tEventInfo("shareResult")}
       >
-        <Share2 className="h-4 w-4" />
+        <Share2 className="h-4 w-4 shrink-0" />
+        {tEventInfo("shareResult")}
       </button>
 
       <EventResultShareModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        eventTitle={eventTitle}
+        locale={locale}
+        resultText={resultText}
+        resultSummary={resultSummary}
         canNativeShareResultText={canNativeShareResultText}
-        resultTextShareStatus={resultTextShareStatus}
         resultTextCopied={resultTextCopied}
         onShareResultText={handleShareResultText}
         showShareToLineOption={canShareResultToLine}

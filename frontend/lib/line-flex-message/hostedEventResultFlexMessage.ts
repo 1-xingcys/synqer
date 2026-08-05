@@ -11,7 +11,7 @@ type HostedEventResultFlexMessageInfo = {
   locale: string;
 };
 
-type HostedEventResultFlexCopy = {
+export type HostedEventResultFlexCopy = {
   titlePrefix: string;
   untitledEvent: string;
   unavailableLabel: string;
@@ -21,7 +21,12 @@ type HostedEventResultFlexCopy = {
 
 const MAX_FLEX_MESSAGE_BYTES = 28 * 1024;
 
-function getHostedEventResultFlexCopy(
+/**
+ * Exported so the in-app preview renders the same words LINE receives. The
+ * preview replicates the bubble's layout by hand; sharing the copy and the
+ * palette below is what keeps the two from saying different things.
+ */
+export function getHostedEventResultFlexCopy(
   locale: string,
 ): HostedEventResultFlexCopy {
   if (locale === "zh-TW") {
@@ -62,7 +67,10 @@ function buildEventResultUrl(eventId: string, locale: string): string {
   return new URL(`https://liff.line.me/${liffId}${resultPath}`).toString();
 }
 
-function getAttendanceTextColor(availableCount: number, totalExpected: number) {
+export function getAttendanceTextColor(
+  availableCount: number,
+  totalExpected: number,
+) {
   if (totalExpected <= 0) return "#6B7280";
 
   const percentage = (availableCount / totalExpected) * 100;
@@ -71,7 +79,7 @@ function getAttendanceTextColor(availableCount: number, totalExpected: number) {
   return "#B96868";
 }
 
-function getAttendanceBarColors(
+export function getAttendanceBarColors(
   availableCount: number,
   totalExpected: number,
 ): { fill: string; track: string } {

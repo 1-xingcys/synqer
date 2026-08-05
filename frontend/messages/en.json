@@ -198,8 +198,8 @@
       "copyLinkTitle": "Copy shareable link with current filter",
       "linkCopied": "Copied!",
       "shareModalTitle": "Share current filtered results",
-      "shareModalHint": "Share this link so others can open the same filtered view.",
-      "shareViaSystem": "Share"
+      "shareViaSystem": "Share",
+      "shareCurrentView": "Share current filtered results"
     },
     "viewResultsDescription": "View availability analysis",
     "notParticipant": {
@@ -609,22 +609,19 @@
     "copyVoteLink": "Vote Link",
     "shareResult": "Share result",
     "shareResultTitle": "Share confirmed result",
-    "shareResultHint": "Choose how to share the confirmed result.",
     "shareResultText": "Share result text",
-    "shareResultTextHint": "Share the result as text to make absence reasons easier to track",
-    "sharingResultText": "Sharing result text",
-    "resultTextShared": "Result text shared",
-    "shareResultTextFailed": "Failed to share result text",
-    "shareResultTextFailedHint": "Unable to open the system share sheet. Please try again.",
     "copyResultText": "Copy result text",
-    "copyResultTextHint": "Copy plain text you can paste into a chat or group",
     "resultTextCopied": "Result text copied",
     "shareToLine": "Share to LINE",
-    "shareToLineHint": "Share the result card to a LINE chat",
     "sharingToLine": "Sharing to LINE",
     "sharedToLine": "Shared to LINE",
     "shareToLineFailed": "Failed to share to LINE",
-    "shareToLineFailedHint": "Unable to share the Flex card. Please try again.",
+    "sharePreview": {
+      "tabsLabel": "Choose share format",
+      "lineTab": "LINE message",
+      "textTab": "Plain text",
+      "flexAria": "LINE message preview"
+    },
     "resultText": {
       "title": "[Poll Results]",
       "event": "Event: {eventTitle}",

@@ -10,7 +10,7 @@ import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
 import ResultsView from "@/features/time-grid/results-view";
 import { SlotRangeInfo } from "@/features/time-grid/results-view";
 import { EventTimeSelector } from "./EventTimeSelector";
-import { EventResultShareButton } from "./EventResultShareButton";
+import { EventResultShareButton } from "./share";
 import {
   useEventTimeSelection,
   useEventTimeConfirmation,
