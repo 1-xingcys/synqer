@@ -615,6 +615,12 @@
     "sharingToLine": "Sharing to LINE",
     "sharedToLine": "Shared to LINE",
     "shareToLineFailed": "Failed to share to LINE",
+    "sharePreview": {
+      "tabsLabel": "Choose share format",
+      "lineTab": "LINE message",
+      "textTab": "Plain text",
+      "flexAria": "LINE message preview"
+    },
     "resultText": {
       "title": "[Poll Results]",
       "event": "Event: {eventTitle}",

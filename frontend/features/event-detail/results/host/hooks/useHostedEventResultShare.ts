@@ -69,19 +69,18 @@ export function useHostedEventResultShare(opts: {
   const canShareResultToLine =
     canShareResult && isInLiffClient && isLiffInitialized;
 
-  const buildResultText = () => {
-    if (!resultSummary) return "";
-
-    return buildHostedEventResultTextFromSummary({
-      eventTitle: opts.eventTitle,
-      summary: resultSummary,
-      locale: opts.locale,
-      copy: opts.copy,
-    });
-  };
+  // Built up front rather than inside the handler: the share modal previews
+  // the very same string it is about to send.
+  const resultText = resultSummary
+    ? buildHostedEventResultTextFromSummary({
+        eventTitle: opts.eventTitle,
+        summary: resultSummary,
+        locale: opts.locale,
+        copy: opts.copy,
+      })
+    : "";
 
   const handleShareResultText = async () => {
-    const resultText = buildResultText();
     if (!resultText) return false;
 
     if (!canNativeShareResultText) {
@@ -130,6 +129,8 @@ export function useHostedEventResultShare(opts: {
   return {
     canShareResult,
     canNativeShareResultText,
+    resultText,
+    resultSummary,
     resultTextCopied,
     lineShareStatus,
     canShareResultToLine,

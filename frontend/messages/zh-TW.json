@@ -615,6 +615,12 @@
     "sharingToLine": "正在分享到 LINE",
     "sharedToLine": "已分享到 LINE",
     "shareToLineFailed": "分享到 LINE 失敗",
+    "sharePreview": {
+      "tabsLabel": "選擇分享形式",
+      "lineTab": "LINE 訊息",
+      "textTab": "文字",
+      "flexAria": "LINE 訊息預覽"
+    },
     "resultText": {
       "title": "【投票結果】",
       "event": "活動：{eventTitle}",
