@@ -1,5 +1,5 @@
 import { useCallback, useRef, type MutableRefObject } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/apiClient";
 import type { LiffLoginRequest, LiffLoginResponse, User } from "@/types/auth";
 import {
@@ -75,7 +75,6 @@ async function resolveSession(
 }
 
 export function useAuth() {
-  const queryClient = useQueryClient();
   const liffAttemptedRef = useRef(false);
 
   const query = useQuery({
@@ -90,7 +89,12 @@ export function useAuth() {
       await apiFetch("/auth/logout", { method: "POST" });
     },
     onSuccess: () => {
-      queryClient.setQueryData(authKeys.me, null);
+      // A full reload, deliberately without clearing the auth cache first.
+      // The cookie is gone, so middleware answers the next document with
+      // /login. Emptying the cache here instead would leave *this* document
+      // rendering a signed-out tree for as long as the reload takes — long
+      // enough for ProtectedShell to start its own redirect and for protected
+      // queries to refetch into a 401.
       window.location.reload();
     },
   });
