@@ -291,11 +291,9 @@
     "untitledEvent": "Untitled Event",
     "addToCalendar": {
       "title": "Add to Google Calendar",
-      "description": "Save the event time to your calendar",
       "add": "Add",
       "addAll": "Add All",
-      "addAllShort": "All",
-      "hint": "Opens Google Calendar in a new tab"
+      "addAllShort": "All"
     },
     "completed": {
       "title": "Event Completed"
