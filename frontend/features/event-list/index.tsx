@@ -16,6 +16,13 @@ export default function EventListPage({ status }: { status: OverviewStatus }) {
 
   const filtered = events.filter((e) => e.status === category);
 
+  // `loading` is only true on the very first fetch, so a failed *background*
+  // refetch would otherwise replace a perfectly good list with an error — most
+  // visibly on logout, where the refetch can only 401 once the cookie is gone.
+  // Cached events stay on screen; the error is for when there is nothing else
+  // to show.
+  const showError = error !== null && events.length === 0;
+
   return (
     <div className="space-y-6">
       <div>
@@ -29,7 +36,7 @@ export default function EventListPage({ status }: { status: OverviewStatus }) {
 
       {loading ? (
         <LoadingState label={t("loading")} spinnerTone="neutral" />
-      ) : error ? (
+      ) : showError ? (
         <div className="flex items-center justify-center min-h-[40vh]">
           <p className="text-red-600 dark:text-red-400">{error}</p>
         </div>
