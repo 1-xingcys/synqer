@@ -43,7 +43,6 @@ interface UseOptimisticVotingReturn {
     voteMode: VoteMode,
   ) => void;
   commitStagedVotes: () => void;
-  isPatchPending: boolean;
   isCommitPending: boolean;
   isPending: boolean;
 }
@@ -242,7 +241,6 @@ export function useOptimisticVoting({
     commitFeedback,
     updateStagedVotes,
     commitStagedVotes,
-    isPatchPending: patchMutation.isPending,
     isCommitPending: commitMutation.isPending,
     isPending: patchMutation.isPending || commitMutation.isPending,
   };

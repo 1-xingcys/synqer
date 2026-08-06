@@ -4,6 +4,8 @@ import { eventDetailKeys, type EventDetailData } from "@/hooks/useEventDetail";
 import { VoteMode } from "@/types/event";
 import {
   createPatchStagedVotesMutationOptions,
+  stagedVoteMutationKey,
+  stagedVoteMutationScope,
   type PatchStagedVotesVariables,
 } from "./stagedVoteMutations";
 import { patchStagedVotesApi } from "./votingApi";
@@ -124,6 +126,48 @@ describe("createPatchStagedVotesMutationOptions", () => {
     await flush();
 
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("runs a commit fired mid-burst after every queued patch", async () => {
+    // This is what lets the confirm button stay enabled while cell edits are
+    // still going out: the queue, not a disabled attribute, is what stops a
+    // commit from overtaking a draft the server has not received yet.
+    const order: string[] = [];
+    const first = deferred<PatchResponse>();
+    const second = deferred<PatchResponse>();
+    patchStagedVotesApiMock.mockImplementation(() => {
+      order.push("patch");
+      return order.filter((entry) => entry === "patch").length === 1
+        ? first.promise
+        : second.promise;
+    });
+
+    const commitDone = deferred<{ success: boolean; committedSlots: number }>();
+    const commitObserver = new MutationObserver(queryClient, {
+      mutationKey: stagedVoteMutationKey(eventId),
+      scope: stagedVoteMutationScope(eventId),
+      mutationFn: async () => {
+        order.push("commit");
+        return commitDone.promise;
+      },
+    });
+
+    fire(queryClient, addSlot("slot-1"));
+    fire(queryClient, addSlot("slot-2"));
+    void commitObserver.mutate(undefined).catch(() => undefined);
+    await flush();
+
+    expect(order).toEqual(["patch"]);
+
+    first.resolve({ success: true, stagedSlotCount: 1 });
+    await flush();
+    second.resolve({ success: true, stagedSlotCount: 2 });
+    await flush();
+
+    expect(order).toEqual(["patch", "patch", "commit"]);
+
+    commitDone.resolve({ success: true, committedSlots: 2 });
+    await flush();
   });
 
   it("stacks a queued patch on the draft of the one in flight", async () => {
