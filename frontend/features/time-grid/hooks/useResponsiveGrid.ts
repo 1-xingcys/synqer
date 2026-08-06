@@ -20,8 +20,8 @@ interface ResponsiveGridConfig {
  */
 export function useResponsiveGrid(): ResponsiveGridConfig {
   const [config, setConfig] = useState<ResponsiveGridConfig>({
-    datesPerPage: 7,
-    slotHeight: "2.75rem", // h-11 (desktop default)
+    datesPerPage: 5,
+    slotHeight: "2.5rem", // h-10 (mobile default)
     isMobile: false,
   });
 
