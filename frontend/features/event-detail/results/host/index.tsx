@@ -4,7 +4,8 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback } from "react";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
-import { LoadingState } from "@/components/ui/loading-state";
+import { SkeletonRegion } from "@/components/ui/skeleton-region";
+import { ResultsTabSkeleton } from "../ResultsTabSkeleton";
 import { EventStatus } from "@/types/event";
 import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
 import ResultsView from "@/features/time-grid/results-view";
@@ -81,9 +82,15 @@ export default function HostResultsView() {
   const hasCommittedConfirmation = committedSlotIdsSet.size > 0;
   const eventTitle = event?.title || t("event.untitled");
 
-  // Host data comes from a separate /events/:id/hosted query, so this view shows its own loading state.
+  // Host data comes from a separate /events/:id/hosted query, so this view shows
+  // its own loading state — the same skeleton the layout just showed, so the two
+  // stages read as one continuous placeholder.
   if (isLoading) {
-    return <LoadingState label={t("common.loading")} viewport="section" />;
+    return (
+      <SkeletonRegion>
+        <ResultsTabSkeleton />
+      </SkeletonRegion>
+    );
   }
 
   if (!data || !event) {
