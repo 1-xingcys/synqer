@@ -24,6 +24,41 @@ type PatchStagedVotesResponse = Awaited<ReturnType<typeof patchStagedVotesApi>>;
 export const stagedVoteMutationKey = (eventId: string) =>
   ["stagedVote", eventId] as const;
 
+/**
+ * One scope for every staged-vote mutation of an event.
+ *
+ * React Query runs same-scope mutations one at a time. `onMutate` still fires
+ * the moment the cell is clicked, so the grid stays instant — only the request
+ * waits. Two PATCHes in flight at once would each read the same draft on the
+ * server, and the later write would drop the earlier one's slots.
+ */
+export const stagedVoteMutationScope = (eventId: string) => ({
+  id: `stagedVote:${eventId}`,
+});
+
+/**
+ * Refetch the event detail once the staged-vote mutations have gone quiet.
+ *
+ * `onSettled` runs while its own mutation still counts as pending, so a count
+ * above one means another one is queued behind it. Refetching then would race
+ * that mutation's write and paint the pre-write server state over the grid
+ * until the next round trip corrects it.
+ */
+export function invalidateEventDetailWhenSettled(
+  queryClient: QueryClient,
+  eventId: string,
+): void {
+  if (
+    queryClient.isMutating({ mutationKey: stagedVoteMutationKey(eventId) }) > 1
+  ) {
+    return;
+  }
+
+  void queryClient.invalidateQueries({
+    queryKey: eventDetailKeys.detail(eventId),
+  });
+}
+
 function getCurrentUserCommittedSlots(
   data: EventDetailData,
   currentUserId: string,
@@ -75,6 +110,7 @@ export function createPatchStagedVotesMutationOptions({
 > {
   return {
     mutationKey: stagedVoteMutationKey(eventId),
+    scope: stagedVoteMutationScope(eventId),
     mutationFn: ({ addSlotIds, removeSlotIds, voteMode }) =>
       patchStagedVotesApi(eventId, addSlotIds, removeSlotIds, voteMode),
     onMutate: async ({ addSlotIds, removeSlotIds, voteMode }) => {
@@ -157,10 +193,6 @@ export function createPatchStagedVotesMutationOptions({
         );
       }
     },
-    onSettled: () => {
-      void queryClient.invalidateQueries({
-        queryKey: eventDetailKeys.detail(eventId),
-      });
-    },
+    onSettled: () => invalidateEventDetailWhenSettled(queryClient, eventId),
   };
 }

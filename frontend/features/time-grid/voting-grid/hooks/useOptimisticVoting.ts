@@ -7,7 +7,10 @@ import { commitStagedVotesApi } from "./votingApi";
 import {
   createPatchStagedVotesMutationOptions,
   getCurrentUserHasVoted,
+  invalidateEventDetailWhenSettled,
   orderByAllSlotIds,
+  stagedVoteMutationKey,
+  stagedVoteMutationScope,
 } from "./stagedVoteMutations";
 import {
   ShareResult,
@@ -115,7 +118,11 @@ export function useOptimisticVoting({
     }),
   );
 
+  // Same queue as the patches: a commit that overtook a queued patch would
+  // commit a draft the server has not been told about yet.
   const commitMutation = useMutation({
+    mutationKey: stagedVoteMutationKey(eventId),
+    scope: stagedVoteMutationScope(eventId),
     mutationFn: async () => commitStagedVotesApi(eventId),
     onMutate: async () => {
       setCommitFeedback("idle");
@@ -206,11 +213,7 @@ export function useOptimisticVoting({
       setCommitFeedback("error");
       setCommitShareFeedback("idle");
     },
-    onSettled: () => {
-      void queryClient.invalidateQueries({
-        queryKey: eventDetailKeys.detail(eventId),
-      });
-    },
+    onSettled: () => invalidateEventDetailWhenSettled(queryClient, eventId),
   });
 
   // useMutation returns a fresh object every render, so depending on the
