@@ -2,7 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import ResultsView from "@/features/time-grid/results-view";
-import { LoadingState } from "@/components/ui/loading-state";
+import { SkeletonRegion } from "@/components/ui/skeleton-region";
+import { ResultsTabSkeleton } from "../ResultsTabSkeleton";
 import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
 import { useJoinedEventResults } from "./useJoinedEventResults";
 import { ErrorView } from "./ErrorView";
@@ -12,7 +13,6 @@ interface GuestResultsViewProps {
 }
 
 export default function GuestResultsView({ eventId }: GuestResultsViewProps) {
-  const tEvent = useTranslations("event");
   const tJoined = useTranslations("joined");
   const {
     data,
@@ -23,13 +23,14 @@ export default function GuestResultsView({ eventId }: GuestResultsViewProps) {
     committedSlotIds,
   } = useJoinedEventResults(eventId);
 
+  // Unreachable in practice: this shares useEventDetail's query with the layout,
+  // which only renders this view once that query has settled. Kept as a guard,
+  // and matched to the host view so both read the same.
   if (isLoading) {
     return (
-      <LoadingState
-        label={tEvent("loading")}
-        viewport="section"
-        textSize="lg"
-      />
+      <SkeletonRegion>
+        <ResultsTabSkeleton />
+      </SkeletonRegion>
     );
   }
 

@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { EventDetailNav, NavIcons } from "./event-detail-nav";
 import { DeletedEventView } from "@/components/event/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
-import { LoadingState } from "@/components/ui/loading-state";
+import { EventDetailShellSkeleton } from "./EventDetailShellSkeleton";
 import EventJoinPage from "@/features/event-join";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,7 +42,7 @@ export function EventDetailContent({
   const { user, loading: authLoading } = useAuth();
 
   if (isLoading || authLoading) {
-    return <LoadingState label={t("common.loading")} viewport="section" />;
+    return <EventDetailShellSkeleton />;
   }
 
   if (data?.isDeleted) {
@@ -128,7 +128,7 @@ export function EventDetailContent({
           </h1>
           {isHost && (
             <div
-              className="p-1.5 flex items-center gap-2 text-amber-600 dark:text-amber-400"
+              className="p-1.5 flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400"
               title={t("hosted.participantsPage.host")}
             >
               <span>{t("eventInfo.youAreHost")}</span>

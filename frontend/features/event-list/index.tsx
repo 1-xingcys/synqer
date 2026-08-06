@@ -3,13 +3,12 @@
 import { useTranslations } from "next-intl";
 import { useMyEvents } from "@/hooks/useMyEvents";
 import EventListWithPagination from "./EventListWithPagination";
-import { LoadingState } from "@/components/ui/loading-state";
+import { EventListSkeleton } from "./EventListSkeleton";
 import { eventStatusForOverview, type OverviewStatus } from "@/lib/eventRoutes";
 
 const TRANSLATION_NS = "joinedEvents";
 
 export default function EventListPage({ status }: { status: OverviewStatus }) {
-  const t = useTranslations(TRANSLATION_NS);
   const tOverview = useTranslations("unifiedEvents.overview");
   const { events, loading, error } = useMyEvents();
   const category = eventStatusForOverview(status);
@@ -35,7 +34,7 @@ export default function EventListPage({ status }: { status: OverviewStatus }) {
       </div>
 
       {loading ? (
-        <LoadingState label={t("loading")} spinnerTone="neutral" />
+        <EventListSkeleton />
       ) : showError ? (
         <div className="flex items-center justify-center min-h-[40vh]">
           <p className="text-red-600 dark:text-red-400">{error}</p>
