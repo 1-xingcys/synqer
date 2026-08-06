@@ -42,8 +42,13 @@ export class VoteRepository {
   /**
    * 查詢使用者目前已提交（committed）的 available slot IDs
    */
-  async findUserCommittedSlotIds(eventId: string, userId: string) {
-    const rows = await this.prisma.eventVote.findMany({
+  async findUserCommittedSlotIds(
+    eventId: string,
+    userId: string,
+    prismaClient?: Prisma.TransactionClient,
+  ) {
+    const client = prismaClient || this.prisma;
+    const rows = await client.eventVote.findMany({
       where: {
         eventId,
         userId,
@@ -58,8 +63,13 @@ export class VoteRepository {
   /**
    * 查詢使用者目前的 staged 草稿
    */
-  async findUserStagedVote(eventId: string, userId: string) {
-    return this.prisma.eventStagedVote.findUnique({
+  async findUserStagedVote(
+    eventId: string,
+    userId: string,
+    prismaClient?: Prisma.TransactionClient,
+  ) {
+    const client = prismaClient || this.prisma;
+    return client.eventStagedVote.findUnique({
       where: {
         eventId_userId: {
           eventId,
@@ -71,6 +81,24 @@ export class VoteRepository {
         baselineSlotIds: true,
         updatedAt: true,
       },
+    });
+  }
+
+  /**
+   * 讓同一位使用者的 staged 草稿讀取→套用 delta→寫回成為單一臨界區。
+   *
+   * 這段是 read-modify-write，而且 upsert 是整份 slotIds 覆蓋：兩個同時飛的
+   * PATCH 會讀到同一份舊資料，後寫的那個把先寫的格子整個蓋掉。advisory lock
+   * 綁在 transaction 上，交易結束（含 rollback）時由 Postgres 自動釋放。
+   */
+  async runInStagedVoteLock<T>(
+    eventId: string,
+    userId: string,
+    fn: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`staged-vote:${eventId}:${userId}`}, 0))`;
+      return fn(tx);
     });
   }
 

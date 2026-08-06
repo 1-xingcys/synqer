@@ -623,4 +623,53 @@ describe('VoteRepository', () => {
       expect(result).toEqual({ availableSlotIds: ['slot-1', 'slot-2'] });
     });
   });
+
+  describe('runInStagedVoteLock', () => {
+    const eventId = 'event-123';
+    const userId = 'user-123';
+
+    it('takes the advisory lock before running the callback', async () => {
+      const order: string[] = [];
+      const mockTx = {
+        $executeRaw: jest.fn(() => {
+          order.push('lock');
+          return Promise.resolve(1);
+        }),
+      };
+
+      mockPrismaService.$transaction.mockImplementation(
+        async (callback: (tx: unknown) => Promise<unknown>) => callback(mockTx),
+      );
+
+      const result = await repository.runInStagedVoteLock(
+        eventId,
+        userId,
+        (tx) => {
+          order.push('callback');
+          expect(tx).toBe(mockTx);
+          return Promise.resolve('done');
+        },
+      );
+
+      expect(prismaService.$transaction).toHaveBeenCalled();
+      expect(order).toEqual(['lock', 'callback']);
+      expect(result).toBe('done');
+    });
+
+    it('keys the lock on the event and the voter', async () => {
+      const mockTx = { $executeRaw: jest.fn().mockResolvedValue(1) };
+
+      mockPrismaService.$transaction.mockImplementation(
+        async (callback: (tx: unknown) => Promise<unknown>) => callback(mockTx),
+      );
+
+      await repository.runInStagedVoteLock(eventId, userId, () =>
+        Promise.resolve(null),
+      );
+
+      // Tagged-template call: the interpolated values land after the strings.
+      const lockKey = mockTx.$executeRaw.mock.calls[0][1] as string;
+      expect(lockKey).toBe(`staged-vote:${eventId}:${userId}`);
+    });
+  });
 });
