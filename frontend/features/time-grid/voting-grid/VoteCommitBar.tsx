@@ -7,8 +7,7 @@ import type { CommitFeedback } from "./hooks/useOptimisticVoting";
 interface VoteCommitBarProps {
   hasStagedVoteDraft: boolean;
   hasCommittedVote: boolean;
-  isPatchPending: boolean;
-  isCommitPending: boolean;
+  isCommitting: boolean;
   commitFeedback: CommitFeedback;
   onCommit: () => void;
 }
@@ -16,8 +15,7 @@ interface VoteCommitBarProps {
 export function VoteCommitBar({
   hasStagedVoteDraft,
   hasCommittedVote,
-  isPatchPending,
-  isCommitPending,
+  isCommitting,
   commitFeedback,
   onCommit,
 }: VoteCommitBarProps) {
@@ -65,17 +63,25 @@ export function VoteCommitBar({
               ? t("stagedVotePending")
               : t("firstVotePending")}
         </p>
+        {/*
+          Unsent cell edits deliberately do not disable this. The commit shares
+          a mutation scope with the patches, so it already runs after every one
+          of them — while "a patch is pending" now also covers one merely queued
+          behind another, which React Query resumes only once the document is
+          focused and online. Gating the button on that left it dead after a
+          visibility blip mid-tap.
+        */}
         <button
           onClick={onCommit}
-          disabled={isPatchPending || isCommitPending}
+          disabled={isCommitting}
           className={`shrink-0 rounded-lg disabled:opacity-60 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-medium px-3 py-1.5 transition-colors inline-flex items-center gap-1.5 ${
             commitFeedback === "error"
               ? "bg-rose-600 hover:bg-rose-700"
               : "bg-sky-600 hover:bg-sky-700"
           }`}
         >
-          {isCommitPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          {isCommitPending ? t("confirmingVote") : t("confirmVote")}
+          {isCommitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+          {isCommitting ? t("confirmingVote") : t("confirmVote")}
         </button>
       </div>
     </>

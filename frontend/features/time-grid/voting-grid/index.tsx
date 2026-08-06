@@ -53,8 +53,7 @@ export default function VotingGrid({
     selectAll,
     hasStagedVoteDraft,
     commitStagedVotes,
-    isPatchPending,
-    isCommitPending,
+    isCommitting,
     commitFeedback,
     isDayFullySelected,
     selectEntireDay,
@@ -154,8 +153,7 @@ export default function VotingGrid({
           <VoteCommitBar
             hasStagedVoteDraft={hasStagedVoteDraft}
             hasCommittedVote={currentUserHasVoted}
-            isPatchPending={isPatchPending}
-            isCommitPending={isCommitPending}
+            isCommitting={isCommitting}
             commitFeedback={commitFeedback}
             onCommit={commitStagedVotes}
           />

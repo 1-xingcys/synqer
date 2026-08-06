@@ -3,7 +3,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { eventDetailKeys, EventDetailData } from "@/hooks/useEventDetail";
-import { patchStagedVotesApi, commitStagedVotesApi } from "./votingApi";
+import { commitStagedVotesApi } from "./votingApi";
+import {
+  createPatchStagedVotesMutationOptions,
+  getCurrentUserHasVoted,
+  invalidateEventDetailWhenSettled,
+  orderByAllSlotIds,
+  stagedVoteMutationKey,
+  stagedVoteMutationScope,
+} from "./stagedVoteMutations";
 import {
   ShareResult,
   shareVoteCommitFlexMessage,
@@ -35,44 +43,8 @@ interface UseOptimisticVotingReturn {
     voteMode: VoteMode,
   ) => void;
   commitStagedVotes: () => void;
-  isPatchPending: boolean;
-  isCommitPending: boolean;
-  isPending: boolean;
-}
-
-function getCurrentUserCommittedSlots(
-  data: EventDetailData,
-  currentUserId: string,
-): Set<string> {
-  return new Set(
-    data.votes
-      .filter((vote) => vote.userId === currentUserId)
-      .map((vote) => vote.slotId),
-  );
-}
-
-function getCurrentUserHasVoted(
-  data: EventDetailData,
-  currentUserId: string,
-): boolean {
-  return data.expectedParticipants.some(
-    (participant) =>
-      (participant.userId === currentUserId ||
-        participant.user?.id === currentUserId) &&
-      participant.hasVoted,
-  );
-}
-
-function orderByAllSlotIds(
-  slotIdSet: Set<string>,
-  allSlotIds: string[],
-): string[] {
-  return allSlotIds.filter((slotId) => slotIdSet.has(slotId));
-}
-
-function areOrderedSlotIdsEqual(left: string[], right: string[]): boolean {
-  if (left.length !== right.length) return false;
-  return left.every((slotId, index) => slotId === right[index]);
+  /** True from the click on confirm until the commit has settled. */
+  isCommitting: boolean;
 }
 
 /**
@@ -95,9 +67,9 @@ export function shouldShareVoteNotice({
 }
 
 /**
- * staged 投票的樂觀更新：
- * - PATCH /voting/staged 只更新草稿
- * - POST /voting/commit 才覆蓋 committed votes
+ * Optimistic updates for staged voting:
+ * - PATCH /voting/staged only moves the draft
+ * - POST /voting/commit is what replaces the committed votes
  */
 export function useOptimisticVoting({
   eventId,
@@ -137,104 +109,19 @@ export function useOptimisticVoting({
     return () => window.clearTimeout(timerId);
   }, [commitFeedback, commitShareFeedback]);
 
-  const patchMutation = useMutation({
-    mutationFn: ({
-      addSlotIds,
-      removeSlotIds,
-      voteMode,
-    }: {
-      addSlotIds: string[];
-      removeSlotIds: string[];
-      voteMode: VoteMode;
-    }) => patchStagedVotesApi(eventId, addSlotIds, removeSlotIds, voteMode),
-    onMutate: async ({ addSlotIds, removeSlotIds, voteMode }) => {
-      await queryClient.cancelQueries({
-        queryKey: eventDetailKeys.detail(eventId),
-      });
+  const patchMutation = useMutation(
+    createPatchStagedVotesMutationOptions({
+      eventId,
+      currentUserId,
+      queryClient,
+    }),
+  );
 
-      const previousData = queryClient.getQueryData<EventDetailData>(
-        eventDetailKeys.detail(eventId),
-      );
-
-      queryClient.setQueryData<EventDetailData>(
-        eventDetailKeys.detail(eventId),
-        (old) => {
-          if (!old) return old;
-
-          const allSlotIds = old.slots.map((slot) => slot.id);
-          const currentCommittedSlots = getCurrentUserCommittedSlots(
-            old,
-            currentUserId,
-          );
-          const currentHasVoted = getCurrentUserHasVoted(old, currentUserId);
-
-          let baseAvailableSlots: Set<string>;
-          let baselineAvailableSlots: Set<string>;
-
-          if (old.stagedVote) {
-            baseAvailableSlots = new Set(old.stagedVote.slotIds);
-            baselineAvailableSlots = new Set(old.stagedVote.baselineSlotIds);
-          } else if (currentHasVoted) {
-            baseAvailableSlots = new Set(currentCommittedSlots);
-            baselineAvailableSlots = new Set(currentCommittedSlots);
-          } else if (voteMode === VoteMode.UNAVAILABLE) {
-            baseAvailableSlots = new Set(allSlotIds);
-            baselineAvailableSlots = new Set(allSlotIds);
-          } else {
-            baseAvailableSlots = new Set<string>();
-            baselineAvailableSlots = new Set<string>();
-          }
-
-          addSlotIds.forEach((slotId) => baseAvailableSlots.add(slotId));
-          removeSlotIds.forEach((slotId) => baseAvailableSlots.delete(slotId));
-
-          const orderedNextSlotIds = orderByAllSlotIds(
-            baseAvailableSlots,
-            allSlotIds,
-          );
-          const orderedBaselineSlotIds = orderByAllSlotIds(
-            baselineAvailableSlots,
-            allSlotIds,
-          );
-
-          if (
-            areOrderedSlotIdsEqual(orderedNextSlotIds, orderedBaselineSlotIds)
-          ) {
-            return {
-              ...old,
-              stagedVote: null,
-            };
-          }
-
-          return {
-            ...old,
-            stagedVote: {
-              slotIds: orderedNextSlotIds,
-              baselineSlotIds: orderedBaselineSlotIds,
-              updatedAt: new Date().toISOString(),
-            },
-          };
-        },
-      );
-
-      return { previousData };
-    },
-    onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(
-          eventDetailKeys.detail(eventId),
-          context.previousData,
-        );
-      }
-    },
-    onSettled: () => {
-      void queryClient.invalidateQueries({
-        queryKey: eventDetailKeys.detail(eventId),
-      });
-    },
-  });
-
+  // Same queue as the patches: a commit that overtook a queued patch would
+  // commit a draft the server has not been told about yet.
   const commitMutation = useMutation({
+    mutationKey: stagedVoteMutationKey(eventId),
+    scope: stagedVoteMutationScope(eventId),
     mutationFn: async () => commitStagedVotesApi(eventId),
     onMutate: async () => {
       setCommitFeedback("idle");
@@ -325,11 +212,7 @@ export function useOptimisticVoting({
       setCommitFeedback("error");
       setCommitShareFeedback("idle");
     },
-    onSettled: () => {
-      void queryClient.invalidateQueries({
-        queryKey: eventDetailKeys.detail(eventId),
-      });
-    },
+    onSettled: () => invalidateEventDetailWhenSettled(queryClient, eventId),
   });
 
   // useMutation returns a fresh object every render, so depending on the
@@ -358,8 +241,6 @@ export function useOptimisticVoting({
     commitFeedback,
     updateStagedVotes,
     commitStagedVotes,
-    isPatchPending: patchMutation.isPending,
-    isCommitPending: commitMutation.isPending,
-    isPending: patchMutation.isPending || commitMutation.isPending,
+    isCommitting: commitMutation.isPending,
   };
 }

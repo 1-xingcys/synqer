@@ -14,7 +14,7 @@ interface UseMergedTimeGridSelectionInteractionProps {
   mergedTimeRows: MergedTimeRow[];
   slotsByDate: Record<string, { id: string }[]>;
   paginatedDates: string[];
-  /** 拖曳/點擊結束時的 callback，傳入新增與移除的 slot IDs */
+  /** Called when a drag or click ends, with the slot IDs added and removed. */
   onSelectionCommit: (addSlotIds: string[], removeSlotIds: string[]) => void;
 }
 
@@ -42,7 +42,7 @@ interface UseMergedTimeGridSelectionInteractionReturn {
 }
 
 /**
- * 計算兩個 Set 的差異
+ * The difference between two sets.
  */
 function computeDiff(
   base: Set<string>,
@@ -62,8 +62,8 @@ function computeDiff(
 }
 
 /**
- * 管理合併時間列的互動狀態：
- * 處理滑鼠/觸控拖曳、單格點擊、預覽選取與 commit diff 的整套流程。
+ * Interaction state for the merged time rows: mouse and touch drags, single
+ * cell clicks, the selection preview and the diff each gesture commits.
  */
 export function useMergedTimeGridSelectionInteraction({
   selectedSlots,
@@ -253,6 +253,16 @@ export function useMergedTimeGridSelectionInteraction({
   // Click handler for single cell toggle
   const handleClick = useCallback(
     (rowIndex: number, dateIndex: number) => {
+      // A drag across more than one cell has already committed on touchend,
+      // but a touch that stayed within the browser's slop threshold still
+      // emits a click — and a touch retargets it to the cell the finger
+      // started in. Acting on it would toggle that first cell straight back
+      // off, which is why a short two-cell drag sometimes lost its origin.
+      if (hasCommittedRef.current) {
+        hasCommittedRef.current = false;
+        return;
+      }
+
       const slotIds = getSlotIdsForCell(rowIndex, dateIndex);
       if (slotIds.length === 0) return;
 

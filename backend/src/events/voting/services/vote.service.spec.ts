@@ -1,9 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { VoteService } from './vote.service';
 import { VoteRepository } from '../repositories/vote.repository';
 import { TimeSlotRepository } from '../../shared/repositories/time-slot.repository';
 import { VoteMode } from '../dto/vote-event.dto';
+
+/**
+ * Stands in for the transaction client the lock hands to its callback, so the
+ * assertions below can show which reads and writes happen inside the critical
+ * section.
+ */
+const mockTransactionClient = {} as unknown as Prisma.TransactionClient;
 
 describe('VoteService', () => {
   let service: VoteService;
@@ -20,6 +28,13 @@ describe('VoteService', () => {
     upsertStagedVote: jest.fn(),
     deleteStagedVote: jest.fn(),
     commitStagedVotesInTransaction: jest.fn(),
+    runInStagedVoteLock: jest.fn(
+      async (
+        _eventId: string,
+        _userId: string,
+        fn: (tx: Prisma.TransactionClient) => Promise<unknown>,
+      ) => fn(mockTransactionClient),
+    ),
   };
 
   const mockTimeSlotRepository = {
@@ -532,6 +547,7 @@ describe('VoteService', () => {
         userId,
         ['slot-2', 'slot-3'],
         ['slot-1', 'slot-2', 'slot-3'],
+        mockTransactionClient,
       );
       expect(result).toEqual({ success: true, stagedSlotCount: 2 });
     });
@@ -569,6 +585,7 @@ describe('VoteService', () => {
         userId,
         ['slot-1', 'slot-2'],
         ['slot-1'],
+        mockTransactionClient,
       );
       expect(result).toEqual({ success: true, stagedSlotCount: 2 });
     });
@@ -598,12 +615,14 @@ describe('VoteService', () => {
       expect(voteRepository.findUserCommittedSlotIds).toHaveBeenCalledWith(
         eventId,
         userId,
+        mockTransactionClient,
       );
       expect(voteRepository.upsertStagedVote).toHaveBeenCalledWith(
         eventId,
         userId,
         ['slot-1', 'slot-3'],
         ['slot-1'],
+        mockTransactionClient,
       );
       expect(result).toEqual({ success: true, stagedSlotCount: 2 });
     });
@@ -633,6 +652,7 @@ describe('VoteService', () => {
       expect(voteRepository.deleteStagedVote).toHaveBeenCalledWith(
         eventId,
         userId,
+        mockTransactionClient,
       );
       expect(voteRepository.upsertStagedVote).not.toHaveBeenCalled();
       expect(result).toEqual({ success: true, stagedSlotCount: 0 });
@@ -649,6 +669,112 @@ describe('VoteService', () => {
       await expect(
         service.updateStagedVotes(eventId, userId, { addSlotIds: ['slot-1'] }),
       ).rejects.toThrow(new ForbiddenException('非活動參與者不可投票'));
+    });
+  });
+
+  describe('updateStagedVotes under concurrent requests', () => {
+    const eventId = 'event-123';
+    const userId = 'user-123';
+    const allSlotIds = ['slot-1', 'slot-2', 'slot-3', 'slot-4'];
+
+    let store: { slotIds: string[]; baselineSlotIds: string[] } | null;
+
+    const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+    beforeEach(() => {
+      store = null;
+      let lockChain: Promise<unknown> = Promise.resolve();
+
+      mockVoteRepository.findEventVotingInfo.mockImplementation(async () => {
+        await tick();
+        return { votingDeadline: null, isDeleted: false };
+      });
+      mockTimeSlotRepository.findIdsByEventId.mockImplementation(async () => {
+        await tick();
+        return allSlotIds;
+      });
+      mockVoteRepository.findParticipantVoteStatus.mockImplementation(
+        async () => {
+          await tick();
+          return { hasVoted: false };
+        },
+      );
+      mockVoteRepository.findUserStagedVote.mockImplementation(async () => {
+        await tick();
+        return store ? { ...store, updatedAt: new Date() } : null;
+      });
+      mockVoteRepository.upsertStagedVote.mockImplementation(
+        async (
+          _eventId: string,
+          _userId: string,
+          slotIds: string[],
+          baselineSlotIds: string[],
+        ) => {
+          await tick();
+          store = { slotIds, baselineSlotIds };
+          return {};
+        },
+      );
+      mockVoteRepository.deleteStagedVote.mockImplementation(async () => {
+        await tick();
+        store = null;
+        return { count: 1 };
+      });
+
+      // A real critical section: a second caller's callback does not start
+      // until the first one has finished, which is what the advisory lock
+      // buys us in Postgres.
+      mockVoteRepository.runInStagedVoteLock.mockImplementation(
+        async (
+          _eventId: string,
+          _userId: string,
+          fn: (tx: Prisma.TransactionClient) => Promise<unknown>,
+        ) => {
+          const run = lockChain.then(() => fn(mockTransactionClient));
+          lockChain = run.catch(() => undefined);
+          return run;
+        },
+      );
+    });
+
+    it('keeps both slots when two clicks overlap', async () => {
+      await Promise.all([
+        service.updateStagedVotes(eventId, userId, {
+          addSlotIds: ['slot-1'],
+          removeSlotIds: [],
+          voteMode: VoteMode.AVAILABLE,
+        }),
+        service.updateStagedVotes(eventId, userId, {
+          addSlotIds: ['slot-2'],
+          removeSlotIds: [],
+          voteMode: VoteMode.AVAILABLE,
+        }),
+      ]);
+
+      expect(store?.slotIds).toEqual(['slot-1', 'slot-2']);
+    });
+
+    it('keeps the draft alive when a removal overlaps an addition', async () => {
+      await service.updateStagedVotes(eventId, userId, {
+        addSlotIds: ['slot-1', 'slot-2', 'slot-3'],
+        removeSlotIds: [],
+        voteMode: VoteMode.AVAILABLE,
+      });
+
+      await Promise.all([
+        service.updateStagedVotes(eventId, userId, {
+          addSlotIds: ['slot-4'],
+          removeSlotIds: [],
+          voteMode: VoteMode.AVAILABLE,
+        }),
+        service.updateStagedVotes(eventId, userId, {
+          addSlotIds: [],
+          removeSlotIds: ['slot-3'],
+          voteMode: VoteMode.AVAILABLE,
+        }),
+      ]);
+
+      expect(store?.slotIds).toEqual(['slot-1', 'slot-2', 'slot-4']);
     });
   });
 

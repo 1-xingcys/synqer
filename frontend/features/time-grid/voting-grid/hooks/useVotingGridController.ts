@@ -47,8 +47,7 @@ interface UseVotingGridControllerResult {
     selectAll: () => void;
     hasStagedVoteDraft: boolean;
     commitStagedVotes: () => void;
-    isPatchPending: boolean;
-    isCommitPending: boolean;
+    isCommitting: boolean;
     commitFeedback: CommitFeedback;
     isDayFullySelected: (dateKey: string) => boolean;
     selectEntireDay: (dateKey: string) => void;
@@ -131,8 +130,7 @@ export function useVotingGridController({
     commitFeedback,
     updateStagedVotes,
     commitStagedVotes,
-    isPatchPending,
-    isCommitPending,
+    isCommitting,
   } = useOptimisticVoting({
     eventId,
     currentUserId,
@@ -262,8 +260,7 @@ export function useVotingGridController({
       selectAll,
       hasStagedVoteDraft,
       commitStagedVotes,
-      isPatchPending,
-      isCommitPending,
+      isCommitting,
       commitFeedback,
       isDayFullySelected,
       selectEntireDay,
