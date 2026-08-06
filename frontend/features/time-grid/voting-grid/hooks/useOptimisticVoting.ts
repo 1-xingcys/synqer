@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { eventDetailKeys, EventDetailData } from "@/hooks/useEventDetail";
-import { patchStagedVotesApi, commitStagedVotesApi } from "./votingApi";
+import { commitStagedVotesApi } from "./votingApi";
+import {
+  createPatchStagedVotesMutationOptions,
+  getCurrentUserHasVoted,
+  orderByAllSlotIds,
+} from "./stagedVoteMutations";
 import {
   ShareResult,
   shareVoteCommitFlexMessage,
@@ -38,41 +43,6 @@ interface UseOptimisticVotingReturn {
   isPatchPending: boolean;
   isCommitPending: boolean;
   isPending: boolean;
-}
-
-function getCurrentUserCommittedSlots(
-  data: EventDetailData,
-  currentUserId: string,
-): Set<string> {
-  return new Set(
-    data.votes
-      .filter((vote) => vote.userId === currentUserId)
-      .map((vote) => vote.slotId),
-  );
-}
-
-function getCurrentUserHasVoted(
-  data: EventDetailData,
-  currentUserId: string,
-): boolean {
-  return data.expectedParticipants.some(
-    (participant) =>
-      (participant.userId === currentUserId ||
-        participant.user?.id === currentUserId) &&
-      participant.hasVoted,
-  );
-}
-
-function orderByAllSlotIds(
-  slotIdSet: Set<string>,
-  allSlotIds: string[],
-): string[] {
-  return allSlotIds.filter((slotId) => slotIdSet.has(slotId));
-}
-
-function areOrderedSlotIdsEqual(left: string[], right: string[]): boolean {
-  if (left.length !== right.length) return false;
-  return left.every((slotId, index) => slotId === right[index]);
 }
 
 /**
@@ -137,102 +107,13 @@ export function useOptimisticVoting({
     return () => window.clearTimeout(timerId);
   }, [commitFeedback, commitShareFeedback]);
 
-  const patchMutation = useMutation({
-    mutationFn: ({
-      addSlotIds,
-      removeSlotIds,
-      voteMode,
-    }: {
-      addSlotIds: string[];
-      removeSlotIds: string[];
-      voteMode: VoteMode;
-    }) => patchStagedVotesApi(eventId, addSlotIds, removeSlotIds, voteMode),
-    onMutate: async ({ addSlotIds, removeSlotIds, voteMode }) => {
-      await queryClient.cancelQueries({
-        queryKey: eventDetailKeys.detail(eventId),
-      });
-
-      const previousData = queryClient.getQueryData<EventDetailData>(
-        eventDetailKeys.detail(eventId),
-      );
-
-      queryClient.setQueryData<EventDetailData>(
-        eventDetailKeys.detail(eventId),
-        (old) => {
-          if (!old) return old;
-
-          const allSlotIds = old.slots.map((slot) => slot.id);
-          const currentCommittedSlots = getCurrentUserCommittedSlots(
-            old,
-            currentUserId,
-          );
-          const currentHasVoted = getCurrentUserHasVoted(old, currentUserId);
-
-          let baseAvailableSlots: Set<string>;
-          let baselineAvailableSlots: Set<string>;
-
-          if (old.stagedVote) {
-            baseAvailableSlots = new Set(old.stagedVote.slotIds);
-            baselineAvailableSlots = new Set(old.stagedVote.baselineSlotIds);
-          } else if (currentHasVoted) {
-            baseAvailableSlots = new Set(currentCommittedSlots);
-            baselineAvailableSlots = new Set(currentCommittedSlots);
-          } else if (voteMode === VoteMode.UNAVAILABLE) {
-            baseAvailableSlots = new Set(allSlotIds);
-            baselineAvailableSlots = new Set(allSlotIds);
-          } else {
-            baseAvailableSlots = new Set<string>();
-            baselineAvailableSlots = new Set<string>();
-          }
-
-          addSlotIds.forEach((slotId) => baseAvailableSlots.add(slotId));
-          removeSlotIds.forEach((slotId) => baseAvailableSlots.delete(slotId));
-
-          const orderedNextSlotIds = orderByAllSlotIds(
-            baseAvailableSlots,
-            allSlotIds,
-          );
-          const orderedBaselineSlotIds = orderByAllSlotIds(
-            baselineAvailableSlots,
-            allSlotIds,
-          );
-
-          if (
-            areOrderedSlotIdsEqual(orderedNextSlotIds, orderedBaselineSlotIds)
-          ) {
-            return {
-              ...old,
-              stagedVote: null,
-            };
-          }
-
-          return {
-            ...old,
-            stagedVote: {
-              slotIds: orderedNextSlotIds,
-              baselineSlotIds: orderedBaselineSlotIds,
-              updatedAt: new Date().toISOString(),
-            },
-          };
-        },
-      );
-
-      return { previousData };
-    },
-    onError: (_err, _variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(
-          eventDetailKeys.detail(eventId),
-          context.previousData,
-        );
-      }
-    },
-    onSettled: () => {
-      void queryClient.invalidateQueries({
-        queryKey: eventDetailKeys.detail(eventId),
-      });
-    },
-  });
+  const patchMutation = useMutation(
+    createPatchStagedVotesMutationOptions({
+      eventId,
+      currentUserId,
+      queryClient,
+    }),
+  );
 
   const commitMutation = useMutation({
     mutationFn: async () => commitStagedVotesApi(eventId),
