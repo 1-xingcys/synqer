@@ -14,7 +14,7 @@ import { TimeSlotRepository } from '../../shared/repositories/time-slot.reposito
 import { zonedWallClockToInstant } from '../../../common/time';
 
 /**
- * 投票服務（業務邏輯層）
+ * Vote service (business logic layer)
  */
 @Injectable()
 export class VoteService {
@@ -24,10 +24,11 @@ export class VoteService {
   ) {}
 
   /**
-   * 儲存使用者的投票
-   * 支援兩種模式：
-   * 1. available: 投自己「可以」的時間，未選擇的時段視為不行
-   * 2. unavailable: 投自己「不行」的時間，未選擇的時段視為可以
+   * Save a user's vote.
+   *
+   * Two modes: in available mode they pick the times they can make and
+   * everything unpicked counts as a no; in unavailable mode they pick the
+   * times they cannot make and everything unpicked counts as a yes.
    */
   async vote(
     eventId: string,
@@ -39,23 +40,23 @@ export class VoteService {
     const allSlotIds = await this.validateEventAndGetAllSlotIds(eventId, now);
     await this.validateParticipantAndGetVoteStatus(eventId, userId);
 
-    // 去重並驗證 selectedSlotIds 都屬於該活動
+    // Dedupe, and check every selected slot belongs to this event
     const uniqueSelectedSlotIds = [...new Set(selectedSlotIds)];
     this.validateSlotIdsBelongToEvent(allSlotIds, uniqueSelectedSlotIds);
 
-    // 根據投票模式計算「有空」的時段
+    // Derive the available slots from the vote mode
     let availableSlotIds: string[];
 
     if (voteMode === VoteMode.UNAVAILABLE) {
-      // 如果是投「不行」的時間，把其他時間都視為可以
+      // Picking unavailable times means every other slot counts as available
       const unavailableSet = new Set(uniqueSelectedSlotIds);
       availableSlotIds = allSlotIds.filter((id) => !unavailableSet.has(id));
     } else {
-      // 如果是投「可以」的時間，使用去重後的選擇
+      // Picking available times means the deduped selection is the answer
       availableSlotIds = uniqueSelectedSlotIds;
     }
 
-    // 使用 transaction 執行投票
+    // Run the vote in a transaction
     const result = await this.voteRepository.submitVoteInTransaction(
       eventId,
       userId,
@@ -70,8 +71,8 @@ export class VoteService {
   }
 
   /**
-   * 增量更新使用者的投票
-   * 新增 addSlotIds 的投票紀錄、移除 removeSlotIds 的投票紀錄
+   * Update a user's votes incrementally: add rows for addSlotIds and drop
+   * the rows for removeSlotIds.
    */
   async updateVotes(
     eventId: string,
@@ -93,7 +94,7 @@ export class VoteService {
     const allRequestedIds = [...uniqueAddSlotIds, ...uniqueRemoveSlotIds];
     this.validateSlotIdsBelongToEvent(allSlotIds, allRequestedIds);
 
-    // 使用 transaction 執行增量更新
+    // Run the incremental update in a transaction
     const result = await this.voteRepository.updateVotesInTransaction(
       eventId,
       userId,
@@ -109,7 +110,7 @@ export class VoteService {
   }
 
   /**
-   * 增量更新 staged 草稿（canonical available slots）
+   * Update the staged draft incrementally (canonical available slots)
    */
   async updateStagedVotes(
     eventId: string,
@@ -143,8 +144,9 @@ export class VoteService {
       ...uniqueRemoveSlotIds,
     ]);
 
-    // 讀取現況、套用 delta、寫回必須在同一個臨界區內完成，否則兩個同時進來的
-    // 點擊會讀到同一份舊草稿，後寫的把先寫的格子蓋掉。
+    // Read, apply the delta and write have to happen in one critical section:
+    // two clicks arriving at once would otherwise read the same stale draft,
+    // and the later write would drop the earlier one's slots.
     return this.voteRepository.runInStagedVoteLock(
       eventId,
       userId,
@@ -229,7 +231,7 @@ export class VoteService {
   }
 
   /**
-   * 提交 staged 草稿為 committed votes
+   * Commit the staged draft into committed votes
    */
   async commitStagedVotes(eventId: string, userId: string) {
     const allSlotIds = await this.validateEventAndGetAllSlotIds(eventId);
@@ -259,7 +261,7 @@ export class VoteService {
   }
 
   /**
-   * 驗證活動可投票並回傳所有 slot IDs
+   * Check the event is open for voting and return all of its slot IDs
    */
   private async validateEventAndGetAllSlotIds(
     eventId: string,
@@ -272,7 +274,8 @@ export class VoteService {
     }
 
     if (event.votingDeadline) {
-      // votingDeadline 以 naive 牆上數字儲存；解析成真實 instant 再與真實 now 比較。
+      // votingDeadline is stored as naive wall-clock digits; resolve it to a
+      // real instant before comparing it against a real now.
       const deadlineInstant = zonedWallClockToInstant(
         event.votingDeadline,
         event.timeZone,
@@ -286,7 +289,7 @@ export class VoteService {
   }
 
   /**
-   * 驗證指定 slot IDs 是否都屬於活動
+   * Check the given slot IDs all belong to the event
    */
   private validateSlotIdsBelongToEvent(
     allSlotIds: string[],
@@ -302,7 +305,7 @@ export class VoteService {
   }
 
   /**
-   * 驗證使用者是否為活動的有效預期參與者
+   * Check the user is a valid expected participant of the event
    */
   private async validateParticipantAndGetVoteStatus(
     eventId: string,
@@ -319,7 +322,7 @@ export class VoteService {
   }
 
   /**
-   * 依照活動原始 slot 順序輸出 canonical slot IDs
+   * Emit canonical slot IDs, ordered by the event's own slot order
    */
   private toCanonicalSlotIds(allSlotIds: string[], slotIds: Iterable<string>) {
     const slotIdSet = new Set(slotIds);

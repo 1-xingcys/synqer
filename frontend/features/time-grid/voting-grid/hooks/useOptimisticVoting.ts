@@ -67,9 +67,9 @@ export function shouldShareVoteNotice({
 }
 
 /**
- * staged 投票的樂觀更新：
- * - PATCH /voting/staged 只更新草稿
- * - POST /voting/commit 才覆蓋 committed votes
+ * Optimistic updates for staged voting:
+ * - PATCH /voting/staged only moves the draft
+ * - POST /voting/commit is what replaces the committed votes
  */
 export function useOptimisticVoting({
   eventId,

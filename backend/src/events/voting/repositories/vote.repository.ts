@@ -3,14 +3,14 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
 /**
- * 投票資料存取層
+ * Vote data access layer
  */
 @Injectable()
 export class VoteRepository {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * 查詢活動的投票相關資訊
+   * Find the voting-related fields of an event
    */
   async findEventVotingInfo(eventId: string) {
     return this.prisma.event.findUnique({
@@ -24,7 +24,7 @@ export class VoteRepository {
   }
 
   /**
-   * 查詢使用者在活動中的 hasVoted 狀態
+   * Find a user's hasVoted status for an event
    */
   async findParticipantVoteStatus(eventId: string, userId: string) {
     return this.prisma.eventExpectedParticipant.findFirst({
@@ -40,7 +40,7 @@ export class VoteRepository {
   }
 
   /**
-   * 查詢使用者目前已提交（committed）的 available slot IDs
+   * Find the available slot IDs a user has already committed
    */
   async findUserCommittedSlotIds(
     eventId: string,
@@ -61,7 +61,7 @@ export class VoteRepository {
   }
 
   /**
-   * 查詢使用者目前的 staged 草稿
+   * Find a user's current staged draft
    */
   async findUserStagedVote(
     eventId: string,
@@ -85,11 +85,14 @@ export class VoteRepository {
   }
 
   /**
-   * 讓同一位使用者的 staged 草稿讀取→套用 delta→寫回成為單一臨界區。
+   * Make read, apply-delta and write of one voter's staged draft a single
+   * critical section.
    *
-   * 這段是 read-modify-write，而且 upsert 是整份 slotIds 覆蓋：兩個同時飛的
-   * PATCH 會讀到同一份舊資料，後寫的那個把先寫的格子整個蓋掉。advisory lock
-   * 綁在 transaction 上，交易結束（含 rollback）時由 Postgres 自動釋放。
+   * This is a read-modify-write and the upsert replaces the whole slotIds
+   * array, so two PATCHes in flight at once both read the same pre-write row
+   * and the later write drops the earlier one's slots. The advisory lock is
+   * transaction-scoped: Postgres releases it when the transaction ends,
+   * including on rollback.
    */
   async runInStagedVoteLock<T>(
     eventId: string,
@@ -103,7 +106,7 @@ export class VoteRepository {
   }
 
   /**
-   * upsert staged 草稿
+   * Upsert a staged draft
    */
   async upsertStagedVote(
     eventId: string,
@@ -134,7 +137,7 @@ export class VoteRepository {
   }
 
   /**
-   * 刪除 staged 草稿
+   * Delete a staged draft
    */
   async deleteStagedVote(
     eventId: string,
@@ -151,7 +154,7 @@ export class VoteRepository {
   }
 
   /**
-   * 刪除使用者在活動中的所有投票
+   * Delete every vote a user cast in an event
    */
   async deleteUserVotes(
     eventId: string,
@@ -168,7 +171,7 @@ export class VoteRepository {
   }
 
   /**
-   * 批次建立投票紀錄
+   * Create vote rows in bulk
    */
   async createVotes(
     eventId: string,
@@ -187,7 +190,7 @@ export class VoteRepository {
   }
 
   /**
-   * 更新預期參與者的投票狀態
+   * Update an expected participant's vote status
    */
   async updateParticipantVoteStatus(
     eventId: string,
@@ -208,7 +211,7 @@ export class VoteRepository {
   }
 
   /**
-   * 使用交易執行完整的投票流程
+   * Run the whole vote flow in a transaction
    */
   async submitVoteInTransaction(
     eventId: string,
@@ -217,15 +220,15 @@ export class VoteRepository {
   ) {
     return this.prisma.$transaction(
       async (prisma: Prisma.TransactionClient) => {
-        // 1. 刪除該 user 在此 event 的舊投票
+        // 1. Drop this user's previous votes for the event
         await this.deleteUserVotes(eventId, userId, prisma);
 
-        // 2. 建立新的投票紀錄（記錄有空的時段）
+        // 2. Create the new vote rows (the slots they are available for)
         if (availableSlotIds.length > 0) {
           await this.createVotes(eventId, userId, availableSlotIds, prisma);
         }
 
-        // 3. 更新 EventExpectedParticipant 的 hasVoted 狀態
+        // 3. Update hasVoted on EventExpectedParticipant
         await this.updateParticipantVoteStatus(eventId, userId, true, prisma);
 
         return { availableSlotIds };
@@ -234,7 +237,7 @@ export class VoteRepository {
   }
 
   /**
-   * 增量新增投票
+   * Add votes incrementally
    */
   async upsertVotes(
     eventId: string,
@@ -255,7 +258,7 @@ export class VoteRepository {
   }
 
   /**
-   * 刪除指定 slots 的投票
+   * Delete the votes for the given slots
    */
   async deleteSpecificVotes(
     eventId: string,
@@ -275,7 +278,7 @@ export class VoteRepository {
   }
 
   /**
-   * 使用交易執行增量投票更新
+   * Run an incremental vote update in a transaction
    */
   async updateVotesInTransaction(
     eventId: string,
@@ -285,12 +288,12 @@ export class VoteRepository {
   ) {
     return this.prisma.$transaction(
       async (prisma: Prisma.TransactionClient) => {
-        // 1. 新增投票
+        // 1. Add votes
         if (addSlotIds.length > 0) {
           await this.upsertVotes(eventId, userId, addSlotIds, prisma);
         }
 
-        // 2. 刪除投票
+        // 2. Remove votes
         if (removeSlotIds.length > 0) {
           await this.deleteSpecificVotes(
             eventId,
@@ -300,7 +303,7 @@ export class VoteRepository {
           );
         }
 
-        // 3. 更新 EventExpectedParticipant 的 hasVoted 狀態
+        // 3. Update hasVoted on EventExpectedParticipant
         await this.updateParticipantVoteStatus(eventId, userId, true, prisma);
 
         return { addSlotIds, removeSlotIds };
@@ -309,7 +312,7 @@ export class VoteRepository {
   }
 
   /**
-   * 將 staged 草稿提交為 committed votes 並清除草稿
+   * Commit a staged draft into committed votes and clear the draft
    */
   async commitStagedVotesInTransaction(
     eventId: string,
