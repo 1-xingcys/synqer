@@ -253,6 +253,16 @@ export function useMergedTimeGridSelectionInteraction({
   // Click handler for single cell toggle
   const handleClick = useCallback(
     (rowIndex: number, dateIndex: number) => {
+      // A drag across more than one cell has already committed on touchend,
+      // but a touch that stayed within the browser's slop threshold still
+      // emits a click — and a touch retargets it to the cell the finger
+      // started in. Acting on it would toggle that first cell straight back
+      // off, which is why a short two-cell drag sometimes lost its origin.
+      if (hasCommittedRef.current) {
+        hasCommittedRef.current = false;
+        return;
+      }
+
       const slotIds = getSlotIdsForCell(rowIndex, dateIndex);
       if (slotIds.length === 0) return;
 
