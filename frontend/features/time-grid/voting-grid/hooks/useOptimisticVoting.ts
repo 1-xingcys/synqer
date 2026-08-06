@@ -43,8 +43,8 @@ interface UseOptimisticVotingReturn {
     voteMode: VoteMode,
   ) => void;
   commitStagedVotes: () => void;
-  isCommitPending: boolean;
-  isPending: boolean;
+  /** True from the click on confirm until the commit has settled. */
+  isCommitting: boolean;
 }
 
 /**
@@ -241,7 +241,6 @@ export function useOptimisticVoting({
     commitFeedback,
     updateStagedVotes,
     commitStagedVotes,
-    isCommitPending: commitMutation.isPending,
-    isPending: patchMutation.isPending || commitMutation.isPending,
+    isCommitting: commitMutation.isPending,
   };
 }
