@@ -143,75 +143,89 @@ export class VoteService {
       ...uniqueRemoveSlotIds,
     ]);
 
-    const existingStagedVote = await this.voteRepository.findUserStagedVote(
+    // 讀取現況、套用 delta、寫回必須在同一個臨界區內完成，否則兩個同時進來的
+    // 點擊會讀到同一份舊草稿，後寫的把先寫的格子蓋掉。
+    return this.voteRepository.runInStagedVoteLock(
       eventId,
       userId,
+      async (tx) => {
+        const existingStagedVote = await this.voteRepository.findUserStagedVote(
+          eventId,
+          userId,
+          tx,
+        );
+
+        let baseAvailableSlotIds: string[];
+        let baselineSlotIds: string[];
+
+        if (existingStagedVote) {
+          baseAvailableSlotIds = this.toCanonicalSlotIds(
+            allSlotIds,
+            existingStagedVote.slotIds,
+          );
+
+          baselineSlotIds = this.toCanonicalSlotIds(
+            allSlotIds,
+            existingStagedVote.baselineSlotIds,
+          );
+        } else {
+          const hasVoted = Boolean(participantVoteStatus?.hasVoted);
+
+          if (hasVoted) {
+            baseAvailableSlotIds =
+              await this.voteRepository.findUserCommittedSlotIds(
+                eventId,
+                userId,
+                tx,
+              );
+          } else if (voteMode === VoteMode.UNAVAILABLE) {
+            baseAvailableSlotIds = allSlotIds;
+          } else {
+            baseAvailableSlotIds = [];
+          }
+
+          baselineSlotIds = this.toCanonicalSlotIds(
+            allSlotIds,
+            baseAvailableSlotIds,
+          );
+          baseAvailableSlotIds = [...baselineSlotIds];
+        }
+
+        const nextAvailableSlotIds = new Set(baseAvailableSlotIds);
+        uniqueAddSlotIds.forEach((slotId) => nextAvailableSlotIds.add(slotId));
+        uniqueRemoveSlotIds.forEach((slotId) =>
+          nextAvailableSlotIds.delete(slotId),
+        );
+
+        const nextCanonicalSlotIds = this.toCanonicalSlotIds(
+          allSlotIds,
+          nextAvailableSlotIds,
+        );
+
+        if (this.areSameSlotIds(nextCanonicalSlotIds, baselineSlotIds)) {
+          if (existingStagedVote) {
+            await this.voteRepository.deleteStagedVote(eventId, userId, tx);
+          }
+          return {
+            success: true,
+            stagedSlotCount: 0,
+          };
+        }
+
+        await this.voteRepository.upsertStagedVote(
+          eventId,
+          userId,
+          nextCanonicalSlotIds,
+          baselineSlotIds,
+          tx,
+        );
+
+        return {
+          success: true,
+          stagedSlotCount: nextCanonicalSlotIds.length,
+        };
+      },
     );
-
-    let baseAvailableSlotIds: string[];
-    let baselineSlotIds: string[];
-
-    if (existingStagedVote) {
-      baseAvailableSlotIds = this.toCanonicalSlotIds(
-        allSlotIds,
-        existingStagedVote.slotIds,
-      );
-
-      baselineSlotIds = this.toCanonicalSlotIds(
-        allSlotIds,
-        existingStagedVote.baselineSlotIds,
-      );
-    } else {
-      const hasVoted = Boolean(participantVoteStatus?.hasVoted);
-
-      if (hasVoted) {
-        baseAvailableSlotIds =
-          await this.voteRepository.findUserCommittedSlotIds(eventId, userId);
-      } else if (voteMode === VoteMode.UNAVAILABLE) {
-        baseAvailableSlotIds = allSlotIds;
-      } else {
-        baseAvailableSlotIds = [];
-      }
-
-      baselineSlotIds = this.toCanonicalSlotIds(
-        allSlotIds,
-        baseAvailableSlotIds,
-      );
-      baseAvailableSlotIds = [...baselineSlotIds];
-    }
-
-    const nextAvailableSlotIds = new Set(baseAvailableSlotIds);
-    uniqueAddSlotIds.forEach((slotId) => nextAvailableSlotIds.add(slotId));
-    uniqueRemoveSlotIds.forEach((slotId) =>
-      nextAvailableSlotIds.delete(slotId),
-    );
-
-    const nextCanonicalSlotIds = this.toCanonicalSlotIds(
-      allSlotIds,
-      nextAvailableSlotIds,
-    );
-
-    if (this.areSameSlotIds(nextCanonicalSlotIds, baselineSlotIds)) {
-      if (existingStagedVote) {
-        await this.voteRepository.deleteStagedVote(eventId, userId);
-      }
-      return {
-        success: true,
-        stagedSlotCount: 0,
-      };
-    }
-
-    await this.voteRepository.upsertStagedVote(
-      eventId,
-      userId,
-      nextCanonicalSlotIds,
-      baselineSlotIds,
-    );
-
-    return {
-      success: true,
-      stagedSlotCount: nextCanonicalSlotIds.length,
-    };
   }
 
   /**
