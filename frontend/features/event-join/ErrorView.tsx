@@ -6,9 +6,11 @@ import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 
 interface ErrorViewProps {
   error?: string | null;
+  /** Present only when the failure is a retryable join, not a missing event. */
+  onRetry?: () => void;
 }
 
-export function ErrorView({ error }: ErrorViewProps) {
+export function ErrorView({ error, onRetry }: ErrorViewProps) {
   const t = useTranslations();
 
   return (
@@ -30,17 +32,32 @@ export function ErrorView({ error }: ErrorViewProps) {
           </svg>
         </div>
         <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
-          {t("event.notFound")}
+          {onRetry ? t("eventJoin.joinFailed") : t("event.notFound")}
         </h2>
         <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-          {error || t("eventJoin.eventNotFoundDescription")}
+          {error ||
+            t(
+              onRetry
+                ? "eventJoin.joinFailedDescription"
+                : "eventJoin.eventNotFoundDescription",
+            )}
         </p>
-        <Link
-          href={DEFAULT_OVERVIEW_PATH}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-        >
-          {t("event.backToDashboard")}
-        </Link>
+        <div className="flex items-center justify-center gap-3">
+          <Link
+            href={DEFAULT_OVERVIEW_PATH}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+          >
+            {t("event.backToDashboard")}
+          </Link>
+          {onRetry && (
+            <button
+              onClick={onRetry}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              {t("eventJoin.retry")}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
