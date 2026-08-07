@@ -7,7 +7,8 @@ import { EventDetailNav, NavIcons } from "./event-detail-nav";
 import { DeletedEventView } from "@/components/event/DeletedEventView";
 import { BackButton } from "@/components/ui/BackButton";
 import { EventDetailShellSkeleton } from "./EventDetailShellSkeleton";
-import EventJoinPage from "@/features/event-join";
+import { ErrorView } from "@/features/event-join/ErrorView";
+import { useAutoJoinEvent } from "@/features/event-join/useAutoJoinEvent";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useAuth } from "@/hooks/useAuth";
 import { EventStatus } from "@/types/event";
@@ -41,6 +42,24 @@ export function EventDetailContent({
   const { data, isLoading } = useEventDetail(eventId);
   const { user, loading: authLoading } = useAuth();
 
+  // Resolved before the early returns below, because the auto-join hook cannot
+  // be called conditionally.
+  const isParticipant =
+    data && user
+      ? data.expectedParticipants.some(
+          (p) =>
+            p.userId === user.id.toString() ||
+            p.user?.id === user.id.toString(),
+        )
+      : null;
+
+  const { joinError, retryJoin } = useAutoJoinEvent(eventId, {
+    isAuthenticated: !!user,
+    isParticipant,
+    eventExists: !!data,
+    isDeleted: !!data?.isDeleted,
+  });
+
   if (isLoading || authLoading) {
     return <EventDetailShellSkeleton />;
   }
@@ -63,13 +82,12 @@ export function EventDetailContent({
     );
   }
 
-  const isParticipant = data.expectedParticipants.some(
-    (p) => p.userId === user.id.toString() || p.user?.id === user.id.toString(),
-  );
-
-  // 非參與者：顯示 join UI（EventJoinPage 只在非參與者分支渲染，其內部 redirect 不會觸發）
+  // 非參與者：auto-join 正在進行，完成後 useEventDetail 失效重取，本分支自然消失。
   if (!isParticipant) {
-    return <EventJoinPage eventId={eventId} />;
+    if (joinError) {
+      return <ErrorView error={joinError} onRetry={retryJoin} />;
+    }
+    return <EventDetailShellSkeleton />;
   }
 
   const { event } = data;
