@@ -467,10 +467,6 @@
     }
   },
   "eventJoin": {
-    "youAreInvited": "You're invited to",
-    "joinEvent": "Join Event",
-    "joining": "Joining...",
-    "cancel": "Cancel",
     "votingDeadline": "Voting Deadline",
     "confirmedTime": "Confirmed Event Time",
     "currentParticipants": "Current Participants",

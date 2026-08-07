@@ -467,10 +467,6 @@
     }
   },
   "eventJoin": {
-    "youAreInvited": "您被邀請參加",
-    "joinEvent": "加入活動",
-    "joining": "加入中...",
-    "cancel": "取消",
     "votingDeadline": "投票截止時間",
     "confirmedTime": "確認的活動時間",
     "currentParticipants": "目前參與者",
