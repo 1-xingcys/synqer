@@ -3,44 +3,32 @@
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useEventJoin } from "./useEventJoin";
+import { postJoinRedirectPath } from "./autoJoin";
 import { ErrorView } from "./ErrorView";
-import { JoinConfirmView } from "./JoinConfirmView";
 import { DeletedEventView } from "@/components/event/DeletedEventView";
 import { LoadingState } from "@/components/ui/loading-state";
 import { useRouter } from "@/i18n/routing";
-import { EventStatus } from "@/types/event";
-import { DEFAULT_OVERVIEW_PATH, eventDetailPath } from "@/lib/eventRoutes";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
 
 interface EventJoinPageProps {
   eventId: string;
 }
 
+/**
+ * Landing page for a bare event link, which is where the shared LINE flex
+ * button points. Nobody is asked to confirm anything: a stranger is enrolled
+ * on arrival and forwarded to the tab the link promised.
+ */
 export default function EventJoinPage({ eventId }: EventJoinPageProps) {
   const t = useTranslations();
   const router = useRouter();
-  const {
-    eventInfo,
-    participationStatus,
-    loading,
-    joining,
-    error,
-    handleJoin,
-  } = useEventJoin(eventId);
+  const { eventInfo, isParticipant, loading, error, joinError, retryJoin } =
+    useEventJoin(eventId);
 
   useEffect(() => {
-    if (
-      !loading &&
-      eventInfo &&
-      !eventInfo.isDeleted &&
-      participationStatus?.isParticipant
-    ) {
-      const redirectPath =
-        eventInfo.status === EventStatus.VOTING
-          ? eventDetailPath(eventId, "vote")
-          : eventDetailPath(eventId);
-      router.replace(redirectPath);
-    }
-  }, [eventId, eventInfo, loading, participationStatus?.isParticipant, router]);
+    if (!eventInfo || eventInfo.isDeleted || !isParticipant) return;
+    router.replace(postJoinRedirectPath(eventId, eventInfo.status));
+  }, [eventId, eventInfo, isParticipant, router]);
 
   if (loading) {
     return (
@@ -67,21 +55,16 @@ export default function EventJoinPage({ eventId }: EventJoinPageProps) {
     return <ErrorView error={error} />;
   }
 
-  if (participationStatus?.isParticipant) {
-    return (
-      <LoadingState
-        label={t("common.loading")}
-        viewport="section"
-        textSize="base"
-      />
-    );
+  if (joinError) {
+    return <ErrorView error={joinError} onRetry={retryJoin} />;
   }
 
+  // Joining, or the redirect that follows it, is in flight.
   return (
-    <JoinConfirmView
-      eventInfo={eventInfo}
-      joining={joining}
-      onJoin={() => void handleJoin()}
+    <LoadingState
+      label={t("common.loading")}
+      viewport="section"
+      textSize="base"
     />
   );
 }

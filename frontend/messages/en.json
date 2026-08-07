@@ -467,20 +467,19 @@
     }
   },
   "eventJoin": {
-    "youAreInvited": "You're invited to",
     "votingDeadline": "Voting Deadline",
     "confirmedTime": "Confirmed Event Time",
     "currentParticipants": "Current Participants",
-    "joinEvent": "Join Event",
-    "joining": "Joining...",
-    "cancel": "Cancel",
     "alreadyParticipant": "You're Already a Participant",
     "alreadyParticipantDescription": "You have already joined this event.",
     "goToVote": "Go to Vote",
     "goToEvent": "View Event",
     "eventNotFoundDescription": "The event you're looking for doesn't exist or has been deleted.",
     "eventDeleted": "This event has been deleted",
-    "eventDeletedDescription": "This event has been deleted by the host and can no longer be accessed."
+    "eventDeletedDescription": "This event has been deleted by the host and can no longer be accessed.",
+    "joinFailed": "Couldn't join this event",
+    "joinFailedDescription": "Something went wrong while adding you to this event. Please try again.",
+    "retry": "Try again"
   },
   "event": {
     "loading": "Loading...",

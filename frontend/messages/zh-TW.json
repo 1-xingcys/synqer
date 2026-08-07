@@ -467,20 +467,19 @@
     }
   },
   "eventJoin": {
-    "youAreInvited": "您被邀請參加",
     "votingDeadline": "投票截止時間",
     "confirmedTime": "確認的活動時間",
     "currentParticipants": "目前參與者",
-    "joinEvent": "加入活動",
-    "joining": "加入中...",
-    "cancel": "取消",
     "alreadyParticipant": "您已經是參與者",
     "alreadyParticipantDescription": "您已經加入了這個活動。",
     "goToVote": "前往投票",
     "goToEvent": "查看活動",
     "eventNotFoundDescription": "您尋找的活動不存在或已被刪除。",
     "eventDeleted": "此活動已被刪除",
-    "eventDeletedDescription": "此活動已被主辦人刪除，無法再存取。"
+    "eventDeletedDescription": "此活動已被主辦人刪除，無法再存取。",
+    "joinFailed": "無法加入這個活動",
+    "joinFailedDescription": "把你加入活動時發生問題，請再試一次。",
+    "retry": "重新嘗試"
   },
   "event": {
     "loading": "載入中...",
