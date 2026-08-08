@@ -26,6 +26,50 @@
       "learnMore": "Learn More",
       "scroll": "Scroll to explore"
     },
+    "flow": {
+      "title": "How it works",
+      "tabs": {
+        "line": "Inside LINE",
+        "web": "On the web"
+      },
+      "line": {
+        "create": {
+          "title": "Create the event",
+          "description": "Tap \"New event\" on the official account menu, set the date range and daily hours, then share the event card to your LINE group."
+        },
+        "collect": {
+          "title": "Collect everyone's times",
+          "description": "Group members tap the vote button on the card and drag across the times that work for them."
+        },
+        "inspect": {
+          "title": "See every slot",
+          "description": "Anyone can tap or drag the results grid to see who can make a given slot and how many to expect."
+        },
+        "confirm": {
+          "title": "Confirm the time",
+          "description": "The host picks a slot on the results page as the confirmed time, then shares the result back to the group."
+        }
+      },
+      "web": {
+        "create": {
+          "title": "Create the event",
+          "description": "Create the event on the site, set the date range and daily hours, and get a link to it."
+        },
+        "collect": {
+          "title": "Collect everyone's times",
+          "description": "Paste the link into any chat or email; opening it takes people straight to the voting grid."
+        },
+        "inspect": {
+          "title": "See every slot",
+          "description": "Anyone can tap or drag the results grid to see who can make a given slot and how many to expect."
+        },
+        "confirm": {
+          "title": "Confirm the time",
+          "description": "The host picks a slot as the confirmed time, then sends the link out to tell everyone."
+        }
+      },
+      "mediaPending": "Walkthrough coming soon"
+    },
     "howItWorks": {
       "title": "How It Works",
       "subtitle": "Schedule your events in just 4 simple steps",
