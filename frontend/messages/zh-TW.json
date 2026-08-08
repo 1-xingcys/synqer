@@ -16,9 +16,7 @@
     "close": "關閉"
   },
   "landing": {
-    "gotoDashboard": "前往控制台",
     "startUsing": "開始使用",
-    "signIn": "登入",
     "hero": {
       "badge": "智慧活動排程",
       "titlePart1": "一起投票，",
@@ -27,20 +25,6 @@
       "getStarted": "免費開始使用",
       "learnMore": "了解更多",
       "scroll": "滑動探索更多"
-    },
-    "features": {
-      "events": {
-        "title": "活動管理",
-        "description": "輕鬆建立和管理您的活動，追蹤所有重要細節"
-      },
-      "collaboration": {
-        "title": "協作共享",
-        "description": "與您的團隊成員無縫協作，讓每個人都保持同步"
-      },
-      "simple": {
-        "title": "簡單易用",
-        "description": "直觀的介面設計，讓您立即上手，無需複雜的學習過程"
-      }
     },
     "howItWorks": {
       "title": "使用流程",

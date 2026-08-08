@@ -16,9 +16,7 @@
     "close": "Close"
   },
   "landing": {
-    "gotoDashboard": "Go to Dashboard",
     "startUsing": "Get Started",
-    "signIn": "Sign In",
     "hero": {
       "badge": "Smart Event Scheduling",
       "titlePart1": "Schedule Together,",
@@ -27,20 +25,6 @@
       "getStarted": "Get Started Free",
       "learnMore": "Learn More",
       "scroll": "Scroll to explore"
-    },
-    "features": {
-      "events": {
-        "title": "Event Management",
-        "description": "Easily create and manage your events, tracking all the important details"
-      },
-      "collaboration": {
-        "title": "Seamless Collaboration",
-        "description": "Work together with your team members seamlessly, keeping everyone in sync"
-      },
-      "simple": {
-        "title": "Simple to Use",
-        "description": "Intuitive interface design lets you get started immediately, no complex learning curve"
-      }
     },
     "howItWorks": {
       "title": "How It Works",
