@@ -1,9 +1,11 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
-import { LOCALES } from "@/i18n/locales";
+import { LOCALES, DEFAULT_LOCALE } from "@/i18n/locales";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { SITE_URL, siteUrl } from "@/lib/site";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
@@ -18,15 +20,64 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Synqer - 輕鬆管理您的活動",
-  description: "Synqer 讓活動管理變得簡單而有效率，讓您專注於最重要的事情",
-  icons: {
-    icon: "/synqer.png",
-    shortcut: "/synqer.png",
-    apple: "/synqer.png",
-  },
+/** The `og:locale` spelling of each of our locales. */
+const OG_LOCALES: Record<string, string> = {
+  "zh-TW": "zh_TW",
+  en: "en_US",
 };
+
+/**
+ * Per-locale metadata.
+ *
+ * It has to be generated rather than stated: a single hard-coded title left
+ * the English page describing itself in Chinese, and left both pages without a
+ * canonical URL, hreflang alternates or a share card.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+
+  const title = t("title");
+  const description = t("description");
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title,
+    description,
+    applicationName: "Synqer",
+    icons: {
+      icon: "/synqer.png",
+      shortcut: "/synqer.png",
+      apple: "/synqer.png",
+    },
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        ...Object.fromEntries(
+          LOCALES.map((alternate) => [alternate, `/${alternate}`]),
+        ),
+        "x-default": `/${DEFAULT_LOCALE}`,
+      },
+    },
+    openGraph: {
+      type: "website",
+      siteName: "Synqer",
+      title,
+      description,
+      url: siteUrl(`/${locale}`),
+      locale: OG_LOCALES[locale] ?? locale,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
 
 /** Lets the public pages under this layout be prerendered, one per locale. */
 export function generateStaticParams() {
