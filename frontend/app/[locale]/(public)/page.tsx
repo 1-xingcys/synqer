@@ -66,7 +66,7 @@ function AnimatedGrid() {
 
       {/* Animated grid lines */}
       <svg
-        className="absolute inset-0 w-full h-full opacity-[0.03] dark:opacity-[0.05]"
+        className="hidden md:block absolute inset-0 w-full h-full opacity-[0.03] dark:opacity-[0.05]"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -90,11 +90,11 @@ function AnimatedGrid() {
 
       {/* Floating shapes - using Synqer colors */}
       <FloatingIcon
-        className="hidden md:block top-[18%] left-[10%]"
+        className="hidden md:block md:top-[18%] md:left-[10%]"
         delay={0.2}
       >
         <div
-          className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl backdrop-blur-sm flex items-center justify-center"
+          className="w-9 h-9 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-xl backdrop-blur-sm flex items-center justify-center"
           style={{
             background:
               "linear-gradient(to bottom right, rgba(103, 128, 199, 0.2), rgba(103, 128, 199, 0.1))",
@@ -103,7 +103,7 @@ function AnimatedGrid() {
           }}
         >
           <svg
-            className="w-6 h-6 lg:w-7 lg:h-7"
+            className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7"
             style={{ color: "rgba(103, 128, 199, 0.6)" }}
             fill="none"
             stroke="currentColor"
@@ -120,11 +120,11 @@ function AnimatedGrid() {
       </FloatingIcon>
 
       <FloatingIcon
-        className="hidden md:block top-[24%] right-[12%]"
+        className="hidden md:block md:top-[24%] md:right-[12%]"
         delay={0.4}
       >
         <div
-          className="w-12 h-12 lg:w-14 lg:h-14 rounded-full backdrop-blur-sm flex items-center justify-center"
+          className="w-9 h-9 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full backdrop-blur-sm flex items-center justify-center"
           style={{
             background:
               "linear-gradient(to bottom right, rgba(120, 176, 224, 0.2), rgba(120, 176, 224, 0.1))",
@@ -133,7 +133,7 @@ function AnimatedGrid() {
           }}
         >
           <svg
-            className="w-6 h-6 lg:w-7 lg:h-7"
+            className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7"
             style={{ color: "rgba(120, 176, 224, 0.6)" }}
             fill="none"
             stroke="currentColor"
@@ -168,16 +168,16 @@ function AnimatedGrid() {
 
       {/* Gradient orbs - using Synqer colors */}
       <div
-        className="absolute top-1/4 -left-16 md:-left-32 w-48 h-48 md:w-72 md:h-72 lg:w-96 lg:h-96 rounded-full blur-3xl"
+        className="absolute top-1/4 -left-10 md:-left-32 w-64 h-64 md:w-72 md:h-72 lg:w-96 lg:h-96 rounded-full blur-3xl"
         style={{
-          backgroundColor: "rgba(103, 128, 199, 0.1)",
+          backgroundColor: "rgba(103, 128, 199, 0.16)",
           animation: "pulse 8s ease-in-out infinite",
         }}
       />
       <div
-        className="absolute bottom-1/4 -right-16 md:-right-32 w-48 h-48 md:w-72 md:h-72 lg:w-96 lg:h-96 rounded-full blur-3xl"
+        className="absolute bottom-1/4 -right-10 md:-right-32 w-64 h-64 md:w-72 md:h-72 lg:w-96 lg:h-96 rounded-full blur-3xl"
         style={{
-          backgroundColor: "rgba(120, 176, 224, 0.1)",
+          backgroundColor: "rgba(120, 176, 224, 0.16)",
           animation: "pulse 8s ease-in-out infinite 2s",
         }}
       />
