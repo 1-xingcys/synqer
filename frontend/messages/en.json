@@ -18,13 +18,11 @@
   "landing": {
     "startUsing": "Get Started",
     "hero": {
-      "badge": "Smart Event Scheduling",
       "titlePart1": "Schedule Together,",
       "titlePart2": "Effortlessly",
-      "subtitle": "Stop the endless back-and-forth. Let everyone vote on the best time and sync it to your calendar in seconds.",
-      "getStarted": "Get Started Free",
-      "learnMore": "Learn More",
-      "scroll": "Scroll to explore"
+      "subtitle": "Create the event, drop it in the chat, pick the time — done in five minutes. No more endless back-and-forth.",
+      "getStarted": "Add on LINE to start",
+      "learnMore": "Create on the web"
     },
     "flow": {
       "title": "How it works",
@@ -69,35 +67,6 @@
         }
       },
       "mediaPending": "Walkthrough coming soon"
-    },
-    "howItWorks": {
-      "title": "How It Works",
-      "subtitle": "Schedule your events in just 4 simple steps",
-      "step1": {
-        "title": "Create Event",
-        "description": "Set up your event with possible time slots that work for you"
-      },
-      "step2": {
-        "title": "Invite Participants",
-        "description": "Share the event link or use LINE to invite your friends"
-      },
-      "step3": {
-        "title": "Collect Votes",
-        "description": "Participants vote on their available times"
-      },
-      "step4": {
-        "title": "Confirm Time",
-        "description": "Choose the best time slot and add it to your calendar"
-      }
-    },
-    "lineIntegration": {
-      "title": "Seamless LINE Integration",
-      "description": "Connect with Synqer through LINE for the ultimate convenience. Create events, receive notifications, and manage everything right from your favorite messaging app.",
-      "feature1": "Create and manage events directly in LINE groups",
-      "feature2": "Get instant notifications when participants vote",
-      "feature3": "Quick access to all your events via LINE menu",
-      "scanQR": "Scan to add our LINE Official Account",
-      "addFriend": "Add Friend"
     }
   },
   "auth": {
