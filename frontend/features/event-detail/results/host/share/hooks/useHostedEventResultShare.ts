@@ -13,11 +13,7 @@ import {
   type HostedResultSlot,
   type HostedResultVote,
 } from "@/lib/hostedEventResultSummary";
-import {
-  canShareHostedEventResultText,
-  shareHostedEventResultText,
-  TextShareResult,
-} from "../shareHostedEventResultText";
+import { canShareText, shareText, TextShareResult } from "@/lib/shareText";
 import { shareHostedEventResultFlexMessage } from "@/lib/line-flex-message/hostedEventResultFlexMessage";
 import { ShareResult } from "@/lib/line-flex-message/shareEventFlexMessage";
 
@@ -43,7 +39,7 @@ export function useHostedEventResultShare(opts: {
     useCopyToClipboard();
   const { isInClient: isInLiffClient, isInitialized: isLiffInitialized } =
     useLiffContext();
-  const canNativeShareResultText = canShareHostedEventResultText();
+  const canNativeShareResultText = canShareText();
   // The native share sheet is modal and reports its own progress, so this only
   // needs to stop a second call while one is open. A ref, not state: nothing
   // renders it.
@@ -91,7 +87,7 @@ export function useHostedEventResultShare(opts: {
     isSharingResultText.current = true;
 
     try {
-      const result = await shareHostedEventResultText({ text: resultText });
+      const result = await shareText({ text: resultText });
       return result === TextShareResult.Success;
     } finally {
       isSharingResultText.current = false;
