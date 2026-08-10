@@ -13,12 +13,6 @@ interface ProtectedHeaderProps {
 /**
  * ProtectedHeader 元件
  * 用於登入後的受保護頁面（dashboard, events 等）
- *
- * 顯示內容：
- * - 漢堡按鈕（左側，用於打開 Sidebar）
- * - Logo（左側，在漢堡按鈕右邊）
- * - 中間內容（可選，通過 children 傳入）
- * - UserMenu（右側，使用者頭像 + 下拉選單）
  */
 export default function ProtectedHeader({
   children,
@@ -29,10 +23,10 @@ export default function ProtectedHeader({
 
   return (
     <header
-      className={`bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 ${headerPositionClass}`}
+      className={`h-[var(--header-height)] bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 ${headerPositionClass}`}
     >
-      <div className="w-full pl-3 pr-4 py-2">
-        <div className="flex items-center justify-between">
+      <div className="w-full h-full pl-3 pr-4">
+        <div className="flex h-full items-center justify-between">
           {/* 左側：漢堡按鈕 + Logo */}
           <div className="flex items-center gap-2">
             {/* 漢堡按鈕 - 用於打開 Sidebar */}
