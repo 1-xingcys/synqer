@@ -21,7 +21,10 @@ function ProtectedShellContent({ children }: ProtectedShellProps) {
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-900">
+    // dvh rather than vh: on a phone `100vh` is the viewport with the browser
+    // chrome hidden, so a min-height of it leaves every page scrollable by the
+    // height of the address bar even when nothing overflows.
+    <div className="min-h-dvh bg-white dark:bg-zinc-900">
       <ProtectedHeader
         onMenuClick={toggle}
         sticky={!isEventDetailPagePath(pathname)}

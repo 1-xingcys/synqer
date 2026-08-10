@@ -32,8 +32,8 @@ function getLocalePrefix(pathname: string): string {
   return localeMatch ? `/${localeMatch[1]}` : "";
 }
 
-function getEventShareCopy(localePrefix: string): EventShareCopy {
-  if (localePrefix === "/zh-TW") {
+function getEventShareCopy(locale: string): EventShareCopy {
+  if (locale === "zh-TW") {
     return {
       votePrefix: "[投票] ",
       untitledEvent: "未命名活動",
@@ -56,36 +56,66 @@ function getEventShareCopy(localePrefix: string): EventShareCopy {
   };
 }
 
-function getDateLocale(localePrefix: string) {
-  return localePrefix === "/zh-TW" ? "zh-TW" : "en-US";
+function getDateLocale(locale: string) {
+  return locale === "zh-TW" ? "zh-TW" : "en-US";
 }
 
 function formatDeadline(
   votingDeadline: WallClock | undefined,
   copy: EventShareCopy,
-  localePrefix: string,
+  locale: string,
 ): string | null {
   if (!votingDeadline) return null;
   // Pinned to UTC below because the digits live in the UTC fields; formatting
   // through the event's real zone here would double-apply the offset.
   const d = wallClockToDate(votingDeadline);
-  const locale = getDateLocale(localePrefix);
-  const monthDay = new Intl.DateTimeFormat(locale, {
+  const dateLocale = getDateLocale(locale);
+  const monthDay = new Intl.DateTimeFormat(dateLocale, {
     month: "numeric",
     day: "numeric",
     timeZone: "UTC",
   }).format(d);
-  const weekday = new Intl.DateTimeFormat(locale, {
-    weekday: localePrefix === "/zh-TW" ? "narrow" : "short",
+  const weekday = new Intl.DateTimeFormat(dateLocale, {
+    weekday: locale === "zh-TW" ? "narrow" : "short",
     timeZone: "UTC",
   }).format(d);
-  const time = new Intl.DateTimeFormat(locale, {
+  const time = new Intl.DateTimeFormat(dateLocale, {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
     timeZone: "UTC",
   }).format(d);
   return `${copy.deadlinePrefix}${monthDay}${copy.openingParenthesis}${weekday}${copy.closingParenthesis}${time}`;
+}
+
+/** Every string the invite bubble puts on screen. */
+export interface EventShareBubbleFields {
+  titleText: string;
+  /** Null when the event has no voting deadline. */
+  deadlineText: string | null;
+  instructionText: string;
+  voteButtonLabel: string;
+}
+
+/**
+ * The bubble's visible copy, resolved once and shared by the message builder
+ * below and by the on-screen preview of it. The preview is a hand-built
+ * replica of the layout, so pulling the strings from here is what stops the
+ * two from drifting apart.
+ */
+export function buildEventShareBubbleFields(opts: {
+  title: string;
+  votingDeadline?: WallClock;
+  locale: string;
+}): EventShareBubbleFields {
+  const copy = getEventShareCopy(opts.locale);
+
+  return {
+    titleText: `${copy.votePrefix}${opts.title || copy.untitledEvent}`,
+    deadlineText: formatDeadline(opts.votingDeadline, copy, opts.locale),
+    instructionText: copy.instructionText,
+    voteButtonLabel: copy.voteButtonLabel,
+  };
 }
 
 function buildEventVoteUrl(eventId: string, localePrefix: string): string {
@@ -103,15 +133,17 @@ export function buildEventShareFlexMessage(info: EventShareInfo) {
   const pathname =
     typeof window !== "undefined" ? window.location.pathname : "";
   const localePrefix = getLocalePrefix(pathname);
-  const copy = getEventShareCopy(localePrefix);
-  const title = info.title || copy.untitledEvent;
-  const deadline = formatDeadline(info.votingDeadline, copy, localePrefix);
+  const fields = buildEventShareBubbleFields({
+    title: info.title,
+    votingDeadline: info.votingDeadline,
+    locale: localePrefix.slice(1),
+  });
   const voteUrl = buildEventVoteUrl(info.eventId, localePrefix);
 
   const bodyContents: Array<Record<string, unknown>> = [
     {
       type: "text",
-      text: `${copy.votePrefix}${title}`,
+      text: fields.titleText,
       weight: "bold",
       size: "lg",
       wrap: true,
@@ -120,10 +152,10 @@ export function buildEventShareFlexMessage(info: EventShareInfo) {
     },
   ];
 
-  if (deadline) {
+  if (fields.deadlineText) {
     bodyContents.push({
       type: "text",
-      text: deadline,
+      text: fields.deadlineText,
       size: "sm",
       color: "#999999",
       margin: "md",
@@ -132,16 +164,16 @@ export function buildEventShareFlexMessage(info: EventShareInfo) {
 
   bodyContents.push({
     type: "text",
-    text: copy.instructionText,
+    text: fields.instructionText,
     size: "sm",
     color: "#666666",
     wrap: true,
-    margin: deadline ? "lg" : "xl",
+    margin: fields.deadlineText ? "lg" : "xl",
   });
 
   return {
     type: "flex",
-    altText: `${copy.votePrefix}${title}`,
+    altText: fields.titleText,
     contents: {
       type: "bubble",
       size: "kilo",
@@ -162,7 +194,7 @@ export function buildEventShareFlexMessage(info: EventShareInfo) {
             height: "sm",
             action: {
               type: "uri",
-              label: copy.voteButtonLabel,
+              label: fields.voteButtonLabel,
               uri: voteUrl,
             },
             color: "#2563EB",

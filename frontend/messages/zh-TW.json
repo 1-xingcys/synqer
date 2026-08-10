@@ -912,24 +912,23 @@
     },
     "success": {
       "title": "活動建立成功！",
-      "description": "現在可以開始邀請參與者投票。",
-      "eventName": "活動名稱",
-      "unnamedEvent": "未命名活動",
-      "nextSteps": "下一步",
-      "goToManage": "前往管理頁面",
-      "goToManageDescription": "決定最終時間、管理參與者",
-      "goToVote": "前往投票頁面",
-      "goToVoteDescription": "填寫自己的有空時間",
-      "copyLink": "複製投票連結",
-      "copyLinkDescription": "分享連結給朋友參與投票",
-      "linkCopied": "連結已複製！",
+      "invite": {
+        "title": "邀請參與者投票",
+        "lineSubtitle": "參與者會在聊天室收到這則訊息",
+        "textSubtitle": "傳送下方文字給要參與的人"
+      },
       "shareToLine": "分享到 LINE",
-      "shareToLineDescription": "選擇好友或群組分享活動",
       "sendToLineGroup": "發送到 LINE 群組",
-      "sendToLineGroupDescription": "將活動資訊發送到綁定的 LINE 群組",
-      "sending": "發送中...",
-      "sentSuccess": "發送成功！",
-      "sentFailed": "發送失敗，請稍後再試"
+      "sendToNamedGroup": "發送到「{groupName}」",
+      "sharingToLine": "傳送中...",
+      "sharedToLine": "已傳送",
+      "shareToLineFailed": "傳送失敗，請再試一次",
+      "copyShareText": "複製投票文字",
+      "shareShareText": "分享投票文字",
+      "sharePreview": {
+        "flexAria": "LINE 訊息預覽"
+      },
+      "shareTextCopied": "已複製投票文字！"
     },
     "preference": {
       "title": "Preference"
