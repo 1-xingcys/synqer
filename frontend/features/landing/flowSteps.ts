@@ -7,38 +7,64 @@
  * routes through one process rather than two products.
  */
 
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/locales";
+
 export const FLOW_MODES = ["line", "web"] as const;
 
 export type FlowMode = (typeof FLOW_MODES)[number];
 
-/** Where the captures live, under `public/`. */
-export const FLOW_MEDIA_DIR = "/landing";
+/**
+ * Where the captures live.
+ *
+ * They sit in an R2 bucket rather than `public/` because they are the heaviest
+ * thing on the page and they change on their own schedule — a new capture
+ * should not need a rebuild and a new image.
+ */
+export const FLOW_MEDIA_BASE = "https://assets.synqer.club";
+
+/** The site themes a capture can be shot against — next-themes' resolved values. */
+export const FLOW_THEMES = ["light", "dark"] as const;
+
+export type FlowTheme = (typeof FLOW_THEMES)[number];
+
+/**
+ * One shot combination, which is also the directory it lives in.
+ *
+ * Locale and theme are path segments rather than filename suffixes so that a
+ * whole locale or a whole theme uploads as one folder, and so that the hyphen
+ * inside `zh-TW` never has to be told apart from a separator.
+ */
+export type FlowVariant = `${Locale}/${FlowTheme}`;
 
 export interface FlowStep {
   /** Also the translation key under `landing.flow.<mode>`. */
   key: string;
-  /** Filename inside {@link FLOW_MEDIA_DIR}. */
+  /** Leaf object name, below the variant directory. */
   file: string;
   /**
-   * Whether the file exists yet. While false the step renders a placeholder
-   * holding the right amount of space, so dropping the capture in later does
-   * not reflow the page.
+   * Which variants have actually been shot.
+   *
+   * Existence is declared here rather than discovered at runtime: probing for
+   * a missing object would cost a 404 and a flash of broken image, and could
+   * not run during SSR at all. Empty means the step renders a placeholder
+   * holding exactly the space its capture will occupy, so dropping the capture
+   * in later does not reflow the page.
    */
-  ready: boolean;
+  captured: readonly FlowVariant[];
 }
 
 export const FLOW_STEPS: Record<FlowMode, FlowStep[]> = {
   line: [
-    { key: "create", file: "line-1-create.gif", ready: false },
-    { key: "collect", file: "line-2-collect.gif", ready: false },
-    { key: "inspect", file: "line-3-inspect.gif", ready: false },
-    { key: "confirm", file: "line-4-confirm.gif", ready: false },
+    { key: "create", file: "line-step-1.png", captured: [] },
+    { key: "collect", file: "line-step-2.png", captured: [] },
+    { key: "inspect", file: "line-step-3.png", captured: [] },
+    { key: "confirm", file: "line-step-4.png", captured: [] },
   ],
   web: [
-    { key: "create", file: "web-1-create.gif", ready: false },
-    { key: "collect", file: "web-2-collect.gif", ready: false },
-    { key: "inspect", file: "web-3-inspect.gif", ready: false },
-    { key: "confirm", file: "web-4-confirm.gif", ready: false },
+    { key: "create", file: "web-step-1.png", captured: [] },
+    { key: "collect", file: "web-step-2.png", captured: [] },
+    { key: "inspect", file: "web-step-3.png", captured: [] },
+    { key: "confirm", file: "web-step-4.png", captured: [] },
   ],
 };
 
@@ -60,6 +86,34 @@ export const FLOW_MEDIA: Record<
   web: { aspect: "16 / 10", maxWidth: "36rem", pixels: "1600 × 1000" },
 };
 
-export function flowMediaSrc(step: FlowStep): string {
-  return `${FLOW_MEDIA_DIR}/${step.file}`;
+/**
+ * The best capture available for this reader, or null if the step has none.
+ *
+ * Locale outranks theme. A light capture on a dark page merely looks a little
+ * out of place, while a Chinese capture is unreadable to an English reader —
+ * so a matching language is worth giving up a matching theme for.
+ *
+ * Both themes draw from the same four candidates in a different order, so the
+ * two calls a step makes are null together or not at all: whenever anything
+ * has been shot, both themes resolve to something.
+ */
+export function flowMediaSrc(
+  step: FlowStep,
+  theme: FlowTheme,
+  locale: Locale,
+): string | null {
+  const fallbackTheme: FlowTheme = theme === "dark" ? "light" : "dark";
+
+  const preference: FlowVariant[] = [
+    `${locale}/${theme}`,
+    `${locale}/${fallbackTheme}`,
+    `${DEFAULT_LOCALE}/${theme}`,
+    `${DEFAULT_LOCALE}/${fallbackTheme}`,
+  ];
+
+  const variant = preference.find((candidate) =>
+    step.captured.includes(candidate),
+  );
+
+  return variant ? `${FLOW_MEDIA_BASE}/landing/${variant}/${step.file}` : null;
 }
