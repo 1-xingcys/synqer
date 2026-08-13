@@ -55,16 +55,52 @@ export interface FlowStep {
 
 export const FLOW_STEPS: Record<FlowMode, FlowStep[]> = {
   line: [
-    { key: "create", file: "line-step-1.png", captured: [] },
-    { key: "collect", file: "line-step-2.png", captured: [] },
-    { key: "inspect", file: "line-step-3.png", captured: [] },
-    { key: "confirm", file: "line-step-4.png", captured: [] },
+    {
+      key: "create",
+      file: "line-step-1.png",
+      captured: ["en/light", "en/dark", "zh-TW/light", "zh-TW/dark"],
+    },
+    // Only step 1 has been shot in dark so far; the rest fall back to light.
+    {
+      key: "collect",
+      file: "line-step-2.png",
+      captured: ["en/light", "en/dark", "zh-TW/light", "zh-TW/dark"],
+    },
+    {
+      key: "inspect",
+      file: "line-step-3.png",
+      captured: ["en/light", "en/dark", "zh-TW/light", "zh-TW/dark"],
+    },
+    {
+      key: "confirm",
+      file: "line-step-4.png",
+      captured: ["en/light", "en/dark", "zh-TW/light", "zh-TW/dark"],
+    },
   ],
+  // The web flow has only been shot in dark, in both languages, so a reader on
+  // a light page is served the dark capture in their own language rather than
+  // a light one in the other — see flowMediaSrc on why locale wins.
   web: [
-    { key: "create", file: "web-step-1.png", captured: [] },
-    { key: "collect", file: "web-step-2.png", captured: [] },
-    { key: "inspect", file: "web-step-3.png", captured: [] },
-    { key: "confirm", file: "web-step-4.png", captured: [] },
+    {
+      key: "create",
+      file: "web-step-1.png",
+      captured: ["en/light", "en/dark", "zh-TW/light", "zh-TW/dark"],
+    },
+    {
+      key: "collect",
+      file: "web-step-2.png",
+      captured: ["en/light", "en/dark", "zh-TW/light", "zh-TW/dark"],
+    },
+    {
+      key: "inspect",
+      file: "web-step-3.png",
+      captured: ["en/light", "en/dark", "zh-TW/light", "zh-TW/dark"],
+    },
+    {
+      key: "confirm",
+      file: "web-step-4.png",
+      captured: ["en/light", "en/dark", "zh-TW/light", "zh-TW/dark"],
+    },
   ],
 };
 
