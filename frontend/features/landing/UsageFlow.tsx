@@ -17,17 +17,15 @@ import {
  * One capture, filling the frame its parent has already reserved.
  *
  * `className` is what decides whether this copy is the one on screen, so the
- * two themes can be told apart without either of them knowing the theme.
+ * two themes can be told apart without any of them knowing the theme.
  */
 function Capture({
   src,
   alt,
-  sizes,
   className,
 }: {
   src: string;
   alt: string;
-  sizes: string;
   className?: string;
 }) {
   return (
@@ -35,8 +33,8 @@ function Capture({
       src={src}
       alt={alt}
       fill
-      className={`object-cover ${className ?? ""}`}
-      sizes={sizes}
+      className={`object-contain ${className ?? ""}`}
+      sizes={`(max-width: 1024px) 100vw, ${FLOW_MEDIA.maxWidth}`}
       // Captures are hand-made and already sized; re-encoding a GIF through
       // the optimizer would drop its animation.
       unoptimized
@@ -47,9 +45,11 @@ function Capture({
 /**
  * The capture for one step, or the space it will occupy.
  *
- * No frame around it: a phone bezel or browser chrome drawn in CSS competes
- * with whatever chrome is already inside the screenshot. Rounded corners and
- * a soft shadow are enough to lift it off the page.
+ * Nothing is drawn around the capture. It arrives as a device mockup that
+ * already carries its own bezel and its own drop shadow, so a CSS shadow would
+ * land on the rectangular frame rather than on the phone — a soft grey oblong
+ * floating behind a transparent image — and rounded corners would clip a
+ * picture whose corners are already transparent.
  *
  * The theme is picked in CSS rather than in JavaScript. next-themes only puts
  * its class on `<html>` once the client has run, so choosing a `src` from the
@@ -61,52 +61,42 @@ function Capture({
  */
 function StepMedia({
   step,
-  mode,
   alt,
   pendingLabel,
 }: {
   step: FlowStep;
-  mode: FlowMode;
   alt: string;
   pendingLabel: string;
 }) {
-  const { aspect, maxWidth, pixels } = FLOW_MEDIA[mode];
+  const { aspect, maxWidth, bleed, bleedInset, pixels } = FLOW_MEDIA;
   const active = useLocale();
   const locale = isLocale(active) ? active : DEFAULT_LOCALE;
-  const sizes = `(max-width: 1024px) 100vw, ${maxWidth}`;
 
   const light = flowMediaSrc(step, "light", locale);
   const dark = flowMediaSrc(step, "dark", locale);
 
   return (
-    <div className="w-full" style={{ maxWidth }}>
-      <div
-        className="relative w-full overflow-hidden rounded-2xl shadow-lg shadow-zinc-900/10 dark:shadow-black/40"
-        style={{ aspectRatio: aspect }}
-      >
+    // The bleed applies whether or not the capture has been shot, and the
+    // placeholder below is inset by the matching amount, so the two states
+    // stand in exactly the same space and dropping a capture in never reflows.
+    <div className="w-full" style={{ maxWidth, marginBlock: bleed }}>
+      <div className="relative w-full" style={{ aspectRatio: aspect }}>
         {light !== null && dark !== null ? (
           // Both themes fall back to one capture until the other is shot, and
           // a second copy of the same file would only ever be the hidden one.
           light === dark ? (
-            <Capture src={light} alt={alt} sizes={sizes} />
+            <Capture src={light} alt={alt} />
           ) : (
             <>
-              <Capture
-                src={light}
-                alt={alt}
-                sizes={sizes}
-                className="dark:hidden"
-              />
-              <Capture
-                src={dark}
-                alt={alt}
-                sizes={sizes}
-                className="hidden dark:block"
-              />
+              <Capture src={light} alt={alt} className="dark:hidden" />
+              <Capture src={dark} alt={alt} className="hidden dark:block" />
             </>
           )
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40 rounded-2xl px-4 text-center">
+          <div
+            className="absolute inset-x-0 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/40 rounded-2xl px-4 text-center"
+            style={{ top: bleedInset, bottom: bleedInset }}
+          >
             <svg
               className="w-7 h-7 text-zinc-400 dark:text-zinc-600"
               fill="none"
@@ -186,7 +176,6 @@ function FlowSteps({ mode }: { mode: FlowMode }) {
           <div className="flex w-full justify-center lg:w-1/2">
             <StepMedia
               step={step}
-              mode={mode}
               alt={t(`${mode}.${step.key}.title`)}
               pendingLabel={t("mediaPending")}
             />

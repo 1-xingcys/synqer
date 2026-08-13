@@ -14,7 +14,6 @@ describe("FLOW_STEPS", () => {
   it("describes every mode", () => {
     FLOW_MODES.forEach((mode) => {
       expect(FLOW_STEPS[mode]).toHaveLength(4);
-      expect(FLOW_MEDIA[mode]).toBeDefined();
     });
   });
 
@@ -41,24 +40,6 @@ describe("FLOW_STEPS", () => {
     );
 
     expect(new Set(files).size).toBe(files.length);
-  });
-
-  // A typo in a declared variant — "zh-tw/dark", "dark/zh-TW" — would type
-  // check against the template literal only loosely and then silently resolve
-  // to a 404, so the declared data is checked against the real lists. Vacuous
-  // while nothing has been shot; the point is to catch the first typo.
-  it("only declares variants that name a real locale and theme", () => {
-    const legal: string[] = LOCALES.flatMap((locale) =>
-      FLOW_THEMES.map((theme) => `${locale}/${theme}`),
-    );
-
-    FLOW_MODES.forEach((mode) => {
-      FLOW_STEPS[mode].forEach((declared) => {
-        declared.captured.forEach((variant) => {
-          expect(legal).toContain(variant);
-        });
-      });
-    });
   });
 });
 
@@ -128,5 +109,48 @@ describe("flowMediaSrc", () => {
 
       expect(light === null).toBe(dark === null);
     });
+  });
+
+  // A typo in a declared variant — "zh-tw/dark", "dark/zh-TW" — would type
+  // check against the template literal only loosely and then silently resolve
+  // to a 404, so the declared data is checked against the real lists. Vacuous
+  // while nothing has been shot; the point is to catch the first typo.
+  it("only declares variants that name a real locale and theme", () => {
+    const legal: string[] = LOCALES.flatMap((locale) =>
+      FLOW_THEMES.map((theme) => `${locale}/${theme}`),
+    );
+
+    FLOW_MODES.forEach((mode) => {
+      FLOW_STEPS[mode].forEach((declared) => {
+        declared.captured.forEach((variant) => {
+          expect(legal).toContain(variant);
+        });
+      });
+    });
+  });
+});
+
+describe("FLOW_MEDIA", () => {
+  // Both flows are shot on a phone now, so one frame serves both and it is
+  // 1080 × 1920 exactly. An aspect that disagreed with the captures would
+  // letterbox them silently rather than fail.
+  it("reserves the shape the captures are shot in", () => {
+    expect(FLOW_MEDIA.aspect).toBe("9 / 16");
+    expect(FLOW_MEDIA.pixels).toBe("1080 × 1920");
+  });
+
+  // The frame holds the whole transparent canvas, so it has to be the wider
+  // number: sized to the phone alone the mockup would come out a third small.
+  it("scales the frame up past the phone it contains", () => {
+    expect(parseFloat(FLOW_MEDIA.maxWidth)).toBeCloseTo(24.02, 2);
+  });
+
+  // Whatever the bleed claws back, the placeholder has to give back, or a step
+  // would jump by twice the band the moment its capture landed.
+  it("insets the placeholder by the band the bleed removes", () => {
+    const bleed = Math.abs(parseFloat(FLOW_MEDIA.bleed));
+    const inset = parseFloat(FLOW_MEDIA.bleedInset);
+
+    expect(bleed).toBeCloseTo(inset * (16 / 9), 2);
   });
 });
