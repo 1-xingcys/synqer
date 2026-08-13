@@ -16,60 +16,56 @@
     "close": "關閉"
   },
   "landing": {
-    "gotoDashboard": "前往控制台",
-    "startUsing": "開始使用",
-    "signIn": "登入",
     "hero": {
-      "badge": "智慧活動排程",
       "titlePart1": "一起投票，",
       "titlePart2": "輕鬆搞定",
-      "subtitle": "告別繁瑣的時間協調。讓大家投票選出最佳時間，一鍵同步到行事曆。",
-      "getStarted": "免費開始使用",
-      "learnMore": "了解更多",
-      "scroll": "滑動探索更多"
+      "subtitle": "建立活動、傳進群組、選出時間，五分鐘內搞定，告別繁瑣的時間協調！",
+      "getStarted": "加入 LINE 好友開始使用",
+      "learnMore": "用網頁建立活動"
     },
-    "features": {
-      "events": {
-        "title": "活動管理",
-        "description": "輕鬆建立和管理您的活動，追蹤所有重要細節"
-      },
-      "collaboration": {
-        "title": "協作共享",
-        "description": "與您的團隊成員無縫協作，讓每個人都保持同步"
-      },
-      "simple": {
-        "title": "簡單易用",
-        "description": "直觀的介面設計，讓您立即上手，無需複雜的學習過程"
-      }
-    },
-    "howItWorks": {
+    "flow": {
       "title": "使用流程",
-      "subtitle": "只需 4 個簡單步驟即可安排您的活動",
-      "step1": {
-        "title": "建立活動",
-        "description": "設定活動並加入您方便的時段選項"
+      "tabs": {
+        "line": "在 LINE 使用",
+        "web": "在網頁使用"
       },
-      "step2": {
-        "title": "邀請參與者",
-        "description": "分享活動連結或使用 LINE 邀請您的朋友"
+      "line": {
+        "create": {
+          "title": "建立活動",
+          "description": "在官方帳號選單點「建立新活動」，設定日期範圍與每日時段，再把活動卡片分享到 LINE 群組。"
+        },
+        "collect": {
+          "title": "收集參與者時間",
+          "description": "群組成員點卡片上的投票按鈕，在投票網格上刷出自己有空的時間。"
+        },
+        "inspect": {
+          "title": "查看各個時段",
+          "description": "每個人都能在結果分析頁點選或拖曳網格，看任一時段有誰能到、預期出席多少人。"
+        },
+        "confirm": {
+          "title": "確認活動時間",
+          "description": "主辦人在結果分析頁選取時段作為確認時間，再把結果分享回群組通知大家。"
+        }
       },
-      "step3": {
-        "title": "收集投票",
-        "description": "參與者投票選擇他們有空的時間"
+      "web": {
+        "create": {
+          "title": "建立活動",
+          "description": "在網站上建立活動，設定日期範圍與每日時段，拿到一條活動連結。"
+        },
+        "collect": {
+          "title": "收集參與者時間",
+          "description": "把連結貼到任何聊天室或信件，對方打開就直接進到投票網格。"
+        },
+        "inspect": {
+          "title": "查看各個時段",
+          "description": "每個人都能在結果分析頁點選或拖曳網格，看任一時段有誰能到、預期出席多少人。"
+        },
+        "confirm": {
+          "title": "確認活動時間",
+          "description": "主辦人選取時段作為確認時間，再把活動連結傳給大家通知結果。"
+        }
       },
-      "step4": {
-        "title": "確認時間",
-        "description": "選擇最佳時段並加入您的行事曆"
-      }
-    },
-    "lineIntegration": {
-      "title": "無縫 LINE 整合",
-      "description": "透過 LINE 連結 Synqer，享受極致便利。直接在您最愛的通訊軟體中建立活動、接收通知並管理一切。",
-      "feature1": "在 LINE 群組中直接建立和管理活動",
-      "feature2": "參與者投票時即時收到通知",
-      "feature3": "透過 LINE 選單快速存取所有活動",
-      "scanQR": "掃描 QR Code 加入我們的 LINE 官方帳號",
-      "addFriend": "加入好友"
+      "mediaPending": "示範畫面準備中"
     }
   },
   "auth": {
@@ -688,11 +684,11 @@
     "lineOfficialAccount": "LINE 官方帳號",
     "privacyPolicy": "隱私權政策",
     "termsOfUse": "使用條款",
-    "copyright": "© 2025 Synqer. All rights reserved."
+    "copyright": "© 2026 Synqer. All rights reserved."
   },
   "privacy": {
     "title": "隱私權政策",
-    "lastUpdated": "最後更新：2024 年 12 月 23 日",
+    "lastUpdated": "最後更新：2025 年 12 月 23 日",
     "intro": "Synqer 非常重視您的隱私。本隱私權政策說明我們在您使用活動排程服務時，如何收集、使用和保護您的個人資訊。",
     "sections": {
       "collection": {
@@ -752,7 +748,7 @@
   },
   "terms": {
     "title": "使用條款",
-    "lastUpdated": "最後更新：2024 年 12 月 23 日",
+    "lastUpdated": "最後更新：2025 年 12 月 23 日",
     "intro": "歡迎使用 Synqer。存取或使用我們的服務即表示您同意受本使用條款的約束。請仔細閱讀。",
     "sections": {
       "acceptance": {

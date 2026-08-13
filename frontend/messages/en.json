@@ -16,60 +16,56 @@
     "close": "Close"
   },
   "landing": {
-    "gotoDashboard": "Go to Dashboard",
-    "startUsing": "Get Started",
-    "signIn": "Sign In",
     "hero": {
-      "badge": "Smart Event Scheduling",
       "titlePart1": "Schedule Together,",
       "titlePart2": "Effortlessly",
-      "subtitle": "Stop the endless back-and-forth. Let everyone vote on the best time and sync it to your calendar in seconds.",
-      "getStarted": "Get Started Free",
-      "learnMore": "Learn More",
-      "scroll": "Scroll to explore"
+      "subtitle": "Create the event, drop it in the chat, pick the time — done in five minutes. No more endless back-and-forth.",
+      "getStarted": "Add on LINE to start",
+      "learnMore": "Create on the web"
     },
-    "features": {
-      "events": {
-        "title": "Event Management",
-        "description": "Easily create and manage your events, tracking all the important details"
+    "flow": {
+      "title": "How it works",
+      "tabs": {
+        "line": "Inside LINE",
+        "web": "On the web"
       },
-      "collaboration": {
-        "title": "Seamless Collaboration",
-        "description": "Work together with your team members seamlessly, keeping everyone in sync"
+      "line": {
+        "create": {
+          "title": "Create the event",
+          "description": "Tap \"New event\" on the official account menu, set the date range and daily hours, then share the event card to your LINE group."
+        },
+        "collect": {
+          "title": "Collect everyone's times",
+          "description": "Group members tap the vote button on the card and drag across the times that work for them."
+        },
+        "inspect": {
+          "title": "See every slot",
+          "description": "Anyone can tap or drag the results grid to see who can make a given slot and how many to expect."
+        },
+        "confirm": {
+          "title": "Confirm the time",
+          "description": "The host picks a slot on the results page as the confirmed time, then shares the result back to the group."
+        }
       },
-      "simple": {
-        "title": "Simple to Use",
-        "description": "Intuitive interface design lets you get started immediately, no complex learning curve"
-      }
-    },
-    "howItWorks": {
-      "title": "How It Works",
-      "subtitle": "Schedule your events in just 4 simple steps",
-      "step1": {
-        "title": "Create Event",
-        "description": "Set up your event with possible time slots that work for you"
+      "web": {
+        "create": {
+          "title": "Create the event",
+          "description": "Create the event on the site, set the date range and daily hours, and get a link to it."
+        },
+        "collect": {
+          "title": "Collect everyone's times",
+          "description": "Paste the link into any chat or email; opening it takes people straight to the voting grid."
+        },
+        "inspect": {
+          "title": "See every slot",
+          "description": "Anyone can tap or drag the results grid to see who can make a given slot and how many to expect."
+        },
+        "confirm": {
+          "title": "Confirm the time",
+          "description": "The host picks a slot as the confirmed time, then sends the link out to tell everyone."
+        }
       },
-      "step2": {
-        "title": "Invite Participants",
-        "description": "Share the event link or use LINE to invite your friends"
-      },
-      "step3": {
-        "title": "Collect Votes",
-        "description": "Participants vote on their available times"
-      },
-      "step4": {
-        "title": "Confirm Time",
-        "description": "Choose the best time slot and add it to your calendar"
-      }
-    },
-    "lineIntegration": {
-      "title": "Seamless LINE Integration",
-      "description": "Connect with Synqer through LINE for the ultimate convenience. Create events, receive notifications, and manage everything right from your favorite messaging app.",
-      "feature1": "Create and manage events directly in LINE groups",
-      "feature2": "Get instant notifications when participants vote",
-      "feature3": "Quick access to all your events via LINE menu",
-      "scanQR": "Scan to add our LINE Official Account",
-      "addFriend": "Add Friend"
+      "mediaPending": "Walkthrough coming soon"
     }
   },
   "auth": {
@@ -688,7 +684,7 @@
     "lineOfficialAccount": "LINE Official Account",
     "privacyPolicy": "Privacy Policy",
     "termsOfUse": "Terms of Use",
-    "copyright": "© 2025 Synqer. All rights reserved."
+    "copyright": "© 2026 Synqer. All rights reserved."
   },
   "privacy": {
     "title": "Privacy Policy",

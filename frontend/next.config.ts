@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
       },
+      // Landing page captures, served from R2.
+      {
+        protocol: "https",
+        hostname: "assets.synqer.club",
+      },
     ],
   },
 };

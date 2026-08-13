@@ -346,6 +346,33 @@ html.slide-back::view-transition-new(root) {
   opacity: 0;
 }
 
+/* The hero's rise, with the delay given per element instead of baked into the
+   class name.
+
+   The hero has exactly three children to stagger, so three numbered classes
+   suit it. Anything with a variable number of children — the usage flow's
+   steps — sets `--reveal-delay` instead, and one rule covers them all.
+
+   `both` rather than `forwards`: the element has to hold the keyframe's
+   starting state during its delay, or it would show up, disappear, and fade
+   back in. */
+.animate-rise {
+  animation: fadeInUp 0.6s ease-out var(--reveal-delay, 0s) both;
+}
+
+/* The animations above are decoration; none of them carries meaning that is
+   lost by arriving all at once. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-fade-in-up,
+  .animate-fade-in-up-delay-1,
+  .animate-fade-in-up-delay-2,
+  .animate-fade-in-up-delay-3 {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 /* The landing page's "learn more" controls are plain anchors now, so the
    smooth scroll they used to get from scrollIntoView comes from CSS instead. */
 @media (prefers-reduced-motion: no-preference) {

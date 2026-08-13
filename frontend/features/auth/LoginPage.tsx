@@ -19,7 +19,7 @@ export default async function LoginPage({
 
   return (
     <div className="flex flex-col min-h-screen bg-zinc-50 font-sans dark:bg-black">
-      <PublicHeader isLoginPage />
+      <PublicHeader />
       <main className="min-h-screen flex w-full max-w-md mx-auto flex-col items-center justify-center gap-8 px-4 py-32">
         <div className="w-full space-y-8">
           <div className="text-center">
