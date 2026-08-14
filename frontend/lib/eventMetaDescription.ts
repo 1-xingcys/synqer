@@ -27,28 +27,33 @@ export interface EventMetaDescriptionInput {
 
 const SEPARATOR = " · ";
 
+/** One labelled row of an event's schedule. */
+export interface EventScheduleField {
+  label: string;
+  value: string;
+}
+
 /**
- * An event's schedule as one line of prose, for `<meta name="description">`
- * and the share preview.
+ * What an event's schedule says, as labelled rows.
  *
  * It says what EventConfigurationSummary shows, in the same order and through
  * the same formatters, so the description a link previews with and the panel
  * behind it cannot drift apart.
  *
+ * Rows rather than a string because the share card stacks them into a column
+ * while the description runs them together into a line. Both readings come
+ * from here, so there is one answer to what an event's schedule is.
+ *
  * The time zone rides along with the daily window rather than standing as a
- * field of its own: these are wall-clock values belonging to the event, and
+ * row of its own: these are wall-clock values belonging to the event, and
  * "09:00 ~ 18:00" alone reads as the viewer's own clock.
  */
-export function formatEventMetaDescription(
+export function eventScheduleFields(
   event: EventMetaDescriptionInput,
   locale: string,
   labels: EventMetaDescriptionLabels,
-): string {
+): EventScheduleField[] {
   const days = formatEventCandidateDaySummary(event, locale);
-  const dayLabel =
-    event.type === "RECURRING"
-      ? labels.candidateWeekdays
-      : labels.candidateDates;
 
   const window = `${formatMinutesToTime(event.schedule.startMinuteOfDay)} ~ ${formatMinutesToTime(event.schedule.endMinuteOfDay)} (${event.timeZone})`;
 
@@ -59,8 +64,32 @@ export function formatEventMetaDescription(
   return [
     // A recurring event with no weekdays summarises to "", which would leave a
     // label dangling in front of nothing.
-    ...(days ? [`${dayLabel} ${days}`] : []),
-    `${labels.candidateTime} ${window}`,
-    `${labels.votingDeadline} ${deadline}`,
-  ].join(SEPARATOR);
+    ...(days
+      ? [
+          {
+            label:
+              event.type === "RECURRING"
+                ? labels.candidateWeekdays
+                : labels.candidateDates,
+            value: days,
+          },
+        ]
+      : []),
+    { label: labels.candidateTime, value: window },
+    { label: labels.votingDeadline, value: deadline },
+  ];
+}
+
+/**
+ * The same rows as one line of prose, for `<meta name="description">` and for
+ * the share preview's own description.
+ */
+export function formatEventMetaDescription(
+  event: EventMetaDescriptionInput,
+  locale: string,
+  labels: EventMetaDescriptionLabels,
+): string {
+  return eventScheduleFields(event, locale, labels)
+    .map((field) => `${field.label} ${field.value}`)
+    .join(SEPARATOR);
 }
