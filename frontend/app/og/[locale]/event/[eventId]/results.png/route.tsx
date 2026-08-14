@@ -13,8 +13,7 @@ import { renderEventCard } from "@/lib/ogCard/renderEventCard";
  * knows the event and nothing else.
  */
 
-/** Cached on demand, like its sibling. */
-export const revalidate = 3600;
+/** Drawn per request, like its sibling, and for the same reasons. */
 
 export async function GET(
   _request: Request,

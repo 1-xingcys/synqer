@@ -13,12 +13,16 @@ import { renderEventCard } from "@/lib/ogCard/renderEventCard";
  */
 
 /**
- * Drawn on demand and then cached: there is no finite set of events to
- * prerender. An hour is well inside how long the platforms cache a preview
- * themselves, so a card that lags an edit by that much is not visible to
- * anyone who was not already looking.
+ * Drawn per request. There is no finite set of events to prerender, and the
+ * public-info fetch behind it is `no-store`, which opts the route out of the
+ * route cache — a `revalidate` here reads as caching and does nothing.
+ *
+ * Measured against a production build: ~145ms steady, ~680ms on the very first
+ * card of a process, which is `next/og` fetching the CJK subset it then keeps.
+ * A preview fetcher waits seconds and asks once, then caches the answer for
+ * days, so the cost lands well inside what it will wait for — and the card can
+ * never disagree with an event the host has just edited.
  */
-export const revalidate = 3600;
 
 export async function GET(
   _request: Request,
