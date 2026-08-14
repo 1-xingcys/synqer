@@ -1,8 +1,8 @@
 /**
  * The canonical public origin.
  *
- * Canonical URLs, hreflang alternates, the sitemap and the OG card all have to
- * be absolute, and all four have to agree — two spellings of the same page
+ * Canonical URLs, hreflang alternates, the sitemap and the share card all have
+ * to be absolute, and all four have to agree — two spellings of the same page
  * split its ranking between them. So the origin is stated once, here.
  */
 

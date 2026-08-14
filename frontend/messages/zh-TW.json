@@ -70,8 +70,9 @@
   },
   "seo": {
     "title": "Synqer｜LINE 上的 when2meet，群組約時間、投票喬時間",
-    "description": "不用再在群組裡刷「大家哪天有空」。建立時間投票、把卡片傳進 LINE 群組，成員點一下就投，顏色最深的時段就是答案。選定後直接確認時間、加進行事曆。免費使用。",
-    "ogImageAlt": "Synqer — LINE 上的 when2meet"
+    "og_title": "Synqer | 一起投票，輕鬆搞定",
+    "description": "建立活動、傳進群組、選出時間，五分鐘內搞定，告別繁瑣的時間協調！",
+    "ogImageAlt": "Synqer — 一起投票，輕鬆搞定"
   },
   "auth": {
     "title": "登入",

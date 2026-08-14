@@ -70,8 +70,9 @@
   },
   "seo": {
     "title": "Synqer — Find a time everyone can meet, right inside LINE",
-    "description": "Stop asking \"when is everyone free\" in the group chat. Create a time poll, share it in LINE, and let everyone tap the slots that work. Confirm the winning time and add it to your calendar. Free to use.",
-    "ogImageAlt": "Synqer — when2meet, inside LINE"
+    "og_title": "Synqer — Find a time everyone can meet",
+    "description": "Create the event, drop it in the chat, pick the time — done in five minutes. No more endless back-and-forth.",
+    "ogImageAlt": "Synqer — Schedule Together, Effortlessly"
   },
   "auth": {
     "title": "Sign In",

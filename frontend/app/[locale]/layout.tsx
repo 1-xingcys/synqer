@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import { LOCALES, DEFAULT_LOCALE } from "@/i18n/locales";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { SITE_URL, siteUrl } from "@/lib/site";
+import { brandOgImage } from "@/lib/ogImage";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
@@ -43,6 +44,7 @@ export async function generateMetadata({
 
   const title = t("title");
   const description = t("description");
+  const image = brandOgImage(locale, t("ogImageAlt"));
 
   return {
     metadataBase: new URL(SITE_URL),
@@ -70,11 +72,13 @@ export async function generateMetadata({
       description,
       url: siteUrl(`/${locale}`),
       locale: OG_LOCALES[locale] ?? locale,
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [image],
     },
   };
 }
