@@ -7,6 +7,7 @@ import { LOCALES } from "@/i18n/locales";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { SITE_URL } from "@/lib/site";
 import { SITE_NAME, pageIdentity } from "@/lib/pageMetadata";
+import { brandOgImage } from "@/lib/ogImage";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
@@ -63,7 +64,7 @@ export async function generateMetadata({
       // useless, so the brand line is a key of its own.
       shareTitle: t("og_title"),
       description: t("description"),
-      ogImageAlt: t("ogImageAlt"),
+      image: brandOgImage(locale, t("ogImageAlt")),
     }),
   };
 }

@@ -4,13 +4,14 @@ import {
   pageIdentity,
   privatePageShare,
 } from "./pageMetadata";
+import { brandOgImage } from "./ogImage";
 import { SITE_URL } from "./site";
 import { DEFAULT_LOCALE, LOCALES } from "@/i18n/locales";
 
 const BASE = {
   shareTitle: "Synqer — the brand line",
   description: "The pitch.",
-  ogImageAlt: "The card.",
+  image: brandOgImage("zh-TW", "The card."),
 };
 
 describe("brandedTitle", () => {

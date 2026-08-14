@@ -4,6 +4,7 @@ import PublicHeader from "@/components/layout/header/PublicHeader";
 import Footer from "@/components/layout/footer";
 import { Link } from "@/i18n/routing";
 import { brandedTitle, pageIdentity } from "@/lib/pageMetadata";
+import { brandOgImage } from "@/lib/ogImage";
 
 export async function generateMetadata({
   params,
@@ -24,7 +25,7 @@ export async function generateMetadata({
       path: "/privacy",
       shareTitle: brandedTitle(name),
       description: t("description"),
-      ogImageAlt: seo("ogImageAlt"),
+      image: brandOgImage(locale, seo("ogImageAlt")),
     }),
   };
 }

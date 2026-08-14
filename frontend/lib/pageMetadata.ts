@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DEFAULT_LOCALE, LOCALES } from "@/i18n/locales";
-import { brandOgImage } from "@/lib/ogImage";
+import type { OgImage } from "@/lib/ogImage";
 import { siteUrl } from "@/lib/site";
 
 /** The brand, as it appears in the title bar and in `og:site_name`. */
@@ -34,7 +34,12 @@ interface PageIdentity {
   shareTitle: string;
   /** What both `<meta name="description">` and og:description will say. */
   description: string;
-  ogImageAlt: string;
+  /**
+   * The card the preview shows. Passed in rather than assumed: the brand card
+   * is a build artefact shared by every page that has nothing of its own,
+   * while an event page points at a card drawn for that event.
+   */
+  image: OgImage;
 }
 
 /**
@@ -58,14 +63,14 @@ export function pageIdentity({
   path = "",
   shareTitle,
   description,
-  ogImageAlt,
+  image,
 }: PageIdentity): Metadata {
   return {
     ...shareBlock({
       locale,
       shareTitle,
       description,
-      ogImageAlt,
+      image,
       url: siteUrl(`/${locale}${path}`),
     }),
     alternates: {
@@ -103,10 +108,10 @@ export function privatePageShare({
   locale,
   shareTitle,
   description,
-  ogImageAlt,
+  image,
 }: Omit<PageIdentity, "path">): Metadata {
   return {
-    ...shareBlock({ locale, shareTitle, description, ogImageAlt }),
+    ...shareBlock({ locale, shareTitle, description, image }),
     alternates: null,
   };
 }
@@ -119,11 +124,9 @@ function shareBlock({
   locale,
   shareTitle,
   description,
-  ogImageAlt,
+  image,
   url,
 }: Omit<PageIdentity, "path"> & { url?: string }): Metadata {
-  const image = brandOgImage(locale, ogImageAlt);
-
   return {
     description,
     openGraph: {
