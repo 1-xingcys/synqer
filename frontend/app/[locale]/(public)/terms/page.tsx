@@ -23,7 +23,7 @@ export async function generateMetadata({
       locale,
       path: "/terms",
       shareTitle: brandedTitle(name),
-      description: seo("description"),
+      description: t("description"),
       ogImageAlt: seo("ogImageAlt"),
     }),
   };

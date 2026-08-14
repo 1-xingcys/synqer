@@ -694,6 +694,7 @@
   },
   "privacy": {
     "title": "Privacy Policy",
+    "description": "What Synqer collects, how it is used, and how you can manage your own data.",
     "lastUpdated": "Last updated: December 23, 2025",
     "intro": "At Synqer, we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect your personal information when you use our event scheduling service.",
     "sections": {
@@ -754,6 +755,7 @@
   },
   "terms": {
     "title": "Terms of Use",
+    "description": "The rules and responsibilities that apply when you create events, vote and confirm times on Synqer.",
     "lastUpdated": "Last updated: December 23, 2025",
     "intro": "Welcome to Synqer. By accessing or using our service, you agree to be bound by these Terms of Use. Please read them carefully.",
     "sections": {
