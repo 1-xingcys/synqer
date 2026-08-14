@@ -1,4 +1,5 @@
 import { DEFAULT_LOCALE, isLocale } from "@/i18n/locales";
+import type { EventShareView } from "@/lib/eventShare";
 import { siteUrl } from "@/lib/site";
 
 /**
@@ -76,11 +77,6 @@ export interface OgImage {
  *
  * `alt` is passed in because the strings live in the `seo` namespace of the
  * message catalogues and this module has no translator of its own.
- *
- * Note for whoever adds a per-event card later: metadata merges *shallowly*,
- * so a page that sets `openGraph` replaces the layout's entire object —
- * `siteName`, `locale` and `url` included. Repeat them, or share them from
- * here.
  */
 export function brandOgImage(locale: string, alt: string): OgImage {
   // A malformed URL segment should still get a card rather than a broken image.
@@ -88,6 +84,33 @@ export function brandOgImage(locale: string, alt: string): OgImage {
 
   return {
     url: siteUrl(`/og/${drawing}/card.png`),
+    ...OG_IMAGE_SIZE,
+    alt,
+  };
+}
+
+/**
+ * The card for one event, drawn on demand.
+ *
+ * The two views are separate URLs rather than one with a query string: a
+ * preview URL is cached by the platform that fetched it, by the CDN and by
+ * Next's own route cache, and a query string is one more thing all three have
+ * to agree about.
+ *
+ * The card renderer answers an event it cannot draw by redirecting here to the
+ * brand card, so a link never previews with a broken image.
+ */
+export function eventOgImage(
+  locale: string,
+  eventId: string,
+  view: EventShareView,
+  alt: string,
+): OgImage {
+  const drawing = isLocale(locale) ? locale : DEFAULT_LOCALE;
+  const file = view === "results" ? "results.png" : "card.png";
+
+  return {
+    url: siteUrl(`/og/${drawing}/event/${eventId}/${file}`),
     ...OG_IMAGE_SIZE,
     alt,
   };

@@ -1,4 +1,9 @@
-import { OG_ILLUSTRATION_URL, brandOgImage, imageDataUrl } from "./ogImage";
+import {
+  OG_ILLUSTRATION_URL,
+  brandOgImage,
+  eventOgImage,
+  imageDataUrl,
+} from "./ogImage";
 import { SITE_URL } from "./site";
 import { DEFAULT_LOCALE, LOCALES } from "@/i18n/locales";
 
@@ -41,6 +46,43 @@ describe("brandOgImage", () => {
   it("carries the alt text it is handed", () => {
     expect(brandOgImage("en", "Synqer — vote together").alt).toBe(
       "Synqer — vote together",
+    );
+  });
+});
+
+describe("eventOgImage", () => {
+  it("points each view at a card of its own", () => {
+    const event = eventOgImage("zh-TW", "evt_1", "event", "alt").url;
+    const results = eventOgImage("zh-TW", "evt_1", "results", "alt").url;
+
+    expect(event).toBe(`${SITE_URL}/og/zh-TW/event/evt_1/card.png`);
+    expect(results).toBe(`${SITE_URL}/og/zh-TW/event/evt_1/results.png`);
+  });
+
+  it("draws each locale its own card", () => {
+    const urls = LOCALES.map(
+      (locale) => eventOgImage(locale, "evt_1", "event", "alt").url,
+    );
+
+    expect(new Set(urls).size).toBe(LOCALES.length);
+  });
+
+  it("falls back to the default locale for a malformed segment", () => {
+    expect(eventOgImage("de", "evt_1", "event", "alt").url).toBe(
+      `${SITE_URL}/og/${DEFAULT_LOCALE}/event/evt_1/card.png`,
+    );
+  });
+
+  // Middleware's matcher skips any path containing a dot, which is what keeps
+  // the locale middleware from redirecting a card away from itself.
+  it("ends every card URL in an extension", () => {
+    expect(eventOgImage("en", "evt_1", "event", "alt").url).toMatch(/\.png$/);
+    expect(eventOgImage("en", "evt_1", "results", "alt").url).toMatch(/\.png$/);
+  });
+
+  it("returns an absolute URL", () => {
+    expect(eventOgImage("en", "evt_1", "event", "alt").url).toMatch(
+      /^https:\/\//,
     );
   });
 });
