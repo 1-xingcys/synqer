@@ -2,6 +2,8 @@ import { ImageResponse } from "next/og";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE, LOCALES, isLocale } from "@/i18n/locales";
 import { OG_ILLUSTRATION_URL, imageDataUrl } from "@/lib/ogImage";
+import { Heatmap } from "@/lib/ogCard/Heatmap";
+import { OG_CARD_SIZE, PALETTE } from "@/lib/ogCard/palette";
 
 /**
  * The brand share card.
@@ -22,7 +24,7 @@ import { OG_ILLUSTRATION_URL, imageDataUrl } from "@/lib/ogImage";
  * middleware from redirecting this away from itself.
  */
 
-export const size = { width: 1200, height: 630 };
+export const size = OG_CARD_SIZE;
 
 /**
  * Both cards are drawn at build time. Otherwise the illustration fetch and the
@@ -34,31 +36,6 @@ export const dynamic = "force-static";
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
 }
-
-/**
- * The landing page's palette, which this card belongs to.
- *
- * Zinc on white, with the hero headline's own blue gradient as the one accent.
- * The card used to be navy, which matched nothing the visitor would find after
- * clicking it.
- */
-const PALETTE = {
-  surface: "linear-gradient(160deg, #ffffff 0%, #f4f4f5 100%)",
-  heading: "#18181b",
-  body: "#52525b",
-  quiet: "#a1a1aa",
-  emptyCell: "#f4f4f5",
-} as const;
-/** The results heatmap's own emerald ramp, at the five steps it uses. */
-const RAMP = ["#d1fae5", "#a7f3d0", "#6ee7b7", "#34d399", "#10b981"];
-
-const COLUMNS = [
-  [0, 1, 0, 2, 1],
-  [1, 2, 3, 3, 2],
-  [0, 1, 1, 2, 0],
-  [2, 3, 4, 4, 3],
-  [1, 2, 2, 3, 2],
-];
 
 /**
  * Satori cannot report a failed `<img src>` — a fetch that 404s takes the whole
@@ -89,32 +66,6 @@ async function loadIllustration(): Promise<string | null> {
     console.warn("OG illustration: unreachable, drawing fallback", error);
     return null;
   }
-}
-
-/** Stands in for the illustration until one is uploaded: darker means freer. */
-function Heatmap() {
-  return (
-    <div style={{ display: "flex", gap: 12 }}>
-      {COLUMNS.map((column, columnIndex) => (
-        <div
-          key={columnIndex}
-          style={{ display: "flex", flexDirection: "column", gap: 12 }}
-        >
-          {column.map((step, rowIndex) => (
-            <div
-              key={rowIndex}
-              style={{
-                width: 62,
-                height: 62,
-                borderRadius: 10,
-                background: step === 0 ? PALETTE.emptyCell : RAMP[step],
-              }}
-            />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
 }
 
 export async function GET(
