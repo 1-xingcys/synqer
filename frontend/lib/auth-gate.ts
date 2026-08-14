@@ -31,6 +31,28 @@ export function matchesLineUserAgent(userAgent: string): boolean {
   return LINE_USER_AGENT_PATTERN.test(userAgent);
 }
 
+/**
+ * The link preview fetchers of the chat apps an event link gets pasted into.
+ *
+ * They are named individually rather than matched by a generic "bot" pattern:
+ * this list decides who may read a page without a session, and a rule that
+ * loose would hand that to every crawler that calls itself one — search
+ * engines included, which robots.txt is separately keeping out.
+ */
+const UNFURLER_USER_AGENT_PATTERN =
+  /facebookexternalhit|Slackbot|Twitterbot|Discordbot|TelegramBot|WhatsApp|LinkedInBot|SkypeUriPreview|redditbot/i;
+
+/**
+ * Whether this request is a chat app fetching a link preview.
+ *
+ * Spoofable, and that is acceptable. All it grants is a page whose server
+ * rendering is built from `/events/:id/public`, which answers anyone without a
+ * session already; the body still shows nothing until a real session loads it.
+ */
+export function matchesUnfurlerUserAgent(userAgent: string): boolean {
+  return UNFURLER_USER_AGENT_PATTERN.test(userAgent);
+}
+
 export function isProtectedPath(pathname: string): boolean {
   const { path } = splitLocale(pathname);
   const segment = path.split("/")[1] ?? "";
@@ -64,6 +86,13 @@ export function resolveLoginRedirect({
   // LINE's in-app browser carries no cookie on first entry — LIFF establishes
   // the session client-side, so /login would cut that handshake short.
   if (matchesLineUserAgent(userAgent)) {
+    return null;
+  }
+
+  // A preview fetcher has no session and never will. Bounced to /login it
+  // reads that page's metadata instead, which is how an event link shared
+  // outside LINE previewed as the login page rather than as the event.
+  if (matchesUnfurlerUserAgent(userAgent)) {
     return null;
   }
 

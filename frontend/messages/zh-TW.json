@@ -68,6 +68,16 @@
       "mediaPending": "示範畫面準備中"
     }
   },
+  "seo": {
+    "title": "首頁 | Synqer",
+    "og_title": "Synqer | 一起投票，輕鬆搞定",
+    "description": "建立活動、傳進群組、選出時間，五分鐘內搞定，告別繁瑣的時間協調！",
+    "ogImageAlt": "Synqer — 一起投票，輕鬆搞定",
+    "eventOgImageAlt": "「{name}」的候選時間與投票截止時間",
+    "eventResultsOgImageAlt": "「{name}」的投票結果分析",
+    "eventShareTitle": "投票活動：{name}",
+    "eventResultsShareTitle": "投票結果：{name}"
+  },
   "auth": {
     "title": "登入",
     "pleaseSignIn": "請登入以繼續",
@@ -104,7 +114,7 @@
     "overview": {
       "voting": {
         "title": "投票中的活動",
-        "description": ""
+        "description": "正在收集參與者投票"
       },
       "voting-ended": {
         "title": "投票結束的活動",
@@ -116,7 +126,7 @@
       },
       "completed": {
         "title": "已結束的活動",
-        "description": ""
+        "description": "已經舉行完畢的活動"
       }
     }
   },
@@ -688,6 +698,7 @@
   },
   "privacy": {
     "title": "隱私權政策",
+    "description": "說明 Synqer 收集哪些資料、如何使用，以及使用者可以怎麼管理自己的資料。",
     "lastUpdated": "最後更新：2025 年 12 月 23 日",
     "intro": "Synqer 非常重視您的隱私。本隱私權政策說明我們在您使用活動排程服務時，如何收集、使用和保護您的個人資訊。",
     "sections": {
@@ -748,6 +759,7 @@
   },
   "terms": {
     "title": "使用條款",
+    "description": "使用 Synqer 建立活動、投票與確認時間之前，所需知道的規範與責任。",
     "lastUpdated": "最後更新：2025 年 12 月 23 日",
     "intro": "歡迎使用 Synqer。存取或使用我們的服務即表示您同意受本使用條款的約束。請仔細閱讀。",
     "sections": {

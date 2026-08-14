@@ -4,6 +4,7 @@ import PublicHeader from "@/components/layout/header/PublicHeader";
 import Footer from "@/components/layout/footer";
 import { LiffPathHandler } from "@/components/providers/LiffPathHandler";
 import { UsageFlow } from "@/features/landing/UsageFlow";
+import { siteUrl } from "@/lib/site";
 
 const LINE_OA_URL = "https://line.me/R/ti/p/@453ykpnm";
 
@@ -205,8 +206,31 @@ export default async function LandingPage({
   setRequestLocale(locale);
 
   const t = await getTranslations("landing");
+  const tSeo = await getTranslations("seo");
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Synqer",
+    url: siteUrl(`/${locale}`),
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web",
+    description: tSeo("description"),
+    inLanguage: locale,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "TWD",
+    },
+  };
+
   return (
     <LiffPathHandler>
+      <script
+        type="application/ld+json"
+        // Values are our own literals and translated copy, never user input.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <div className="bg-white dark:bg-zinc-900">
         <PublicHeader />
 

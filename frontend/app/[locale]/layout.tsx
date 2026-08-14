@@ -1,9 +1,13 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { LOCALES } from "@/i18n/locales";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { SITE_URL } from "@/lib/site";
+import { SITE_NAME, pageIdentity } from "@/lib/pageMetadata";
+import { brandOgImage } from "@/lib/ogImage";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
@@ -18,15 +22,52 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Synqer - 輕鬆管理您的活動",
-  description: "Synqer 讓活動管理變得簡單而有效率，讓您專注於最重要的事情",
-  icons: {
-    icon: "/synqer.png",
-    shortcut: "/synqer.png",
-    apple: "/synqer.png",
-  },
-};
+/**
+ * Per-locale metadata, and the defaults every page below inherits.
+ *
+ * It has to be generated rather than stated: a single hard-coded title left
+ * the English page describing itself in Chinese, and left both pages without a
+ * canonical URL, hreflang alternates or a share card.
+ *
+ * `title.template` is what gives the rest of the site "<page> | Synqer". It
+ * applies only to children, so this segment states its own through
+ * `title.default` — the landing page is the site, and reads better without the
+ * brand appended to a title that already opens with it.
+ *
+ * The identity block belongs to the landing page specifically, not to the
+ * layout: a canonical URL declared here would be inherited verbatim by every
+ * page below, each one claiming to be a duplicate of the landing page.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    applicationName: SITE_NAME,
+    title: {
+      default: t("title"),
+      template: `%s | ${SITE_NAME}`,
+    },
+    icons: {
+      icon: "/synqer.png",
+      shortcut: "/synqer.png",
+      apple: "/synqer.png",
+    },
+    ...pageIdentity({
+      locale,
+      // The tab reads "首頁 | Synqer"; a share preview saying that would be
+      // useless, so the brand line is a key of its own.
+      shareTitle: t("og_title"),
+      description: t("description"),
+      image: brandOgImage(locale, t("ogImageAlt")),
+    }),
+  };
+}
 
 /** Lets the public pages under this layout be prerendered, one per locale. */
 export function generateStaticParams() {

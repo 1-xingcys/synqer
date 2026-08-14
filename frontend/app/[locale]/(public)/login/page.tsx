@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n/routing";
 import { DEFAULT_LOCALE, isLocale } from "@/i18n/locales";
 import LoginPage from "@/features/auth/LoginPage";
@@ -8,6 +10,25 @@ import {
   resolveSignedInRedirect,
   validateRedirectPath,
 } from "@/lib/auth-gate";
+
+/**
+ * The title and description alone. robots.txt disallows this path, so a
+ * canonical URL and hreflang alternates would only describe a page no crawler
+ * is coming to — but the tab still has to say something, and both fields are
+ * inherited from the landing page otherwise.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "auth" });
+
+  const name = t("title");
+
+  return { title: name, description: name };
+}
 
 /**
  * Unlike its neighbours this page is rendered per request rather than
