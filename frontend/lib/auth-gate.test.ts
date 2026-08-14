@@ -1,6 +1,7 @@
 import {
   isProtectedPath,
   matchesLineUserAgent,
+  matchesUnfurlerUserAgent,
   resolveLoginRedirect,
   resolveSignedInRedirect,
   validateRedirectPath,
@@ -59,6 +60,48 @@ describe("matchesLineUserAgent", () => {
   });
 });
 
+describe("matchesUnfurlerUserAgent", () => {
+  it("detects the chat apps' link preview fetchers", () => {
+    for (const agent of [
+      "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
+      "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)",
+      "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)",
+      "Twitterbot/1.0",
+      "TelegramBot (like TwitterBot)",
+      "WhatsApp/2.19.81 A",
+      "LinkedInBot/1.0 (compatible; Mozilla/5.0)",
+    ]) {
+      expect(matchesUnfurlerUserAgent(agent)).toBe(true);
+    }
+  });
+
+  // The list names agents individually so that it cannot quietly grow to mean
+  // "anything calling itself a bot" — robots.txt is what keeps search engines
+  // out, and this must not contradict it.
+  it("does not match a search engine crawler", () => {
+    expect(
+      matchesUnfurlerUserAgent(
+        "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+      ),
+    ).toBe(false);
+    expect(
+      matchesUnfurlerUserAgent("Mozilla/5.0 (compatible; bingbot/2.0)"),
+    ).toBe(false);
+  });
+
+  it("does not match an ordinary browser", () => {
+    expect(
+      matchesUnfurlerUserAgent(
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120",
+      ),
+    ).toBe(false);
+  });
+
+  it("is safe on an empty user agent", () => {
+    expect(matchesUnfurlerUserAgent("")).toBe(false);
+  });
+});
+
 describe("resolveLoginRedirect", () => {
   it("sends a cookieless visitor on a protected path to /login", () => {
     expect(
@@ -108,6 +151,28 @@ describe("resolveLoginRedirect", () => {
         userAgent: LINE_UA,
       }),
     ).toBeNull();
+  });
+
+  // Bounced to /login a preview fetcher reads that page's metadata, which is
+  // how an event link shared outside LINE previewed as the login page.
+  it("lets a link preview fetcher through so it can read the event's card", () => {
+    expect(
+      resolveLoginRedirect({
+        pathname: "/zh-TW/events/evt_1",
+        hasSessionCookie: false,
+        userAgent: "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)",
+      }),
+    ).toBeNull();
+  });
+
+  it("still sends a search engine crawler to /login", () => {
+    expect(
+      resolveLoginRedirect({
+        pathname: "/zh-TW/events/evt_1",
+        hasSessionCookie: false,
+        userAgent: "Mozilla/5.0 (compatible; Googlebot/2.1)",
+      }),
+    ).toBe("/zh-TW/login?redirect=%2Fevents%2Fevt_1");
   });
 
   it("never touches public paths", () => {
