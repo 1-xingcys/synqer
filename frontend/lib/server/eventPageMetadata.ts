@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { formatEventMetaDescription } from "@/lib/eventMetaDescription";
+import { eventOgImage } from "@/lib/ogImage";
+import {
+  eventOgImageAltKey,
+  eventShareTitleKey,
+  type EventShareView,
+} from "@/lib/eventShare";
 import {
   brandedTitle,
   pageIdentity,
@@ -17,10 +23,16 @@ interface EventPageMetadata {
    * which of them it is wrapping, so they go without a canonical URL.
    */
   path?: string;
+  /**
+   * Which card to preview with. The results tab is the one page about an event
+   * that is shared separately from the event itself, so it is the one that
+   * needs a card saying which of the two a link goes to.
+   */
+  view?: EventShareView;
 }
 
 /**
- * Title and description for a page about one event, named after that event.
+ * Title, description and share card for a page about one event.
  *
  * Shared by the bare event link and by the five detail tabs, so a link and the
  * page it opens are described the same way.
@@ -34,6 +46,7 @@ export async function eventPageMetadata({
   locale,
   eventId,
   path,
+  view = "event",
 }: EventPageMetadata): Promise<Metadata> {
   const [event, t, seo] = await Promise.all([
     fetchEventPublicInfo(eventId),
@@ -43,9 +56,13 @@ export async function eventPageMetadata({
 
   if (!event) {
     // The share block stays inherited — an event nobody can resolve has
-    // nothing better to preview as than the product. The canonical URL does
-    // not: claiming to be the landing page is worse than claiming nothing.
-    return { title: t("pageTitle"), alternates: null };
+    // nothing better to preview as than the product, which is also what its
+    // card would have redirected to. The canonical URL does not: claiming to
+    // be the landing page is worse than claiming nothing.
+    return {
+      title: { absolute: brandedTitle(t("pageTitle")) },
+      alternates: null,
+    };
   }
 
   // An event may be saved without a name, and the placeholder reads better in
@@ -54,9 +71,10 @@ export async function eventPageMetadata({
 
   const share = {
     locale,
-    // The locale layout's title.template gives the tab this same shape;
-    // og:title has no template of its own and has to be spelled out.
-    shareTitle: brandedTitle(name),
+    // Not the tab's title. That is the event's name alone, which reads well in
+    // a row of tabs because the brand is already the window. A preview lands in
+    // a chat among other people's links and has to say what it is first.
+    shareTitle: seo(eventShareTitleKey(view), { name }),
     description: formatEventMetaDescription(event, locale, {
       candidateDates: t("candidateDates"),
       candidateWeekdays: t("candidateWeekdays"),
@@ -64,11 +82,21 @@ export async function eventPageMetadata({
       votingDeadline: t("votingDeadline"),
       noDeadline: t("noDeadline"),
     }),
-    ogImageAlt: seo("ogImageAlt"),
+    image: eventOgImage(
+      locale,
+      eventId,
+      view,
+      seo(eventOgImageAltKey(view), { name }),
+    ),
   };
 
   return {
-    title: name,
+    // Stated in full rather than left to the locale layout's title.template.
+    // The detail layout declares a plain-string title of its own, and that
+    // clears the inherited template for the segments below it — which left the
+    // results tab, the one tab with metadata of its own, as the only page on
+    // the site whose tab did not carry the brand.
+    title: { absolute: brandedTitle(name) },
     ...(path ? pageIdentity({ ...share, path }) : privatePageShare(share)),
   };
 }
