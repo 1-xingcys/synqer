@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import PublicHeader from "@/components/layout/header/PublicHeader";
 import Footer from "@/components/layout/footer";
 import { Link } from "@/i18n/routing";
+import { brandedTitle, pageIdentity } from "@/lib/pageMetadata";
 
 export async function generateMetadata({
   params,
@@ -11,9 +12,21 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "privacy" });
+  const seo = await getTranslations({ locale, namespace: "seo" });
 
-  // The locale layout's title.template turns this into "<name> | Synqer".
-  return { title: t("title") };
+  const name = t("title");
+
+  return {
+    // The locale layout's title.template turns this into "<name> | Synqer".
+    title: name,
+    ...pageIdentity({
+      locale,
+      path: "/privacy",
+      shareTitle: brandedTitle(name),
+      description: seo("description"),
+      ogImageAlt: seo("ogImageAlt"),
+    }),
+  };
 }
 
 /** Static content with no session and no interaction: prerendered per locale. */
