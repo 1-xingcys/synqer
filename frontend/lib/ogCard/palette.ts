@@ -6,11 +6,17 @@
  * after clicking one.
  */
 export const PALETTE = {
-  surface: "linear-gradient(160deg, #ffffff 0%, #f4f4f5 100%)",
+  // The brand blue washed across the surface rather than confined to the
+  // accent. Held at very low saturation: it has to read as tinted paper behind
+  // near-black text, not as a coloured panel.
+  surface: "linear-gradient(150deg, #ffffff 0%, #eef3fc 52%, #d9e5f7 100%)",
   heading: "#18181b",
   body: "#52525b",
   quiet: "#a1a1aa",
-  emptyCell: "#f4f4f5",
+  // Zinc 200 rather than the 100 the grid uses on screen. The surface fades to
+  // #f4f4f5 on the side the heatmap sits on, so a lighter empty cell dissolves
+  // into it and leaves the grid full of holes.
+  emptyCell: "#e4e4e7",
 } as const;
 
 /** The results heatmap's own emerald ramp, at the five steps it uses. */
