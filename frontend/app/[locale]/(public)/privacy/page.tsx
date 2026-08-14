@@ -1,7 +1,20 @@
+import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import PublicHeader from "@/components/layout/header/PublicHeader";
 import Footer from "@/components/layout/footer";
 import { Link } from "@/i18n/routing";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "privacy" });
+
+  // The locale layout's title.template turns this into "<name> | Synqer".
+  return { title: t("title") };
+}
 
 /** Static content with no session and no interaction: prerendered per locale. */
 export default async function PrivacyPolicyPage({

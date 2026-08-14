@@ -28,11 +28,15 @@ const OG_LOCALES: Record<string, string> = {
 };
 
 /**
- * Per-locale metadata.
+ * Per-locale metadata, and the defaults every page below inherits.
  *
  * It has to be generated rather than stated: a single hard-coded title left
  * the English page describing itself in Chinese, and left both pages without a
  * canonical URL, hreflang alternates or a share card.
+ *
+ * `title.template` is what gives the rest of the site "<page> | Synqer". It
+ * applies only to children, so this segment states its own through
+ * `title.default`.
  */
 export async function generateMetadata({
   params,
@@ -48,7 +52,10 @@ export async function generateMetadata({
 
   return {
     metadataBase: new URL(SITE_URL),
-    title,
+    title: {
+      default: title,
+      template: "%s | Synqer",
+    },
     description,
     applicationName: "Synqer",
     icons: {
@@ -68,7 +75,7 @@ export async function generateMetadata({
     openGraph: {
       type: "website",
       siteName: "Synqer",
-      title,
+      title: t("og_title"),
       description,
       url: siteUrl(`/${locale}`),
       locale: OG_LOCALES[locale] ?? locale,
@@ -76,7 +83,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: t("og_title"),
       description,
       images: [image],
     },

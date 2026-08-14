@@ -1,6 +1,8 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "@/i18n/routing";
 import { DEFAULT_LOCALE, isLocale } from "@/i18n/locales";
+import { getTranslations } from "next-intl/server";
 import LoginPage from "@/features/auth/LoginPage";
 import {
   SESSION_COOKIE_NAME,
@@ -8,6 +10,21 @@ import {
   resolveSignedInRedirect,
   validateRedirectPath,
 } from "@/lib/auth-gate";
+
+/**
+ * The title alone. robots.txt disallows this path, so the tab is all it is for
+ * — but without one it reads as the landing page.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "auth" });
+
+  return { title: t("title") };
+}
 
 /**
  * Unlike its neighbours this page is rendered per request rather than
