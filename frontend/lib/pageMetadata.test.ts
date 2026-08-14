@@ -1,4 +1,9 @@
-import { SITE_NAME, brandedTitle, pageIdentity } from "./pageMetadata";
+import {
+  SITE_NAME,
+  brandedTitle,
+  pageIdentity,
+  privatePageShare,
+} from "./pageMetadata";
 import { SITE_URL } from "./site";
 import { DEFAULT_LOCALE, LOCALES } from "@/i18n/locales";
 
@@ -100,5 +105,40 @@ describe("pageIdentity", () => {
 
   it("states no title of its own, leaving that to the page", () => {
     expect(pageIdentity({ locale: "en", ...BASE }).title).toBeUndefined();
+  });
+});
+
+describe("privatePageShare", () => {
+  // The reason it is a separate function: the event detail tabs are declared by
+  // one layout that does not know which tab it wraps, so a canonical stated
+  // there would have all five claiming to be duplicates of one another.
+  // Leaving `alternates` unsaid is not the same as declining it: the locale
+  // layout declares the landing page's, and anything unsaid inherits it.
+  it("declines a canonical URL rather than inheriting the landing page's", () => {
+    const share = privatePageShare({ locale: "zh-TW", ...BASE });
+
+    expect(share.alternates).toBeNull();
+    expect(share.openGraph?.url).toBeUndefined();
+  });
+
+  // Without one, an event link previews with the landing page's pitch.
+  it("still returns the share block complete", () => {
+    const { description, openGraph, twitter } = privatePageShare({
+      locale: "zh-TW",
+      ...BASE,
+      shareTitle: brandedTitle("週會"),
+      description: "候選日期 2026/07/30 ~ 2026/08/02",
+    });
+
+    expect(description).toBe("候選日期 2026/07/30 ~ 2026/08/02");
+    expect(openGraph).toMatchObject({
+      type: "website",
+      siteName: SITE_NAME,
+      locale: "zh_TW",
+      title: `週會 | ${SITE_NAME}`,
+      description: "候選日期 2026/07/30 ~ 2026/08/02",
+    });
+    expect(openGraph?.images).toHaveLength(1);
+    expect(twitter?.title).toBe(`週會 | ${SITE_NAME}`);
   });
 });

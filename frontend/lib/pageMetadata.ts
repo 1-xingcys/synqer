@@ -60,10 +60,14 @@ export function pageIdentity({
   description,
   ogImageAlt,
 }: PageIdentity): Metadata {
-  const image = brandOgImage(locale, ogImageAlt);
-
   return {
-    description,
+    ...shareBlock({
+      locale,
+      shareTitle,
+      description,
+      ogImageAlt,
+      url: siteUrl(`/${locale}${path}`),
+    }),
     alternates: {
       canonical: `/${locale}${path}`,
       languages: {
@@ -73,12 +77,61 @@ export function pageIdentity({
         "x-default": `/${DEFAULT_LOCALE}${path}`,
       },
     },
+  };
+}
+
+/**
+ * The same block for a page that cannot name a canonical URL of its own.
+ *
+ * The event detail tabs are declared by one layout, which does not know which
+ * tab it is wrapping. A canonical stated there would be inherited by all five,
+ * each one announcing itself as a duplicate of the others — the bug
+ * {@link pageIdentity} exists to prevent, reintroduced one level down. They are
+ * disallowed in robots.txt and have no search result to lose by staying silent.
+ *
+ * What they do need is the share block. Without it they inherit the landing
+ * page's, so an event link previews with the product pitch instead of the
+ * event.
+ *
+ * Staying silent about the canonical URL is not the same as not having one:
+ * the locale layout declares the landing page's identity, which every page
+ * that does not override it inherits — so silence here would have each tab
+ * announcing itself as a duplicate of the landing page rather than of nothing.
+ * `null` is how metadata is declined rather than merely left unsaid.
+ */
+export function privatePageShare({
+  locale,
+  shareTitle,
+  description,
+  ogImageAlt,
+}: Omit<PageIdentity, "path">): Metadata {
+  return {
+    ...shareBlock({ locale, shareTitle, description, ogImageAlt }),
+    alternates: null,
+  };
+}
+
+/**
+ * og:url is the only difference between the two, and it is optional — a
+ * preview falls back to the URL it was handed.
+ */
+function shareBlock({
+  locale,
+  shareTitle,
+  description,
+  ogImageAlt,
+  url,
+}: Omit<PageIdentity, "path"> & { url?: string }): Metadata {
+  const image = brandOgImage(locale, ogImageAlt);
+
+  return {
+    description,
     openGraph: {
       type: "website",
       siteName: SITE_NAME,
       title: shareTitle,
       description,
-      url: siteUrl(`/${locale}${path}`),
+      ...(url ? { url } : {}),
       locale: OG_LOCALES[locale] ?? locale,
       images: [image],
     },
