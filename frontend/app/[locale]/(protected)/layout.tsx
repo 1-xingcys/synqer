@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { headers } from "next/headers";
-import { matchesLineUserAgent } from "@/lib/auth-gate";
+import { matchesLineUserAgent } from "@/lib/routing/auth-gate";
 import { LiffProvider } from "@/contexts/LiffContext";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { LiffPathHandler } from "@/components/providers/LiffPathHandler";

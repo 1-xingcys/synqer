@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { getVoteShareCopy } from "@/lib/line-flex-message/shareVoteCommitFlexMessage";
+import { getVoteShareCopy } from "@/lib/line/line-flex-message/shareVoteCommitFlexMessage";
 
 /**
  * What the notice looks like once it lands in the chat.

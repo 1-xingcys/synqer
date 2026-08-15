@@ -15,8 +15,8 @@ import {
 import {
   ShareResult,
   shareVoteCommitFlexMessage,
-} from "@/lib/line-flex-message";
-import { getLiff } from "@/lib/liff";
+} from "@/lib/line/line-flex-message";
+import { getLiff } from "@/lib/line/liff";
 import { Vote, StagedVote } from "../../types";
 import { VoteMode } from "@/types/event";
 

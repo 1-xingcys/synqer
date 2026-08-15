@@ -7,7 +7,7 @@ import {
   resolveLiffEntryAction,
   type LiffEntryDecision,
 } from "@/components/providers/liffEntry";
-import { getLiffId, initializeLiff, isLineUserAgent } from "@/lib/liff";
+import { getLiffId, initializeLiff, isLineUserAgent } from "@/lib/line/liff";
 import { LoadingState } from "@/components/ui/loading-state";
 
 /** URL we have already routed through the LIFF entry flow, per browser tab. */

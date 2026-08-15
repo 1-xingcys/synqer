@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/apiClient";
+import { apiFetch } from "@/lib/api/apiClient";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API;
 

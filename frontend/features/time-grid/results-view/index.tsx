@@ -14,8 +14,8 @@ import { ResultsHeatmapGrid } from "./ResultsHeatmapGrid";
 import { useFilteredVotes } from "./hooks/useFilteredVotes";
 import type { TimeGranularity } from "@/types/event";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
-import { eventDetailPath } from "@/lib/eventRoutes";
-import { Z_INDEX } from "@/lib/zIndex";
+import { eventDetailPath } from "@/lib/routing/eventRoutes";
+import { Z_INDEX } from "@/lib/ui/zIndex";
 import { Text } from "@/components/ui/text";
 
 export type { ResultsViewProps, SlotRangeInfo };

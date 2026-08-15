@@ -2,12 +2,12 @@ import {
   formatWeekdayLabel,
   formatWeekdayLabelFromDate,
   getOrderedWeekdays,
-} from "@/lib/event-time";
+} from "@/lib/event/event-time";
 import { calendarDayParts, calendarDayToDate } from "@/lib/time";
 import type { CalendarDay } from "@/lib/time";
 import { calendarDayMinuteToInstant } from "@/lib/time";
 import { axisDateToCalendarDay } from "@/lib/time";
-import { axisSpanKey, axisSpanOfSlot } from "@/lib/axisSpan";
+import { axisSpanKey, axisSpanOfSlot } from "@/lib/event/axisSpan";
 import { TimeSlot, Vote, CalendarEvent, GridAxisColumn } from "./types";
 
 function warnInvalidSlot(slot: TimeSlot, reason: string) {

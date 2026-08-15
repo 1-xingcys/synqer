@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { isVotingDeadlineComplete } from "@/lib/votingDeadline";
+import { isVotingDeadlineComplete } from "@/lib/event/votingDeadline";
 import { CreateEventFormData } from "../types";
 import { todayInZone } from "@/lib/time";
 import { parseTimeToMinutes } from "./utils";

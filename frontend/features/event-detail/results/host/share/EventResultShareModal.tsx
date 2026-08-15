@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { ShareSheet } from "@/components/ui/ShareSheet";
-import { type HostedEventResultSummary } from "@/lib/hostedEventResultSummary";
+import { type HostedEventResultSummary } from "@/lib/event/hostedEventResultSummary";
 import { EventResultShareContent } from "./EventResultShareContent";
 
 interface EventResultShareModalProps {

@@ -7,7 +7,7 @@ import { GridDefaultFields } from "@/features/event-preference/grid-default-fiel
 import { VoteNoticeFields } from "@/features/event-preference/vote-notice-fields";
 import type { VoteMode } from "@/types/event";
 import type { TimeGranularity } from "@/types/event";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/ui/utils";
 import { useFormStateContext } from "./CreateEventFormContext";
 
 const PREFERENCE_CONTENT_ID = "create-event-preference-content";

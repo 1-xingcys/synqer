@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLiffContext } from "@/contexts/LiffContext";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/ui/utils";
 import { LineGroupSection } from "./LineGroupSection";
 import { LineGroupInfoModal } from "./LineGroupInfoModal";
 import { useFormStateContext } from "./CreateEventFormContext";

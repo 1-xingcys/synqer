@@ -3,10 +3,10 @@
 import { useCallback } from "react";
 import { useRouter } from "@/i18n/routing";
 import { calendarDayToWallClock } from "@/lib/time";
-import { toVoteModeDto } from "@/lib/eventPreference";
+import { toVoteModeDto } from "@/lib/event/eventPreference";
 import { useLiffContext } from "@/contexts/LiffContext";
-import { apiFetchJson } from "@/lib/apiClient";
-import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
+import { apiFetchJson } from "@/lib/api/apiClient";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/routing/eventRoutes";
 import type { operations } from "@/generated/openapi";
 import { CreateEventFormData } from "../types";
 import { getCreateEventValidationErrors } from "./useFormValidation";

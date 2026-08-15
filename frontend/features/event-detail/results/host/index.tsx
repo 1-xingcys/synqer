@@ -7,7 +7,7 @@ import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
 import { SkeletonRegion } from "@/components/ui/skeleton-region";
 import { ResultsTabSkeleton } from "../ResultsTabSkeleton";
 import { EventStatus } from "@/types/event";
-import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
+import { normalizeGranularity, toVoteMode } from "@/lib/event/eventPreference";
 import ResultsView from "@/features/time-grid/results-view";
 import { SlotRangeInfo } from "@/features/time-grid/results-view";
 import { EventTimeSelector } from "./EventTimeSelector";

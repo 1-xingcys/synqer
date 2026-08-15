@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import PublicHeader from "@/components/layout/header/PublicHeader";
 import Footer from "@/components/layout/footer";
-import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/routing/eventRoutes";
 
 interface LoginPageProps {
   redirectPath?: string;

@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import {
   formatLocalizedDateTimeRangeLabel,
   type OneTimeConfirmedSelection,
-} from "@/lib/event-time";
+} from "@/lib/event/event-time";
 import { generateGoogleCalendarUrl } from "./google-calendar-url";
 
 interface AddToCalendarPanelProps {

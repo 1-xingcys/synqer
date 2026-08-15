@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { ApiError, apiFetchJson } from "@/lib/apiClient";
+import { ApiError, apiFetchJson } from "@/lib/api/apiClient";
 import type { operations } from "@/generated/openapi";
-import { normalizeHostedEventDetailResponse } from "@/lib/event-normalizers";
+import { normalizeHostedEventDetailResponse } from "@/lib/event/event-normalizers";
 
 type RawHostedEventDetailResponse =
   operations["EventCoreController_findOneHosted"]["responses"][200]["content"]["application/json"];

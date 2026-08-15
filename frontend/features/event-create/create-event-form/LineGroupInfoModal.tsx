@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Z_INDEX } from "@/lib/zIndex";
+import { Z_INDEX } from "@/lib/ui/zIndex";
 
 interface LineGroupInfoModalProps {
   isOpen: boolean;

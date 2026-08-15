@@ -1,5 +1,5 @@
 import { EventStatus } from "@/types/event";
-import { eventDetailPath } from "@/lib/eventRoutes";
+import { eventDetailPath } from "@/lib/routing/eventRoutes";
 
 export interface AutoJoinState {
   /**

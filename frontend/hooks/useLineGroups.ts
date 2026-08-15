@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { operations } from "@/generated/openapi";
-import { apiFetchJson } from "@/lib/apiClient";
+import { apiFetchJson } from "@/lib/api/apiClient";
 
 export type LineGroup =
   operations["LineBotController_getMyGroups"]["responses"][200]["content"]["application/json"][number];

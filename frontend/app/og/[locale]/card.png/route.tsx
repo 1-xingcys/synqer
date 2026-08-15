@@ -1,9 +1,9 @@
 import { ImageResponse } from "next/og";
 import { getTranslations } from "next-intl/server";
 import { DEFAULT_LOCALE, LOCALES, isLocale } from "@/i18n/locales";
-import { OG_ILLUSTRATION_URL, imageDataUrl } from "@/lib/ogImage";
-import { Heatmap } from "@/lib/ogCard/Heatmap";
-import { OG_CARD_SIZE, PALETTE } from "@/lib/ogCard/palette";
+import { OG_ILLUSTRATION_URL, imageDataUrl } from "@/lib/seo/ogImage";
+import { Heatmap } from "@/lib/seo/ogCard/Heatmap";
+import { OG_CARD_SIZE, PALETTE } from "@/lib/seo/ogCard/palette";
 
 /**
  * The brand share card.

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { LOCALES, DEFAULT_LOCALE } from "@/i18n/locales";
-import { siteUrl } from "@/lib/site";
+import { siteUrl } from "@/lib/seo/site";
 
 /** Every public route. The app itself is behind a session and is not indexed. */
 const PUBLIC_PATHS = ["", "/privacy", "/terms"] as const;

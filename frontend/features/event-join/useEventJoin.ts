@@ -3,10 +3,10 @@
 import { useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "@/i18n/routing";
-import { apiFetch, apiFetchJson } from "@/lib/apiClient";
+import { apiFetch, apiFetchJson } from "@/lib/api/apiClient";
 import { useAuth } from "@/hooks/useAuth";
 import type { operations } from "@/generated/openapi";
-import { normalizeEventPublicInfoResponse } from "@/lib/event-normalizers";
+import { normalizeEventPublicInfoResponse } from "@/lib/event/event-normalizers";
 import { eventJoinKeys } from "./queryKeys";
 import { useAutoJoinEvent } from "./useAutoJoinEvent";
 import { postJoinRedirectPath } from "./autoJoin";

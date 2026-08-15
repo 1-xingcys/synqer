@@ -1,4 +1,4 @@
-import { renderEventCard } from "@/lib/ogCard/renderEventCard";
+import { renderEventCard } from "@/lib/seo/ogCard/renderEventCard";
 
 /**
  * The share card for one event.

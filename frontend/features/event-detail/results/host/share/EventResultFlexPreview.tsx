@@ -1,13 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { formatLocalizedRangeLabel } from "@/lib/event-time";
-import { type HostedEventResultSummary } from "@/lib/hostedEventResultSummary";
+import { formatLocalizedRangeLabel } from "@/lib/event/event-time";
+import { type HostedEventResultSummary } from "@/lib/event/hostedEventResultSummary";
 import {
   getAttendanceBarColors,
   getAttendanceTextColor,
   getHostedEventResultFlexCopy,
-} from "@/lib/line-flex-message/hostedEventResultFlexMessage";
+} from "@/lib/line/line-flex-message/hostedEventResultFlexMessage";
 
 /**
  * What the confirmed result looks like once it lands in a LINE chat.

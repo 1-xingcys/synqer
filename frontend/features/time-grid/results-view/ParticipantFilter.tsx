@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Participant } from "../types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Z_INDEX } from "@/lib/zIndex";
+import { Z_INDEX } from "@/lib/ui/zIndex";
 
 interface ParticipantFilterProps {
   participants: Participant[];

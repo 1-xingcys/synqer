@@ -7,7 +7,7 @@ import { isEventDetailPagePath } from "@/components/layout/header/pathRules";
 import Sidebar from "@/components/layout/Sidebar";
 import { SidebarProvider, useSidebar } from "@/contexts/SidebarContext";
 import { useAuth } from "@/hooks/useAuth";
-import { SESSION_EXPIRED_PARAM } from "@/lib/auth-gate";
+import { SESSION_EXPIRED_PARAM } from "@/lib/routing/auth-gate";
 
 interface ProtectedShellProps {
   children: ReactNode;

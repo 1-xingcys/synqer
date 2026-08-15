@@ -19,8 +19,8 @@ import { useDateTimeFields } from "./hooks/useDateTimeFields";
 import { ValidationError } from "./hooks/useFormValidation";
 import { VotingDeadlineFields } from "./VotingDeadlineFields";
 import { todayInZone } from "@/lib/time";
-import { cn } from "@/lib/utils";
-import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/event-time";
+import { cn } from "@/lib/ui/utils";
+import { formatWeekdayLabel, getOrderedWeekdays } from "@/lib/event/event-time";
 
 export function ConfigurationSection() {
   const t = useTranslations();

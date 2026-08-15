@@ -2,7 +2,7 @@
 
 import type { ConfirmedSelection } from "@/types/event";
 import { useLocale } from "next-intl";
-import { formatConfirmedSelection } from "@/lib/event-time";
+import { formatConfirmedSelection } from "@/lib/event/event-time";
 
 interface ConfirmedTimeDisplayProps {
   selections: ConfirmedSelection[];

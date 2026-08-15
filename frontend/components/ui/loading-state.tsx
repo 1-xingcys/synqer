@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useTranslations } from "next-intl";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/ui/utils";
 import {
   Spinner,
   type SpinnerSize,

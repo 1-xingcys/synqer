@@ -1,12 +1,12 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/apiClient";
+import { apiFetch } from "@/lib/api/apiClient";
 import type { LiffLoginRequest, LiffLoginResponse, User } from "@/types/auth";
 import {
   getLiffAccessToken,
   initializeLiff,
   isLiffEnabled,
   liffLogin,
-} from "@/lib/liff";
+} from "@/lib/line/liff";
 
 export const authKeys = {
   me: ["auth", "me"] as const,

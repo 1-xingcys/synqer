@@ -12,14 +12,14 @@ import { useAutoJoinEvent } from "@/features/event-join/useAutoJoinEvent";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useAuth } from "@/hooks/useAuth";
 import { EventStatus } from "@/types/event";
-import { Z_INDEX } from "@/lib/zIndex";
+import { Z_INDEX } from "@/lib/ui/zIndex";
 import { Crown } from "lucide-react";
 import {
   eventDetailPath,
   eventOverviewPath,
   overviewStatusForEventStatus,
   type OverviewStatus,
-} from "@/lib/eventRoutes";
+} from "@/lib/routing/eventRoutes";
 
 /** overview 分類 → 側邊欄分類文案 key，供返回鍵顯示對應分類名稱。 */
 const OVERVIEW_LABEL_KEY: Record<OverviewStatus, string> = {

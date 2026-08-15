@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { VotingGridProps } from "../types";
 import { useVotingGridController } from "./hooks/useVotingGridController";
 import { formatMinutesToTime } from "@/lib/time/minuteOfDay";
-import { Z_INDEX } from "@/lib/zIndex";
+import { Z_INDEX } from "@/lib/ui/zIndex";
 import { DateHeader, TimeColumn, DatePagination } from "../ui";
 import { GridLegend } from "./GridLegend";
 import { SlotMatrix } from "./SlotMatrix";

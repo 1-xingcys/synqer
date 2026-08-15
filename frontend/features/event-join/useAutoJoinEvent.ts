@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ApiError, apiFetch } from "@/lib/apiClient";
+import { ApiError, apiFetch } from "@/lib/api/apiClient";
 import { myEventsKeys } from "@/hooks/useMyEvents";
 import { eventDetailKeys } from "@/hooks/useEventDetail";
 import type { operations } from "@/generated/openapi";

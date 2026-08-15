@@ -8,7 +8,7 @@ import { ErrorView } from "./ErrorView";
 import { DeletedEventView } from "@/components/event/DeletedEventView";
 import { LoadingState } from "@/components/ui/loading-state";
 import { useRouter } from "@/i18n/routing";
-import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/routing/eventRoutes";
 
 interface EventJoinPageProps {
   eventId: string;

@@ -4,7 +4,10 @@ import { useTranslations } from "next-intl";
 import { useMyEvents } from "@/hooks/useMyEvents";
 import EventListWithPagination from "./EventListWithPagination";
 import { EventListSkeleton } from "./EventListSkeleton";
-import { eventStatusForOverview, type OverviewStatus } from "@/lib/eventRoutes";
+import {
+  eventStatusForOverview,
+  type OverviewStatus,
+} from "@/lib/routing/eventRoutes";
 
 const TRANSLATION_NS = "joinedEvents";
 

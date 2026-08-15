@@ -1,4 +1,4 @@
-import { buildEventShareBubbleFields } from "@/lib/line-flex-message";
+import { buildEventShareBubbleFields } from "@/lib/line/line-flex-message";
 import type { WallClock } from "@/lib/time";
 
 function getInstruction(locale: string): string {

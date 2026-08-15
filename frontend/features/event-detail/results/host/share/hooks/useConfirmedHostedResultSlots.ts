@@ -2,8 +2,8 @@
 import { axisDateToCalendarDay } from "@/lib/time";
 
 import { useMemo } from "react";
-import type { HostedResultSlot } from "@/lib/hostedEventResultSummary";
-import { CANONICAL_WEEKDAY_ORDER } from "@/lib/event-time";
+import type { HostedResultSlot } from "@/lib/event/hostedEventResultSummary";
+import { CANONICAL_WEEKDAY_ORDER } from "@/lib/event/event-time";
 import type { EventSlot } from "../../types";
 
 interface UseConfirmedHostedResultSlotsOptions {

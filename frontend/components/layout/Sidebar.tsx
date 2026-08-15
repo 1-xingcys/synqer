@@ -13,12 +13,12 @@ import { useTranslations } from "next-intl";
 import { Clock, CheckCheck, CalendarCheck, ClockFading } from "lucide-react";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { Z_INDEX } from "@/lib/zIndex";
+import { Z_INDEX } from "@/lib/ui/zIndex";
 import {
   eventOverviewPath,
   overviewStatusForEventStatus,
   type OverviewStatus,
-} from "@/lib/eventRoutes";
+} from "@/lib/routing/eventRoutes";
 import { useMyEvents } from "@/hooks/useMyEvents";
 import {
   isHiddenFromAssistiveTech,

@@ -10,7 +10,7 @@ import {
   DEFAULT_GRANULARITY,
   DEFAULT_SHARE_VOTE_TO_CHAT,
   DEFAULT_VOTE_MODE,
-} from "@/lib/eventPreference";
+} from "@/lib/event/eventPreference";
 import { calendarDay } from "@/lib/time";
 
 function buildFormData(

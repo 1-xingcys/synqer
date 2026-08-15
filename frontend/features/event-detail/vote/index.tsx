@@ -9,7 +9,7 @@ import {
   normalizeGranularity,
   normalizeShareVoteToChat,
   toVoteMode,
-} from "@/lib/eventPreference";
+} from "@/lib/event/eventPreference";
 import VotingGrid from "@/features/time-grid/voting-grid";
 import { Text } from "@/components/ui/text";
 

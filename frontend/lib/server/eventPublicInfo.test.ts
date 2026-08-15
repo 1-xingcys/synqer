@@ -10,7 +10,7 @@ import {
   fetchEventPublicInfo,
   resolveApiUrl,
 } from "@/lib/server/eventPublicInfo";
-import { SITE_URL } from "@/lib/site";
+import { SITE_URL } from "@/lib/seo/site";
 
 const ORIGINAL_API = process.env.NEXT_PUBLIC_API;
 

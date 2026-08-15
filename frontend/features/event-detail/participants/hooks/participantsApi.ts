@@ -1,6 +1,6 @@
 "use client";
 
-import { apiFetchJson } from "@/lib/apiClient";
+import { apiFetchJson } from "@/lib/api/apiClient";
 import type { operations } from "@/generated/openapi";
 
 type UpdateParticipantsRequest =

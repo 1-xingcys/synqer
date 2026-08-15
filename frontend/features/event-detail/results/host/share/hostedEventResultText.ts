@@ -1,5 +1,5 @@
-import { type HostedEventResultSummary } from "@/lib/hostedEventResultSummary";
-import { formatLocalizedRangeLabel } from "@/lib/event-time";
+import { type HostedEventResultSummary } from "@/lib/event/hostedEventResultSummary";
+import { formatLocalizedRangeLabel } from "@/lib/event/event-time";
 
 export type HostedEventResultTextCopy = {
   title: string;
