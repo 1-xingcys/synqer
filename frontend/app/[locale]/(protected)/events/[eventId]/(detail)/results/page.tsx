@@ -6,8 +6,9 @@ import ResultsTab from "@/features/event-detail/results/ResultsTab";
  * The one tab that overrides its layout's metadata.
  *
  * Its own share sheet hands out a link to a filtered reading of the grid, so
- * this URL arrives in the same chat as the link to the event itself. Previewing
- * both with the same card makes them one message repeated.
+ * this URL arrives in the same chat as the link to the event itself. Both
+ * preview with the brand mark, which says nothing about which of the two a
+ * link opens; the title is what has to.
  *
  * The whole block is restated rather than only the card: metadata merges
  * shallowly, so returning a partial `openGraph` would drop `siteName`,

@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { formatEventMetaDescription } from "@/lib/seo/eventMetaDescription";
-import { eventOgImage } from "@/lib/seo/ogImage";
-import {
-  eventOgImageAltKey,
-  eventShareTitleKey,
-  type EventShareView,
-} from "@/lib/seo/eventShare";
+import { markOgImage } from "@/lib/seo/ogImage";
 import {
   brandedTitle,
   pageIdentity,
@@ -24,11 +19,11 @@ interface EventPageMetadata {
    */
   path?: string;
   /**
-   * Which card to preview with. The results tab is the one page about an event
-   * that is shared separately from the event itself, so it is the one that
-   * needs a card saying which of the two a link goes to.
+   * Which of an event's pages the share is about. The results tab is the one
+   * page shared separately from the event itself, so the two links arrive in
+   * the same chat and their previews have to say which is which.
    */
-  view?: EventShareView;
+  view?: "event" | "results";
 }
 
 /**
@@ -74,7 +69,10 @@ export async function eventPageMetadata({
     // Not the tab's title. That is the event's name alone, which reads well in
     // a row of tabs because the brand is already the window. A preview lands in
     // a chat among other people's links and has to say what it is first.
-    shareTitle: seo(eventShareTitleKey(view), { name }),
+    shareTitle: seo(
+      view === "results" ? "eventResultsShareTitle" : "eventShareTitle",
+      { name },
+    ),
     description: formatEventMetaDescription(event, locale, {
       candidateDates: t("candidateDates"),
       candidateWeekdays: t("candidateWeekdays"),
@@ -82,12 +80,7 @@ export async function eventPageMetadata({
       votingDeadline: t("votingDeadline"),
       noDeadline: t("noDeadline"),
     }),
-    image: eventOgImage(
-      locale,
-      eventId,
-      view,
-      seo(eventOgImageAltKey(view), { name }),
-    ),
+    image: markOgImage(seo("markOgImageAlt")),
   };
 
   return {

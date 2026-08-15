@@ -1,5 +1,4 @@
 import { DEFAULT_LOCALE, isLocale } from "@/i18n/locales";
-import type { EventShareView } from "@/lib/seo/eventShare";
 import { siteUrl } from "@/lib/seo/site";
 
 /**
@@ -90,27 +89,18 @@ export function brandOgImage(locale: string, alt: string): OgImage {
 }
 
 /**
- * The card for one event, drawn on demand.
+ * The brand mark, previewed by every page about an event.
  *
- * The two views are separate URLs rather than one with a query string: a
- * preview URL is cached by the platform that fetched it, by the CDN and by
- * Next's own route cache, and a query string is one more thing all three have
- * to agree about.
- *
- * The card renderer answers an event it cannot draw by redirecting here to the
- * brand card, so a link never previews with a broken image.
+ * One URL for all of them, and for both locales. Each of those pages used to
+ * point at a card drawn for that event — its name, its candidate dates, its
+ * deadline — which said in a picture what the `og:title` and `og:description`
+ * beside it already say in words. What is left is the mark, and a mark is the
+ * same whichever event the link is about, so it takes neither a locale nor an
+ * event id.
  */
-export function eventOgImage(
-  locale: string,
-  eventId: string,
-  view: EventShareView,
-  alt: string,
-): OgImage {
-  const drawing = isLocale(locale) ? locale : DEFAULT_LOCALE;
-  const file = view === "results" ? "results.png" : "card.png";
-
+export function markOgImage(alt: string): OgImage {
   return {
-    url: siteUrl(`/og/${drawing}/event/${eventId}/${file}`),
+    url: siteUrl("/og/mark.png"),
     ...OG_IMAGE_SIZE,
     alt,
   };

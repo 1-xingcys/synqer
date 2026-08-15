@@ -73,8 +73,7 @@
     "og_title": "Synqer — Find a time everyone can meet",
     "description": "Create the event, drop it in the chat, pick the time — done in five minutes. No more endless back-and-forth.",
     "ogImageAlt": "Synqer — Schedule Together, Effortlessly",
-    "eventOgImageAlt": "Candidate times and voting deadline for {name}",
-    "eventResultsOgImageAlt": "Results analysis for {name}",
+    "markOgImageAlt": "The Synqer logo",
     "eventShareTitle": "Poll: {name}",
     "eventResultsShareTitle": "Poll results: {name}"
   },

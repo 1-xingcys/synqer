@@ -73,8 +73,7 @@
     "og_title": "Synqer | 一起投票，輕鬆搞定",
     "description": "建立活動、傳進群組、選出時間，五分鐘內搞定，告別繁瑣的時間協調！",
     "ogImageAlt": "Synqer — 一起投票，輕鬆搞定",
-    "eventOgImageAlt": "「{name}」的候選時間與投票截止時間",
-    "eventResultsOgImageAlt": "「{name}」的投票結果分析",
+    "markOgImageAlt": "Synqer 標誌",
     "eventShareTitle": "投票活動：{name}",
     "eventResultsShareTitle": "投票結果：{name}"
   },
