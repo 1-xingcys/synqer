@@ -35,9 +35,9 @@ interface PageIdentity {
   /** What both `<meta name="description">` and og:description will say. */
   description: string;
   /**
-   * The card the preview shows. Passed in rather than assumed: the brand card
-   * is a build artefact shared by every page that has nothing of its own,
-   * while an event page points at a card drawn for that event.
+   * The card the preview shows. Passed in rather than assumed: the public
+   * pages point at the locale's brand card, while the pages about an event
+   * point at the brand mark.
    */
   image: OgImage;
 }
