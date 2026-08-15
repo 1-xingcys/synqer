@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { formatEventMetaDescription } from "@/lib/seo/eventMetaDescription";
-import { eventOgImage } from "@/lib/seo/ogImage";
-import {
-  eventOgImageAltKey,
-  eventShareTitleKey,
-  type EventShareView,
-} from "@/lib/seo/eventShare";
+import { markOgImage } from "@/lib/seo/ogImage";
+import { eventShareTitleKey, type EventShareView } from "@/lib/seo/eventShare";
 import {
   brandedTitle,
   pageIdentity,
@@ -82,12 +78,7 @@ export async function eventPageMetadata({
       votingDeadline: t("votingDeadline"),
       noDeadline: t("noDeadline"),
     }),
-    image: eventOgImage(
-      locale,
-      eventId,
-      view,
-      seo(eventOgImageAltKey(view), { name }),
-    ),
+    image: markOgImage(seo("markOgImageAlt")),
   };
 
   return {

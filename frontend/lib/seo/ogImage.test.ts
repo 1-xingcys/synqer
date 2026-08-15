@@ -1,8 +1,8 @@
 import {
   OG_ILLUSTRATION_URL,
   brandOgImage,
-  eventOgImage,
   imageDataUrl,
+  markOgImage,
 } from "./ogImage";
 import { SITE_URL } from "./site";
 import { DEFAULT_LOCALE, LOCALES } from "@/i18n/locales";
@@ -50,40 +50,36 @@ describe("brandOgImage", () => {
   });
 });
 
-describe("eventOgImage", () => {
-  it("points each view at a card of its own", () => {
-    const event = eventOgImage("zh-TW", "evt_1", "event", "alt").url;
-    const results = eventOgImage("zh-TW", "evt_1", "results", "alt").url;
-
-    expect(event).toBe(`${SITE_URL}/og/zh-TW/event/evt_1/card.png`);
-    expect(results).toBe(`${SITE_URL}/og/zh-TW/event/evt_1/results.png`);
-  });
-
-  it("draws each locale its own card", () => {
-    const urls = LOCALES.map(
-      (locale) => eventOgImage(locale, "evt_1", "event", "alt").url,
-    );
-
-    expect(new Set(urls).size).toBe(LOCALES.length);
-  });
-
-  it("falls back to the default locale for a malformed segment", () => {
-    expect(eventOgImage("de", "evt_1", "event", "alt").url).toBe(
-      `${SITE_URL}/og/${DEFAULT_LOCALE}/event/evt_1/card.png`,
-    );
+describe("markOgImage", () => {
+  it("points at the one card every event page shares", () => {
+    expect(markOgImage("alt").url).toBe(`${SITE_URL}/og/mark.png`);
   });
 
   // Middleware's matcher skips any path containing a dot, which is what keeps
-  // the locale middleware from redirecting a card away from itself.
-  it("ends every card URL in an extension", () => {
-    expect(eventOgImage("en", "evt_1", "event", "alt").url).toMatch(/\.png$/);
-    expect(eventOgImage("en", "evt_1", "results", "alt").url).toMatch(/\.png$/);
+  // the locale middleware from redirecting the card away from itself.
+  it("ends in an extension, so middleware never sees it", () => {
+    expect(markOgImage("alt").url).toMatch(/\.png$/);
+  });
+
+  // The brand card lives at /og/<locale>/card.png. One segment against two is
+  // what keeps this route from being reachable as a locale.
+  it("sits one segment under /og, where the brand card is two", () => {
+    const path = new URL(markOgImage("alt").url).pathname;
+
+    expect(path.split("/").filter(Boolean)).toHaveLength(2);
+    expect(LOCALES.some((locale) => path.includes(`/${locale}/`))).toBe(false);
   });
 
   it("returns an absolute URL", () => {
-    expect(eventOgImage("en", "evt_1", "event", "alt").url).toMatch(
-      /^https:\/\//,
-    );
+    expect(markOgImage("alt").url).toMatch(/^https:\/\//);
+  });
+
+  it("reports the size crawlers are told to expect", () => {
+    expect(markOgImage("alt")).toMatchObject({ width: 1200, height: 630 });
+  });
+
+  it("carries the alt text it is handed", () => {
+    expect(markOgImage("The Synqer logo").alt).toBe("The Synqer logo");
   });
 });
 

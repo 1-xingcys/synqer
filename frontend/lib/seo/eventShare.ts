@@ -17,10 +17,3 @@ export function eventShareTitleKey(
 ): "eventShareTitle" | "eventResultsShareTitle" {
   return view === "results" ? "eventResultsShareTitle" : "eventShareTitle";
 }
-
-/** The `seo` key describing the card image itself, for `og:image:alt`. */
-export function eventOgImageAltKey(
-  view: EventShareView,
-): "eventOgImageAlt" | "eventResultsOgImageAlt" {
-  return view === "results" ? "eventResultsOgImageAlt" : "eventOgImageAlt";
-}

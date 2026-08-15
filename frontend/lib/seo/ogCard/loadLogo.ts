@@ -14,7 +14,8 @@ import { imageDataUrl } from "@/lib/seo/ogImage";
  * server is up.
  *
  * @returns null when the file cannot be read or is not a format the renderer
- *   can decode, which the card answers by drawing the wordmark alone.
+ *   can decode. What that is worth answering with is the caller's to decide:
+ *   the brand mark is prerendered and half of it is the logo, so it raises.
  */
 let cached: string | null | undefined;
 
