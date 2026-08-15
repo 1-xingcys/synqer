@@ -9,7 +9,7 @@ import {
   SESSION_EXPIRED_PARAM,
   resolveSignedInRedirect,
   validateRedirectPath,
-} from "@/lib/auth-gate";
+} from "@/lib/routing/auth-gate";
 
 /**
  * The title and description alone. robots.txt disallows this path, so a

@@ -4,13 +4,16 @@ import { useRef, useState, useSyncExternalStore } from "react";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
 import { useLiffContext } from "@/contexts/LiffContext";
-import { apiFetchVoid } from "@/lib/apiClient";
-import { shareEventFlexMessage, ShareResult } from "@/lib/line-flex-message";
+import { apiFetchVoid } from "@/lib/api/apiClient";
+import {
+  shareEventFlexMessage,
+  ShareResult,
+} from "@/lib/line/line-flex-message";
 import {
   canShareText,
   shareText as openNativeShareSheet,
   TextShareResult,
-} from "@/lib/shareText";
+} from "@/lib/share/shareText";
 import type { WallClock } from "@/lib/time";
 import { buildVoteInviteShareText } from "./voteInviteShareText";
 

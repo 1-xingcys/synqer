@@ -6,7 +6,7 @@ import { Check, Copy, Share, Share2, X } from "lucide-react";
 import type { TimeGranularity } from "@/types/event";
 import { ShareOption, ShareSheet } from "@/components/ui/ShareSheet";
 import { ResultsAvailabilityMode } from "./types";
-import { Z_INDEX } from "@/lib/zIndex";
+import { Z_INDEX } from "@/lib/ui/zIndex";
 
 interface ResultsGridToolsMenuProps {
   mode: ResultsAvailabilityMode;

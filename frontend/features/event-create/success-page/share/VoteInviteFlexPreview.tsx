@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { buildEventShareBubbleFields } from "@/lib/line-flex-message";
+import { buildEventShareBubbleFields } from "@/lib/line/line-flex-message";
 import type { WallClock } from "@/lib/time";
 
 /**

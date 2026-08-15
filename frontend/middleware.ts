@@ -1,8 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
-import { SESSION_COOKIE_NAME, resolveLoginRedirect } from "./lib/auth-gate";
-import { resolveLegacyEventRedirect } from "./lib/legacyEventRoutes";
+import {
+  SESSION_COOKIE_NAME,
+  resolveLoginRedirect,
+} from "./lib/routing/auth-gate";
+import { resolveLegacyEventRedirect } from "./lib/routing/legacyEventRoutes";
 import {
   LIFF_ENTRY_COOKIE_NAME,
   resolveLiffStateServerRedirect,

@@ -3,8 +3,8 @@
 import { useCallback, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { apiFetchJson } from "@/lib/apiClient";
-import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
+import { apiFetchJson } from "@/lib/api/apiClient";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/routing/eventRoutes";
 import { myEventsKeys } from "@/hooks/useMyEvents";
 import type { operations } from "@/generated/openapi";
 

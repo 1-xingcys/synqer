@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { CalendarDays, Clock3, Globe, Timer, Calendar } from "lucide-react";
 import { formatMinutesToTime } from "@/lib/time/minuteOfDay";
-import { formatEventCandidateDaySummary } from "@/lib/event-presentation";
+import { formatEventCandidateDaySummary } from "@/lib/event/event-presentation";
 import { EventSchedule, EventType } from "@/types/event";
 import { formatWallClock, type WallClock } from "@/lib/time";
 

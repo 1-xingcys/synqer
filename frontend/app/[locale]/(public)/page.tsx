@@ -4,7 +4,7 @@ import PublicHeader from "@/components/layout/header/PublicHeader";
 import Footer from "@/components/layout/footer";
 import { LiffPathHandler } from "@/components/providers/LiffPathHandler";
 import { UsageFlow } from "@/features/landing/UsageFlow";
-import { siteUrl } from "@/lib/site";
+import { siteUrl } from "@/lib/seo/site";
 
 const LINE_OA_URL = "https://line.me/R/ti/p/@453ykpnm";
 

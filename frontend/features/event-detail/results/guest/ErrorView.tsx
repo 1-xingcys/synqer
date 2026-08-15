@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
-import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/routing/eventRoutes";
 
 interface ErrorViewProps {
   error?: string | null;

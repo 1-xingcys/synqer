@@ -3,8 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import PublicHeader from "@/components/layout/header/PublicHeader";
 import Footer from "@/components/layout/footer";
 import { Link } from "@/i18n/routing";
-import { brandedTitle, pageIdentity } from "@/lib/pageMetadata";
-import { brandOgImage } from "@/lib/ogImage";
+import { brandedTitle, pageIdentity } from "@/lib/seo/pageMetadata";
+import { brandOgImage } from "@/lib/seo/ogImage";
 
 export async function generateMetadata({
   params,

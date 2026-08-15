@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useAuth } from "@/hooks/useAuth";
-import { isEventHost } from "@/lib/eventHost";
+import { isEventHost } from "@/lib/event/eventHost";
 
 export function useEventDetailWithRole(eventId: string) {
   const { data, isLoading, isFetching, error, refetch } =

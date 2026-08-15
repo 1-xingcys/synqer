@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { LOCALES } from "@/i18n/locales";
-import { siteUrl } from "@/lib/site";
+import { siteUrl } from "@/lib/seo/site";
 
 export const dynamic = "force-static";
 

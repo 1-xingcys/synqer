@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { buildEventShareBubbleFields } from "@/lib/line-flex-message";
+import { buildEventShareBubbleFields } from "@/lib/line/line-flex-message";
 import { wallClock } from "@/lib/time";
 import { buildVoteInviteShareText } from "./voteInviteShareText";
 

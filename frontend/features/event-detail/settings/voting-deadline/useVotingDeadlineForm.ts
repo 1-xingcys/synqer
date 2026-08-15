@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useHostedEventDetail } from "@/hooks/useHostedEventDetail";
-import { apiFetchJson } from "@/lib/apiClient";
+import { apiFetchJson } from "@/lib/api/apiClient";
 import type { operations } from "@/generated/openapi";
 import type { CalendarDay } from "@/lib/time";
 import {

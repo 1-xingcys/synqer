@@ -6,7 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Check, X, Info } from "lucide-react";
 import { Vote, Participant } from "../../types";
 import { ResultsAvailabilityMode, SlotRangeInfo } from "../types";
-import { Z_INDEX } from "@/lib/zIndex";
+import { Z_INDEX } from "@/lib/ui/zIndex";
 import { AddButtonView, CloseButtonView } from "./footerViews";
 
 interface SlotDetailModalProps {

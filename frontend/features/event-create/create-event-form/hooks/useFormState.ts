@@ -15,7 +15,7 @@ import {
   DEFAULT_GRANULARITY,
   DEFAULT_SHARE_VOTE_TO_CHAT,
   DEFAULT_VOTE_MODE,
-} from "@/lib/eventPreference";
+} from "@/lib/event/eventPreference";
 
 function getInitialFormData(): CreateEventFormData {
   const timeZone = resolveDefaultTimeZone();

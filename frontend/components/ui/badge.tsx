@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, UserPlus, Clock, type LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/ui/utils";
 
 type BadgeVariant = "registered" | "notRegistered" | "voted" | "notVoted";
 

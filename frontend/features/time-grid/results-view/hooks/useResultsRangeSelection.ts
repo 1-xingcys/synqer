@@ -9,7 +9,7 @@ import {
   type RefObject,
   type TouchEvent as ReactTouchEvent,
 } from "react";
-import { extendAxisSpan, type AxisSpan } from "@/lib/axisSpan";
+import { extendAxisSpan, type AxisSpan } from "@/lib/event/axisSpan";
 import { GridAxisColumn, MergedTimeRow } from "../../types";
 
 interface CellPosition {

@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiFetchJson, apiFetchVoid } from "@/lib/apiClient";
+import { apiFetchJson, apiFetchVoid } from "@/lib/api/apiClient";
 import type { operations } from "@/generated/openapi";
 import {
   hostedEventKeys,

@@ -1,4 +1,4 @@
-import { isVotingDeadlineComplete } from "@/lib/votingDeadline";
+import { isVotingDeadlineComplete } from "@/lib/event/votingDeadline";
 import { calendarDayToWallClock, type CalendarDay } from "@/lib/time";
 import { wallClockDay, wallClockTime, type WallClock } from "@/lib/time";
 import { EventStatus } from "@/types/event";

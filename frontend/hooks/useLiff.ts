@@ -13,7 +13,7 @@ import {
   type LiffState,
   type LiffProfile,
   type LiffContext,
-} from "@/lib/liff";
+} from "@/lib/line/liff";
 
 export interface UseLiffReturn {
   // 狀態

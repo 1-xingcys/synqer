@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { VoteMode } from "@/types/event";
 import type { TimeGranularity } from "@/types/event";
-import { GRANULARITY_OPTIONS } from "@/lib/eventPreference";
-import { cn } from "@/lib/utils";
+import { GRANULARITY_OPTIONS } from "@/lib/event/eventPreference";
+import { cn } from "@/lib/ui/utils";
 import { PreferenceRow } from "../PreferenceRow";
 import { GridDefaultPreview } from "./GridDefaultPreview";
 

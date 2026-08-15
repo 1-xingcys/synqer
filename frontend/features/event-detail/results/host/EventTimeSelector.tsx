@@ -4,8 +4,8 @@ import { type ReactNode, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { Z_INDEX } from "@/lib/zIndex";
-import { formatLocalizedRangeLabel } from "@/lib/event-time";
+import { Z_INDEX } from "@/lib/ui/zIndex";
+import { formatLocalizedRangeLabel } from "@/lib/event/event-time";
 import type { SelectedTimeRange } from "./types";
 
 interface EventTimeSelectorProps {

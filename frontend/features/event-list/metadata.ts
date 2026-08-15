@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import type { OverviewStatus } from "@/lib/eventRoutes";
+import type { OverviewStatus } from "@/lib/routing/eventRoutes";
 
 /**
  * The four overview lists differ only by which status they show, in their

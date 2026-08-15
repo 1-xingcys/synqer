@@ -8,7 +8,7 @@ import {
   useHostedEventDetail,
 } from "@/hooks/useHostedEventDetail";
 import { eventDetailKeys } from "@/hooks/useEventDetail";
-import { apiFetchJson } from "@/lib/apiClient";
+import { apiFetchJson } from "@/lib/api/apiClient";
 import type { operations } from "@/generated/openapi";
 import { VoteMode, type TimeGranularity } from "@/types/event";
 import {
@@ -19,7 +19,7 @@ import {
   normalizeShareVoteToChat,
   toVoteMode,
   toVoteModeDto,
-} from "@/lib/eventPreference";
+} from "@/lib/event/eventPreference";
 
 type UpdateEventRequest =
   operations["EventCoreController_update"]["requestBody"]["content"]["application/json"];

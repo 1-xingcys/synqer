@@ -1,5 +1,5 @@
 import type { EventSlotAxisType, Weekday } from "@/types/event";
-import type { AxisSpan } from "@/lib/axisSpan";
+import type { AxisSpan } from "@/lib/event/axisSpan";
 
 export interface EventSlot {
   id: string;

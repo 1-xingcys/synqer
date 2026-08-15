@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/ui/DatePicker";
 import type { CalendarDay } from "@/lib/time";
 import { TimePicker } from "@/components/ui/TimePicker";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/ui/utils";
 
 interface VotingDeadlineFieldsProps {
   /** Expanded state driven by the toggle */

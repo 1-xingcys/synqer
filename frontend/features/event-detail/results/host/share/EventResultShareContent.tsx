@@ -11,7 +11,7 @@ import {
   Send,
   Share,
 } from "lucide-react";
-import { type HostedEventResultSummary } from "@/lib/hostedEventResultSummary";
+import { type HostedEventResultSummary } from "@/lib/event/hostedEventResultSummary";
 import { EventResultFlexPreview } from "./EventResultFlexPreview";
 import { EventResultTextPreview } from "./EventResultTextPreview";
 

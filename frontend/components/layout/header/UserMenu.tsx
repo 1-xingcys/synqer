@@ -17,7 +17,7 @@ import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import ThemeSwitcher from "@/components/layout/ThemeSwitcher";
 import { LogOutIcon } from "lucide-react";
 import { useLiffContext } from "@/contexts/LiffContext";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/ui/utils";
 
 export default function UserMenu() {
   const t = useTranslations();

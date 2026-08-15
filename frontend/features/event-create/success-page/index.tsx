@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useAuth } from "@/hooks/useAuth";
-import { DEFAULT_OVERVIEW_PATH } from "@/lib/eventRoutes";
+import { DEFAULT_OVERVIEW_PATH } from "@/lib/routing/eventRoutes";
 import { LoadingState } from "@/components/ui/loading-state";
 import { CreateEventShareContent, useCreateEventShare } from "./share";
 

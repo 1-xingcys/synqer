@@ -5,7 +5,7 @@ import {
   VoteMode,
   Weekday,
 } from "@/types/event";
-import type { AxisSpan } from "@/lib/axisSpan";
+import type { AxisSpan } from "@/lib/event/axisSpan";
 
 export interface GridAxisColumn {
   /** Stable key for grouping and lookup; see axisSpanKey. */

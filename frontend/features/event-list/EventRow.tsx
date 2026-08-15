@@ -24,8 +24,8 @@ import {
 } from "lucide-react";
 import { EventRowData } from "./types";
 import { useEventShareLink } from "@/hooks/useEventShareLink";
-import { formatEventDateRangeLabel } from "@/lib/event-presentation";
-import { eventDetailPath } from "@/lib/eventRoutes";
+import { formatEventDateRangeLabel } from "@/lib/event/event-presentation";
+import { eventDetailPath } from "@/lib/routing/eventRoutes";
 import { eventStatusColor } from "@/components/event/eventStatusStyles";
 
 // Icon glyph per event status. Color comes from the shared eventStatusColor map

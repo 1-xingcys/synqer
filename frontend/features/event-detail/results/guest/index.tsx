@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import ResultsView from "@/features/time-grid/results-view";
 import { SkeletonRegion } from "@/components/ui/skeleton-region";
 import { ResultsTabSkeleton } from "../ResultsTabSkeleton";
-import { normalizeGranularity, toVoteMode } from "@/lib/eventPreference";
+import { normalizeGranularity, toVoteMode } from "@/lib/event/eventPreference";
 import { useJoinedEventResults } from "./useJoinedEventResults";
 import { ErrorView } from "./ErrorView";
 

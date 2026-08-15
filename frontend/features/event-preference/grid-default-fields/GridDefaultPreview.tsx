@@ -6,7 +6,7 @@ import { VoteMode } from "@/types/event";
 import type { TimeGranularity } from "@/types/event";
 import { TimeColumn } from "@/features/time-grid/ui";
 import { useResponsiveGrid } from "@/features/time-grid/hooks";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/ui/utils";
 import {
   buildPreviewRows,
   PREVIEW_DAYS,

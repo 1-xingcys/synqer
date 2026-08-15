@@ -83,7 +83,7 @@ export default tseslint.config(
       // Time handling: date-fns formats and reads a Date's LOCAL fields, which
       // silently shifts this app's naive wall-clock values (candidate days,
       // votingDeadline, slot axisDate) by the viewer's UTC offset. Everything
-      // date-related goes through lib/time.ts or lib/calendarDay.ts, which are
+      // date-related goes through lib/time/, which is
       // explicit about the zone they read in. react-day-picker still uses
       // date-fns internally; that is its business, not ours.
       'no-restricted-imports': [
@@ -93,7 +93,7 @@ export default tseslint.config(
             {
               name: 'date-fns',
               message:
-                'date-fns reads local fields. Use lib/time.ts (instants, zone conversion) or lib/calendarDay.ts (calendar days) instead.',
+                'date-fns reads local fields. Use lib/time/ (wallClock and zone for instants, calendarDay for calendar days) instead.',
             },
           ],
           patterns: ['date-fns/*'],

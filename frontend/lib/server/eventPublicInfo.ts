@@ -1,7 +1,7 @@
 import { cache } from "react";
 import type { operations } from "@/generated/openapi";
-import { normalizeEventPublicInfoResponse } from "@/lib/event-normalizers";
-import { SITE_URL } from "@/lib/site";
+import { normalizeEventPublicInfoResponse } from "@/lib/event/event-normalizers";
+import { SITE_URL } from "@/lib/seo/site";
 
 type EventPublicInfoResponse =
   operations["EventCoreController_getEventPublicInfo"]["responses"][200]["content"]["application/json"];

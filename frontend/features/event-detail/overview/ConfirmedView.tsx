@@ -5,7 +5,7 @@ import { CalendarCheck, Calendar } from "lucide-react";
 import { ConfirmedTimeDisplay } from "@/components/event/ConfirmedTimeDisplay";
 import { AddToCalendarPanel } from "./AddToCalendarPanel";
 import { ConfirmedSelection } from "@/types/event";
-import { isOneTimeConfirmedSelection } from "@/lib/event-time";
+import { isOneTimeConfirmedSelection } from "@/lib/event/event-time";
 
 interface ConfirmedViewProps {
   eventTitle: string;

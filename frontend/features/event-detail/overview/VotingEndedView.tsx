@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { ClockFading, BarChart3 } from "lucide-react";
-import { eventDetailPath } from "@/lib/eventRoutes";
+import { eventDetailPath } from "@/lib/routing/eventRoutes";
 
 interface VotingEndedViewProps {
   eventId: string;

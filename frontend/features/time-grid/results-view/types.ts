@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { AxisSpan } from "@/lib/axisSpan";
+import type { AxisSpan } from "@/lib/event/axisSpan";
 import { TimeSlot, Vote, Participant } from "../types";
 import type { TimeGranularity } from "@/types/event";
 

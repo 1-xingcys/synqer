@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { apiFetchJson } from "@/lib/apiClient";
+import { apiFetchJson } from "@/lib/api/apiClient";
 
 export interface SearchedUser {
   id: string;

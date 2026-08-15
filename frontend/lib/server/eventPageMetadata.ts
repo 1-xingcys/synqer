@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { formatEventMetaDescription } from "@/lib/eventMetaDescription";
-import { eventOgImage } from "@/lib/ogImage";
+import { formatEventMetaDescription } from "@/lib/seo/eventMetaDescription";
+import { eventOgImage } from "@/lib/seo/ogImage";
 import {
   eventOgImageAltKey,
   eventShareTitleKey,
   type EventShareView,
-} from "@/lib/eventShare";
+} from "@/lib/seo/eventShare";
 import {
   brandedTitle,
   pageIdentity,
   privatePageShare,
-} from "@/lib/pageMetadata";
+} from "@/lib/seo/pageMetadata";
 import { fetchEventPublicInfo } from "@/lib/server/eventPublicInfo";
 
 interface EventPageMetadata {

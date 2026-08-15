@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiFetchJson } from "@/lib/apiClient";
+import { apiFetchJson } from "@/lib/api/apiClient";
 import type { operations } from "@/generated/openapi";
 import {
   normalizeMyEventsResponse,
   type NormalizedEventLike,
-} from "@/lib/event-normalizers";
+} from "@/lib/event/event-normalizers";
 
 type MyEventsResponse =
   operations["EventCoreController_findMyInvolvedEvents"]["responses"][200]["content"]["application/json"];

@@ -12,10 +12,14 @@ import {
   type HostedResultExpectedParticipant,
   type HostedResultSlot,
   type HostedResultVote,
-} from "@/lib/hostedEventResultSummary";
-import { canShareText, shareText, TextShareResult } from "@/lib/shareText";
-import { shareHostedEventResultFlexMessage } from "@/lib/line-flex-message/hostedEventResultFlexMessage";
-import { ShareResult } from "@/lib/line-flex-message/shareEventFlexMessage";
+} from "@/lib/event/hostedEventResultSummary";
+import {
+  canShareText,
+  shareText,
+  TextShareResult,
+} from "@/lib/share/shareText";
+import { shareHostedEventResultFlexMessage } from "@/lib/line/line-flex-message/hostedEventResultFlexMessage";
+import { ShareResult } from "@/lib/line/line-flex-message/shareEventFlexMessage";
 
 const LineShareStatus = {
   Idle: "idle",
