@@ -10,6 +10,20 @@ export type EventPublicInfo = ReturnType<
 >;
 
 /**
+ * A base URL that cannot be used, as opposed to an API that did not answer.
+ *
+ * The two are worth telling apart because only one of them is anybody's
+ * mistake: fetchEventPublicInfo swallows failures by design, and this is the
+ * one it should say something about on the way past.
+ */
+class ApiBaseUrlError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ApiBaseUrlError";
+  }
+}
+
+/**
  * The API base, as an absolute URL.
  *
  * One value serves the browser and the server both, because in this system the
@@ -26,7 +40,14 @@ export function resolveApiUrl(path: string): string {
   const base = process.env.NEXT_PUBLIC_API;
 
   if (!base) {
-    throw new Error("NEXT_PUBLIC_API is not set");
+    throw new ApiBaseUrlError("NEXT_PUBLIC_API is not set");
+  }
+
+  if (!/^https?:\/\//.test(base)) {
+    throw new ApiBaseUrlError(
+      `NEXT_PUBLIC_API must be absolute for server-side requests, got "${base}". ` +
+        "Point it at your tunnel host, e.g. https://YOUR_TUNNEL_HOST/api.",
+    );
   }
 
   return `${base.replace(/\/+$/, "")}${path}`;
@@ -70,10 +91,19 @@ export const fetchEventPublicInfo = cache(
       // A deleted event keeps answering, so that the page can say so. Its
       // title is not worth announcing.
       return event.isDeleted ? null : event;
-    } catch {
+    } catch (error) {
       // normalizeEventPublicInfoResponse throws on a malformed schedule or a
       // malformed wall clock, and fetch throws on an unreachable API. Neither
       // is a reason to fail the page.
+      //
+      // A base URL that cannot be used is different in kind: nothing will ever
+      // answer, and the symptom — every event page wearing the generic title —
+      // says nothing about the cause. Still not worth a 500, but worth saying
+      // out loud once per render.
+      if (error instanceof ApiBaseUrlError) {
+        console.error(`[eventPublicInfo] ${error.message}`);
+      }
+
       return null;
     }
   },

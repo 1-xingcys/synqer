@@ -89,6 +89,15 @@ describe("resolveApiUrl", () => {
       "NEXT_PUBLIC_API is not set",
     );
   });
+
+  // The one base the browser accepts and the server cannot.
+  it("rejects a relative base rather than failing silently later", () => {
+    process.env.NEXT_PUBLIC_API = "/api";
+
+    expect(() => resolveApiUrl("/events/evt_1/public")).toThrow(
+      /must be absolute/,
+    );
+  });
 });
 
 describe("fetchEventPublicInfo", () => {
@@ -129,6 +138,18 @@ describe("fetchEventPublicInfo", () => {
     });
 
     await expect(fetchEventPublicInfo("evt_malformed")).resolves.toBeNull();
+  });
+
+  // The symptom of a misconfigured base is every page wearing the generic
+  // title, which on its own names no cause.
+  it("says so in the log when the base URL is unusable", async () => {
+    process.env.NEXT_PUBLIC_API = "/api";
+    const logged = jest.spyOn(console, "error").mockImplementation(() => {});
+
+    await expect(fetchEventPublicInfo("evt_1")).resolves.toBeNull();
+    expect(logged).toHaveBeenCalledWith(
+      expect.stringContaining("must be absolute"),
+    );
   });
 
   // A deleted event still answers, so that the page can say it is gone.
