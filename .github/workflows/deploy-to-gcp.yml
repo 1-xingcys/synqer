@@ -25,6 +25,10 @@ on:
     branches: [main]
     types: [closed]
 
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 env:
   PROJECT_ID: no-invite-478215
   REGION: asia-east1

@@ -33,6 +33,9 @@ test
 *.db-journal
 prisma/dev.db
 
+# Production database dumps written by `npm run db:pull`
+.backups
+
 # Docs
 README.md
 ESLINT.md
