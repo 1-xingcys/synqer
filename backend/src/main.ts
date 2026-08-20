@@ -10,11 +10,14 @@ import { createSessionStore } from './auth/session-store';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    // 啟用 rawBody 以便 LINE Webhook 簽章驗證
+    // LINE signs the raw bytes of a webhook request. Re-serialising the
+    // parsed JSON is not guaranteed to reproduce them, so verifying the
+    // signature needs the original body.
     rawBody: true,
   });
 
-  // Env 已於 AppModule 啟動時驗證，這裡可安全取用且型別非空
+  // Env was validated when AppModule booted, so every read below is safe and
+  // typed as non-nullable.
   const config = app.get<ConfigService<EnvVars, true>>(ConfigService);
 
   app.useGlobalPipes(
@@ -26,12 +29,20 @@ async function bootstrap() {
   );
 
   // Configure CORS
+  // WEB_ORIGIN is the only accepted origin. In local development it is the
+  // tunnel subdomain rather than localhost:3000, because the browser loads the
+  // frontend through the tunnel and nginx (:8088), so that subdomain is what
+  // it sends as Origin. In production it is synqer.club.
   app.enableCors({
     origin: config.get('WEB_ORIGIN', { infer: true }),
     credentials: true,
   });
 
   // Trust proxy for Cloud Run / load balancer
+  // TLS is terminated before the request reaches this process — by Cloud Run
+  // in production, by cloudflared locally — so Express has to trust the
+  // X-Forwarded-* headers from that hop. Otherwise it judges the connection
+  // not to be https and withholds secure cookies.
   app.set('trust proxy', 1);
 
   // Configure session
@@ -48,16 +59,24 @@ async function bootstrap() {
         httpOnly: true,
         secure: isProduction,
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        // Locally the frontend and backend share one origin through nginx, so
+        // lax is enough. In production they are synqer.club and
+        // api.synqer.club, which makes every API call cross-site: only 'none'
+        // gets the cookie attached, and browsers require secure: true with it.
         sameSite: isProduction ? 'none' : 'lax',
-        // 設定 domain 讓 cookie 可以在所有子域名共享 (synqer.club, api.synqer.club)
+        // Sharing the cookie across subdomains (synqer.club, api.synqer.club).
+        // Left unset locally, where the tunnel subdomain has nothing to do
+        // with this domain and the cookie would simply be discarded.
         domain: isProduction ? '.synqer.club' : undefined,
       },
     }),
   );
 
-  // PORT 由 env schema 驗證並帶預設值（8080）；Cloud Run 會注入此變數
+  // PORT is validated by the env schema and defaults to 8080; Cloud Run
+  // injects its own value.
   const port = config.get('PORT', { infer: true });
-  const host = '0.0.0.0'; // 监听所有网络接口，确保 Docker 容器可以接收外部请求
+  // Listen on every interface, so the container accepts external requests.
+  const host = '0.0.0.0';
   await app.listen(port, host);
   console.log(`Application is running on: http://${host}:${port}`);
 }
