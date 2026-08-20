@@ -10,7 +10,6 @@ import {
   fetchEventPublicInfo,
   resolveApiUrl,
 } from "@/lib/server/eventPublicInfo";
-import { SITE_URL } from "@/lib/seo/site";
 
 const ORIGINAL_API = process.env.NEXT_PUBLIC_API;
 
@@ -49,7 +48,7 @@ function respondWith(body: unknown, ok = true) {
 }
 
 beforeEach(() => {
-  process.env.NEXT_PUBLIC_API = "/api";
+  process.env.NEXT_PUBLIC_API = "https://tunnel.example.com/api";
 });
 
 afterEach(() => {
@@ -58,19 +57,28 @@ afterEach(() => {
 });
 
 describe("resolveApiUrl", () => {
-  // The bug this exists for: "/api" is a perfectly good base in the browser
-  // and throws outright in a server fetch.
-  it("resolves a site-relative API base against the site origin", () => {
+  // The prefix nginx routes on rides along in the base, and has to survive
+  // intact — locally it is what tells the proxy this is an API call.
+  it("appends the path to the configured base", () => {
     expect(resolveApiUrl("/events/evt_1/public")).toBe(
-      `${SITE_URL}/api/events/evt_1/public`,
+      "https://tunnel.example.com/api/events/evt_1/public",
     );
   });
 
-  it("leaves an API base that is already absolute alone", () => {
-    process.env.NEXT_PUBLIC_API = "http://localhost:8080";
+  it("takes a base with no path prefix, as production has", () => {
+    process.env.NEXT_PUBLIC_API = "https://api.synqer.club";
 
     expect(resolveApiUrl("/events/evt_1/public")).toBe(
-      "http://localhost:8080/events/evt_1/public",
+      "https://api.synqer.club/events/evt_1/public",
+    );
+  });
+
+  // Both halves supply a slash, and "//events" would be read as a host.
+  it("never doubles the slash between base and path", () => {
+    process.env.NEXT_PUBLIC_API = "https://api.synqer.club/";
+
+    expect(resolveApiUrl("/events/evt_1/public")).toBe(
+      "https://api.synqer.club/events/evt_1/public",
     );
   });
 
