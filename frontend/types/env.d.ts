@@ -6,7 +6,7 @@
 
 declare namespace NodeJS {
   interface ProcessEnv {
-    // API 端點
+    /** API 端點，瀏覽器與 server 共用，必須是絕對網址 */
     NEXT_PUBLIC_API: string;
 
     // LINE LIFF

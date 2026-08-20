@@ -9,13 +9,6 @@ export type EventPublicInfo = ReturnType<
   typeof normalizeEventPublicInfoResponse
 >;
 
-/**
- * A base URL that cannot be used, as opposed to an API that did not answer.
- *
- * The two are worth telling apart because only one of them is anybody's
- * mistake: fetchEventPublicInfo swallows failures by design, and this is the
- * one it should say something about on the way past.
- */
 class ApiBaseUrlError extends Error {
   constructor(message: string) {
     super(message);
@@ -25,16 +18,6 @@ class ApiBaseUrlError extends Error {
 
 /**
  * The API base, as an absolute URL.
- *
- * One value serves the browser and the server both, because in this system the
- * two always want the same origin: production has synqer.club calling
- * api.synqer.club, and local development reaches the frontend and the backend
- * through the one tunnel host that nginx merges them behind.
- *
- * Absolute is the part that matters. The browser would take "/api" happily and
- * resolve it against the document it loaded; a server fetch has no document,
- * and a relative base throws. So the tunnel host has to be spelled out in
- * `NEXT_PUBLIC_API` even though the browser alone would not need it.
  */
 export function resolveApiUrl(path: string): string {
   const base = process.env.NEXT_PUBLIC_API;
@@ -94,12 +77,8 @@ export const fetchEventPublicInfo = cache(
     } catch (error) {
       // normalizeEventPublicInfoResponse throws on a malformed schedule or a
       // malformed wall clock, and fetch throws on an unreachable API. Neither
-      // is a reason to fail the page.
-      //
-      // A base URL that cannot be used is different in kind: nothing will ever
-      // answer, and the symptom — every event page wearing the generic title —
-      // says nothing about the cause. Still not worth a 500, but worth saying
-      // out loud once per render.
+      // is a reason to fail the page. A base URL that cannot be used is, so
+      // it is reported rather than swallowed.
       if (error instanceof ApiBaseUrlError) {
         console.error(`[eventPublicInfo] ${error.message}`);
       }
