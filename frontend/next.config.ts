@@ -4,7 +4,10 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  output: "standalone", // standalone mode keeps the Docker image small
+  // Emits .next/standalone, a self-contained server bundle that the production
+  // stage of frontend/Dockerfile copies instead of the whole node_modules tree.
+  // Removing this breaks that Dockerfile.
+  output: "standalone",
   experimental: {
     externalDir: true,
     viewTransition: true,

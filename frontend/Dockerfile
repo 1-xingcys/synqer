@@ -1,9 +1,26 @@
+# The image Cloud Run runs in production. It is built and pushed to Artifact
+# Registry by .github/workflows/deploy-to-gcp.yml, which supplies the build
+# arguments below from GitHub secrets.
+#
+# The thing to know before changing production configuration: NEXT_PUBLIC_*
+# variables are inlined into the client bundle during `npm run build`, so they
+# are frozen into the image. Editing them on the Cloud Run service does
+# nothing; the image has to be rebuilt and redeployed.
+#
+# NEXT_PUBLIC_SITE_URL is intentionally absent. It is not passed as a build
+# argument, so production falls back to the DEFAULT_SITE_URL constant in
+# lib/seo/site.ts. Adding it here would also mean adding it to the workflow's
+# build-args and to the repository secrets.
+
 # Build stage
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Build arguments (NEXT_PUBLIC_* variables must exist at build time)
+# Build arguments (NEXT_PUBLIC_* variables must exist at build time).
+# NEXT_PUBLIC_API is the absolute API origin in production, unlike the relative
+# /api used locally, because there is no nginx in front of Cloud Run to merge
+# the two services into one origin.
 ARG NEXT_PUBLIC_API
 ARG NEXT_PUBLIC_LINE_LIFF_ID
 
