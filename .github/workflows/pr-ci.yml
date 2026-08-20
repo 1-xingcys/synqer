@@ -1,3 +1,21 @@
+# Checks run on every pull request, as three independent jobs.
+#
+# ci-contract guards the generated API contract. The backend emits
+# backend/openapi/openapi.json from its controllers, the frontend generates
+# frontend/generated/openapi.ts from that file, and both are committed. This
+# job regenerates them and fails if anything differs, so a backend change that
+# alters the API has to be followed locally by:
+#     npm --prefix backend run openapi:generate
+#     npm --prefix frontend run api:gen
+# It also runs a whole-project frontend type check, which the unit tests do not
+# substitute for: ts-jest is configured here without type diagnostics, so a
+# file containing an outright type error still compiles and its tests still
+# pass. `tsc --noEmit` is the only step that catches those.
+#
+# ci-backend additionally rejects direct process.env access outside the config
+# layer, so every variable stays declared in src/config/env.validation.ts and
+# is validated at boot instead of read ad hoc.
+
 name: PR CI
 
 on:
