@@ -1,3 +1,13 @@
+# The local development database. Production is Neon and is never touched by
+# this file — the production connection string lives on the Cloud Run service
+# in GCP, and in the deploy workflow as a GitHub secret.
+#
+#   npm run db:up      start it (blocks until it accepts connections)
+#   npm run db:down    stop it, keeping the data
+#   npm run db:pull    replace its contents with a dump of production
+#
+# DATABASE_URL in backend/.env must match the credentials and port below.
+
 services:
   postgres:
     image: postgres:17-alpine
@@ -8,6 +18,8 @@ services:
       POSTGRES_PASSWORD: synqer
       POSTGRES_DB: synqer_dev
     ports:
+      # 5435 on the host rather than 5432, so an existing local Postgres
+      # install keeps working.
       - '5435:5432'
     volumes:
       - synqer-pgdata:/var/lib/postgresql/data
