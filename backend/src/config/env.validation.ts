@@ -1,8 +1,9 @@
 import * as Joi from 'joi';
 
 /**
- * 驗證後的環境變數型別。搭配 `ConfigService<EnvVars, true>` 注入，即可獲得
- * key 名稱檢查與非空的回傳型別（因為已於啟動時驗證過）。
+ * The shape of the validated environment. Injected as
+ * `ConfigService<EnvVars, true>`, it gives both key-name checking and
+ * non-nullable return types, since validation already ran at startup.
  */
 export interface EnvVars {
   NODE_ENV: 'development' | 'production' | 'test';
@@ -24,33 +25,35 @@ export interface EnvVars {
 }
 
 /**
- * 集中定義所有 Runtime 必要的環境變數，並在應用啟動時一次驗證。
+ * Every environment variable the runtime needs, validated once at startup.
  *
- * 設計重點：
- *  - fail-fast：缺少或格式錯誤的變數會在 boot 時拋錯，而非 runtime 才用
- *    `undefined` 靜默壞掉。
- *  - 一次列出所有問題：`abortEarly: false`，方便一次補齊。
- *  - 旁路：`SKIP_ENV_VALIDATION=true` 時跳過驗證。這讓「不需要真實密鑰」
- *    的場景使用——例如 CI 產生 OpenAPI 契約時會啟動整個 AppModule，但環境
- *    中沒有 .env（見 scripts/generate-openapi.js）。
+ * The design:
+ *  - Fail fast. A missing or malformed variable throws during boot instead of
+ *    failing silently as `undefined` somewhere at runtime.
+ *  - Report everything at once. `abortEarly: false`, so one run lists every
+ *    problem and they can all be fixed together.
+ *  - Escape hatch. `SKIP_ENV_VALIDATION=true` skips validation, for the cases
+ *    that need no real secrets — generating the OpenAPI contract in CI boots
+ *    the whole AppModule without a .env (see scripts/generate-openapi.js).
  */
 export const envValidationSchema = Joi.object({
-  // 執行環境
+  // Runtime environment
   NODE_ENV: Joi.string()
     .valid('development', 'production', 'test')
     .default('development'),
   PORT: Joi.number().default(8080),
 
-  // 資料庫（Prisma 使用）
+  // Database, read by Prisma
   DATABASE_URL: Joi.string()
     .uri({ scheme: ['postgres', 'postgresql'] })
     .required(),
 
-  // Session / 前端來源
+  // Session, and the single accepted frontend origin
   SESSION_SECRET: Joi.string().min(1).required(),
   WEB_ORIGIN: Joi.string().uri().required(),
 
-  // 儲存 Google OAuth token 的欄位層級加密金鑰（base64 編碼的 32 bytes）
+  // Field-level encryption key for stored Google OAuth tokens
+  // (32 bytes, base64 encoded)
   TOKEN_ENCRYPTION_KEY: Joi.string()
     .base64()
     .custom((value: string, helpers) => {
@@ -65,7 +68,7 @@ export const envValidationSchema = Joi.object({
         'TOKEN_ENCRYPTION_KEY must decode to 32 bytes (a base64-encoded 256-bit key).',
     }),
 
-  // Google OAuth2 / Calendar
+  // Google OAuth2 and Calendar
   GOOGLE_CLIENT_ID: Joi.string().required(),
   GOOGLE_CLIENT_SECRET: Joi.string().required(),
   GOOGLE_REDIRECT_URI: Joi.string().uri().required(),
@@ -77,13 +80,13 @@ export const envValidationSchema = Joi.object({
   LINE_LOGIN_REDIRECT_URI: Joi.string().uri().required(),
   LINE_LIFF_URL: Joi.string().uri().required(),
 
-  // LINE Bot / Messaging API
+  // LINE Bot, Messaging API
   LINE_BOT_CHANNEL_SECRET: Joi.string().required(),
   LINE_CHANNEL_ACCESS_TOKEN: Joi.string().required(),
 });
 
 /**
- * 供 `ConfigModule.forRoot({ validate })` 使用的驗證函式。
+ * The validation function handed to `ConfigModule.forRoot({ validate })`.
  */
 export function validateEnv(
   config: Record<string, unknown>,

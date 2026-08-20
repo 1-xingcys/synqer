@@ -1,3 +1,23 @@
+# Production deploy. It triggers on a pull request being merged into main.
+#
+# Order matters: migrations run against Neon before either image is deployed,
+# so a destructive migration takes effect while the previous revision is still
+# serving traffic. Keep migrations additive, or split them over two PRs.
+#
+# Steps: authenticate to GCP through Workload Identity Federation (no
+# long-lived service account key) -> `prisma migrate deploy` against Neon ->
+# build and push both images to Artifact Registry -> `gcloud run deploy` each.
+#
+# Repository secrets it needs:
+#   WIF_PROVIDER, WIF_SERVICE_ACCOUNT  GCP authentication
+#   PROD_DATABASE_URL                  Neon, for the migration step
+#   NEXT_PUBLIC_API                    baked into the frontend image
+#   NEXT_PUBLIC_LINE_LIFF_ID           baked into the frontend image
+#
+# The services' own runtime environment variables are not set here. They live
+# on the Cloud Run services in GCP, and `gcloud run deploy --image` leaves them
+# untouched, so adding a new one means adding it there by hand as well.
+
 name: Deploy to GCP
 
 on:

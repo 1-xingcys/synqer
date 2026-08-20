@@ -1,3 +1,17 @@
+# The image Cloud Run runs in production. It is built and pushed to Artifact
+# Registry by .github/workflows/deploy-to-gcp.yml, which then deploys it.
+#
+# Two things deliberately live outside this image:
+#   * Runtime configuration. DATABASE_URL (Neon), the session secret and every
+#     OAuth credential are set on the Cloud Run service itself in GCP, not
+#     baked in here. `gcloud run deploy --image` replaces only the image, so
+#     those values survive each deploy.
+#   * Migrations. The workflow runs `prisma migrate deploy` against Neon before
+#     this image is deployed, so the container never migrates on startup.
+#
+# Local development does not use this file at all — see backend/docker-compose.yml
+# for the local database and the repo root's nginx.conf for the request chain.
+
 # Build stage
 FROM node:20-alpine AS builder
 

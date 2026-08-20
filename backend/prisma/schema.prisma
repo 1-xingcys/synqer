@@ -5,6 +5,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// DATABASE_URL points at the Postgres in backend/docker-compose.yml locally and
+// at Neon in production, where it is set on the Cloud Run service in GCP.
+// Schema changes are applied with `npx prisma migrate dev` locally; production
+// is migrated by `prisma migrate deploy` in .github/workflows/deploy-to-gcp.yml.
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
