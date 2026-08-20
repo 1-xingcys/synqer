@@ -1,19 +1,18 @@
 /**
- * 環境變數類型定義
+ * Environment variable types.
  *
- * 在 Next.js 中，NEXT_PUBLIC_ 前綴的變數會暴露給瀏覽器端
+ * In Next.js, variables prefixed NEXT_PUBLIC_ are exposed to the browser.
  */
 
 declare namespace NodeJS {
   interface ProcessEnv {
-    // API 端點
+    /** API base, shared by the browser and the server, so it must be absolute */
     NEXT_PUBLIC_API: string;
 
-    // LINE LIFF
-    /** LINE LIFF App ID（從 LINE Developers Console 取得） */
+    /** LINE LIFF App ID, from the LINE Developers Console */
     NEXT_PUBLIC_LINE_LIFF_ID?: string;
 
-    // 其他環境變數...
+    // Other environment variables...
     NODE_ENV: "development" | "production" | "test";
   }
 }
