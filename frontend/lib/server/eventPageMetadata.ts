@@ -43,7 +43,7 @@ export async function eventPageMetadata({
 
   if (!event) {
     return {
-      title: { absolute: brandedTitle(t("pageTitle")) },
+      title: brandedTitle(t("pageTitle")),
       alternates: null,
     };
   }
@@ -67,12 +67,7 @@ export async function eventPageMetadata({
   };
 
   return {
-    // Stated in full rather than left to the locale layout's title.template.
-    // The detail layout declares a plain-string title of its own, and that
-    // clears the inherited template for the segments below it — which left the
-    // results tab, the one tab with metadata of its own, as the only page on
-    // the site whose tab did not carry the brand.
-    title: { absolute: brandedTitle(name) },
+    title: brandedTitle(name),
     ...(path ? pageIdentity({ ...share, path }) : privatePageShare(share)),
   };
 }

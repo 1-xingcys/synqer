@@ -12,9 +12,7 @@ const OG_LOCALES: Record<string, string> = {
   en: "en_US",
 };
 
-/**
- * "<page> | Synqer", the same shape `title.template` gives the tab.
- */
+/** "<page> | Synqer", the shape every title on the site takes. */
 export function brandedTitle(name: string): string {
   return `${name} | ${SITE_NAME}`;
 }

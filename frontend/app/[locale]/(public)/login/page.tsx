@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n/routing";
 import { DEFAULT_LOCALE, isLocale } from "@/i18n/locales";
 import LoginPage from "@/features/auth/LoginPage";
+import { brandedTitle } from "@/lib/seo/pageMetadata";
 import {
   SESSION_COOKIE_NAME,
   SESSION_EXPIRED_PARAM,
@@ -27,7 +28,7 @@ export async function generateMetadata({
 
   const name = t("title");
 
-  return { title: name, description: name };
+  return { title: brandedTitle(name), description: name };
 }
 
 /**

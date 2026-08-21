@@ -15,9 +15,9 @@ const BASE = {
 };
 
 describe("brandedTitle", () => {
-  // title.template gives the tab "<name> | Synqer"; og:title has no template
-  // mechanism, so the two only agree if the suffix is spelled the same way.
-  it("matches the shape title.template produces", () => {
+  // Every tab and every og:title on the site is spelled by this one function,
+  // so the suffix cannot drift between the two.
+  it("appends the brand to the page's own name", () => {
     expect(brandedTitle("Privacy Policy")).toBe(
       `Privacy Policy | ${SITE_NAME}`,
     );

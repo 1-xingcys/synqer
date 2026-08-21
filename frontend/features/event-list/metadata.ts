@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { brandedTitle } from "@/lib/seo/pageMetadata";
 import type { OverviewStatus } from "@/lib/routing/eventRoutes";
 
 /**
@@ -22,7 +23,6 @@ export function overviewMetadata(status: OverviewStatus) {
       namespace: `unifiedEvents.overview.${status}`,
     });
 
-    // The locale layout's title.template turns this into "<name> | Synqer".
-    return { title: t("title"), description: t("description") };
+    return { title: brandedTitle(t("title")), description: t("description") };
   };
 }

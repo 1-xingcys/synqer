@@ -18,8 +18,7 @@ export async function generateMetadata({
   const name = t("title");
 
   return {
-    // The locale layout's title.template turns this into "<name> | Synqer".
-    title: name,
+    title: brandedTitle(name),
     ...pageIdentity({
       locale,
       path: "/privacy",

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { brandedTitle } from "@/lib/seo/pageMetadata";
 import CreateEventSuccessPage from "@/features/event-create/success-page";
 
 /**
@@ -15,8 +16,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "createEvent" });
 
-  // The locale layout's title.template turns this into "<name> | Synqer".
-  return { title: t("title"), description: t("description") };
+  return { title: brandedTitle(t("title")), description: t("description") };
 }
 
 export default function NewEventSuccessPage() {

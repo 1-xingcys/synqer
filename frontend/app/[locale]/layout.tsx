@@ -6,7 +6,7 @@ import { routing } from "@/i18n/routing";
 import { LOCALES } from "@/i18n/locales";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { SITE_URL } from "@/lib/seo/site";
-import { SITE_NAME, pageIdentity } from "@/lib/seo/pageMetadata";
+import { SITE_NAME, brandedTitle, pageIdentity } from "@/lib/seo/pageMetadata";
 import { brandOgImage } from "@/lib/seo/ogImage";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -29,11 +29,6 @@ const geistMono = Geist_Mono({
  * the English page describing itself in Chinese, and left both pages without a
  * canonical URL, hreflang alternates or a share card.
  *
- * `title.template` is what gives the rest of the site "<page> | Synqer". It
- * applies only to children, so this segment states its own through
- * `title.default` — the landing page is the site, and reads better without the
- * brand appended to a title that already opens with it.
- *
  * The identity block belongs to the landing page specifically, not to the
  * layout: a canonical URL declared here would be inherited verbatim by every
  * page below, each one claiming to be a duplicate of the landing page.
@@ -49,10 +44,7 @@ export async function generateMetadata({
   return {
     metadataBase: new URL(SITE_URL),
     applicationName: SITE_NAME,
-    title: {
-      default: t("title"),
-      template: `%s | ${SITE_NAME}`,
-    },
+    title: brandedTitle(t("title")),
     icons: {
       icon: "/synqer.png",
       shortcut: "/synqer.png",
