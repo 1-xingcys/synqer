@@ -6,9 +6,6 @@ import { eventPageMetadata } from "@/lib/server/eventPageMetadata";
  * This is the link that gets shared, so it is the one page in the signed-in app
  * whose share block earns its keep: without one it inherits the landing page's,
  * and an invitation to a specific event previews as the product pitch.
- *
- * It states a canonical URL as well, which the detail tabs cannot — it is a
- * route of its own and knows its own path.
  */
 export async function generateMetadata({
   params,

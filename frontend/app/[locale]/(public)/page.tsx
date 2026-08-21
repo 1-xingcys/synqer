@@ -189,11 +189,6 @@ function AnimatedGrid() {
 /**
  * The marketing page, prerendered per locale.
  *
- * It used to wait on /auth/me before painting anything, so the first thing a
- * visitor with no session saw was a spinner. Nothing here depends on the
- * session any more: the web call to action points at /login, which forwards an
- * existing session into the app on the server.
- *
  * LiffPathHandler still wraps the content because this URL is the LIFF entry
  * point and the LINE Login callback target.
  */
