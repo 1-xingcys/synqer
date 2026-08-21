@@ -5,23 +5,8 @@ import { OG_ILLUSTRATION_URL, imageDataUrl } from "@/lib/seo/ogImage";
 import { Heatmap } from "@/lib/seo/ogCard/Heatmap";
 import { OG_CARD_SIZE, PALETTE } from "@/lib/seo/ogCard/palette";
 
-/**
- * The brand share card.
- *
- * A route handler rather than an `opengraph-image.tsx`, because file-based
- * metadata outranks `generateMetadata` — with that convention in the tree, the
- * `openGraph.images` the locale layout sets would never reach the `<head>`.
- * Nothing here is special to Next's metadata; it is an endpoint that returns a
- * PNG, and `brandOgImage()` is what points the tags at it.
- */
-
 export const size = OG_CARD_SIZE;
 
-/**
- * Both cards are drawn at build time. Otherwise the illustration fetch and the
- * font fetch below happen while a crawler waits — and a failure becomes a
- * broken preview in production instead of a red build.
- */
 export const dynamic = "force-static";
 
 export function generateStaticParams() {

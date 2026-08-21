@@ -4,14 +4,6 @@ import { loadFont, WORDMARK_FONT } from "@/lib/seo/ogCard/loadFont";
 import { loadLogo } from "@/lib/seo/ogCard/loadLogo";
 import { OG_CARD_SIZE } from "@/lib/seo/ogCard/palette";
 
-/**
- * The share card for every page about an event.
- *
- * A route handler rather than an `opengraph-image.tsx`, for the same reason the
- * brand card is one: file-based metadata outranks `generateMetadata`, and the
- * `openGraph.images` each page sets would never reach the `<head>`.
- */
-
 export const size = OG_CARD_SIZE;
 
 export const dynamic = "force-static";
