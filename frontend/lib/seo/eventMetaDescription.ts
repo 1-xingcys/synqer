@@ -30,14 +30,6 @@ const SEPARATOR = " · ";
 /**
  * What an event's schedule says, for `<meta name="description">` and for the
  * share preview's own description.
- *
- * It says what EventConfigurationSummary shows, in the same order and through
- * the same formatters, so the description a link previews with and the panel
- * behind it cannot drift apart.
- *
- * The time zone rides along with the daily window rather than standing as a
- * field of its own: these are wall-clock values belonging to the event, and
- * "09:00 ~ 18:00" alone reads as the viewer's own clock.
  */
 export function formatEventMetaDescription(
   event: EventMetaDescriptionInput,

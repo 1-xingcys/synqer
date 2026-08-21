@@ -10,20 +10,7 @@ interface BrandMarkProps {
   logo: string;
 }
 
-/**
- * The share card every page about an event previews with.
- *
- * The logo beside the wordmark on the landing page's paper, and nothing else.
- * The card it replaced drew the event — its name as a headline, then its
- * candidate dates and voting deadline — which said in a picture exactly what
- * the `og:title` and `og:description` beside it already say in words, and paid
- * for the repetition by fetching the event on every request.
- *
- * So it says the one thing the text around it does not: whose link this is.
- *
- * Nothing here is about a particular event or a particular locale, which is
- * what lets one build artefact serve every event page in both languages.
- */
+/** The share card every page about an event previews with. */
 export function BrandMark({ logo }: BrandMarkProps) {
   return (
     <div
@@ -37,8 +24,6 @@ export function BrandMark({ logo }: BrandMarkProps) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 44 }}>
-        {/* next/image has nothing to optimise here: this never reaches a
-            browser, and the source is already an inlined data URI. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={logo}

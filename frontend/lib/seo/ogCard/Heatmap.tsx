@@ -1,14 +1,5 @@
 import { PALETTE, RAMP } from "./palette";
 
-/**
- * The results grid, as a motif. Darker means more people free.
- *
- * It stands in for the brand card's illustration when that cannot be fetched,
- * which is the only place it is drawn. The event cards are type alone.
- *
- * The steps are fixed. Real vote counts sit behind the session guard, and a
- * card is an image anyone can fetch — this is a pattern, not a reading.
- */
 const COLUMNS = [
   [0, 1, 0, 2, 1],
   [1, 2, 3, 3, 2],
