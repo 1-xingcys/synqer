@@ -1,256 +1,71 @@
-# OAuth Login System
-
-A full-stack OAuth authentication system using Google and LINE login, built with NestJS (backend) and Next.js (frontend).
-
-## Project Structure
-
-```
-noInvite/
-├── backend/          # NestJS API server
-│   ├── prisma/      # Database schema and migrations
-│   ├── src/
-│   │   ├── auth/    # Authentication module (OAuth logic)
-│   │   ├── users/   # User management module
-│   │   └── prisma/  # Prisma service module
-│   └── .env         # Backend environment variables
-└── frontend/         # Next.js web application
-    ├── app/
-    │   └── [locale]/ # Internationalized pages
-    └── .env.local    # Frontend environment variables
-```
-
-## Features
-
-- OAuth 2.0 authentication with PKCE (Proof Key for Code Exchange)
-- Google OAuth login
-- LINE OAuth login
-- Session-based authentication using HTTP-only cookies
-- User profile management
-- Multiple OAuth provider linking to single user account
-
-## Prerequisites
-
-- Node.js 18+ and npm
-- Google OAuth credentials
-- LINE Login channel credentials
-
-## Setup Instructions
-
-### 1. Backend Setup
-
-#### Install Dependencies
-
-```bash
-cd backend
-npm install
-```
-
-#### Configure Environment Variables
-
-The `.env` file in `backend/` is already configured with your credentials:
-
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/synqer
-
-# Server
-NODE_ENV=development
-PORT=8080
-WEB_ORIGIN=http://localhost:3000
-
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:8080/api/auth/google/callback
-GOOGLE_CALENDAR_REDIRECT_URI=http://localhost:8080/api/google-calendar/callback
-
-# LINE Login (OAuth 登入專用)
-LINE_LOGIN_CHANNEL_ID=your_line_login_channel_id
-LINE_LOGIN_CHANNEL_SECRET=your_line_login_channel_secret
-LINE_LOGIN_REDIRECT_URI=http://localhost:8080/api/auth/line/callback
-LINE_LIFF_URL=https://liff.line.me/your_liff_id
-
-# LINE Bot (Messaging API 專用)
-LINE_BOT_CHANNEL_SECRET=your_line_bot_channel_secret
-LINE_CHANNEL_ACCESS_TOKEN=your_channel_access_token
-
-# Session
-SESSION_SECRET=dev-secret-change-in-production
-
-# Token encryption (base64-encoded 32-byte key for stored Google OAuth tokens)
-TOKEN_ENCRYPTION_KEY=your_base64_32_byte_key
-```
-
-**Important**: In production, generate a secure `SESSION_SECRET` and never commit credentials to version control.
-
-#### Initialize Database
-
-```bash
-# Generate Prisma client
-npx prisma generate
-
-# Run migrations to create database tables
-npx prisma migrate dev --name init
-```
-
-This will create the tables in your PostgreSQL database (`DATABASE_URL`) with the following schema:
-
-- `User`: Stores user information (id, displayName, primaryEmail, timestamps)
-- `AuthIdentity`: Stores OAuth provider information linked to users
-
-#### Start Backend Server
-
-```bash
-# Development mode with hot-reload
-npm run start:dev
-
-# Production mode
-npm run build
-npm run start:prod
-```
-
-The backend will run on http://localhost:4000
-
-### 2. Frontend Setup
-
-#### Install Dependencies
-
-```bash
-cd frontend
-npm install
-```
-
-#### Configure Environment Variables
-
-The `.env.local` file in `frontend/` is already configured:
-
-```env
-NEXT_PUBLIC_API=http://localhost:4000
-NEXT_PUBLIC_API_BASE=http://localhost:4000
-```
-
-#### Start Frontend Server
-
-```bash
-# Development mode
-npm run dev
-
-# Production mode
-npm run build
-npm start
-```
-
-The frontend will run on http://localhost:3000
-
-## Usage
-
-1. **Start both servers**:
-   - Backend: `cd backend && npm run start:dev`
-   - Frontend: `cd frontend && npm run dev`
-
-2. **Access the application**:
-   - Open http://localhost:3000 in your browser
-   - You'll see login options for Google and LINE
-
-3. **Login flow**:
-   - Click "Sign in with Google" or "Sign in with LINE"
-   - Complete OAuth authorization on the provider's page
-   - You'll be redirected back to the app with user information displayed
-
-4. **Features**:
-   - View your display name, email, and connected providers
-   - Logout to clear session
-   - Session persists across page refreshes
-
-## API Endpoints
-
-### Authentication
-
-- `GET /auth/google/start?redirect=/path` - Initiate Google OAuth flow
-- `GET /auth/google/callback` - Google OAuth callback handler
-- `GET /auth/line/start?redirect=/path` - Initiate LINE OAuth flow
-- `GET /auth/line/callback` - LINE OAuth callback handler
-- `GET /auth/me` - Get current authenticated user
-- `POST /auth/logout` - Logout and destroy session
-
-### Response Format
-
-#### GET /auth/me (Success - 200)
-```json
-{
-  "id": 1,
-  "displayName": "John Doe",
-  "primaryEmail": "john@example.com",
-  "providers": ["google", "line"]
-}
-```
-
-#### GET /auth/me (Unauthorized - 401)
-```json
-{
-  "message": "Unauthorized"
-}
-```
-
-## Database Schema
-
-### User Model
-```prisma
-model User {
-  id            BigInt   @id @default(autoincrement())
-  displayName   String?
-  primaryEmail  String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  identities    AuthIdentity[]
-}
-```
-
-### AuthIdentity Model
-```prisma
-model AuthIdentity {
-  id              BigInt   @id @default(autoincrement())
-  provider        String
-  providerUserId  String
-  providerEmail   String?
-  createdAt       DateTime @default(now())
-  userId          BigInt
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([provider, providerUserId])
-}
-```
-
-## Security Features
-
-- **PKCE**: Prevents authorization code interception attacks
-- **HTTP-only cookies**: Prevents XSS attacks on session tokens
-- **CORS**: Configured to only allow requests from frontend origin
-- **State parameter**: Prevents CSRF attacks during OAuth flow
-- **ID token verification**: Validates audience, issuer, and expiration
-
-## Troubleshooting
-
-### CORS Issues
-- Ensure `WEB_ORIGIN` in backend `.env` matches your frontend URL
-- Check that frontend is making requests with `credentials: 'include'`
-
-### Session Not Persisting
-- Verify cookie settings in browser (should see `connect.sid` cookie)
-- Check that both frontend and backend are on same domain (localhost)
-- Ensure `sameSite: 'lax'` in session configuration
-
-### OAuth Errors
-- Verify redirect URIs in Google/LINE console match `.env` configuration
-- Check that OAuth credentials are valid and not expired
-- Ensure scopes include `openid email profile`
-
-## Development Notes
-
-- The in-memory PKCE store is suitable for development but should be replaced with Redis or similar in production
-- Session secret should be a cryptographically secure random string in production
-- Consider using HTTPS in production and set `secure: true` for cookies
-- SQLite is used for development; consider PostgreSQL or MySQL for production
-
-## License
-
-This project is for demonstration purposes.
+# Synqer API
+
+NestJS over Prisma and PostgreSQL. It serves the web app, runs both OAuth
+flows, receives LINE webhooks and pushes messages back, and reads Google
+Calendar.
+
+## Modules
+
+| Module | Responsibility |
+| --- | --- |
+| `auth/` | Google and LINE Login (authorization code + PKCE), the LIFF token exchange, session issuing, and `SessionAuthGuard`. |
+| `users/` | Turning an OAuth identity into a `User`, and user lookup. |
+| `events/core/` | Creating, reading, updating and soft-deleting an event; the caller's own event list. |
+| `events/voting/` | Staged votes, and committing them. |
+| `events/participation/` | Joining an event, the expected-participant list, who still hasn't voted. |
+| `events/confirmation/` | The host picking the final slots — staged and committed the same way votes are. |
+| `events/shared/` | What those four have in common: the event and time-slot repositories, plus the pure services (status, schedule, mapper, authorization, capabilities). |
+| `line-bot/` | Webhook handling, group membership tracking, Flex messages, rich menu. |
+| `google-calendar/` | Calendar OAuth — separate from login — reading busy times, and encrypting the stored tokens. |
+| `prisma/`, `config/`, `common/` | Prisma client lifecycle, environment validation, time helpers. |
+
+## Layering
+
+Within a module the chain is controller → service → repository.
+
+- **Controllers** do HTTP and nothing else: DTOs and the global
+  `ValidationPipe` for input, `SessionAuthGuard` and `@CurrentUser()` for
+  identity, and the `@nestjs/swagger` decorators that become `openapi.json`.
+- **Services** hold the rules. The pure ones — `event-status`,
+  `event-schedule`, `time-slot`, `event-mapper`, `common/time` — never touch
+  the database, which is what makes them cheap to unit test.
+- **Repositories** are the only place Prisma is called.
+
+Event status is a good example of the split: `VOTING`, `VOTING_ENDED`,
+`CONFIRMED` and `COMPLETED` are not stored anywhere. `EventStatusService`
+derives them from the voting deadline, the confirmed slots and the clock, so
+there is no state to keep in sync.
+
+## Authentication
+
+- Google and LINE Login both run authorization code with PKCE. A callback
+  upserts an `AuthIdentity` keyed by `(provider, providerUserId)`; an identity
+  that has been seen before resolves to its existing `User`, a new one creates
+  a `User` alongside it.
+- Inside LINE, the LIFF page skips the redirect dance and posts its access
+  token to `POST /auth/liff/login`, which verifies it with LINE and issues the
+  same session.
+- Sessions are rows in the `Session` table via `@quixo3/prisma-session-store`,
+  behind an httpOnly `synqer.sid` cookie. [`src/main.ts`](src/main.ts) explains
+  why the cookie's `sameSite` and `domain` differ between local development
+  (one origin, behind nginx) and production (two subdomains, so every call is
+  cross-site).
+
+## Configuration
+
+Every environment variable is declared and validated with Joi in
+[`src/config/env.validation.ts`](src/config/env.validation.ts), so a missing or
+malformed one fails at boot rather than on the first request that needs it.
+Reading `process.env` anywhere else is rejected by CI — inject `ConfigService`
+instead. [`.env.example`](.env.example) documents what each variable is for.
+
+## Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm run start:dev` | Watch mode on `:8080`. |
+| `npm run db:up` / `db:down` | The local Postgres from [`docker-compose.yml`](docker-compose.yml), on host port 5435. |
+| `npm run db:pull` | Replace the local database with a dump of production. Needs `PROD_DATABASE_URL`. |
+| `npm run openapi:generate` | Rebuild `openapi/openapi.json`. Run it after any controller or DTO change, then regenerate the frontend types. |
+| `npm run reset-rich-menu` | Re-upload the LINE rich menu for your bot channel. |
+| `npm test` / `npm run lint:ci` | Unit tests, lint. |

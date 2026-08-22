@@ -1,145 +1,122 @@
-# Web Programming Final Group 13 - Synqer
+# Synqer
 
-組員：
+Group scheduling that never leaves the chat. Start an event from a LINE group,
+everyone paints their free hours onto a shared grid, and the host locks in the
+slot that works — without anybody installing an app or creating an account.
 
-* B11902173 資工四 陳順霙 
-* B10705009 資工四 邱一新
+**[synqer.club](https://synqer.club)**
 
-## Demo 影片連結
+## How it works
 
-[影片連結]
+```mermaid
+flowchart LR
+  L["LINE app<br/>chat + LIFF"] --> F["Next.js<br/>synqer.club"]
+  B["Web browser"] --> F
+  F -->|"REST + session cookie"| A["NestJS<br/>api.synqer.club"]
+  A --> DB[("PostgreSQL")]
+  A <-->|"webhooks in, cards out"| M["LINE Messaging API"]
+  A -->|"reads busy times"| G["Google Calendar API"]
+```
 
-## 服務描述
+The two clients are the same Next.js app: LIFF renders it in an in-app browser
+that is already authenticated, and a normal browser gets the same routes behind
+a login page.
 
-Synqer 是一個整合 LINE Bot 與 Google 日曆的活動預約與管理系統，旨在打造比 When2meet 更好用的多人約時間解決方案。使用者可以透過 LINE 帳號直接登入，快速發起活動並邀請好友。系統能夠整合參與者的空閒時間，並在時間確認後自動將行程同步至所有參與者的 Google 日曆，實現無縫的行程協調體驗。相較於 When2meet，Synqer 提供更直覺的操作介面、LINE 生態系整合、自動日曆同步等進階功能，大幅提升多人協調效率。
+## Tech stack
 
-## Deployed 連結
+| Layer | What we use |
+| --- | --- |
+| Frontend | Next.js 16 (App Router, React 19), Tailwind CSS v4, Radix UI, TanStack Query, next-intl |
+| Backend | NestJS 11, Prisma 6, express-session |
+| Database | PostgreSQL — Docker locally, [Neon](https://neon.tech) in production |
+| Integrations | LINE Login, LIFF, LINE Messaging API, Google OAuth, Google Calendar API |
+| Infrastructure | Docker, Cloud Run, Artifact Registry, GitHub Actions |
 
-https://synqer.club
+## Repository layout
 
-## 使用/操作方式
+| Path | What's in it |
+| --- | --- |
+| [`frontend/`](frontend) | The Next.js app, and the LIFF view — see [frontend/README.md](frontend/README.md) |
+| [`backend/`](backend) | The NestJS API and the Prisma schema — see [backend/README.md](backend/README.md) |
+| [`nginx.conf`](nginx.conf), [`run-nginx.sh`](run-nginx.sh) | Local reverse proxy putting both dev servers on one origin |
+| [`.github/workflows/`](.github/workflows) | Pull request checks, and the deploy to Cloud Run |
 
-### 伺服器端
+## Running it locally
 
-- 管理 LINE Messaging API Webhook 與 LIFF 設定。
-- 設定 Google Cloud Console OAuth 2.0 認證資訊。
-- 維護後端 API 服務與 Prisma/postgreSQL 資料庫。
-- 監控伺服器日誌與使用者連線狀態。
+Local development does not run on `localhost`. LIFF and the session cookie both
+require a single HTTPS origin, and LINE has to be able to reach your webhook
+from the outside, so requests arrive through a tunnel and an nginx proxy that
+merges the two dev servers:
 
-### 使用者端
+```
+LINE / browser  ->  https tunnel  ->  nginx :8088  ->  Next :3000
+                                                   ->  Nest :8080  (/api)
+```
 
-- 加入 Synqer LINE 官方帳號。
-- 點擊圖文選單開啟 LIFF 頁面。
-- 建立活動：輸入活動資訊並選擇多個候選時段。
-- 分享邀請：將活動訊息傳送給 LINE 好友或群組。
-- 填寫時間：受邀者點擊訊息進入頁面，勾選方便參加的時間。
-- 確認活動：發起人根據大家的回覆決定最終時段。
-- 自動同步：系統自動在參與者的 Google 日曆建立活動提醒。
+see [`nginx.conf`](nginx.conf).
 
-## 其他說明
+### Prerequisites
 
-- 系統支援繁體中文與英文多語系切換。
-- 提供符合系統設定的深色與淺色模式 UI 介面。
-- 使用 LIFF 讓使用者不需離開 LINE 即可完成所有操作。
+- Node 20 and Docker
+- An HTTPS tunnel to `localhost:8088` — we use Cloudflare Tunnel, ngrok works too
+- Your own Google OAuth client, LINE Login channel with a LIFF app, and LINE
+  Messaging API channel. [`backend/.env.example`](backend/.env.example) lists
+  which value comes from where, and why the channels can't be shared between
+  developers.
 
-## 使用與參考之框架/模組/原始碼
+### Setup
 
-- NestJS (Backend Framework)
-- Next.js (Frontend Framework)
-- Prisma (ORM)
-- Tailwind CSS (CSS Framework)
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+npm --prefix backend install
+npm --prefix frontend install
+```
 
-## 使用之第三方套件、框架、程式碼
+Fill in both `.env` files before going further — the comments in the examples
+say what each variable is for. Every redirect URI has to use your tunnel host,
+never `localhost`.
 
-- @line/liff: LINE 前端框架整合
-- @nestjs/platform-express: 底層通訊框架
-- Google Calendar API: 日曆同步功能
-- Radix UI: 前端無障礙元件
-- Lucide React: 圖示集
-- Axios: API 請求處理
+Then bring up the database and create the schema:
 
-## 專題製作心得
+```bash
+npm --prefix backend run db:up
+cd backend && npx prisma migrate dev
+```
 
-B10705009 - 邱一新：做專題的過程中學到很多，第一次開發出這種完成度的作品，很開心。
+Prisma reads `backend/.env`, so that second command has to run from `backend/`
+rather than the repository root.
 
-B11902173 - 陳順霙：之前開發 Web 應用時還沒有 AI，每個功能都是慢慢手刻的，現在有了 AI，開發速度真的快很多，太厲害！
+### Every session
 
+Four processes, one per terminal:
 
----
+| Process | Command |
+| --- | --- |
+| Backend | `npm --prefix backend run start:dev` |
+| Frontend | `npm --prefix frontend run dev` |
+| Proxy | `./run-nginx.sh` |
+| Tunnel | `cloudflared tunnel run --token <token>` |
 
-## 如何在 localhost 安裝與測試之詳細步驟
+Then open your tunnel URL. Opening `localhost:3000` directly will look like it
+works and then fail on the first API call, because CORS and the session cookie
+are both bound to the tunnel host.
 
-### 基本需求
+## The API contract
 
-- Node.js (建議 v18 以上)
-- Docker (用於執行 Nginx 代理)
-- ngrok (用於本地測試 Webhook)
-- npm 或 yarn 封裝管理工具
+The API types are generated, not hand-written. Nest emits
+`backend/openapi/openapi.json` from its controllers and DTOs, and the frontend
+turns that into `frontend/generated/openapi.ts`. Both files are committed, and
+CI fails if either is out of date. After changing a controller or a DTO:
 
-### 安裝步驟
+```bash
+npm --prefix backend run openapi:generate
+npm --prefix frontend run api:gen
+```
 
-0. 環境變數設定
+## Deployment
 
-   請先建立前後端環境變數檔，並依專案需求填入對應的金鑰與網址。
-
-   ```bash
-   cp backend/.env.example backend/.env
-   cp frontend/.env.example frontend/.env.local
-   ```
-
-   - `backend/.env`：填入資料庫連線、LINE Login/Bot、Google OAuth、JWT/Session 等設定。
-   - `frontend/.env.local`：設定前端呼叫的 API 位址與 LIFF ID。
-
-1. 後端設定與啟動
-
-   ```bash
-   cd backend
-   npm install
-   ```
-
-   ```bash
-   npx prisma generate
-   npx prisma migrate dev
-   npm run start:dev
-   ```
-
-2. 前端設定與啟動
-
-   ```bash
-   cd ../frontend
-   npm install
-   ```
-
-   ```bash
-   npm run dev
-   ```
-
-3. 執行 Nginx 腳本
-
-   ```bash
-   cd ..
-   ./run-nginx.sh
-   ```
-
-   此腳本會使用 Docker 啟動 Nginx，監聽本地 8088 端口，並將請求轉發至前端 (3000) 與後端 (8080)。
-
-4. 使用 ngrok 暴露服務
-
-   ```bash
-   ngrok http 8088
-   ```
-
-   取得 ngrok 的 https 網址，此網址將作為 LINE Bot Webhook 與 Google OAuth 的 Redirect URI 基礎。
-
-### 測試方式
-
-- 將 ngrok 產生的 https 網址填入 LINE Developers Console 的 Webhook URL 欄位。
-- 在 Google Cloud Console 設定 Authorized redirect URIs 為 ngrok 網址對應的路徑。
-- 透過 LINE 加入機器人好友並點擊選單進行功能測試。
-
-## 每位組員之負責項目
-
-- 資工四 陳順霙：主要負責各種投票 UI 介面、 Google Calendar 串接
-
-- 資工四 邱一新：主要負責 Line Bot 相關串接
-
+Merging a pull request into `main` runs
+[`deploy-to-gcp.yml`](.github/workflows/deploy-to-gcp.yml): migrate Neon, build
+and push both images to Artifact Registry, then deploy each to Cloud Run. The
+frontend serves `synqer.club` and the backend `api.synqer.club`.
