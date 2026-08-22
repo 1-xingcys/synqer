@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import PublicHeader from "@/components/layout/header/PublicHeader";
 import Footer from "@/components/layout/footer";
 import { Link } from "@/i18n/routing";
-import { brandedTitle, pageIdentity } from "@/lib/seo/pageMetadata";
+import { brandedTitle, pageMetadata } from "@/lib/seo/pageMetadata";
 import { brandOgImage } from "@/lib/seo/ogImage";
 
 export async function generateMetadata({
@@ -15,18 +15,13 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "terms" });
   const seo = await getTranslations({ locale, namespace: "seo" });
 
-  const name = t("title");
-
-  return {
-    title: brandedTitle(name),
-    ...pageIdentity({
-      locale,
-      path: "/terms",
-      shareTitle: brandedTitle(name),
-      description: t("description"),
-      image: brandOgImage(locale, seo("ogImageAlt")),
-    }),
-  };
+  return pageMetadata({
+    locale,
+    path: "/terms",
+    title: brandedTitle(t("title")),
+    description: t("description"),
+    image: brandOgImage(locale, seo("ogImageAlt")),
+  });
 }
 
 /** Static content with no session and no interaction: prerendered per locale. */

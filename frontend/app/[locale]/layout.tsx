@@ -6,7 +6,7 @@ import { routing } from "@/i18n/routing";
 import { LOCALES } from "@/i18n/locales";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { SITE_URL } from "@/lib/seo/site";
-import { SITE_NAME, brandedTitle, pageIdentity } from "@/lib/seo/pageMetadata";
+import { SITE_NAME, brandedTitle, pageMetadata } from "@/lib/seo/pageMetadata";
 import { brandOgImage } from "@/lib/seo/ogImage";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -25,13 +25,9 @@ const geistMono = Geist_Mono({
 /**
  * Per-locale metadata, and the defaults every page below inherits.
  *
- * It has to be generated rather than stated: a single hard-coded title left
- * the English page describing itself in Chinese, and left both pages without a
- * canonical URL, hreflang alternates or a share card.
- *
- * The identity block belongs to the landing page specifically, not to the
- * layout: a canonical URL declared here would be inherited verbatim by every
- * page below, each one claiming to be a duplicate of the landing page.
+ * The page block belongs to the landing page specifically, not to the layout:
+ * a canonical URL declared here would be inherited verbatim by every page
+ * below, each one claiming to be a duplicate of the landing page.
  */
 export async function generateMetadata({
   params,
@@ -44,14 +40,14 @@ export async function generateMetadata({
   return {
     metadataBase: new URL(SITE_URL),
     applicationName: SITE_NAME,
-    title: brandedTitle(t("title")),
     icons: {
       icon: "/synqer.png",
       shortcut: "/synqer.png",
       apple: "/synqer.png",
     },
-    ...pageIdentity({
+    ...pageMetadata({
       locale,
+      title: brandedTitle(t("title")),
       // The tab reads "首頁 | Synqer"; a share preview saying that would be
       // useless, so the brand line is a key of its own.
       shareTitle: t("og_title"),

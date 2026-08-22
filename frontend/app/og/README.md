@@ -12,7 +12,7 @@ Two PNGs, drawn with `next/og`:
 File-based metadata outranks `generateMetadata`. With an `opengraph-image.tsx`
 anywhere in the `app/[locale]` tree, Next would attach that file's card to
 every page under it and the `openGraph.images` our pages set would never reach
-the `<head>` — which is the whole point of `pageIdentity()`, since an event
+the `<head>` — which is the whole point of `pageMetadata()`, since an event
 link and the landing page do not share a preview.
 
 ## Why they are `force-static`

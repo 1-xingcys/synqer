@@ -4,8 +4,8 @@ import { formatEventMetaDescription } from "@/lib/seo/eventMetaDescription";
 import { markOgImage } from "@/lib/seo/ogImage";
 import {
   brandedTitle,
-  pageIdentity,
-  privatePageShare,
+  pageMetadata,
+  privatePageMetadata,
 } from "@/lib/seo/pageMetadata";
 import { fetchEventPublicInfo } from "@/lib/server/eventPublicInfo";
 
@@ -50,8 +50,9 @@ export async function eventPageMetadata({
 
   const name = event.title?.trim() || t("pageTitle");
 
-  const share = {
+  const page = {
     locale,
+    title: brandedTitle(name),
     shareTitle: seo(
       view === "results" ? "eventResultsShareTitle" : "eventShareTitle",
       { name },
@@ -66,8 +67,5 @@ export async function eventPageMetadata({
     image: markOgImage(seo("markOgImageAlt")),
   };
 
-  return {
-    title: brandedTitle(name),
-    ...(path ? pageIdentity({ ...share, path }) : privatePageShare(share)),
-  };
+  return path ? pageMetadata({ ...page, path }) : privatePageMetadata(page);
 }

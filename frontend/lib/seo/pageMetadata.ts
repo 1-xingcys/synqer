@@ -17,29 +17,32 @@ export function brandedTitle(name: string): string {
   return `${name} | ${SITE_NAME}`;
 }
 
-interface PageIdentity {
+interface PageMetadata {
   locale: string;
   /** Locale-less path, with a leading slash. `""` is the landing page. */
   path?: string;
-  /** The title the share preview shows. */
-  shareTitle: string;
+  /** The tab. Title on the site. */
+  title: string;
+  /** For a page whose preview should say something else entirely. */
+  shareTitle?: string;
   /** What both `<meta name="description">` and og:description will say. */
   description: string;
   /** The card the preview shows. */
   image: OgImage;
 }
 
-/** The half of a page's metadata that says *which page this is. */
-export function pageIdentity({
+export function pageMetadata({
   locale,
   path = "",
+  title,
   shareTitle,
   description,
   image,
-}: PageIdentity): Metadata {
+}: PageMetadata): Metadata {
   return {
-    ...shareBlock({
+    ...pageBlock({
       locale,
+      title,
       shareTitle,
       description,
       image,
@@ -57,31 +60,36 @@ export function pageIdentity({
   };
 }
 
-/** The same block for a page that cannot name a canonical URL of its own. */
-export function privatePageShare({
+/** For a page that cannot name a canonical URL of its own. */
+export function privatePageMetadata({
   locale,
+  title,
   shareTitle,
   description,
   image,
-}: Omit<PageIdentity, "path">): Metadata {
+}: Omit<PageMetadata, "path">): Metadata {
   return {
-    ...shareBlock({ locale, shareTitle, description, image }),
+    ...pageBlock({
+      locale,
+      title,
+      shareTitle,
+      description,
+      image,
+    }),
     alternates: null,
   };
 }
 
-/**
- * og:url is the only difference between the two, and it is optional — a
- * preview falls back to the URL it was handed.
- */
-function shareBlock({
+function pageBlock({
   locale,
-  shareTitle,
+  title,
+  shareTitle = title,
   description,
   image,
   url,
-}: Omit<PageIdentity, "path"> & { url?: string }): Metadata {
+}: Omit<PageMetadata, "path"> & { url?: string }): Metadata {
   return {
+    title,
     description,
     openGraph: {
       type: "website",
