@@ -39,18 +39,9 @@ export function resolveApiUrl(path: string): string {
 /**
  * An event's public information, for the metadata of the pages that show it.
  *
- * `GET /events/:id/public` is the one event endpoint with no session guard —
- * it backs the bare event link, which strangers open. That is what makes
- * server-rendered titles possible here at all: `generateMetadata` carries no
- * session, and every other event endpoint would answer it with a 401.
- *
  * `cache()` is what keeps the detail routes to one request rather than two:
  * the layout and the page below it both generate metadata within the same
  * render pass.
- *
- * @returns null for an event that is missing, deleted, or malformed, and for
- *   an API that did not answer. A page whose title could not be resolved still
- *   has to render — throwing here would turn a cosmetic gap into a 500.
  */
 export const fetchEventPublicInfo = cache(
   async (eventId: string): Promise<EventPublicInfo | null> => {

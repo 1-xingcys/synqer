@@ -5,32 +5,8 @@ import { OG_ILLUSTRATION_URL, imageDataUrl } from "@/lib/seo/ogImage";
 import { Heatmap } from "@/lib/seo/ogCard/Heatmap";
 import { OG_CARD_SIZE, PALETTE } from "@/lib/seo/ogCard/palette";
 
-/**
- * The brand share card.
- *
- * A route handler rather than an `opengraph-image.tsx`, because file-based
- * metadata outranks `generateMetadata` — with that convention in the tree, the
- * `openGraph.images` the locale layout sets would never reach the `<head>`.
- * Nothing here is special to Next's metadata; it is an endpoint that returns a
- * PNG, and `brandOgImage()` is what points the tags at it.
- *
- * The copy is drawn rather than baked into artwork so the two locales share one
- * layout, and so a wording change is a change to the message catalogue. The
- * renderer needs no bundled CJK font for that: the `@vercel/og` inside Next
- * detects the script and fetches a subset covering exactly these characters.
- *
- * The directory is literally named `card.png` so the URL ends in an extension.
- * Middleware's matcher skips any path containing a dot, which keeps the locale
- * middleware from redirecting this away from itself.
- */
-
 export const size = OG_CARD_SIZE;
 
-/**
- * Both cards are drawn at build time. Otherwise the illustration fetch and the
- * font fetch below happen while a crawler waits — and a failure becomes a
- * broken preview in production instead of a red build.
- */
 export const dynamic = "force-static";
 
 export function generateStaticParams() {
@@ -41,10 +17,6 @@ export function generateStaticParams() {
  * Satori cannot report a failed `<img src>` — a fetch that 404s takes the whole
  * card down with it. So the illustration is fetched here, where a miss can be
  * answered with the heatmap motif instead of a broken deploy.
- *
- * The response's own `content-type` is not consulted. It is whatever the object
- * store inferred from the file name, and a JPEG uploaded as `illustration.png`
- * is announced as a PNG — a claim that decodes to an empty rectangle.
  */
 async function loadIllustration(): Promise<string | null> {
   try {

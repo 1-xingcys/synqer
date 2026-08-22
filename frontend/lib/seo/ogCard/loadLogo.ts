@@ -5,14 +5,6 @@ import { imageDataUrl } from "@/lib/seo/ogImage";
 /**
  * The wordmark, inlined as a data URI.
  *
- * Read off disk rather than fetched over the network. Satori cannot report a
- * failed `<img src>` — a fetch that 404s takes the whole card down — and the
- * file is already sitting in `public/` beside the renderer, so there is no
- * reason to ask a web server for it and no request to fail.
- *
- * Read once per process. It is a build artefact and cannot change while the
- * server is up.
- *
  * @returns null when the file cannot be read or is not a format the renderer
  *   can decode. What that is worth answering with is the caller's to decide:
  *   the brand mark is prerendered and half of it is the logo, so it raises.

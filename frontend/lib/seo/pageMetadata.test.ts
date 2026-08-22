@@ -1,34 +1,34 @@
 import {
   SITE_NAME,
   brandedTitle,
-  pageIdentity,
-  privatePageShare,
+  pageMetadata,
+  privatePageMetadata,
 } from "./pageMetadata";
 import { brandOgImage } from "./ogImage";
 import { SITE_URL } from "./site";
 import { DEFAULT_LOCALE, LOCALES } from "@/i18n/locales";
 
 const BASE = {
-  shareTitle: "Synqer — the brand line",
+  title: brandedTitle("Privacy Policy"),
   description: "The pitch.",
   image: brandOgImage("zh-TW", "The card."),
 };
 
 describe("brandedTitle", () => {
-  // title.template gives the tab "<name> | Synqer"; og:title has no template
-  // mechanism, so the two only agree if the suffix is spelled the same way.
-  it("matches the shape title.template produces", () => {
+  // Every tab and every og:title on the site is spelled by this one function,
+  // so the suffix cannot drift between the two.
+  it("appends the brand to the page's own name", () => {
     expect(brandedTitle("Privacy Policy")).toBe(
       `Privacy Policy | ${SITE_NAME}`,
     );
   });
 });
 
-describe("pageIdentity", () => {
+describe("pageMetadata", () => {
   // The bug this function exists for: with these declared once in the locale
   // layout, every page below inherited them and claimed to be the landing page.
   it("points a page's canonical URL at itself, not at the landing page", () => {
-    const privacy = pageIdentity({
+    const privacy = pageMetadata({
       locale: "zh-TW",
       path: "/privacy",
       ...BASE,
@@ -39,7 +39,7 @@ describe("pageIdentity", () => {
   });
 
   it("offers each locale's own spelling of that same page", () => {
-    const { alternates } = pageIdentity({
+    const { alternates } = pageMetadata({
       locale: "en",
       path: "/terms",
       ...BASE,
@@ -54,28 +54,43 @@ describe("pageIdentity", () => {
   });
 
   it("treats the landing page as the root of its locale", () => {
-    const landing = pageIdentity({ locale: "zh-TW", ...BASE });
+    const landing = pageMetadata({ locale: "zh-TW", ...BASE });
 
     expect(landing.alternates?.canonical).toBe("/zh-TW");
     expect(landing.openGraph?.url).toBe(`${SITE_URL}/zh-TW`);
   });
 
-  it("shares the title it is given, on both networks", () => {
-    const { openGraph, twitter } = pageIdentity({
+  it("hands the same title to the tab and to both networks", () => {
+    const { title, openGraph, twitter } = pageMetadata({
       locale: "en",
       path: "/privacy",
       ...BASE,
-      shareTitle: brandedTitle("Privacy Policy"),
     });
 
+    expect(title).toBe(`Privacy Policy | ${SITE_NAME}`);
     expect(openGraph?.title).toBe(`Privacy Policy | ${SITE_NAME}`);
     expect(twitter?.title).toBe(`Privacy Policy | ${SITE_NAME}`);
+  });
+
+  // The landing page and the event pages both want a preview that reads as an
+  // invitation rather than as a tab, and neither wants the tab to follow suit.
+  it("lets a page reword the preview without touching its tab", () => {
+    const { title, openGraph, twitter } = pageMetadata({
+      locale: "zh-TW",
+      ...BASE,
+      title: brandedTitle("週會"),
+      shareTitle: "投票活動：週會",
+    });
+
+    expect(title).toBe(`週會 | ${SITE_NAME}`);
+    expect(openGraph?.title).toBe("投票活動：週會");
+    expect(twitter?.title).toBe("投票活動：週會");
   });
 
   // A page's own description has to reach all three, or the search result and
   // the share preview describe different pages.
   it("describes the page the same way everywhere", () => {
-    const page = pageIdentity({
+    const page = pageMetadata({
       locale: "zh-TW",
       path: "/terms",
       ...BASE,
@@ -90,7 +105,7 @@ describe("pageIdentity", () => {
   // Metadata merges shallowly: a page that returns a partial openGraph drops
   // whatever the layout declared, share card included.
   it("returns the share block complete, so a page can replace it wholesale", () => {
-    const { openGraph } = pageIdentity({
+    const { openGraph } = pageMetadata({
       locale: "zh-TW",
       path: "/terms",
       ...BASE,
@@ -103,34 +118,31 @@ describe("pageIdentity", () => {
     });
     expect(openGraph?.images).toHaveLength(1);
   });
-
-  it("states no title of its own, leaving that to the page", () => {
-    expect(pageIdentity({ locale: "en", ...BASE }).title).toBeUndefined();
-  });
 });
 
-describe("privatePageShare", () => {
+describe("privatePageMetadata", () => {
   // The reason it is a separate function: the event detail tabs are declared by
   // one layout that does not know which tab it wraps, so a canonical stated
   // there would have all five claiming to be duplicates of one another.
   // Leaving `alternates` unsaid is not the same as declining it: the locale
   // layout declares the landing page's, and anything unsaid inherits it.
   it("declines a canonical URL rather than inheriting the landing page's", () => {
-    const share = privatePageShare({ locale: "zh-TW", ...BASE });
+    const page = privatePageMetadata({ locale: "zh-TW", ...BASE });
 
-    expect(share.alternates).toBeNull();
-    expect(share.openGraph?.url).toBeUndefined();
+    expect(page.alternates).toBeNull();
+    expect(page.openGraph?.url).toBeUndefined();
   });
 
   // Without one, an event link previews with the landing page's pitch.
-  it("still returns the share block complete", () => {
-    const { description, openGraph, twitter } = privatePageShare({
+  it("still names the tab and returns the share block complete", () => {
+    const { title, description, openGraph, twitter } = privatePageMetadata({
       locale: "zh-TW",
       ...BASE,
-      shareTitle: brandedTitle("週會"),
+      title: brandedTitle("週會"),
       description: "候選日期 2026/07/30 ~ 2026/08/02",
     });
 
+    expect(title).toBe(`週會 | ${SITE_NAME}`);
     expect(description).toBe("候選日期 2026/07/30 ~ 2026/08/02");
     expect(openGraph).toMatchObject({
       type: "website",
