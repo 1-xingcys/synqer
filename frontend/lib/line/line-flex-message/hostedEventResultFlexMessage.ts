@@ -15,6 +15,7 @@ export type HostedEventResultFlexCopy = {
   titlePrefix: string;
   untitledEvent: string;
   unavailableLabel: string;
+  notVotedLabel: string;
   hiddenResultsLabel: (count: number) => string;
   viewResultsLabel: string;
 };
@@ -34,6 +35,7 @@ export function getHostedEventResultFlexCopy(
       titlePrefix: "已確認結果",
       untitledEvent: "未命名活動",
       unavailableLabel: "不能出席",
+      notVotedLabel: "未投票",
       hiddenResultsLabel: (count) => `另有 ${count} 個時段未顯示`,
       viewResultsLabel: "查看結果",
     };
@@ -43,6 +45,7 @@ export function getHostedEventResultFlexCopy(
     titlePrefix: "Confirmed result",
     untitledEvent: "Untitled Event",
     unavailableLabel: "Unavailable",
+    notVotedLabel: "Not voted",
     hiddenResultsLabel: (count) => `${count} more confirmed slots`,
     viewResultsLabel: "View results",
   };
@@ -95,6 +98,32 @@ function getJsonByteLength(value: unknown) {
   return new TextEncoder().encode(JSON.stringify(value)).length;
 }
 
+function buildNamesRow(label: string, labelColor: string, names: string[]) {
+  return {
+    type: "box",
+    layout: "horizontal",
+    spacing: "sm",
+    contents: [
+      {
+        type: "text",
+        text: label,
+        size: "xs",
+        color: labelColor,
+        weight: "bold",
+        flex: 0,
+      },
+      {
+        type: "text",
+        text: names.join("、"),
+        size: "xs",
+        color: "#4B5563",
+        wrap: true,
+        flex: 1,
+      },
+    ],
+  };
+}
+
 function buildRangeSection(params: {
   range: HostedEventResultSummary["ranges"][number];
   totalExpected: number;
@@ -112,8 +141,6 @@ function buildRangeSection(params: {
   const unavailableNames = params.range.unavailableParticipants.map(
     (participant) => participant.name,
   );
-  const hasUnavailableNames = unavailableNames.length > 0;
-  const unavailableText = unavailableNames.join("、");
   const barColors = getAttendanceBarColors(
     params.range.availableCount,
     params.totalExpected,
@@ -177,31 +204,13 @@ function buildRangeSection(params: {
           },
         ],
       },
-      ...(hasUnavailableNames
+      ...(unavailableNames.length > 0
         ? [
-            {
-              type: "box",
-              layout: "horizontal",
-              spacing: "sm",
-              contents: [
-                {
-                  type: "text",
-                  text: params.copy.unavailableLabel,
-                  size: "xs",
-                  color: "#6B7280",
-                  weight: "bold",
-                  flex: 0,
-                },
-                {
-                  type: "text",
-                  text: unavailableText,
-                  size: "xs",
-                  color: "#4B5563",
-                  wrap: true,
-                  flex: 1,
-                },
-              ],
-            },
+            buildNamesRow(
+              params.copy.unavailableLabel,
+              "#6B7280",
+              unavailableNames,
+            ),
           ]
         : []),
     ],
@@ -284,13 +293,33 @@ export function buildHostedEventResultFlexMessageFromSummary(
     }),
   );
 
+  // Kept at the bottom whichever ranges fit, so it counts toward the budget.
+  const notVotedContents: Array<Record<string, unknown>> =
+    info.summary.notVotedParticipants.length > 0
+      ? [
+          {
+            ...buildNamesRow(
+              copy.notVotedLabel,
+              "#D97706",
+              info.summary.notVotedParticipants.map((p) => p.name),
+            ),
+            margin: "xl",
+          },
+        ]
+      : [];
+
   const visibleRangeSections: Array<Record<string, unknown>> = [];
   allRangeSections.forEach((section) => {
     const candidateBubble = buildFlexBubble({
       title,
       viewResultsLabel: copy.viewResultsLabel,
       eventResultUrl,
-      bodyContents: [...baseBodyContents, ...visibleRangeSections, section],
+      bodyContents: [
+        ...baseBodyContents,
+        ...visibleRangeSections,
+        section,
+        ...notVotedContents,
+      ],
     });
     const candidateMessage = {
       type: "flex",
@@ -319,7 +348,7 @@ export function buildHostedEventResultFlexMessageFromSummary(
       title,
       viewResultsLabel: copy.viewResultsLabel,
       eventResultUrl,
-      bodyContents: [...bodyContents, hiddenResultsText],
+      bodyContents: [...bodyContents, hiddenResultsText, ...notVotedContents],
     });
     const candidateMessage = {
       type: "flex",
@@ -339,7 +368,7 @@ export function buildHostedEventResultFlexMessageFromSummary(
       title,
       viewResultsLabel: copy.viewResultsLabel,
       eventResultUrl,
-      bodyContents,
+      bodyContents: [...bodyContents, ...notVotedContents],
     }),
   };
 }

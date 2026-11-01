@@ -76,6 +76,20 @@ export function EventResultFlexPreview({
               unavailableLabel={copy.unavailableLabel}
             />
           ))}
+
+          {summary.notVotedParticipants.length > 0 && (
+            <div className={`mt-4 flex gap-2 sm:mt-5 ${TEXT_XS}`}>
+              <span className="shrink-0 font-bold" style={{ color: "#D97706" }}>
+                {copy.notVotedLabel}
+              </span>
+              <span
+                className="min-w-0 break-words"
+                style={{ color: "#4B5563" }}
+              >
+                {summary.notVotedParticipants.map((p) => p.name).join("、")}
+              </span>
+            </div>
+          )}
         </div>
 
         <div
