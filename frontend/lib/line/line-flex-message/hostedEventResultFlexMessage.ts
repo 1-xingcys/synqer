@@ -21,6 +21,7 @@ export type HostedEventResultFlexCopy = {
 };
 
 const MAX_FLEX_MESSAGE_BYTES = 28 * 1024;
+const MAX_NOT_VOTED_ROW_BYTES = 4 * 1024;
 
 /**
  * Exported so the in-app preview renders the same words LINE receives. The
@@ -122,6 +123,24 @@ function buildNamesRow(label: string, labelColor: string, names: string[]) {
       },
     ],
   };
+}
+
+/** Caps the row so a long list can't crowd out the time ranges or the budget. */
+function buildNotVotedRow(label: string, names: string[]) {
+  const color = "#D97706";
+  const row = buildNamesRow(label, color, names);
+  if (getJsonByteLength(row) <= MAX_NOT_VOTED_ROW_BYTES) return row;
+
+  const kept = [...names];
+  let truncatedRow = buildNamesRow(label, color, [...kept, "…"]);
+  while (
+    kept.length > 0 &&
+    getJsonByteLength(truncatedRow) > MAX_NOT_VOTED_ROW_BYTES
+  ) {
+    kept.pop();
+    truncatedRow = buildNamesRow(label, color, [...kept, "…"]);
+  }
+  return truncatedRow;
 }
 
 function buildRangeSection(params: {
@@ -298,9 +317,8 @@ export function buildHostedEventResultFlexMessageFromSummary(
     info.summary.notVotedParticipants.length > 0
       ? [
           {
-            ...buildNamesRow(
+            ...buildNotVotedRow(
               copy.notVotedLabel,
-              "#D97706",
               info.summary.notVotedParticipants.map((p) => p.name),
             ),
             margin: "xl",
