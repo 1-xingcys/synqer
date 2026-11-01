@@ -33,6 +33,7 @@ export type HostedResultExpectedParticipant = {
   lineUserId?: string | null;
   userId?: string | null;
   displayName?: string | null;
+  hasVoted: boolean;
 };
 
 export type HostedResultSummaryParticipant = {
@@ -50,6 +51,7 @@ export type HostedResultSummaryRange = {
 export type HostedEventResultSummary = {
   totalExpected: number;
   ranges: HostedResultSummaryRange[];
+  notVotedParticipants: HostedResultSummaryParticipant[];
 };
 
 function sortSlots(slots: HostedResultSlot[]) {
@@ -197,7 +199,10 @@ export function buildHostedEventResultSummary(opts: {
     const unavailableParticipants: HostedResultSummaryParticipant[] = [];
 
     expectedParticipantByIndex.forEach((participant, participantIndex) => {
-      if (!availableIndexes.has(participantIndex)) {
+      if (
+        opts.expectedParticipants[participantIndex].hasVoted &&
+        !availableIndexes.has(participantIndex)
+      ) {
         unavailableParticipants.push(participant);
       }
     });
@@ -215,8 +220,19 @@ export function buildHostedEventResultSummary(opts: {
     };
   });
 
+  const notVotedParticipants: HostedResultSummaryParticipant[] = [];
+  expectedParticipantByIndex.forEach((participant, participantIndex) => {
+    if (!opts.expectedParticipants[participantIndex].hasVoted) {
+      notVotedParticipants.push(participant);
+    }
+  });
+  notVotedParticipants.sort((left, right) =>
+    left.name.localeCompare(right.name),
+  );
+
   return {
     totalExpected,
     ranges,
+    notVotedParticipants,
   };
 }

@@ -31,8 +31,8 @@ export function ConfirmedView({
   return (
     <div className="p-6 space-y-4">
       <div className="text-center">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-          <CalendarCheck className="w-8 h-8 text-green-600 dark:text-green-400" />
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/20 flex items-center justify-center">
+          <CalendarCheck className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
         </div>
         <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
           {t("confirmed.title")}
@@ -41,14 +41,14 @@ export function ConfirmedView({
 
       {/* Confirmed Time Display */}
       {hasDisplayableConfirmedTime && (
-        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-          <h4 className="text-sm font-medium text-green-800 dark:text-green-300 mb-2 flex items-center gap-2">
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-emerald-800 dark:text-emerald-300 mb-2 flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             {t("confirmed.eventTime")}
           </h4>
           <ConfirmedTimeDisplay
             selections={confirmedSelections}
-            className="text-green-700 dark:text-green-400"
+            className="text-emerald-700 dark:text-emerald-400"
           />
         </div>
       )}

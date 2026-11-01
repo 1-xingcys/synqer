@@ -70,6 +70,7 @@ export function EventResultShareButton({
         }),
       unavailableLine: (names) =>
         t("eventInfo.resultText.unavailable", { names }),
+      notVotedLine: (names) => t("eventInfo.resultText.notVoted", { names }),
       none: t("eventInfo.resultText.none"),
     },
   });

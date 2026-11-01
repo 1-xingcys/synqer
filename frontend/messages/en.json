@@ -199,6 +199,9 @@
       "availableParticipants": "Available",
       "unavailableParticipants": "Not Available",
       "noOneAvailable": "No one is available",
+      "notVoted": "Not voted",
+      "noOneUnavailable": "No one is unavailable",
+      "applyFilter": "Apply",
       "close": "Close",
       "rangeHint": "Showing people available for ALL selected time slots",
       "copyLink": "Copy Link",
@@ -631,6 +634,7 @@
       "event": "Event: {eventTitle}",
       "available": "Available: {availableCount}/{totalExpected}",
       "unavailable": "Unavailable: {names}",
+      "notVoted": "Not voted: {names}",
       "none": "None"
     },
     "goToVotePage": "Vote Page",

@@ -194,8 +194,17 @@ export default function ResultsView({
     votes,
     selectedParticipants,
   });
+  const notVotedCount = useMemo(
+    () =>
+      participants.filter(
+        (p) => selectedParticipants.has(p.userId) && !p.hasVoted,
+      ).length,
+    [participants, selectedParticipants],
+  );
   const legendMaxVotes =
-    availabilityMode === "available" ? maxVotes : selectedParticipants.size;
+    availabilityMode === "available"
+      ? maxVotes
+      : selectedParticipants.size - notVotedCount;
 
   // Show empty state if no participants selected
   const showEmptyState = selectedParticipants.size === 0;

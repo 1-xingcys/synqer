@@ -25,11 +25,13 @@ interface UseResultsAvailabilityMetricsResult {
   getAvailableVotesForRange: (cells: RangeCell[]) => Vote[];
   getUnavailableParticipantsForRange: (cells: RangeCell[]) => Participant[];
   getSlotIdsFromRange: (cells: RangeCell[]) => string[];
+  notVotedParticipants: Participant[];
+  votedCount: number;
 }
 
 /**
- * 結果頁資料計算層：
- * 將 available/unavailable 的統計與區間參與者推導集中，避免 grid component 過度膨脹。
+ * Data layer for the results page: centralizes available/unavailable counts
+ * and per-range participant derivation to keep the grid component small.
  */
 export function useResultsAvailabilityMetrics({
   slotsByDate,
@@ -46,6 +48,13 @@ export function useResultsAvailabilityMetrics({
       ),
     [participants, selectedParticipants],
   );
+
+  const notVotedParticipants = useMemo(
+    () => selectedParticipantsList.filter((p) => !p.hasVoted),
+    [selectedParticipantsList],
+  );
+  const votedCount =
+    selectedParticipantsList.length - notVotedParticipants.length;
 
   const getSlotIdsFromRange = useCallback(
     (cells: RangeCell[]): string[] => {
@@ -132,9 +141,9 @@ export function useResultsAvailabilityMetrics({
       if (mode === "available") {
         return availableCount;
       }
-      return Math.max(0, selectedParticipants.size - availableCount);
+      return Math.max(0, votedCount - availableCount);
     },
-    [availableCountByCell, selectedParticipants.size],
+    [availableCountByCell, votedCount],
   );
 
   const getAvailableVotesForRange = useCallback(
@@ -152,7 +161,8 @@ export function useResultsAvailabilityMetrics({
         availableVotes.map((vote) => vote.userId),
       );
       return selectedParticipantsList.filter(
-        (participant) => !availableUserIds.has(participant.userId),
+        (participant) =>
+          participant.hasVoted && !availableUserIds.has(participant.userId),
       );
     },
     [getAvailableVotesForRange, selectedParticipantsList],
@@ -163,5 +173,7 @@ export function useResultsAvailabilityMetrics({
     getAvailableVotesForRange,
     getUnavailableParticipantsForRange,
     getSlotIdsFromRange,
+    notVotedParticipants,
+    votedCount,
   };
 }

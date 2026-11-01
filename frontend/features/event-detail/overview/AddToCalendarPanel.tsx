@@ -132,7 +132,7 @@ export function AddToCalendarPanel({
   };
 
   return (
-    <div className="bg-linear-to-r from-blue-50 via-white to-green-50 dark:from-zinc-800/80 dark:via-zinc-800/60 dark:to-zinc-800/80 rounded-xl border border-blue-100 dark:border-zinc-700 p-3 sm:p-4">
+    <div className="bg-linear-to-r from-blue-50 via-white to-emerald-50 dark:from-zinc-800/80 dark:via-zinc-800/60 dark:to-zinc-800/80 rounded-xl border border-blue-100 dark:border-zinc-700 p-3 sm:p-4">
       <div className="flex flex-col gap-3">
         {/* Header Row */}
         <div className="flex items-center justify-between gap-2">
@@ -158,7 +158,7 @@ export function AddToCalendarPanel({
             >
               <div className="flex items-center gap-2 min-w-0">
                 <svg
-                  className="w-4 h-4 text-green-500 shrink-0"
+                  className="w-4 h-4 text-emerald-500 shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

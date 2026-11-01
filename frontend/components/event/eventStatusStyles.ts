@@ -8,6 +8,6 @@ import { EventStatus } from "@/types/event";
 export const eventStatusColor: Record<EventStatus, string> = {
   [EventStatus.VOTING]: "text-blue-600 dark:text-blue-400",
   [EventStatus.VOTING_ENDED]: "text-amber-600 dark:text-amber-400",
-  [EventStatus.CONFIRMED]: "text-green-600 dark:text-green-400",
+  [EventStatus.CONFIRMED]: "text-emerald-600 dark:text-emerald-400",
   [EventStatus.COMPLETED]: "text-zinc-500 dark:text-zinc-400",
 };

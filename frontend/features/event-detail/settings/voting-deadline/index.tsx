@@ -104,7 +104,7 @@ export function VotingDeadline() {
             <span className="text-sm text-destructive">{saveError}</span>
           )}
           {saveSuccess && (
-            <span className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
+            <span className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400">
               <Check className="w-4 h-4" />
               {t("hosted.settingsPage.saved")}
             </span>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { AlertCircle } from "lucide-react";
 import { Participant } from "../types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Z_INDEX } from "@/lib/ui/zIndex";
@@ -20,11 +21,18 @@ export function ParticipantFilter({
   const t = useTranslations("joined");
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  // Checks stay in a draft until confirmed, so toggling doesn't recompute the heatmap
+  const [draftSelection, setDraftSelection] = useState(selectedParticipants);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const allSelected = selectedParticipants.size === participants.length;
   const noneSelected = selectedParticipants.size === 0;
   const someSelected = !allSelected && !noneSelected;
+  const draftAllSelected = draftSelection.size === participants.length;
+  const draftNoneSelected = draftSelection.size === 0;
+  const draftChanged =
+    draftSelection.size !== selectedParticipants.size ||
+    [...draftSelection].some((id) => !selectedParticipants.has(id));
 
   // Filter participants by search query
   const filteredParticipants = useMemo(() => {
@@ -53,22 +61,32 @@ export function ParticipantFilter({
     }
   }, [isOpen]);
 
+  const toggleOpen = () => {
+    if (!isOpen) setDraftSelection(selectedParticipants);
+    setIsOpen(!isOpen);
+  };
+
   const toggleParticipant = (userId: string) => {
-    const newSelection = new Set(selectedParticipants);
+    const newSelection = new Set(draftSelection);
     if (newSelection.has(userId)) {
       newSelection.delete(userId);
     } else {
       newSelection.add(userId);
     }
-    onSelectionChange(newSelection);
+    setDraftSelection(newSelection);
   };
 
   const selectAll = () => {
-    onSelectionChange(new Set(participants.map((p) => p.userId)));
+    setDraftSelection(new Set(participants.map((p) => p.userId)));
   };
 
   const clearAll = () => {
-    onSelectionChange(new Set());
+    setDraftSelection(new Set());
+  };
+
+  const applySelection = () => {
+    onSelectionChange(draftSelection);
+    setIsOpen(false);
   };
 
   // Get display text for the button
@@ -90,7 +108,7 @@ export function ParticipantFilter({
     <div className="relative" ref={dropdownRef}>
       {/* Filter Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleOpen}
         className={`
           flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg
           border transition-all
@@ -175,7 +193,7 @@ export function ParticipantFilter({
           <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900/50">
             <button
               onClick={selectAll}
-              disabled={allSelected}
+              disabled={draftAllSelected}
               className="px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t("results.selectAll")}
@@ -183,13 +201,13 @@ export function ParticipantFilter({
             <span className="text-gray-300 dark:text-zinc-600">|</span>
             <button
               onClick={clearAll}
-              disabled={noneSelected}
+              disabled={draftNoneSelected}
               className="px-2 py-1 text-xs font-medium text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t("results.clearAll")}
             </button>
             <span className="ml-auto text-xs text-gray-500 dark:text-zinc-500">
-              {selectedParticipants.size}/{participants.length}
+              {draftSelection.size}/{participants.length}
             </span>
           </div>
 
@@ -202,9 +220,7 @@ export function ParticipantFilter({
             ) : (
               <div className="py-1">
                 {filteredParticipants.map((participant) => {
-                  const isSelected = selectedParticipants.has(
-                    participant.userId,
-                  );
+                  const isSelected = draftSelection.has(participant.userId);
                   return (
                     <button
                       key={participant.userId}
@@ -265,11 +281,28 @@ export function ParticipantFilter({
                       >
                         {participant.displayName}
                       </span>
+                      {!participant.hasVoted && (
+                        <span className="ml-auto shrink-0 inline-flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          {t("results.notVoted")}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
               </div>
             )}
+          </div>
+
+          {/* Apply */}
+          <div className="p-3 border-t border-gray-100 dark:border-zinc-700">
+            <button
+              onClick={applySelection}
+              disabled={!draftChanged}
+              className="w-full px-3 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t("results.applyFilter")}
+            </button>
           </div>
         </div>
       )}

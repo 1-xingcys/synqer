@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useCallback, useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Check, X, Info } from "lucide-react";
+import { AlertCircle, Check, X, Info } from "lucide-react";
 import { Vote, Participant } from "../../types";
 import { ResultsAvailabilityMode, SlotRangeInfo } from "../types";
 import { Z_INDEX } from "@/lib/ui/zIndex";
@@ -16,6 +16,7 @@ interface SlotDetailModalProps {
   timeLabel: string;
   voters: Vote[];
   nonVoters: Participant[];
+  notVoted: Participant[];
   totalFiltered: number;
   mode?: ResultsAvailabilityMode;
   isRange?: boolean;
@@ -33,6 +34,7 @@ export function SlotDetailModal({
   timeLabel,
   voters,
   nonVoters,
+  notVoted,
   totalFiltered,
   mode = "available",
   isRange = false,
@@ -181,7 +183,9 @@ export function SlotDetailModal({
                   </h4>
                   {nonVoters.length === 0 ? (
                     <p className="text-sm text-gray-500 dark:text-zinc-400 py-2">
-                      {t("everyoneAvailable")}
+                      {notVoted.length === 0
+                        ? t("everyoneAvailable")
+                        : t("results.noOneUnavailable")}
                     </p>
                   ) : (
                     <div className="space-y-2">
@@ -307,6 +311,37 @@ export function SlotDetailModal({
                   </div>
                 )}
               </>
+            )}
+
+            {/* Not Voted List */}
+            {notVoted.length > 0 && (
+              <div className="mt-5">
+                <h4 className="flex items-center gap-2 text-sm font-medium text-amber-600 dark:text-amber-400 mb-3">
+                  <AlertCircle className="w-4 h-4" />
+                  {t("results.notVoted")} ({notVoted.length})
+                </h4>
+                <div className="space-y-2">
+                  {notVoted.map((participant) => (
+                    <div
+                      key={participant.userId}
+                      className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-zinc-800/50"
+                    >
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage
+                          src={participant.pictureUrl}
+                          alt={participant.displayName}
+                        />
+                        <AvatarFallback className="bg-linear-to-br from-gray-300 to-gray-400 dark:from-zinc-600 dark:to-zinc-700 text-white text-sm font-semibold">
+                          {participant.displayName[0]?.toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-gray-600 dark:text-zinc-400">
+                        {participant.displayName}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
 

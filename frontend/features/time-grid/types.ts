@@ -48,6 +48,7 @@ export interface Participant {
   userId: string;
   displayName: string;
   pictureUrl?: string;
+  hasVoted: boolean;
 }
 
 export interface CalendarEvent {

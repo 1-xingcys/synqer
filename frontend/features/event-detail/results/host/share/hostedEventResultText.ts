@@ -6,6 +6,7 @@ export type HostedEventResultTextCopy = {
   eventLine: (eventTitle: string) => string;
   availableLine: (availableCount: number, totalExpected: number) => string;
   unavailableLine: (names: string) => string;
+  notVotedLine: (names: string) => string;
   none: string;
 };
 
@@ -50,6 +51,14 @@ export function buildHostedEventResultTextFromSummary(opts: {
     lines.push(opts.copy.unavailableLine(unavailable));
     lines.push("");
   });
+
+  if (opts.summary.notVotedParticipants.length > 0) {
+    lines.push(
+      opts.copy.notVotedLine(
+        opts.summary.notVotedParticipants.map((p) => p.name).join("、"),
+      ),
+    );
+  }
 
   return lines.join("\n").trim();
 }

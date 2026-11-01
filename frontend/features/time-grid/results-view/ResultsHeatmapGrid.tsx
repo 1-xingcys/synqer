@@ -36,7 +36,7 @@ import {
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];
-  /** 根據 slotId 分組的投票（從 ResultsView 傳入） */
+  /** Votes grouped by slotId (passed in from ResultsView). */
   votesBySlot: Record<string, Vote[]>;
   participants: Participant[];
   selectedParticipants: Set<string>;
@@ -121,6 +121,8 @@ export function ResultsHeatmapGrid({
     getAvailableVotesForRange,
     getUnavailableParticipantsForRange,
     getSlotIdsFromRange,
+    notVotedParticipants,
+    votedCount,
   } = useResultsAvailabilityMetrics({
     slotsByDate,
     dates,
@@ -285,8 +287,7 @@ export function ResultsHeatmapGrid({
     paginatedColumns,
     onRangeSelect: showModalForSelection,
   });
-  const maxHeatmapCount =
-    mode === "available" ? maxVotes : selectedParticipants.size;
+  const maxHeatmapCount = mode === "available" ? maxVotes : votedCount;
   const firstTimeLabel =
     mergedTimeRows.length > 0
       ? formatMinutesToTime(mergedTimeRows[0].startMinute)
@@ -506,6 +507,7 @@ export function ResultsHeatmapGrid({
           timeLabel={modalData.timeLabel}
           voters={modalData.voters}
           nonVoters={modalData.nonVoters}
+          notVoted={notVotedParticipants}
           totalFiltered={selectedParticipants.size}
           mode={mode}
           canAddToEventTime={canAddToEventTime}

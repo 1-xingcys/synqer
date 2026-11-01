@@ -16,7 +16,7 @@ const variantStyles: Record<
   { containerClass: string; Icon: LucideIcon }
 > = {
   registered: {
-    containerClass: "text-green-600 dark:text-green-400",
+    containerClass: "text-emerald-600 dark:text-emerald-400",
     Icon: Check,
   },
   notRegistered: {
@@ -24,7 +24,7 @@ const variantStyles: Record<
     Icon: UserPlus,
   },
   voted: {
-    containerClass: "text-green-600 dark:text-green-400",
+    containerClass: "text-emerald-600 dark:text-emerald-400",
     Icon: Check,
   },
   notVoted: {

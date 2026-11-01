@@ -36,7 +36,7 @@ export function InviteLink() {
           className="shrink-0"
         >
           {copied ? (
-            <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+            <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           ) : (
             <Copy className="w-4 h-4" />
           )}

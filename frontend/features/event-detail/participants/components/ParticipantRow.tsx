@@ -127,7 +127,7 @@ export function ParticipantRow({
       {variant === "toggle" && (
         <div
           className={`p-1 rounded-full ${
-            isSelected ? "text-green-500" : "text-zinc-400"
+            isSelected ? "text-emerald-500" : "text-zinc-400"
           }`}
         >
           {isSelected ? (
@@ -140,7 +140,7 @@ export function ParticipantRow({
       {variant === "add" && (
         <div
           className={`p-1 rounded-full ${
-            isSelected ? "text-green-500" : "text-zinc-400"
+            isSelected ? "text-emerald-500" : "text-zinc-400"
           }`}
         >
           {isSelected ? (
