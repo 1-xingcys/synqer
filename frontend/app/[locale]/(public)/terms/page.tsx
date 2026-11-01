@@ -106,7 +106,7 @@ export default async function TermsOfUsePage({
             {/* Section 3 */}
             <section className="mb-10">
               <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-4 flex items-center gap-3">
-                <span className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400 text-sm font-bold">
+                <span className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-sm font-bold">
                   3
                 </span>
                 {t("sections.account.title")}
@@ -122,7 +122,7 @@ export default async function TermsOfUsePage({
                         key={index}
                         className="flex items-start gap-2 text-zinc-600 dark:text-zinc-300"
                       >
-                        <span className="text-green-500 mt-1">•</span>
+                        <span className="text-emerald-500 mt-1">•</span>
                         {item}
                       </li>
                     ),
