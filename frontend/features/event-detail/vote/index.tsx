@@ -11,7 +11,6 @@ import {
   toVoteMode,
 } from "@/lib/event/eventPreference";
 import VotingGrid from "@/features/time-grid/voting-grid";
-import { Text } from "@/components/ui/text";
 
 export default function VoteTab() {
   const params = useParams();
@@ -31,28 +30,22 @@ export default function VoteTab() {
   );
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <Text variant="hint" align="center">
-        {data.event.votingDeadline
-          ? tJoined("votingInstructionDeadline")
-          : tJoined("votingInstruction")}
-      </Text>
-      <VotingGrid
-        slots={data.slots}
-        votes={data.votes}
-        stagedVote={data.stagedVote}
-        currentUserHasVoted={currentUserHasVoted}
-        currentUserId={user.id.toString()}
-        eventId={eventId}
-        eventTitle={data.event.title || tJoined("untitledEvent")}
-        timeZone={data.event.timeZone}
-        capabilities={data.event.capabilities}
-        defaultGranularity={normalizeGranularity(
-          data.event.defaultGranularityMin,
-        )}
-        defaultVoteMode={toVoteMode(data.event.defaultVoteMode)}
-        shareVoteToChat={normalizeShareVoteToChat(data.event.shareVoteToChat)}
-      />
-    </div>
+    <VotingGrid
+      slots={data.slots}
+      votes={data.votes}
+      stagedVote={data.stagedVote}
+      currentUserHasVoted={currentUserHasVoted}
+      currentUserId={user.id.toString()}
+      eventId={eventId}
+      eventTitle={data.event.title || tJoined("untitledEvent")}
+      timeZone={data.event.timeZone}
+      capabilities={data.event.capabilities}
+      defaultGranularity={normalizeGranularity(
+        data.event.defaultGranularityMin,
+      )}
+      defaultVoteMode={toVoteMode(data.event.defaultVoteMode)}
+      shareVoteToChat={normalizeShareVoteToChat(data.event.shareVoteToChat)}
+      votingDeadline={data.event.votingDeadline}
+    />
   );
 }

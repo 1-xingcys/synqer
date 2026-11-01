@@ -6,6 +6,7 @@ import {
   Weekday,
 } from "@/types/event";
 import type { AxisSpan } from "@/lib/event/axisSpan";
+import type { WallClock } from "@/lib/time";
 
 export interface GridAxisColumn {
   /** Stable key for grouping and lookup; see axisSpanKey. */
@@ -72,6 +73,7 @@ export interface VotingGridProps {
   defaultVoteMode: VoteMode;
   /** Host preference: whether committing a vote posts a notice into the chat. */
   shareVoteToChat: boolean;
+  votingDeadline: WallClock | null;
 }
 
 /**
