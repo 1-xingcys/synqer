@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { AlertCircle } from "lucide-react";
 import { Participant } from "../types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Z_INDEX } from "@/lib/ui/zIndex";
@@ -280,6 +281,12 @@ export function ParticipantFilter({
                       >
                         {participant.displayName}
                       </span>
+                      {!participant.hasVoted && (
+                        <span className="ml-auto shrink-0 inline-flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          {t("results.notVoted")}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
