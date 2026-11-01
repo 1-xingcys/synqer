@@ -6,6 +6,7 @@ import {
   calendarDayToDate,
   formatMinutesToTime,
   wallClockDay,
+  wallClockTime,
   wallClockToDate,
   type CalendarDay,
   type WallClock,
@@ -100,6 +101,18 @@ function formatWeekdaySpanLabel(weekday: Weekday, locale: string) {
     formatWeekdayLabel(weekday, dateLocale, weekdayStyleOf(locale)),
     locale,
   );
+}
+
+/** A voting deadline: "11/5 18:00" in zh-TW, "Nov 5, 18:00" otherwise. */
+export function formatDeadlineLabel(deadline: WallClock, locale: string) {
+  const isZhTw = locale === "zh-TW";
+  const dateText = new Intl.DateTimeFormat(dateLocaleOf(locale), {
+    month: isZhTw ? "numeric" : "short",
+    day: "numeric",
+    timeZone: NAIVE_TIME_ZONE,
+  }).format(wallClockToDate(deadline));
+
+  return `${dateText}${isZhTw ? " " : ", "}${wallClockTime(deadline)}`;
 }
 
 /**
