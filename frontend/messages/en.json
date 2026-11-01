@@ -632,6 +632,7 @@
       "event": "Event: {eventTitle}",
       "available": "Available: {availableCount}/{totalExpected}",
       "unavailable": "Unavailable: {names}",
+      "notVoted": "Not voted: {names}",
       "none": "None"
     },
     "goToVotePage": "Vote Page",

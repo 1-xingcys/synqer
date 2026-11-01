@@ -632,6 +632,7 @@
       "event": "活動：{eventTitle}",
       "available": "可出席人數：{availableCount}/{totalExpected}",
       "unavailable": "不能出席：{names}",
+      "notVoted": "未投票：{names}",
       "none": "無"
     },
     "goToVotePage": "投票頁面",
