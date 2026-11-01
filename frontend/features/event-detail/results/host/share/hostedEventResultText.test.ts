@@ -26,6 +26,7 @@ describe("hostedEventResultText", () => {
             unavailableParticipants: [{ name: "Alex" }],
           },
         ],
+        notVotedParticipants: [],
       },
     });
 
@@ -61,6 +62,7 @@ describe("hostedEventResultText", () => {
             unavailableParticipants: [],
           },
         ],
+        notVotedParticipants: [],
       },
     });
 

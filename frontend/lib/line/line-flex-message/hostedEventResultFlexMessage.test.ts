@@ -26,6 +26,7 @@ describe("hostedEventResultFlexMessage", () => {
             unavailableParticipants: [{ name: "Alex" }],
           },
         ],
+        notVotedParticipants: [],
       },
     });
 
