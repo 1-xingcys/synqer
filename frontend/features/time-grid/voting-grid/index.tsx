@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Text } from "@/components/ui/text";
 import { VoteMode } from "@/types/event";
 import { VotingGridProps } from "../types";
 import { useVotingGridController } from "./hooks/useVotingGridController";
+import { formatDeadlineLabel } from "@/lib/event/event-time";
 import { formatMinutesToTime } from "@/lib/time/minuteOfDay";
 import { Z_INDEX } from "@/lib/ui/zIndex";
 import { DateHeader, TimeColumn, DatePagination } from "../ui";
@@ -31,6 +32,7 @@ export default function VotingGrid({
   votingDeadline,
 }: VotingGridProps) {
   const tJoined = useTranslations("joined");
+  const locale = useLocale();
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [isStickyActive, setIsStickyActive] = useState(false);
   const stickySentinelRef = useRef<HTMLDivElement>(null);
@@ -143,13 +145,16 @@ export default function VotingGrid({
     };
   }, []);
 
+  const deadline = votingDeadline
+    ? formatDeadlineLabel(votingDeadline, locale)
+    : null;
   const instruction =
     voteMode === VoteMode.AVAILABLE
-      ? votingDeadline
-        ? tJoined("votingInstructionAvailableDeadline")
+      ? deadline
+        ? tJoined("votingInstructionAvailableDeadline", { deadline })
         : tJoined("votingInstructionAvailable")
-      : votingDeadline
-        ? tJoined("votingInstructionUnavailableDeadline")
+      : deadline
+        ? tJoined("votingInstructionUnavailableDeadline", { deadline })
         : tJoined("votingInstructionUnavailable");
 
   return (

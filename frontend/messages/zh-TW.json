@@ -132,9 +132,9 @@
   "joined": {
     "title": "加入的活動",
     "description": "您正在參與的活動",
-    "votingInstructionAvailableDeadline": "在截止時間前投票選擇你「可以」的時間",
+    "votingInstructionAvailableDeadline": "請在 {deadline} 前投票選擇你「可以」的時間",
     "votingInstructionAvailable": "投票選擇你「可以」的時間",
-    "votingInstructionUnavailableDeadline": "在截止時間前投票選擇你「不行」的時間",
+    "votingInstructionUnavailableDeadline": "請在 {deadline} 前投票選擇你「不行」的時間",
     "votingInstructionUnavailable": "投票選擇你「不行」的時間",
     "pageHint": {
       "voting": {
