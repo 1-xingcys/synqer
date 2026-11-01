@@ -299,7 +299,7 @@ export function ParticipantFilter({
             <button
               onClick={applySelection}
               disabled={!draftChanged}
-              className="w-full px-3 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t("results.applyFilter")}
             </button>
