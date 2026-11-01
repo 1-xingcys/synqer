@@ -121,6 +121,7 @@ export function ResultsHeatmapGrid({
     getAvailableVotesForRange,
     getUnavailableParticipantsForRange,
     getSlotIdsFromRange,
+    votedCount,
   } = useResultsAvailabilityMetrics({
     slotsByDate,
     dates,
@@ -285,8 +286,7 @@ export function ResultsHeatmapGrid({
     paginatedColumns,
     onRangeSelect: showModalForSelection,
   });
-  const maxHeatmapCount =
-    mode === "available" ? maxVotes : selectedParticipants.size;
+  const maxHeatmapCount = mode === "available" ? maxVotes : votedCount;
   const firstTimeLabel =
     mergedTimeRows.length > 0
       ? formatMinutesToTime(mergedTimeRows[0].startMinute)
