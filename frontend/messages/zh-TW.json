@@ -197,6 +197,8 @@
       "availableParticipants": "有空",
       "unavailableParticipants": "沒空",
       "noOneAvailable": "沒有人有空",
+      "notVoted": "未投票",
+      "noOneUnavailable": "沒有人沒空",
       "close": "關閉",
       "rangeHint": "顯示所有選取時段都有空的人",
       "copyLink": "複製連結",

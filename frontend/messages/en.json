@@ -197,6 +197,8 @@
       "availableParticipants": "Available",
       "unavailableParticipants": "Not Available",
       "noOneAvailable": "No one is available",
+      "notVoted": "Not voted",
+      "noOneUnavailable": "No one is unavailable",
       "close": "Close",
       "rangeHint": "Showing people available for ALL selected time slots",
       "copyLink": "Copy Link",

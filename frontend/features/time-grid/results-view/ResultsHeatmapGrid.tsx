@@ -121,6 +121,7 @@ export function ResultsHeatmapGrid({
     getAvailableVotesForRange,
     getUnavailableParticipantsForRange,
     getSlotIdsFromRange,
+    notVotedParticipants,
     votedCount,
   } = useResultsAvailabilityMetrics({
     slotsByDate,
@@ -506,6 +507,7 @@ export function ResultsHeatmapGrid({
           timeLabel={modalData.timeLabel}
           voters={modalData.voters}
           nonVoters={modalData.nonVoters}
+          notVoted={notVotedParticipants}
           totalFiltered={selectedParticipants.size}
           mode={mode}
           canAddToEventTime={canAddToEventTime}
