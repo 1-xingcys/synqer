@@ -36,7 +36,7 @@ import {
 
 interface ResultsHeatmapGridProps {
   slots: TimeSlot[];
-  /** 根據 slotId 分組的投票（從 ResultsView 傳入） */
+  /** Votes grouped by slotId (passed in from ResultsView). */
   votesBySlot: Record<string, Vote[]>;
   participants: Participant[];
   selectedParticipants: Set<string>;

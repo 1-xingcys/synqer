@@ -28,8 +28,8 @@ interface UseResultsAvailabilityMetricsResult {
 }
 
 /**
- * 結果頁資料計算層：
- * 將 available/unavailable 的統計與區間參與者推導集中，避免 grid component 過度膨脹。
+ * Data layer for the results page: centralizes available/unavailable counts
+ * and per-range participant derivation to keep the grid component small.
  */
 export function useResultsAvailabilityMetrics({
   slotsByDate,
