@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Text } from "@/components/ui/text";
+import { VoteMode } from "@/types/event";
 import { VotingGridProps } from "../types";
 import { useVotingGridController } from "./hooks/useVotingGridController";
 import { formatMinutesToTime } from "@/lib/time/minuteOfDay";
@@ -142,9 +143,14 @@ export default function VotingGrid({
     };
   }, []);
 
-  const instruction = votingDeadline
-    ? tJoined("votingInstructionDeadline")
-    : tJoined("votingInstruction");
+  const instruction =
+    voteMode === VoteMode.AVAILABLE
+      ? votingDeadline
+        ? tJoined("votingInstructionAvailableDeadline")
+        : tJoined("votingInstructionAvailable")
+      : votingDeadline
+        ? tJoined("votingInstructionUnavailableDeadline")
+        : tJoined("votingInstructionUnavailable");
 
   return (
     <div className="space-y-4 sm:space-y-6">
