@@ -7,6 +7,7 @@ export interface ParticipantWithAvatar {
   userId: string;
   displayName: string;
   pictureUrl?: string;
+  hasVoted: boolean;
 }
 
 export interface VoteWithAvatar {
@@ -38,6 +39,7 @@ export function useJoinedEventResults(
       userId: p.userId || p.user?.id || p.id,
       displayName: p.user?.displayName || p.lineUserId || "Unknown",
       pictureUrl: p.user?.avatarUrl || undefined,
+      hasVoted: p.hasVoted,
     }));
   }, [eventDetailData]);
 

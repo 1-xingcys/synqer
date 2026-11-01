@@ -20,6 +20,7 @@ export function useParticipantsData(
       userId: p.userId || p.id,
       displayName: p.displayName || "Unknown",
       pictureUrl: p.pictureUrl,
+      hasVoted: p.hasVoted,
     }));
   }, [data]);
 
