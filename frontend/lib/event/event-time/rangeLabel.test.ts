@@ -1,6 +1,25 @@
 import { describe, expect, it } from "@jest/globals";
-import { formatLocalizedRangeLabel } from "@/lib/event/event-time";
-import { calendarDay } from "@/lib/time";
+import {
+  formatDeadlineLabel,
+  formatLocalizedRangeLabel,
+} from "@/lib/event/event-time";
+import { calendarDay, wallClock } from "@/lib/time";
+
+describe("formatDeadlineLabel", () => {
+  it("renders the format of each locale", () => {
+    const deadline = wallClock("2026-11-05T18:00:00.000Z");
+
+    expect(formatDeadlineLabel(deadline, "zh-TW")).toBe("11/5 18:00");
+    expect(formatDeadlineLabel(deadline, "en")).toBe("Nov 5, 18:00");
+  });
+
+  it("keeps midnight on its stored day as 00:00", () => {
+    const deadline = wallClock("2026-11-05T00:00:00.000Z");
+
+    expect(formatDeadlineLabel(deadline, "zh-TW")).toBe("11/5 00:00");
+    expect(formatDeadlineLabel(deadline, "en")).toBe("Nov 5, 00:00");
+  });
+});
 
 // The cases that used to live here are gone because the types and the API make
 // them unrepresentable: AxisSpan brands a date span's days as CalendarDay and
